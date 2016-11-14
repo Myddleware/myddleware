@@ -1,0 +1,117 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+menu {
+	margin-top: -5px;
+}
+
+menu ul, menu li {
+	list-style: none;
+}
+
+menu li {
+	background: #444446;	
+	display: inline-block;
+	width: 150px;
+	padding-top: 5px;
+	height: 50px;
+	text-align: center;
+	font-weight: bold;
+}
+
+menu .dropdown-menu > li > a, menu .dropdown-menu > li > a:hover {   		
+	background-color:transparent;
+	background-image:transparent;
+	background:transparent;
+}
+
+menu .dropdown-menu .divider {
+    background-color: #e5e5e5;
+    height: 2px;
+    overflow: hidden;
+    padding: 0;
+    width: 100%;
+}
+   	
+menu .dropdown-menu > li > a {
+	color: #444446;
+}
+
+menu .dropdown-menu > li > a:hover {
+	color: #0F66A9;
+}
+
+menu li li, #myd_top li li {
+	background: white;
+    text-align: left;
+    width: 200px; 
+    max-width: 200px;
+    overflow:hidden;  
+    height: 25px; 	
+    padding:0px;	
+}
+
+menu li li:hover, #myd_top li li:hover {
+	background: transparent;
+}
+
+#myd_top .nav-pills > li > a:focus, menu .nav-pills > li > a:focus {
+	background: transparent;
+}
+
+#myd_top li a {
+	color: white;
+}
+
+#myd_top li li a {
+	color: #0F66A9;
+}
+
+menu .nav-pills > li > a, menu .nav-pills > li > a:hover, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
+	color: white;
+	background-color:transparent;
+	border-radius: none;
+}
+
+menu li:hover {
+	background: #0F66A9;
+	cursor:pointer;
+}
+
+#myd_top nav {
+	padding-right: 150px;
+}
+
+#myd_top .nav-pills > li > a, #myd_top .nav-pills > li > a:hover, #myd_top .nav .open > a, #myd_top .nav .open > a:hover, #myd_top .nav .open > a:focus {   		
+	background-color:transparent;
+	border-radius: none;
+}
+
+#myd_top .nav-pills > li > a:hover, #myd_top .nav .open > a, #myd_top .nav .open > a:hover, #myd_top .nav .open > a:focus {
+	color: #C6BD20;
+}
+
+#search {
+	padding-top: 25px;	
+}

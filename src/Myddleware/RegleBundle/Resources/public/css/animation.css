@@ -1,0 +1,459 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+* {
+	margin: 0;
+	padding: 0;
+	font-size: 1em;
+	text-decoration: none;
+	border: none;
+	list-style: none;
+	outline: none;
+}
+
+#animation .loader-source, #animation .loader-cible {
+	width: 43px;
+	height: 11px;
+	min-height:11px;
+	min-width:43px;	
+	display: inline-block;
+	margin: 0 15px;
+}
+
+#animation #connector-source-error, #animation #connector-cible-error,
+#animation #connector-source-success, #animation #connector-cible-success {
+	width: 300px;
+	max-width: 300px;
+	height: auto;
+	word-wrap: break-word;
+}
+
+#animation #connector-source-error, #animation #connector-source-success  {
+	float: left;
+}
+
+#animation #connector-cible-error, #animation #connector-cible-success  {
+	float: right;
+}
+
+#animation {
+    max-width: 1280px;
+    margin: auto;
+}
+
+#animation > .animation-content{
+    display: inline-block;
+    vertical-align: top;
+}
+
+#animation a {
+    color: #067dd7;
+}
+#animation a:hover {
+    text-decoration: underline;
+}
+
+#animation .animation-content-left{
+	width: 15%;
+	height: 100%;
+    padding-left: 5px;
+}
+
+#animation .animation-position-text-source{
+    position: relative;
+    top: 180px;
+    left: 72px;
+}
+
+
+#animation .animation-content-right{
+	width: 15%;
+	height: 100%;
+	padding-right: 5px;
+}
+
+#animation .animation-content-right > div{
+    float: right;
+}
+
+#animation .animation-position-text-cible{
+    position: relative;
+    top: 260px;
+    right: 72px;
+}
+
+#animation .animation-content-left-toggle-btn{
+    display: none;
+}
+
+#animation .animation-content-right-toggle-btn{
+    display: none;
+}
+
+#animation .animation-workspace{
+	width: 69%;
+	height: 100%;
+    margin-top: 5%;
+}
+
+#animation .animation-workspace-title{
+    text-align: center;
+    font-weight: normal;
+    text-shadow: 0px 0px 1px #AAA;
+    color: #424140;
+}
+
+#animation .animation-center{
+	margin: auto;
+}
+
+#animation .animation-workspace-container{
+    width: 100%;
+    height: 200px;
+}
+
+#animation .animation-workspace-content{
+    width: 20%;
+    height: 100%;
+    float: left;
+}
+
+#animation .animation-workspace img{
+    background: #EEE;
+	border: 2px solid #AAA;
+	border-radius: 10px;
+    opacity: 0.9;
+    display: inline-block;
+    height: 65px;
+    width: 65px;
+}
+
+#animation-myddleware-div div{
+    height: 150px;
+    width: 150px;
+}
+
+#animation-myddleware-div .animation-myddleware-logo{
+    border: none;
+    padding: none;
+    height: 105px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+#animation-myddleware-back-2 > .animation-myddleware-logo {
+    float: left;
+    width: 0px;
+}
+
+#animation-myddleware-back-3 > .animation-myddleware-logo {
+    float: right;
+    margin-right: 45px;
+    width: 0px;
+}
+
+#animation .animation-puce > ul{
+    width: 120px;
+    height: 120px;
+    margin: auto;
+    margin-top: 10%;
+    padding-top: 50px;
+    text-align: center;
+}
+
+#animation select{
+	padding: 5px;
+    /*width: 85px;*/
+    overflow: hidden;
+    text-align: left;
+    font-size: 1em;
+    border-radius: 1px;
+    -webkit-box-shadow: rgba(0,0,0,.6) -1px -2px 2px;
+    -moz-box-shadow:  rgba(0,0,0,.6) 0px 2px 2px;
+   background:white;
+}
+
+/* PROGRESS-BAR */
+
+#animation .animation-bar-left {
+    height: 20px;
+    width: 80%;
+    border-radius: 4px;
+    background: #DDDBDE;
+    border: 1px solid #AAA;
+    overflow: hidden;
+}
+#animation .animation-bar-left .progress-bar {
+	float: left;
+	border-radius: 4px;
+	min-height: 10px;
+	border-right: 1px solid #AAA;
+    height: 100%;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    background-color: #428bca;
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    -moz-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    -webkit-transition: none;
+          transition: none;
+    -moz-transition: none;
+          transition: none;
+}
+
+#animation .animation-bar-right {
+    height: 20px;
+    width: 80%;
+    border-radius: 4px;
+    background: #DDDBDE;
+    border: 1px solid #AAA;
+    overflow: hidden;
+}
+#animation .animation-bar-right .progress-bar {
+    float: right;
+    border-radius: 4px;
+    min-height: 10px;
+    border-right: 1px solid #AAA;
+    height: 100%;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    background-color: #AFC428;
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    -moz-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    -webkit-transition: none;
+          transition: none;
+    -moz-transition: none;
+          transition: none;
+}
+
+@-webkit-keyframes progress-bar-stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 0;
+  }
+}
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 0;
+  }
+}
+
+h2 { margin-top: 50px;}
+
+/* ---------------------------------------------------------------------- */
+
+@media screen and (max-width: 950px) {
+    #animation > .animation-content{
+        display: block;
+    }
+
+    #animation .animation-workspace{
+        width: 80%;
+        height: 100%;
+        margin: auto;
+        margin-top: 5%;
+    }
+
+    #animation .animation-content-left{
+        position: absolute;
+        top: 0;
+        left: -80px;
+        width: 80px;
+        background: #CACACA;
+    }
+
+    #animation .animation-content-right{
+        position: absolute;
+        top: 0;
+        right: -80px;
+        width: 80px;
+        background: #CACACA;
+    }
+
+    #animation .animation-content-left-toggle-btn{
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 80px;
+        width: 35px;
+        height: 35px;
+    }
+
+    #animation .animation-content-right-toggle-btn {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 80px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media screen and (max-width: 830px) {
+    #animation .animation-bar-left {
+        width: 50%;
+        margin: 50px 5% 50px auto;
+    }
+
+    #animation .animation-bar-right {
+        width: 50%;
+        margin: 50px 5% 50px auto;
+    }
+}
+
+/* ---------------------------------------------------------------------- */
+
+#animation #template, #animation #module {
+	display:block
+}
+
+#animation #choice, #animation #validation {
+	margin: 50px;
+}
+
+#animation #template table tbody tr {
+	background:white;
+	color:black;
+}
+
+#animation #template tr:hover {
+	cursor:pointer;
+}
+
+#animation ul.bar-left, #animation ul.bar-right {
+	padding-top: 65px;
+}
+
+/*
+#animation .gray {
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+    filter: gray; /* IE 6-9 */
+}*/
+
+#animation .animation-solution-cible, #animation .animation-solution-source {
+	width: 50px;
+}
+
+#animation #animation-cleft li, #animation #animation-cright li {
+	border-bottom: 2px solid #ccc;	
+	text-align: center;
+}
+
+#animation .animation-addbtn {
+	font-size: 2.4em;
+	color: #C6BD20;
+}
+
+#animation .animation-addbtn:hover {
+	color:#0F66A9;
+}
+
+#animation #nameverif .has-success .form-control {
+    border-color: #C6BD20;  
+}
+
+#animation #nameverif .form-control {
+	border-radius: 4px;
+}
+#animation #nameverif .has-success .form-control:focus {
+	box-shadow:0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 6px #C6BD20;
+}
+
+#animation #nameverif .has-success .form-control-feedback {
+    color: #C6BD20;
+}
+
+#animation #nameverif .has-normal .form-control {
+	border-color: #66afe9;
+}
+
+#animation #animation-Connecteur-source, #animation #animation-Module-source {
+	color: #0D6AAF;		
+}
+
+#animation #animation-Connecteur-cible, #animation-Module-cible {
+	color: #C6BD20;
+}
+
+#animation #choice .btn-primary {
+    background-color: #444446;
+    border-color: black;
+    color: white;	
+}
+
+#animation #choice .btn-default {
+    color: #9D9EA0;	
+}
+
+#animation #choice .btn-default, #animation #choice .btn-primary {
+    padding: 20px;
+    width: 250px;
+}
+
+#animation .name_solution {
+	font-variant:small-caps;
+	letter-spacing:0.5em;
+	font-size: 1.5em;
+}
+
+#animation #template th {
+	background: #ECECEC;
+	height: 20px;
+	padding: 2px;
+	text-align: center;	
+}
+
+#animation #template .info td {
+	color: white;
+	background: #444446;	
+}
+
+#animation #template .alert {
+	width: 400px;
+}
+
+#animation #head {
+	padding-bottom: 50px;
+}
+
+#animation .selected {
+	color: #1667A8;
+}
+
+#animation .sub_module_selected:hover {
+	cursor: pointer;
+}

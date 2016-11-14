@@ -1,0 +1,222 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#step_modules {
+	padding: 20px;
+}
+
+#validation_simulation:hover {
+	cursor: pointer;
+}
+
+#connexion #rulename {
+	border: 3px solid transparent;
+	padding: 5px;
+	color: white;
+	background: #202020;
+}
+
+.obl {
+	display: inline-block;
+	width:16px;
+	height:16px;
+	margin-left: 20px;
+	padding-left: 5px;
+}
+.windows {
+	display:none;
+}
+
+
+.clr {
+	both:clear;
+}
+
+.left {
+	float: left;
+	text-align: left;
+}
+
+.right {
+	float: right;
+	text-align: right;
+}
+
+.cursor:hover {
+	cursor:pointer;
+	color: #12BA00;
+}
+
+
+
+/* step 3 */
+
+.note, #error {
+	float: left; 
+	margin-right: .3em;	
+	width: 400px;
+	margin: 20px 0;
+}
+
+.ui-widget-content {
+	font-size: 1em;
+}
+
+.ui-widget-header {
+	font-size:0.85em;	
+}
+
+/*#cible ul li li::before{ content:"Formule : "; }*/
+
+
+
+#choix fieldset {
+	border: 0px;
+}
+
+.clr {
+	clear:both;
+}
+
+.listepager {
+	min-width:75px;
+}
+
+.listepager td {
+	padding: 5px;
+	color: black; 
+	min-width:150px;
+	
+}
+.solution_block {	
+	width: 200px;
+	height: 64px auto;
+}
+
+.listepager .off td {
+	opacity:0.5;
+}
+
+.listepager tr {
+	padding: 10px;
+}
+
+.has-switch > div {
+	height: 30px;
+}
+
+.listepagerflux{
+  width: 99%;
+}
+
+.listepagerflux td {
+  padding: 5px;
+}
+
+/* params */
+
+
+
+
+#fields_duplicate_target li {
+    -moz-user-select: none;
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0);
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857;
+    margin-bottom: 0;
+    padding: 6px 12px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;	
+    
+    background-color: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #333333;    
+}
+
+#fields_duplicate_target li:hover {
+	cursor: pointer;
+}
+#fields_duplicate_target li.active {
+    background-color: #5BC0DE;
+    border-color: #46B8DA;
+    color: #FFFFFF;  
+}
+
+#fields_duplicate_target li.no_active {
+    background-color: #D9534F;
+    border-color: #D43F3A;
+    color: #FFFFFF;
+}
+
+/* relation step 3 */
+
+#relation .rel .obl {
+	margin-left: 0px;
+}
+
+#relation .rel, #fieldsfilter {
+	list-style: none outside none;
+}
+
+#fieldsfilter li {
+	margin: 10px 0px;
+}
+
+#fieldsfilter select {
+	margin: 0px 10px;
+}
+
+input[type="text"] {
+	color: black;
+}
+
+/* infobulle mapping des champs */
+.info_delete_fields {
+	position:absolute;
+	background: rgba(157,192,225,4);
+	border: 1px solid #0F66A9;
+	color: #444446;
+	min-width: 100px;
+	padding:0px 4px;
+	font-weight:bold;	
+	font-size: 0.7em;
+	margin-left: 50px;
+}
+
+#tabs .badge {
+	background: #CCC31C;
+	display:inline-block;
+	width: 30px;
+}
+
+#champs #catalog {
+	max-height: 870px;
+	overflow: auto;
+}

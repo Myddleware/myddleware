@@ -1,0 +1,13 @@
+login:
+    title: Connexion
+    index: Accueil
+    user: Identifiant
+    pwd: Mot de passe 
+    connexion: Se Connecter
+    error_session: Erreur de session 
+    text_up_right: Pour en savoir plus sur myddleware
+    text_bottom_right: Vous serez redirigé vers notre site explicatif
+    btn:
+        here: Cliquez ici
+        create: Créer un compte
+        pwd_forgot: Mot de passe oublié ?

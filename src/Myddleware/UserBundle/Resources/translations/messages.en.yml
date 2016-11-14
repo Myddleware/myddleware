@@ -1,0 +1,12 @@
+login:
+    title: Connection
+    index: Home
+    user: Login
+    pwd: Password 
+    connexion: Sign in
+    error_session: Error of session 
+    text_up_right: More information about myddleware
+    text_bottom_right: You will be redirected towards our site
+    btn:
+        here: Click here
+        create: create an account

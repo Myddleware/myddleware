@@ -1,0 +1,143 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% extends "::baseone.html.twig" %}
+
+{# {% trans_default_domain 'FOSUserBundle' %} #}
+
+{% block title %}{{parent()}} | {{ 'login.title'|trans }}{% endblock %}
+
+
+{% block body %}
+
+{% block fos_user_content %}
+
+		{# L'utilisateur est-il connecté ? #}
+		{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+		    {# L'utilisateur est connecté ! #}
+		    {% include "RegleBundle:Home:index.html.twig" %}
+		{% else %}
+		    {# L'utilisateur n'est pas connecté ! #}
+    	<div id="myd_connexion">
+
+    		<div class="white">
+
+    			<p class="ctr"><span class="logo"></span></p>
+				  <form id="mydlogin" action="{{ path("fos_user_security_check") }}" method="post" class="form-inline" role="form"> 
+
+				  {% if attempt < 6 %}			
+				  <div class="form-group">
+				    <p>
+				    	<input type="text" class="form-control" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
+				    	<input type="password" class="form-control" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
+				    	<input type="hidden" name="_csrf_token" value="{{ csrf_token }}" >
+				    </p>
+				    {% if error %}
+   						<div class="alert alert-danger" role="alert">
+   							<span class="glyphicon glyphicon-remove-circle"> {{ error|trans }} ( {{ attempt }} ) </span>
+   						</div>
+   					{% else %}
+   						<div id="_error" style="display:none;" class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-remove-circle"> {{ 'login.error_session'|trans }}</div>	
+					{% endif %}
+				    <span id="control" class="btn-myd">{{ 'login.connexion'|trans }}</button>
+				    <button style="display:none;" id="_submit" name="_submit" class="btn-myd"></button>
+				    <p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('fos_user_resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
+				  </div>
+				  {% else %}
+   						<div class="alert alert-danger" role="alert">
+   							<span class="glyphicon glyphicon-remove-circle"> Please wait :  {{ remaining.minute }}min {{ remaining.second }}s </span>
+   						</div>
+						<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('fos_user_resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
+				  {% endif %}
+				</form>			
+    		</div>
+    		<div class="grey">
+    			<p class="ctr">
+    				{{ 'login.text_up_right'|trans }}   			
+    				<a href="http://www.myddleware.com" class="btn-mydinv">{{ 'login.btn.here'|trans }}</a>
+    			</p>
+    			{#<p class="ctr">
+    				<small>{{ 'login.text_bottom_right'|trans }}</small>
+    			</p>
+    			<p class="ctr">
+    				<button type="submit" class="btn-myd">{{ 'login.btn.create'|trans }}</button>
+    			</p>#}		
+    		</div>    		
+    		
+		<div clss="clr"></div>
+    	</div>
+		{% endif %}
+{% endblock fos_user_content %}	
+{# ------------- PARAMETRES JQUERY ------------- #}
+<script type="text/javascript">	
+	var path_control = "{{ path('login_protect') }}";
+</script>
+{# ------------- PARAMETRES JQUERY ------------- #}	
+	
+{% endblock %}
+
+{% block cssin %}
+	body {
+		background: url({{ asset('bundles/login/images/') }}fd.jpg) repeat-y;
+		background-color: #9DC0E1;
+		overflow-y:hidden;
+	}
+
+	#myd_connexion .logo {
+		background: url({{ asset('bundles/login/images/') }}logo.png) no-repeat;
+		background-size: 158px;
+	}
+
+	.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+		background: url({{ asset('bundles/login/images/') }}btn.png);		
+	}
+
+	#myd_connexion .load {
+		background: url({{ asset('bundles/login/images/') }}loadlogin.gif);
+		height: 16px;
+		width: 16px;  	
+		display: inline-block;	
+	}
+	
+	.btn-myd {
+		background-position: left top;   		
+	}
+
+	.btn-myd:hover {
+		background-position: left bottom;
+	}
+
+	.btn-mydinv {
+		background-position: left bottom;
+	}
+
+	.btn-mydinv:hover {
+		background-position: left top;
+	}	
+{% endblock cssin %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/login/css/login.css') }}" type="text/css" />
+{% endblock css %}
+  

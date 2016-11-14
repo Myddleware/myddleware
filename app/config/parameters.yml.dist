@@ -1,0 +1,28 @@
+parameters:
+    database_driver: pdo_mysql
+    database_host: 
+    database_port: 
+    database_name: 
+    database_user: 
+    database_password: 
+    mailer_transport: mail
+    mailer_host: 
+    mailer_port: 
+    mailer_auth_mode: 
+    mailer_user: 
+    mailer_password: 
+    mailer_email:
+    mailer_name: 
+    secret: 
+    myddleware_support: 0
+    param:
+        mode: front_office
+    extension_allowed:
+        - xml
+        - wsdl
+    myd_version: 2.0.2
+    php:
+        executable: php
+    locale: en
+    pager: 20
+    block_install: 0

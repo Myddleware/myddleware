@@ -1,0 +1,323 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% extends '::base.html.twig' %}
+{% block title %}{{parent()}} | {{'title.rule.create'|trans}}{% endblock %}
+{% block titlesm %}{{'title.rule.create'|trans}}{% endblock titlesm %} 
+{% block body %}
+    <div id="animation">
+
+        {% if error != false  %}
+        <!-- erreur -->
+        <div id="error" class="ui-widget">
+            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;">
+            <p>
+            <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+                <strong>Alerte:</strong>
+                {{ error }}
+                </p>
+            </div>
+        </div>
+        <div class="clr"></div>
+        {% endif %}
+        
+        <div class="animation-content animation-content-left">
+            <div class="animation-content-left-toggle-btn"></div>
+            <div id="animation-cleft" class="carousel">
+                <a class="prev">{{'animate.carousel.previous'|trans}}</a>
+                <div class="window">
+                    <ul class="clr">
+                        <li>
+                            <a class="fancybox_animation" data-fancybox-type="iframe" href="{{ path('regle_connector_create_out',{'type' : 'source' }) }}">
+                                <span class="animation-addbtn glyphicon glyphicon-plus-sign"></span>
+                            </a>
+                        </li>
+                        {# Liste des solutions possédant au moins 1 connecteur de type : SOURCE #}
+                        {% if source %}
+                            {% for s in source %}
+                           <li>
+                                <img data-id="{{ s.getId }}" data-solution="{{ s.getName }}" class="animation-solution-source gray" src="{{ asset('bundles/regle/images/solution/' ~ s.getName ~ '.png' ) }}" alt="{{ s.getName }}" />
+                            </li>
+                            {% endfor %}
+                        {% endif %} 
+                        {# Liste des solutions possédant au moins 1 connecteur de type : SOURCE #}
+                    </ul>
+                </div> <!-- .window -->
+                <a class="next">{{'animate.carousel.next'|trans}}</a>
+            </div> <!-- .carousel -->
+        </div>
+        <div class="animation-content animation-workspace">
+          
+            <div align="center" id="head">
+                <div class="left name_solution">
+                    {{'animate.solution.source'|trans}}
+                </div> 
+                <div class="right name_solution">
+                    {{'animate.solution.target'|trans}}
+                </div>
+                <div class="clr">
+                	<ul>
+	                	<li>
+	                		<a href="{{'animate.tutoriel.link'|trans}}" target="_blank">{{'animate.tutoriel.textlink'|trans}}</a>
+	                	</li>                             
+	                    <li>
+		                    <form class="form-inline" role="form" id="nameverif" onsubmit="return false;">
+		                      <div class="form-group has-normal has-feedback">
+		                        <input type="text" class="form-control" id="rulename" placeholder="{{'animate.rulename'|trans}}" maxlength="40">
+		                        <span class="glyphicon form-control-feedback"></span>
+		                      </div>
+		                    </form>
+	                    </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <ul>
+                <li>
+                </li>
+                <li class="animation-workspace-container">
+                    <div class="animation-workspace-content">
+                        <div class="animation-puce arcleft-g">
+                            <ul id="animation-source-container">
+                                <li><div id="animation-source"><img src="" alt=""/></div></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="animation-workspace-content" align="right">
+                        <ul class="bar-left">
+                            <li><div id="animation-Bar1" class="progress progress-striped active animation-bar-left">
+                            <div class="progress-bar">
+                            <span class="sr-only"></span>
+                            </div></div></li>
+                            <li><div id="animation-Bar2" class="progress progress-striped active animation-bar-left">
+                            <div class="progress-bar">
+                            <span class="sr-only"></span>
+                            </div></div></li>
+                        </ul>
+                    </div>
+                    <div class="animation-workspace-content">
+                        <div id="animation-myddleware-div" class="animation-puce">
+                            <div id="animation-myddleware-back-0"><div class="animation-myddleware-logo"></div></div>
+                            <div id="animation-myddleware-back-1"><div class="animation-myddleware-logo"></div></div>
+                            <div id="animation-myddleware-back-2"><div class="animation-myddleware-logo"></div></div>
+                            <div id="animation-myddleware-back-3"><div class="animation-myddleware-logo"></div></div>
+                        </div>
+                    </div>
+                    <div class="animation-workspace-content">
+                        <ul class="bar-right">
+                            <li><div id="animation-Bar3" class="progress progress-striped active animation-bar-right">
+                            <div class="progress-bar">
+                            <span class="sr-only"></span>
+                            </div></div></li>
+                            <li><div id="animation-Bar4" class="progress progress-striped active animation-bar-right">
+                            <div class="progress-bar">
+                            <span class="sr-only"></span>
+                            </div></div></li>
+                        </ul>
+                    </div> 
+                    <div class="animation-workspace-content">
+                        <div class="animation-puce arcright-g">
+                            <ul id="animation-cible-container">
+                                <li><div id="animation-cible"><img src="" alt=""/></div></li>
+                            </ul>                                   
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div>
+                <div class="left">
+                    <p>
+                        <select id="animation-Connecteur-source" name="animation-Connecteur-source"></select>
+                        <span class="loader-source"></span>
+                    </p>
+                    <div id="connector-source-error" class="alert alert-danger"></div>
+                    <div id="connector-source-success" class="alert alert-success"></div>
+                    
+                </div>
+                <div class="right">
+                    <p>
+                        <span class="loader-cible"></span><select id="animation-Connecteur-cible" name="animation-Connecteur-cible"></select>
+                    </p>
+                    <div id="connector-cible-error" class="alert alert-danger"></div>
+                    <div id="connector-cible-success" class="alert alert-success"></div>
+                   
+                </div>
+                <div class="clr"></div>
+                <div id="choice" class="btn-toolbar" role="toolbar">
+                    <div align="center" text-align="center">
+                        <button class="btn btn-default" id="btn_module" type="button">
+                            <span class="glyphicon glyphicon-hand-right"></span> {{'animate.choice.module'|trans}}</button>
+                        <button class="btn btn-default"id="btn_template" type="button">{{'animate.choice.template'|trans}}
+                            <span class="glyphicon glyphicon-hand-left"></span></button>
+                    </div>
+                </div>                      
+                <div id="module">
+                    <div class="left">
+                        <p><select id="animation-Module-source" name="animation-Module-source"></select></p>
+                    </div>
+                    <div class="right">
+                        <p><select id="animation-Module-cible" name="animation-Module-cible"></select></p>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+                <div id="template"></div>
+                <div id="submodules"></div>              
+                <div id="validation" align="center" text-align="center">
+                    <button id="btn_validation" type="button" class="btn-large-mydinv"></button>
+                </div>                                 
+            </div>
+        </div>
+        <div class="animation-content animation-content-right">
+            <div class="animation-content-right-toggle-btn"></div>
+            <div id="animation-cright" class="carousel">
+                <a class="prev">{{'animate.carousel.previous'|trans}}</a>
+                <div class="window">
+                    <ul class="clr">
+                        <li><a class="fancybox_animation" data-fancybox-type="iframe" href="{{ path('regle_connector_create_out',{'type' : 'target' }) }}">
+                            <span class="animation-addbtn glyphicon glyphicon-plus-sign"></span>
+                            </a></li>
+
+                        {# Liste des solutions possédant au moins 1 connecteur de type : TARGET #}
+                        {% if target %}
+                            {% for t in target %}
+                           <li>
+                                <img data-id="{{ t.getId }}" data-solution="{{ t.getName }}" class="animation-solution-cible gray" src="{{ asset('bundles/regle/images/solution/' ~ t.getName ~ '.png' ) }}" alt="{{ t.getName }}" />
+                            </li>
+                            {% endfor %}
+                        {% endif %} 
+                        {# Liste des solutions possédant au moins 1 connecteur de type : TARGET #}
+
+                    </ul>
+                </div> <!-- .window -->
+                <a class="next">{{'animate.carousel.next'|trans}}</a>
+            </div> <!-- .carousel -->
+        </div>
+    </div>
+
+    {# ------------- PARAMETRES JQUERY ------------- #}   
+    <script type="text/javascript">
+        var path_new_solution = "{{ path('regle_connector_insert_solution') }}";
+        var path_img = "{{ asset('bundles/regle/images/') }}";
+        var path_connector_by_solution = "{{ path('regle_connector_by_solution') }}";
+        var path_module = "{{ path('regle_list_module') }}"; 
+        var path_rulename = "{{ path('regle_inputs_name_unique') }}"; 
+        var path_template = "{{ path('regle_template') }}"; 
+        var path_submodules = "{{ path('regle_submodules') }}";       
+        var path_validation = "{{ path('regle_validation_animation') }}"; 
+        var path_mapping = "{{ path('regle_stepthree') }}";  
+        var path_listrule = "{{ path('regle_list') }}";
+        var wait = "{{'animate.wait'|trans}}";
+        var trans_btn_mapping = "{{'create_rule.step1.btn_mapping'|trans}}"
+        var trans_btn_confirm = "{{'create_rule.step1.btn_confirm'|trans}}"
+    </script>
+    {# ------------- PARAMETRES JQUERY ------------- #}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/animation.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/jcarousel.ajax.css') }}" type="text/css" />
+{% endblock css %}
+
+{% block cssin %}
+    #animation .loader-source {
+        background: url({{ asset('bundles/regle/images/') }}loader-source.gif);
+        background-repeat:no-repeat;
+    }
+
+    #animation .loader-cible {
+        background: url({{ asset('bundles/regle/images/') }}loader-cible.gif);
+        background-repeat:no-repeat;
+    }
+
+    #animation-myddleware-back-1 > .animation-myddleware-logo {
+        background: url({{ asset('bundles/regle/images/') }}logo/text.png);
+    }
+
+    #animation-myddleware-back-2 > .animation-myddleware-logo {
+        background: url({{ asset('bundles/regle/images/') }}logo/up.png); 
+    }
+
+    #animation-myddleware-back-3 > .animation-myddleware-logo {
+        background: url({{ asset('bundles/regle/images/') }}logo/down.png) right top;       
+    }
+
+    #animation .arcleft-c  {
+        background: url({{ asset('bundles/regle/images/') }}template/left-arc-color.png) no-repeat right;  
+        height: 165px;   
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;     
+    }
+
+    #animation .arcleft-g  {
+        background: url({{ asset('bundles/regle/images/') }}template/left-arc-gray.png) no-repeat right;   
+            height: 165px;   
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;             
+    }
+
+    #animation .arcright-c  {
+        background: url({{ asset('bundles/regle/images/') }}template/right-arc-color.png) no-repeat left;  
+        height: 165px; 
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;              
+    }        
+
+    #animation .arcright-g  {
+        background: url({{ asset('bundles/regle/images/') }}template/right-arc-gray.png) no-repeat left; 
+        height: 165px; 
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;           
+    }
+
+    #animation .animation-myddleware-logo {
+        background-size: 105px 105px; 
+        background-repeat: no-repeat;
+    }
+
+    #animation .animation-content-left-toggle-btn, #animation .animation-content-right-toggle-btn {
+        background: #CACACA;
+        background-image: url({{ asset('bundles/regle/images/') }}data.png);
+        background-size: 15px 22px;
+        background-position: 10px 5px; 
+        background-repeat: no-repeat;
+    }   
+{% endblock cssin %}
+
+{% block js %}
+    <script src="{{ asset('bundles/regle/js/jcarousel.ajax.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('bundles/regle/js/animation.js') }}" type="text/javascript"></script>
+{% endblock js %}

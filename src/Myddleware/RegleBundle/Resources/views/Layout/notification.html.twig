@@ -1,0 +1,57 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% if app.session %}
+
+<ul id="zone_notification">
+
+{% if app.session.get('error') is not empty  %}
+    {% for error in app.session.get('error') %}
+        <li class="error"><span class="glyphicon glyphicon-remove"></span><p>{{ error|raw }}</p></li>
+    {% endfor %}
+{% endif %}
+
+
+{% if app.session.get('warning') is not empty  %}
+    {% for warning in app.session.get('warning') %}
+        <li class="warning"><span class="glyphicon glyphicon-exclamation-sign"></span><p>{{ warning|raw }}</p></li>
+    {% endfor %}
+{% endif %}
+
+{% if app.session.get('info') is not empty  %}
+    {% for info in app.session.get('info') %}
+        <li class="info"><span class="glyphicon glyphicon-info-sign"></span><p>{{ info|raw }}</p></li>
+    {% endfor %}
+{% endif %}
+
+{% if app.session.get('success') is not empty  %}
+    {% for success in app.session.get('success') %}
+        <li class="success"><span class="glyphicon glyphicon-ok"></span><p>{{ success|raw }}</p></li>
+    {% endfor %}
+{% endif %}
+
+{{ app.session.clear() }}
+
+</ul>
+{% endif %}

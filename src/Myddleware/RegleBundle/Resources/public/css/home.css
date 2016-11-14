@@ -1,0 +1,157 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#panel #info-blocks{
+	padding-left: 9%;
+}
+#panel .onoffswitch {
+    position: relative; width: 170px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    top: 5px; right: 5px;
+}
+#panel .onoffswitch-checkbox {
+    display: none;
+}
+#panel .onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 0px;
+}
+#panel .onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    -moz-transition: margin 0.3s ease-in 0s; -webkit-transition: margin 0.3s ease-in 0s;
+    -o-transition: margin 0.3s ease-in 0s; transition: margin 0.3s ease-in 0s;
+}
+#panel .onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 26px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+#panel .onoffswitch-inner:before {
+    padding-left: 10px;
+    background-color: #0069B4; color: #FFFFFF;
+}
+#panel .onoffswitch-inner:after {
+    padding-right: 10px;
+    background-color: #CCCCCC; color: #333333;
+    text-align: right;
+}
+#panel .onoffswitch-switch {
+    display: block; width: 25px; height: 34px; margin: 0px;
+    background: #444446;
+    position: absolute; top: 0; bottom: 0; right: 145px;
+    -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
+    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+}
+#panel .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+#panel .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
+
+#panel .info, #panel .infob {
+    display: inline-block;
+    float: left;
+    margin: 20px;
+    width: 450px;
+    text-align:center;
+}
+
+#panel .info .list-group {
+	text-align: left;	
+}
+
+#panel .info #periods span {
+	color: #0F66A9;
+	font-weight:bold;
+}
+
+#panel .infob {
+	border: 1px solid #ccc;
+	min-height: 360px;
+	border-radius: 4px;
+}
+
+#panel #info {
+    font-size: 1.2em;
+    margin: 5px;
+}
+
+#panel #info .value {
+	color: #0F66A9;
+	font-weight:bold;
+}
+#panel #listing-solutions-container {
+	height: 75px;
+}
+#panel #listing-solutions-container > div, #panel #listing-solutions-container > button {
+	display: inline-block;
+}
+#panel #listing-solutions-container button {
+	width: 50px;
+	height: 75px;
+	vertical-align: top;
+}
+#panel .scroll-img {
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	width: 697px;
+	height: 75px;
+	overflow: hidden;
+	font-size: 0;
+}
+#panel .scroll-img ul {
+	width: 2500px;
+	height: 600px;
+	margin: 0;
+	padding-left: 0;
+	text-align: left;
+}
+#panel .scroll-img ul li {
+	width: 64px;
+	height: 64px;
+	display: inline-block;
+	margin: 5px 0 5px 5px;
+}
+#panel .scroll-img img{
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+}
+#panel .scroll-img img:hover{
+    filter: none;
+    -webkit-filter: none;
+    -moz-filter: none;
+    -ms-filter: none;
+    -o-filter: none;
+	cursor: pointer;
+}
+#panel .scroll-img a{
+	width: 64px;
+	height: 64px;
+}

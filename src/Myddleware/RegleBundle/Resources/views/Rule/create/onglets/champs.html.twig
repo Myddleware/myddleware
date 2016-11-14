@@ -1,0 +1,181 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<div class="link-help right">
+	<a href="#help-content-fields"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
+</div>
+<div class="clr"></div>
+<div id="source">
+	<div align="center">
+		<p><img src="{{ asset('bundles/regle/images/solution/') }}{{params.source.solution }}.png" alt="{{params.source.solution }}" /></p>
+		<h1><img src="{{ asset('bundles/regle/images/template/source') }}.png" alt="{{'rule.source'|trans}}" /> {{'rule.source'|trans}}</h1>
+	</div>
+	<div id="catalog">
+		{% if source %}
+			{% for module_name, fields in source %}
+
+				<h2><a href="#">{{ module_name }}</a></h2>
+				<div>
+					<ul>
+					{% for fieldid, fieldname in fields %}
+						<li><a class="fancybox" data-fancybox-type="iframe" id="{{ fieldid }}" href="{{ path('path_info_field',{'field' : fieldid, 'type' : 'source' }) }}"><span class="glyphicon glyphicon-question-sign"></span></a> {{ fieldname }}</li>		
+					{% endfor %}
+					</ul>	
+				</div>
+			{% endfor %}
+		{% endif %}
+	</div>
+</div>
+
+<div id="cible">
+	<div align="center" data-title="true">
+		<p><img src="{{ asset('bundles/regle/images/solution/') }}{{params.cible.solution }}.png" alt="{{params.cible.solution }}" /></p>
+		<h1><img src="{{ asset('bundles/regle/images/template/target') }}.png" alt="{{'rule.target'|trans}}" /> {{'rule.target'|trans}}</h1>
+	</div>
+
+	<div class="clr"></div>
+
+	{# ----------- BLOCK ADD FILTER ---------- #}
+	{% if fieldMappingAddListType %}	
+		<div id="blockaddfield" data-title="true">
+			<button id="addField" class="btn btn-default btn-lg" type="button">
+			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+			{{'create_rule.step3.addfield.custom'|trans}}
+			</button> 
+			<div id="formatfield" style="display:none;">
+				<p><input type="text" />
+					<select>
+						{% for name, type_field in fieldMappingAddListType %}
+							<option value="{{name}}">{{ type_field }}</option> 
+						{% endfor %}
+					</select>
+				<button id="saveBtnField" type="button" class="btn btn-default" aria-label="Left Align">
+				  <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+				</button>				
+				</p>
+			</div>
+		</div>
+	{% endif %}
+	{# ----------- BLOCK ADD FILTER ---------- #}
+
+	<p>{{'create_rule.step3.filter'|trans}} : <input id="hidefields" type="text" placeholder="{{'create_rule.step3.filter_fields'|trans}}" /></p>
+
+
+	{% for module_name, fields in cible %}
+	<h4 class="titre">{{ module_name }}</h4>
+		<div id="targetfields" data-title="true">
+		{% if cible %}	
+			{% for field, value in fields %}
+				<div data-show="true" class="champs{{ value ? ' require' : '' }}" id="{{ field }}">
+					<h1 class="nom ui-widget-header">{{ value ? '<span class="glyphicon glyphicon-star"></span>' : '' }} {{ field }} 
+						 <a class="fancybox" data-fancybox-type="iframe" href="{{ path('path_info_field',{'field' : field, 'type' : 'target' }) }}"><span class="glyphicon glyphicon-question-sign"></span></a>
+					</h1>
+					<div data-show="" class="ui-widget-content">
+						<ol>	
+							<li class="placeholder">{{'create_rule.step3.placeholder'|trans}}</li>	
+						</ol>
+						<ul>
+							<li class="formule_text" id="formule_{{ field }}"></li>
+						</ul>				
+						<p>							
+							<input class="formule btn-mydinv" type="button" value="{{'create_rule.step3.formula.create'|trans}}"/>
+						</p>
+					</div>
+				</div>	
+			{% endfor %}	
+		{% endif %}		
+		</div>
+	{% endfor %}
+</div>
+
+<div class="clr"></div>
+
+<div id="help-content-fields" class="help-content">
+	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
+	<p>{{'help.rule.fields'|trans|raw}}</p>
+</div>
+
+<div class="windows" id="dialog" title="{{'create_rule.step3.alert.fields_title'|trans}}">
+<p>{{'create_rule.step3.alert.fields'|trans}}</p>
+</div>
+
+<div class="windows" id="formule" title="{{'create_rule.step3.formula.compose'|trans}}">
+	<span id="formule_table"></span>
+	<div>
+		<textarea id="area_insert" class="left" rows="10" cols="30"></textarea>
+		<div id="area_color" class="left"></div>
+		<div class="clr"></div>		
+	</div>
+	<div>
+		<div class="left wdh">
+			<p>{{ 'create_rule.step3.formula.fields'|trans }} :</p>
+			<select class="listarea" id="champs_insert" name="champs_insert" multiple="multiple" size="13"></select>
+		</div>
+		<div class="left wdh">
+			<p>{{ 'create_rule.step3.formula.function'|trans }} :</p>
+			<select class="filter" id="filter" name="filter_functions">
+				<option selected="selected" value="0">- {{ 'function.all' |trans }} -</option>
+
+				{% for t, v in lst_category %}
+					<option data-type="{{ v.getId }}">{{ ('function.category.' ~ v.getNameYml) |trans }}</option>
+				{% endfor %}
+
+			</select>
+
+			<ul class="listarea" id="functions" name="functions">
+
+				{% for t, v in lst_functions %}
+					<li class="func" data-type="{{ v.getCategorieId.getId }}">
+						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategorieId.getNameYml ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
+					</li> 				
+				{% endfor %}
+
+			</ul>
+		</div>	
+	</div>
+	<div class="clr"></div>	 
+	<div>
+		<div id="source_info">
+			{% if opt_source is not empty %}
+			<label>{{'rule.source'|trans}} :</label>
+				<select name="source_info">
+					{{ opt_source|raw }}
+				</select> <button class="btn-mydinv-small"><span class="glyphicon glyphicon-upload"></span></button>
+			{% endif %}
+		</div>
+		<div id="target_info">
+			{% if opt_target is not empty %}
+			<label>{{'rule.target'|trans}} :</label>
+				<select name="target_info">
+					{{ opt_target|raw }}
+				</select> <button class="btn-mydinv-small"><span class="glyphicon glyphicon-upload"></span></button>
+			{% endif %}
+		</div>
+	</div>
+	<div>
+		<input class="btn-mydinv" id="area_confirm" type="button" value="{{'create_rule.step3.formula.confirm'|trans}}"/>
+		<input class="btn-mydinv" id="area_eff" type="button" value="{{'create_rule.step3.formula.delete'|trans}}"/>
+		<input class="btn-mydinv" id="area_quit" type="button" value="{{'create_rule.step3.formula.close'|trans}}"/>	
+	</div>
+</div>

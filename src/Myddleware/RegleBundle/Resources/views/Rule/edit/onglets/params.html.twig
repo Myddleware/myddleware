@@ -1,0 +1,82 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<div class="link-help-view">
+	<a href="#help-content-param"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
+</div>
+
+<div id="ruleparams">
+{% if params %}
+	{% for c, p in params %}
+		{% if p.type != 'option' %}
+			<p>{{p.label|trans}} : <input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params"' : 'class="params"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" /></p>
+		{% else %}
+			<p>
+				{{p.label|trans}} : <select data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params"' : 'class="params"' }} name="{{ p.name }}" id="{{ p.name }}">
+					{% for opt_value, opt_name in p.option %}
+						{% if opt_value == p.value_bdd %}
+							<option selected="selected" value="{{ opt_value }}">{{ opt_name|trans }}</option>
+						{% else %}
+							<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>
+			</p>
+		{% endif %}
+	{% endfor %}
+{% endif %}
+</div>
+
+<div id="validRuleParams" class="left">
+	<button id="saveRuleParams" type="button" class="btn-mydinv">
+	  <span class="glyphicon glyphicon-edit"></span> {{'view_rule.params.save'|trans}}
+	</button>
+	<div class="myd_loading"><img id="myd_loading_img" src="" /></div>
+</div>
+
+<div id="simuleRuleFlux" class="right">
+	<div id="simuleRuleFluxBtn">
+		<div class="simuleRuleFluxLoading"><img id="simuleRuleFluxLoading_img" src="" /></div>
+		<button id="simuleRuleFluxAction" type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-play-circle"></span> {{'view_rule.params.simule'|trans}}
+		</button>
+	</div>
+	<div id="simuleRuleFluxContainer">
+		<p class="simuleRuleFluxResult">{{'view_rule.params.result'|trans}}*: </p><p class="simuleRuleFluxResult" id="simuleRuleFluxResult">-</p>
+		<div id="simuleRuleFluxError" class="alert alert-danger" role="alert"></div>
+		<p id="simuleRuleFluxDetails">*{{'view_rule.params.details'|trans}}</p>
+	</div>
+</div>
+
+<div class="clr"></div>
+{# ------------- PARAMETRES JQUERY ------------- #}
+<script type="text/javascript">	
+var path_img = "{{ asset('bundles/regle/images/') }}";
+</script>
+{# ------------- PARAMETRES JQUERY ------------- #}
+
+<div id="help-content-param" class="help-content">
+	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
+	<p>{{'help.viewrule.param'|trans|raw}}</p>
+</div>

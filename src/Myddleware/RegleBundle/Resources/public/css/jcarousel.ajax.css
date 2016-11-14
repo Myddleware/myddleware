@@ -1,0 +1,97 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+.carousel {
+    width: 65px;
+    position: relative;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
+}
+
+.carousel > .window {
+    /*background: #828282;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border:solid 1px #424140;*/
+    overflow: hidden;
+    position: relative;
+    height: 370px;
+    /*-webkit-box-shadow: rgba(0,0,0,.6) -1px -2px 2px;
+    -moz-box-shadow:  rgba(0,0,0,.6) 0px 2px 2px;;*/
+}
+
+.carousel ul {
+    list-style: none;
+    margin: 0;
+    height: 10000px;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.carousel li {
+    /*padding: 0 10px 0 10px;*/
+    margin: 3px 0 0;
+    /*opacity: 0.4; */
+}
+
+.carousel li:hover {
+    cursor: pointer;
+    /*opacity: 1;*/
+    padding-top: 1px;
+}
+
+.carousel li:first-child {
+    margin: 0;
+}
+
+.carousel img {
+	border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    display: block;
+}
+
+.carousel > a {
+	cursor: pointer;
+    display: block;
+    width: 65px;
+    height: 29px;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAABBCAYAAAA3408NAAABJElEQVRYw2PQ11RgwIUPBjGsnu/B8QTIXodPHT4DMoH4PwjnWgn9B4rlkGQIUKPBgSCGHzBD9gQy/vc2lPoBlDMgyhCgJh6gAbdgBsDwGh/W/+bacneBaniIMWQRugEw3OvCDfLWUryGABUm4DIAhtMsREAGJWA1BKhAHeiN74QMAYWPh4H0d6AeLRRDgJKcQAOuETIAhld6s/431Za/BtTLiWzIHGINgOEOJx6Qt+aADQHFxg5/poJuZ57lpGI7XdkCUGwx/P//n2I8asioIaOGjBoyasioIaOGjBoyasioIaOGUGQIvg4isZg6HQSqdFWo1mmiSveNah1JJIOWUtSlpVrnGls3fx+km/+L6G4+1QYcqDb0ATWEv9qOXxbI5senDgA17ERBpBXknAAAAABJRU5ErkJggg==);
+    background-repeat: no-repeat;
+    background-position: 50% 9px;
+    text-indent: -9999px;
+}
+
+.carousel > .next {
+    background-position: 50% -45px;
+}
+
+.carousel > .disabled {
+    opacity: 0.4;
+    -moz-opacity: 0.4;
+    filter:alpha(opacity=40);
+}

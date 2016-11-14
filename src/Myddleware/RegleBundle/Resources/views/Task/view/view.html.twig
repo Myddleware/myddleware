@@ -1,0 +1,179 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% extends '::base.html.twig' %}
+{% block title %}{{parent()}} | {{'title.task.view'|trans}} {{ task.getId }}{% endblock %}
+{% block titlesm %}<a href="{{ path('task_list') }}">{{'breadcrumb.task_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.task.view'|trans}} {{ task.getId }}{% endblock titlesm %} 
+{% block body %}
+    <div id="task">
+		<button id="task_refresh" type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-refresh"></span> {{'view_task.refresh'|trans}}
+		</button>
+		<button id="task_stop" type="button" class="btn-mydinv">
+		  {{'view_task.task_stop'|trans}}
+		</button>
+		{# ------------- TASK ------------- #}
+		<div align="center">
+			{% if task %}
+
+				<table id="headertab" class="listepager">
+					<tr>
+						<th>{{'view_task.header.id'|trans}}</th>
+						<th>{{'view_task.header.status'|trans}}</th>
+						<th>{{'list_task.th.param'|trans}}</th>
+						<th>{{'view_task.header.begin'|trans}}</th>
+						<th>{{'view_task.header.end'|trans}}</th>
+						<th>{{'list_task.th.open'|trans}}</th>
+						<th>{{'list_task.th.close'|trans}}</th>
+						<th>{{'list_task.th.cancel'|trans}}</th>
+						<th>{{'list_task.th.error'|trans}}</th>
+						<th>{{'list_task.th.manual'|trans}}</th>
+						<th>{{'view_task.header.message'|trans}}</th>
+					</tr>
+					<tr>
+						<td class="ctr">{{ task.getId }}</td>
+						<td class="ctr">
+				     		{% if task.getStatus|lower == 'end' %}
+				     		<span id="task_status" class="label label-default" name="{{ task.getStatus }}">{{ task.getStatus }}</span>
+				     		{% else %}
+							<span id="task_status" class="label label-warning" name="{{ task.getStatus }}">{{ task.getStatus }}</span>
+				     		{% endif %}
+						</td>
+						<td class="ctr">{{ task.getParam }}</td>
+						<td class="ctr">{{ task.getBegin|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">{{ task.getEnd|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">{{ task.getOpen }}</td>
+						<td class="ctr">{{ task.getClose }}</td>
+						<td class="ctr">{{ task.getCancel }}</td>
+						<td class="ctr">{{ task.getError }}</td>
+						<td class="ctr">{{ task.getManual }}</td>
+						<td class="ctr">{{ task.getMessage }}</td>
+					</tr>
+				</table>
+			{% endif %}
+		</div>
+		{# ------------- TASK ------------- #}
+
+		{% if nb > 0 %}
+		<div id="fd-title-small" class="left">
+			<p>{{'view_task.nblogs'|trans}}<p><span class="nb">{{ nb }}</span>
+		</div>
+		{% endif %} 	
+		<div class="clr"></div>
+    	{# ------------- MESSAGE ------------- #}
+    	<div id="message" align="center">
+
+			{% if nb > 0 %}		
+	
+		    	<table class="listepager">
+					{% if entities is not empty %}	
+						<tr>
+							<th>{{'view_task.log.id'|trans}}</th>
+							<th>{{'view_task.log.ref'|trans}}</th>
+							<th>{{'view_task.log.transfer'|trans}}</th>
+							<th>{{'view_task.log.date_created'|trans}}</th>
+							<th>{{'view_task.log.type'|trans}}</th>
+							<th>{{'view_task.log.msg'|trans}}</th>
+						</tr> 
+					     {% for log in entities %}
+					     <tr class="fd_log_{{ log.getType|lower }}">
+					     	<td class="ctr">
+					     		{{ log.getId }}
+					     	</td>
+					     	<td>				     		
+					     		{% if log.getRef is not empty %}	
+									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
+									    {{ log.getRef }}
+									</a>
+					     		{% else %}
+					     			{{ log.getRef }}
+					     		{% endif %}
+					     	</td>	
+					     	<td>
+					     		{% if log.getDocument is not empty %}
+					     			<a href="{{ path('flux_info', {'id': log.getDocument}) }}">{{ log.getDocument }}</a>
+					     		{% endif %}
+					     	</td>					     					     			     			     	
+					     	<td>{{ log.getDateCreated|date("d/m/Y H:i:s") }}</td>
+					     	<td class="ctr">
+					     		<div class="log_{{ log.getType|lower }}">{{ log.getType }}
+					     		{% if log.getType|lower == 's' %}
+					     			<span class="glyphicon glyphicon-ok"></span>
+					     		{% elseif log.getType|lower == 'e' %}
+									<span class="glyphicon glyphicon-remove"></span>
+								{% elseif log.getType|lower == 'w' %}
+									<span class="glyphicon glyphicon-exclamation-sign"></span>
+					     		{% endif %}
+					     		</div>
+					     	</td>
+					     	<td class="msg">
+					     		{{ log.getMessage }}
+					     	</td>				     	     			     	
+						</tr>			
+						{% endfor %}			
+						<tr>
+							<th>{{'view_task.log.id'|trans}}</th>
+							<th>{{'view_task.log.ref'|trans}}</th>
+							<th>{{'view_task.log.transfer'|trans}}</th>
+							<th>{{'view_task.log.date_created'|trans}}</th>
+							<th>{{'view_task.log.type'|trans}}</th>
+							<th>{{'view_task.log.msg'|trans}}</th>
+						</tr>			
+					{% endif %}
+				</table>
+				<div align="center">
+					{% if pager.haveToPaginate %}
+						<div align="center">
+							{% if pager.haveToPaginate %}
+								{{ pagerfanta(pager, 'twitter_bootstrap3', { 'routeParams' : { 'id': task.getId }, 'routeName': 'task_view_page' } ) }}
+							{% endif %}
+						</div>	 				      
+					{% endif %}
+				</div>		 
+				{% else %}
+				<p>{{'view_task.empty_log'|trans}}</p>
+				{% endif %}
+
+    	</div>
+		{# ------------- MESSAGE ------------- #}
+    </div>
+
+    {# ------------- PARAMETRES JQUERY ------------- #}
+    <script type="text/javascript">   	
+    var path_img = "{{ asset('bundles/regle/images/') }}";
+	var path_task_stop = "{{ path('task_stop',{'id' : task.getId }) }}";
+    </script>
+    {# ------------- PARAMETRES JQUERY ------------- #}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/task.css') }}" type="text/css" />
+{% endblock css %}
+
+{% block cssin %}
+{% endblock cssin %}
+
+{% block js %}
+	<script src="{{ asset('bundles/regle/js/task.js') }}" type="text/javascript"></script>
+{% endblock js %}

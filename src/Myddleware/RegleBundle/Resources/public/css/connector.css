@@ -1,0 +1,98 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#connexion_connector #soluce_source {
+    font-size: 1.2em;
+    margin: 20px 0;
+    padding: 10px;
+    width: 280px;
+    margin-left: 210px;
+}
+
+#connexion_connector #source_test {
+	margin-left: 235px;
+}
+
+#connexion_connector .help {
+	margin-top: 5px;	
+}
+
+#connexion_connector .picture, #connexion_connector .help {
+	margin-left: 315px;
+}
+
+#connexion_connector .champs label {
+    text-align: right;
+    width: 190px;	
+}
+
+#connexion_connector .champs input[type="text"], #connexion_connector #step_modules input[type="text"],
+#connexion_connector .champs input[type="password"], #connexion_connector #step_modules input[type="password"] {
+    margin-left: 20px;
+    width: 280px;	
+    padding: 4px;
+}
+
+#connexion_connector #step_modules {
+	margin-left: 17px;
+}
+
+#connexion_connector #step_modules_confirme {
+	margin-left: 175px;
+}
+
+#connexion_connector #msg_status {
+	width: 280px;
+	padding: 10px;
+	margin-left: 175px;
+	word-wrap: break-word;
+}
+
+#connexion_connector .picture {
+	padding-top: 20px;
+}
+
+#connector .ui-state-default, #connector .ui-widget-content .ui-state-default, #connector .ui-widget-header .ui-state-default {
+	padding-top: 23px;		
+}
+
+#connexion_connector .sync {
+	margin-left: 50px;
+}
+
+#connexion_connector a:hover {
+	text-decoration:none;
+}
+
+#tabs ul.ui-widget-header li {
+    max-width: calc(1200px / 1 + 1.8px);
+    min-width: calc(1200px / 1 + 1.8px);
+    padding-top: 23px;
+}
+
+#connector #tabs ul.ui-widget-header li {
+    max-width: calc(1200px / 2 + 1.8px);
+    min-width: calc(1200px / 2 + 1.8px);
+    padding-top: 23px;
+}

@@ -1,0 +1,103 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+#reset_password, #change_password {
+	color: #0067AD;
+}
+
+#change_password {
+	
+}
+
+#change_password #fos_user_resetting_form {
+	label: inline-block;
+	width: 200px;
+} 
+
+#change_password #fos_user_resetting_form input {
+	width: 190px;
+}
+
+/* boutons */
+
+.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+	color: #404042;
+	font-weight: bold;
+	background: url({{ asset('bundles/regle/images/') }}template/btn.png) no-repeat; 
+	height: 31px;
+	width: 196px;  
+	border: none;  
+	display:inline-block; 	
+	cursor:pointer;		
+}
+
+.btn-small-myd, .btn-small-mydinv, .btn-small-mydinv:hover, .btn-small-myd:hover {
+	color: #404042;
+	font-weight: bold;
+	background: url({{ asset('bundles/regle/images/') }}template/btn-small.png) no-repeat; 
+	height: 31px;
+	width: 50px;  
+	border: none; 
+	display:inline-block; 		
+}
+
+.btn-middle-myd, .btn-myddle-mydinv, .btn-middle-mydinv:hover, .btn-middle-myd:hover {
+	color: #404042;
+	font-weight: bold;
+	background: url({{ asset('bundles/regle/images/') }}template/btn-middle.png) no-repeat; 
+	height: 31px;
+	width: 100px;  
+	border: none;  
+	display:inline-block; 			
+}
+
+.btn-large-myd, .btn-large-mydinv, .btn-large-mydinv:hover, .btn-large-myd:hover {
+	color: #404042;
+	font-weight: bold;
+	background: url({{ asset('bundles/regle/images/') }}template/btn-large.png) no-repeat; 
+	height: 31px;
+	width: 278px;  
+	border: none;  
+	display:inline-block;
+	cursor:pointer; 		
+}
+
+
+.btn-myd, .btn-small-myd, .btn-middle-myd, .btn-large-myd  {
+	background-position: left top;   		
+}
+
+.btn-myd:hover, .btn-small-myd:hover, .btn-middle-myd:hover, .btn-large-myd:hover {
+	background-position: left bottom;
+	text-decoration:none;
+}
+
+.btn-mydinv, .btn-small-mydinv, .btn-middle-mydinv, .btn-large-mydinv {
+	background-position: left bottom;	
+}
+
+.btn-mydinv:hover, .btn-small-mydinv:hover, .btn-middle-mydinv:hover, .btn-large-mydinv:hover {
+	background-position: left top;
+	text-decoration:none;
+}

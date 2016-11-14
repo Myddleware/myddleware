@@ -1,0 +1,96 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#myd_connexion { 		
+	margin: 100px auto;
+	width: 700px;
+	height: 400px;
+} 
+
+#myd_connexion div {
+	height: 350px;
+	float: left;
+	padding: 20px;	
+}  
+
+#myd_connexion .grey, #myd_connexion .white {
+	-webkit-box-shadow: 1px 1px 9px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    1px 1px 9px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         1px 1px 9px 0px rgba(50, 50, 50, 0.75);
+}
+
+#myd_connexion .grey {
+	width: 320px;
+	min-width: 320px;    		
+	background: #404042;
+	color: white;
+	padding-top: 20%;
+}
+
+#myd_connexion .white {
+	width: 300px;
+	min-width: 300px; 
+	background: white;
+}
+
+#myd_connexion .white .form-inline .form-control {
+	width: 196px;
+}
+
+#myd_connexion .logo {
+	width:160px;
+	height:113px;
+	display:inline-block;
+}
+
+#myd_connexion .form-inline {
+	display:inline-block;
+}
+
+#myd_connexion .alert {
+    height: 27px;
+    padding: 4px;
+    width: 196px;
+    word-spacing: -0.6em;
+}
+
+.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+	color: #404042;
+	font-weight: bold;
+	height: 31px;
+	width: 196px;  
+	border: none;  
+    display: inline-block;
+    line-height: 2em;
+    text-align: center;	
+    cursor:pointer;	
+}
+
+.clr {
+	clear: both;
+}  
+
+.ctr {
+	text-align: center;
+}

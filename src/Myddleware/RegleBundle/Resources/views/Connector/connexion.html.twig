@@ -1,0 +1,67 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<!-- create -->
+<div id="source">
+	<div class="picture"></div>	
+	<div class="help"></div>
+	<select id="soluce_source" class="liste_solution">
+		{{solutions | raw }}
+	</select>
+	<div class="champs"></div>
+</div>
+
+<div class="clr"></div>
+<div id="step_modules">
+	<form method="post" action="{{ path('regle_connector_insert') }}">
+
+		<div id="msg_status" class="alert alert-danger" role="alert">
+			<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
+		</div>
+
+		<p><label>{{'create_connector.connexion'|trans}} : </label><input type="text" name="label" value="" /></p>		
+		<p><input class="btn-large-myd" id="step_modules_confirme" type="submit" value="{{'create_connector.save'|trans}}" disabled="disabled"/></p>
+	</form>
+</div>
+
+{# ------------- PARAMETRES JQUERY ------------- #}
+<script type="text/javascript">	
+	var path_img = "{{ asset('bundles/regle/images/solution/') }}";
+	var path_link_fr = "{{'view_connector.help.link'|trans}}";
+	var path_upload = "{{ path('upload', {'solution': 'all'}) }}";
+	var inputs = "{{ path('regle_inputs') }}";	
+	var help_connector = "{{'create_connector.help'|trans}}";
+	var callback = "{{ path('connector_callback') }}";
+</script>
+{# ------------- PARAMETRES JQUERY ------------- #}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/connector.css') }}" type="text/css" />
+{% endblock css %}
+
+{% block cssin %}
+{% endblock cssin %}
+
+{% block js %}
+{% endblock js %}

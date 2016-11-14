@@ -1,0 +1,78 @@
+parameters:
+#    regle.example.class: Myddleware\RegleBundle\Example
+
+services:       
+     myddleware_rule.salesforce:
+         class: Myddleware\RegleBundle\Solutions\salesforce
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.sugarcrm:
+         class: Myddleware\RegleBundle\Solutions\sugarcrm
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.prestashop:
+         class: Myddleware\RegleBundle\Solutions\prestashop
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.dolist:
+         class: Myddleware\RegleBundle\Solutions\dolist
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.mailchimp:
+         class: Myddleware\RegleBundle\Solutions\mailchimp
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.eventbrite:
+         class: Myddleware\RegleBundle\Solutions\eventbrite
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.suitecrm:
+         class: Myddleware\RegleBundle\Solutions\suitecrm
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.bittle:
+         class: Myddleware\RegleBundle\Solutions\bittle
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.sagecrm:
+         class: Myddleware\RegleBundle\Solutions\sagecrm
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.sapcrm:
+         class: Myddleware\RegleBundle\Solutions\sapcrm
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.sap:
+         class: Myddleware\RegleBundle\Solutions\sap
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.database:
+        class: Myddleware\RegleBundle\Solutions\database
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]		
+     myddleware_rule.magento:
+        class: Myddleware\RegleBundle\Solutions\magento
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]	
+     myddleware_rule.moodle:
+        class: Myddleware\RegleBundle\Solutions\moodle
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]	
+     myddleware_rule.file:
+        class: Myddleware\RegleBundle\Solutions\file
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.rule:  
+         class: Myddleware\RegleBundle\Classes\rule
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']
+     formula.myddleware:  
+         class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
+     myddleware_job.job:  
+         class: Myddleware\RegleBundle\Classes\job
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.home:  
+         class: Myddleware\RegleBundle\Classes\home
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_tools.tools:  
+         class: Myddleware\RegleBundle\Classes\tools
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.document:  
+         class: Myddleware\RegleBundle\Classes\document
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection, %param%]
+     myddleware.template:  
+         class: Myddleware\RegleBundle\Classes\template
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.permission:  
+         class: Myddleware\RegleBundle\Classes\permission
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.twig.user_extension:
+        class: Myddleware\RegleBundle\Twig\UserExtension
+        arguments: [@doctrine.dbal.default_connection]
+        tags:
+            - { name: twig.extension }
+

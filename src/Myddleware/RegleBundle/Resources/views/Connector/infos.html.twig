@@ -1,0 +1,67 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{# BTN #}
+<div class="block-btn-infos">
+	<a href="{{ path('connector_delete',{'id' : connector_params.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-remove"></span> {{'view_connector.btn.delete'|trans}}
+		</button> 
+	</a>
+</div>
+{# BTN #} 
+
+<div align="center">
+	<table id="tab_connector">
+		<tr>
+			<th colspan="2">{{'view_connector.info.title'|trans}}</th>
+		</tr>	
+		<tr>
+			<td class="title solution">{{'view_connector.info.solution'|trans}}</td>
+			<td class="value"><p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{ connector_params.solution.name }}.png" alt="{{ connector_params.solution.name }}" /></p></td>
+		</tr>
+		<tr>
+			<td class="title">nom</td>
+			<td class="value"><input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" /></td>
+		</tr>		
+		{% for title,field in connector_params.params %}
+		{% if field.type is defined %}
+		<tr>
+			<td class="title">{{ title }}</td>
+			<td class="value"><input type="{{ field.type }}" value="{{ field.value }}" data-param="{{ title }}" data-id="{{ field.id }}" class="params" /></td>
+		</tr>
+		{% endif %}	
+		{% endfor %}
+	</table>
+	<p><span id="connexion" class="btn-myd">Test</span>
+		<span id="source_status" class="status">
+				<img alt="status" src="{{ asset('bundles/regle/images/') }}status_offline.png">
+		</span>
+	</p>	
+	<p><span id="connector_save" class="btn-myd">{{'view_connector.btn.save'|trans}}</span> <div id="validation"></div></p>
+	<div id="msg_status" class="alert alert-danger" role="alert">
+		<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
+	</div>
+
+</div>

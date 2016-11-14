@@ -1,0 +1,126 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<!doctype html>
+<head>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+<style>
+form { display: block; margin: 20px auto; background: #eee; border-radius: 10px; padding: 15px }
+#progress { position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px; }
+#bar { background-color: #C1BB24; width:0%; height:20px; border-radius: 3px; }
+#percent { position:absolute; display:inline-block; top:3px; left:48%; color:#444346; }
+input[type="file"] { display: inline-block; }
+.ko { color: #FC0025; } .ok { color: #00BF1C; }
+</style>
+</head>
+<body>
+ 
+<form id="myForm" action="{{ path('upload', {'solution': solution }) }}" method="post" enctype="multipart/form-data">
+     <input id="file" type="file" size="60" name="myfile">
+     <input type="submit" id="send" value="{{'create_connector.upload_btn'|trans}}" class="btn btn-primary btn">
+ </form>
+ 
+ <div id="progress">
+        <div id="bar"></div>
+        <div id="percent">0%</div >
+</div>
+<br/>
+ 
+<div id="message" class="well well-lg"></div>
+ 
+<script>
+    $(document).ready(function()
+    {
+     
+        $('#progress').hide();
+        $('#message').hide();
+
+        var options = {
+        beforeSend: function()
+        {
+            $("#progress").show();
+            $("#bar").width('0%');
+            $("#message").html("");
+            $("#percent").html("0%");
+            $('#progress').fadeIn();
+            $('#message').hide();
+        },
+        uploadProgress: function(event, position, total, percentComplete)
+        {
+            $("#bar").width(percentComplete+'%');
+            $("#percent").html(percentComplete+'%');
+     
+        },
+        success: function()
+        {
+            $("#bar").width('100%');
+            $("#percent").html('100%');
+     
+        },
+        complete: function(response)
+        {
+            
+            data = response.responseText;
+            r = data.split(';');    
+            if(r[0] == 1) {
+                $("#message").html('<p class="ok"><span class="glyphicon glyphicon-ok"></span> ' + r[1] + '</p>');
+            }
+            else {
+                $("#message").html('<p class="ko"><span class="glyphicon glyphicon-remove"></span> ' + r[1] + '</p>'); 
+                $('#progress').fadeOut();
+            } 
+
+            $('#message').fadeIn();   
+        },
+        error: function()
+        {
+            $("#message").html('<p class="ko"><span class="glyphicon glyphicon-remove"></span> ' + "Unable to upload files" + '</p>');
+            $('#progress').fadeOut();
+            $('#message').fadeIn();   
+        }
+     
+    };
+ 
+    $('#send').click(function(){
+        if($('#file').val() != '') {
+          $("#myForm").ajaxForm(options);  
+        } else { return false; }
+    });    
+ 
+});
+ 
+</script>
+</body>
+ 
+</html>

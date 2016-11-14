@@ -1,0 +1,81 @@
+ {#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Myddleware{% endblock %}</title>
+        {% block stylesheets %}
+            {% stylesheets 
+                '@RegleBundle/Resources/public/css/regle.css'              
+                'http://code.jquery.com/ui/1.10.3/themes/redmond/jquery-ui.css'    
+                'http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css'
+                '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.css'
+                'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css'                    
+                filter='lessphp,cssrewrite' 
+                output='css/compiled/main.css'                
+             %}
+
+              <link rel="stylesheet" href="{{ asset_url }}" type="text/css" />
+            {% endstylesheets %}
+        {% endblock %}
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">   
+         {% block css %}{% endblock css %}
+     
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body>
+        <style type="text/css"> 
+        	{% include 'css.html.twig' %}             
+            {% block cssin %}{% endblock cssin %}
+        </style>
+
+        {# Content #}
+        {% block body %}
+        	{% block arianne %}Myddleware{% endblock %}
+        {% endblock %}
+
+        {# Javascript #}
+        {% javascripts
+            '%kernel.root_dir%/../vendor/jquery/jquery/jquery-2.1.3.min.js'
+            '%kernel.root_dir%/../vendor/jquery/jquery_ui/jquery-ui.min.js'
+            '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_onoff/jquery.onoff.min.js'        
+            '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.pack.js'
+            '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js'            
+            'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js'    
+            '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_myddleware/function.js'   
+            '@LoginBundle/Resources/public/js/login.js'
+            '@RegleBundle/Resources/public/js/regle.js'
+        %}
+         <script type="text/javascript" src="{{ asset_url }}"></script>       
+         {% endjavascripts %}  
+         
+          <!-- Latest compiled and minified JavaScript -->
+         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>  
+                
+        {% block js %}{% endblock js %}
+    </body>
+</html>

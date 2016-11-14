@@ -1,0 +1,19 @@
+LoginBundleDefault:
+    pattern:  /
+    defaults: { _controller: LoginBundle:Default:index }
+
+LoginBundleUser:
+    pattern:  /login
+    defaults: { _controller: LoginBundle:Default:index }
+
+prestashop_account:
+    pattern:  /prestashop/account
+    defaults: { _controller: LoginBundle:Default:accountPrestashop }
+
+login_protect:
+    pattern:  /login/control
+    defaults: { _controller: LoginBundle:Default:verifAccount }
+
+connector_callback:
+    pattern:  /callback/
+    defaults: { _controller: RegleBundle:Connector:callBack }  

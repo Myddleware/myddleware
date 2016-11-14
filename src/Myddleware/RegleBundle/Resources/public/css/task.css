@@ -1,0 +1,92 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#task {
+    padding: 20px 0;
+    text-align: center;
+}
+
+#task th {
+	background: #ECECEC;
+	height: 30px;
+	padding: 2px;
+	text-align: center;
+}
+
+#task tr {
+	border-bottom: 1px solid #ccc;	
+}
+
+#task .fd_error, #task .fd_open, #task .fd_log_e {
+	background: #F2DEDF;
+}
+
+#task .fd_cancel, #task .fd_log_w {
+	background: #FFECCC;
+}
+
+#task .gblstatus_error, #task .gblstatus_open, #task .log_e {
+	color: #D60405;
+}
+
+#task .gblstatus_cancel, #task .log_w {
+	color: #F1B753;
+}
+
+#flux .gblstatus_close, #task .log_s  {
+	color: #9AA932;
+}
+
+#task .gblstatus_close, #task .gblstatus_cancel, #task .gblstatus_error, #task .gblstatus_open {
+	font-weight: bold;
+}
+
+#task tr:hover, #task .fd_normal {
+	background: #ECECEC;
+}
+
+#task table a, #task table a:hover {
+	color: #0F66A9;
+	font-weight: bold;
+}
+
+#task #headertab {
+	margin-top:20px;
+}
+
+#task #headertab td {
+    height: 50px;
+    max-width: 200px;
+    min-width: 80px;
+	width: 80px;
+    padding: 5px;
+    word-wrap: break-word;
+}
+
+#task .listepager .count {
+	max-width: 80px;
+	width: 80px;
+	min-width: 80px;
+	text-align: center;
+}

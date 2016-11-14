@@ -1,0 +1,161 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+
+#flux fieldset {
+    float: left;
+    height: 160px;
+    margin: 10px;
+    width: 270px;
+    padding-left: 30px;
+}
+
+#flux fieldset.border {
+	border-right: 1px solid #ccc;
+}
+
+#flux {
+	padding: 20px 0px;
+}
+
+#flux fieldset label {
+	display:block;	
+}
+
+#flux #form_rule {
+    font-size: 1.3em;
+    height: 31px;
+    width: 715px;
+}
+
+#flux legend {
+	color: #71CBFF;
+}
+
+#flux legend {
+	border:none;
+	color: #444446;
+}
+
+#flux th {
+	background: #ECECEC;
+	height: 30px;
+	padding: 2px;
+	text-align: center;
+}
+
+#flux tr {
+	border-bottom: 1px solid #ccc;	
+}
+
+#flux .fd_error, #flux .fd_log_e {
+	background: #F2DEDF;
+}
+
+#flux .fd_cancel, #flux .fd_log_w, #flux .fd_open {
+	background: #FFECCC;
+}
+
+#flux .gblstatus_open {
+	color: #845A00;
+}
+
+#flux .gblstatus_error, #flux .log_e {
+	color: #D60405;
+}
+
+#flux .gblstatus_cancel, #flux .log_w {
+	color: #F1B753;
+}
+
+#flux .gblstatus_close, #flux .log_s  {
+	color: #9AA932;
+}
+
+#flux .gblstatus_close, #flux .gblstatus_cancel, #flux .gblstatus_error, #flux .gblstatus_open {
+	font-weight: bold;
+}
+
+#flux tr:hover{
+	background: #ECECEC;
+}
+
+#flux table a, #flux table a:hover {
+	color: #0F66A9;
+	font-weight: bold;
+}
+
+#flux #headertab {
+	margin-top:20px;
+}
+
+#flux #headertab td {
+    height: 50px;
+    max-width: 200px;
+    min-width: 140px;
+    padding: 5px;
+    word-wrap: break-word;
+}
+
+#flux .zone {
+	float:left; 
+	padding-top:30px; 
+	padding-left:50px;
+	width: 380px;
+	max-width: 380px;
+	overflow:hidden;
+	text-align: left;
+}
+
+#flux .zone ul {
+	list-style:none;
+}
+
+#flux .zone .field {
+	color: #0F66A9;
+	display: block !important;
+}
+
+#flux #message tr {
+	height: 40px;
+}
+
+#flux #message .msg {
+	width: 300px;
+	max-width: 300px;
+	word-wrap:break-word;
+}
+
+#flux .btn-large-mydinv {
+	line-height: 2em;
+}
+
+#flux .massbtn {
+	margin-left: 43px;
+}
+
+#flux #massselectall {
+	float: left;
+	margin-left: 3px;
+}

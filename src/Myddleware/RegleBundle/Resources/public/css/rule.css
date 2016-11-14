@@ -1,0 +1,502 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#rule .onoffswitch {
+	position: relative;
+	width: 74px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	margin: auto;
+}
+#rule .onoffswitch-checkbox {
+	display: none;
+}
+#rule .onoffswitch-label {
+	display: block;
+	overflow: hidden;
+	cursor: pointer;
+	border: 0px solid #999999;
+	border-radius: 0px;
+}
+#rule .onoffswitch-inner {
+	display: block;
+	width: 200%;
+	margin-left: -100%;
+	-moz-transition: margin 0.3s ease-in 0s;
+	-webkit-transition: margin 0.3s ease-in 0s;
+	-o-transition: margin 0.3s ease-in 0s;
+	transition: margin 0.3s ease-in 0s;
+}
+#rule .onoffswitch-inner > span {
+	display: block;
+	float: left;
+	position: relative;
+	width: 50%;
+	height: 16px;
+	padding: 0;
+	line-height: 16px;
+	font-size: 12px;
+	color: white;
+	font-family: Trebuchet, Arial, sans-serif;
+	font-weight: bold;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#rule .onoffswitch-inner .onoffswitch-active {
+	padding-left: 11px;
+	background-color: #EEEEEE;
+	color: #FFFFFF;
+}
+#rule .onoffswitch-inner .onoffswitch-inactive {
+	padding-right: 11px;
+	background-color: #EEEEEE;
+	color: #FFFFFF;
+	text-align: right;
+}
+#rule .onoffswitch-switch {
+	display: block;
+	width: 31px;
+	margin: 0px;
+	text-align: center;
+	border: 0px solid #999999;
+	border-radius: 0px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+#rule .onoffswitch-active .onoffswitch-switch {
+	background: #C6BD20;
+	left: 0;
+}
+#rule .onoffswitch-inactive .onoffswitch-switch {
+	background: #555555;
+	right: 0;
+}
+#rule .onoffswitch-active .onoffswitch-switch:before {
+	content: " ";
+	position: absolute;
+	top: 0;
+	left: 31px;
+	border-style: solid;
+	border-color: #C6BD20 transparent transparent #C6BD20;
+	border-width: 8px 7px;
+}
+#rule .onoffswitch-inactive .onoffswitch-switch:before {
+	content: " ";
+	position: absolute;
+	top: 0;
+	right: 31px;
+	border-style: solid;
+	border-color: transparent #555555 #555555 transparent;
+	border-width: 8px 7px;
+}
+#rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+	margin-left: 0;
+}
+
+#rule .btn-opt {
+	color: #555555;
+	font-size: 1.2em;
+}
+
+#rule .btn-opt:hover {
+	color: #0F66A9;
+}
+
+#rule th {
+	background: #ECECEC;
+	height: 20px;
+	padding: 2px;
+	text-align: center;
+}
+
+#rule tr {
+	border-bottom: 1px solid #ccc;	
+}
+
+#rule td {
+	text-align: center;
+}
+
+#rule td.lft {
+	text-align: center;
+}
+
+#rule td.lft > a{
+	color: black;
+}
+
+#rule .vignette {
+	width: 50px;
+}
+
+
+/* relate */
+
+#rule_mapping #relation #relate input.title {
+	border: none;
+	min-width: 250px;
+}
+
+/*  fields mapping */
+
+#source { float:left; width: 250px; margin-right: 2em; overflow:hidden; }
+
+#source, #cible {
+	float:left;
+	padding-top:10px;
+}
+
+#source h1, #cible h1 { padding: .2em; margin: 0; }
+
+#source li:hover, #cible ol:hover { cursor:move }
+
+#cible {
+	width: 815px;
+	max-width: 815px;
+	overflow: auto;
+}
+
+#cible .champs {
+	width: 260px;
+	float: left;
+	padding:5px;
+}
+
+#cible ul li {
+	color:#4297D7;
+}
+
+#cible .ui-widget-header {
+    background: none repeat scroll 0 0 #ccc31c;
+    border: 0px;
+    color: #454539;
+    font-weight: bold;
+    text-align: center;		
+    height: 40px;
+    line-height: 2.5em;
+    word-wrap: break-word;
+}
+
+#cible .ch, #cible .placeholder {
+	list-style:none;
+}
+
+#cible .ch {
+	border-bottom: 1px solid #cccccc;
+    border-width: 1px 10px 1px 1px;
+    color: #aaa00b;
+    line-height: 2em;
+    margin-right: 5px;	
+}
+
+#cible .placeholder {
+	color: #CCCCCC;
+	font-weight: bold;
+}
+
+#source .ui-accordion-content {
+	padding:0px;
+	border:none;	
+}
+
+#source ul {
+	list-style:none;
+	padding-left:0px;
+}
+
+
+#source .ui-state-active, #source .ui-widget-content .ui-state-active, #source .ui-widget-header .ui-state-active,
+#source .ui-state-default, #source .ui-widget-content .ui-state-default, #source .ui-widget-header .ui-state-default {
+	background:#EDEDED;	
+	border:none;	
+}
+/*
+#source .ui-state-active a, #source .ui-state-active a:link, #source .ui-state-active a:visited {
+	color:#444446;
+} */
+
+#source h2, #source .h2 {
+	font-size: 1em;
+}
+
+#rule .ui-widget-content, #cible .ui-widget-content {
+	border: none;
+}
+
+#cible .ui-widget-content {
+	height: 150px;
+	overflow: auto;	
+}
+
+#rule #catalog {
+	height: 680px;
+	overflow:auto;
+}
+
+#targetfields {
+	height: 800px;
+	overflow:auto;
+	background: #C7C7C7;
+	clear: both;
+}
+
+#targetfields ol, #targetfields ul {
+	padding-left: 5px;
+	list-style: none outside none;
+}
+
+#targetfields p {
+	padding-bottom: 10px;	
+	padding-left: 25px;
+}
+
+#cible h1.title {
+	color: #444446;
+	font-size: 1.3em;
+}
+
+/* formula */
+
+#formule .listarea {
+	min-height: 150px;
+}
+
+#formule #functions {
+	display: inline-block;
+	height: 180px;
+	max-height: 180px;
+	overflow-y: scroll;
+}
+
+#formule #functions .func {
+	width: 25px;
+}
+
+#formule #functions .tooltip {
+	position: relative;
+	opacity: inherit;
+	cursor: pointer;
+	text-decoration:none;
+}
+
+#formule #filter {
+	height: 30px;
+}
+
+#formule #area_insert, #formule #area_color {
+	height: 225px;
+	padding: 10px;
+	max-height: 225px;
+	overflow:scroll;	
+}
+
+#formule #area_insert {
+	width: 250px;
+}
+
+#formule #area_color {
+	min-width: 350px;
+	width: 350px;
+}
+
+#formule .wdh, #formule #filter, #formule .listarea {
+    max-width: 300px;
+    width: 300px;
+}
+
+#formule .formule_text {
+	list-style-type:none;
+}
+
+/* simulate */
+
+#simulation .middle {
+	width:50%;
+}
+
+#simulation #warning {
+	width: 400px;
+}
+
+#simulation #validation_simulation {
+	line-height: 2.5em;
+	text-align: center;
+}
+
+#simulation #simulation_tab li {
+    border-bottom: 1px solid #ccc;
+    min-height: 40px auto;
+    list-style: none outside none;
+    padding-top: 10px;
+}
+
+#relation th {
+	background:none;
+}
+
+#relation td {
+	padding: 20px;
+}
+
+#relation td.title {
+	font-weight: bold;
+	text-align: center;
+}
+
+#relation tr {
+	border: none;
+	height: 60px;
+}
+
+#fieldsfilter span {
+	color: #0F66A9;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+#fieldsfilter li, #viewfilters li {
+	height: 40px;
+	border-bottom: 1px solid #ccc;	
+	list-style:none;
+}
+
+#fieldsfilter select {
+	border: 0px;
+}
+
+#fieldsfilter input {
+    float: right;
+    padding: 5px;
+    width: 250px;
+}
+
+#rule #tabs ul.ui-widget-header li {
+	min-width: calc( (1200px / 5) + 1.8px );
+	max-width: calc( (1200px / 5) + 1.8px );
+}
+
+/* filtres */
+
+#viewfilters span {
+	margin: 0px 20px;
+}
+
+#viewfilters .target, #viewfilters .value {
+	font-weight: bold;
+	font-size: 1.2em;
+		
+}
+
+#viewfilters .target {
+	color: #0F66A9;
+    display: inline-block;
+    min-width: 350px;
+}
+
+#viewfilters .value {
+	color: #0F66A9;
+	font-size: 1em;
+}
+
+/* correction tabs */
+
+#catalog .ui-state-default, #catalog .ui-widget-content .ui-state-default, #catalog .ui-widget-header .ui-state-default { 
+	border-right: 0px;
+	border-left: 0px;	
+	background: none;
+	padding: none;
+}
+
+#targetfields .ui-state-default {
+	border: 0em !important;
+	background: #E2E2E2;
+}
+
+#cible .ui-state-default .placeholder {
+	color: #404042;
+}
+
+/* Button saveParam et loading en display inline block */
+#validRuleParams > * {
+	display: inline-block;
+}
+
+#rule #mapping .fields {
+	word-wrap: break-word;
+}
+
+#rule #tabs .ui-state-default, #rule #tabs .ui-widget-content .ui-state-default, #rule #tabs .ui-widget-header .ui-state-default,
+#rule_mapping #tabs .ui-state-default, #rule_mapping #tabs .ui-widget-content .ui-state-default, #rule_mapping #tabs .ui-widget-header .ui-state-default {
+	padding-top: 23px;	
+	font-size: 0.8em;	
+}
+
+/* Button "help" création de règle */
+.link-help {
+	position: relative;
+	top: -100px;
+	font-size: 1.2em;
+	margin-top: 25px;
+	margin-right: 25px;
+}
+
+.link-help-view {
+	float: right;
+	font-size: 1.2em;
+}
+
+.link-help > a, .link-help-view > a {
+	color: #0069b4;
+}
+
+.link-help > a:hover, .link-help-view > a:hover  {
+	color: #cdc400;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.help-content > h2, .help-content > p{
+	width: 80%;
+	margin: auto;
+}
+
+#simulate_list .value {
+	font-size: 0.9em;
+	color: #0069b4;	
+}
+
+#rule_mapping .rule_arrow_left {
+	margin-left: 25px;
+}
+
+#rule_mapping .rule_arrow_right {
+	margin-right: 25px;
+}
+
+#rule_mapping .rule_arrow_left:hover, #rule_mapping .rule_arrow_right:hover {
+	cursor: pointer;
+}

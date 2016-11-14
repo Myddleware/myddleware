@@ -1,0 +1,199 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#rule td.value {
+	height: 40px;
+}
+
+#rule .tabinfo {
+	margin: 50px;
+}
+
+#rule .tabinfo .title_source, #rule .tabinfo .title_source_ctr {
+	color: #0F66A9;
+}
+
+#rule .tabinfo .title_target, #rule .tabinfo .title_target_ctr {
+	color: #C6BD20;
+}
+
+#rule #tab_rule {
+	width: 400px;
+}
+
+#rule #tab_connector {
+	width: 500px;
+}
+
+#rule .title, #rule .title_target, #rule .title_source, #rule .title_target_ctr, #rule .title_source_ctr {
+	text-align: left;
+}
+
+#rule .glyphicon-edit:hover {
+	color: #0F66A9;
+}
+
+#rule .title_target_ctr, #rule .title_source_ctr {
+	font-weight: bold;
+	font-size:1.2em;
+}
+
+#rule .onoffswitch {
+	margin-left: 55px;	
+}
+
+#rule .mapping {
+    float: left;
+    margin: 20px;
+    width: 300px;
+ 
+	padding:5px;   
+}
+
+#rule .mapping .title {
+    color: #454547;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    height: 40px;
+    line-height: 2.5em;  
+    margin-left: 8px;
+    margin-top: 5px;      
+}
+
+#rule .mapping .title {
+	background:#CCC31C;
+	font-weight: bold;	
+}
+
+#rule .mapping .fields {
+	background:white;
+}
+
+#rule .mapping .formula {
+	color: #0E68A7;
+}
+
+#rule .gray {
+	box-shadow:2px 2px 2px grey,
+	-1px -1px 2px white; 
+}
+
+#rule .fields .field {
+	color: #CCC31C;
+}
+
+#rule .fields div {
+	padding-left: 10px;
+}
+
+#rule #relate th {
+	background:none;
+}
+
+#rule #relate td {
+	padding: 20px;
+}
+
+#rule #relate td.title {
+	font-weight: bold;
+	text-align: center;
+}
+
+#rule #relate tr {
+	border: none;
+	height: 60px;
+}
+
+#rule #relate a:hover {
+	text-decoration: none;
+	color: #0E68A7;
+}
+
+#ruleparams {
+	background: #444446;
+	color: white;
+	margin-bottom: 20px;
+    padding: 10px;
+    width: 500px;
+}
+
+#ruleparams select, input {
+	background: white;
+	color: #444446;
+    margin: 2px;
+    padding: 5px;
+    border:none;	
+	width: 180px;
+}
+
+#rule #tabs #mapping #fd-title {
+	margin: 20px 20px 20px -35px;
+}
+
+#rule a {
+	color: #428bca;
+}
+
+#ruleparams p {
+	margin: 0 auto;
+	max-width: 400px;
+}
+
+#ruleparams input, #ruleparams select {
+	display:block;
+}
+
+/* Simulation Flux fiche règle */
+#simuleRuleFluxContainer {
+	background: #444446;
+	color: white;
+	margin-top: 20px;
+	margin-bottom: 20px;
+    padding: 10px;
+    width: 500px;
+    min-height: 100px;
+}
+
+.simuleRuleFluxResult {
+	display: inline-block;
+	margin: 5px;
+}
+
+#simuleRuleFluxResult {
+	font-weight: bold;
+}
+
+#simuleRuleFluxDetails {
+	font-size: 0.7em;
+	text-align: left;
+}
+
+#simuleRuleFluxBtn > * {
+	display: inline-block;
+}
+
+#simuleRuleFluxError, #simuleRuleFluxLoading_img {
+	display: none;
+}

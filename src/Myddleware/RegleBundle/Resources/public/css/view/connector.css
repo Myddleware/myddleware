@@ -1,0 +1,66 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+#connector #tabs li {
+	width: 50.16%;
+}
+
+#connector #tab_connector th {
+    background: none repeat scroll 0 0 #ececec;
+    height: 20px;
+    padding: 2px;
+    text-align: center;
+}
+
+
+#connector #tab_connector {
+	width: 600px;
+	margin: 0px 0px 20px 0px;
+}
+
+
+#connector #tab_connector td {
+	
+}
+
+#connector #tab_connector td.title {
+	width: 35%;
+	color:#0F66A9;
+	text-align:right;
+	padding-right: 10px;
+}
+
+
+#connector #tab_connector td.solution {
+	height: 80px;
+}
+
+#connector #tab_connector td.value {
+	width: 65%;
+}
+
+#connector #tab_connector td.value input {
+	width:100%;
+	padding:8px;
+}
