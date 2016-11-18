@@ -33,6 +33,8 @@ require_once('lib/lib_moodle.php');
 class moodlecore  extends solution { 
 	protected $moodleClient;
 	protected $required_fields = array('default' => array('id'));
+	
+	protected $FieldsDuplicate = array(	'users' => array('email', 'username')  );
 		
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
@@ -80,15 +82,23 @@ class moodlecore  extends solution {
 	// Permet de récupérer tous les modules accessibles à l'utilisateur
 	public function get_modules($type = 'source') {
 	    try {
-			return array(
-				'users'						=> 'Users',
-				'courses'					=> 'Courses',
-				'groups'					=> 'Groups',
-				'group_members'				=> 'Group members',
-				'manual_enrol_users'		=> 'Manual enrol users',
-				'manual_unenrol_users'		=> 'Manual unenrol users',
-				'notes'	=> 'Notes',
-			);	
+			if ($type == 'source') {
+				return array(
+					'get_users_completion'			=> 'Get users completion',
+					'get_users_last_access'			=> 'Get users last access'
+				);	
+			}
+			else {
+				return array(
+						'users'						=> 'Users',
+						'courses'					=> 'Courses',
+						'groups'					=> 'Groups',
+						'group_members'				=> 'Group members',
+						'manual_enrol_users'		=> 'Manual enrol users',
+						'manual_unenrol_users'		=> 'Manual unenrol users',
+						'notes'	=> 'Notes',
+				);	
+			}
 	    }
 		catch (\Exception $e) {
 			return false;
@@ -303,6 +313,27 @@ class moodlecore  extends solution {
 						'4' => 'MARKDOWN'
 					);
 					break;	
+				case 'get_users_completion':	
+					$this->moduleFields = array(
+						'instance' => array('label' => 'Instance', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'moduletype' => array('label' => 'Module type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'completionstate' => array('label' => 'Completion state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					);
+					$this->fieldsRelate = array(
+						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+					);
+					break;	
+				case 'get_users_last_access':	
+					$this->moduleFields = array(
+						'lastaccess' => array('label' => 'Last access', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					);
+					$this->fieldsRelate = array(
+						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+					);
+					break;		
 				default:
 					throw new \Exception("Module unknown. ");
 					break;
@@ -325,10 +356,6 @@ class moodlecore  extends solution {
 
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
 	public function read_last($param) {	
-		// Le read_lats n'est valide que pour le module user pour l'instant
-		if ($param['module'] != 'users') {
-			return null;
-		}
 		$query = '';
 		try {
 			// Si le tableau de requête est présent alors construction de la requête
@@ -342,6 +369,16 @@ class moodlecore  extends solution {
 					$parameters = array( 'criteria' => $filters );
 					$functionname = 'core_user_get_users';
 					break;
+				case 'get_users_completion':
+					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
+					$parameters = array('time_modified' => date('U', strtotime('-1 week')));
+					$functionname = 'local_myddleware_get_users_completion';
+					break;	
+				case 'get_users_last_access':
+					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
+					$parameters = array('time_modified' => date('U', strtotime('-1 week')));
+					$functionname = 'local_myddleware_get_users_last_access';
+					break;	
 				default:
 					throw new \Exception("Module unknown. ");
 					break;
@@ -350,20 +387,32 @@ class moodlecore  extends solution {
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			
 			$response = $this->moodleClient->post($serverurl, $parameters);				
 			$xml = simplexml_load_string($response);
-			
-			if (!empty($xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY->VALUE)) {
+
+			// Get the data from the output structure
+			if (in_array($param['module'], array('get_users_completion','get_users_last_access'))) {		
+				if (!empty($xml->MULTIPLE->SINGLE[0]->KEY[0]->VALUE)) {
+					$data = $xml->MULTIPLE->SINGLE[0]->KEY;
+				}
+			}
+			elseif (!empty($xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY->VALUE)) {
 				$param['fields'] = $this->addRequiredField($param['fields']);
-				foreach ($xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY AS $data) {
+				$data = $xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY;
+				
+			}
+			
+			// Transform the data to Myddleware format
+			if (!empty($data)) {
+				foreach ($data AS $value) {
 					// Si le champ est demandé
-					if (array_search($data->attributes()->__toString(), $param['fields']) !== false) {
-						$result['values'][$data->attributes()->__toString()] = $data->VALUE->__toString();
+					if (array_search($value->attributes()->__toString(), $param['fields']) !== false) {
+						$result['values'][$value->attributes()->__toString()] = $value->VALUE->__toString();
 					}
 				}
 				$result['done'] = true;
 			}
 			else {
 				$result['done'] = false;
-			}
+			}				
 			return $result;		 
 		}
 		catch (\Exception $e) {
