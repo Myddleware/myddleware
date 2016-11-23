@@ -1339,7 +1339,7 @@ class documentcore {
 		
 			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
-			$sqlParams = "	SELECT 
+			$sqlParamsSoure = "	SELECT 
 								Documents.id, 
 								Documents.target_id 
 							FROM Rule
@@ -1354,35 +1354,39 @@ class documentcore {
 								AND Documents.id != :id_doc
 							ORDER BY target_id DESC
 							LIMIT 1";
-			$stmt = $this->connection->prepare($sqlParams);
+			$stmt = $this->connection->prepare($sqlParamsSoure);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 			$stmt->bindValue(":id", $id);
 			$stmt->bindValue(":id_doc", $this->id);
 		    $stmt->execute();	   				
 			$result = $stmt->fetch();
-			
+		
+			// Si on ne trouve pas d'id alors on prépare la requête pour rechercher dans la partie target
+			if (empty($result['id'])) {
+				$sqlParamsTarget = "	SELECT 
+									Documents.id, 
+									Documents.source_id target_id 
+								FROM Rule
+									INNER JOIN Rule Rule_version
+										ON Rule_version.rule_name = Rule.rule_name
+									INNER JOIN Documents 
+										ON Documents.rule_id = Rule_version.rule_id
+								WHERE 
+										Rule.rule_id IN (:ruleId)									
+									AND Documents.global_status != 'Cancel'	
+									AND	Documents.target_id = :id
+									AND Documents.id != :id_doc
+								ORDER BY target_id DESC
+								LIMIT 1";
+			}
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
 			// Alors on recherche dans la règle opposée
 			if (
 					empty($result['id'])
 				&&	!empty($this->ruleParams['bidirectional'])
 			) {
-				$sqlParams = "	SELECT 
-								Documents.id, 
-								Documents.source_id target_id 
-							FROM Rule
-								INNER JOIN Rule Rule_version
-									ON Rule_version.rule_name = Rule.rule_name
-								INNER JOIN Documents 
-									ON Documents.rule_id = Rule_version.rule_id
-							WHERE 
-									Rule.rule_id IN (:ruleId)									
-								AND Documents.global_status != 'Cancel'	
-								AND	Documents.target_id = :id
-								AND Documents.id != :id_doc
-							ORDER BY target_id DESC
-							LIMIT 1";
-				$stmt = $this->connection->prepare($sqlParams);
+				
+				$stmt = $this->connection->prepare($sqlParamsTarget);
 				$stmt->bindValue(":ruleId", $this->ruleParams['bidirectional']);
 				$stmt->bindValue(":id", $id);
 				$stmt->bindValue(":id_doc", $this->id);
@@ -1414,12 +1418,20 @@ class documentcore {
 							) {
 								// On recherche l'id target dans la règle liée
 								$this->sourceId = ($ruleRelationship['rrs_field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['rrs_field_name_source']]);
-								$stmt = $this->connection->prepare($sqlParams);
+								// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
+								$direction = $this->getRelationshipDirection($ruleRelationship);
+								if ($direction == '-1') {	
+									$stmt = $this->connection->prepare($sqlParamsTarget);
+								}
+								else {
+									$stmt = $this->connection->prepare($sqlParamsSoure);
+								}
 								$stmt->bindValue(":ruleId", $ruleRelationship['rrs_field_id']);
 								$stmt->bindValue(":id", $this->sourceId);
 								$stmt->bindValue(":id_doc", $this->id);
 								$stmt->execute();	   				
-								$result = $stmt->fetch();							
+								$result = $stmt->fetch();				
+							
 								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE
 								if (!empty($result['id'])) {
 									$this->targetId = $result['target_id'];

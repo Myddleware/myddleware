@@ -32,8 +32,12 @@ require_once('lib/lib_moodle.php');
 
 class moodlecore  extends solution { 
 	protected $moodleClient;
-	protected $required_fields = array('default' => array('id'));
-	
+	protected $required_fields = array(
+										'default' => array('id'),
+										'get_users_completion' => array('id','timemodified'),
+										'get_users_last_access' => array('id','lastaccess')
+								);
+								
 	protected $FieldsDuplicate = array(	'users' => array('email', 'username')  );
 		
     public function login($paramConnexion) {
@@ -387,7 +391,10 @@ class moodlecore  extends solution {
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			
 			$response = $this->moodleClient->post($serverurl, $parameters);				
 			$xml = simplexml_load_string($response);
-
+			if (!empty($xml->ERRORCODE)) {
+				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
+			}
+			
 			// Get the data from the output structure
 			if (in_array($param['module'], array('get_users_completion','get_users_last_access'))) {		
 				if (!empty($xml->MULTIPLE->SINGLE[0]->KEY[0]->VALUE)) {
@@ -420,6 +427,78 @@ class moodlecore  extends solution {
 			$result['done'] = -1;
 			return $result;
 		}	
+	}
+	
+	// Read data in Moodle
+	public function read($param) {	
+		try {
+			$result['count'] = 0;
+			// Put date ref in Moodle format
+			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);
+
+			// Get the function name and the parameters
+			switch ($param['module']) {
+				case 'get_users_completion':
+					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
+					$parameters = array('time_modified' => $result['date_ref']);
+					$functionname = 'local_myddleware_get_users_completion';
+					break;	
+				case 'get_users_last_access':
+					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
+					$parameters = array('time_modified' => $result['date_ref']);
+					$functionname = 'local_myddleware_get_users_last_access';
+					break;	
+				default:
+					throw new \Exception("Module unknown. ");
+					break;
+			}
+
+			// Call to Moodle
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			
+			$response = $this->moodleClient->post($serverurl, $parameters);				
+			$xml = simplexml_load_string($response);
+		
+			if (!empty($xml->ERRORCODE)) {
+				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
+			}
+			
+			// Transform the data to Myddleware format
+			if (!empty($xml->MULTIPLE->SINGLE)) {
+				foreach ($xml->MULTIPLE->SINGLE AS $data) {
+					foreach ($data AS $field) {
+						// Save the new date ref
+						if (
+								$field->attributes()->__toString() == $DateRefField
+							&&	$result['date_ref'] < $field->VALUE->__toString()
+						) {
+							$result['date_ref'] = $field->VALUE->__toString();
+						}
+						// Get the date modified
+						if (
+								$field->attributes()->__toString() == $DateRefField
+						) {
+							$row['date_modified'] = $field->VALUE->__toString();
+						}
+						// Get all the requested fields
+						if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {
+							$row[$field->attributes()->__toString()] = $field->VALUE->__toString();
+						}
+					}
+					$result['values'][$row['id']] = $row;
+					$result['count']++;
+				}
+			}	
+			// Put date ref in Myddleware format
+			$result['date_ref'] = $this->dateTimeToMyddleware($result['date_ref']);			
+		}
+		catch (\Exception $e) {
+		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';;
+		}	
+		return $result;
 	}
 	
 	// Permet de créer des données
@@ -653,7 +732,34 @@ class moodlecore  extends solution {
 		return parent::getRuleMode($module,$type);
 	}
 	
-
+	// Function de conversion de datetime format solution à un datetime format Myddleware
+	protected function dateTimeToMyddleware($dateTime) {
+		$date = new \DateTime();
+		$date->setTimestamp($dateTime);
+		return $date->format('Y-m-d H:i:s');
+	}// dateTimeToMyddleware($dateTime)	
+	
+	// Function de conversion de datetime format Myddleware à un datetime format solution
+	protected function dateTimeFromMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('U');
+	}// dateTimeFromMyddleware($dateTime)    
+	
+	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+	public function getDateRefName($moduleSource, $RuleMode) {
+		switch ($moduleSource) {
+			case 'get_users_completion':
+				return 'timemodified';
+				break;	
+			case 'get_users_last_access':
+				return 'lastaccess';
+				break;	
+			default:
+				throw new \Exception("Module unknown. ");
+				break;
+		}
+		return null;
+	}
 	
 }
 
