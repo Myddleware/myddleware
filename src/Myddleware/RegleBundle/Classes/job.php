@@ -709,6 +709,15 @@ class jobcore  {
 	
 	// Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
 	public function clearData() {
+		//Get the table list 
+		$sqlTables = "SHOW TABLES";
+		$stmt = $this->connection->prepare($sqlTables);
+		$stmt->execute();	   				
+		$tablesQuery = $stmt->fetchAll();
+		foreach ($tablesQuery as $key => $table) {
+			$tables[] = current($table);
+		}
+	
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
 							Rule.rule_id,
@@ -723,35 +732,67 @@ class jobcore  {
 		$stmt = $this->connection->prepare($sqlParams);
 		$stmt->execute();	   				
 		$rules = $stmt->fetchAll();
+		
 		if (!empty($rules)) {
 			// Boucle sur toutes les règles
 			foreach ($rules as $rule) {
 				$tableId = array();
-				$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source';
-				$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target';
-				$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history';
-					
-				foreach ($tableId as $table => $id) {
-					$this->connection->beginTransaction();						
-					try {
-						$deleteSource = "
-							DELETE $table
-							FROM Documents
-								INNER JOIN $table
-									ON Documents.id = $table.$id
-							WHERE 
-									Documents.rule_id = '$rule[rule_id]'
-								AND Documents.global_status IN ('Close','Cancel')
-								AND DATEDIFF(CURRENT_DATE( ),Documents.date_modified) >= $rule[days]
-						";	
-						$stmt = $this->connection->prepare($deleteSource);
-						$stmt->execute();
-						$this->connection->commit(); // -- COMMIT TRANSACTION
-					} catch (\Exception $e) {
-						$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-						$this->message .= 'Failed to clear data for the rule '.$rule['rule_id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-						$this->logger->error($this->message);	
+				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source',$tables)) {
+					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source';
+				}
+				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target',$tables)) {
+					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target';
+				}
+				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history',$tables)) {
+					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history';
+				}
+				
+				if (!empty($tableId)) {
+					foreach ($tableId as $table => $id) {
+						$this->connection->beginTransaction();						
+						try {
+							$deleteSource = "
+								DELETE $table
+								FROM Documents
+									INNER JOIN $table
+										ON Documents.id = $table.$id
+								WHERE 
+										Documents.rule_id = '$rule[rule_id]'
+									AND Documents.global_status IN ('Close','Cancel')
+									AND DATEDIFF(CURRENT_DATE( ),Documents.date_modified) >= $rule[days]
+							";							
+							$stmt = $this->connection->prepare($deleteSource);
+							$stmt->execute();
+							$this->connection->commit(); // -- COMMIT TRANSACTION
+						} catch (\Exception $e) {
+							$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+							$this->message .= 'Failed to clear data for the rule '.$rule['rule_id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+							$this->logger->error($this->message);	
+						}
 					}
+				}
+				
+				// Delete log for these rule
+				$this->connection->beginTransaction();						
+				try {
+					$deleteLog = "
+						DELETE Log
+						FROM Log
+							INNER JOIN Documents
+								ON Log.doc_id = Documents.id
+						WHERE 
+								Log.rule_id = '$rule[rule_id]'
+							AND Log.log_msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
+							AND Documents.global_status IN ('Close','Cancel')
+							AND DATEDIFF(CURRENT_DATE( ),Documents.date_modified) >= $rule[days]
+					";						
+					$stmt = $this->connection->prepare($deleteLog);
+					$stmt->execute();
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				} catch (\Exception $e) {
+					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+					$this->message .= 'Failed to clear logs for the rule '.$rule['rule_id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$this->logger->error($this->message);	
 				}
 			}
 		}
