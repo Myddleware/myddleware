@@ -1609,6 +1609,7 @@ class documentcore {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
 			// En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
+			// Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT source_id record_id 
 								FROM Rule
@@ -1620,7 +1621,10 @@ class documentcore {
 										Rule.rule_id = :ruleRelateId 
 									AND Documents.source_id != '' 
 									AND Documents.target_id = :record_id 
-									AND Documents.global_status = 'Close' 
+									AND (
+											Documents.global_status = 'Close' 
+										 OR Documents.status = 'No_send'
+									)	 
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
@@ -1634,7 +1638,10 @@ class documentcore {
 										Rule.rule_id = :ruleRelateId 
 									AND Documents.source_id = :record_id 
 									AND Documents.target_id != '' 
-									AND Documents.global_status = 'Close'
+									AND (
+											Documents.global_status = 'Close' 
+										 OR Documents.status = 'No_send'
+									)	
 								LIMIT 1";	
 			}
 			else {
