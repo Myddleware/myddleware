@@ -20,7 +20,7 @@ parameters:
     extension_allowed:
         - xml
         - wsdl
-    myd_version: 2.0.3
+    myd_version: 2.0.4
     php:
         executable: php
     locale: en

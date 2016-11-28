@@ -106,7 +106,7 @@ class prestashopcore extends solution {
 						),
                    array(
                             'name' => 'apikey',
-                            'type' => 'text',
+                            'type' => 'password',
                             'label' => 'solution.fields.apikey'
                         )
         );
