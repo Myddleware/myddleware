@@ -268,7 +268,7 @@ class solutioncore {
 	//	query : les champs à rechercher, exemple : array('name'=>'mon_compte')
 	// Valeur de sortie est un tableau contenant : 
 	//		done : Le nombre d'enregistrement trouvé
-	//   	values : les enregsitrements du module demandé (l'id' et date_modified sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier)
+	//   	values : les enregsitrements du module demandé (l'id' est obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier)
 	public function read_last($param) {
 		$result['done'] = false;					
 		return $result;

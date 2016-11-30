@@ -34,6 +34,9 @@ class shopapplicationcore extends solution {
 	protected $url;
 	protected $apiKey;
 	
+	protected $required_fields = array('default' => array('id','date_modified','date_created'));
+	protected $FieldsDuplicate = array('customers' => array('email'));
+	
 	// Connection parameters
 	public function getFieldsLogin() {	
         return array(
@@ -96,20 +99,20 @@ class shopapplicationcore extends solution {
 				case 'customers':
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
-						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
+						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+						'last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'email' => array('label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'birth_date' => array('label' => 'Birth date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'fax' => array('label' => 'Fax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'discount' => array('label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'credit' => array('label' => 'Credit', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'credit_expiration_date"' => array('label' => 'Credit expiration date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'reward_points"' => array('label' => 'Reward points', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'password' => array('label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'auto_connect_url' => array('label' => 'Auto connect url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+						'birth_date' => array('label' => 'Birth date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'fax' => array('label' => 'Fax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'discount' => array('label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'credit' => array('label' => 'Credit', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'credit_expiration_date"' => array('label' => 'Credit expiration date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'reward_points"' => array('label' => 'Reward points', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'password' => array('label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'auto_connect_url' => array('label' => 'Auto connect url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'photo' => array('label' => 'Photo', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 					);
 					$this->fieldsRelate = array(
@@ -142,32 +145,48 @@ class shopapplicationcore extends solution {
 	public function read_last($param) {
 		$result = array();	
 		try {
-// print_r($param);
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);	
+
 			// Simulation : we get the last record
 			if (empty($param['query'])) {
-				$urlApi = $this->url.$param['module'].'/orderby/date_created/desc/limit/1'.$this->apiKey;
-				// http://test-api.shop-application.com/api/customers/orderby/date_created/desc/limit/1?key=jhkCNgPmRUacE4JqMFe4
-				// $urlApi = 'http://test-api.shop-application.com/api/orders/filter/status/equal/25/orderby/date_created/desc/limit/3?key=jhkCNgPmRUacE4JqMFe4';		
+				$urlApi = $this->url.$param['module'].'/orderby/date_modified/desc/limit/1'.$this->apiKey;	
 			}
+			// We try to get the history of the record
+			elseif (!empty($param['query']['id'])) {
+				$urlApi = $this->url.$param['module'].'/'.$param['query']['id'].$this->apiKey;
+			}
+			// search for duplicate date in the target module
+			else {
+				// Buid the search query
+				$search = '';
+				foreach ($param['query'] as $key => $value) {
+					$search .= '/filter/'.$key.'/equal/'.urlencode($value);
+				}
+				$urlApi = $this->url.$param['module'].$search.'/orderby/date_modified/desc/limit/1'.$this->apiKey;
+			}
+// echo $urlApi;			
 			// Try to access to the shop
 			$return = $this->call($urlApi, 'get', '');	
-			
 			$code = $return->__get('code');
 			// If the call is a success
 			if ($code == '200') {		
 				$body = $return->__get('body');
+// print_r($body);			
 				if (!empty($body)) {
 					// destroy the dimension because we can have only one record
-					$body = current($body);
-// print_r($body);					
+					$body = current($body);			
 					foreach ($body as $key => $value) {
 						// If the field is requested
-						if(in_array($key, $param['fields'])) {
-// echo $key.' => '.$value.'<BR>';				
+						if(in_array($key, $param['fields'])) {			
 							$result['values'][$key] = $value;
 						}
 					}
 					$result['done'] = true;
+				}
+				// If id is in query we should have a result
+				elseif (!empty($param['query']['id'])) {
+					throw new \Exception('Failed to get the history of the record in the target solution. ');
 				}
 				else {
 					$result['done'] = false;
@@ -182,14 +201,243 @@ class shopapplicationcore extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;			
-		}		
-print_r($result);					
+		}						
 		return $result;
 	}
 	
+	// Read one specific record
 	public function read($param) {
-		print_r($param);
-		$result = array();	
+		$result['count'] = 0;
+		try {
+			// Get the reference date
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			
+			// We build the url (get all data after the reference date)
+			$urlApi = $this->url.$param['module'].'/filter/'.$dateRefField.'/superior/'.urlencode($param['date_ref']).'/orderby/date_created/asc'.$this->apiKey;
+// echo $urlApi;			
+			// http://test-api.shop-application.com/api/customers/filter/date_created/superior/2000-11-29 00:00:00/orderby/date_created/desc?key=jhkCNgPmRUacE4JqMFe4
+// print_r($param);
+		
+			// Try to access to the shop
+			$return = $this->call($urlApi, 'get', '');	
+			
+			$code = $return->__get('code');
+			// If the call is a success
+			if ($code == '200') {		
+				$body = $return->__get('body');
+				if (!empty($body)) {
+					// For each record
+					foreach ($body as $id => $record) {
+						$row = array();
+						// For each fields
+						foreach ($record as $key => $value) {
+							// prepare data (id is always present in $param['fields'] because we have added it via the method addRequiredField
+							if(in_array($key, $param['fields'])) {
+								$row[$key] = $value;
+							}
+							if ($key == $dateRefField) {
+								$row['date_modified'] = $value;
+								// Save the latest reference date
+								if (	
+										empty($result['date_ref'])
+									 || $value > $result['date_ref']
+								) {
+									$result['date_ref'] = $value;
+								}
+							}
+						}
+						$result['values'][$id] = $row;
+						$result['count']++;
+					}
+				}
+			}
+			else {
+				// Get the error message
+				$body = $return->__get('body');
+				throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
+			}		
+		}
+		catch (\Exception $e) {
+		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+		}		 
+// print_r($result);
+// return null;					
+		return $result;
+	}
+	
+	
+	// Permet de créer un enregistrement
+	public function create($param) {
+// print_r($param);
+// return null;		
+		// For each record to send
+		foreach($param['data'] as $idDoc => $data) {
+			try {		
+				// Check control before update
+				$data = $this->checkDataBeforeCreate($param, $data);
+				$first = false;
+				// Preparation of the post
+				$dataTosSendTmp = array();
+				// For each fields
+				foreach ($data as $key => $value) {				
+					// Jump the first value of the table data (contain the document id)
+					if (!$first) {
+						$first = true;
+						continue;
+					}
+					// Target id isn't a shop-application field (it is used by Myddleware)
+					if ($key == 'target_id') {
+						continue;
+					}
+					$dataTosSendTmp[$key] = $value;
+				}
+				// Add a dimension for the webservice
+				$dataTosSend[] = $dataTosSendTmp;
+				
+				// Generate URL
+				$urlApi = $this->url.$param['module'].$this->apiKey;
+		
+				// Creation of the record
+				$return = $this->call($urlApi, 'post', $dataTosSend);	
+				
+				// Get the response code
+				$code = $return->__get('code');			
+				// If the call is a success
+				if ($code == '200') {
+					// Get the data from the response
+					$body = $return->__get('body');				
+					// Could be in 200 with an error
+					if (!empty($body->errors)) {
+						throw new \Exception(print_r($body->errors,true));	
+					}		
+					// The record has been successfully created if the id exist
+					if (!empty($body[0]->id)) {
+						$result[$idDoc] = array(
+												'id' => $body[0]->id,
+												'error' => false
+										);
+					}
+					else  {
+						$result[$idDoc] = array(
+												'id' => '-1',
+												'error' => '01'
+										);
+					} 
+				}
+				else {
+					// Get the error message
+					$body = $return->__get('body');
+					throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
+				}			
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		} 
+// print_r($result);
+// return null;			
+		return $result;			
+	}	
+	
+		// Permet de créer un enregistrement
+	public function update($param) {
+// print_r($param);
+// return null;		
+		// For each record to send
+		foreach($param['data'] as $idDoc => $data) {
+			try {		
+				// Check control before update
+				$data = $this->checkDataBeforeCreate($param, $data);
+				$first = false;
+				// Preparation of the post
+				$dataTosSendTmp = array();
+				// For each fields
+				foreach ($data as $key => $value) {				
+					// Jump the first value of the table data (contain the document id)
+					if (!$first) {
+						$first = true;
+						continue;
+					}
+					// Target id contains te id of teh record in the target application
+					if ($key == 'target_id') {
+						$dataTosSendTmp['id'] = $value;
+						continue;
+					}
+					$dataTosSendTmp[$key] = $value;
+				}
+				// Add a dimension for the webservice
+				$dataTosSend[] = $dataTosSendTmp;
+				// Generate URL
+				$urlApi = $this->url.$param['module'].$this->apiKey;
+		
+				// Creation of the record
+				$return = $this->call($urlApi, 'put', $dataTosSend);	
+				
+				// Get the response code
+				$code = $return->__get('code');			
+				// If the call is a success
+				if ($code == '200') {
+					// Get the data from the response
+					$body = $return->__get('body');				
+					// Could be in 200 with an error
+					if (!empty($body->errors)) {
+						throw new \Exception(print_r($body->errors,true));	
+					}		
+					// The record has been successfully created if the id exist
+					if (!empty($body[0]->id)) {
+						$result[$idDoc] = array(
+												'id' => $body[0]->id,
+												'error' => false
+										);
+					}
+					else  {
+						$result[$idDoc] = array(
+												'id' => '-1',
+												'error' => '01'
+										);
+					} 
+				}
+				else {
+					// Get the error message
+					$body = $return->__get('body');
+					throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
+				}			
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		} 
+print_r($result);
+return null;			
+		return $result;			
+	}	
+
+	
+	// Return the filed reference
+	public function getDateRefName($moduleSource, $ruleMode) {
+		if ($ruleMode == '0') {
+			return 'date_modified';
+		} elseif ($ruleMode == 'C'){
+			return 'date_created';
+		} else {
+			throw new \Exception ("Rule mode $RuleMode unknown.");
+		}
+		return null;
 	}
 	
 	protected function call($url, $method = 'get', $data=array()){	

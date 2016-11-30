@@ -413,8 +413,11 @@ class prestashopcore extends solution {
 
 					// If we search by ID we get directly all the data of the record
 					$resources = $xml->children()->children();
-					// Otherwise we have to get it
-					if(empty($param['query']['id'])) {
+					// Otherwise we have to get it if a ressource has been found
+					if(
+							!empty($resources) 
+						AND empty($param['query']['id'])
+					) {
 						// Get the id of the record
 						foreach($resources->attributes() as $key => $value) {
 							if ($key == 'id') {

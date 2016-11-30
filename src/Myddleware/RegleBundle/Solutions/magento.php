@@ -407,6 +407,9 @@ class magentocore extends solution {
 			if(!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
 				$fieldId = $this->idByModule[$param['module']];
 			}
+			
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);
 	
 			// Init parameters for modules or submodules
 			$function = '';
