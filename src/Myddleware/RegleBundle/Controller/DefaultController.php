@@ -2826,8 +2826,6 @@ class DefaultControllerCore extends Controller
 	
 		// Creation de la table document
 		$sql_create = "
-		#SET GLOBAL innodb_file_per_table=1;
-		#SET GLOBAL innodb_file_format=Barracuda;
 		CREATE TABLE IF NOT EXISTS z_$name_table (
 									id_$name_table varchar(255),";
 		

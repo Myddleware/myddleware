@@ -84,6 +84,7 @@ class shopapplicationcore extends solution {
 	public function get_modules($type = 'source') {
 		return array(	
 			'customers' => 'Customers',
+			'address' => 'Address',
 			'orders' => 'Order',
 			'products' => 'Products',
 		);
@@ -119,6 +120,32 @@ class shopapplicationcore extends solution {
 						'store_id' => array('label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						'group_id' => array('label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						'default_address_id' => array('label' => 'Default address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
+					);
+					break;
+				case 'address':			
+					$this->moduleFields = array(
+						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'company' => array('label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'vat_number' => array('label' => 'Vat_number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
+						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+						'phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'street' => array('label' => 'Street', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'suburb' => array('label' => 'Suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'doorcode' => array('label' => 'Door code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'floor' => array('label' => 'Floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'postcode' => array('label' => 'Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'city' => array('label' => 'City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'state"' => array('label' => 'State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'department' => array('label' => 'Department', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'region' => array('label' => 'Region', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'latitude' => array('label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'longitude' => array('label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'country_id' => array('label' => 'Country ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+					);
+					$this->fieldsRelate = array(
+						'customers_id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
 					);
 					break;
 				default:
@@ -426,6 +453,30 @@ print_r($result);
 return null;			
 		return $result;			
 	}	
+	
+	// Force some module in child
+	public function getFieldsParamUpd($type, $module) {	
+		try {
+			if (
+					$type == 'target'
+				&& in_array($module,array('address'))	
+			){
+				$groupParam = array(
+							'id' => 'group',
+							'name' => 'Group',
+							'type' => 'option',
+							'label' => 'Group',
+							'required'	=> true,
+							'option'	=> array('child' => 'child')
+						);
+				$params[] = $groupParam;
+			}			
+			return $params;
+		}
+		catch (\Exception $e){
+			return array();
+		}
+	}
 
 	
 	// Return the filed reference
