@@ -759,7 +759,10 @@ class DefaultControllerCore extends Controller
 					}			
 				}	
 				
-				if($field->getName() == 'bidirectional') {
+				if(
+						$field->getName() == 'bidirectional'
+					AND !empty($field->getValue())
+				) {
 					$ruleBidirectional = $this->em->getRepository('RegleBundle:Rule')
 										   ->findOneBy( array(
 														'id' => $field->getValue()

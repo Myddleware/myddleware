@@ -26,15 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use OAuth2;
-//use Psr\LoggerInterface;
-
-// Permet de charger automatiquement les classe Google sans faire d'include de classe manuellement
-$file = __DIR__.'/lib/autoload.php';
-if(file_exists($file)){
-	require_once($file);
-}
-
+	
 class magentocore extends solution {
 	
 	protected $token;
@@ -415,6 +407,9 @@ class magentocore extends solution {
 			if(!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
 				$fieldId = $this->idByModule[$param['module']];
 			}
+			
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);
 	
 			// Init parameters for modules or submodules
 			$function = '';
