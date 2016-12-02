@@ -46,7 +46,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name'=> 'database' , 'active' => 1 , 'source' => 1 , 'target' => 1),
 									array('name'=> 'sapecc' , 'active' => 0 , 'source' => 1 , 'target' => 0),
 									array('name'=> 'magento' , 'active' => 1 , 'source' => 1 , 'target' => 1),
-									array('name'=> 'moodle' , 'active' => 1 , 'source' => 0 , 'target' => 1),
+									array('name'=> 'moodle' , 'active' => 1 , 'source' => 1 , 'target' => 1),
 									array('name'=> 'file' , 'active' => 1 , 'source' => 1 , 'target' => 0)
 							);
  

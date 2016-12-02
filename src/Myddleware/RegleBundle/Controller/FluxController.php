@@ -507,7 +507,8 @@ class FluxControllerCore extends Controller
 		  $value = strip_tags($this->getRequest()->request->get('value'));
 		  
 		  if(!empty($value)) {
-			  $stmt = $conn->prepare("UPDATE $zName SET $fields = $value WHERE $nameId = :id"); 	  
+			  $stmt = $conn->prepare('UPDATE z_'.$name.' SET '.$fields.' = :value WHERE id_'.$name.' = :id'); 	  
+			  $stmt->bindValue('value', $value ); 
 			  $stmt->bindValue('id', $this->getRequest()->request->get('flux') ); 	 		  
 			  $stmt->execute();  			  
 			  

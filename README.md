@@ -10,10 +10,10 @@ This community is ours : let’s all contribute, make it a friendly, helpful space
 
 Please don’t hide any precious skills from us, whether it is coding, translation, connectors creation, .... the list goes on! The whole community could then benefit from these!
 
-Applications connected (Version 2.0.2): SAP CRM, SuiteCRM, Prestashop, Bittle, Dolist, Salesforce, SugarCRM, Mailchimp, Magento, Sage CRM, Moodle, Evetbrite.  We also connect File et Database.
+Applications connected : SAP CRM, SuiteCRM, Prestashop, Bittle, Dolist, Salesforce, SugarCRM, Mailchimp, Magento, Sage CRM, Moodle, Evetbrite.  We also connect File via ftp and Database.
 
 Find us here : <a href="http://www.myddleware.com">www.myddleware.com</a>
 
-<em>We made it, you own it!</em>
+<em>We created it, you own it!</em>
 
 <img class="alignnone size-medium wp-image-161" src="http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg" alt="myddleware_logo" width="300" height="215" />

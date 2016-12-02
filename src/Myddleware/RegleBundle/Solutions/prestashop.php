@@ -396,15 +396,38 @@ class prestashopcore extends solution {
 				if ($this->referenceIsDate($param['module'])) {
 					$opt['sort'] = '[date_upd_DESC]';
 				}
-				
+			
 				// Si le tableau de requête est présent alors construction de la requête
 				if (!empty($param['query'])) {
-					if(empty($param['query']['id']))
-						throw new \Exception ('Something missing in the query of readLast.');
-					$options['id'] = (int) $param['query']['id'];
+					// Building of the option array
+					if(!empty($param['query']['id'])) {
+						$options['id'] = (int) $param['query']['id'];
+					}
+					else {
+						foreach ($param['query'] as $key => $value) {
+							$options['filter['.$key.']'] = '['.$value.']';
+						}
+					}					
 					$options['resource'] = $param['module'];
-					$xml = $this->webService->get($options);
+					$xml = $this->webService->get($options);		
+
+					// If we search by ID we get directly all the data of the record
 					$resources = $xml->children()->children();
+					// Otherwise we have to get it
+					if(empty($param['query']['id'])) {
+						// Get the id of the record
+						foreach($resources->attributes() as $key => $value) {
+							if ($key == 'id') {
+								$optionsDetail['id'] = (int) $value;
+								$optionsDetail['resource'] = $param['module'];
+								$xml = $this->webService->get($optionsDetail);	
+								$resources = $xml->children()->children();
+								break;
+							}
+						}
+					}
+					
+					// Creation of the output parameter
 					if(empty($resources->id)) {
 						$result['done'] = false;
 					} else {
@@ -414,11 +437,11 @@ class prestashopcore extends solution {
 							if(in_array($key, $param['fields']))
 								$result['values'][$key] = (string) $resource;
 						}
-					}
+					}				
 					return $result;
 				}
 
-				// Call
+				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
 				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
