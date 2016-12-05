@@ -324,7 +324,7 @@ flux:
         predecessor_ko: Predecessor error
         relate_ko: Relation error
         error_transformed: Transformation error
-        error_history: History error
+        error_checking: Checking error
         error_sending: Sending error
 
 view_flux:

@@ -325,7 +325,7 @@ flux:
         predecessor_ko: Prédécesseur en erreur
         relate_ko: Relation en erreur
         error_transformed: Transformation en erreur
-        error_history: Historique en erreur
+        error_checking: Vérification en erreur
         error_sending: Envoi en erreur
  
 view_flux:

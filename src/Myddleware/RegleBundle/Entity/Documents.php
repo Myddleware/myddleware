@@ -146,7 +146,13 @@ class Documents
 	 * 
      */
     private $globalStatus;	
-				
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="parentId", type="string", nullable=false)
+     */
+    private $parentId;	
 
     /**
      * Set id
@@ -468,5 +474,28 @@ class Documents
     public function getGlobalStatus()
     {
         return $this->globalStatus;
+    }
+	
+	/**
+     * Set parentId
+     *
+     * @param string $parentId
+     * @return Documents
+     */
+    public function setParentId($parentId)
+    {
+        $this->parentId = $parentId;
+    
+        return $this;
+    }
+
+    /**
+     * Get parentId
+     *
+     * @return string 
+     */
+    public function getParentId()
+    {
+        return $this->parentId;
     }
 }

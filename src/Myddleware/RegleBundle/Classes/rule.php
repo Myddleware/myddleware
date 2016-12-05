@@ -95,7 +95,7 @@ class rulecore {
 	
 	// Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
 	// If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application 
-	public function generateDocument($idSource, $readSource = true, $param = '', $idFiledName = 'id') {
+	public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id') {
 		try {
 			if ($readSource) {
 				// Connection to source application
@@ -110,27 +110,32 @@ class rulecore {
 				$read['ruleParams'] = $this->ruleParams;
 				$read['rule'] = $this->rule;
 				$read['query'] = array($idFiledName => $idSource);
-				$dataSource = $this->solutionSource->read_last($read);
-				if (!$dataSource['done']) {
+				$dataSource = $this->solutionSource->read($read);				
+				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
 				}
 			}
 			else {
-				$dataSource['values'] = $param['values'];
+				$dataSource['values'][] = $param['values'];
 			}
 			
-			// Generate document
-			$doc['rule'] = $this->rule;
-			$doc['ruleFields'] = $this->ruleFields;
-			$doc['ruleRelationships'] = $this->ruleRelationships;
-			$doc['data'] = $dataSource['values'];
-			$doc['jobId'] = $this->jobId;			
-			$document = new document($this->logger, $this->container, $this->connection, $doc);
-			$createDocument = $document->createDocument();		
-			if (!$createDocument) {
-				throw new \Exception ('Failed to create document : '.$document->getMessage());
+			if (!empty($dataSource['values'])) {
+				foreach($dataSource['values'] as $docData) {
+					// Generate document
+					$doc['rule'] = $this->rule;
+					$doc['ruleFields'] = $this->ruleFields;
+					$doc['ruleRelationships'] = $this->ruleRelationships;
+					$doc['data'] = $docData;
+					$doc['jobId'] = $this->jobId;			
+					$document = new document($this->logger, $this->container, $this->connection, $doc);
+					$createDocument = $document->createDocument();		
+					if (!$createDocument) {
+						throw new \Exception ('Failed to create document : '.$document->getMessage());
+					}
+					$documents[] = $document;
+				}
 			}
-			return $document;
+			return $documents;
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
@@ -832,7 +837,7 @@ class rulecore {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
 			}
 		}
-		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_history'))) {
+		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking'))) {
 			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
 			if ($response[$id_document] === true) {
 				if ($this->rule['rule_mode'] == 'S') {
@@ -843,7 +848,7 @@ class rulecore {
 				}
 			}
 			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_history';
+				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_checking';
 			}
 		}
 		// Si la règle est en mode recherche alors on n'envoie pas de données
@@ -1222,6 +1227,31 @@ class rulecore {
 		}
 	}
     
+	// Get the child rules of the current rule
+	// Return the relationships between the parent and the clild rules (rrs_field_id = parent_rule, rule_id = child_rule)
+	public function getChildRules() {
+		try {		
+			// get the rule linked to the current rule and check if they have the param child
+			$sqlFields = "SELECT RuleRelationShips.*
+							FROM RuleRelationShips
+								INNER JOIN Rule 
+									ON RuleRelationShips.rule_id = Rule.rule_id
+								INNER JOIN 	RuleParams
+									ON Rule.rule_id = RuleParams.rule_id 
+							WHERE 
+									RuleRelationShips.rrs_field_id = :ruleId
+								AND Rule.rule_deleted = 0
+								AND RuleParams.rulep_name = 'Group'
+								AND RuleParams.rulep_value = 'child'";
+			$stmt = $this->connection->prepare($sqlFields);
+			$stmt->bindValue(":ruleId", $this->ruleId);
+		    $stmt->execute();	   				
+			return $stmt->fetchAll();
+		} catch (\Exception $e) {
+			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+		}
+	}
+	
 	// Parametre de la règle choix utilisateur
 	/* 
 	array(

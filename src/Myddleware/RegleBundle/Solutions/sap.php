@@ -385,9 +385,9 @@ class sapcore extends saproot {
 										$data['values']['id'] = $this->generateId($rule['rule_module_source'],$childDocument);
 										// Ajout de l'id du module d'en-tête
 										$data['values']['ET_BKPF'] = $record['id'];
-										$generateDocument = $ruleMyddleware->generateDocument($record['id'],false,$data);
-										if (!empty($generateDocument->error)) {
-											$record['ZmydMessage'] = array('type' => 'E', 'message' => 'Failed to create child document ('.$rule['rule_module_source'].') '.$generateDocument->error);
+										$generateDocuments = $ruleMyddleware->generateDocuments($record['id'],false,$data);
+										if (!empty($generateDocuments->error)) {
+											$record['ZmydMessage'] = array('type' => 'E', 'message' => 'Failed to create child document ('.$rule['rule_module_source'].') '.$generateDocuments->error);
 										}
 									}
 								}

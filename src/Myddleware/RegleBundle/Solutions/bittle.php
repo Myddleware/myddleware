@@ -745,10 +745,10 @@ class bittlecore extends solution {
 					$rule = new ruleMyddleware($this->logger, $this->container, $this->conn ,$param);
 					// Si un document sur la même règle avec le même id source a déjà été fait dans ce paquet d'envoi alors on ne régénère pas un autre document qui serait doublon
 					if (empty($this->duplicateDoc[$param['ruleId']][$data[$relationship['rrs_field_name_target']]])) {
-						$generateDocument = $rule->generateDocument($data[$relationship['rrs_field_name_target']]);	
+						$generateDocuments = $rule->generateDocuments($data[$relationship['rrs_field_name_target']]);	
 						// Si on a eu une erreur alors on arrête de générer les documents child
-						if (!empty($generateDocument->error)) {
-							return $generateDocument->error;
+						if (!empty($generateDocuments->error)) {
+							return $generateDocuments->error;
 						}
 						$this->duplicateDoc[$param['ruleId']][$data[$relationship['rrs_field_name_target']]] = 1;
 					}

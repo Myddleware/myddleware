@@ -543,32 +543,40 @@ class prestashopcore extends solution {
 				
 				$optRuleMode0 = $opt; // On stocke les options sans les filtres pour l'appel en RuleMode 0
 				
-				// Si la référence est une date alors la requête dépend de la date
-				if ($this->referenceIsDate($param['module'])) {
-					if($DateRefField == 'date_add') {
-						$opt['filter[date_add]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
-						
-						$opt['sort'] = '[date_add_ASC]';
-					} else {
-						$opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
-						
-						$opt['sort'] = '[date_upd_ASC]';
+				// Query creation
+				// if a specific query is requeted we don't use date_ref
+				if (!empty($param['query'])) {
+					foreach ($param['query'] as $key => $value) {
+						$opt['filter['.$key.']'] = '['.$value.']';
 					}
 				}
-				// Si la référence n'est pas une date alors c'est l'ID de prestashop
-				else {
-					if ($param['date_ref'] == '') {
-						$param['date_ref'] = 1;
+				else{
+					// Si la référence est une date alors la requête dépend de la date
+					if ($this->referenceIsDate($param['module'])) {
+						if($DateRefField == 'date_add') {
+							$opt['filter[date_add]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
+							
+							$opt['sort'] = '[date_add_ASC]';
+						} else {
+							$opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
+							
+							$opt['sort'] = '[date_upd_ASC]';
+						}
 					}
-					$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
-					$opt['sort'] = '[id_ASC]';
+					// Si la référence n'est pas une date alors c'est l'ID de prestashop
+					else {
+						if ($param['date_ref'] == '') {
+							$param['date_ref'] = 1;
+						}
+						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
+						$opt['sort'] = '[id_ASC]';
+					}
 				}
-
+				
 				// Call
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
 				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-
 				$result['count'] = $simplexml->children()->children()->count();
 				
 				$record = array();
@@ -629,7 +637,7 @@ class prestashopcore extends solution {
 					}
 					$result['values'][(string)$data->id] = $record;
 					$record = array();
-				}			
+				}					
 				return $result;	
 			}
 			catch (\PrestaShopWebserviceException $e)

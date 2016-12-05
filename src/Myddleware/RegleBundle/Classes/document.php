@@ -28,7 +28,6 @@ namespace Myddleware\RegleBundle\Classes;
 use Symfony\Bridge\Monolog\Logger; // Gestion des logs
 use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
 use Doctrine\DBAL\Connection; // Connexion BDD
-// use Myddleware\RegleBundle\Encryption\encryption as enCrypt; // Encryption
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // SugarCRM Myddleware
 
 class documentcore { 
@@ -79,7 +78,7 @@ class documentcore {
 										'Predecessor_KO' => 'Error',
 										'Relate_KO' => 'Error',
 										'Error_transformed' => 'Error',
-										'Error_history' => 'Error',
+										'Error_checking' => 'Error',
 										'Error_sending' => 'Error'
 								);
 	
@@ -112,7 +111,7 @@ class documentcore {
 			'Predecessor_KO' => 'flux.status.predecessor_ko',
 			'Relate_KO' => 'flux.status.relate_ko',
 			'Error_transformed' => 'flux.status.error_transformed',
-			'Error_history' => 'flux.status.error_history',
+			'Error_checking' => 'flux.status.error_checking',
 			'Error_sending' => 'flux.status.error_sending'		
 		);		
 	}
@@ -728,6 +727,8 @@ class documentcore {
 		}	
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
+			// Check if the rule is a parent and run the child data.
+			$this->runChildRule();
 			
 			// Si le document est une modification de données alors on va chercher les données dans la cible avec l'ID
 			if ($this->type_document == 'U') {
@@ -738,13 +739,9 @@ class documentcore {
 				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
-					$return = true;
 				}
 				else {
-					$this->message .= 'Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
 			// Si on est en mode recherche on récupère la donnée cible avec les paramètre de la source
@@ -755,10 +752,7 @@ class documentcore {
 					$searchFields[$this->ruleField[0]['rulef_target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
 				}
 				else {
-					$this->message .= 'Failed to search data because there is no field in the query. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search data because there is no field in the query. This document is queued. ');
 				}
 
 				if(!empty($searchFields)) {
@@ -770,24 +764,17 @@ class documentcore {
 		
 				// Gestion de l'erreur
 				if ($history === -1) {
-					$this->message .= 'Failed to search data because the query is empty. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search data because the query is empty. This document is queued. ');
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
 					$rule = $this->getRule();
-					$this->message .= 'No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['rule_module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['rule_module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ');
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on passe le flux à envoyé car le lien est fait
 				else {
 					$this->updateStatus('Send');
 					$this->updateTargetId($history);
-					$return = true;
 				}
 			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
@@ -813,28 +800,22 @@ class documentcore {
 					$history = -1;
 				}
 				if ($history === -1) {
-					$this->message .= 'Failed to search duplicate data in the target system. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search duplicate data in the target system. This document is queued. ');
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
 					$this->updateStatus('Ready_to_send');
-					$return = true;
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
 					$this->updateStatus('Ready_to_send');
 					$this->updateTargetId($history);
 					$this->updateType('U');
-					$return = true;
 				}
 			}
 			// Sinon on mets directement le document en ready to send
 			else {
 				$this->updateStatus('Ready_to_send');
-				$return = true;
 			}
 			
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
@@ -843,15 +824,57 @@ class documentcore {
 				$this->checkNoChange();
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
-			return $return;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to get target document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
+			$this->updateStatus('Error_checking');
 			$this->logger->error($this->message);
-			$this->createDocLog();
 			return false;
 		}	
+		return true;
+	}
+	
+	// Get the child rule of the current rule
+	// If child rule exist, we run it
+	protected function runChildRule() {
+		// $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		$ruleParam['ruleId'] = $this->ruleId;
+		$ruleParam['jobId'] = $this->jobId;
+		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
+		// Get the child rules of the current rule
+		$childRuleIds = $parentRule->getChildRules();
+		if (!empty($childRuleIds)) {
+			foreach($childRuleIds as $childRuleId) {
+				// Instantiate the child rule
+				$ruleParam['ruleId'] = $childRuleId['rule_id'];
+				$ruleParam['jobId'] = $this->jobId;
+				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
+				// Generate documents for the child rule (could be several documents)
+				$docsChildRule = $childRule->generateDocuments($this->sourceId, true, '', $childRuleId['rrs_field_name_source']);
+				// Run documents
+				if (!empty($docsChildRule)) {
+					foreach ($docsChildRule as $doc) {
+						$docChildRule = $childRule->actionDocument($doc->id,'rerun');
+					}
+				}
+			}
+		}
+// print_r($docChildRule);	
+// print_r($childRuleIds);	
+// echo 'sourceId : '.$this->sourceId.chr(10);
+// $this->getSourceData();
+// print_r($this->sourceData);	
+throw new \Exception( 'Test runChildRule.' );
+		// try {
+		// } catch (\Exception $e) {
+			// $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			// $this->message .= 'Failed run the child rule : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			// $this->typeError = 'E';
+			// $this->logger->error($this->message);
+			// return false;
+		// }	
+		return true;
 	}
 	
 	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
