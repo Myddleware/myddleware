@@ -716,7 +716,7 @@ class documentcore {
 			}
 			else {
 				throw new \Exception( 'Failed to transformed data. This document is queued. ' );
-			}
+			}			
 			$this->updateStatus('Transformed');
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
@@ -743,10 +743,14 @@ class documentcore {
 			$this->runChildRule();
 			
 			// Si le document est une modification de données alors on va chercher les données dans la cible avec l'ID
-			// Except if the rule is a child (no target id is required, it will be send with the parent rule)
+			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
 					$this->type_document == 'U'
-				 &&	$this->ruleParams['group'] != 'child'
+				 &&	empty($this->ruleParams['group'])
+				 || (
+						!empty($this->ruleParams['group'])
+					 &&	$this->ruleParams['group'] != 'child'
+				)
 			) {
 				// Récupération des données avec l'id de la cible
 				$searchFields = array('id' => $this->targetId);
@@ -854,9 +858,8 @@ class documentcore {
 	// Get the child rule of the current rule
 	// If child rule exist, we run it
 	protected function runChildRule() {
-		// $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		$ruleParam['ruleId'] = $this->ruleId;
-		$ruleParam['jobId'] = $this->jobId;
+		$ruleParam['jobId'] = $this->jobId;		
 		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
 		// Get the child rules of the current rule
 		$childRuleIds = $parentRule->getChildRules();
@@ -864,7 +867,7 @@ class documentcore {
 			foreach($childRuleIds as $childRuleId) {
 				// Instantiate the child rule
 				$ruleParam['ruleId'] = $childRuleId['rule_id'];
-				$ruleParam['jobId'] = $this->jobId;
+				$ruleParam['jobId'] = $this->jobId;				
 				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
 				// Generate documents for the child rule (could be several documents)
 				$docsChildRule = $childRule->generateDocuments($this->sourceId, true, array('parent_id' => $this->id), $childRuleId['rrs_field_name_source']);
@@ -1237,7 +1240,10 @@ class documentcore {
 				}
 				
 				// If the rule is a child, data will be send with the parent document. No target id is required 
-				if ($this->ruleParams['group'] == 'child') {
+				if (
+						!empty($this->ruleParams['group'])
+					 && $this->ruleParams['group'] == 'child'
+				) {
 					return null;
 				}
 				

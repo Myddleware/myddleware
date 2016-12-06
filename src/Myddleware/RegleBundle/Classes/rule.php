@@ -62,7 +62,7 @@ class rulecore {
 		$this->container = $container;
 		$this->connection = $dbalConnection;
 		$this->em = $this->container->get('doctrine')->getEntityManager();
-		
+				
 		if (!empty($param['ruleId'])) {
 			$this->ruleId = $param['ruleId'];
 			$this->setRule($this->ruleId);
@@ -79,7 +79,7 @@ class rulecore {
 		$this->setRuleParams();
 		$this->setRuleRelationships();
 		$this->setRuleFields();
-		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);	
+		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
 	}
 	
 	public function setRule($idRule) {
@@ -475,6 +475,7 @@ class rulecore {
 	// Si un document n'est pas clos alors le statut du docuement est mis à "pending"
 	public function transformDocuments($documents = null){
 		include_once 'document.php';
+				
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
 	
@@ -484,7 +485,7 @@ class rulecore {
 		}
 		if(!empty($documents)) {
 			// Transformation de tous les docuements sélectionnés
-			foreach ($documents as $document) { 
+			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['ruleFields'] = $this->ruleFields;
 				$param['ruleRelationships'] = $this->ruleRelationships;
@@ -504,6 +505,7 @@ class rulecore {
 	//     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
 	public function getTargetDataDocuments($documents = null) {
 		include_once 'document.php';
+	
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
 		
@@ -726,7 +728,7 @@ class rulecore {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
 			
-			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:synchro '.$ruleSlugName.' --env=prod > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -1121,7 +1123,7 @@ class rulecore {
 			if (!empty($childRules)) {
 				foreach($childRules as $childRule) {
 					$ruleChildParam['ruleId'] = $childRule['rule_id'];
-					$ruleChildParam['jobId'] = $this->jobId;
+					$ruleChildParam['jobId'] = $this->jobId;				
 					$childRuleObj = new rule($this->logger, $this->container, $this->connection, $ruleChildParam);					
 					// Recursive call 
 					// Child document has the type 'U'
@@ -1178,8 +1180,7 @@ class rulecore {
 			}
 			if (!empty($this->sourceFields)) {
 				$this->sourceFields = array_unique($this->sourceFields); 				
-			}
-			
+			}			
 			// Récupération des types de champs de la source
 			$sourceTable = "z_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_source";
 			$sqlParams = "SHOW COLUMNS FROM ".$sourceTable;

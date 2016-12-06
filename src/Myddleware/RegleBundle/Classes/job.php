@@ -96,7 +96,7 @@ class jobcore  {
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
 			$param['limit'] = $this->limit;
-			$param['manual'] = $this->manual;
+			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			return true;
 		} catch (\Exception $e) {
@@ -187,7 +187,7 @@ class jobcore  {
 				include_once 'rule.php';		
 				foreach ($documentsError as $documentError) {
 					$param['ruleId'] = $documentError['rule_id'];
-					$param['jobId'] = $this->id;
+					$param['jobId'] = $this->id;					
 					$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					$errorActionDocument = $rule->actionDocument($documentError['id'],'rerun');
 					if (!empty($errorActionDocument)) {
@@ -275,7 +275,7 @@ class jobcore  {
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
 			}
-			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:'.$job.' '.$params.' --env=prod  > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -350,7 +350,7 @@ class jobcore  {
 					// Chargement d'une nouvelle règle que si nécessaire
 					if ($param['ruleId'] != $document['rule_id']) {
 						$param['ruleId'] = $document['rule_id'];
-						$param['jobId'] = $this->id;
+						$param['jobId'] = $this->id;						
 						$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					}
 					$errorActionDocument = $rule->actionDocument($document['id'],$action);

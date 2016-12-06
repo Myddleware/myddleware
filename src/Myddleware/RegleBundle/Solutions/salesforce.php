@@ -103,7 +103,7 @@ class salesforcecore extends solution {
 		    }
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Salesforce : '.$e->getMessage();
+			$error = 'Failed to login : '.$e->getMessage();
 			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
@@ -191,7 +191,6 @@ class salesforcecore extends solution {
 		$query_url = $instance_url.'/services/data/'.$this->versionApi.'/sobjects/' . $module . '/describe/';
 		try {
 			$query_request_data = $this->call($query_url, false);		
-            $fields = array();
             // Ces champs ne doivent pas apparaître comme requis
             $calculateFields = array("NumberOfLeads", "NumberOfConvertedLeads", "NumberOfContacts","NumberOfResponses","NumberOfOpportunities","NumberOfWonOpportunities","AmountAllOpportunities","AmountWonOpportunities","ForecastCategory");
             
@@ -244,14 +243,14 @@ class salesforcecore extends solution {
 						) {
 							$required = true;
 						}
-						$fields[$field['name']] = array(
+						$this->moduleFields[$field['name']] = array(
 												'label' => $field['label'],
 												'type' => $field['type'],
 												'type_bdd' => $type_bdd,
 												'required' => $required
 											);
 						if(strpos($field['name'], "__c")) // Si le champs est un champs custom, il n'est pas requis par défaut
-							$fields[$field['name']]['required'] = false;
+							$this->moduleFields[$field['name']]['required'] = false;
                     } 
 					else {
 						// Ajout du champ ID permettant de gérer les relations
@@ -266,9 +265,9 @@ class salesforcecore extends solution {
                     // Récupération des listes déroulantes
                     if ($field['type']=='picklist') {
                         foreach($field['picklistValues'] as $option) {
-                            $fields[$field['name']]['option'][$option['value']] = $option['label'];
+                            $this->moduleFields[$field['name']]['option'][$option['value']] = $option['label'];
                         }
-                         $fields[$field['name']]['type_bdd'] = 'varchar(255)';
+                         $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
                     }   
                 }           
             }
@@ -280,7 +279,7 @@ class salesforcecore extends solution {
 			if ($extension) {
 				$this->fieldsRelate = array();
 			}
-			return $fields;
+			return $this->moduleFields;
 		}
 		catch (\Exception $e) {
 			return false;
