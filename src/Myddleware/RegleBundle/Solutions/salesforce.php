@@ -25,7 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class salesforce extends solution {
+class salesforcecore extends solution {
 
 	protected $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
@@ -915,7 +915,7 @@ class salesforce extends solution {
 /* * * * * * * *  * * * * * *  * * * * * * 
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
-/* $file = __DIR__.'/../Custom/Solutions/salesforce.php';
+$file = __DIR__.'/../Custom/Solutions/salesforce.php';
 if(file_exists($file)){
 	require_once($file);
 }
@@ -924,4 +924,4 @@ else {
 	class salesforce extends salesforcecore {
 		
 	}
-} */
+} 
