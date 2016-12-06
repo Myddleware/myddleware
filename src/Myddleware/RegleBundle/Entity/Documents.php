@@ -150,9 +150,9 @@ class Documents
 	/**
      * @var string
      *
-     * @ORM\Column(name="parentId", type="string", nullable=false)
+     * @ORM\Column(name="parent_id", type="string", nullable=false)
      */
-    private $parentId;	
+    private $parent_id;	
 
     /**
      * Set id
@@ -479,12 +479,12 @@ class Documents
 	/**
      * Set parentId
      *
-     * @param string $parentId
+     * @param string $parent_id
      * @return Documents
      */
-    public function setParentId($parentId)
+    public function setParentId($parent_id)
     {
-        $this->parentId = $parentId;
+        $this->parent_id = $parent_id;
     
         return $this;
     }
@@ -496,6 +496,6 @@ class Documents
      */
     public function getParentId()
     {
-        return $this->parentId;
+        return $this->parent_id;
     }
 }

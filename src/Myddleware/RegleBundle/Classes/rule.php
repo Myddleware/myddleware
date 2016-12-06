@@ -92,6 +92,10 @@ class rulecore {
 			$this->rule = $stmt->fetch();
 		}
 	}
+
+	public function getRule() {
+		return $this->rule;
+	}
 	
 	// Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
 	// If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application 
@@ -126,7 +130,11 @@ class rulecore {
 					$doc['ruleFields'] = $this->ruleFields;
 					$doc['ruleRelationships'] = $this->ruleRelationships;
 					$doc['data'] = $docData;
-					$doc['jobId'] = $this->jobId;			
+					$doc['jobId'] = $this->jobId;		
+					// If the document is a child, we save the parent in the table Document
+					if (!empty($param['parent_id'])) {
+						$doc['parentId'] = $param['parent_id'];		
+					}
 					$document = new document($this->logger, $this->container, $this->connection, $doc);
 					$createDocument = $document->createDocument();		
 					if (!$createDocument) {
@@ -936,6 +944,18 @@ class rulecore {
 		
 		// Si des données sont prêtes à être créées
 		if (!empty($send['data'])) {
+			// If the rule is a child rule, no document is sent. They will be sent with the parent rule.
+			if (
+					!empty($this->ruleParams['group']) 
+				 && $this->ruleParams['group'] == 'child'
+			) {
+				foreach($send['data'] as $key => $data) {			
+					// True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
+					$response[$key] = array('id' => true);		
+				}
+				return $response;
+			}
+			
 			// Connexion à la cible
 			$connect = $this->connexionSolution('target');				
 			if ($connect === true) {
@@ -1066,13 +1086,16 @@ class rulecore {
 		}
 	}
 	
-	protected function getSendDocuments($type,$documentId,$table = 'target') {
+	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {
 		$nameId = "id_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_".$table; 
 		$tableRule = "z_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_".$table;
 		
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
 			$documentFilter = " Documents.id = '$documentId'";
+		}
+		elseif (!empty($parentId)) {
+			$documentFilter = " Documents.parent_id = '$parentId'";
 		}
 		// Sinon on récupère tous les documents élligible pour l'envoi
 		else {
@@ -1093,6 +1116,21 @@ class rulecore {
 		$documents = $stmt->fetchAll();
 
 		foreach ($documents as $document) {
+			// If the rule is a parent, we have to get the data of all rules child		
+			$childRules = $this->getChildRules();		
+			if (!empty($childRules)) {
+				foreach($childRules as $childRule) {
+					$ruleChildParam['ruleId'] = $childRule['rule_id'];
+					$ruleChildParam['jobId'] = $this->jobId;
+					$childRuleObj = new rule($this->logger, $this->container, $this->connection, $ruleChildParam);					
+					// Recursive call 
+					// Child document has the type 'U'
+					$dataTest = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware']);
+					$childRuleDetail = $childRuleObj->getRule();
+					// Store the submodule data to be send in the parent document
+					$document[$childRuleDetail['rule_module_source']] = $dataTest;			
+				}
+			}
 			$return[$document['id_doc_myddleware']] = $document;
 		}
 
@@ -1241,7 +1279,7 @@ class rulecore {
 							WHERE 
 									RuleRelationShips.rrs_field_id = :ruleId
 								AND Rule.rule_deleted = 0
-								AND RuleParams.rulep_name = 'Group'
+								AND RuleParams.rulep_name = 'group'
 								AND RuleParams.rulep_value = 'child'";
 			$stmt = $this->connection->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $this->ruleId);

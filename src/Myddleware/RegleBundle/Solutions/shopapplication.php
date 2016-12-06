@@ -37,6 +37,9 @@ class shopapplicationcore extends solution {
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
 	
+	// Submodule 
+	protected $childModule = array('address');
+	
 	// Connection parameters
 	public function getFieldsLogin() {	
         return array(
@@ -298,8 +301,8 @@ class shopapplicationcore extends solution {
 	
 	// Permet de créer un enregistrement
 	public function create($param) {
-// print_r($param);
-// return null;		
+print_r($param['data']);
+return null;		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
@@ -377,8 +380,8 @@ class shopapplicationcore extends solution {
 	
 		// Permet de créer un enregistrement
 	public function update($param) {
-// print_r($param);
-// return null;		
+print_r($param);
+return null;		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
@@ -459,11 +462,11 @@ return null;
 		try {
 			if (
 					$type == 'target'
-				&& in_array($module,array('address'))	
+				&& in_array($module,$this->childModule)	
 			){
 				$groupParam = array(
 							'id' => 'group',
-							'name' => 'Group',
+							'name' => 'group',
 							'type' => 'option',
 							'label' => 'Group',
 							'required'	=> true,
