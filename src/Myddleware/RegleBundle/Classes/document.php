@@ -583,7 +583,7 @@ class documentcore {
 					// Si un prédécesseur non clos est trouvé on passe le document au statut Predecessor_KO
 					if (!empty($result['id'])) {
 						$this->docIdRefError = $result['id'];
-						throw new \Exception('Another document for the same record is not close. This document is queued. ');
+						throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
 					}
 					else {
 						// Mise à jour du target id si celui-ci n'était pas renseigné (document précédent sans target id au moment de la creation de ce docuement)
@@ -878,7 +878,7 @@ class documentcore {
 						// If a child is in error, we stop the whole processus : child document not saved (roolback) and parent document in error checking
 						if (!empty($errors)) {
 							// The error should be clear because the child document won't be saved
-							throw new \Exception( 'Child document in error (rule '.$childRuleId['rule_id'].')  : '.$errors[0].' The child document has not be saved. ');
+							throw new \Exception( 'Child document in error (rule '.$childRuleId['rule_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/prod.log) for more information. ');
 						}
 					}
 				}

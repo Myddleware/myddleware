@@ -33,6 +33,7 @@ class shopapplicationcore extends solution {
 
 	protected $url;
 	protected $apiKey;
+	protected $docIdList;
 	
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
@@ -124,32 +125,64 @@ class shopapplicationcore extends solution {
 						'group_id' => array('label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						'default_address_id' => array('label' => 'Default address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
 					);
+					try {
+						// Get customer's groups
+						$urlApi = $this->url.'customers/groups'.$this->apiKey;
+						$return = $this->call($urlApi, 'get', '');	
+						$code = $return->__get('code');
+						if ($code == '200') {		
+							$body = $return->__get('body');
+							if (!empty($body)) {
+								foreach ($body as $group) {
+									$this->fieldsRelate['group_id']['option'][$group->id] = $group->name;
+								}
+							}
+						}
+					} 
+					catch (\Exception $e) {
+					} 			
 					break;
 				case 'address':			
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'company' => array('label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'vat_number' => array('label' => 'Vat_number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
-						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'street' => array('label' => 'Street', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'suburb' => array('label' => 'Suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'doorcode' => array('label' => 'Door code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'floor' => array('label' => 'Floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'postcode' => array('label' => 'Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'city' => array('label' => 'City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'state"' => array('label' => 'State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'department' => array('label' => 'Department', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'region' => array('label' => 'Region', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'latitude' => array('label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'longitude' => array('label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_company' => array('label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_vat_number' => array('label' => 'Vat_number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
+						'address_first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+						'address_phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_street' => array('label' => 'Street', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_suburb' => array('label' => 'Suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_doorcode' => array('label' => 'Door code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_floor' => array('label' => 'Floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_postcode' => array('label' => 'Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_city' => array('label' => 'City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_state"' => array('label' => 'State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_department' => array('label' => 'Department', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_region' => array('label' => 'Region', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_latitude' => array('label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'address_longitude' => array('label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'country_id' => array('label' => 'Country ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 					);
 					$this->fieldsRelate = array(
 						'customers_id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
 					);
+					try {
+						// Get countries
+						$urlApi = $this->url.'countries'.$this->apiKey;
+						$return = $this->call($urlApi, 'get', '');	
+						$code = $return->__get('code');
+						if ($code == '200') {		
+							$body = $return->__get('body');
+							if (!empty($body)) {
+								foreach ($body as $country) {
+									$this->moduleFields['country_id']['option'][$country->id] = $country->name;
+								}
+							}
+						}
+					} 
+					catch (\Exception $e) {
+					} 		
 					break;
 				default:
 					throw new \Exception("Module ".$module." unknown.");
@@ -172,7 +205,7 @@ class shopapplicationcore extends solution {
 	} // get_module_fields($module)	 
 	
 	// Read one specific record
-	public function read_last($param) {
+	public function read_last($param) {	
 		$result = array();	
 		try {
 			// Add requiered fields 
@@ -298,21 +331,49 @@ class shopapplicationcore extends solution {
 		return $result;
 	}
 	
+	// Generate the data to send in the create or update POST
+	protected function buildSendingData($data,$mode = 'C') {
+		$first = false;
+		foreach ($data as $key => $value) {				
+			// Jump the first value of the table data (contain the document id)
+			if (!$first) {
+				// Save all doc ID to change their status to send (child and parent document)
+				$this->docIdList[] = $value;
+				$first = true;
+				continue;
+			}
+			// Target id isn't a shop-application field (it is used by Myddleware)
+			if ($key == 'target_id') {
+				if ($mode == 'U') {
+					$dataTosSend['id'] = $value;
+				}
+				continue;
+			}
+			if (is_array($value)) {
+				foreach($value as $subrecord) {
+					// recursive call in cas sub tab exist
+					$dataTosSend[$key][] = $this->buildSendingData($subrecord);
+				}
+			} else {
+				$dataTosSend[$key] = $value;
+			}
+		}
+		return $dataTosSend;
+	}
 	
 	// Permet de créer un enregistrement
 	public function create($param) {
-print_r($param['data']);
-return null;		
+		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = false;
+				// $first = false;
 				// Preparation of the post
-				$dataTosSendTmp = array();
+				$dataTosSendTmp = $this->buildSendingData($data);
 				// For each fields
-				foreach ($data as $key => $value) {				
+				/* foreach ($data as $key => $value) {				
 					// Jump the first value of the table data (contain the document id)
 					if (!$first) {
 						$first = true;
@@ -323,22 +384,26 @@ return null;
 						continue;
 					}
 					$dataTosSendTmp[$key] = $value;
-				}
+				} */
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
 				
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
-		
+// print_r($param['data']);
+// print_r($dataTosSend);
+// return null;		
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
+// print_r($return);
 				
 				// Get the response code
 				$code = $return->__get('code');			
 				// If the call is a success
 				if ($code == '200') {
 					// Get the data from the response
-					$body = $return->__get('body');				
+					$body = $return->__get('body');	
+// print_r($body);					
 					// Could be in 200 with an error
 					if (!empty($body->errors)) {
 						throw new \Exception(print_r($body->errors,true));	
@@ -370,8 +435,13 @@ return null;
 						'error' => $error
 				);
 			}
-			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			// Change document status
+// print_r($this->docIdList);
+			if (!empty($this->docIdList)) {
+				foreach ($this->docIdList as $docId) {
+					$this->updateDocumentStatus($docId,$result[$idDoc],$param);	
+				}
+			}
 		} 
 // print_r($result);
 // return null;			
@@ -459,26 +529,22 @@ return null;
 	
 	// Force some module in child
 	public function getFieldsParamUpd($type, $module) {	
-		try {
-			if (
-					$type == 'target'
-				&& in_array($module,$this->childModule)	
-			){
-				$groupParam = array(
-							'id' => 'group',
-							'name' => 'group',
-							'type' => 'option',
-							'label' => 'Group',
-							'required'	=> true,
-							'option'	=> array('child' => 'child')
-						);
-				$params[] = $groupParam;
-			}			
+		if (
+				$type == 'target'
+			&& in_array($module,$this->childModule)	
+		){
+			$groupParam = array(
+						'id' => 'group',
+						'name' => 'group',
+						'type' => 'option',
+						'label' => 'Group',
+						'required'	=> true,
+						'option'	=> array('child' => 'child')
+					);
+			$params[] = $groupParam;
 			return $params;
-		}
-		catch (\Exception $e){
-			return array();
-		}
+		}			
+		return array();
 	}
 
 	
