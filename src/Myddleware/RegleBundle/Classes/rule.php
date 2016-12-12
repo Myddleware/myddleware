@@ -1129,8 +1129,8 @@ class rulecore {
 					// Child document has the type 'U'
 					$dataTest = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware']);
 					$childRuleDetail = $childRuleObj->getRule();
-					// Store the submodule data to be send in the parent document
-					$document[$childRuleDetail['rule_module_source']] = $dataTest;			
+					// Store the submodule data to be send in the parent document					
+					$document[$childRuleDetail['rule_module_target']] = $dataTest;			
 				}
 			}
 			$return[$document['id_doc_myddleware']] = $document;

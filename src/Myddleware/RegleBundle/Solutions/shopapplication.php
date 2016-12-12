@@ -37,9 +37,21 @@ class shopapplicationcore extends solution {
 	
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
+	protected $IdByModule = array(
+							'customers_addresses' => 'address_id'
+							);
+							
+	// Get the key of the array when we send data with documents merged						
+	protected $arrayKey = array(
+							'customers_addresses' => 'addresses',
+							'orders_products' => 'products'
+							);
+							
+	// Modules with language						
+	protected $moduleWithLanguage = array('categories');	
 	
 	// Submodule 
-	protected $childModule = array('address');
+	protected $childModule = array('customers_addresses','orders_products');
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -88,105 +100,112 @@ class shopapplicationcore extends solution {
 	public function get_modules($type = 'source') {
 		return array(	
 			'customers' => 'Customers',
-			'address' => 'Address',
-			'orders' => 'Order',
+			'customers_addresses' => 'Customers addresses',
+			'orders' => 'Orders',
+			'orders_products' => 'Orders products',
 			'products' => 'Products',
+			'categories' => 'Categories',
+			'brands' => 'Brands',
 		);
 
 	} // get_modules()	
 	 
 	// Renvoie les champs du module passé en paramètre
 	public function get_module_fields($module, $type = 'source', $extension = false) {
+		require_once('lib/shopapplication/metadata.php');		
 		parent::get_module_fields($module, $type, $extension);
 		try{
-			// Pour chaque module, traitement différent
-			switch ($module) {
-				case 'customers':
-					$this->moduleFields = array(
-						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
-						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'email' => array('label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'birth_date' => array('label' => 'Birth date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'fax' => array('label' => 'Fax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'discount' => array('label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'credit' => array('label' => 'Credit', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'credit_expiration_date"' => array('label' => 'Credit expiration date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'reward_points"' => array('label' => 'Reward points', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'password' => array('label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'auto_connect_url' => array('label' => 'Auto connect url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'photo' => array('label' => 'Photo', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					);
-					$this->fieldsRelate = array(
-						'store_id' => array('label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
-						'group_id' => array('label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
-						'default_address_id' => array('label' => 'Default address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
-					);
-					try {
-						// Get customer's groups
-						$urlApi = $this->url.'customers/groups'.$this->apiKey;
-						$return = $this->call($urlApi, 'get', '');	
-						$code = $return->__get('code');
-						if ($code == '200') {		
-							$body = $return->__get('body');
-							if (!empty($body)) {
-								foreach ($body as $group) {
-									$this->fieldsRelate['group_id']['option'][$group->id] = $group->name;
-								}
+// echo '<pre>';
+// print_r($moduleFields);
+// print_r($moduleFields[$module]);
+// echo 'module : '.$module;		
+			$this->moduleFields = $moduleFields[$module]; 
+			$this->fieldsRelate = $fieldsRelate[$module]; 
+			
+			// Retrieve specific list
+			if ($module == 'customers') {
+				try {
+					// Get customer's groups
+					$urlApi = $this->url.'customers/groups'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							foreach ($body as $group) {
+								$this->fieldsRelate['group_id']['option'][$group->id] = $group->name;
+							}
+						}
+					}
+				} 
+				catch (\Exception $e) {
+				} 			
+			}
+			if ($module == 'orders') {	
+				try {
+					// Get order's status
+					$urlApi = $this->url.'orders/status'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					/* if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							foreach ($body as $status) {
+								$this->fieldsRelate['group_id']['option'][$status->id] = $status->name;
+							}
+						}
+					} */
+					// Get currencies
+					$urlApi = $this->url.'currencies'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							foreach ($body as $currency) {
+								$this->fieldsRelate['currency']['option'][$currency->code] = $currency->name;
 							}
 						}
 					} 
-					catch (\Exception $e) {
-					} 			
-					break;
-				case 'address':			
-					$this->moduleFields = array(
-						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_company' => array('label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_vat_number' => array('label' => 'Vat_number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_gender' => array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
-						'address_first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_last_name' => array('label' => 'Last_name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'address_phone' => array('label' => 'Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_street' => array('label' => 'Street', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_suburb' => array('label' => 'Suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_doorcode' => array('label' => 'Door code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_floor' => array('label' => 'Floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_postcode' => array('label' => 'Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_city' => array('label' => 'City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_state"' => array('label' => 'State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_department' => array('label' => 'Department', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_region' => array('label' => 'Region', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_latitude' => array('label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'address_longitude' => array('label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'country_id' => array('label' => 'Country ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					);
-					$this->fieldsRelate = array(
-						'customers_id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
-					);
-					try {
-						// Get countries
-						$urlApi = $this->url.'countries'.$this->apiKey;
-						$return = $this->call($urlApi, 'get', '');	
-						$code = $return->__get('code');
-						if ($code == '200') {		
-							$body = $return->__get('body');
-							if (!empty($body)) {
-								foreach ($body as $country) {
-									$this->moduleFields['country_id']['option'][$country->id] = $country->name;
-								}
+				} 
+				catch (\Exception $e) {
+				} 			
+			}
+			if ($module == 'customers_addresses') {			
+				try {
+					// Get countries
+					$urlApi = $this->url.'countries'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							foreach ($body as $country) {
+								$this->moduleFields['country_id']['option'][$country->id] = $country->name;
 							}
 						}
-					} 
-					catch (\Exception $e) {
-					} 		
-					break;
-				default:
-					throw new \Exception("Module ".$module." unknown.");
-					break;
+					}
+				} 
+				catch (\Exception $e) {
+				} 		
+			}
+			if ($module == 'categories') {			
+				try {
+					// Get store id
+					$urlApi = $this->url.'stores'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							foreach ($body as $store) {
+								$this->moduleFields['store_id']['option'][$store->id] = $store->name;
+							}
+						}
+					}
+				} 
+				catch (\Exception $e) {
+				} 		
 			}
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
@@ -195,7 +214,7 @@ class shopapplicationcore extends solution {
 			// Si l'extension est demandée alors on vide relate 
 			if ($extension) {
 				$this->fieldsRelate = array();
-			}
+			}		
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -332,9 +351,16 @@ class shopapplicationcore extends solution {
 	}
 	
 	// Generate the data to send in the create or update POST
-	protected function buildSendingData($data,$mode = 'C') {
+	protected function buildSendingData($param,$data,$mode = 'C') {		
 		$first = false;
-		foreach ($data as $key => $value) {				
+		foreach ($data as $key => $value) {	
+			$fieldStructure = '';
+			// Replace __ISO__ if the field contains __ISO__
+			if (!empty($param['ruleParams']['language'])) {
+				$key = str_replace('__ISO__', '__'.$param['ruleParams']['language'].'__', $key);
+			}
+
+			
 			// Jump the first value of the table data (contain the document id)
 			if (!$first) {
 				// Save all doc ID to change their status to send (child and parent document)
@@ -352,18 +378,60 @@ class shopapplicationcore extends solution {
 			if (is_array($value)) {
 				foreach($value as $subrecord) {
 					// recursive call in cas sub tab exist
-					$dataTosSend[$key][] = $this->buildSendingData($subrecord);
+					$dataTosSend[$this->arrayKey[$key]][] = $this->buildSendingData($param,$subrecord);
 				}
 			} else {
-				$dataTosSend[$key] = $value;
+				// 
+	// echo '$key : '.$key.' $value : '.$value.chr(10);			
+	// Formattage des données à envoyer
+				$fieldStructure = explode('__',$key);
+	// print_r($fieldStructure);	
+				// $temp = array();
+				// if (is_array($fieldStructure)) {
+	// echo 'tab'.chr(10);			
+				$nbLevel = count($fieldStructure);
+				if ($nbLevel == 3) {
+					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]] = $value;
+				}
+				elseif ($nbLevel == 2) {
+					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]] = $value;
+				// }
+					// foreach($fieldStructure as $subKey) {
+						// $temp[$subKey] = $temp;
+					// }
+	// print_r($temp);
+				// if (!empty($filedStructure[1])) {
+					// $dataMailchimp[$filedStructure[0]][$filedStructure[1]] = $value;
+				// }
+				// elseif (!empty($filedStructure[0])) { 
+					// $dataMailchimp[$filedStructure[0]] = $value;
+				// }
+				// else {
+					// throw new \Exception('Field '.$filedStructure.' invalid');
+				// }
+				} else {
+	// echo 'data'.chr(10);			
+	// echo '$key : '.$key.' $value : '.$value.chr(10);			
+					$dataTosSend[$key] = $value;
+				}
+				// $dataTosSend[$key] = $this->myExplode($value);
 			}
 		}
 		return $dataTosSend;
 	}
 	
+	protected function myExplode($value) {
+		$fieldStructure = explode('__',$value);
+		if (is_array($fieldStructure)) {
+			$value = $this->myExplode($fieldStructure);
+		}
+		return $value;
+	}
+	
 	// Permet de créer un enregistrement
 	public function create($param) {
-		
+// print_r($param);
+// return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
@@ -371,7 +439,7 @@ class shopapplicationcore extends solution {
 				$data = $this->checkDataBeforeCreate($param, $data);
 				// $first = false;
 				// Preparation of the post
-				$dataTosSendTmp = $this->buildSendingData($data);
+				$dataTosSendTmp = $this->buildSendingData($param,$data);
 				// For each fields
 				/* foreach ($data as $key => $value) {				
 					// Jump the first value of the table data (contain the document id)
@@ -385,25 +453,29 @@ class shopapplicationcore extends solution {
 					}
 					$dataTosSendTmp[$key] = $value;
 				} */
+				
+$dataTosSendTmp['parent_id'] = 0;				
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
 				
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($param['data']);
-// print_r($dataTosSend);
+print_r($dataTosSend);
 // return null;		
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
-// print_r($return);
+print_r($urlApi);
+print_r($return);
 				
 				// Get the response code
 				$code = $return->__get('code');			
+print_r($code);
 				// If the call is a success
 				if ($code == '200') {
 					// Get the data from the response
 					$body = $return->__get('body');	
-// print_r($body);					
+print_r($body);					
 					// Could be in 200 with an error
 					if (!empty($body->errors)) {
 						throw new \Exception(print_r($body->errors,true));	
@@ -529,24 +601,48 @@ return null;
 	
 	// Force some module in child
 	public function getFieldsParamUpd($type, $module) {	
-		if (
-				$type == 'target'
-			&& in_array($module,$this->childModule)	
-		){
-			$groupParam = array(
-						'id' => 'group',
-						'name' => 'group',
-						'type' => 'option',
-						'label' => 'Group',
-						'required'	=> true,
-						'option'	=> array('child' => 'child')
-					);
-			$params[] = $groupParam;
-			return $params;
-		}			
-		return array();
+		$params = array();
+		if ($type == 'target') {
+		// If module is a child we force the parameter child
+			if (in_array($module,$this->childModule)	){
+				$groupParam = array(
+							'id' => 'group',
+							'name' => 'group',
+							'type' => 'option',
+							'label' => 'Group',
+							'required'	=> true,
+							'option'	=> array('child' => 'child')
+						);
+				$params[] = $groupParam;
+			}	
+			
+			// If language is required for the module
+			if (in_array($module,$this->moduleWithLanguage)	){
+				$params = array();
+				// Get languages
+				$urlApi = $this->url.'languages'.$this->apiKey;
+				$return = $this->call($urlApi, 'get', '');	
+				$code = $return->__get('code');
+				if ($code == '200') {		
+					$body = $return->__get('body');
+					if (!empty($body)) {
+						$idParam = array(
+									'id' => 'language',
+									'name' => 'language',
+									'type' => 'option',
+									'label' => 'Language',
+									'required'	=> true
+								);
+						foreach ($body as $language) {		
+							$idParam['option'][$language->code] = $language->name;
+						}
+						$params[] = $idParam;
+					}
+				} 		
+			}
+		}		
+		return $params;
 	}
-
 	
 	// Return the filed reference
 	public function getDateRefName($moduleSource, $ruleMode) {
