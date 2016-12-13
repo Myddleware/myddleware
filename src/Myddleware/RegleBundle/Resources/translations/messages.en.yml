@@ -102,6 +102,8 @@ create_rule:
             target: Target
             rule: Rules
             fields: Fields source
+            parent: Parent
+            yes: Yes
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization

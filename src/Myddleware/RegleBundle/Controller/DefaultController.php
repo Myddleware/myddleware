@@ -1330,7 +1330,7 @@ class DefaultControllerCore extends Controller
 			$myddlewareSession['param']['rule']['source']['datereference'] = $solution_source->referenceIsDate($module['source']);
 			
 			// Ajoute des champs source pour la validation
-			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source']);
+			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source'],$myddlewareSession);
 			
 			// CIBLE ------------------------------------------------------------------	
 			// Si la solution est la même que la précèdente on récupère les infos
@@ -1368,7 +1368,7 @@ class DefaultControllerCore extends Controller
 			}
 			
 			// Récupère la liste des paramètres cible
-			$rule_params_target = $solution_cible->getFieldsParamUpd('target',$module['cible']);
+			$rule_params_target = $solution_cible->getFieldsParamUpd('target',$module['cible'],$myddlewareSession);
 			
 			// Récupère la liste des champs cible
 			$rule_fields_target = $solution_cible->get_module_fields($module['cible'],'target');
@@ -1824,7 +1824,7 @@ class DefaultControllerCore extends Controller
 
 	// CREATION - STEP THREE - Validation du formulaire 
 	public function ruleValidationAction() {
-		$request = $this->get('request');
+		$request = $this->get('request');	
 		$session = $request->getSession();
 		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 		// We always add data again in session because these data are removed after the call of the get
@@ -1968,10 +1968,17 @@ class DefaultControllerCore extends Controller
 						$this->em->flush();	
 					} 		  	
 				}		
-			  	// rev 1.07 Bidirectionnel  
-				$stmt = $this->connection->prepare('UPDATE RuleParams SET rulep_value = :rulep_value_new 
-						WHERE rulep_value = :rulep_value_old
-						AND rulep_name = "bidirectional"'); 
+			  	// If current rule has a child or a bidrectiobnal rule, we update the parameters
+				$stmt = $this->connection->prepare('
+							UPDATE RuleParams 
+								SET rulep_value = :rulep_value_new 
+								WHERE 
+										rulep_value = :rulep_value_old
+									AND ( 
+											rulep_name = "bidirectional"
+										 OR	rulep_name = "child"
+									)
+						'); 
 				$stmt->bindValue(":rulep_value_new", $oneRule->getId());
 				$stmt->bindValue(":rulep_value_old", $myddlewareSession['param']['rule']['last_version_id']);
 				$stmt->execute();	
@@ -2110,6 +2117,7 @@ class DefaultControllerCore extends Controller
 						$oneRuleRelationShips->setFieldNameSource( $rel['source'] );
 						$oneRuleRelationShips->setFieldNameTarget( $rel['target'] );
 						$oneRuleRelationShips->setFieldId( $rel['rule'] );
+						$oneRuleRelationShips->setParent( $rel['parent'] );
 						
 						$tabRelationShips['target'][] = $rel['target'];
 						$tabRelationShips['source'][] = $rel['source'];

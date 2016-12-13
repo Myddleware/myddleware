@@ -113,8 +113,8 @@ class rulecore {
 				$read['fields'] = $this->sourceFields;
 				$read['ruleParams'] = $this->ruleParams;
 				$read['rule'] = $this->rule;
-				$read['query'] = array($idFiledName => $idSource);
-				$dataSource = $this->solutionSource->read($read);				
+				$read['query'] = array($idFiledName => $idSource);			
+				$dataSource = $this->solutionSource->read($read);			;				
 				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
 				}
@@ -918,8 +918,18 @@ class rulecore {
 			}
 			return $sendData;
 		}
-	}	
-	
+	}
+	// Check if the rule is a child rule
+	protected function isChild($ruleRelationships) {
+		if (!empty($ruleRelationships)) {
+			foreach ($ruleRelationships as $ruleRelationship) {
+				if ($ruleRelationship['parent'] == 1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	protected function sendTarget($type, $documentId = null) {
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
@@ -943,14 +953,10 @@ class rulecore {
 		$send['ruleRelationships'] = $this->ruleRelationships;
 		$send['fieldsType'] = $this->fieldsType;
 		$send['jobId'] = $this->jobId;
-		
 		// Si des données sont prêtes à être créées
 		if (!empty($send['data'])) {
 			// If the rule is a child rule, no document is sent. They will be sent with the parent rule.
-			if (
-					!empty($this->ruleParams['group']) 
-				 && $this->ruleParams['group'] == 'child'
-			) {
+			if ($this->isChild($this->ruleRelationships)) {
 				foreach($send['data'] as $key => $data) {			
 					// True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
 					$response[$key] = array('id' => true);		
@@ -1273,15 +1279,9 @@ class rulecore {
 			// get the rule linked to the current rule and check if they have the param child
 			$sqlFields = "SELECT RuleRelationShips.*
 							FROM RuleRelationShips
-								INNER JOIN Rule 
-									ON RuleRelationShips.rule_id = Rule.rule_id
-								INNER JOIN 	RuleParams
-									ON Rule.rule_id = RuleParams.rule_id 
 							WHERE 
 									RuleRelationShips.rrs_field_id = :ruleId
-								AND Rule.rule_deleted = 0
-								AND RuleParams.rulep_name = 'group'
-								AND RuleParams.rulep_value = 'child'";
+								AND RuleRelationShips.parent = 1";
 			$stmt = $this->connection->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();	   				

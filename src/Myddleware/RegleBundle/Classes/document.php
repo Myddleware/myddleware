@@ -266,13 +266,7 @@ class documentcore {
 			if (
 					$this->ruleMode == 'C' 
 				&& $this->type_document == 'U'
-				&& (
-						empty($this->ruleParams['group'])
-					|| (
-							!empty($this->ruleParams['group'])
-						&& $this->ruleParams['group'] != 'child'
-					)
-				)
+				&& !$this->isChild()
 			) {
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
@@ -597,14 +591,8 @@ class documentcore {
 							}
 							// Si on est sur une règle groupée avec un child alors il est possible qu'il n'y ait pas de prédécesseur 
 							// mais que l'on vienne quand même mettre à jour la règle root.
-							elseif (
-									empty($this->ruleParams['group'])
-								|| (
-										!empty($this->ruleParams['group'])
-									&& $this->ruleParams['group'] != 'child'
-								)
-							) {
-								throw new \Exception('Failed to retrieve the target in a parent document. Failed to unblock this update document. ');
+							elseif (!$this->isChild()) {
+								throw new \Exception('Failed to retrieve the target in a parent document. Failed to unlock this update document. ');
 							}
 						}
 					}
@@ -632,12 +620,12 @@ class documentcore {
 			return false;
 		}	
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
-		try {
+		try {		
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
 					!empty($ruleRelationships)
-				&& empty($this->ruleParams['group'])
+				&& !$this->isChild()
 			) {
 				$this->getSourceData();
 				$error = false;
@@ -701,7 +689,7 @@ class documentcore {
 				if (
 						$this->type_document == 'U'
 					&& empty($this->targetId)
-					&& $this->ruleParams['group'] != 'child'
+					&& !$this->isChild()
 				) {
 					$this->checkRecordExist($this->document_data['source_id']);
 					if (!empty($this->targetId)) {
@@ -746,11 +734,7 @@ class documentcore {
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
 					$this->type_document == 'U'
-				 &&	empty($this->ruleParams['group'])
-				 || (
-						!empty($this->ruleParams['group'])
-					 &&	$this->ruleParams['group'] != 'child'
-				)
+				 &&	!$this->isChild()
 			) {
 				// Récupération des données avec l'id de la cible
 				$searchFields = array('id' => $this->targetId);
@@ -858,11 +842,13 @@ class documentcore {
 	// Get the child rule of the current rule
 	// If child rule exist, we run it
 	protected function runChildRule() {
+	
 		$ruleParam['ruleId'] = $this->ruleId;
 		$ruleParam['jobId'] = $this->jobId;		
 		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
 		// Get the child rules of the current rule
 		$childRuleIds = $parentRule->getChildRules();
+// print_r($childRuleIds);	
 		if (!empty($childRuleIds)) {
 			foreach($childRuleIds as $childRuleId) {
 				// Instantiate the child rule
@@ -1240,10 +1226,7 @@ class documentcore {
 				}
 				
 				// If the rule is a child, data will be send with the parent document. No target id is required 
-				if (
-						!empty($this->ruleParams['group'])
-					 && $this->ruleParams['group'] == 'child'
-				) {
+				if ($this->isChild()) {
 					return null;
 				}
 				
@@ -1299,6 +1282,20 @@ class documentcore {
 			$this->message .= 'Error getRule  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
 		}	
+	}
+	
+	
+	// Check if the document is a child
+	protected function isChild() {	
+		$sqlIsChild = "SELECT *	FROM RuleRelationShips WHERE RuleRelationShips.rule_id	= :ruleId AND RuleRelationShips.parent = 1";
+		$stmt = $this->connection->prepare($sqlIsChild);
+		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->execute();	    
+		$isChild = $stmt->fetch(); // 1 row
+		if (!empty($isChild)) {
+			return true;
+		}
+		return false;;		
 	}
 	
 	// Permet de récupérer les champs de la cible
@@ -1361,10 +1358,7 @@ class documentcore {
 	protected function checkRecordExist($id) {
 		try {	
 			// Si on est sur une règle de type groupe avec la valeur child alors on est focément en update (seule la règle root est autorisée à créer des données)
-			if (
-					!empty($this->ruleParams['group'])
-				&& $this->ruleParams['group'] == 'child'
-			){
+			if ($this->isChild()){
 				return 'U';
 			}
 		

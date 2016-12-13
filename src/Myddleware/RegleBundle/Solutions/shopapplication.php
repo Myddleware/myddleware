@@ -44,14 +44,15 @@ class shopapplicationcore extends solution {
 	// Get the key of the array when we send data with documents merged						
 	protected $arrayKey = array(
 							'customers_addresses' => 'addresses',
-							'orders_products' => 'products'
+							'orders_products' => 'products',
+							'options_values' => 'values'
 							);
 							
 	// Modules with language						
-	protected $moduleWithLanguage = array('categories');	
+	protected $moduleWithLanguage = array('products','categories','options','options_values');	
 	
 	// Submodule 
-	protected $childModule = array('customers_addresses','orders_products');
+	protected $childModule = array('customers_addresses','orders_products','options_values');
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -104,6 +105,9 @@ class shopapplicationcore extends solution {
 			'orders' => 'Orders',
 			'orders_products' => 'Orders products',
 			'products' => 'Products',
+			'products_options' => 'Products options',
+			'options' => 'Options',
+			'options_values' => 'Options values',
 			'categories' => 'Categories',
 			'brands' => 'Brands',
 		);
@@ -116,12 +120,20 @@ class shopapplicationcore extends solution {
 		parent::get_module_fields($module, $type, $extension);
 		try{
 // echo '<pre>';
+// echo 'module : '.$module;	
+// echo 'AAA';	
 // print_r($moduleFields);
 // print_r($moduleFields[$module]);
-// echo 'module : '.$module;		
-			$this->moduleFields = $moduleFields[$module]; 
-			$this->fieldsRelate = $fieldsRelate[$module]; 
-			
+			if (!empty($moduleFields[$module])) {
+				$this->moduleFields = $moduleFields[$module];
+			}
+// echo 'BBB';	}
+			if (!empty($fieldsRelate[$module])) {
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}
+// echo 'CCC';	
+// print_r($this->moduleFields);	
+// die();				
 			// Retrieve specific list
 			if ($module == 'customers') {
 				try {
@@ -214,7 +226,10 @@ class shopapplicationcore extends solution {
 			// Si l'extension est demandée alors on vide relate 
 			if ($extension) {
 				$this->fieldsRelate = array();
-			}		
+			}	
+// echo '<pre>';
+// print_r($this->moduleFields);	
+// die();		
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -434,27 +449,13 @@ class shopapplicationcore extends solution {
 // return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
-			try {		
+			try {	
+				$dataTosSend = '';
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
-				// $first = false;
 				// Preparation of the post
 				$dataTosSendTmp = $this->buildSendingData($param,$data);
-				// For each fields
-				/* foreach ($data as $key => $value) {				
-					// Jump the first value of the table data (contain the document id)
-					if (!$first) {
-						$first = true;
-						continue;
-					}
-					// Target id isn't a shop-application field (it is used by Myddleware)
-					if ($key == 'target_id') {
-						continue;
-					}
-					$dataTosSendTmp[$key] = $value;
-				} */
-				
-$dataTosSendTmp['parent_id'] = 0;				
+// print_r($dataTosSend);			
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
 				
@@ -462,11 +463,9 @@ $dataTosSendTmp['parent_id'] = 0;
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($param['data']);
 print_r($dataTosSend);
-// return null;		
+// return null;	
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
-print_r($urlApi);
-print_r($return);
 				
 				// Get the response code
 				$code = $return->__get('code');			
@@ -507,59 +506,49 @@ print_r($body);
 						'error' => $error
 				);
 			}
-			// Change document status
-// print_r($this->docIdList);
-			if (!empty($this->docIdList)) {
-				foreach ($this->docIdList as $docId) {
-					$this->updateDocumentStatus($docId,$result[$idDoc],$param);	
-				}
-			}
 		} 
-// print_r($result);
+print_r($this->docIdList);
+		// Change document status
+		if (!empty($this->docIdList)) {
+			foreach ($this->docIdList as $docId) {
+				$this->updateDocumentStatus($docId,$result[$docId],$param);	
+			}
+		}
+print_r($result);
 // return null;			
 		return $result;			
 	}	
 	
 		// Permet de créer un enregistrement
 	public function update($param) {
-print_r($param);
-return null;		
+// print_r($param);
+// return null;		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
+				$dataTosSend = '';
 				// Check control before update
-				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = false;
-				// Preparation of the post
-				$dataTosSendTmp = array();
-				// For each fields
-				foreach ($data as $key => $value) {				
-					// Jump the first value of the table data (contain the document id)
-					if (!$first) {
-						$first = true;
-						continue;
-					}
-					// Target id contains te id of teh record in the target application
-					if ($key == 'target_id') {
-						$dataTosSendTmp['id'] = $value;
-						continue;
-					}
-					$dataTosSendTmp[$key] = $value;
-				}
+				$data = $this->checkDataBeforeUpdate($param, $data);
+				// Preparation of the put
+				$dataTosSendTmp = $this->buildSendingData($param,$data,'U');
+
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
-		
+// print_r($urlApi);		
+// print_r($dataTosSend);		
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
 				// Get the response code
-				$code = $return->__get('code');			
+				$code = $return->__get('code');		
+// print_r($code);				
 				// If the call is a success
 				if ($code == '200') {
 					// Get the data from the response
 					$body = $return->__get('body');				
+// print_r($body);					
 					// Could be in 200 with an error
 					if (!empty($body->errors)) {
 						throw new \Exception(print_r($body->errors,true));	
@@ -592,55 +581,53 @@ return null;
 				);
 			}
 			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			// $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		} 
-print_r($result);
-return null;			
+		// Change document status
+		if (!empty($this->docIdList)) {
+			foreach ($this->docIdList as $docId) {
+				$this->updateDocumentStatus($docId,$result[$docId],$param);	
+			}
+		}
+// print_r($result);
+// return null;			
 		return $result;			
 	}	
 	
+	
+	
 	// Force some module in child
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		$params = array();
-		if ($type == 'target') {
-		// If module is a child we force the parameter child
-			if (in_array($module,$this->childModule)	){
-				$groupParam = array(
-							'id' => 'group',
-							'name' => 'group',
-							'type' => 'option',
-							'label' => 'Group',
-							'required'	=> true,
-							'option'	=> array('child' => 'child')
-						);
-				$params[] = $groupParam;
-			}	
-			
-			// If language is required for the module
-			if (in_array($module,$this->moduleWithLanguage)	){
-				$params = array();
-				// Get languages
-				$urlApi = $this->url.'languages'.$this->apiKey;
-				$return = $this->call($urlApi, 'get', '');	
-				$code = $return->__get('code');
-				if ($code == '200') {		
-					$body = $return->__get('body');
-					if (!empty($body)) {
-						$idParam = array(
-									'id' => 'language',
-									'name' => 'language',
-									'type' => 'option',
-									'label' => 'Language',
-									'required'	=> true
-								);
-						foreach ($body as $language) {		
-							$idParam['option'][$language->code] = $language->name;
+		try {	
+			if ($type == 'target') {			
+				// If language is required for the module
+				if (in_array($module,$this->moduleWithLanguage)	){
+					// Get languages
+					$urlApi = $this->url.'languages'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');
+						if (!empty($body)) {
+							$idParam = array(
+										'id' => 'language',
+										'name' => 'language',
+										'type' => 'option',
+										'label' => 'Language',
+										'required'	=> true
+									);
+							foreach ($body as $language) {		
+								$idParam['option'][$language->code] = $language->name;
+							}
+							$params[] = $idParam;
 						}
-						$params[] = $idParam;
-					}
-				} 		
+					} 		
+				}
 			}
-		}		
+		}
+		catch (\Exception $e) {
+		}			
 		return $params;
 	}
 	

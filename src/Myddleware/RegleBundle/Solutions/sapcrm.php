@@ -616,7 +616,7 @@ class sapcrmcore extends saproot {
 			
 	
 	// Ajout des filiale et du groupe en paramètre
-	public function getFieldsParamUpd($type,$module) {	
+	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
 		try {
 			$params = array();
 			if ($type == 'source'){

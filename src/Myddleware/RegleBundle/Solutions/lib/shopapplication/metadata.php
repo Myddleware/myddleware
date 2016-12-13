@@ -197,7 +197,32 @@ $moduleFields = array (
 							'multilangual__ISO__h3_tag' => array('label' => 'H3 tag', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'multilangual__ISO__url_title' => array('label' => 'URL title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'multilangual__ISO__views' => array('label' => 'Views', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						),					
+						),	
+					'products_options' =>
+						array(
+							'attribute_sort_order' => array('label' => 'Attribute sort order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'attribute_price' => array('label' => 'Attribute price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'attribute_price_prefix' => array('label' => 'Attribute price prefix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'attribute_photo' => array('label' => 'Attribute photo', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'attribute_weight' => array('label' => 'Attribute weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'attribute_volume' => array('label' => 'Attribute volume', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),
+					'options' =>
+						array(
+							'id' => array('label' => 'ID option', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'multilangual__ISO__name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'multilangual__ISO__comment' => array('label' => 'Comment', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'type' => array('label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('0' => 'Liste déroulante', '1' => 'Champ Texte', '2' => 'Bouton Radio', '3' => 'Case à cocher', '4' => 'Zone de texte', '5' => 'Fichier à transférer', '6' => 'Icone')),
+							'length' => array('label' => 'Length', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'required' => array('label' => 'Required', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('0' => 'Non', '1' => 'Oui')),
+							'track_stock' => array('label' => 'ID option', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('0' => 'Non', '1' => 'Oui')),					
+						),
+					'options_values' =>
+						array(
+							'id' => array('label' => 'ID value', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'multilangual__ISO__value_name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'multilangual__ISO__value_image' => array('label' => 'Image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),
 					'categories' =>
 						array(
 							'id' => array('label' => 'ID category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -263,6 +288,15 @@ $fieldsRelate = array (
 					'orders_products' =>
 						array(
 							'order_id' => array('label' => 'Order ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_options' =>
+						array(
+							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'options_values' =>
+						array(
+							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),		
 					);
 					

@@ -80,6 +80,13 @@ class RuleRelationShips
      */
     private $fieldId;     
 
+	/**
+     * @var boolean
+     *
+	 * @ORM\Column(name="parent", type="boolean", nullable=false)
+	 * 
+     */
+    private $parent; 	
 
 
     /**
@@ -182,5 +189,28 @@ class RuleRelationShips
     public function getFieldId()
     {
         return $this->fieldId;
+    }
+	
+	/**
+     * Set parent
+     *
+     * @param string $parent
+     * @return RuleRelationShips
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    
+        return $this;
+    }
+
+    /**
+     * Get parent
+     *
+     * @return string 
+     */
+    public function getParent()
+    {
+        return $this->parent;
     }
 }

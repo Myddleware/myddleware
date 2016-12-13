@@ -38,6 +38,7 @@
 		<td class="title">{{'create_rule.step3.relation.source'|trans}}</td>
 		<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 		<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>
+		<td class="title" colspan="3">{{'create_rule.step3.relation.parent'|trans}}</td>
 	</tr>
 	{% for rule in lst_relation_target %}
 	<tr class="line-relation">
@@ -58,6 +59,12 @@
     			<span class="glyphicon glyphicon-star"></span>
     		{% endif %}		
 			<input readonly="readonly" class="title" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
+		</td>
+		<td>
+			<select class="lst_parent_relate" id="parent_{{ rule.name }}" name="">
+				<option value="0" selected></option>
+				<option value="1">{{'create_rule.step3.relation.yes'|trans}}</option>
+	    	</select>
 		</td>
 	</tr>
 	{% endfor %}

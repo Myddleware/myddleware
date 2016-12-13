@@ -1263,7 +1263,7 @@ class databasecore extends solution {
 		return $this->messages;
 	}
 
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);

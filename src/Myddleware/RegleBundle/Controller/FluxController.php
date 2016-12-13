@@ -135,11 +135,11 @@ class FluxControllerCore extends Controller
 		// Detecte si la session est le support ---------		
 
 		// Liste des règles
-		$lstRuleName = array();
+		$lstRuleName = array();		
 		if($rule) {
 			
 			foreach ($rule as $r) {
-				$lstRuleName[$r->getId()] = $r->getName().' - v'.$r->getVersion();
+				$lstRuleName[$r->getName()] = $r->getName();
 			}	
 			
 			asort($lstRuleName);
@@ -256,7 +256,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['rule'] ) && is_string($data['rule'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "rule_id='".trim($data['rule'])."' ";
+				$where .= "rule_name='".trim($data['rule'])."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['rule'] = $data['rule'];
 			}				
@@ -341,7 +341,7 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT d.*, u.username, r.rule_version, concat(r.rule_name, 'v', r.rule_version) rule_name
+		$sql = "SELECT d.*, u.username, r.rule_version, concat(r.rule_name, ' v', r.rule_version) rule_name
 				FROM Documents d 
 				JOIN users u ON(u.id=d.created_by)
 				JOIN Rule r USING(rule_id) 

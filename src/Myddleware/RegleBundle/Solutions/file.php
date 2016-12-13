@@ -347,12 +347,12 @@ class filecore extends solution {
 					$colonne = array_search($field, $header);
 					if($field==$param['ruleParams']['fieldId']){
 						if ($field == 'myddleware_generated') {
-							$idRow = $this->generateId($param,$rowFile);
+							$idRow = uniqid('', true);
 						}
 						else {
 							$idRow = $rowFile[$colonne];							
 						}
-						$row['id'] = $idRow;
+						$row['id'] = $rowFile[$colonne];
 					}
 					$row[$field] = $rowFile[$colonne];
 				}
@@ -379,9 +379,8 @@ class filecore extends solution {
 		}
 	} // read($param)
 	
-	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);
@@ -406,11 +405,6 @@ class filecore extends solution {
 		catch (\Exception $e){
 			return array();
 		}
-	}
-	
-	// Generate ID for the document
-	protected function generateId($param,$rowFile) {
-		return uniqid('', true);
 	}
 
 	protected function cleanHeader($str) { 

@@ -176,7 +176,7 @@ class solutioncore {
 	
 	// Même structure que la méthode getFieldsLogin
 	// Prend en paramètre d'entre source ou target
-	public function getFieldsParamUpd($type,$module) {
+	public function getFieldsParamUpd($type,$module,$myddlewareSession) {
 		return array();	
 	}
 	

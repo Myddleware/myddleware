@@ -33,12 +33,19 @@ require_once('lib/lib_prestashop.php');
 
 class prestashopcore extends solution {
 
-	protected $required_fields =  array('default' => array('id', 'date_upd', 'date_add'));
+	protected $required_fields =  array(
+										'default' => array('id', 'date_upd', 'date_add'),
+										'product_options' => array('id'),
+										'product_option_values' => array('id'),
+								);
 	
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
 	
 	// Module dépendants du langage
 	protected $moduleWithLanguage = array('products');
+	
+	// Module without reference date
+	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values');
 
 	protected $required_relationships = array(
 												'default' => array()
@@ -371,7 +378,7 @@ class prestashopcore extends solution {
 					$param['fields'] = array();
 				}
 				// Ajout des champs obligatoires
-				$param['fields'] = $this->addRequiredField($param['fields']);
+				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
 				
 				// Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
 				$getCurrentState = false;
@@ -443,7 +450,6 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
-
 				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
@@ -516,7 +522,7 @@ class prestashopcore extends solution {
 					$param['limit'] = 100;
 				}
 				// Ajout des champs obligatoires
-				$param['fields'] = $this->addRequiredField($param['fields']);
+				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
 				
 				// Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
 				$getCurrentState = false;
@@ -572,11 +578,11 @@ class prestashopcore extends solution {
 						$opt['sort'] = '[id_ASC]';
 					}
 				}
-				
+
 				// Call
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);			
 				$result['count'] = $simplexml->children()->children()->count();
 				
 				$record = array();
@@ -669,7 +675,7 @@ class prestashopcore extends solution {
 				$result = array();
 				
 				// Ajout des champs obligatoires
-				$param['fields'] = $this->addRequiredField($param['fields']);
+				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
 				
 				$opt['resource'] = 'customers&date=1';
 				
@@ -977,14 +983,14 @@ class prestashopcore extends solution {
 	// Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
 	public function referenceIsDate($module) {
 		// Le module order détail n'a pas de date de référence. On utilise donc l'ID comme référence
-		if(in_array($module, array('order_details'))){
+		if(in_array($module, $this->moduleWithoutReferenceDate)){
 			return false;
 		}
 		return true;
 	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			if (
 					$type == 'target'
