@@ -34,6 +34,7 @@ class shopapplicationcore extends solution {
 	protected $url;
 	protected $apiKey;
 	protected $docIdList;
+	protected $docIdListResult;
 	
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
@@ -41,18 +42,19 @@ class shopapplicationcore extends solution {
 							'customers_addresses' => 'address_id'
 							);
 							
-	// Get the key of the array when we send data with documents merged						
+	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $arrayKey = array(
-							'customers_addresses' => 'addresses',
-							'orders_products' => 'products',
-							'options_values' => 'values'
+							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id')),
+							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id')),
+							'products' => array('products_options' => array('entry_name' => 'options', 'id_name' => 'option_id')),
+							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id')),
 							);
 							
 	// Modules with language						
 	protected $moduleWithLanguage = array('products','categories','options','options_values');	
 	
 	// Submodule 
-	protected $childModule = array('customers_addresses','orders_products','options_values');
+	// protected $childModule = array('customers_addresses','orders_products','options_values');
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -240,6 +242,7 @@ class shopapplicationcore extends solution {
 	
 	// Read one specific record
 	public function read_last($param) {	
+// return null;	
 		$result = array();	
 		try {
 			// Add requiered fields 
@@ -364,89 +367,11 @@ class shopapplicationcore extends solution {
 // return null;					
 		return $result;
 	}
-	
-	// Generate the data to send in the create or update POST
-	protected function buildSendingData($param,$data,$mode = 'C') {		
-		$first = false;
-		foreach ($data as $key => $value) {	
-			$fieldStructure = '';
-			// Replace __ISO__ if the field contains __ISO__
-			if (!empty($param['ruleParams']['language'])) {
-				$key = str_replace('__ISO__', '__'.$param['ruleParams']['language'].'__', $key);
-			}
 
-			
-			// Jump the first value of the table data (contain the document id)
-			if (!$first) {
-				// Save all doc ID to change their status to send (child and parent document)
-				$this->docIdList[] = $value;
-				$first = true;
-				continue;
-			}
-			// Target id isn't a shop-application field (it is used by Myddleware)
-			if ($key == 'target_id') {
-				if ($mode == 'U') {
-					$dataTosSend['id'] = $value;
-				}
-				continue;
-			}
-			if (is_array($value)) {
-				foreach($value as $subrecord) {
-					// recursive call in cas sub tab exist
-					$dataTosSend[$this->arrayKey[$key]][] = $this->buildSendingData($param,$subrecord);
-				}
-			} else {
-				// 
-	// echo '$key : '.$key.' $value : '.$value.chr(10);			
-	// Formattage des données à envoyer
-				$fieldStructure = explode('__',$key);
-	// print_r($fieldStructure);	
-				// $temp = array();
-				// if (is_array($fieldStructure)) {
-	// echo 'tab'.chr(10);			
-				$nbLevel = count($fieldStructure);
-				if ($nbLevel == 3) {
-					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]] = $value;
-				}
-				elseif ($nbLevel == 2) {
-					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]] = $value;
-				// }
-					// foreach($fieldStructure as $subKey) {
-						// $temp[$subKey] = $temp;
-					// }
-	// print_r($temp);
-				// if (!empty($filedStructure[1])) {
-					// $dataMailchimp[$filedStructure[0]][$filedStructure[1]] = $value;
-				// }
-				// elseif (!empty($filedStructure[0])) { 
-					// $dataMailchimp[$filedStructure[0]] = $value;
-				// }
-				// else {
-					// throw new \Exception('Field '.$filedStructure.' invalid');
-				// }
-				} else {
-	// echo 'data'.chr(10);			
-	// echo '$key : '.$key.' $value : '.$value.chr(10);			
-					$dataTosSend[$key] = $value;
-				}
-				// $dataTosSend[$key] = $this->myExplode($value);
-			}
-		}
-		return $dataTosSend;
-	}
-	
-	protected function myExplode($value) {
-		$fieldStructure = explode('__',$value);
-		if (is_array($fieldStructure)) {
-			$value = $this->myExplode($fieldStructure);
-		}
-		return $value;
-	}
-	
 	// Permet de créer un enregistrement
 	public function create($param) {
-// print_r($param);
-// return null;			
+print_r($param);
+return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -454,7 +379,7 @@ class shopapplicationcore extends solution {
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
 				// Preparation of the post
-				$dataTosSendTmp = $this->buildSendingData($param,$data);
+				$dataTosSendTmp = $this->buildSendingData($param,$data,'C');
 // print_r($dataTosSend);			
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
@@ -462,19 +387,19 @@ class shopapplicationcore extends solution {
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($param['data']);
-print_r($dataTosSend);
+// print_r($dataTosSend);
 // return null;	
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
 				// Get the response code
 				$code = $return->__get('code');			
-print_r($code);
+				// Get the data from the response
+				$body = $return->__get('body');	
+// print_r($code);
 				// If the call is a success
 				if ($code == '200') {
-					// Get the data from the response
-					$body = $return->__get('body');	
-print_r($body);					
+// print_r($body);					
 					// Could be in 200 with an error
 					if (!empty($body->errors)) {
 						throw new \Exception(print_r($body->errors,true));	
@@ -485,6 +410,14 @@ print_r($body);
 												'id' => $body[0]->id,
 												'error' => false
 										);
+// print_r($result);											
+						// Set all id from the childs documents in the array $this->docIdList
+						$this->getTargetIds($param,$body[0]);
+// print_r($this->docIdList);											
+						if (!empty($this->docIdList)) {
+							$result = array_merge($this->docIdList,$result);
+						}
+// print_r($result);											
 					}
 					else  {
 						$result[$idDoc] = array(
@@ -494,8 +427,7 @@ print_r($body);
 					} 
 				}
 				else {
-					// Get the error message
-					$body = $return->__get('body');
+					// Set the error message
 					throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
 				}			
 			}
@@ -507,17 +439,19 @@ print_r($body);
 				);
 			}
 		} 
-print_r($this->docIdList);
+// print_r($result);
+// return null;			
+// print_r($this->docIdList);
 		// Change document status
-		if (!empty($this->docIdList)) {
-			foreach ($this->docIdList as $docId) {
-				$this->updateDocumentStatus($docId,$result[$docId],$param);	
+		if (!empty($result)) {
+			foreach ($result as $key => $value) {
+				$this->updateDocumentStatus($key,$value,$param);	
 			}
 		}
-print_r($result);
-// return null;			
 		return $result;			
 	}	
+	
+
 	
 		// Permet de créer un enregistrement
 	public function update($param) {
@@ -538,16 +472,17 @@ print_r($result);
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($urlApi);		
 // print_r($dataTosSend);		
+// return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
 				// Get the response code
 				$code = $return->__get('code');		
+				// Get the data from the response
+				$body = $return->__get('body');				
 // print_r($code);				
 				// If the call is a success
 				if ($code == '200') {
-					// Get the data from the response
-					$body = $return->__get('body');				
 // print_r($body);					
 					// Could be in 200 with an error
 					if (!empty($body->errors)) {
@@ -559,6 +494,11 @@ print_r($result);
 												'id' => $body[0]->id,
 												'error' => false
 										);
+						// Set all id from the childs documents in the array $this->docIdList
+						$this->getTargetIds($param,$body[0]);
+						if (!empty($this->docIdList)) {
+							$result = array_merge($this->docIdList,$result);
+						}
 					}
 					else  {
 						$result[$idDoc] = array(
@@ -568,8 +508,7 @@ print_r($result);
 					} 
 				}
 				else {
-					// Get the error message
-					$body = $return->__get('body');
+					// Set the error message
 					throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
 				}			
 			}
@@ -583,17 +522,146 @@ print_r($result);
 			// Modification du statut du flux
 			// $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		} 
-		// Change document status
-		if (!empty($this->docIdList)) {
-			foreach ($this->docIdList as $docId) {
-				$this->updateDocumentStatus($docId,$result[$docId],$param);	
-			}
-		}
+// print_r($this->docIdList);
 // print_r($result);
 // return null;			
+		// Change document status
+		if (!empty($result)) {
+			foreach ($result as $key => $value) {
+				$this->updateDocumentStatus($key,$value,$param);	
+			}
+		}
 		return $result;			
 	}	
 	
+	// Get the child target id from the response
+	protected function getTargetIds($param,$data,$entryName = '') {
+		if (!empty($data)) {
+			$idDocMyddlewareTemp = '';		
+			foreach($data as $key => $value) {				
+				if (
+						is_array($value)
+					 ||	is_object($value)
+				) {
+					// We don't keep numreric entry name because it is only the index of tab. 
+					// Exemple : for module optons_values we ant to keep the entre name values
+					if (!is_numeric($key)) {
+						$newEntryName = $key;
+					}
+					else {
+						$newEntryName  = $entryName;
+					}
+					// Recursiv call
+					$this->getTargetIds($param,$value,$newEntryName);
+				}
+				// Save the document id
+				elseif ($key == 'id_doc_myddleware') {
+					// $idDocMyddlewareTemp = $value;	
+// print_r($data);	
+// echo 'entry_name : '.$entryName.chr(10);				
+// print_r($this->arrayKey);
+					// We have the entry_name, we search the id name
+					foreach ($this->arrayKey[$param['module']] as $subModule) {
+// print_r($subModule);	
+					
+						if ($subModule['entry_name'] == $entryName) {
+// echo 'ZZZZ'.chr(10);						
+							$this->docIdList[$value] = array(
+																	'id' => $data->$subModule['id_name'],
+																	'error' => false
+															); 	
+// print_r($this->docIdList);															
+							// break;								
+						}
+					}
+					// if (!empty($data[$this->arrayKey[$param['module']][$entryName]['id_name']]
+					// Get the id value (always after the field id_doc_myddleware)
+					// $this->docIdList[$idDocMyddlewareTemp] = array(
+																	// 'id' => $data[$this->arrayKey[$param['module']][$entryName]['id_name']],
+																	// 'error' => false
+															// ); 							
+				}
+				/* 
+				elseif (
+						!empty($idDocMyddlewareTemp)
+					AND (
+							$key == 'id'
+						 OR substr($key,-3) == '_id'
+					)
+				) {			
+					$this->docIdList[$idDocMyddlewareTemp] = array(
+																	'id' => $value,
+																	'error' => false
+															); 				
+				} */
+			}
+		}
+	}
+	
+		
+	// Generate the data to send in the create or update POST
+	// Entry_name is the name of the entry in cas the function is call for a child data
+	protected function buildSendingData($param,$data,$mode,$entry_name = '') {		
+		$first = false;
+		foreach ($data as $key => $value) {	
+			$fieldStructure = '';
+			// Replace __ISO__ if the field contains __ISO__
+			if (!empty($param['ruleParams']['language'])) {
+				$key = str_replace('__ISO__', '__'.$param['ruleParams']['language'].'__', $key);
+			}
+			
+			// Jump the first value of the table data (contain the document id)
+			if (!$first) {
+				// Save all doc ID to change their status to send (child and parent document)
+				$this->docIdList[$value] = $value;
+				$first = true;
+				continue;
+			}
+			// Target id isn't a shop-application field (it is used by Myddleware)
+			if ($key == 'target_id') {
+				if ($mode == 'U') {			
+// print_r($data);
+// print_r($this->arrayKey);
+// echo 'module : '.$param['module'].chr(10);				
+// echo '$entry_name : '.$entry_name.chr(10);				
+					// If a specific id exist we get it otherwise we put the default value id
+					if (!empty($this->arrayKey[$param['module']][$entry_name]['id_name'])) {
+						$dataTosSend[$this->arrayKey[$param['module']][$entry_name]['id_name']] = $value;
+					} else {
+						$dataTosSend['id'] = $value;
+					}
+				}
+				continue;
+			}
+			if (is_array($value)) {
+				foreach($value as $subrecord) {
+					// recursive call in case sub tab exist
+					$dataTosSend[$this->arrayKey[$param['module']][$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$mode,$key);
+				}
+			} else {		
+				// Structure transformation to an array id needed
+				$fieldStructure = explode('__',$key);			
+				$nbLevel = count($fieldStructure);
+				if ($nbLevel == 3) {
+					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]] = $value;
+				}
+				elseif ($nbLevel == 2) {
+					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]] = $value;
+				} else {		
+					$dataTosSend[$key] = $value;
+				}
+			}
+		}
+		return $dataTosSend;
+	}
+	
+	protected function myExplode($value) {
+		$fieldStructure = explode('__',$value);
+		if (is_array($fieldStructure)) {
+			$value = $this->myExplode($fieldStructure);
+		}
+		return $value;
+	}
 	
 	
 	// Force some module in child

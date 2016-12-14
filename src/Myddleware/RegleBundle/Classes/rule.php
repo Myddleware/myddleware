@@ -542,7 +542,7 @@ class rulecore {
 		if (!empty($this->solutionTarget)) {
 			$loginResult['error'] = $this->solutionTarget->logout();	
 			if (!$loginResult) {
-				$sendTarget .= 'Failed to logout from the target solution';
+				$sendTarget['error'] .= 'Failed to logout from the target solution';
 			}
 		}
 		return $sendTarget;

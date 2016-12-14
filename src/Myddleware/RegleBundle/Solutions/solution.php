@@ -128,8 +128,14 @@ class solutioncore {
 				else {
 					$status = $forceStatus;
 				}
+				// In cas of a child document, it is possible to have $value['id'] empty, we just set an error because the document can't be sent again (prent document successfully sent)
+				if (!empty($value['id'])) {
+					$document->updateTargetId($value['id']);	
+				}
+				else {
+					$document->setMessage('No target ID found in return of the parent document creation. ');
+				}
 				$document->updateStatus($status);
-				$document->updateTargetId($value['id']);		
 				$response[$idDoc] = true;							
 			}
 			else {

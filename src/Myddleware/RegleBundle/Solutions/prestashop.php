@@ -37,6 +37,7 @@ class prestashopcore extends solution {
 										'default' => array('id', 'date_upd', 'date_add'),
 										'product_options' => array('id'),
 										'product_option_values' => array('id'),
+										'combinations' => array('id'),
 								);
 	
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
@@ -45,7 +46,7 @@ class prestashopcore extends solution {
 	protected $moduleWithLanguage = array('products');
 	
 	// Module without reference date
-	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values');
+	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations');
 
 	protected $required_relationships = array(
 												'default' => array()
@@ -54,7 +55,8 @@ class prestashopcore extends solution {
 	protected $fieldsIdNotRelate = array('id_gender', 'id_supply_order_state');
 
 	protected $module_relationship_many_to_many = array(
-														'groups_customers' => array('label' => 'Relationship Groups Customers', 'module_name' => 'CustomersGroup', 'link_field_name' => 'customers', 'fields' => array(), 'relationships' => array('group_id','customer_id'))
+														'groups_customers' => array('label' => 'Groups customers', 'module_name' => 'CustomersGroup', 'link_field_name' => 'customers', 'fields' => array(), 'relationships' => array('group_id','customer_id')),
+														// 'combinaisons_options' => array('label' => 'Product combinaison options', 'module_name' => 'CombinaisonsOptions', 'link_field_name' => 'combinaisons', 'fields' => array(), 'relationships' => array('combination_id','product_option_value_id')),
 														);
 	
 	private $webService;

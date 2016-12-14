@@ -291,6 +291,7 @@ $fieldsRelate = array (
 						),
 					'products_options' =>
 						array(
+							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),

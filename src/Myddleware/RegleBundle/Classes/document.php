@@ -1356,12 +1356,7 @@ class documentcore {
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {
-		try {	
-			// Si on est sur une règle de type groupe avec la valeur child alors on est focément en update (seule la règle root est autorisée à créer des données)
-			if ($this->isChild()){
-				return 'U';
-			}
-		
+		try {			
 			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
 			$sqlParamsSoure = "	SELECT 
@@ -1472,6 +1467,10 @@ class documentcore {
 							}
 						}
 					}
+				}
+				// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
+				if ($this->isChild()){
+					return 'U';
 				}
 				// Si aucune règle avec relation Myddleware_element_id alors on est en création
 				return 'C';
