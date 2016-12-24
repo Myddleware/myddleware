@@ -519,63 +519,62 @@ class documentcore {
 				}
 				// Sinon on fait la recherche du prédécesseur classique
 				else {
-					// Selection des documents antérieurs de la même règle (toute version confondues) avec le même id au statut différent de closed et Cancel
-					$sqlParams = "	SELECT 
-										Documents.id							
-									FROM Documents
-										INNER JOIN Rule
-											ON Documents.rule_id = Rule.rule_id
-											AND Rule.rule_name_slug = :rule_name_slug
-										INNER JOIN Rule Rule_version
-											ON Rule_version.rule_name = Rule.rule_name
-									WHERE 
-											Rule_version.conn_id_source = :conn_id_source 
-										AND Rule_version.rule_module_source = :rule_module_source  	
-										AND Documents.source_id = :source_id 
-										AND Documents.global_status NOT IN ('Close','Cancel') 
-										AND Documents.date_created < :date_created  
-									LIMIT 1";								
-					$stmt = $this->connection->prepare($sqlParams);
-					$stmt->bindValue(":rule_name_slug", $this->document_data['rule_name_slug']);
-					$stmt->bindValue(":conn_id_source", $this->document_data['conn_id_source']);
-					$stmt->bindValue(":source_id", $this->document_data['source_id']);
-					$stmt->bindValue(":rule_module_source", $this->document_data['rule_module_source']);
-					$stmt->bindValue(":date_created", $this->document_data['date_created']);
-					$stmt->execute();	   				
-					$result = $stmt->fetch(); 				
-					
-					// Si aucun prédécesseur en erreur sur la règle en cours on vérifie les document de la règle inverse (bidirectionnelle) si elle existe
-					if (
-							empty($result['id'])
-						&&	!empty($this->ruleParams['bidirectional'])
-					) {
+					$rules[] = $this->document_data['rule_id'];
+					// We check the bidirectionnal rule too if it exists
+					if (!empty($this->ruleParams['bidirectional'])) {
+						$rules[] = $this->ruleParams['bidirectional'];
+					}
+					foreach ($rules as $ruleId) {
+						// Selection des documents antérieurs de la même règle (toute version confondues) avec le même id au statut différent de closed et Cancel
+						// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
 						$sqlParams = "	SELECT 
-											Documents.id							
+											Documents.id,							
+											Documents.rule_id,
+											Rule.rule_id rule_parent,
+											Rule.rule_deleted rule_parent_deleted,
+											Documents.status,
+											Documents.global_status											
 										FROM Documents
-											INNER JOIN Rule
-												ON Documents.rule_id = Rule.rule_id
-												AND Rule.rule_id = :bidirectional
-											INNER JOIN Rule Rule_version
-												ON Rule_version.rule_name = Rule.rule_name
+											LEFT OUTER JOIN RuleRelationShips
+												ON RuleRelationShips.rrs_field_id = Documents.rule_id
+												AND RuleRelationShips.parent = 1
+											LEFT OUTER JOIN Rule
+												ON Rule.rule_id = RuleRelationShips.rule_id 									
 										WHERE 
-												Rule_version.conn_id_target = :conn_id_source 
-											AND Rule_version.rule_module_target = :rule_module_source  	
-											AND Documents.target_id = :source_id  
-											AND Documents.global_status NOT IN ('Close','Cancel') 
+												Documents.rule_id = :rule_id 
+											AND Documents.source_id = :source_id 
 											AND Documents.date_created < :date_created  
-										LIMIT 1";
+										HAVING 
+												Rule.rule_deleted != 1
+											AND (
+													global_status = 'Error'
+												OR (
+														global_status = 'OPEN'
+													AND (
+															status != 'Ready_to_send'
+														OR (
+																status = 'Ready_to_send'
+															AND rule_parent IS NULL
+														)
+													)
+												)	
+											)
+										LIMIT 1	
+										";								
 						$stmt = $this->connection->prepare($sqlParams);
-						$stmt->bindValue(":bidirectional", $this->ruleParams['bidirectional']);
-						$stmt->bindValue(":conn_id_source", $this->document_data['conn_id_source']);
-						$stmt->bindValue(":rule_module_source",$this->document_data['rule_module_source']);
-						$stmt->bindValue(":source_id",$this->document_data['source_id']);
-						$stmt->bindValue(":date_created",$this->document_data['date_created']);
+						$stmt->bindValue(":rule_id", $ruleId);
+						$stmt->bindValue(":source_id", $this->document_data['source_id']);
+						$stmt->bindValue(":date_created", $this->document_data['date_created']);
 						$stmt->execute();	   				
 						$result = $stmt->fetch();
-					} 
-				
+						// if id found, we stop to send an error
+						if (!empty($result['id'])) {
+							break;
+						}
+					}
+
 					// Si un prédécesseur non clos est trouvé on passe le document au statut Predecessor_KO
-					if (!empty($result['id'])) {
+					if (!empty($result['id'])) {		
 						$this->docIdRefError = $result['id'];
 						throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
 					}
@@ -817,7 +816,7 @@ class documentcore {
 					$this->updateType('U');
 				}
 			}
-			// Sinon on mets directement le document en ready to send
+			// Sinon on mets directement le document en ready to send (example child rule)
 			else {
 				$this->updateStatus('Ready_to_send');
 			}
@@ -848,23 +847,36 @@ class documentcore {
 		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
 		// Get the child rules of the current rule
 		$childRuleIds = $parentRule->getChildRules();
-// print_r($childRuleIds);	
+
 		if (!empty($childRuleIds)) {
 			foreach($childRuleIds as $childRuleId) {
 				// Instantiate the child rule
-				$ruleParam['ruleId'] = $childRuleId['rule_id'];
+				$ruleParam['ruleId'] = $childRuleId['rrs_field_id'];
 				$ruleParam['jobId'] = $this->jobId;				
-				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
+				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);				
+				// If field = Myddleware_element_id, the query will be build with the sourceId of the document
+				if ($childRuleId['rrs_field_name_source'] == 'Myddleware_element_id') {
+					$idQuery = $this->sourceId;
+				}
+				else {
+					// Get the data of the current document to build the query in function generateDocuments
+					$this->getSourceData();
+					if (!empty($this->sourceData[$childRuleId['rrs_field_name_source']])) {
+						$idQuery = $this->sourceData[$childRuleId['rrs_field_name_source']];
+					} else {
+						throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['rrs_field_name_source'].'. The query to search to generate child data can\'t be created');
+					}
+				}	
 				// Generate documents for the child rule (could be several documents)
-				$docsChildRule = $childRule->generateDocuments($this->sourceId, true, array('parent_id' => $this->id), $childRuleId['rrs_field_name_source']);
+				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['rrs_field_name_source']);
 				// Run documents
 				if (!empty($docsChildRule)) {
 					foreach ($docsChildRule as $doc) {
 						$errors = $childRule->actionDocument($doc->id,'rerun');
 						// If a child is in error, we stop the whole processus : child document not saved (roolback) and parent document in error checking
-						if (!empty($errors)) {
+						if (!empty($errors)) {									
 							// The error should be clear because the child document won't be saved
-							throw new \Exception( 'Child document in error (rule '.$childRuleId['rule_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/prod.log) for more information. ');
+							throw new \Exception( 'Child document in error (rule '.$childRuleId['rrs_field_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/'.$this->container->get( 'kernel' )->getEnvironment().'.log) for more information. ');
 						}
 					}
 				}
@@ -1287,7 +1299,16 @@ class documentcore {
 	
 	// Check if the document is a child
 	protected function isChild() {	
-		$sqlIsChild = "SELECT *	FROM RuleRelationShips WHERE RuleRelationShips.rule_id	= :ruleId AND RuleRelationShips.parent = 1";
+		// $sqlIsChild = "SELECT *	FROM RuleRelationShips WHERE RuleRelationShips.rule_id	= :ruleId AND RuleRelationShips.parent = 1";
+		$sqlIsChild = "	SELECT Rule.rule_id 
+									FROM RuleRelationShips 
+										INNER JOIN Rule
+											ON Rule.rule_id  = RuleRelationShips.rule_id 
+									WHERE 
+											RuleRelationShips.rrs_field_id = :ruleId
+										AND RuleRelationShips.parent = 1
+										AND Rule.rule_deleted = 0
+								";		
 		$stmt = $this->connection->prepare($sqlIsChild);
 		$stmt->bindValue(":ruleId", $this->ruleId);
 		$stmt->execute();	    
@@ -1505,7 +1526,7 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);;				
+			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);

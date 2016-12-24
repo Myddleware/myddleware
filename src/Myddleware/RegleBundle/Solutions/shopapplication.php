@@ -242,9 +242,15 @@ class shopapplicationcore extends solution {
 	
 	// Read one specific record
 	public function read_last($param) {	
+// print_r($param);
 // return null;	
-		$result = array();	
+		$result = array();
 		try {
+			// No history search for module options_values
+			if (in_array($param['module'], array('options_values','products_options'))) {
+				$result['done'] = false;					
+				return $result;			
+			}
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);	
 
@@ -370,7 +376,7 @@ class shopapplicationcore extends solution {
 
 	// Permet de créer un enregistrement
 	public function create($param) {
-print_r($param);
+// print_r($param);
 return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
@@ -455,8 +461,8 @@ return null;
 	
 		// Permet de créer un enregistrement
 	public function update($param) {
-// print_r($param);
-// return null;		
+print_r($param);
+return null;		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
@@ -471,8 +477,8 @@ return null;
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($urlApi);		
-// print_r($dataTosSend);		
-// return null;
+print_r($dataTosSend);		
+return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				

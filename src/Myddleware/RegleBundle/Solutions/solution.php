@@ -432,7 +432,11 @@ class solutioncore {
 
 	// Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible 
 	protected function addRequiredField($fields,$module = 'default') {
-
+		// If no entry for the module we put default
+		if (empty($this->required_fields[$module])) {
+			$module = 'default';
+		}
+		
 		// Boucle sur tous les champs obligatoires
 		if (!empty($this->required_fields[$module])) {
 			foreach($this->required_fields[$module] as $required_field) {
