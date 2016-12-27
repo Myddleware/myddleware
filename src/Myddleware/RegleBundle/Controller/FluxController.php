@@ -59,7 +59,6 @@ class FluxControllerCore extends Controller
 
 		// Detecte si la session est le support ---------
 		$permission =  $this->get('myddleware.permission');
-		
 		if( $permission->isAdmin($this->getUser()->getId()) ) {
 			$list_fields_sql = 
 				array('id' => $id
@@ -76,11 +75,11 @@ class FluxControllerCore extends Controller
 
 		// Infos des flux
 		$rule = $em->getRepository('RegleBundle:Rule')
-                   ->findBy( $list_fields_sql );	
+                   ->findBy( $list_fields_sql );		
 		if($rule) {
-			$myddlewareSession['flux_filter']['c']['rule'] = $rule[0]->getId();
+			$myddlewareSession['flux_filter']['c']['rule'] = $rule[0]->getName();
 			$myddlewareSession['flux_filter']['c']['gblstatus'] = 'Error';			
-			$myddlewareSession['flux_filter']['where'] = "WHERE rule_id='".$rule[0]->getId()."' AND global_status='Error' ";					
+			$myddlewareSession['flux_filter']['where'] = "WHERE rule_name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ";					
 		}
 		else {
 			unset($myddlewareSession['flux_filter']);

@@ -44,10 +44,11 @@ class shopapplicationcore extends solution {
 							
 	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $arrayKey = array(
-							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id')),
-							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id')),
-							'products' => array('products_options' => array('entry_name' => 'options', 'id_name' => 'option_id')),
-							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id')),
+							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1)),
+							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1)),
+							'products' => array('products_options' => array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1)),
+							// 'products_options' => array('options_values' => array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1)),
+							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1)),
 							);
 							
 	// Modules with language						
@@ -376,8 +377,8 @@ class shopapplicationcore extends solution {
 
 	// Permet de créer un enregistrement
 	public function create($param) {
-// print_r($param);
-return null;			
+print_r($param);
+// return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -393,8 +394,8 @@ return null;
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($param['data']);
-// print_r($dataTosSend);
-// return null;	
+print_r($dataTosSend);
+return null;	
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -438,7 +439,7 @@ return null;
 				}			
 			}
 			catch (\Exception $e) {
-				$error = $e->getMessage();
+				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -462,9 +463,10 @@ return null;
 		// Permet de créer un enregistrement
 	public function update($param) {
 print_r($param);
-return null;		
+// return null;		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
+// print_r($data);
 			try {		
 				$dataTosSend = '';
 				// Check control before update
@@ -519,7 +521,7 @@ return null;
 				}			
 			}
 			catch (\Exception $e) {
-				$error = $e->getMessage();
+				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -530,27 +532,27 @@ return null;
 		} 
 // print_r($this->docIdList);
 // print_r($result);
-// return null;			
 		// Change document status
 		if (!empty($result)) {
 			foreach ($result as $key => $value) {
 				$this->updateDocumentStatus($key,$value,$param);	
 			}
 		}
+// return null;			
 		return $result;			
 	}	
 	
 	// Get the child target id from the response
 	protected function getTargetIds($param,$data,$entryName = '') {
 		if (!empty($data)) {
-			$idDocMyddlewareTemp = '';		
+			$idDocMyddlewareTemp = '';			
 			foreach($data as $key => $value) {				
 				if (
 						is_array($value)
 					 ||	is_object($value)
 				) {
 					// We don't keep numreric entry name because it is only the index of tab. 
-					// Exemple : for module optons_values we ant to keep the entre name values
+					// Exemple : for module optons_values we want to keep the entry name values
 					if (!is_numeric($key)) {
 						$newEntryName = $key;
 					}
@@ -607,9 +609,10 @@ return null;
 		
 	// Generate the data to send in the create or update POST
 	// Entry_name is the name of the entry in cas the function is call for a child data
-	protected function buildSendingData($param,$data,$mode,$entry_name = '') {		
-		$first = false;
+	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = 0) {		
+		$first = false;	
 		foreach ($data as $key => $value) {	
+print_r($data);		
 			$fieldStructure = '';
 			// Replace __ISO__ if the field contains __ISO__
 			if (!empty($param['ruleParams']['language'])) {
@@ -625,11 +628,7 @@ return null;
 			}
 			// Target id isn't a shop-application field (it is used by Myddleware)
 			if ($key == 'target_id') {
-				if ($mode == 'U') {			
-// print_r($data);
-// print_r($this->arrayKey);
-// echo 'module : '.$param['module'].chr(10);				
-// echo '$entry_name : '.$entry_name.chr(10);				
+				if ($mode == 'U') {					
 					// If a specific id exist we get it otherwise we put the default value id
 					if (!empty($this->arrayKey[$param['module']][$entry_name]['id_name'])) {
 						$dataTosSend[$this->arrayKey[$param['module']][$entry_name]['id_name']] = $value;
@@ -640,9 +639,19 @@ return null;
 				continue;
 			}
 			if (is_array($value)) {
+				$level++;
 				foreach($value as $subrecord) {
 					// recursive call in case sub tab exist
-					$dataTosSend[$this->arrayKey[$param['module']][$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$mode,$key);
+					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
+echo 'module :'.$param['module'].chr(10);
+echo '$key :'.$key	.chr(10);
+print_r($this->arrayKey);					
+					// If the deep level is greater than the maximu allowed by the module, we merge data into the maximum level 
+					if ($level > $this->arrayKey[$param['module']][$key]['max_level']) {
+						$dataTosSend = array_merge($dataTosSend, $dataChild);
+					} else {
+						$dataTosSend[$this->arrayKey[$param['module']][$key]['entry_name']][] = $dataChild;
+					}
 				}
 			} else {		
 				// Structure transformation to an array id needed

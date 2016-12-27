@@ -632,7 +632,13 @@ class documentcore {
 				foreach ($ruleRelationships as $ruleRelationship) {			
 					if(empty(trim($this->sourceData[$ruleRelationship['rrs_field_name_source']]))) {				
 						continue; // S'il n'y a pas de relation, on envoie sans erreur
-					}				
+					}		
+
+					// If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
+					if (!empty($ruleRelationship['parent'])) {
+						continue;
+					}		
+					
 					// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed		
 					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['rrs_field_name_source']]);
 					if (empty($targetId['record_id'])) {
@@ -869,6 +875,9 @@ class documentcore {
 				}	
 				// Generate documents for the child rule (could be several documents)
 				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['rrs_field_name_source']);
+				if (!empty($docsChildRule->error)) {
+					throw new \Exception($docsChildRule->error);
+				}
 				// Run documents
 				if (!empty($docsChildRule)) {
 					foreach ($docsChildRule as $doc) {
@@ -1237,8 +1246,8 @@ class documentcore {
 					return null;
 				}
 				
-				// If the rule is a child, data will be send with the parent document. No target id is required 
-				if ($this->isChild()) {
+				// If the relationship is a parent type, we don't search the id in the child rule now. Data will be read from the child rule when we will send the parent document. So no target id is required now.
+				if (!empty($ruleField['parent'])) {
 					return null;
 				}
 				
@@ -1299,7 +1308,6 @@ class documentcore {
 	
 	// Check if the document is a child
 	protected function isChild() {	
-		// $sqlIsChild = "SELECT *	FROM RuleRelationShips WHERE RuleRelationShips.rule_id	= :ruleId AND RuleRelationShips.parent = 1";
 		$sqlIsChild = "	SELECT Rule.rule_id 
 									FROM RuleRelationShips 
 										INNER JOIN Rule
@@ -1473,13 +1481,14 @@ class documentcore {
 								$stmt->execute();	   				
 								$result = $stmt->fetch();				
 							
-								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE
+								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 								if (!empty($result['id'])) {
 									$this->targetId = $result['target_id'];
 									return 'U';
 								}
 								// Sinon on bloque la création du document 
-								else {
+								// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
+								elseif (empty($ruleRelationship['parent'])) {
 									throw new \Exception( 'Failed to get the id target of the current module in the rule linked.' );
 								}
 							}

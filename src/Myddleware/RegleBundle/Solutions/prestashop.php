@@ -54,9 +54,11 @@ class prestashopcore extends solution {
 
 	protected $fieldsIdNotRelate = array('id_gender', 'id_supply_order_state');
 
+	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
 														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','group_id')),
-														'products_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('product_id','id')),
+														'product_options_values' => array('label' => 'Association product options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id')),
+														'products_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('product_id','product_option_values_id')),
 														'products_images' => array('label' => 'Association product - images', 'fields' => array(), 'relationships' => array('product_id','id')),
 														);
 	
@@ -508,7 +510,8 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {
+print_r($param);	
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -556,6 +559,10 @@ class prestashopcore extends solution {
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
+						// If the key is equal to the name of the module + '_id', so the ky is 'id' (usefull when we use many to many modules) 
+						if ($key == $param['module'].'_id') {
+							$key = 'id';
+						}
 						$opt['filter['.$key.']'] = '['.$value.']';
 					}
 				}
@@ -582,10 +589,10 @@ class prestashopcore extends solution {
 					}
 				}
 				
-				// Call
+				// Call				
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);			
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);							
 				$result['count'] = $simplexml->children()->children()->count();
 				
 				$record = array();
@@ -668,10 +675,9 @@ class prestashopcore extends solution {
 	
 	// Read pour les modules fictifs sur les relations many to many
 	protected function readManyToMany($param){
-		try { // try-catch Myddleware
+		try { // try-catch Myddleware	
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
-			
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
 				// 
@@ -681,6 +687,11 @@ class prestashopcore extends solution {
 						$searchModule = 'customers';
 						$subModule = 'groups';
 						$subData = 'group';
+						break;
+					case 'product_options_values':
+						$searchModule = 'product_options';
+						$subModule = 'product_option_values';
+						$subData = 'product_option_value';
 						break;
 					case 'products_product_options_values':
 						$searchModule = 'combinations';
@@ -702,7 +713,7 @@ class prestashopcore extends solution {
 				// Ajout des champs obligatoires
 				$param['fields'] = $this->addRequiredField($param['fields'],$searchModule);				
 				$opt['resource'] = $searchModule.'&date=1';			
-				$opt['display'] = 'full';
+				$opt['display'] = 'full';		
 				
 				// Query creation
 				// if a specific query is requeted we don't use date_ref
@@ -777,16 +788,7 @@ class prestashopcore extends solution {
 						} else {
 							$record[$key] = (string)$value;
 						}				
-					
-						/* if ($key == $DateRefField) {
-							// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
-							$date_ref = date_create($value);
-							date_modify($date_ref, '+1 seconde');
-							$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
-
-							$record['date_modified'] = (string)$value;
-							continue;
-						} */
+				
 						if($key == 'associations'){
 							foreach ($resultRecord->associations->$subModule->$subData as $data) {
 								$subRecord = array();
@@ -819,7 +821,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}
+		}		
 		return $result;
 	}// readManyToMany($param)
 	

@@ -113,6 +113,10 @@ class rulecore {
 				$read['fields'] = $this->sourceFields;
 				$read['ruleParams'] = $this->ruleParams;
 				$read['rule'] = $this->rule;
+				// If the query is in the current record we replace Myddleware_element_id by id
+				if ($idFiledName == 'Myddleware_element_id') {
+					$idFiledName = 'id';
+				}	
 				$read['query'] = array($idFiledName => $idSource);			
 				$dataSource = $this->solutionSource->read($read);			;				
 				if (!empty($dataSource['error'])) {

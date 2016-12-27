@@ -59,13 +59,12 @@ class homecore {
 
 		    $sql = "SELECT 
 						Rule.rule_name,
-						Rule.rule_version,
 						Rule.rule_id,
 						count(Documents.id) cpt
 					FROM Rule
 						LEFT OUTER JOIN Documents
 							ON  Rule.rule_id = Documents.rule_id
-							AND Documents.global_status = 'Error'
+							AND Documents.global_status IN ('Open','Error')
 					$where 
 					GROUP BY Rule.rule_name
 					HAVING cpt > 0
