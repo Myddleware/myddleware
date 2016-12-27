@@ -56,10 +56,10 @@ class prestashopcore extends solution {
 
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
-														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','group_id')),
-														'product_options_values' => array('label' => 'Association product options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id')),
-														'products_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('product_id','product_option_values_id')),
-														'products_images' => array('label' => 'Association product - images', 'fields' => array(), 'relationships' => array('product_id','id')),
+														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','group_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
+														'products_options_values' => array('label' => 'Association product options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'combinations_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('combinaison_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'combinations_images' => array('label' => 'Association product - images', 'fields' => array(), 'relationships' => array('combinaison_id','image_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
 														);
 	
 	private $webService;
@@ -511,7 +511,7 @@ class prestashopcore extends solution {
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function read($param) {
-print_r($param);	
+// print_r($param);	
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -680,35 +680,10 @@ print_r($param);
 			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
-				// 
-				$idNameMainRecord = 'id';
-				switch ($param['module']) {
-					case 'groups_customers':
-						$searchModule = 'customers';
-						$subModule = 'groups';
-						$subData = 'group';
-						break;
-					case 'product_options_values':
-						$searchModule = 'product_options';
-						$subModule = 'product_option_values';
-						$subData = 'product_option_value';
-						break;
-					case 'products_product_options_values':
-						$searchModule = 'combinations';
-						$subModule = 'product_option_values';
-						$subData = 'product_option_value';
-						$idNameMainRecord = 'id_product';
-						break;
-					case 'products_images':
-						$searchModule = 'combinations';
-						$subModule = 'images';
-						$subData = 'image';
-						$idNameMainRecord = 'id_product';
-						break;
-					default:
-						throw new \Exception('Module  '.$param['module'].' unknown. ');
-						break;
-				}
+				// Init parameter to read in Prestashop
+				$searchModule = $this->module_relationship_many_to_many[$param['module']]['searchModule'];
+				$subModule = $this->module_relationship_many_to_many[$param['module']]['subModule'];
+				$subData = $this->module_relationship_many_to_many[$param['module']]['subData'];
 				
 				// Ajout des champs obligatoires
 				$param['fields'] = $this->addRequiredField($param['fields'],$searchModule);				
@@ -792,8 +767,8 @@ print_r($param);
 						if($key == 'associations'){
 							foreach ($resultRecord->associations->$subModule->$subData as $data) {
 								$subRecord = array();
-								$idRelation = (string) $resultRecord->$idNameMainRecord . '_' . (string) $data->id;
-								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]] = (string) $resultRecord->$idNameMainRecord;
+								$idRelation = (string) $resultRecord->id . '_' . (string) $data->id;
+								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]] = (string) $resultRecord->id;
 								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->id;
 								$subRecord['id'] = $idRelation;
 								$subRecord['date_modified'] = $record['date_modified'];

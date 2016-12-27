@@ -829,7 +829,11 @@ class documentcore {
 			
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
 			// Si le document est en type recherche, alors la sible est forcément égal à la source et il ne fait pas annuler le doc. 
-			if ($this->type_document != 'S') {
+			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
+			if (	
+					$this->type_document != 'S' 
+				&&	!$this->isParent()
+			) {
 				$this->checkNoChange();
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
@@ -853,26 +857,21 @@ class documentcore {
 		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
 		// Get the child rules of the current rule
 		$childRuleIds = $parentRule->getChildRules();
-
 		if (!empty($childRuleIds)) {
 			foreach($childRuleIds as $childRuleId) {
 				// Instantiate the child rule
 				$ruleParam['ruleId'] = $childRuleId['rrs_field_id'];
 				$ruleParam['jobId'] = $this->jobId;				
 				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);				
-				// If field = Myddleware_element_id, the query will be build with the sourceId of the document
-				if ($childRuleId['rrs_field_name_source'] == 'Myddleware_element_id') {
-					$idQuery = $this->sourceId;
+
+				// Get the data of the current document to build the query in function generateDocuments
+				$this->getSourceData();
+				if (!empty($this->sourceData[$childRuleId['rrs_field_name_source']])) {
+					$idQuery = $this->sourceData[$childRuleId['rrs_field_name_source']];
+				} else {
+					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['rrs_field_name_source'].'. The query to search to generate child data can\'t be created');
 				}
-				else {
-					// Get the data of the current document to build the query in function generateDocuments
-					$this->getSourceData();
-					if (!empty($this->sourceData[$childRuleId['rrs_field_name_source']])) {
-						$idQuery = $this->sourceData[$childRuleId['rrs_field_name_source']];
-					} else {
-						throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['rrs_field_name_source'].'. The query to search to generate child data can\'t be created');
-					}
-				}	
+
 				// Generate documents for the child rule (could be several documents)
 				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['rrs_field_name_source']);
 				if (!empty($docsChildRule->error)) {
@@ -1316,6 +1315,24 @@ class documentcore {
 											RuleRelationShips.rrs_field_id = :ruleId
 										AND RuleRelationShips.parent = 1
 										AND Rule.rule_deleted = 0
+								";		
+		$stmt = $this->connection->prepare($sqlIsChild);
+		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->execute();	    
+		$isChild = $stmt->fetch(); // 1 row
+		if (!empty($isChild)) {
+			return true;
+		}
+		return false;;		
+	}
+	
+	// Check if the document is a parent
+	protected function isParent() {	
+		$sqlIsChild = "	SELECT RuleRelationShips.rule_id 
+							FROM RuleRelationShips 				
+							WHERE 
+									RuleRelationShips.rule_id = :ruleId
+								AND RuleRelationShips.parent = 1
 								";		
 		$stmt = $this->connection->prepare($sqlIsChild);
 		$stmt->bindValue(":ruleId", $this->ruleId);

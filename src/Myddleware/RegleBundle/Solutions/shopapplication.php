@@ -46,8 +46,10 @@ class shopapplicationcore extends solution {
 	protected $arrayKey = array(
 							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1)),
 							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1)),
-							'products' => array('products_options' => array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1)),
-							// 'products_options' => array('options_values' => array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1)),
+							'products' => array(
+												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
+												'options_values' 	=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0), // 2nd level possible
+											),
 							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1)),
 							);
 							
@@ -378,7 +380,7 @@ class shopapplicationcore extends solution {
 	// Permet de créer un enregistrement
 	public function create($param) {
 print_r($param);
-// return null;			
+return null;			
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -395,7 +397,7 @@ print_r($param);
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($param['data']);
 print_r($dataTosSend);
-return null;	
+// return null;	
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -446,7 +448,7 @@ return null;
 				);
 			}
 		} 
-// print_r($result);
+print_r($result);
 // return null;			
 // print_r($this->docIdList);
 		// Change document status
@@ -479,8 +481,9 @@ print_r($param);
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 // print_r($urlApi);		
-print_r($dataTosSend);		
-return null;
+print_r($dataTosSend);	
+// continue;	
+// return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -531,14 +534,14 @@ return null;
 			// $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		} 
 // print_r($this->docIdList);
-// print_r($result);
+print_r($result);
+// return null;			
 		// Change document status
 		if (!empty($result)) {
 			foreach ($result as $key => $value) {
 				$this->updateDocumentStatus($key,$value,$param);	
 			}
 		}
-// return null;			
 		return $result;			
 	}	
 	
@@ -612,7 +615,7 @@ return null;
 	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = 0) {		
 		$first = false;	
 		foreach ($data as $key => $value) {	
-print_r($data);		
+// print_r($data);		
 			$fieldStructure = '';
 			// Replace __ISO__ if the field contains __ISO__
 			if (!empty($param['ruleParams']['language'])) {
@@ -622,7 +625,10 @@ print_r($data);
 			// Jump the first value of the table data (contain the document id)
 			if (!$first) {
 				// Save all doc ID to change their status to send (child and parent document)
-				$this->docIdList[$value] = $value;
+				$this->docIdList[$value] = array(
+													'id' => '',
+													'error' => false
+											); 	
 				$first = true;
 				continue;
 			}
@@ -643,9 +649,9 @@ print_r($data);
 				foreach($value as $subrecord) {
 					// recursive call in case sub tab exist
 					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
-echo 'module :'.$param['module'].chr(10);
-echo '$key :'.$key	.chr(10);
-print_r($this->arrayKey);					
+// echo 'module :'.$param['module'].chr(10);
+// echo '$key :'.$key	.chr(10);
+// print_r($this->arrayKey);					
 					// If the deep level is greater than the maximu allowed by the module, we merge data into the maximum level 
 					if ($level > $this->arrayKey[$param['module']][$key]['max_level']) {
 						$dataTosSend = array_merge($dataTosSend, $dataChild);
