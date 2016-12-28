@@ -41,7 +41,7 @@ class Log
     /**
      * @var integer
      *
-     * @ORM\Column(name="log_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
@@ -51,7 +51,7 @@ class Log
      * @var datetime
      *
 	 * 
-     * @ORM\Column(name="log_created", type="datetime", nullable=false)
+     * @ORM\Column(name="created", type="datetime", nullable=false)
 	 * 
      */
     private $dateCreated;
@@ -60,7 +60,7 @@ class Log
     /**
      * @var string
      *
-	 * @ORM\Column(name="log_type", type="string", length=5, nullable=false)
+	 * @ORM\Column(name="type", type="string", length=5, nullable=false)
 	 * 
      */
     private $type;
@@ -68,7 +68,7 @@ class Log
     /**
      * @var text
      *
-     * @ORM\Column(name="log_msg", type="text", nullable=false)
+     * @ORM\Column(name="msg", type="text", nullable=false)
 	 * 
      */
     private $message;

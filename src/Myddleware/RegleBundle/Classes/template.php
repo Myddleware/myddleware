@@ -113,25 +113,25 @@ class templatecore {
 						$nbRule++;
 					}
 					// Si la règle contient une relation, on récupère l'id de la règle créée pour mettre à jour la relation
-					if (substr($query['tplq_query'],0,31) == 'INSERT INTO `RuleRelationShips`') {
+					if (substr($query['tplq_query'],0,31) == 'INSERT INTO `RuleRelationShip`') {
 						// Récupération du name_slug
 						$marqueurDebut = "#BEG#"; 
 						$debutLien = strpos( $query['tplq_query'], $marqueurDebut ) + strlen( $marqueurDebut ); 
 						$marqueurFin = "#END#"; 
 						$finLien = strpos( $query['tplq_query'], $marqueurFin ); 
-						$rule_name_slug = substr( $query['tplq_query'], $debutLien, $finLien - $debutLien ); 
+						$name_slug = substr( $query['tplq_query'], $debutLien, $finLien - $debutLien ); 
 						// Ajout du prefix de la règle
-						$rule_name_slug_prefix = $this->prefixRuleName.'_'.$rule_name_slug;
+						$name_slug_prefix = $this->prefixRuleName.'_'.$name_slug;
 						
 						// Récupération de l'id de la règle
-						$querySlug = "	SELECT Rule.rule_id FROM Rule WHERE rule_name_slug = :rule_name_slug_prefix";
+						$querySlug = "	SELECT Rule.id FROM Rule WHERE name_slug = :name_slug_prefix";
 						$stmt = $this->connection->prepare($querySlug);
-						$stmt->bindValue("rule_name_slug_prefix", $rule_name_slug_prefix);
+						$stmt->bindValue("name_slug_prefix", $name_slug_prefix);
 						$stmt->execute();	    		
 						$rule = $stmt->fetch();
 
-						// remplacement de rule_name_slug par l'id de la règle dans le Myddleware en cours
-						$query['tplq_query'] = str_replace($marqueurDebut.$rule_name_slug.$marqueurFin, $rule['rule_id'],$query['tplq_query']);
+						// remplacement de name_slug par l'id de la règle dans le Myddleware en cours
+						$query['tplq_query'] = str_replace($marqueurDebut.$name_slug.$marqueurFin, $rule['id'],$query['tplq_query']);
 					}
 					// Remplacement des variables pour que les règles soient adaptées à la configuration de Myddleware du client
 					$query['tplq_query'] = str_replace('idConnectorSource', $this->idConnectorSource,$query['tplq_query']);
@@ -177,7 +177,7 @@ class templatecore {
 						INNER JOIN Connector Connector_target
 							ON Rule.conn_id_target = Connector_target.conn_id							
 					WHERE 
-						rule_id = :ruleId";
+						id = :ruleId";
 		$stmt = $this->connection->prepare($query);
 		$stmt->bindValue("ruleId", $ruleId);
 		$stmt->execute();	    		
@@ -204,7 +204,7 @@ class templatecore {
 						INNER JOIN Connector Connector_target
 							ON Rule.conn_id_target = Connector_target.conn_id							
 					WHERE 
-						rule_id = :ruleId";
+						id = :ruleId";
 		$stmt = $this->connection->prepare($query);
 		$stmt->bindValue("ruleId", $ruleId);
 		$stmt->execute();	    		
@@ -217,32 +217,32 @@ class templatecore {
 		}
 		$sql .= $sqlRule;
 		
-		// Export table RuleParams
-		$sqlRuleParams = $this->getSqlDump('RuleParams', $ruleId, $guidTemplate);
-		if (empty($sqlRuleParams)) {
-			return array('sql' => '', 'error' => 'Failed to generate dump of table RuleParams');
+		// Export table RuleParam
+		$sqlRuleParam = $this->getSqlDump('RuleParam', $ruleId, $guidTemplate);
+		if (empty($sqlRuleParam)) {
+			return array('sql' => '', 'error' => 'Failed to generate dump of table RuleParam');
 		}
-		$sql .= $sqlRuleParams;
+		$sql .= $sqlRuleParam;
 		
-		// Export table RuleFilters	
-		$sqlRuleFilters = $this->getSqlDump('RuleFilters', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleFilters)) {
-			$sql .= $sqlRuleFilters;
+		// Export table RuleFilter	
+		$sqlRuleFilter = $this->getSqlDump('RuleFilter', $ruleId, $guidTemplate);
+		if (!empty($sqlRuleFilter)) {
+			$sql .= $sqlRuleFilter;
 		}
 		
-		// Export table RuleRelationShips	
-		$sqlRuleRelationShips = $this->getSqlDump('RuleRelationShips', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleRelationShips)) {
-			$sql .= $sqlRuleRelationShips;
+		// Export table RuleRelationShip	
+		$sqlRuleRelationShip = $this->getSqlDump('RuleRelationShip', $ruleId, $guidTemplate);
+		if (!empty($sqlRuleRelationShip)) {
+			$sql .= $sqlRuleRelationShip;
 		}
 
-		// Export table RuleFields
-		$sqlRuleFields = $this->getSqlDump('RuleFields', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleFields)) {
-			$sql .= $sqlRuleFields;
+		// Export table RuleField
+		$sqlRuleField = $this->getSqlDump('RuleField', $ruleId, $guidTemplate);
+		if (!empty($sqlRuleField)) {
+			$sql .= $sqlRuleField;
 		}
 		
-		$prefixTable = 'z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_';
+		$prefixTable = 'z_'.$rule['name_slug'].'_'.$rule['version'].'_';
 		
 		// Récupération de la table source 
 		$query = "SHOW CREATE TABLE ".$prefixTable.'source';
@@ -253,7 +253,7 @@ class templatecore {
 			return array('sql' => '', 'error' => 'Failed to load the table source');
 		}
 		// Remplacement du nom de la règle
-		$sqlSource = str_replace($rule['rule_name_slug'],'prefixRuleName_'.$rule['rule_name_slug'],$tableSource['Create Table']).';';
+		$sqlSource = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableSource['Create Table']).';';
 		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlSource');".chr(10).chr(10);
 		
 		// Récupération de la table target 
@@ -265,7 +265,7 @@ class templatecore {
 			return array('sql' => '', 'error' => 'Failed to load the table target');
 		}
 		// Remplacement du nom de la règle
-		$sqlTarget = str_replace($rule['rule_name_slug'],'prefixRuleName_'.$rule['rule_name_slug'],$tableTarget['Create Table']).';';
+		$sqlTarget = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableTarget['Create Table']).';';
 		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlTarget');".chr(10).chr(10);
 		
 		// Récupération de la table history 
@@ -276,7 +276,7 @@ class templatecore {
 		if (empty($tableHistory['Create Table'])) {
 			return array('sql' => '', 'error' => 'Failed to load the table history');
 		}
-		$sqlHistory = str_replace($rule['rule_name_slug'],'prefixRuleName_'.$rule['rule_name_slug'],$tableHistory['Create Table']).';';
+		$sqlHistory = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableHistory['Create Table']).';';
 		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlHistory');".chr(10).chr(10);
 		
 		return array('sql' => $sql, 'error' => '');
@@ -288,7 +288,7 @@ class templatecore {
 		$values = '';
 		$break = false;
 		$nextDateReference = false;
-		$query = "SELECT * FROM $table WHERE rule_id = :ruleId";
+		$query = "SELECT * FROM $table WHERE id = :ruleId";
 		$stmt = $this->connection->prepare($query);
 		$stmt->bindValue("ruleId", $ruleId);
 		$stmt->execute();	    		
@@ -316,7 +316,7 @@ class templatecore {
 						$fields .= "`$key`,";
 					}
 					// Pour certaine données on insère la clé et non la valeur car ces données seront des paramètres
-					if ($key == 'rule_id') {
+					if ($key == 'id') {
 						$values .= "'idRule',";
 					}
 					elseif ($key == 'conn_id_source') {
@@ -326,20 +326,20 @@ class templatecore {
 						$values .= "'idConnectorTarget',";
 					}
 					// Par défaut une règle est inactive
-					elseif ($key == 'rule_active') {
+					elseif ($key == 'active') {
 						$values .= "'0',";
 					}
-					elseif ($key == 'rule_name') {
-						$values .= "'prefixRuleName_".$row['rule_name_slug']."',";
+					elseif ($key == 'name') {
+						$values .= "'prefixRuleName_".$row['name_slug']."',";
 					}
-					elseif ($key == 'rule_name_slug') {
-						$values .= "'prefixRuleName_".$row['rule_name_slug']."',";
+					elseif ($key == 'name_slug') {
+						$values .= "'prefixRuleName_".$row['name_slug']."',";
 					} 
-					elseif (in_array($key, array('rule_created_by','rule_modified_by'))) {
+					elseif (in_array($key, array('created_by','modified_by'))) {
 						$values .= "'idUser',";
 					}
 					// Les dates doivent être dynamiques
-					elseif(in_array($key, array('rule_date_created','rule_date_modified'))) {
+					elseif(in_array($key, array('date_created','date_modified'))) {
 						$values .= "NOW(),";
 					}
 					// La date de référence est égale à aujourd'hui à minuit
@@ -348,24 +348,24 @@ class templatecore {
 						$nextDateReference = false;
 					}
 					// Il faut gérer les " dans les formule
-					elseif($key == 'rulef_formula') {
+					elseif($key == 'formula') {
 						$values .= "'".addslashes($value)."',";
 					}
 					// S'il s'agit d'une relation il faut mettre un code pour pouvoir mettre l'id de la règle lié
-					elseif($key == 'rrs_field_id') {
+					elseif($key == 'field_id') {
 						// Récupération du name_slug de la règle liée
-						$query = "	SELECT Rule.rule_name_slug FROM Rule WHERE rule_id = :ruleId";
+						$query = "	SELECT Rule.name_slug FROM Rule WHERE id = :ruleId";
 						$stmt = $this->connection->prepare($query);
 						$stmt->bindValue("ruleId", $value);
 						$stmt->execute();	    		
 						$rule = $stmt->fetch();
-						$values .= "'#BEG#$rule[rule_name_slug]#END#',";
+						$values .= "'#BEG#$rule[name_slug]#END#',";
 					}
 					else {
 						$values .= "'".$value."',";
 					}
 					// Gestion de la date de référence
-					if ($value == 'datereference' && $table == 'RuleParams') {
+					if ($value == 'datereference' && $table == 'RuleParam') {
 						$nextDateReference = true;
 					}
 				}

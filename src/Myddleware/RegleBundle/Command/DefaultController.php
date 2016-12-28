@@ -36,7 +36,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 
 use Myddleware\RegleBundle\Entity\Solution;
 use Myddleware\RegleBundle\Entity\Connector;
-use Myddleware\RegleBundle\Entity\ConnectorParam;
+use Myddleware\RegleBundle\Entity\ConnectorParams;
 use Myddleware\RegleBundle\Entity\Rule;
 use Myddleware\RegleBundle\Entity\RuleParam;
 use Myddleware\RegleBundle\Entity\RuleFilter;
@@ -395,7 +395,7 @@ class DefaultControllerCore extends Controller
 			// Connector source -------------------
   			$connectorParamsSource = $this->getDoctrine()
                           ->getManager()
-                          ->getRepository('RegleBundle:ConnectorParam')
+                          ->getRepository('RegleBundle:ConnectorParams')
                           ->findByConnector( $rule->getConnectorSource() );		
 			
 			$connectorSource['solution'] = $rule->getConnectorSource()->getSolution()->getName();
@@ -477,7 +477,7 @@ class DefaultControllerCore extends Controller
 				// Connector source -------------------
 	  			$connectorParamsSource = $this->getDoctrine()
 	                          ->getManager()
-	                          ->getRepository('RegleBundle:ConnectorParam')
+	                          ->getRepository('RegleBundle:ConnectorParams')
 	                          ->findByConnector( $rule->getConnectorSource() );		
 							  
 				$myddlewareSession['param']['rule']['source']['solution'] = $rule->getConnectorSource()->getSolution()->getName();
@@ -490,7 +490,7 @@ class DefaultControllerCore extends Controller
 				// Connector target -------------------						  
 	  			$connectorParamsTarget = $this->getDoctrine()
 	                          ->getManager()
-	                          ->getRepository('RegleBundle:ConnectorParam')
+	                          ->getRepository('RegleBundle:ConnectorParams')
 	                          ->findByConnector( $rule->getConnectorTarget() );		
 							  
 				$myddlewareSession['param']['rule']['cible']['solution'] = $rule->getConnectorTarget()->getSolution()->getName();
@@ -925,7 +925,7 @@ class DefaultControllerCore extends Controller
 						
 						$connector_params = $this->getDoctrine()
 				                          ->getManager()
-				                          ->getRepository('RegleBundle:ConnectorParam')
+				                          ->getRepository('RegleBundle:ConnectorParams')
 				                          ->findByConnector( $connector );
 										  
 						if($connector_params) {
@@ -1724,7 +1724,7 @@ class DefaultControllerCore extends Controller
 			$result = array(
 					'source'=>$source['table'],
 					'cible'=>$cible['table'],
-					'rule_params'=>$rule_params, 
+					'params'=>$rule_params, 
 					'lst_relation_target'=>$lst_relation_target_alpha,
 					'lst_relation_source'=>$choice_source,
 					'lst_rule' =>$choice,
@@ -2671,7 +2671,7 @@ class DefaultControllerCore extends Controller
 			$connector = $this->em->getRepository('RegleBundle:Connector')
 							->findById( $id_connector ); // infos connector
 							
-			$connectorParams = $this->em->getRepository('RegleBundle:ConnectorParam')
+			$connectorParams = $this->em->getRepository('RegleBundle:ConnectorParams')
 								->findByConnector( $id_connector );	// infos params connector
 			
 			foreach ($connectorParams as $p) {

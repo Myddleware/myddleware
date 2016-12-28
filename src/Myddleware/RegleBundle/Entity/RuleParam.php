@@ -28,40 +28,67 @@ namespace Myddleware\RegleBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleOrder
+ * RuleParam
+ *
  * @ORM\Table()
- * @ORM\Entity
- */ 
-class RuleOrder
+ * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\RuleParamRepository")
+ * @ORM\Table(indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
+ */
+class RuleParam
 {
     /**
-     * @var string
+     * @var integer
      *
-     * @ORM\Column(name="rule_id", type="string", length=100)
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $rule;
+    private $id;
+	
+    /**
+	* @var string
+    *
+	* @ORM\Column(name="rule_id", type="string", nullable=false)
+    */
+    private $rule;		
 	
     /**
      * @var string
      *
-	 * 
-     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
+     * @ORM\Column(name="name", type="string", length=100, nullable=false)
 	 * 
      */
-    private $order;
+    private $name;
+	
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="value", type="text", nullable=false)
+	 * 
+     */
+    private $value;			
 
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * Set rule
      *
      * @param string $rule
-     * @return RuleOrder
+     * @return RuleParam
      */
     public function setRule($rule)
     {
         $this->rule = $rule;
-    
+
         return $this;
     }
 
@@ -76,25 +103,48 @@ class RuleOrder
     }
 
     /**
-     * Set order
+     * Set name
      *
-     * @param integer $order
-     * @return RuleOrder
+     * @param string $name
+     * @return RuleParam
      */
-    public function setOrder($order)
+    public function setName($name)
     {
-        $this->order = $order;
-    
+        $this->name = $name;
+
         return $this;
     }
 
     /**
-     * Get order
+     * Get name
      *
-     * @return integer 
+     * @return string 
      */
-    public function getOrder()
+    public function getName()
     {
-        return $this->order;
+        return $this->name;
+    }
+
+    /**
+     * Set value
+     *
+     * @param string $value
+     * @return RuleParam
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+
+        return $this;
+    }
+
+    /**
+     * Get value
+     *
+     * @return string 
+     */
+    public function getValue()
+    {
+        return $this->value;
     }
 }

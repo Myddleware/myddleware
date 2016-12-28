@@ -431,7 +431,7 @@ class magentocore extends solution {
 			}
 		
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Get all data after the reference date
 			$searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';

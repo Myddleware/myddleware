@@ -138,7 +138,7 @@
 				<option selected="selected" value="0">- {{ 'function.all' |trans }} -</option>
 
 				{% for t, v in lst_category %}
-					<option data-type="{{ v.getId }}">{{ ('function.category.' ~ v.getNameYml) |trans }}</option>
+					<option data-type="{{ v.getId }}">{{ ('function.category.' ~ v.getName) |trans }}</option>
 				{% endfor %}
 
 			</select>
@@ -147,7 +147,7 @@
 
 				{% for t, v in lst_functions %}
 					<li class="func" data-type="{{ v.getCategorieId.getId }}">
-						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategorieId.getNameYml ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
+						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategorieId.getName ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
 					</li> 				
 				{% endfor %}
 

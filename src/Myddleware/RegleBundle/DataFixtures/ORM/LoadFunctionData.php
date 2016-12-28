@@ -57,7 +57,7 @@ class LoadFunctionData implements FixtureInterface
  
     private function newEntity($cat,$functions) {
         $funcCat = new FuncCat();
-        $funcCat->setNameYml($cat);
+        $funcCat->setName($cat);
         $this->manager->persist($funcCat);
 		foreach($functions as $function) {
 			$func = new Functions();

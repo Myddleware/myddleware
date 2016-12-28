@@ -26,47 +26,50 @@
 namespace Myddleware\RegleBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-
 
 /**
- * FuncCat
+ * Connector_params
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\FuncCatRepository")
+ * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\ConnectorParamRepository")
  */
-class FuncCat
+class ConnectorParam
 {
     /**
      * @var integer
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+	 * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
+	
+    /**
+	* @var integer
+    *
+    * @ORM\OneToOne(targetEntity="Myddleware\RegleBundle\Entity\Connector")
+	* @ORM\Column(name="conn_id", type="integer", nullable=false)
+	* @ORM\JoinColumn(name="conn_id", referencedColumnName="conn_id")
+    */
+    private $connector;	
+	
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=100)
+     * @ORM\Column(name="name", type="string", length=684)
      */
     private $name;
 
-     /**
-     * @var ArrayCollection $functions
-     *
-     */
-    private $functions;	
-
     /**
-     * Constructor
+     * @var string
+     *
+     * @ORM\Column(name="value", type="string", length=684)
      */
-    public function __construct()
-    {
-        $this->functions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-    
+    private $value;
+
+
+
     /**
      * Get id
      *
@@ -78,14 +81,37 @@ class FuncCat
     }
 
     /**
+     * Set connector
+     *
+     * @param integer $connector
+     * @return ConnectorParam
+     */
+    public function setConnector($connector)
+    {
+        $this->connector = $connector;
+    
+        return $this;
+    }
+
+    /**
+     * Get connector
+     *
+     * @return integer 
+     */
+    public function getConnector()
+    {
+        return $this->connector;
+    }
+
+    /**
      * Set name
      *
-     * @param string $nameYml
-     * @return FuncCat
+     * @param string $name
+     * @return ConnectorParam
      */
-    public function setName($nameYml)
+    public function setName($name)
     {
-        $this->name = $nameYml;
+        $this->name = $name;
     
         return $this;
     }
@@ -101,35 +127,25 @@ class FuncCat
     }
 
     /**
-     * Add functions
+     * Set value
      *
-     * @param \Myddleware\RegleBundle\Entity\Functions $functions
-     * @return FuncCat
+     * @param string $value
+     * @return ConnectorParam
      */
-    public function addFunction(\Myddleware\RegleBundle\Entity\Functions $functions)
+    public function setValue($value)
     {
-        $this->functions[] = $functions;
+        $this->value = $value;
     
         return $this;
     }
 
     /**
-     * Remove functions
+     * Get value
      *
-     * @param \Myddleware\RegleBundle\Entity\Functions $functions
+     * @return string 
      */
-    public function removeFunction(\Myddleware\RegleBundle\Entity\Functions $functions)
+    public function getValue()
     {
-        $this->functions->removeElement($functions);
-    }
-
-    /**
-     * Get functions
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getFunctions()
-    {
-        return $this->functions;
+        return $this->value;
     }
 }

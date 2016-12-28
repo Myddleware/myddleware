@@ -36,6 +36,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 
 use Myddleware\RegleBundle\Entity\Solution;
 use Myddleware\RegleBundle\Entity\Connector;
+use Myddleware\RegleBundle\Entity\ConnectorParams;
 use Myddleware\RegleBundle\Entity\DocumentAudit;
 
 use Myddleware\RegleBundle\Classes\document as doc;
@@ -339,7 +340,7 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT d.*, u.username, r.version, concat(r.name, ' v', r.version) rule_name
+		$sql = "SELECT d.*, u.username, r.version, concat(r.name, ' v', r.version) name
 				FROM Document d 
 				JOIN users u ON(u.id=d.created_by)
 				JOIN Rule r ON(r.id = d.rule_id)
@@ -673,7 +674,7 @@ class FluxControllerCore extends Controller
 			$conn = $this->get( 'database_connection' );	
 		
 			// Document
-			$stmt = $conn->prepare('SELECT rule_id 
+			$stmt = $conn->prepare('SELECT id 
 									FROM Document 
 									WHERE id = :id');  
 								 
@@ -685,7 +686,7 @@ class FluxControllerCore extends Controller
 			$stmt = $conn->prepare('SELECT name_slug, version 
 									FROM Rule 
 									WHERE id = :id'); 								  
-			$stmt->bindValue('id', $flux['source']['champ']['rule_id']);  
+			$stmt->bindValue('id', $flux['source']['champ']['id']);  
 			$stmt->execute();
 			$flux['source'] = $stmt->fetch(); 
 			$flux['source']['table'] = $flux['source']['name_slug'].'_'.$flux['source']['version']; 

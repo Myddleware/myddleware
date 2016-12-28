@@ -28,12 +28,13 @@ namespace Myddleware\RegleBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Connector_params
+ * RuleField
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\ConnectorParamsRepository")
+ * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\RuleFieldRepository")
+ * @ORM\Table(indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
  */
-class ConnectorParams
+class RuleField
 {
     /**
      * @var integer
@@ -43,32 +44,39 @@ class ConnectorParams
 	 * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-	
+
     /**
-	* @var integer
+	* @var string
     *
-    * @ORM\OneToOne(targetEntity="Myddleware\RegleBundle\Entity\Connector")
-	* @ORM\Column(name="conn_id", type="integer", nullable=false)
-	* @ORM\JoinColumn(name="conn_id", referencedColumnName="conn_id")
+	* @ORM\Column(name="rule_id", type="string")
     */
-    private $connector;	
+    private $rule;	
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="target_field_name", type="text", nullable=false)
+	 * 
+     */
+    private $target;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="source_field_name", type="text", nullable=false)
+	 * 
+     */
+    private $source;
 	
-
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=684)
-     */
-    private $name;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="value", type="string", length=684)
-     */
-    private $value;
-
-
+     * @ORM\Column(name="formula", type="text", nullable=true)
+	 * 
+     */ 
+    private $formula;	
+	
 
     /**
      * Get id
@@ -81,71 +89,94 @@ class ConnectorParams
     }
 
     /**
-     * Set connector
+     * Set rule
      *
-     * @param integer $connector
-     * @return ConnectorParams
+     * @param string $rule
+     * @return RuleField
      */
-    public function setConnector($connector)
+    public function setRule($rule)
     {
-        $this->connector = $connector;
+        $this->rule = $rule;
     
         return $this;
     }
 
     /**
-     * Get connector
-     *
-     * @return integer 
-     */
-    public function getConnector()
-    {
-        return $this->connector;
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     * @return ConnectorParams
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    
-        return $this;
-    }
-
-    /**
-     * Get name
+     * Get rule
      *
      * @return string 
      */
-    public function getName()
+    public function getRule()
     {
-        return $this->name;
+        return $this->rule;
     }
 
     /**
-     * Set value
+     * Set target
      *
-     * @param string $value
-     * @return ConnectorParams
+     * @param string $target
+     * @return RuleField
      */
-    public function setValue($value)
+    public function setTarget($target)
     {
-        $this->value = $value;
+        $this->target = $target;
     
         return $this;
     }
 
     /**
-     * Get value
+     * Get target
      *
      * @return string 
      */
-    public function getValue()
+    public function getTarget()
     {
-        return $this->value;
+        return $this->target;
+    }
+
+    /**
+     * Set source
+     *
+     * @param string $source
+     * @return RuleField
+     */
+    public function setSource($source)
+    {
+        $this->source = $source;
+    
+        return $this;
+    }
+
+    /**
+     * Get source
+     *
+     * @return string 
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * Set formula
+     *
+     * @param string $formula
+     * @return RuleField
+     */
+    public function setFormula($formula)
+    {
+        $this->formula = $formula;
+    
+        return $this;
+    }
+
+    /**
+     * Get formula
+     *
+     * @return string 
+     */
+    public function getFormula()
+    {
+        return $this->formula;
     }
 }

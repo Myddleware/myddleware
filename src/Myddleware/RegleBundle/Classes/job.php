@@ -64,7 +64,7 @@ class jobcore  {
 	}
 		
 	/*Permet de charger toutes les données de la règle (en paramètre)*/
-	public function setRule($rule_name_slug) {
+	public function setRule($name_slug) {
 		try {
 			include_once 'rule.php';
 			
@@ -72,25 +72,25 @@ class jobcore  {
 		    $sqlRule = "SELECT * 
 		    		FROM Rule 
 		    		WHERE 
-							rule_name_slug = :rule_name_slug
-						AND rule_deleted = 0
+							name_slug = :name_slug
+						AND deleted = 0
 					";
 		    $stmt = $this->connection->prepare($sqlRule);
-			$stmt->bindValue("rule_name_slug", $rule_name_slug);
+			$stmt->bindValue("name_slug", $name_slug);
 		    $stmt->execute();	    
 			$rule = $stmt->fetch(); // 1 row
-			if (empty($rule['rule_id'])) {
-				throw new \Exception ('Rule '.$rule_name_slug.' doesn\'t exist or is deleted.');
+			if (empty($rule['id'])) {
+				throw new \Exception ('Rule '.$name_slug.' doesn\'t exist or is deleted.');
 			}
 			// Error if the rule is inactive and if we try to run it from a job (not manually)
 			elseif(
-					empty($rule['rule_active'])
+					empty($rule['active'])
 				&& $this->manual == 0
 			) {
-				throw new \Exception ('Rule '.$rule_name_slug.' is inactive.');
+				throw new \Exception ('Rule '.$name_slug.' is inactive.');
 			}
 			
-			$this->ruleId = $rule['rule_id'];
+			$this->ruleId = $rule['id'];
 			
 			// We instance the rule
 			$param['ruleId'] = $this->ruleId;
@@ -170,7 +170,7 @@ class jobcore  {
 		try {
 			// Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
 			$sqlParams = "	SELECT * 
-							FROM Documents	
+							FROM Document	
 							WHERE 
 									(
 											global_status = 'Error'
@@ -208,13 +208,13 @@ class jobcore  {
 		$this->start = microtime(true);
 		
 		// Check if a job is already running
-		$sqlJobOpen = "SELECT * FROM Job WHERE job_status = 'Start' LIMIT 1";
+		$sqlJobOpen = "SELECT * FROM Job WHERE status = 'Start' LIMIT 1";
 		$stmt = $this->connection->prepare($sqlJobOpen);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row
 		// Error if one job is still running
 		if (!empty($job)) {
-			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['job_id'];
+			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
 			return false;
 		}
 		// Create Job
@@ -330,15 +330,15 @@ class jobcore  {
 			
 			// Création de la requête
 			$sqlParams = "	SELECT 
-								Documents.id,
-								Documents.rule_id
-							FROM Documents	
+								Document.id,
+								Document.rule_id
+							FROM Document	
 								INNER JOIN Rule
-									ON Documents.rule_id = Rule.rule_id
+									ON Document.rule_id = Rule.id
 							WHERE
-									Documents.global_status IN ('Open','Error')
-								AND Documents.id IN $queryIn
-							ORDER BY Rule.rule_id";
+									Document.global_status IN ('Open','Error')
+								AND Document.id IN $queryIn
+							ORDER BY Rule.id";
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$documents = $stmt->fetchAll();
@@ -370,20 +370,20 @@ class jobcore  {
 	
 	public function getRules() {
 		try {
-			$sqlParams = "	SELECT rule_name_slug 
+			$sqlParams = "	SELECT name_slug 
 							FROM RuleOrder
 								INNER JOIN Rule
-									ON Rule.rule_id = RuleOrder.rule_id
+									ON Rule.id = RuleOrder.rule_id
 							WHERE 
-									Rule.rule_active = 1
-								AND	Rule.rule_deleted = 0
-							ORDER BY RuleOrder.rod_order ASC";
+									Rule.active = 1
+								AND	Rule.deleted = 0
+							ORDER BY RuleOrder.order ASC";
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$rules = $stmt->fetchAll();
 			if(!empty($rules)) {	
 				foreach ($rules as $rule) {
-					$ruleOrder[] = $rule['rule_name_slug'];
+					$ruleOrder[] = $rule['name_slug'];
 				}			
 			}
 		} catch (\Exception $e) {
@@ -403,13 +403,13 @@ class jobcore  {
 			// Récupération de toutes les règles avec leurs règles liées (si plusieurs elles sont toutes au même endroit)
 			// Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
 			$sql = "SELECT
-						Rule.rule_id,
-						GROUP_CONCAT(RuleRelationShips.rrs_field_id SEPARATOR ';') rrs_field_id,
-						IF(RuleRelationShips.rrs_field_id IS NULL, '1', '99') rule_order
+						Rule.id,
+						GROUP_CONCAT(RuleRelationShip.field_id SEPARATOR ';') field_id,
+						IF(RuleRelationShip.field_id IS NULL, '1', '99') order
 					FROM Rule
-						LEFT OUTER JOIN RuleRelationShips
-							ON Rule.rule_id = RuleRelationShips.rule_id
-					GROUP BY Rule.rule_id";
+						LEFT OUTER JOIN RuleRelationShip
+							ON Rule.id = RuleRelationShip.rule_id
+					GROUP BY Rule.id";
 			$stmt = $this->connection->prepare($sql);
 			$stmt->execute();	    
 			$rules = $stmt->fetchAll(); 	
@@ -417,8 +417,8 @@ class jobcore  {
 				// Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
 				$ruleKeyVakue = array();
 				foreach ($rules as $rule) {
-					$ruleKeyVakue[$rule['rule_id']] = $rule['rule_order'];
-					$rulesRef[$rule['rule_id']] = $rule;
+					$ruleKeyVakue[$rule['id']] = $rule['order'];
+					$rulesRef[$rule['id']] = $rule;
 				}	
 				
 				// On calcule les priorité tant que l'on a encore des priorité 99
@@ -430,9 +430,9 @@ class jobcore  {
 					foreach ($rules as $rule) {
 						$order = 0;
 						// Si on est une règle sans ordre
-						if($rule['rule_order'] == '99') {
+						if($rule['order'] == '99') {
 							// Récupération des règles liées et recherche dans le tableau keyValue
-							$rulesLink = explode(";", $rule['rrs_field_id']);
+							$rulesLink = explode(";", $rule['field_id']);
 							foreach ($rulesLink as $ruleLink) {
 								if(
 										!empty($ruleKeyVakue[$ruleLink])
@@ -443,8 +443,8 @@ class jobcore  {
 							}
 							// Si toutes les règles trouvées ont une priorité autre que 99 alors on affecte à la règle la piorité +1 dans les tableaux de références
 							if ($order < 99) {
-								$ruleKeyVakue[$rule['rule_id']] = $order+1;
-								$rulesRef[$rule['rule_id']]['rule_order'] = $order+1;
+								$ruleKeyVakue[$rule['id']] = $order+1;
+								$rulesRef[$rule['id']]['order'] = $order+1;
 							}
 						}
 					}	
@@ -584,24 +584,24 @@ class jobcore  {
 			// Récupération du nombre de données transférées depuis la dernière notification. On en compte qu'une fois les erreurs
 			$sqlParams = "	SELECT
 								count(distinct Log.doc_id) cpt,
-								Documents.global_status
+								Document.global_status
 							FROM Job
 								INNER JOIN Log
-									ON Log.job_id = Job.job_id
+									ON Log.job_id = Job.id
 								INNER JOIN Rule
-									ON Log.rule_id = Rule.rule_id
-								INNER JOIN Documents
-									ON Documents.id = Log.doc_id
+									ON Log.rule_id = Rule.id
+								INNER JOIN Document
+									ON Document.id = Log.doc_id
 							WHERE
-									Job.job_begin BETWEEN (SELECT MAX(job_begin) FROM Job WHERE job_param = 'notification' AND job_end >= job_begin) AND NOW()
+									Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 								AND (
-										Documents.global_status != 'Error'
+										Document.global_status != 'Error'
 									OR (
-											Documents.global_status = 'Error'
-										AND Documents.date_modified BETWEEN (SELECT MAX(job_begin) FROM Job WHERE job_param = 'notification' AND job_end >= job_begin) AND NOW()
+											Document.global_status = 'Error'
+										AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 									)
 								)
-							GROUP BY Documents.global_status";
+							GROUP BY Document.global_status";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->execute();	   				
 			$cptLogs = $stmt->fetchAll();
@@ -635,8 +635,8 @@ class jobcore  {
 			$sqlParams = "	SELECT * 
 							FROM Rule
 							WHERE
-									Rule.rule_active = 1
-								AND	Rule.rule_deleted = 0
+									Rule.active = 1
+								AND	Rule.deleted = 0
 			";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->execute();	   				
@@ -644,7 +644,7 @@ class jobcore  {
 			if (!empty($activeRules)) {
 				$textMail .= chr(10).$this->tools->getTranslation(array('email_notification', 'active_rule')).chr(10);
 				foreach ($activeRules as $activeRule) {
-					$textMail .= " - ".$activeRule['rule_name']." v".$activeRule['rule_version'].chr(10);
+					$textMail .= " - ".$activeRule['name']." v".$activeRule['version'].chr(10);
 				}
 			}
 			else {
@@ -655,22 +655,22 @@ class jobcore  {
 			// Get errors since the last notification
 			if ($job_error > 0) {
 				$sqlParams = "	SELECT
-									Log.log_created,
-									Log.log_msg,
+									Log.created,
+									Log.msg,
 									Log.doc_id,
-									Rule.rule_name
+									Rule.name
 								FROM Job
 									INNER JOIN Log
-										ON Log.job_id = Job.job_id
+										ON Log.job_id = Job.id
 									INNER JOIN Rule
-										ON Log.rule_id = Rule.rule_id
-									INNER JOIN Documents
-										ON Documents.id = Log.doc_id
+										ON Log.rule_id = Rule.id
+									INNER JOIN Document
+										ON Document.id = Log.doc_id
 								WHERE
-										Job.job_begin BETWEEN (SELECT MAX(job_begin) FROM Job WHERE job_param = 'notification' AND job_end >= job_begin) AND NOW()
-									AND Documents.date_modified BETWEEN (SELECT MAX(job_begin) FROM Job WHERE job_param = 'notification' AND job_end >= job_begin) AND NOW()
-									AND Documents.global_status = 'Error'
-								ORDER BY Log.log_created ASC
+										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+									AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+									AND Document.global_status = 'Error'
+								ORDER BY Log.created ASC
 								LIMIT 100	";
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->execute();	   				
@@ -683,7 +683,7 @@ class jobcore  {
 					$textMail .= chr(10).chr(10).$this->tools->getTranslation(array('email_notification', 'error_list')).chr(10);
 				}
 				foreach ($logs as $log) {
-					$textMail .= " - Règle $log[rule_name], id transfert $log[doc_id], le $log[log_created] : $log[log_msg]".chr(10);
+					$textMail .= " - Règle $log[name], id transfert $log[doc_id], le $log[created] : $log[msg]".chr(10);
 				}
 			}
 			
@@ -720,15 +720,15 @@ class jobcore  {
 	
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
-							Rule.rule_id,
-							Rule.rule_name_slug,
-							Rule.rule_version,
-							RuleParams.rulep_value days
+							Rule.id,
+							Rule.name_slug,
+							Rule.version,
+							RuleParam.value days
 						FROM Rule
-							INNER JOIN RuleParams
-								ON Rule.rule_id = RuleParams.rule_id
+							INNER JOIN RuleParam
+								ON Rule.id = RuleParam.rule_id
 						WHERE
-							RuleParams.rulep_name = 'delete'";
+							RuleParam.name = 'delete'";
 		$stmt = $this->connection->prepare($sqlParams);
 		$stmt->execute();	   				
 		$rules = $stmt->fetchAll();
@@ -737,14 +737,14 @@ class jobcore  {
 			// Boucle sur toutes les règles
 			foreach ($rules as $rule) {
 				$tableId = array();
-				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source',$tables)) {
-					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_source';
+				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_source',$tables)) {
+					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_source'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_source';
 				}
-				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target',$tables)) {
-					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_target';
+				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_target',$tables)) {
+					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_target'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_target';
 				}
-				if (in_array('z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history',$tables)) {
-					$tableId['z_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history'] = 'id_'.$rule['rule_name_slug'].'_'.$rule['rule_version'].'_history';
+				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_history',$tables)) {
+					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_history'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_history';
 				}
 				
 				if (!empty($tableId)) {
@@ -753,20 +753,20 @@ class jobcore  {
 						try {
 							$deleteSource = "
 								DELETE $table
-								FROM Documents
+								FROM Document
 									INNER JOIN $table
-										ON Documents.id = $table.$id
+										ON Document.id = $table.$id
 								WHERE 
-										Documents.rule_id = '$rule[rule_id]'
-									AND Documents.global_status IN ('Close','Cancel')
-									AND DATEDIFF(CURRENT_DATE( ),Documents.date_modified) >= $rule[days]
+										Document.rule_id = '$rule[id]'
+									AND Document.global_status IN ('Close','Cancel')
+									AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= $rule[days]
 							";							
 							$stmt = $this->connection->prepare($deleteSource);
 							$stmt->execute();
 							$this->connection->commit(); // -- COMMIT TRANSACTION
 						} catch (\Exception $e) {
 							$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-							$this->message .= 'Failed to clear data for the rule '.$rule['rule_id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+							$this->message .= 'Failed to clear data for the rule '.$rule['id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 							$this->logger->error($this->message);	
 						}
 					}
@@ -778,20 +778,20 @@ class jobcore  {
 					$deleteLog = "
 						DELETE Log
 						FROM Log
-							INNER JOIN Documents
-								ON Log.doc_id = Documents.id
+							INNER JOIN Document
+								ON Log.doc_id = Document.id
 						WHERE 
-								Log.rule_id = '$rule[rule_id]'
-							AND Log.log_msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
-							AND Documents.global_status IN ('Close','Cancel')
-							AND DATEDIFF(CURRENT_DATE( ),Documents.date_modified) >= $rule[days]
+								Log.rule_id = '$rule[id]'
+							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
+							AND Document.global_status IN ('Close','Cancel')
+							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= $rule[days]
 					";						
 					$stmt = $this->connection->prepare($deleteLog);
 					$stmt->execute();
 					$this->connection->commit(); // -- COMMIT TRANSACTION
 				} catch (\Exception $e) {
 					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$this->message .= 'Failed to clear logs for the rule '.$rule['rule_id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$this->message .= 'Failed to clear logs for the rule '.$rule['id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 					$this->logger->error($this->message);	
 				}
 			}
@@ -806,20 +806,20 @@ class jobcore  {
 			// Suppression des jobs de transfert vide et des autres jobs qui datent de plus de nbDayClearJob jours
 			$deleteJob = " 	DELETE FROM Job
 							WHERE 
-									job_status = 'End'
+									status = 'End'
 								AND (
 										(
-											job_param NOT IN ('cleardata', 'backup', 'notification')
-											AND job_message IN ('', 'Another job is running. Failed to start job. ')
-											AND job_open = 0
-											AND job_close = 0
-											AND job_cancel = 0
-											AND job_error = 0
+											param NOT IN ('cleardata', 'backup', 'notification')
+											AND message IN ('', 'Another job is running. Failed to start job. ')
+											AND open = 0
+											AND close = 0
+											AND cancel = 0
+											AND error = 0
 										)
 									OR 	(
-											job_param IN ('cleardata', 'backup', 'notification')
-											AND job_message = ''
-											AND DATEDIFF(CURRENT_DATE( ),job_end) > '$this->nbDayClearJob'
+											param IN ('cleardata', 'backup', 'notification')
+											AND message = ''
+											AND DATEDIFF(CURRENT_DATE( ),end) > '$this->nbDayClearJob'
 										)
 									)
 			";	
@@ -843,14 +843,14 @@ class jobcore  {
 			$this->logData['Error'] = 0;
 			$this->logData['paramJob'] = $this->paramJob;
 			$sqlParams = "	SELECT 
-								count(distinct Documents.id) nb,
-								Documents.global_status
+								count(distinct Document.id) nb,
+								Document.global_status
 							FROM Log
-								INNER JOIN Documents
-									ON Log.doc_id = Documents.id
+								INNER JOIN Document
+									ON Log.doc_id = Document.id
 							WHERE
 								Log.job_id = :id
-							GROUP BY Documents.global_status";
+							GROUP BY Document.global_status";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("id", $this->id);
 		    $stmt->execute();	   				
@@ -878,7 +878,7 @@ class jobcore  {
 								Connector_source.sol_id sol_id_source
 							FROM (SELECT DISTINCT rule_id FROM Log WHERE job_id = :id) rule_job
 								INNER JOIN Rule
-									ON rule_job.rule_id = Rule.rule_id
+									ON rule_job.rule_id = Rule.id
 								INNER JOIN Connector Connector_source
 									ON Connector_source.conn_id = Rule.conn_id_source
 								INNER JOIN Connector Connector_target
@@ -933,14 +933,14 @@ class jobcore  {
 			}
 			$query_header = "UPDATE Job 
 							SET 
-								job_end = :now, 
-								job_status = 'End', 
-								job_close = :close, 
-								job_cancel = :cancel, 
-								job_open = :open, 
-								job_error = :error, 
-								job_message = :message
-							WHERE job_id = :id"; 	
+								end = :now, 
+								status = 'End', 
+								close = :close, 
+								cancel = :cancel, 
+								open = :open, 
+								error = :error, 
+								message = :message
+							WHERE id = :id"; 	
 			$stmt = $this->connection->prepare($query_header);
 			$stmt->bindValue("now", $now);
 			$stmt->bindValue("close", $close);
@@ -964,7 +964,7 @@ class jobcore  {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query_header = "INSERT INTO Job (job_id, job_begin, job_status, job_param, job_manual) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual')";
+			$query_header = "INSERT INTO Job (id, begin, status, param, manual) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual')";
 			$stmt = $this->connection->prepare($query_header);
 			$stmt->execute();
 			$this->connection->commit(); // -- COMMIT TRANSACTION

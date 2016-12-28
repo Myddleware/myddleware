@@ -32,7 +32,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table()
  * @ORM\Entity
  * @ORM\Table(indexes={
- *  @ORM\Index(name="index_job_status", columns={"job_status"})
+ *  @ORM\Index(name="index_status", columns={"status"})
  *}) 
  */ 
 class Job
@@ -40,7 +40,7 @@ class Job
     /**
      * @var string
      *
-     * @ORM\Column(name="job_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="id", type="string", length=255, nullable=false)
      * @ORM\Id
      */
     private $id;
@@ -49,7 +49,7 @@ class Job
      * @var string
      *
 	 * 
-     * @ORM\Column(name="job_status", type="string", length=50, nullable=false)
+     * @ORM\Column(name="status", type="string", length=50, nullable=false)
 	 * 
      */
     private $status;
@@ -58,7 +58,7 @@ class Job
      * @var string
      *
 	 * 
-     * @ORM\Column(name="job_param", type="string", length=50, nullable=false)
+     * @ORM\Column(name="param", type="string", length=50, nullable=false)
 	 * 
      */
     private $param;
@@ -66,7 +66,7 @@ class Job
     /**
      * @var datetime
      *
-	 * @ORM\Column(name="job_begin", type="datetime", nullable=false)
+	 * @ORM\Column(name="begin", type="datetime", nullable=false)
 	 * 
      */
     private $begin;
@@ -74,7 +74,7 @@ class Job
     /**
      * @var datetime
      *
-	 * @ORM\Column(name="job_end", type="datetime", nullable=false)
+	 * @ORM\Column(name="end", type="datetime", nullable=false)
 	 * 
      */
     private $end;
@@ -83,7 +83,7 @@ class Job
     /**
      * @var string
      *
-	 * @ORM\Column(name="job_message", type="text", nullable=false)
+	 * @ORM\Column(name="message", type="text", nullable=false)
 	 * 
      */
     private $message;	
@@ -92,7 +92,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="job_open", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="open", type="integer", length=6, nullable=false)
 	 * 
      */
     private $open;
@@ -100,7 +100,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="job_close", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="close", type="integer", length=6, nullable=false)
 	 * 
      */
     private $close;	
@@ -108,7 +108,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="job_cancel", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="cancel", type="integer", length=6, nullable=false)
 	 * 
      */
     private $cancel;
@@ -116,7 +116,7 @@ class Job
      /**
      * @var boolean
      *
-	 * @ORM\Column(name="job_manual", type="boolean", nullable=false)
+	 * @ORM\Column(name="manual", type="boolean", nullable=false)
 	 * 
      */
     private $manual;
@@ -124,7 +124,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="job_error", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="error", type="integer", length=6, nullable=false)
 	 * 
      */
     private $error;	

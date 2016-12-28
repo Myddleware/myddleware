@@ -509,9 +509,9 @@ class solutioncore {
 	protected function getInfoDocument($idDocument) {
 		$connection = $this->getConn();
 		$sqlParams = "	SELECT *
-						FROM Documents 
+						FROM Document 
 							INNER JOIN Rule
-								ON Documents.rule_id = Rule.rule_id
+								ON Document.rule_id = Rule.id
 						WHERE id = :id_doc";								
 		$stmt = $connection->prepare($sqlParams);
 		$stmt->bindValue(":id_doc", $idDocument);
@@ -523,7 +523,7 @@ class solutioncore {
 	// Permet de récupérer la source ID du document en paramètre
 	protected function getSourceId($idDoc) {
 		// Récupération du source_id
-		$sql = "SELECT `source_id` FROM `Documents` WHERE `id` = :idDoc";
+		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue(":idDoc", $idDoc);
 		$stmt->execute();
@@ -559,14 +559,14 @@ class solutioncore {
 	
 	// Check if the job is still active
 	protected function isJobActive($param) {
-		$sqlJobDetail = "SELECT * FROM Job WHERE job_id = :jobId";
+		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
 		$stmt = $this->conn->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $param['jobId']);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row	
 		if (
-				empty($job['job_status'])
-			|| 	$job['job_status'] != 'Start'
+				empty($job['status'])
+			|| 	$job['status'] != 'Start'
 		) {
 			throw new \Exception('The task has been manually stopped. ');
 		}
@@ -575,18 +575,19 @@ class solutioncore {
 	// Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule	
 	protected function getParamLogin($connId) {
 		// RECUPERE LE NOM DE LA SOLUTION			
-		$sql = "SELECT sol_name  
+		$sql = "SELECT name  
 				FROM Connector
-				JOIN Solution USING( sol_id )
-				WHERE conn_id = :connId";
+					INNER JOIN Solution 
+						ON Solution.id  = Connector.sol_id
+				WHERE id = :connId";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
 		$stmt->execute();		
 		$r = $stmt->fetch();	
 		
 		// RECUPERE LES PARAMS DE CONNEXION
-		$sql = "SELECT conp_id, conn_id, conp_name, conp_value
-				FROM ConnectorParams 
+		$sql = "SELECT id, conn_id, name, value
+				FROM ConnectorParam 
 				WHERE conn_id = :connId";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
@@ -597,8 +598,8 @@ class solutioncore {
 		
 		if(!empty($tab_params)) {
 			foreach ($tab_params as $key => $value) {
-				$params[$value['conp_name']] = $value['conp_value'];
-				$params['ids'][$value['conp_name']] = array('conp_id' => $value['conp_id'],'conn_id' => $value['conn_id']);
+				$params[$value['name']] = $value['value'];
+				$params['ids'][$value['name']] = array('id' => $value['id'],'conn_id' => $value['conn_id']);
 			}			
 		}	
 		return $params;

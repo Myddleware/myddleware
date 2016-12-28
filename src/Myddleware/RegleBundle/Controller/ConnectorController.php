@@ -34,7 +34,7 @@ use Pagerfanta\Pagerfanta;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 //--
 use Myddleware\RegleBundle\Entity\Connector;
-use Myddleware\RegleBundle\Entity\ConnectorParams;
+use Myddleware\RegleBundle\Entity\ConnectorParam;
 //--
 use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
@@ -359,8 +359,8 @@ class ConnectorController extends Controller
 				// Création d'un connecteur
 				$unConnector = new Connector();	 
 				$unConnector->setSolution( $solution );
-				$unConnector->setLabel( $this->getRequest()->request->get('label') );
-				$unConnector->setLabelSlug( $this->getRequest()->request->get('label') );
+				$unConnector->setName( $this->getRequest()->request->get('label') );
+				$unConnector->setNameSlug( $this->getRequest()->request->get('label') );
 				$unConnector->setDateCreated(new \DateTime);
 				$unConnector->setDateModified(new \DateTime);
 				$unConnector->setCreatedBy( $this->getUser()->getId() );
@@ -372,7 +372,7 @@ class ConnectorController extends Controller
 				// Insert les paramètres de connexion du connecteur
 				foreach ( $myddlewareSession['param']['connector']['source'] as $connexion => $val ) {									
 					if( $connexion != "solution" ) {
-						$unConnectoParams = new ConnectorParams();		
+						$unConnectoParams = new ConnectorParam();		
 						$unConnectoParams->setConnector( $unConnector->getId() );
 						$unConnectoParams->setName( $connexion );
 						$unConnectoParams->setValue( $val );
@@ -498,7 +498,7 @@ class ConnectorController extends Controller
 					   		
 			$connector_params = $this->getDoctrine()
                      ->getManager()
-                     ->getRepository('RegleBundle:ConnectorParams')
+                     ->getRepository('RegleBundle:ConnectorParam')
                      ->findByConnector( $id );	
  			
 			if($connector_params) {
@@ -549,14 +549,14 @@ class ConnectorController extends Controller
 								
 													   
 									   
-				$connector[0]->setLabel( $_POST['nom'] );	
+				$connector[0]->setName( $_POST['nom'] );	
 			    $em->persist($connector[0]);
 			    $em->flush();	
 				
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($_POST['params']) > 0) {
 					foreach($_POST['params']  as $p) {
-						$param = $em->getRepository('RegleBundle:ConnectorParams')
+						$param = $em->getRepository('RegleBundle:ConnectorParam')
 			                        ->findOneBy( array(
 									    	'id' => (int)$p['id']
 									    )
@@ -601,7 +601,7 @@ class ConnectorController extends Controller
 			$em = $this->getDoctrine()->getManager();
 			
 			// Infos du connecteur
-			$connectorP = $em->getRepository('RegleBundle:ConnectorParams')
+			$connectorP = $em->getRepository('RegleBundle:ConnectorParam')
 	                        ->findByConnector( $id );
 			// Infos du connecteur
 			$connector = $em->getRepository('RegleBundle:Connector')
@@ -613,7 +613,7 @@ class ConnectorController extends Controller
 									   
 			if( isset($connectorP) && count($connectorP > 0) ) {				
 				$connector_params = array();
-				$connector_params['label'] = $connector[0]->getLabel();
+				$connector_params['label'] = $connector[0]->getName();
 				
 				$connector_params['solution']['name'] = $connector[0]->getSolution()->getName();
 				$connector_params['solution']['id'] = $connector[0]->getSolution()->getId();
@@ -668,7 +668,7 @@ class ConnectorController extends Controller
 			
 			$lstArray = array();			   			
 			foreach ($listConnector as $c) {
-				$lstArray[$c->getId()] = ucfirst($c->getLabel());
+				$lstArray[$c->getId()] = ucfirst($c->getName());
 			}
 			$lst = tools::composeListHtml($lstArray, $this->get('translator')->trans('create_rule.step1.choose_connector'));
 			return new Response($lst);	
