@@ -499,6 +499,7 @@ error:
         target_module_connect: Erreur de connexion du module cible
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
+        document_error_open: Impossible d'éditer la règle car au moins un document est ouvert ou en erreur sur cette règle. Veuillez annuler ces document pour pouvoi éditer cette règle.		
             
 title:
     account:

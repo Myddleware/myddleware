@@ -319,7 +319,7 @@ class shopapplicationcore extends solution {
 		$result['count'] = 0;
 		try {
 			// Get the reference date
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);

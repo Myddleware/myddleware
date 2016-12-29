@@ -470,7 +470,7 @@ class sagecrmcore extends solution {
 		$result = array();
 		try {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Define SOAP connection options.
 			$options = array(

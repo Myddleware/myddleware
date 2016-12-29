@@ -498,6 +498,7 @@ error:
         target_module_connect: Target module connection error
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
+        document_error_open: Failed to edit the rule because there is at least one document open or in error in this rule. Close or cancel these documents to be able to edit this rule.
 
 title:
     account:

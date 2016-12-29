@@ -255,8 +255,8 @@ class DefaultControllerCore extends Controller
 						    )
 					);
 					
-		$myddlewareSession['flux_filter']['where'] = "WHERE id = '" . $rule->getId() . "'";
-		$myddlewareSession['flux_filter']['c']['rule'] = $rule->getId();
+		$myddlewareSession['flux_filter']['where'] = "WHERE Document.rule_id = '" . $rule->getId() . "'";
+		$myddlewareSession['flux_filter']['c']['rule'] = $rule->getName();
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 		return $this->redirect($this->generateUrl('flux_list'));
 	}
@@ -437,9 +437,24 @@ class DefaultControllerCore extends Controller
 
 	// MODE EDITION D UNE REGLE
 	public function ruleEditAction($id) {
-		try {	
+		try {
 			$request = $this->get('request');
 			$session = $request->getSession();
+			// First, checking that the rule has no document open or in error
+			$docErrorOpen = $this->getDoctrine()
+                         ->getManager()
+                         ->getRepository('RegleBundle:Document')
+                         ->findOneBy( array(
+							    	'rule' => $id,
+									'globalStatus' => array('Open', 'Error')
+							    )
+						);
+			// Return to the view detail fo the rule if we found a document open or in error
+			if (!empty($docErrorOpen)) {
+				$session->set( 'error', array($this->get('translator')->trans('error.rule.document_error_open')));
+				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
+			}
+
 			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 			// We always add data again in session because these data are removed after the call of the get
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	

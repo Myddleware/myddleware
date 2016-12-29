@@ -200,8 +200,8 @@ class documentcore {
 									ON Document.rule_id = Rule.id
 								INNER JOIN RuleParam
 									ON  RuleParam.rule_id = Rule.id
-									AND name= 'mode'
-							WHERE id = :id_doc";											
+									AND RuleParam.name= 'mode'
+							WHERE Document.id = :id_doc";											
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":id_doc", $id_doc);
 			$stmt->execute();	   				
@@ -1754,7 +1754,7 @@ class documentcore {
 		try {
 			$now = gmdate('Y-m-d H:i:s');
 			$this->message = substr(str_replace("'","",$this->message),0,1000);
-			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
+			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->message = '';

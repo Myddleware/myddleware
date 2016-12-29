@@ -435,7 +435,7 @@ class moodlecore  extends solution {
 			$result['count'] = 0;
 			// Put date ref in Moodle format
 			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);

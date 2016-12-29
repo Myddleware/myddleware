@@ -880,9 +880,9 @@ class jobcore  {
 								INNER JOIN Rule
 									ON rule_job.rule_id = Rule.id
 								INNER JOIN Connector Connector_source
-									ON Connector_source.conn_id = Rule.conn_id_source
+									ON Connector_source.id = Rule.conn_id_source
 								INNER JOIN Connector Connector_target
-									ON Connector_target.conn_id = Rule.conn_id_target";
+									ON Connector_target.id = Rule.conn_id_target";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("id", $this->id);
 		    $stmt->execute();	   				

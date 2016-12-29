@@ -173,9 +173,9 @@ class templatecore {
 						Connector_target.sol_id sol_target
 					FROM Rule
 						INNER JOIN Connector Connector_source
-							ON Rule.conn_id_source = Connector_source.conn_id
+							ON Rule.conn_id_source = Connector_source.id
 						INNER JOIN Connector Connector_target
-							ON Rule.conn_id_target = Connector_target.conn_id							
+							ON Rule.conn_id_target = Connector_target.id							
 					WHERE 
 						id = :ruleId";
 		$stmt = $this->connection->prepare($query);
@@ -200,9 +200,9 @@ class templatecore {
 						Connector_target.sol_id sol_target
 					FROM Rule
 						INNER JOIN Connector Connector_source
-							ON Rule.conn_id_source = Connector_source.conn_id
+							ON Rule.conn_id_source = Connector_source.id
 						INNER JOIN Connector Connector_target
-							ON Rule.conn_id_target = Connector_target.conn_id							
+							ON Rule.conn_id_target = Connector_target.id							
 					WHERE 
 						id = :ruleId";
 		$stmt = $this->connection->prepare($query);

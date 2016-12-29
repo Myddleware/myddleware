@@ -159,7 +159,6 @@ class rulecore {
 	
 	// Connect to the source or target application
 	public function connexionSolution($type) {
-
 		try {
 			if ($type == 'source') {
 				$connId = $this->rule['conn_id_source'];
@@ -172,16 +171,15 @@ class rulecore {
 			}
 			
 			// Get the name of the application			
-		    $sql = "SELECT name  
+		    $sql = "SELECT Solution.name  
 		    		FROM Connector
 						INNER JOIN Solution 
 							ON Solution.id  = Connector.sol_id
-		    		WHERE conn_id = :connId";
+		    		WHERE Connector.id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $connId);
 		    $stmt->execute();		
-			$r = $stmt->fetch();	
-			
+			$r = $stmt->fetch();			
 			// Get params connection
 		    $sql = "SELECT id, conn_id, name, value
 		    		FROM ConnectorParam 
@@ -190,7 +188,6 @@ class rulecore {
 			$stmt->bindValue(":connId", $connId);
 		    $stmt->execute();	    
 			$tab_params = $stmt->fetchAll();
-	
 			$params = array();
 			if(!empty($tab_params)) {
 				foreach ($tab_params as $key => $value) {

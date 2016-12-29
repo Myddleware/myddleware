@@ -79,6 +79,7 @@ class prestashopcore extends solution {
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
     	parent::login($paramConnexion);
+print_r($paramConnexion);	
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$this->webService = new \PrestaShopWebservice($this->paramConnexion['url'], $this->paramConnexion['apikey'], false);
@@ -520,7 +521,7 @@ class prestashopcore extends solution {
 			}
 			
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -677,7 +678,7 @@ class prestashopcore extends solution {
 	protected function readManyToMany($param){
 		try { // try-catch Myddleware	
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);			
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
 				// Init parameter to read in Prestashop

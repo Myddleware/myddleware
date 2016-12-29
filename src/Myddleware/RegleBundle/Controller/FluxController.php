@@ -203,7 +203,7 @@ class FluxControllerCore extends Controller
 						'required'=> false	))							
 					 					  
 					->getForm();
-		//
+
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
 		$where = ((isset($myddlewareSession['flux_filter']['where']) ? $myddlewareSession['flux_filter']['where'] : ''));
@@ -214,7 +214,7 @@ class FluxControllerCore extends Controller
 			$where = 'WHERE ';
 			
 			if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
-				$where .= "date_created >= '".$data['date_create_start']."' ";
+				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['date_create_start'] = $data['date_create_start'];							
 			}
@@ -224,7 +224,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['date_create_end'] ) && is_string($data['date_create_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_created <= '".$data['date_create_end']."' ";
+				$where .= "Document.date_created <= '".$data['date_create_end']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_create_end'] = $data['date_create_end'];							
 			}	
@@ -234,7 +234,7 @@ class FluxControllerCore extends Controller
 
 			if(!empty( $data['date_modif_start'] ) && is_string($data['date_modif_start'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_modified >= '".$data['date_modif_start']."' ";
+				$where .= "Document.date_modified >= '".$data['date_modif_start']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_modif_start'] = $data['date_modif_start'];							
 			}
@@ -244,7 +244,7 @@ class FluxControllerCore extends Controller
 							
 			if(!empty( $data['date_modif_end'] ) && is_string($data['date_modif_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_modified <= '".$data['date_modif_end']."' ";
+				$where .= "Document.date_modified <= '".$data['date_modif_end']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_modif_end'] = $data['date_modif_end'];					
 			}
@@ -254,7 +254,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['rule'] ) && is_string($data['rule'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "name='".trim($data['rule'])."' ";
+				$where .= "Rule.name='".trim($data['rule'])."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['rule'] = $data['rule'];
 			}				
@@ -264,7 +264,7 @@ class FluxControllerCore extends Controller
 										
 			if(!empty( $data['status'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "status='".$data['status']."' ";
+				$where .= "Document.status='".$data['status']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['status'] = $data['status'];
 			}
@@ -274,7 +274,7 @@ class FluxControllerCore extends Controller
 
 			if(!empty( $data['gblstatus'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "global_status='".$data['gblstatus']."' ";
+				$where .= "Document.global_status='".$data['gblstatus']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['gblstatus'] = $data['gblstatus'];
 			}
@@ -284,7 +284,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['target_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "target_id LIKE '".$data['target_id']."' ";
+				$where .= "Document.target_id LIKE '".$data['target_id']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['target_id'] = $data['target_id'];
 			}
@@ -294,7 +294,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['source_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "source_id LIKE '".$data['source_id']."' ";
+				$where .= "Document.source_id LIKE '".$data['source_id']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['source_id'] = $data['source_id'];
 			}
@@ -339,10 +339,10 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT d.*, u.username, r.version, concat(r.name, ' v', r.version) rule_name
-				FROM Document d 
-				JOIN users u ON(u.id=d.created_by)
-				JOIN Rule r ON(r.id = d.rule_id)
+		$sql = "SELECT Document.*, users.username, Rule.version, Rule.name rule_name
+				FROM Document  
+				JOIN users ON(users.id = Document.created_by)
+				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 
 				$user
 				ORDER BY date_modified DESC 
@@ -369,9 +369,9 @@ class FluxControllerCore extends Controller
 			// Si on atteind la limit alors on récupère le nombre total de flux
 			if ($compact['nb'] >= $this->llimitListFlux) {
 				$sql = "SELECT count(*) nb
-						FROM Document d 
-						JOIN users u ON(u.id=d.created_by)
-						JOIN Rule r ON(r.id = d.rule_id)
+						FROM Document 
+						JOIN users ON(users.id = Document.created_by)
+						JOIN Rule ON(Rule.id = Document.rule_id)
 						$where 
 						$user";
 				$stmt = $conn->prepare($sql);

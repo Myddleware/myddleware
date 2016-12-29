@@ -299,7 +299,7 @@ class salesforcecore extends solution {
 					'date_ref' => '2000-01-01 00:00:00',
 					'module' => 'Pricebook2',
 					'fields' => array('Id', 'Name'),
-					'rule' => array('rule_mode' => 'C'),
+					'rule' => array('mode' => 'C'),
 					'limit' => 100
 				);
 				$priceBook2SF = $this->read($param);				
@@ -444,7 +444,7 @@ class salesforcecore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			
 			// Récupération du nom du champ date
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
@@ -762,7 +762,7 @@ class salesforcecore extends solution {
 	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
 	protected function getWhere($param) {
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 		// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
 		$tab = explode(' ', $param['date_ref']);
@@ -790,7 +790,7 @@ class salesforcecore extends solution {
 	
 	// Génération du ORDER
 	protected function getOrder($param){	
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
 		} else {
