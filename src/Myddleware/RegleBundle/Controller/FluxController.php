@@ -453,8 +453,14 @@ class FluxControllerCore extends Controller
 												),				
 				'maxPerPage' => $this->container->getParameter('pager'),
 				'page' => $page
-			),false);;
-			
+			),false);		
+			$childDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
+			// Get the rule name of every child doc
+			$childDocumentsRule = array();
+			foreach ($childDocuments as $childDocument) {
+				$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
+			}
+	
 			$name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
 				$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
 				$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
@@ -476,6 +482,9 @@ class FluxControllerCore extends Controller
 		        'entities' => $compact['entities'],
 		        'pager' => $compact['pager'],
 		        'rule' => $rule,
+		        'child_documents' => $childDocuments,
+		        'child_Documents_Rule' => $childDocumentsRule,
+		        'nb_child_documents' => count($childDocuments),
 		        'ctm_btn' => $list_btn			
 				)
 			);			

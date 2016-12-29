@@ -338,6 +338,7 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
+    nbChildDocuments: Tranferts fils
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
@@ -349,6 +350,7 @@ view_flux:
         attempt: Tentative
         gblstatut: Global Status
         version: Version
+        parent: Parent
     log:
         id: Id
         ref: Référence
@@ -466,7 +468,6 @@ solution:
     params: 
         dateref: Date de référence
         active: Activation
-        rate: Fréquence
         delete: Suppression des données
         activate: Activé
         desactivate: Désactivé

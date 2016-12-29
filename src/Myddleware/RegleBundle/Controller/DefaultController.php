@@ -607,13 +607,12 @@ class DefaultControllerCore extends Controller
 						$relate[] = array(
 							'source' => $ruleRelationShipsObj->getFieldNameSource(),
 							'target' => $ruleRelationShipsObj->getFieldNameTarget(),
-							'id' => $ruleRelationShipsObj->getFieldId()
+							'id' => $ruleRelationShipsObj->getFieldId(),
+							'parent' => $ruleRelationShipsObj->getParent()
 						);
-					}	
-					
+					}						
 					$myddlewareSession['param']['rule']['reload']['relate'] = json_encode($relate);
 				}	
-
 
 				// Filter
 	  			$ruleFilters = $this->getDoctrine()
@@ -678,7 +677,6 @@ class DefaultControllerCore extends Controller
 		$rule_relationships = $this->em->getRepository('RegleBundle:RuleRelationShip')
                   				 ->findByRule( $rule->getId() );	
 
-		//NADA
 		$solution_cible_nom = $rule->getConnectorTarget()->getSolution()->getName();
 		$solution_cible= $this->get('myddleware_rule.'.$solution_cible_nom);
 		$moduleCible = (string)$rule->getModuleTarget();
@@ -693,7 +691,6 @@ class DefaultControllerCore extends Controller
 		
 		if (isset($duplicate_fields))
 			$duplicate_fields = $duplicate_fields->getValue();
-		//NADA FIN
 								 					 
 		$tab_rs = array();	
 		$i = 0;					 
@@ -702,6 +699,7 @@ class DefaultControllerCore extends Controller
 			$tab_rs[$i]['getFieldId'] = $r->getFieldId(); 
 			$tab_rs[$i]['getFieldNameSource'] = $r->getFieldNameSource();
 			$tab_rs[$i]['getFieldNameTarget'] = $r->getFieldNameTarget();
+			$tab_rs[$i]['getParent'] = $r->getParent();
 
 			$ruleTmp = $this->em->getRepository('RegleBundle:Rule')
 	                   ->findOneBy( array(
@@ -737,6 +735,7 @@ class DefaultControllerCore extends Controller
 		$params_suite = false;
 		if($Params) {
 			foreach ($Params as $field) {
+				$standardField = false;
 				foreach ($ruleParam as $index => $value) {
 					if($field->getName() == $value['name']) {
 						$ruleParam[$index]['id_bdd'] = $field->getId();
@@ -753,41 +752,43 @@ class DefaultControllerCore extends Controller
 								$ruleParam[$index]['name'] = 'datereference_txt';
 								$ruleParam[$index]['label'] = $autorization_source.'.'.$autorization_module_trans.'.ref';
 							} 
-						}	
+						}
+						$standardField = true;
+						break;
 					} 
-				}
-				
-				if($field->getName() == 'mode') {
-					// We send the translation of the mode to the view
-					switch ($field->getValue()) {
-						case '0':
-							$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'create_modify'));
-							break;
-						case 'C':
-							$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'create_only'));
-							break;
-						case 'S':
-							$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'search_only'));;
-							break;
-						default:
-						   $params_suite['mode'] = $field->getValue();
-					}			
-				}	
-				
-				if(
-						$field->getName() == 'bidirectional'
-					AND !empty($field->getValue())
-				) {
-					$ruleBidirectional = $this->em->getRepository('RegleBundle:Rule')
-										   ->findOneBy( array(
-														'id' => $field->getValue()
-													)
-											);
-					// Send the name and the id of the opposite rule to the view
-					$params_suite['bidirectional'] = $field->getValue();
-					$params_suite['bidirectionalName'] = $ruleBidirectional->getName();
-				}				
-							
+				}		
+				if (!$standardField) {
+					if($field->getName() == 'mode') {
+						// We send the translation of the mode to the view
+						switch ($field->getValue()) {
+							case '0':
+								$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'create_modify'));
+								break;
+							case 'C':
+								$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'create_only'));
+								break;
+							case 'S':
+								$params_suite['mode'] = $tools->getTranslation(array('create_rule', 'step3', 'syncdata', 'search_only'));;
+								break;
+							default:
+							   $params_suite['mode'] = $field->getValue();
+						}			
+					} elseif($field->getName() == 'bidirectional') {
+						if (!empty($field->getValue())) {
+							$ruleBidirectional = $this->em->getRepository('RegleBundle:Rule')
+												   ->findOneBy( array(
+																'id' => $field->getValue()
+															)
+													);
+							// Send the name and the id of the opposite rule to the view
+							$params_suite['bidirectional'] = $field->getValue();
+							$params_suite['bidirectionalName'] = $ruleBidirectional->getName();
+						}				
+					}	
+					else {
+						$params_suite['customParams'][] = array('name' => $field->getName(), 'value' => $field->getValue());
+					}
+				}			
 			}			
 		}
 
@@ -1742,6 +1743,7 @@ class DefaultControllerCore extends Controller
 					'rule_params'=>$rule_params, 
 					'lst_relation_target'=>$lst_relation_target_alpha,
 					'lst_relation_source'=>$choice_source,
+					'lst_relation_parent'=>array('1' => $this->get('translator')->trans('create_rule.step3.relation.yes')),
 					'lst_rule' =>$choice,
 					'lst_category' => $lstCategory,
 					'lst_functions' => $lstFunctions,
@@ -1752,14 +1754,14 @@ class DefaultControllerCore extends Controller
 					'opt_source' => $html_list_source,
 					'fieldMappingAddListType' => $fieldMappingAdd	
 				);
-			
-			// $result = $this->beforeRender($source['table'],$cible['table'],$rule_params,$lst_relation_target_alpha,$choice_source,$choice,$lstCategory,$lstFunctions,$lst_filter,$myddlewareSession['param']['rule'],$fieldsDuplicateTarget,$html_list_source,$fieldMappingAdd);
 			$result = $this->beforeRender($result);
 			
 			// Formatage des listes déroulantes : 
 			$result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
+			$result['lst_relation_parent'] = tools::composeListHtml($result['lst_relation_parent'], ' ');
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
+				
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 			return $this->render('RegleBundle:Rule:create/step3.html.twig',$result);					
 										

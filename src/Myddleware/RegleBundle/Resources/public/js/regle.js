@@ -1497,6 +1497,7 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		$.each(relate, function( index, nameR ) {
 			$('#lst_'+ nameR.target).val( nameR.id );
 			$('#lst_source_'+ nameR.target).val( nameR.source );						
+			$('#lst_parent_'+ nameR.target).val( (nameR.parent ? 1 : 0) ); // Convert true/false to 1/0
 		});
 	}
 	

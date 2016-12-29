@@ -61,10 +61,9 @@
 			<input readonly="readonly" class="title" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 		</td>
 		<td>
-			<select class="lst_parent_relate" id="parent_{{ rule.name }}" name="">
-				<option value="0" selected></option>
-				<option value="1">{{'create_rule.step3.relation.yes'|trans}}</option>
-	    	</select>
+			<select class="lst_parent_relate" id="lst_parent_{{ rule.name }}" name="">
+			    {{ lst_relation_parent | raw }}
+			</select>
 		</td>
 	</tr>
 	{% endfor %}

@@ -1326,7 +1326,6 @@ class rulecore {
 		return array(
 			'active' => false,
 			'RuleParam' => array(
-				'rate' => '5',
 				'delete' => '60',
 				'datereference' => date('Y-m-d').' 00:00:00'			
 			),

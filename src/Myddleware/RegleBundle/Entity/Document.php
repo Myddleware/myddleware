@@ -31,7 +31,10 @@ use Doctrine\ORM\Mapping as ORM;
  * Document
  * @ORM\Table()
  * @ORM\Entity
- * @ORM\Table(indexes={@ORM\Index(name="index_ruleid_status", columns={"rule_id","status"})})
+ * @ORM\Table(indexes={
+ *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
+ *      @ORM\Index(name="index_parent_id", columns={"parent_id"})
+ * })
  */ 
 class Document
 {
@@ -152,7 +155,7 @@ class Document
      *
      * @ORM\Column(name="parent_id", type="string", nullable=false)
      */
-    private $parent_id;	
+    private $parentId;	
 
     /**
      * Set id
@@ -479,12 +482,12 @@ class Document
 	/**
      * Set parentId
      *
-     * @param string $parent_id
+     * @param string $parentId
      * @return Document
      */
-    public function setParentId($parent_id)
+    public function setParentId($parentId)
     {
-        $this->parent_id = $parent_id;
+        $this->parentId = $parentId;
     
         return $this;
     }
@@ -496,6 +499,6 @@ class Document
      */
     public function getParentId()
     {
-        return $this->parent_id;
+        return $this->parentId;
     }
 }
