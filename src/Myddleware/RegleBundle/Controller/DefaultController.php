@@ -791,12 +791,12 @@ class DefaultControllerCore extends Controller
 				}			
 			}			
 		}
-
         return $this->render('RegleBundle:Rule:edit/fiche.html.twig',array(
 			'rule' => $rule,
 			'connector' => $connector[0],
 			'fields' => $Fields,
 			'relate' => $tab_rs,
+			'parentRelationships' => $solution_cible->allowParentRelationship($moduleCible),
 			'params' => $ruleParam,
 			'filters' => $Filters,
 			'params_suite' => $params_suite
@@ -1752,7 +1752,8 @@ class DefaultControllerCore extends Controller
 					'duplicate_target' => $fieldsDuplicateTarget,
 					'opt_target' => $html_list_target,
 					'opt_source' => $html_list_source,
-					'fieldMappingAddListType' => $fieldMappingAdd	
+					'fieldMappingAddListType' => $fieldMappingAdd,
+					'parentRelationships' => $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']),					
 				);
 			$result = $this->beforeRender($result);
 			

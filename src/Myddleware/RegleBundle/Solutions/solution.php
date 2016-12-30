@@ -79,6 +79,9 @@ class solutioncore {
 	// Liste des champs à exclure pour chaque solution
 	protected $exclude_field_list = array();
 	
+	// Module list that allows to make parent relationships
+	protected $allowParentRelationship = array();
+		
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
     	$this->logger = $logger;
@@ -539,6 +542,17 @@ class solutioncore {
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
 		return null;
+	}
+	
+	// The function return true if we can display the column parent in the rule view, relationship tab
+	public function allowParentRelationship($module) {
+		if (
+				!empty($this->allowParentRelationship)
+			 && in_array($module,$this->allowParentRelationship)
+		) {
+			return true;
+		}
+		return false;
 	}
 	
 	// Check data before create 
