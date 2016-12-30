@@ -78,7 +78,6 @@ class rulecore {
 		}
 		$this->setRuleParam();
 		$this->setRuleRelationships();
-		$this->setRuleField();
 		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
 	}
 	
@@ -90,6 +89,8 @@ class rulecore {
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();
 			$this->rule = $stmt->fetch();
+			// Set the rule fields (we use the name_slug in $this->rule)
+			$this->setRuleField();
 		}
 	}
 

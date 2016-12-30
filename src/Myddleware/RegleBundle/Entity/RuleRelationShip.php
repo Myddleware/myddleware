@@ -83,7 +83,7 @@ class RuleRelationShip
 	/**
      * @var boolean
      *
-	 * @ORM\Column(name="parent", type="boolean", nullable=false)
+	 * @ORM\Column(name="parent", type="boolean", nullable=true)
 	 * 
      */
     private $parent; 	

@@ -132,7 +132,40 @@ class DefaultControllerCore extends Controller
 
 	// SUPPRESSION D UNE REGLE
 	public function ruleDeleteAction($id) {
-				
+		$request = $this->get('request');
+		$session = $request->getSession();
+		
+		// First, checking that the rule has document sent (close)
+		$docClose = $this->getDoctrine()
+					 ->getManager()
+					 ->getRepository('RegleBundle:Document')
+					 ->findOneBy( array(
+								'rule' => $id,
+								'globalStatus' => array('Close')
+							)
+					);
+		// Return to the view detail for the rule if we found a document close
+		if (!empty($docClose)) {
+			$session->set( 'error', array($this->get('translator')->trans('error.rule.delete_document_close')));
+			return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
+		}
+		
+		// First, checking that the rule has no document open or in error
+		$docErrorOpen = $this->getDoctrine()
+					 ->getManager()
+					 ->getRepository('RegleBundle:Document')
+					 ->findOneBy( array(
+								'rule' => $id,
+								'globalStatus' => array('Open', 'Error')
+							)
+					);
+		// Return to the view detail fo the rule if we found a document open or in error
+		if (!empty($docErrorOpen)) {
+			$session->set( 'error', array($this->get('translator')->trans('error.rule.delete_document_error_open')));
+			return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
+		}	
+		
+		
 		// Detecte si la session est le support ---------
 		$permission =  $this->get('myddleware.permission');
 		
@@ -451,7 +484,7 @@ class DefaultControllerCore extends Controller
 						);
 			// Return to the view detail fo the rule if we found a document open or in error
 			if (!empty($docErrorOpen)) {
-				$session->set( 'error', array($this->get('translator')->trans('error.rule.document_error_open')));
+				$session->set( 'error', array($this->get('translator')->trans('error.rule.edit_document_error_open')));
 				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
 			}
 
@@ -2252,23 +2285,31 @@ class DefaultControllerCore extends Controller
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 			exit;
 		}catch(\Exception $e) {
-			// Suppression des objets doctrine créés
-			if (!empty($objectToRemove)) {
-				foreach($objectToRemove as $object) {
-					$this->em->remove($object);
+			try {
+				// Suppression des objets doctrine créés
+				if (!empty($objectToRemove)) {
+					foreach($objectToRemove as $object) {	
+						$this->em->remove($object);
+					}
 				}
-			}
-			$this->em->flush();
-		    $this->em->close();	
-			// Suppression des tables créées
-			if (!empty($createTableRule)) {		
-				foreach($createTableRule as $table) {		
-					$this->connection->executeQuery( "DROP TABLE IF EXISTS z_".$table);
+				$this->em->flush();
+				$this->em->close();	
+				// Suppression des tables créées
+				if (!empty($createTableRule)) {		
+					foreach($createTableRule as $table) {		
+						$this->connection->executeQuery( "DROP TABLE IF EXISTS z_".$table);
+					}
 				}
+				$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
+				echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
+				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+				exit;
+			}catch(\Exception $e2) {
+				$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
+				$this->get('logger')->error('2;'.htmlentities($e2->getMessage().' (line '.$e2->getLine().')'));
+				echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
+				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 			}
-			echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			exit;
 		} 	
 	}
 

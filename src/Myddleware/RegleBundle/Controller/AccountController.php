@@ -50,24 +50,34 @@ class AccountController extends Controller
 	 }
 	 
 	 public function changeLocaleAction() {
-	 	if(isset($_POST['locale'])) {
-	 		$locale = $_POST['locale'];
-	 	} else {
-	 		return Response("Something missing (parameter)");
-	 	}	
-		$tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));	
-	 	if($locale == "fr") {
-	 		if($this->container->getParameter('locale') != "fr") { // Si la langue est déjà en Français ne rien faire, logique
-				$tools->changeMyddlewareParameter(array('locale'),'fr');
-	 		}
-	 	} else {
-	 		if($this->container->getParameter('locale') != "en") { // Si la langue est déjà en Anglais ne rien faire, logique
-				$tools->changeMyddlewareParameter(array('locale'),'en');
-	 		}
+	 	try{
+			$request = $this->get('request');
+			$session = $request->getSession();
+			
+			if(isset($_POST['locale'])) {
+				$locale = $_POST['locale'];
+			} else {
+				return Response("Something missing (parameter)");
+			}	
+			$tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));	
+			if($locale == "fr") {
+				if($this->container->getParameter('locale') != "fr") { // Si la langue est déjà en Français ne rien faire, logique
+					$tools->changeMyddlewareParameter(array('locale'),'fr');
+				}
+			} else {
+				if($this->container->getParameter('locale') != "en") { // Si la langue est déjà en Anglais ne rien faire, logique
+					$tools->changeMyddlewareParameter(array('locale'),'en');
+				}
+			}
+			// Clear the cache to change the language
+			$process = new \Symfony\Component\Process\Process('php '. $this->container->get( 'kernel' )->getRootDir() .'/console cache:clear --env='. $this->container->get( 'kernel' )->getEnvironment());
+			$process->run();
+			if (!$process->isSuccessful()) {
+				throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
+			}
+		} catch (Exception $e) {
+			$session->set( 'error', array($this->get('translator')->trans('error.account.language_change').$e->getMessage()));
 		}
-		// Clear the cache to change the language
-		$process = new \Symfony\Component\Process\Process('php '. $this->container->get( 'kernel' )->getRootDir() .'/console cache:clear --env='. $this->container->get( 'kernel' )->getEnvironment());
-		$process->run();
 		return new Response("Success");
 	 }
 	 

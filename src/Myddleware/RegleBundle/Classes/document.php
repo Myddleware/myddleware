@@ -1429,8 +1429,8 @@ class documentcore {
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {
-		try {			
-			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
+		try {
+			// Query used in the method several times
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
@@ -1447,6 +1447,63 @@ class documentcore {
 								AND Document.id != :id_doc
 							ORDER BY target_id DESC
 							LIMIT 1";
+							
+			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
+			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
+			if (!empty($this->ruleRelationships)) {
+				// Boucle sur les relation
+				foreach ($this->ruleRelationships as $ruleRelationship) {
+					// Si on est sur une relation avec le champ Myddleware_element_id
+					if ($ruleRelationship['field_name_target'] == 'Myddleware_element_id'){						
+						// Si le champs avec l'id source n'est pas vide
+						// S'il s'agit de Myddleware_element_id on teste id
+						if (
+								!empty($this->data[$ruleRelationship['field_name_source']])
+							 || (
+									$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
+								&& !empty($this->data['id'])	
+							 )
+						) {
+							// On recherche l'id target dans la règle liée
+							$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
+							// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
+							$direction = $this->getRelationshipDirection($ruleRelationship);
+							if ($direction == '-1') {	
+								$stmt = $this->connection->prepare($sqlParamsTarget);
+							}
+							else {
+								$stmt = $this->connection->prepare($sqlParamsSoure);
+							}
+							$stmt->bindValue(":ruleId", $ruleRelationship['field_id']);
+							$stmt->bindValue(":id", $this->sourceId);
+							$stmt->bindValue(":id_doc", $this->id);
+							$stmt->execute();	   				
+							$result = $stmt->fetch();				
+						
+							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
+							if (!empty($result['id'])) {
+								$this->targetId = $result['target_id'];
+							}
+							// Sinon on bloque la création du document 
+							// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
+							elseif (empty($ruleRelationship['parent'])) {
+								$this->message .= 'Failed to get the id target of the current module in the rule linked.';
+							}
+							return 'U';
+						}
+						else {
+							throw new \Exception( 'The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.' );
+						}
+					}
+				}
+			}
+			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
+			if ($this->isChild()){
+				return 'U';
+			}
+	
+			// If no relationship or no child rule
+			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
 			$stmt = $this->connection->prepare($sqlParamsSoure);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 			$stmt->bindValue(":id", $id);
@@ -1490,64 +1547,8 @@ class documentcore {
 				$this->targetId = $result['target_id'];
 				return 'U';
 			}
-			// Si aucun doc trouvé sur la règle actuelle
-			else {		
-				// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
-				// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
-				if (!empty($this->ruleRelationships)) {
-					// Boucle sur les relation
-					foreach ($this->ruleRelationships as $ruleRelationship) {
-						// Si on est sur une relation avec le champ Myddleware_element_id
-						if ($ruleRelationship['field_name_target'] == 'Myddleware_element_id'){						
-							// Si le champs avec l'id source n'est pas vide
-							// S'il s'agit de Myddleware_element_id on teste id
-							if (
-									!empty($this->data[$ruleRelationship['field_name_source']])
-								 || (
-										$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
-									&& !empty($this->data['id'])	
-								 )
-							) {
-								// On recherche l'id target dans la règle liée
-								$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
-								// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
-								$direction = $this->getRelationshipDirection($ruleRelationship);
-								if ($direction == '-1') {	
-									$stmt = $this->connection->prepare($sqlParamsTarget);
-								}
-								else {
-									$stmt = $this->connection->prepare($sqlParamsSoure);
-								}
-								$stmt->bindValue(":ruleId", $ruleRelationship['field_id']);
-								$stmt->bindValue(":id", $this->sourceId);
-								$stmt->bindValue(":id_doc", $this->id);
-								$stmt->execute();	   				
-								$result = $stmt->fetch();				
-							
-								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
-								if (!empty($result['id'])) {
-									$this->targetId = $result['target_id'];
-								}
-								// Sinon on bloque la création du document 
-								// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
-								elseif (empty($ruleRelationship['parent'])) {
-									$this->message .= 'Failed to get the id target of the current module in the rule linked.';
-								}
-								return 'U';
-							}
-							else {
-								throw new \Exception( 'Failed to get the id source of the current module.' );
-							}
-						}
-					}
-				}
-				// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
-				if ($this->isChild()){
-					return 'U';
-				}
-				// Si aucune règle avec relation Myddleware_element_id alors on est en création
-				return 'C';
-			}
+			// Si aucune règle avec relation Myddleware_element_id alors on est en création
+			return 'C';
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';

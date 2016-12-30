@@ -405,7 +405,7 @@ class jobcore  {
 			$sql = "SELECT
 						Rule.id,
 						GROUP_CONCAT(RuleRelationShip.field_id SEPARATOR ';') field_id,
-						IF(RuleRelationShip.field_id IS NULL, '1', '99') order
+						IF(RuleRelationShip.field_id IS NULL, '1', '99') rule_order
 					FROM Rule
 						LEFT OUTER JOIN RuleRelationShip
 							ON Rule.id = RuleRelationShip.rule_id
@@ -417,7 +417,7 @@ class jobcore  {
 				// Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
 				$ruleKeyVakue = array();
 				foreach ($rules as $rule) {
-					$ruleKeyVakue[$rule['id']] = $rule['order'];
+					$ruleKeyVakue[$rule['id']] = $rule['rule_order'];
 					$rulesRef[$rule['id']] = $rule;
 				}	
 				
@@ -430,7 +430,7 @@ class jobcore  {
 					foreach ($rules as $rule) {
 						$order = 0;
 						// Si on est une règle sans ordre
-						if($rule['order'] == '99') {
+						if($rule['rule_order'] == '99') {
 							// Récupération des règles liées et recherche dans le tableau keyValue
 							$rulesLink = explode(";", $rule['field_id']);
 							foreach ($rulesLink as $ruleLink) {
@@ -444,7 +444,7 @@ class jobcore  {
 							// Si toutes les règles trouvées ont une priorité autre que 99 alors on affecte à la règle la piorité +1 dans les tableaux de références
 							if ($order < 99) {
 								$ruleKeyVakue[$rule['id']] = $order+1;
-								$rulesRef[$rule['id']]['order'] = $order+1;
+								$rulesRef[$rule['id']]['rule_order'] = $order+1;
 							}
 						}
 					}	
