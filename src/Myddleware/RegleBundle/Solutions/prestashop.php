@@ -78,8 +78,7 @@ class prestashopcore extends solution {
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
-    	parent::login($paramConnexion);
-print_r($paramConnexion);	
+    	parent::login($paramConnexion);	
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$this->webService = new \PrestaShopWebservice($this->paramConnexion['url'], $this->paramConnexion['apikey'], false);
