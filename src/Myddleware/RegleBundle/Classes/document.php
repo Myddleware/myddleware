@@ -156,7 +156,7 @@ class documentcore {
 				&& $param['mode'] != 'front_office'
 			)
 		) {
-			if (!empty($param['id_doc_myddleware'])) {
+			if (!empty($param['id_doc_myddleware'])) {		
 				$this->setDocument($param['id_doc_myddleware']);
 			}
 			else {
@@ -187,7 +187,7 @@ class documentcore {
 	}
 	
 	public function setDocument($id_doc) {
-		try {
+		try {		
 			$sqlParams = "	SELECT 
 								Document.*, 
 								Rule.name_slug,
@@ -206,6 +206,7 @@ class documentcore {
 			$stmt->bindValue(":id_doc", $id_doc);
 			$stmt->execute();	   				
 			$this->document_data = $stmt->fetch();
+		
 			if (!empty($this->document_data['id'])) {
 				$this->id = $this->document_data['id'];
 				$this->dateCreated = $this->document_data['date_created'];
@@ -219,6 +220,19 @@ class documentcore {
 				$this->ruleMode = $this->document_data['mode'];
 				$this->type_document = $this->document_data['type'];
 				$this->attempt = $this->document_data['attempt'];
+				// Init the data of the document
+				$sqlData = "SELECT 
+								Document.source_id id, 
+								Document.source_date_modified, 
+								source_table.*
+							FROM Document 
+								INNER JOIN z_".$this->ruleName."_".$this->ruleVersion."_source source_table
+									ON Document.id = source_table.id_".$this->ruleName."_".$this->ruleVersion."_source
+							WHERE Document.id = :id_doc";											
+				$stmt = $this->connection->prepare($sqlData);
+				$stmt->bindValue(":id_doc", $id_doc);
+				$stmt->execute();	   				
+				$this->data = $stmt->fetch();				
 			}
 			else {
 				$this->logger->error( 'Failed to retrieve Document '.$id_doc.'.');
@@ -612,7 +626,7 @@ class documentcore {
 	}
 	
 	// Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-	public function ckeckParentDocument($ruleRelationships) {
+	public function ckeckParentDocument() {
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -623,13 +637,13 @@ class documentcore {
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
-					!empty($ruleRelationships)
+					!empty($this->ruleRelationships)
 				&& !$this->isChild()
 			) {
 				$this->getSourceData();
 				$error = false;
 				// Vérification de chaque relation de la règle
-				foreach ($ruleRelationships as $ruleRelationship) {			
+				foreach ($this->ruleRelationships as $ruleRelationship) {			
 					if(empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {				
 						continue; // S'il n'y a pas de relation, on envoie sans erreur
 					}		
@@ -664,7 +678,20 @@ class documentcore {
 			if (!empty($targetId['document_id'])) {
 				$parentDocumentId = $targetId['document_id'];
 			}
+			// Check if the status was in relate_KO before we set the status Relate_OK
+			// In this cas, new data has been created in Myddleware. So we check again if the mode of the document is still Create		
+			if (
+					$this->status == 'Relate_KO'
+				AND $this->type_document == 'C'
+			) {			
+				$this->type_document = $this->checkRecordExist($this->sourceId);					
+				if ($this->type_document == 'U') {
+					$this->updateTargetId($this->targetId);
+					$this->updateType('U');
+				}
+			}
 			$this->updateStatus('Relate_OK');
+					
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
@@ -1458,14 +1485,13 @@ class documentcore {
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
 				$result = $stmt->fetch();
-			}
-			
+			}			
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
 				return 'U';
 			}
 			// Si aucun doc trouvé sur la règle actuelle
-			else {
+			else {		
 				// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
 				// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
 				if (!empty($this->ruleRelationships)) {
@@ -1501,13 +1527,13 @@ class documentcore {
 								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 								if (!empty($result['id'])) {
 									$this->targetId = $result['target_id'];
-									return 'U';
 								}
 								// Sinon on bloque la création du document 
 								// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
 								elseif (empty($ruleRelationship['parent'])) {
-									throw new \Exception( 'Failed to get the id target of the current module in the rule linked.' );
+									$this->message .= 'Failed to get the id target of the current module in the rule linked.';
 								}
+								return 'U';
 							}
 							else {
 								throw new \Exception( 'Failed to get the id source of the current module.' );
@@ -1525,7 +1551,7 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$this->logger->error( $this->message );
+			$this->logger->error( $this->message );	
 			return null;
 		}
 	}
