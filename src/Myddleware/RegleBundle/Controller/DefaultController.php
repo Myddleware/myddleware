@@ -582,8 +582,7 @@ class DefaultControllerCore extends Controller
 				// get_modules_fields en source pour avoir l'association fieldid / libellé (ticket 548)
 				$solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];			
 				$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);			
-				// $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
-				$solution_source->login($myddlewareSession['param']['rule']['source']);
+				$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 				
 				// SOURCE ----- Récupère la liste des champs source
 				// O récupère le module de la règle et les sous modules s'il y en a 
@@ -989,8 +988,7 @@ class DefaultControllerCore extends Controller
 						$myddlewareSession['param']['rule']['connector'][$this->getRequest()->request->get('parent')] = $params[1];
 						//$myddlewareSession['obj'][$this->getRequest()->request->get('parent')] = $connector_params;
 
-						// $solution->login($this->decrypt_params($myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]));
-						$solution->login($myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]);
+						$solution->login($this->decrypt_params($myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]));
 						$myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]['solution'] = $classe;	
 						
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
@@ -1108,8 +1106,7 @@ class DefaultControllerCore extends Controller
 			$solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];			
 			$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);
 			
-			// $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
-			$solution_source->login($myddlewareSession['param']['rule']['source']);
+			$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 			
 			if(empty($solution_source->connexion_valide)) {
 				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');	
@@ -1146,8 +1143,7 @@ class DefaultControllerCore extends Controller
 				$solution_cible_nom = $myddlewareSession['param']['rule']['cible']['solution'];
 				$solution_cible = $this->get('myddleware_rule.'.$solution_cible_nom);	
 			}
-				// $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
-				$solution_cible->login($myddlewareSession['param']['rule']['cible']);
+				$solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
 			
 				if(empty($solution_cible->connexion_valide)) {
 					$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect');
@@ -1354,8 +1350,7 @@ class DefaultControllerCore extends Controller
 			// Connexion au service de la solution source
 			$solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];			
 			$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);			
-			// $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
-			$solution_source->login($myddlewareSession['param']['rule']['source']);
+			$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 			
 			// Contrôle que la connexion est valide
 			if($solution_source->connexion_valide == false) {
@@ -1399,8 +1394,7 @@ class DefaultControllerCore extends Controller
 			}
 
 			// Connexion vers la cible
-			// $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
-			$solution_cible->login($myddlewareSession['param']['rule']['cible']);
+			$solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
 			
 			if($solution_cible->connexion_valide == false) {
 				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
@@ -2500,8 +2494,7 @@ class DefaultControllerCore extends Controller
 		
 		$solution = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule'][$type]['solution']);
 		
-		// $params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
-		$params_connexion = $myddlewareSession['param']['rule'][$type];
+		$params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
 		$params_connexion['idConnector'] = $id_connector;
 
 		$solution->login( $params_connexion );	
@@ -2742,8 +2735,7 @@ class DefaultControllerCore extends Controller
 				
 			$solution = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule'][$type]['solution']);
 			
-			// $params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
-			$params_connexion = $myddlewareSession['param']['rule'][$type];
+			$params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
 			$params_connexion['idConnector'] = $id_connector;
 			
 			$solution->login( $params_connexion );	
@@ -2916,6 +2908,27 @@ class DefaultControllerCore extends Controller
 		$this->connection->executeQuery( $sql_create );	
 		
 		return $name_table;
+	}
+	
+	// Décrypte les paramètres de connexion d'une solution
+	private function decrypt_params($tab_params) {
+		// Instanciate object to decrypte data
+		$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
+		if( is_array($tab_params) ) {
+			$return_params = array();
+			foreach ($tab_params as $key => $value) {				
+				if(
+						is_string($value)
+					 && !in_array($key, array('solution','module')) // Soe data aren't crypted 	
+				) {
+					$return_params[$key] = $encrypter->decrypt($value);
+				}
+			}
+			return $return_params;				
+		}
+		else {
+			return $encrypter->decrypt($tab_params);	
+		}	
 	}
 	
 }

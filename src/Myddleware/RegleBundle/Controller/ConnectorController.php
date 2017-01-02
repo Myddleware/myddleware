@@ -331,8 +331,8 @@ class ConnectorController extends Controller
 		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 		// We always add data again in session because these data are removed after the call of the get
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		$type = '';
-
+		$type = '';	
+		
 		if($request->getMethod()=='POST' && isset($myddlewareSession['param']['connector'])) {		
 			try {
 				// Récupère l'id d'une solution
@@ -369,13 +369,15 @@ class ConnectorController extends Controller
 				$em->persist($unConnector);
 				$em->flush(); 		
 					
+				// Generate object to encrypt data
+				$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
 				// Insert les paramètres de connexion du connecteur
 				foreach ( $myddlewareSession['param']['connector']['source'] as $connexion => $val ) {									
 					if( $connexion != "solution" ) {
 						$unConnectoParams = new ConnectorParam();		
 						$unConnectoParams->setConnector( $unConnector->getId() );
 						$unConnectoParams->setName( $connexion );
-						$unConnectoParams->setValue( $val );
+						$unConnectoParams->setValue( $encrypter->encrypt($val) );
 						$em->persist($unConnectoParams);
 						$em->flush(); 
 					}
@@ -555,13 +557,15 @@ class ConnectorController extends Controller
 				
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($_POST['params']) > 0) {
+					// Generate object to encrypt data
+					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
 					foreach($_POST['params']  as $p) {
 						$param = $em->getRepository('RegleBundle:ConnectorParam')
 			                        ->findOneBy( array(
 									    	'id' => (int)$p['id']
 									    )
 								);					
-						$param->setValue( $p['value'] );	
+						$param->setValue( $encrypter->encrypt($p['value']) );	
 					    $em->persist($param);
 					    $em->flush();											
 					}	
@@ -617,7 +621,6 @@ class ConnectorController extends Controller
 				
 				$connector_params['solution']['name'] = $connector[0]->getSolution()->getName();
 				$connector_params['solution']['id'] = $connector[0]->getSolution()->getId();
-				
 				foreach ($connectorP as $connectorObj) {	
 					$connector_params['id'] = $connectorObj->getConnector();
 					$connector_params['params'][$connectorObj->getName()]['value'] = $this->decrypt_params($connectorObj->getValue());	
@@ -701,7 +704,6 @@ class ConnectorController extends Controller
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));
 		$myddlewareSession['param']['myddleware']['connector']['add']['message'] = $this->get('translator')->trans('create_rule.step1.connector');
 		$myddlewareSession['param']['myddleware']['connector']['add']['type'] = strip_tags($type);
-Echo 'true<BR>';
 		$myddlewareSession['param']['myddleware']['connector']['animation'] = true;
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);			  
         return $this->render('RegleBundle:Connector:createout.html.twig',array(
@@ -778,17 +780,19 @@ Echo 'true<BR>';
 
 	// Décrypte les paramètres de connexion d'une solution
 	private function decrypt_params($tab_params) {		
+		// Instanciate object to decrypte data
+		$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
 		if( is_array($tab_params) ) {
 			$return_params = array();
 			foreach ($tab_params as $key => $value) {				
 				if(is_string($value)) {
-					$return_params[$key] = $value;
+					$return_params[$key] = $encrypter->decrypt($value);
 				}
 			}
 			return $return_params;				
 		}
 		else {
-			return $tab_params;	
+			return $encrypter->decrypt($tab_params);	
 		}	
 	}
 

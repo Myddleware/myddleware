@@ -95,6 +95,17 @@ class solutioncore {
 		// $this->session avec la session de la solution
 		// $this->connexion_valide (true si la connexion estréussie, false sinon)
 	public function login($paramConnexion) {	
+		// Instanciate object to decrypte data
+		$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
+		// Decrypt connexion parameters
+		foreach ($paramConnexion as $key => $value) {				
+			if(is_string($value)) {
+				try {
+					$paramConnexion[$key] = $encrypter->decrypt($value);
+				} catch (\Exception $e) { // No error if decrypt failed because some data aren't crypted (eg reference date)
+				}
+			}
+		}
 		$this->paramConnexion = $paramConnexion;
     }
 	
