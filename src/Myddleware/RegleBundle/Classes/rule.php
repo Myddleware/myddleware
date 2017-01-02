@@ -444,6 +444,7 @@ class rulecore {
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
+				$param['ruleRelationships'] = $this->ruleRelationships;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->ckeckPredecessorDocument();
 			}			

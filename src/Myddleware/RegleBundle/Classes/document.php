@@ -1432,6 +1432,7 @@ class documentcore {
 		try {
 			// Query used in the method several times
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id 
@@ -1442,7 +1443,13 @@ class documentcore {
 									ON Document.rule_id = Rule_version.id
 							WHERE 
 									Rule.id IN (:ruleId)									
-								AND Document.global_status != 'Cancel'	
+								AND (
+										Document.global_status != 'Cancel'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
+									)
+								)
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
 							ORDER BY target_id DESC
@@ -1463,7 +1470,7 @@ class documentcore {
 									$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
 								&& !empty($this->data['id'])	
 							 )
-						) {
+						) {					
 							// On recherche l'id target dans la règle liée
 							$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
 							// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
@@ -1479,7 +1486,7 @@ class documentcore {
 							$stmt->bindValue(":id_doc", $this->id);
 							$stmt->execute();	   				
 							$result = $stmt->fetch();				
-						
+				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 							if (!empty($result['id'])) {
 								$this->targetId = $result['target_id'];
