@@ -51,7 +51,7 @@ class dolistcore extends solution {
 				$client = new \SoapClient($proxywsdl, array('trace' => 1, 'location' => $location));            
 			
 				// Renseigner la clé d'authentification avec l'identifiant client
-				$authenticationInfos	= array('AuthenticationKey' => $paramConnexion['apikey'],'AccountID' => $paramConnexion['accountid']);
+				$authenticationInfos	= array('AuthenticationKey' => $this->paramConnexion['apikey'],'AccountID' => $this->paramConnexion['accountid']);
 				$authenticationRequest	= array('authenticationRequest' => $authenticationInfos);
 				
 				// Demande du jeton d'authentification
@@ -60,9 +60,9 @@ class dolistcore extends solution {
 				// Instanciation des variables de classes
 				$this->connexion_valide = true;
 				$this->token = $result->GetAuthenticationTokenResult->Key;
-				$this->accountId = $paramConnexion['accountid'];
-				$this->login = $paramConnexion['login'];
-				$this->password = $paramConnexion['password'];
+				$this->accountId = $this->paramConnexion['accountid'];
+				$this->login = $this->paramConnexion['login'];
+				$this->password = $this->paramConnexion['password'];
 				
 			} // Gestion d'erreur SOAP
 			catch(\SoapFault $fault) {

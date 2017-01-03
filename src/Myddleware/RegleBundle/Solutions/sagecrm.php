@@ -81,9 +81,9 @@ class sagecrmcore extends solution {
 								'authentication' => SOAP_AUTHENTICATION_BASIC,
 								'exceptions' => TRUE
 							);
-				$paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/wsdl/'.$paramConnexion['wsdl'];			
-				$client = new \SoapClient($paramConnexion['wsdl'], $options);
-				$login_details  = array('username' => $paramConnexion['login'], 'password' => $paramConnexion['password']);
+				$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/wsdl/'.$this->paramConnexion['wsdl'];			
+				$client = new \SoapClient($this->paramConnexion['wsdl'], $options);
+				$login_details  = array('username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']);
 				$response = $client->logon($login_details);
 
 				if(isset($response->result->sessionid)) {
@@ -95,9 +95,9 @@ class sagecrmcore extends solution {
 				$response = $client->logoff(array("sessionId" => $sessionid));
 
 				// Instanciation des variables de classes
-				$this->wsdl = $paramConnexion['wsdl'];
-				$this->username = $paramConnexion['login'];
-				$this->password = $paramConnexion['password'];
+				$this->wsdl = $this->paramConnexion['wsdl'];
+				$this->username = $this->paramConnexion['login'];
+				$this->password = $this->paramConnexion['password'];
 			    $this->connexion_valide = true;
 			}
 			catch(\SoapFault $fault) 

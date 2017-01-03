@@ -69,8 +69,8 @@ class magentocore extends solution {
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try{			
-			$userData = array("username" => $paramConnexion['login'], "password" => $paramConnexion['password']);
-			$result = $this->call($paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
+			$userData = array("username" => $this->paramConnexion['login'], "password" => $this->paramConnexion['password']);
+			$result = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
 			if (!empty($result['message'])) {
 				throw new \Exception($result['message']);
 			}
