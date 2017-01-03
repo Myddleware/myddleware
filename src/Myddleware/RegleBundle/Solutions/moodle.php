@@ -384,8 +384,8 @@ class moodlecore  extends solution {
 					$functionname = 'local_myddleware_get_users_last_access';
 					break;	
 				default:
-					throw new \Exception("Module unknown. ");
-					break;
+					$result['done'] = false;
+					return $result;
 			}
 
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			

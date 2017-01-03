@@ -89,6 +89,9 @@ class rulecore {
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();
 			$this->rule = $stmt->fetch();
+			// Set the rule parameters and rule relationships
+			$this->setRuleParam();
+			$this->setRuleRelationships();
 			// Set the rule fields (we use the name_slug in $this->rule)
 			$this->setRuleField();
 		}
@@ -1168,8 +1171,7 @@ class rulecore {
 	}
 
 	// Permet de charger tous les champs de la règle
-	protected function setRuleField() {
-		
+	protected function setRuleField() {	
 		try {	
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
@@ -1190,7 +1192,7 @@ class rulecore {
 					$this->targetFields[] = ltrim($RuleField['target_field_name']);
 				}			
 			}
-			
+		
 			// Lecture des relations de la règle
 			if($this->ruleRelationships) {
 				foreach ($this->ruleRelationships as $ruleRelationship) { 
@@ -1217,7 +1219,7 @@ class rulecore {
 					$this->fieldsType['source'][$sourceFiled['Field']] = $sourceFiled;
 				}
 			}
-			
+		
 			// Récupération des types de champs de la target
 			$targetTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 			$sqlParams = "SHOW COLUMNS FROM ".$targetTable;

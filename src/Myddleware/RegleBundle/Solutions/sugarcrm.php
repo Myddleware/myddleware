@@ -109,7 +109,7 @@ class sugarcrmcore  extends solution {
 
 			$result = $this->call('login',$login_paramaters,$this->paramConnexion['url']); 
 			
-			if($result !== false) {
+			if($result != false) {
 				if ( empty($result->id) ) {
 				   throw new \Exception($result->description);
 				}
@@ -417,8 +417,9 @@ class sugarcrmcore  extends solution {
 		try {
 			$result = array();
 			$result['error'] = '';
+			$result['date_ref'] = '';
 			$result['count'] = 0;
-			$result['date_ref'] = $param['date_ref'];
+			$param['offset'] = (!empty($param['offset']) ? $param['offset'] : 0);
 			$currentCount = 0;		
 			$query = '';
 			if (empty($param['limit'])) {
@@ -438,8 +439,28 @@ class sugarcrmcore  extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			$param['fields'] = array_unique($param['fields']);
 			
-			// Construction de la requête pour SugarCRM
-			if (empty($param['query'])) {
+			// Construction de la requête pour SuiteCRM
+			// Si le tableau de requête est présent alors construction de la requête
+			if (!empty($param['query'])) {		
+				foreach ($param['query'] as $key => $value) {			
+					if (!empty($query)) {
+						$query .= ' AND ';
+					}
+					if ($key == 'email1') {
+						$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+					}
+					else {	
+						// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
+						if($param['module'] == 'ProspectLists') {	
+							$query .= "prospect_lists.".$key." = '".$value."' ";
+						}
+						else {
+							$query .= strtolower($param['module']).".".$key." = '".$value."' ";
+						}
+					}
+				}
+			}
+			else {
 				// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
 				if($param['module'] == 'ProspectLists') {	
 					$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
@@ -447,6 +468,8 @@ class sugarcrmcore  extends solution {
 				else {
 					$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
 				}
+				// Date ref is used when there isn't any query
+				$result['date_ref'] = $param['date_ref'];
 			}
 
 			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée

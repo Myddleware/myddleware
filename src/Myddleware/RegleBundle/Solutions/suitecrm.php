@@ -235,16 +235,8 @@ class suitecrmcore  extends solution {
 					if(isset($this->exclude_field_list['default']) ){
 						// Certains champs ne peuvent pas être modifiés
 						if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
-							continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-					}
-					// Ces champs doivent être exclus de la liste des modules car ce sont des champs relations qui sont gérés par les champs se terminant par ID
-					/* if (
-							substr($field->name,-5) == '_name'
-						&&	!in_array($field->name,array('first_name','last_name'))
-						&& $extension == false
-					){
-						continue; 
-					}	 */				
+							continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SugarCRM
+					}		
 					if (!in_array($field->type,$this->type_valide)) { 
 						if(isset($this->exclude_field_list[$module])){
 							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
@@ -429,8 +421,9 @@ class suitecrmcore  extends solution {
 		try {
 			$result = array();
 			$result['error'] = '';
+			$result['date_ref'] = '';
 			$result['count'] = 0;
-			$result['date_ref'] = $param['date_ref'];
+			$param['offset'] = (!empty($param['offset']) ? $param['offset'] : 0);
 			$currentCount = 0;		
 			$query = '';
 			if (empty($param['limit'])) {
@@ -450,8 +443,28 @@ class suitecrmcore  extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			$param['fields'] = array_unique($param['fields']);
 			
-			// Construction de la requête pour SugarCRM
-			if (empty($param['query'])) {
+			// Construction de la requête pour SuiteCRM
+			// Si le tableau de requête est présent alors construction de la requête
+			if (!empty($param['query'])) {		
+				foreach ($param['query'] as $key => $value) {			
+					if (!empty($query)) {
+						$query .= ' AND ';
+					}
+					if ($key == 'email1') {
+						$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+					}
+					else {	
+						// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
+						if($param['module'] == 'ProspectLists') {	
+							$query .= "prospect_lists.".$key." = '".$value."' ";
+						}
+						else {
+							$query .= strtolower($param['module']).".".$key." = '".$value."' ";
+						}
+					}
+				}
+			}
+			else {
 				// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
 				if($param['module'] == 'ProspectLists') {	
 					$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
@@ -459,6 +472,8 @@ class suitecrmcore  extends solution {
 				else {
 					$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
 				}
+				// Date ref is used when there isn't any query
+				$result['date_ref'] = $param['date_ref'];
 			}
 
 			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
