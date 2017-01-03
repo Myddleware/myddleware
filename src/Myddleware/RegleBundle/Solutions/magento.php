@@ -26,15 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use OAuth2;
-//use Psr\LoggerInterface;
-
-// Permet de charger automatiquement les classe Google sans faire d'include de classe manuellement
-$file = __DIR__.'/lib/autoload.php';
-if(file_exists($file)){
-	require_once($file);
-}
-
+	
 class magentocore extends solution {
 	
 	protected $token;
@@ -77,8 +69,8 @@ class magentocore extends solution {
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try{			
-			$userData = array("username" => $paramConnexion['login'], "password" => $paramConnexion['password']);
-			$result = $this->call($paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
+			$userData = array("username" => $this->paramConnexion['login'], "password" => $this->paramConnexion['password']);
+			$result = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
 			if (!empty($result['message'])) {
 				throw new \Exception($result['message']);
 			}
@@ -415,6 +407,9 @@ class magentocore extends solution {
 			if(!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
 				$fieldId = $this->idByModule[$param['module']];
 			}
+			
+			// Add requiered fields 
+			$param['fields'] = $this->addRequiredField($param['fields']);
 	
 			// Init parameters for modules or submodules
 			$function = '';
@@ -436,7 +431,7 @@ class magentocore extends solution {
 			}
 		
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Get all data after the reference date
 			$searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';

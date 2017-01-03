@@ -102,6 +102,8 @@ create_rule:
             target: Target
             rule: Rules
             fields: Fields source
+            parent: Parent
+            yes: Yes
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization
@@ -324,7 +326,7 @@ flux:
         predecessor_ko: Predecessor error
         relate_ko: Relation error
         error_transformed: Transformation error
-        error_history: History error
+        error_checking: Checking error
         error_sending: Sending error
 
 view_flux:
@@ -335,6 +337,7 @@ view_flux:
     history: History
     id: Id
     nblogs: Number of logs
+    nbChildDocuments: Child transfers
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
@@ -346,6 +349,7 @@ view_flux:
         attempt: Attempt
         gblstatut: Global Status
         version: Version
+        parent: Parent
     log:
         id: Id
         ref: Reference
@@ -463,7 +467,6 @@ solution:
     params: 
         dateref: Date of reference
         active: Activation
-        rate: Frequency
         delete: Deleting data
         activate: activated
         desactivate: Deactivate
@@ -496,6 +499,11 @@ error:
         target_module_connect: Target module connection error
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
+        edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
+        delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
+        delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
+    account:
+        language_change: Failed to change the language :
 
 title:
     account:

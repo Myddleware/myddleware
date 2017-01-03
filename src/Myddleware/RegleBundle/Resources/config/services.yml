@@ -47,6 +47,12 @@ services:
      myddleware_rule.file:
         class: Myddleware\RegleBundle\Solutions\file
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.shopapplication:
+        class: Myddleware\RegleBundle\Solutions\shopapplication
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.sagelive:
+        class: Myddleware\RegleBundle\Solutions\sagelive
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']

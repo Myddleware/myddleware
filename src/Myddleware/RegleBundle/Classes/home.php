@@ -58,16 +58,15 @@ class homecore {
 			}
 
 		    $sql = "SELECT 
-						Rule.rule_name,
-						Rule.rule_version,
-						Rule.rule_id,
-						count(Documents.id) cpt
+						Rule.name,
+						Rule.id,
+						count(Document.id) cpt
 					FROM Rule
-						LEFT OUTER JOIN Documents
-							ON  Rule.rule_id = Documents.rule_id
-							AND Documents.global_status = 'Error'
+						LEFT OUTER JOIN Document
+							ON  Rule.id = Document.rule_id
+							AND Document.global_status IN ('Open','Error')
 					$where 
-					GROUP BY Rule.rule_name
+					GROUP BY Rule.name
 					HAVING cpt > 0
 					ORDER BY cpt DESC";
 		    $stmt = $this->connection->prepare($sql);
@@ -92,17 +91,17 @@ class homecore {
 			}			
 				
 		    $sql = "SELECT 
-						Rule.rule_name,
-						count(Documents.id) cpt
+						Rule.name,
+						count(Document.id) cpt
 					FROM Rule
-						LEFT OUTER JOIN Documents
-							ON  Rule.rule_id = Documents.rule_id
-							AND Documents.global_status = 'Close'
+						LEFT OUTER JOIN Document
+							ON  Rule.id = Document.rule_id
+							AND Document.global_status = 'Close'
 					WHERE
-							Rule.rule_active = 1
-						AND Rule.rule_deleted = 0
+							Rule.active = 1
+						AND Rule.deleted = 0
 						$where
-					GROUP BY Rule.rule_name";
+					GROUP BY Rule.name";
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();
@@ -115,16 +114,16 @@ class homecore {
 	public function listError($nbJour = false) {
 		try {				
 		    $sql = "SELECT 
-						Rule.rule_name,
-						Documents.id,
-						Documents.date_modified
-					FROM Documents
+						Rule.name,
+						Document.id,
+						Document.date_modified
+					FROM Document
 						INNER JOIN Rule
-							ON  Rule.rule_id = Documents.rule_id
-							AND Documents.global_status = 'Error'
+							ON  Rule.id = Document.rule_id
+							AND Document.global_status = 'Error'
 					WHERE
-							Rule.rule_active = 1
-						AND Rule.rule_deleted = 0";
+							Rule.active = 1
+						AND Rule.deleted = 0";
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();
@@ -142,7 +141,7 @@ class homecore {
 			}			
 							
 		    $sql = "SELECT count(*) as nb, global_status
-					FROM Documents
+					FROM Document
 					$where
 					GROUP BY global_status
 					ORDER BY nb DESC
@@ -165,14 +164,14 @@ class homecore {
 				$where = ' AND created_by='.$id;
 			}		
 							
-		    $sql = "SELECT count(*) as nb, Rule.rule_name
+		    $sql = "SELECT count(*) as nb, Rule.name
 					FROM Rule
-						INNER JOIN Documents
-							ON Rule.rule_id = Documents.rule_id
+						INNER JOIN Document
+							ON Rule.id = Document.rule_id
 					WHERE
-						Documents.global_status = 'Close'
+						Document.global_status = 'Close'
 						$where
-					GROUP BY rule_name
+					GROUP BY name
 					ORDER BY nb DESC
 					";
 							
@@ -204,7 +203,7 @@ class homecore {
 			if($isAdmin == false) {
 				$where = ' AND created_by='.$id;
 			}		
-		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, Documents.* FROM Documents WHERE date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where;				
+		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, Document.* FROM Document WHERE date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where;				
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();

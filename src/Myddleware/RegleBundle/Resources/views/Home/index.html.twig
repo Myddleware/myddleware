@@ -61,7 +61,7 @@
 	                {% for rule in errorByRule %} 
 	                  <li class="list-group-item">
 	                    <span class="badge">{{ rule.cpt }}</span>
-	                    <a href="{{ path('flux_error_rule',{'id' : rule.rule_id }) }}">{{ rule.rule_name }} <span class="label label-default">v{{ rule.rule_version }}</span></a>
+	                    <a href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</span></a>
 	                  </li>
 	                {% endfor %}
 	            {% endif %}

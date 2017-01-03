@@ -115,15 +115,15 @@ class sapcore extends saproot {
 		if ($type == 'source') {
 			if ($module == 'ET_BSEG') {
 				$sql = "SELECT 
-							Rule.rule_id, 
-							Rule.rule_name, 
-							Rule.rule_version 
+							Rule.id, 
+							Rule.name, 
+							Rule.version 
 						FROM Rule
 						WHERE
-								Rule.rule_deleted = 0
-							AND Rule.rule_module_source = 'BU_PARTNER'";
+								Rule.deleted = 0
+							AND Rule.module_source = 'BU_PARTNER'";
 				$stmt = $this->conn->prepare($sql);
-				$stmt->bindValue(":idHeaderRule", $param['rule']['rule_id']);
+				$stmt->bindValue(":idHeaderRule", $param['rule']['id']);
 				$stmt->execute();
 				$rules = $stmt->fetchAll();
 				if (!empty($rules)){
@@ -167,7 +167,7 @@ class sapcore extends saproot {
 	}	
 
 	
-	public function getFieldsParamUpd($type,$module) {	
+	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
 		try {
 			$params = array();
 			if ($type == 'source'){
@@ -340,24 +340,24 @@ class sapcore extends saproot {
 						// Récupération des règles liées à la règle actuelle
 						// Récupération de toutes les règles avec l'id connector en cours qui sont root et qui ont au moins une référence
 						$sql = "SELECT DISTINCT
-									Rule.rule_id,
-									Rule.rule_module_source,
-									Rule.rule_name_slug
-								FROM RuleRelationShips
+									Rule.id,
+									Rule.module_source,
+									Rule.name_slug
+								FROM RuleRelationShip
 									INNER JOIN Rule
-										ON Rule.rule_id = RuleRelationShips.rule_id
+										ON Rule.id = RuleRelationShip.rule_id
 								WHERE
-										Rule.rule_deleted = 0
-									AND RuleRelationShips.rrs_field_id = :idHeaderRule";
+										Rule.deleted = 0
+									AND RuleRelationShip.field_id = :idHeaderRule";
 						$stmt = $this->conn->prepare($sql);
-						$stmt->bindValue(":idHeaderRule", $param['rule']['rule_id']);
+						$stmt->bindValue(":idHeaderRule", $param['rule']['id']);
 						$stmt->execute();
 						$rules = $stmt->fetchAll();
 						if (!empty($rules)) {
 							// Pour chaque règle liée on récupérère les données et on génère les documents fils
 							foreach ($rules as $rule) {
 								// Calcul du nom du module (exemple ET_BSEG devien Bseg)
-								$moduleDetails = explode('_',$rule['rule_module_source'],2);
+								$moduleDetails = explode('_',$rule['module_source'],2);
 								$moduleName = $this->transformName($moduleDetails[1]);
 								if (!is_array($document->$moduleName->item)) {
 									$childData[] = $document->$moduleName->item;
@@ -367,7 +367,7 @@ class sapcore extends saproot {
 								}
 								if (!empty($childData)) {
 									// Si le module de la règle est présent dans la réponse du webservice, on génère l'objet règle
-									$param['ruleId'] = $rule['rule_id'];
+									$param['ruleId'] = $rule['id'];
 									$ruleMyddleware = new ruleMyddleware($this->logger, $this->container, $this->conn ,$param); 
 									// Pour toutes les lignes du module fils on génère un document fils
 									foreach ($childData as $childDocument) {
@@ -378,16 +378,16 @@ class sapcore extends saproot {
 											if ($key == 'Kunnr') {
 												$value = ltrim($value, '0');
 											}
-											$data['values'][$rule['rule_module_source'].'__'.strtoupper($key)] = $value;
+											$data['values'][$rule['module_source'].'__'.strtoupper($key)] = $value;
 										}			
 										// Ajout des champs obligatoire date_modufied en id
 										$data['values']['date_modified'] = $record['date_modified'];
-										$data['values']['id'] = $this->generateId($rule['rule_module_source'],$childDocument);
+										$data['values']['id'] = $this->generateId($rule['module_source'],$childDocument);
 										// Ajout de l'id du module d'en-tête
 										$data['values']['ET_BKPF'] = $record['id'];
-										$generateDocument = $ruleMyddleware->generateDocument($record['id'],false,$data);
-										if (!empty($generateDocument->error)) {
-											$record['ZmydMessage'] = array('type' => 'E', 'message' => 'Failed to create child document ('.$rule['rule_module_source'].') '.$generateDocument->error);
+										$generateDocuments = $ruleMyddleware->generateDocuments($record['id'],false,$data);
+										if (!empty($generateDocuments->error)) {
+											$record['ZmydMessage'] = array('type' => 'E', 'message' => 'Failed to create child document ('.$rule['module_source'].') '.$generateDocuments->error);
 										}
 									}
 								}

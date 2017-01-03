@@ -437,7 +437,7 @@ class suitecrmcore  extends solution {
 				$param['limit'] = 100;
 			}	
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			// Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {

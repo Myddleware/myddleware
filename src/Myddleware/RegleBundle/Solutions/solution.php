@@ -79,6 +79,9 @@ class solutioncore {
 	// Liste des champs à exclure pour chaque solution
 	protected $exclude_field_list = array();
 	
+	// Module list that allows to make parent relationships
+	protected $allowParentRelationship = array();
+		
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
     	$this->logger = $logger;
@@ -92,6 +95,17 @@ class solutioncore {
 		// $this->session avec la session de la solution
 		// $this->connexion_valide (true si la connexion estréussie, false sinon)
 	public function login($paramConnexion) {	
+		// Instanciate object to decrypte data
+		$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
+		// Decrypt connexion parameters
+		foreach ($paramConnexion as $key => $value) {				
+			if(is_string($value)) {
+				try {
+					$paramConnexion[$key] = $encrypter->decrypt($value);
+				} catch (\Exception $e) { // No error if decrypt failed because some data aren't crypted (eg reference date)
+				}
+			}
+		}
 		$this->paramConnexion = $paramConnexion;
     }
 	
@@ -128,8 +142,14 @@ class solutioncore {
 				else {
 					$status = $forceStatus;
 				}
+				// In cas of a child document, it is possible to have $value['id'] empty, we just set an error because the document can't be sent again (parent document successfully sent)
+				if (!empty($value['id'])) {
+					$document->updateTargetId($value['id']);	
+				}
+				else {
+					$document->setMessage('No target ID found in return of the parent document creation. ');
+				}
 				$document->updateStatus($status);
-				$document->updateTargetId($value['id']);		
 				$response[$idDoc] = true;							
 			}
 			else {
@@ -176,7 +196,7 @@ class solutioncore {
 	
 	// Même structure que la méthode getFieldsLogin
 	// Prend en paramètre d'entre source ou target
-	public function getFieldsParamUpd($type,$module) {
+	public function getFieldsParamUpd($type,$module,$myddlewareSession) {
 		return array();	
 	}
 	
@@ -268,7 +288,7 @@ class solutioncore {
 	//	query : les champs à rechercher, exemple : array('name'=>'mon_compte')
 	// Valeur de sortie est un tableau contenant : 
 	//		done : Le nombre d'enregistrement trouvé
-	//   	values : les enregsitrements du module demandé (l'id' et date_modified sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier)
+	//   	values : les enregsitrements du module demandé (l'id' est obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier)
 	public function read_last($param) {
 		$result['done'] = false;					
 		return $result;
@@ -426,7 +446,11 @@ class solutioncore {
 
 	// Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible 
 	protected function addRequiredField($fields,$module = 'default') {
-
+		// If no entry for the module we put default
+		if (empty($this->required_fields[$module])) {
+			$module = 'default';
+		}
+		
 		// Boucle sur tous les champs obligatoires
 		if (!empty($this->required_fields[$module])) {
 			foreach($this->required_fields[$module] as $required_field) {
@@ -499,9 +523,9 @@ class solutioncore {
 	protected function getInfoDocument($idDocument) {
 		$connection = $this->getConn();
 		$sqlParams = "	SELECT *
-						FROM Documents 
+						FROM Document 
 							INNER JOIN Rule
-								ON Documents.rule_id = Rule.rule_id
+								ON Document.rule_id = Rule.id
 						WHERE id = :id_doc";								
 		$stmt = $connection->prepare($sqlParams);
 		$stmt->bindValue(":id_doc", $idDocument);
@@ -513,7 +537,7 @@ class solutioncore {
 	// Permet de récupérer la source ID du document en paramètre
 	protected function getSourceId($idDoc) {
 		// Récupération du source_id
-		$sql = "SELECT `source_id` FROM `Documents` WHERE `id` = :idDoc";
+		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue(":idDoc", $idDoc);
 		$stmt->execute();
@@ -529,6 +553,17 @@ class solutioncore {
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
 		return null;
+	}
+	
+	// The function return true if we can display the column parent in the rule view, relationship tab
+	public function allowParentRelationship($module) {
+		if (
+				!empty($this->allowParentRelationship)
+			 && in_array($module,$this->allowParentRelationship)
+		) {
+			return true;
+		}
+		return false;
 	}
 	
 	// Check data before create 
@@ -549,14 +584,14 @@ class solutioncore {
 	
 	// Check if the job is still active
 	protected function isJobActive($param) {
-		$sqlJobDetail = "SELECT * FROM Job WHERE job_id = :jobId";
+		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
 		$stmt = $this->conn->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $param['jobId']);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row	
 		if (
-				empty($job['job_status'])
-			|| 	$job['job_status'] != 'Start'
+				empty($job['status'])
+			|| 	$job['status'] != 'Start'
 		) {
 			throw new \Exception('The task has been manually stopped. ');
 		}
@@ -565,18 +600,19 @@ class solutioncore {
 	// Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule	
 	protected function getParamLogin($connId) {
 		// RECUPERE LE NOM DE LA SOLUTION			
-		$sql = "SELECT sol_name  
+		$sql = "SELECT name  
 				FROM Connector
-				JOIN Solution USING( sol_id )
-				WHERE conn_id = :connId";
+					INNER JOIN Solution 
+						ON Solution.id  = Connector.sol_id
+				WHERE id = :connId";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
 		$stmt->execute();		
 		$r = $stmt->fetch();	
 		
 		// RECUPERE LES PARAMS DE CONNEXION
-		$sql = "SELECT conp_id, conn_id, conp_name, conp_value
-				FROM ConnectorParams 
+		$sql = "SELECT id, conn_id, name, value
+				FROM ConnectorParam 
 				WHERE conn_id = :connId";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
@@ -587,8 +623,8 @@ class solutioncore {
 		
 		if(!empty($tab_params)) {
 			foreach ($tab_params as $key => $value) {
-				$params[$value['conp_name']] = $value['conp_value'];
-				$params['ids'][$value['conp_name']] = array('conp_id' => $value['conp_id'],'conn_id' => $value['conn_id']);
+				$params[$value['name']] = $value['value'];
+				$params['ids'][$value['name']] = array('id' => $value['id'],'conn_id' => $value['conn_id']);
 			}			
 		}	
 		return $params;

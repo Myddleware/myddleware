@@ -1248,9 +1248,10 @@ function verifFields(field_id,show) {
 				var name = $( this ).attr('data-value');
 				var valueRule = tr.find('.lst_rule_relate').val();
 				var valueSource = tr.find('.lst_source_relate').val();
+				var valueparent = tr.find('.lst_parent_relate').val();
 
 				if( valueRule != '' && valueSource != '' ) {
-					relations.push( {target: name, rule: valueRule, source: valueSource } );
+					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent } );
 				}
 
 			});
@@ -1496,6 +1497,7 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		$.each(relate, function( index, nameR ) {
 			$('#lst_'+ nameR.target).val( nameR.id );
 			$('#lst_source_'+ nameR.target).val( nameR.source );						
+			$('#lst_parent_'+ nameR.target).val( (nameR.parent ? 1 : 0) ); // Convert true/false to 1/0
 		});
 	}
 	

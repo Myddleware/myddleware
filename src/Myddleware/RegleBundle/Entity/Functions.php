@@ -38,7 +38,7 @@ class Functions
     /**
      * @var integer
      *
-     * @ORM\Column(name="func_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
@@ -49,7 +49,7 @@ class Functions
      * @var FuncCat $FuncCat
      *
      * @ORM\ManyToOne(targetEntity="FuncCat")
-     * @ORM\JoinColumn(name="fcat_id", referencedColumnName="fcat_id")	 
+     * @ORM\JoinColumn(name="fcat_id", referencedColumnName="id")	 
      * 
      */	 
     private $categorieId;
@@ -58,7 +58,7 @@ class Functions
     /**
      * @var string
      *
-     * @ORM\Column(name="func_name", type="string", length=20)
+     * @ORM\Column(name="name", type="string", length=20)
      */
     private $name;
 	

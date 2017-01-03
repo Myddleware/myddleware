@@ -51,7 +51,7 @@ class dolistcore extends solution {
 				$client = new \SoapClient($proxywsdl, array('trace' => 1, 'location' => $location));            
 			
 				// Renseigner la clé d'authentification avec l'identifiant client
-				$authenticationInfos	= array('AuthenticationKey' => $paramConnexion['apikey'],'AccountID' => $paramConnexion['accountid']);
+				$authenticationInfos	= array('AuthenticationKey' => $this->paramConnexion['apikey'],'AccountID' => $this->paramConnexion['accountid']);
 				$authenticationRequest	= array('authenticationRequest' => $authenticationInfos);
 				
 				// Demande du jeton d'authentification
@@ -60,9 +60,9 @@ class dolistcore extends solution {
 				// Instanciation des variables de classes
 				$this->connexion_valide = true;
 				$this->token = $result->GetAuthenticationTokenResult->Key;
-				$this->accountId = $paramConnexion['accountid'];
-				$this->login = $paramConnexion['login'];
-				$this->password = $paramConnexion['password'];
+				$this->accountId = $this->paramConnexion['accountid'];
+				$this->login = $this->paramConnexion['login'];
+				$this->password = $this->paramConnexion['password'];
 				
 			} // Gestion d'erreur SOAP
 			catch(\SoapFault $fault) {
@@ -1258,7 +1258,7 @@ class dolistcore extends solution {
 	// Récupère les données des contacts
 	public function get_contacts($param){
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 		
 		$proxywsdl = "http://api.dolist.net/V2/ContactManagementService.svc?wsdl";
 		$location = "http://api.dolist.net/V2/ContactManagementService.svc/soap1.1";
@@ -2431,31 +2431,31 @@ class dolistcore extends solution {
 		$ruleId = $param['ruleId'];
 		try {
 			// Récupération du ruleId de la règle entre Contacts pour récupérer ensuite les infos du contact courant				
-			$sqlFields = "SELECT rrs_field_id 
-							FROM RuleRelationShips 
+			$sqlFields = "SELECT field_id 
+							FROM RuleRelationShip 
 							WHERE 
-									rule_id = :ruleId
-								AND rule_id IS NOT NULL
-								AND rrs_field_name_target = 'ContactID'";
+									id = :ruleId
+								AND id IS NOT NULL
+								AND field_name_target = 'ContactID'";
 			$stmt = $this->conn->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $ruleId);
 			$stmt->execute();	   				
 			$ruleRelationContactID = $stmt->fetch();
-			if(!empty($ruleRelationContactID['rrs_field_id'])) {
-				$idRuleContacts = $ruleRelationContactID['rrs_field_id'];
+			if(!empty($ruleRelationContactID['field_id'])) {
+				$idRuleContacts = $ruleRelationContactID['field_id'];
 			} else {
 				throw new \Exception ('Failed to find the Contact Rule');
 			}
 			
 			// Récupération du nom, de la version et du conneceur source de la règle (Contacts vers Contacts)
-			$sqlSource = "SELECT rule_name_slug, rule_version, rule_module_source, Solution.sol_name, Connector.conn_id
+			$sqlSource = "SELECT name_slug, version, module_source, Solution.name, Connector.id
 							FROM Rule
 								INNER JOIN Connector
-									ON Rule.conn_id_source = Connector.conn_id
+									ON Rule.conn_id_source = Connector.id
 								INNER JOIN Solution
-									ON Connector.sol_id = Solution.sol_id
+									ON Connector.sol_id = Solution.id
 							WHERE 
-									rule_id = :ruleId";
+									id = :ruleId";
 			$stmt = $this->conn->prepare($sqlSource);
 			$stmt->bindValue(":ruleId", $idRuleContacts);
 			$stmt->execute();	   				
@@ -2465,15 +2465,15 @@ class dolistcore extends solution {
 			}
 
 			// Connexion à la solution source d'un règle définie
-			$solutionSource = $this->connectSolution($ruleData['conn_id'],$ruleData['sol_name'],$param['key']);	
+			$solutionSource = $this->connectSolution($ruleData['id'],$ruleData['name'],$param['key']);	
 			if(!$solutionSource->connexion_valide) {
 				throw new \Exception ('Failed to connect to the source connexion. Failed to get data from the source solution. ');
 			}
 				
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
-							FROM RuleFields 
-							WHERE rule_id = :ruleId";
+							FROM RuleField 
+							WHERE id = :ruleId";
 			$stmt = $this->conn->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $idRuleContacts);
 			$stmt->execute();	   				
@@ -2484,7 +2484,7 @@ class dolistcore extends solution {
 			}
 			foreach ($ruleFields as $RuleField) { 
 				// Plusieurs champs source peuvent être utilisé pour un seul champ cible
-				$fields = explode(";", $RuleField['rulef_source_field_name']);
+				$fields = explode(";", $RuleField['source_field_name']);
 				foreach ($fields as $field) {
 					$sourceFields[] = ltrim($field);
 				}
@@ -2501,9 +2501,9 @@ class dolistcore extends solution {
 				$fields = array();				
 				// Récupération de l'Id du document contenant les infos du contacts					
 				$sqlSource = "SELECT source_id 
-								FROM Documents 
+								FROM Document 
 								WHERE 
-										rule_id = :ruleId
+										id = :ruleId
 									AND target_id = :target_id
 									AND global_status = 'Close'
 								ORDER BY source_date_modified DESC";
@@ -2517,7 +2517,7 @@ class dolistcore extends solution {
 				}
 				
 				// Lescture des données du contact dans la solution source
-				$read['module'] = $ruleData['rule_module_source'];
+				$read['module'] = $ruleData['module_source'];
 				$read['fields'] = $sourceFields;
 				// Avec Dolist il peut y avoir plusieurs contacts dae la source pour un seul contact Dolist
 				// En effet Dolist dédoublonne avec l'email
@@ -2549,8 +2549,8 @@ class dolistcore extends solution {
 				if ($n == 0) {
 					// récupération de la règle du contact
 					foreach ($param['ruleRelationships'] as $ruleRelationships) {					
-						if ($ruleRelationships['rrs_field_name_target'] == 'ContactID') {
-							$idRuleContacts = $ruleRelationships['rrs_field_id'];
+						if ($ruleRelationships['field_name_target'] == 'ContactID') {
+							$idRuleContacts = $ruleRelationships['field_id'];
 						}
 					}
 					if (empty($idRuleContacts)) {
@@ -2558,15 +2558,15 @@ class dolistcore extends solution {
 					}
 					// Récupération des informations cryptées de la règle (Contacts vers Contacts)
 					$sqlSource = "SELECT *
-									FROM RuleFields
-									WHERE rule_id = :ruleId";
+									FROM RuleField
+									WHERE id = :ruleId";
 					$stmt = $this->conn->prepare($sqlSource);
 					$stmt->bindValue(":ruleId", $idRuleContacts);
 					$stmt->execute();	   				
 					$fieldsName = $stmt->fetchAll();
 					$entete = '';
 					foreach($fieldsName as $filedName) {
-						$entete .= $filedName['rulef_target_field_name'].chr(9);
+						$entete .= $filedName['target_field_name'].chr(9);
 					}
 					// Supression de la dernière tabulation
 					$entete = rtrim($entete);
@@ -2628,7 +2628,7 @@ class dolistcore extends solution {
 
 	/* public function getDocumentButton($idDocument) {	
 		$documentData = $this->getInfoDocument($idDocument);
-		if ($documentData['rule_module_target'] == 'StaticSegmentHeader') {
+		if ($documentData['module_target'] == 'StaticSegmentHeader') {
 			return array(
 					array(
 						'name' => 'unlockList',
@@ -2648,8 +2648,8 @@ class dolistcore extends solution {
 	// Permet de se connecter à la solution 
 	protected function connectSolution($conn_id, $sol_name, $paramKey) {
 		// RECUPERE LES PARAMS DE CONNEXION
-		$sqlParam = "SELECT conp_id, conn_id, conp_name, conp_value
-				FROM ConnectorParams 
+		$sqlParam = "SELECT id, conn_id, name, value
+				FROM ConnectorParam 
 				WHERE conn_id = :connId";
 		$stmt = $this->conn->prepare($sqlParam);
 		$stmt->bindValue("connId", $conn_id);
@@ -2663,8 +2663,8 @@ class dolistcore extends solution {
 		$paramsConn = array();
 		if(!empty($tab_params)) {
 			foreach ($tab_params as $key => $value) {
-				$paramsConn[$value['conp_name']] = $value['conp_value'];
-				$paramsConn['ids'][$value['conp_name']] = array('conp_id' => $value['conp_id'],'conn_id' => $value['conn_id']);
+				$paramsConn[$value['name']] = $value['value'];
+				$paramsConn['ids'][$value['name']] = array('id' => $value['id'],'conn_id' => $value['conn_id']);
 			}			
 		}	
 		$solutionSource = $this->container->get('myddleware_rule.'.$sol_name);		

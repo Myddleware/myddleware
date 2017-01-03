@@ -40,7 +40,7 @@ class Solution
     /**
      * @var integer
      *
-     * @ORM\Column(name="sol_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
@@ -50,7 +50,7 @@ class Solution
     /**
      * @var string
      *
-     * @ORM\Column(name="sol_name", type="string", length=20,nullable=false)
+     * @ORM\Column(name="name", type="string", length=20,nullable=false)
      */
     private $name;
 
@@ -58,21 +58,21 @@ class Solution
     /**
      * @var string
      *
-     * @ORM\Column(name="sol_active", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="active", type="integer", length=1,nullable=false)
      */
     private $active;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="sol_source", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="source", type="integer", length=1,nullable=false)
      */
     private $source;
 	
     /**
      * @var integer
      *
-     * @ORM\Column(name="sol_target", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="target", type="integer", length=1,nullable=false)
      */
     private $target;	
 

@@ -38,13 +38,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity; // unique
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(
  *             name="unique_namev",
- *             columns={"rule_name", "rule_version"}
+ *             columns={"name", "version"}
  *         )
  *     }
  * )
  * 
- * @UniqueEntity(fields={"rule_name", "rule_version"}, message="my.unique_namev.unique")
- * @ORM\Table(indexes={@ORM\Index(name="Krule_name", columns={"rule_name"})})
+ * @UniqueEntity(fields={"name", "version"}, message="my.unique_namev.unique")
+ * @ORM\Table(indexes={@ORM\Index(name="Krule_name", columns={"name"})})
  */
  
 class Rule
@@ -52,7 +52,7 @@ class Rule
     /**
      * @var string
      *
-     * @ORM\Column(name="rule_id", type="string")
+     * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
     private $id;
@@ -68,7 +68,7 @@ class Rule
      * @var Connector $connectorSource
      *
      * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_source", referencedColumnName="conn_id")	 
+     * @ORM\JoinColumn(name="conn_id_source", referencedColumnName="id")	 
      * 
      */
     private $connectorSource;
@@ -77,7 +77,7 @@ class Rule
      * @var Connector $connectorTarget
      *
      * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="conn_id")	 
+     * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="id")	 
      * 	 
      */
     private $connectorTarget;
@@ -86,7 +86,7 @@ class Rule
      * @var datetime
      *
 	 * 
-     * @ORM\Column(name="rule_date_created", type="datetime", nullable=false)
+     * @ORM\Column(name="date_created", type="datetime", nullable=false)
 	 * 
      */
     private $dateCreated;
@@ -94,7 +94,7 @@ class Rule
     /**
      * @var datetime
      *
-     * @ORM\Column(name="rule_date_modified", type="datetime", nullable=false)
+     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
 	 * 
      */
     private $dateModified;
@@ -102,7 +102,7 @@ class Rule
     /**
      * @var integer
      *
-	 * @ORM\Column(name="rule_created_by", type="integer", nullable=false)
+	 * @ORM\Column(name="created_by", type="integer", nullable=false)
 	 * 
      */
     private $createdBy;
@@ -110,7 +110,7 @@ class Rule
     /**
      * @var integer
      *
-     * @ORM\Column(name="rule_modified_by", type="integer", nullable=false)
+     * @ORM\Column(name="modified_by", type="integer", nullable=false)
 	 * 
      */
     private $modifiedBy;
@@ -118,7 +118,7 @@ class Rule
     /**
 	* @var string
     *
-	* @ORM\Column(name="rule_module_source", type="string", nullable=false)
+	* @ORM\Column(name="module_source", type="string", nullable=false)
 	* 
     */
     private $moduleSource;		
@@ -126,7 +126,7 @@ class Rule
     /**
 	* @var string
     *
-	* @ORM\Column(name="rule_module_target", type="string", nullable=false)
+	* @ORM\Column(name="module_target", type="string", nullable=false)
     */
     private $moduleTarget;		
 
@@ -134,7 +134,7 @@ class Rule
     /**
      * @var boolean
      *
-	 * @ORM\Column(name="rule_active", type="boolean", nullable=false)
+	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 * 
      */
     private $active;  
@@ -142,7 +142,7 @@ class Rule
     /**
      * @var boolean
      *
-	 * @ORM\Column(name="rule_deleted", type="boolean", nullable=false)
+	 * @ORM\Column(name="deleted", type="boolean", nullable=false)
 	 * 
      */
     private $deleted; 	
@@ -150,14 +150,14 @@ class Rule
     /**
      * @var string
      *
-	 * @ORM\Column(name="rule_name", type="string", length=50, nullable=false)
+	 * @ORM\Column(name="name", type="string", length=50, nullable=false)
 	 * 
      */
     private $name;  
 	
    /**
 	 * @Gedmo\Slug(fields={"name"}, separator="_")
-	 * @ORM\Column(length=50, nullable=false, name="rule_name_slug")
+	 * @ORM\Column(length=50, nullable=false, name="name_slug")
 	 */
 	private $nameSlug;	
 	
@@ -165,7 +165,7 @@ class Rule
     /**
      * @var string
      *
-	 * @ORM\Column(name="rule_version", type="string", length=3, nullable=false)
+	 * @ORM\Column(name="version", type="string", length=3, nullable=false)
 	 * 
      */
     private $version;  	

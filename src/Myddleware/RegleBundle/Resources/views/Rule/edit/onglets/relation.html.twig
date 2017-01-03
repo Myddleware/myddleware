@@ -38,6 +38,9 @@
 		<td class="title">{{'view_rule.relate.solution_source'|trans}}</td>
 		<td class="title" colspan="3">{{'view_rule.relate.rule'|trans}}</td>
 		<td class="title">{{'view_rule.relate.solution_target'|trans}}</td>
+		{% if parentRelationships %}
+			<td class="title" colspan="3">{{'create_rule.step3.relation.parent'|trans}}</td>
+		{% endif %}	
 	</tr>
 	{% for r in relate %}
 	<tr>
@@ -46,6 +49,13 @@
 		<td><a href="{{ path('regle_open',{'id' : r.getFieldId }) }}" title="{{ r.getName }}">{{ r.getName }} <span class="glyphicon glyphicon-share"></span></a></td>
 		<td class="arrow"><img width="20px" src="{{ asset('bundles/regle/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
 		<td>{{ r.getFieldNameTarget }}</td>
+		{% if parentRelationships %}
+			<td>
+				{% if r.getParent %}
+					{{'create_rule.step3.relation.yes'|trans}}
+				{% endif %}	
+			</td>
+		{% endif %}
 	</tr>
 	{% endfor %}
 </table>

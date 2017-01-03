@@ -25,7 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class salesforce extends solution {
+class salesforcecore extends solution {
 
 	protected $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
@@ -103,7 +103,7 @@ class salesforce extends solution {
 		    }
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Salesforce : '.$e->getMessage();
+			$error = 'Failed to login : '.$e->getMessage();
 			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
@@ -191,7 +191,6 @@ class salesforce extends solution {
 		$query_url = $instance_url.'/services/data/'.$this->versionApi.'/sobjects/' . $module . '/describe/';
 		try {
 			$query_request_data = $this->call($query_url, false);		
-            $fields = array();
             // Ces champs ne doivent pas apparaître comme requis
             $calculateFields = array("NumberOfLeads", "NumberOfConvertedLeads", "NumberOfContacts","NumberOfResponses","NumberOfOpportunities","NumberOfWonOpportunities","AmountAllOpportunities","AmountWonOpportunities","ForecastCategory");
             
@@ -244,14 +243,14 @@ class salesforce extends solution {
 						) {
 							$required = true;
 						}
-						$fields[$field['name']] = array(
+						$this->moduleFields[$field['name']] = array(
 												'label' => $field['label'],
 												'type' => $field['type'],
 												'type_bdd' => $type_bdd,
 												'required' => $required
 											);
 						if(strpos($field['name'], "__c")) // Si le champs est un champs custom, il n'est pas requis par défaut
-							$fields[$field['name']]['required'] = false;
+							$this->moduleFields[$field['name']]['required'] = false;
                     } 
 					else {
 						// Ajout du champ ID permettant de gérer les relations
@@ -266,9 +265,9 @@ class salesforce extends solution {
                     // Récupération des listes déroulantes
                     if ($field['type']=='picklist') {
                         foreach($field['picklistValues'] as $option) {
-                            $fields[$field['name']]['option'][$option['value']] = $option['label'];
+                            $this->moduleFields[$field['name']]['option'][$option['value']] = $option['label'];
                         }
-                         $fields[$field['name']]['type_bdd'] = 'varchar(255)';
+                         $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
                     }   
                 }           
             }
@@ -280,7 +279,7 @@ class salesforce extends solution {
 			if ($extension) {
 				$this->fieldsRelate = array();
 			}
-			return $fields;
+			return $this->moduleFields;
 		}
 		catch (\Exception $e) {
 			return false;
@@ -288,7 +287,7 @@ class salesforce extends solution {
 	} // get_module_fields($module)
 
 	// Permet d'ajouter des paramètres 
-	public function getFieldsParamUpd($type,$module) {	
+	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
 		try {
 			// Si le module est PricebookEntry (produit dans le catalogue) alors il faut indiquer le catalogue de produit utilisé
 			if (
@@ -300,7 +299,7 @@ class salesforce extends solution {
 					'date_ref' => '2000-01-01 00:00:00',
 					'module' => 'Pricebook2',
 					'fields' => array('Id', 'Name'),
-					'rule' => array('rule_mode' => 'C'),
+					'rule' => array('mode' => 'C'),
 					'limit' => 100
 				);
 				$priceBook2SF = $this->read($param);				
@@ -445,7 +444,7 @@ class salesforce extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			
 			// Récupération du nom du champ date
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
@@ -763,7 +762,7 @@ class salesforce extends solution {
 	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
 	protected function getWhere($param) {
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 		// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
 		$tab = explode(' ', $param['date_ref']);
@@ -791,7 +790,7 @@ class salesforce extends solution {
 	
 	// Génération du ORDER
 	protected function getOrder($param){	
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
 		} else {
@@ -915,7 +914,7 @@ class salesforce extends solution {
 /* * * * * * * *  * * * * * *  * * * * * * 
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
-/* $file = __DIR__.'/../Custom/Solutions/salesforce.php';
+$file = __DIR__.'/../Custom/Solutions/salesforce.php';
 if(file_exists($file)){
 	require_once($file);
 }
@@ -924,4 +923,4 @@ else {
 	class salesforce extends salesforcecore {
 		
 	}
-} */
+} 
