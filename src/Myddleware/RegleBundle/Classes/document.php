@@ -1555,7 +1555,7 @@ class documentcore {
 				return 'U';
 			}
 			// Si aucune règle avec relation Myddleware_element_id alors on est en création
-			return 'C';
+			return 'C'
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';

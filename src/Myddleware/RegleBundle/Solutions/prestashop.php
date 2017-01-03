@@ -455,6 +455,7 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
+
 				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
