@@ -46,7 +46,7 @@ class RuleOrder
      * @var string
      *
 	 * 
-     * @ORM\Column(name="rod_order", type="integer", length=3, nullable=false)
+     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
 	 * 
      */
     private $order;

@@ -62,7 +62,7 @@ class rulecore {
 		$this->container = $container;
 		$this->connection = $dbalConnection;
 		$this->em = $this->container->get('doctrine')->getEntityManager();
-		
+				
 		if (!empty($param['ruleId'])) {
 			$this->ruleId = $param['ruleId'];
 			$this->setRule($this->ruleId);
@@ -76,26 +76,31 @@ class rulecore {
 		if (!empty($param['limit'])) {
 			$this->limit = $param['limit'];
 		}
-		$this->setRuleParams();
+		$this->setRuleParam();
 		$this->setRuleRelationships();
-		$this->setRuleFields();
-		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);	
+		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
 	}
 	
 	public function setRule($idRule) {
 		$this->ruleId = $idRule;
 		if (!empty($this->ruleId)) {
-			$rule = "SELECT *, (SELECT rulep_value FROM RuleParams WHERE rule_id = :ruleId and rulep_name= 'mode') rule_mode FROM Rule WHERE rule_id = :ruleId";
+			$rule = "SELECT *, (SELECT value FROM RuleParam WHERE rule_id = :ruleId and name= 'mode') mode FROM Rule WHERE id = :ruleId";
 		    $stmt = $this->connection->prepare($rule);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();
 			$this->rule = $stmt->fetch();
+			// Set the rule fields (we use the name_slug in $this->rule)
+			$this->setRuleField();
 		}
+	}
+
+	public function getRule() {
+		return $this->rule;
 	}
 	
 	// Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
 	// If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application 
-	public function generateDocument($idSource, $readSource = true, $param = '', $idFiledName = 'id') {
+	public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id') {
 		try {
 			if ($readSource) {
 				// Connection to source application
@@ -105,32 +110,45 @@ class rulecore {
 				}
 				
 				// Read data in the source application
-				$read['module'] = $this->rule['rule_module_source'];
+				$read['module'] = $this->rule['module_source'];
 				$read['fields'] = $this->sourceFields;
 				$read['ruleParams'] = $this->ruleParams;
 				$read['rule'] = $this->rule;
-				$read['query'] = array($idFiledName => $idSource);
-				$dataSource = $this->solutionSource->read_last($read);
-				if (!$dataSource['done']) {
+				// If the query is in the current record we replace Myddleware_element_id by id
+				if ($idFiledName == 'Myddleware_element_id') {
+					$idFiledName = 'id';
+				}	
+				$read['query'] = array($idFiledName => $idSource);			
+				$dataSource = $this->solutionSource->read($read);			;				
+				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
 				}
 			}
 			else {
-				$dataSource['values'] = $param['values'];
+				$dataSource['values'][] = $param['values'];
 			}
 			
-			// Generate document
-			$doc['rule'] = $this->rule;
-			$doc['ruleFields'] = $this->ruleFields;
-			$doc['ruleRelationships'] = $this->ruleRelationships;
-			$doc['data'] = $dataSource['values'];
-			$doc['jobId'] = $this->jobId;			
-			$document = new document($this->logger, $this->container, $this->connection, $doc);
-			$createDocument = $document->createDocument();		
-			if (!$createDocument) {
-				throw new \Exception ('Failed to create document : '.$document->getMessage());
+			if (!empty($dataSource['values'])) {
+				foreach($dataSource['values'] as $docData) {
+					// Generate document
+					$doc['rule'] = $this->rule;
+					$doc['ruleFields'] = $this->ruleFields;
+					$doc['ruleRelationships'] = $this->ruleRelationships;
+					$doc['data'] = $docData;
+					$doc['jobId'] = $this->jobId;		
+					// If the document is a child, we save the parent in the table Document
+					if (!empty($param['parent_id'])) {
+						$doc['parentId'] = $param['parent_id'];		
+					}
+					$document = new document($this->logger, $this->container, $this->connection, $doc);
+					$createDocument = $document->createDocument();		
+					if (!$createDocument) {
+						throw new \Exception ('Failed to create document : '.$document->getMessage());
+					}
+					$documents[] = $document;
+				}
 			}
-			return $document;
+			return $documents;
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
@@ -142,7 +160,6 @@ class rulecore {
 	
 	// Connect to the source or target application
 	public function connexionSolution($type) {
-
 		try {
 			if ($type == 'source') {
 				$connId = $this->rule['conn_id_source'];
@@ -155,40 +172,39 @@ class rulecore {
 			}
 			
 			// Get the name of the application			
-		    $sql = "SELECT sol_name  
+		    $sql = "SELECT Solution.name  
 		    		FROM Connector
-		    		JOIN Solution USING( sol_id )
-		    		WHERE conn_id = :connId";
+						INNER JOIN Solution 
+							ON Solution.id  = Connector.sol_id
+		    		WHERE Connector.id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $connId);
 		    $stmt->execute();		
-			$r = $stmt->fetch();	
-			
+			$r = $stmt->fetch();			
 			// Get params connection
-		    $sql = "SELECT conp_id, conn_id, conp_name, conp_value
-		    		FROM ConnectorParams 
+		    $sql = "SELECT id, conn_id, name, value
+		    		FROM ConnectorParam 
 		    		WHERE conn_id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $connId);
 		    $stmt->execute();	    
 			$tab_params = $stmt->fetchAll();
-	
 			$params = array();
 			if(!empty($tab_params)) {
 				foreach ($tab_params as $key => $value) {
-					$params[$value['conp_name']] = $value['conp_value'];
-					$params['ids'][$value['conp_name']] = array('conp_id' => $value['conp_id'],'conn_id' => $value['conn_id']);
+					$params[$value['name']] = $value['value'];
+					$params['ids'][$value['name']] = array('id' => $value['id'],'conn_id' => $value['conn_id']);
 				}			
 			}
 			
 			// Connect to the application
 			if ($type == 'source') {	
-				$this->solutionSource = $this->container->get('myddleware_rule.'.$r['sol_name']);				
+				$this->solutionSource = $this->container->get('myddleware_rule.'.$r['name']);				
 				$loginResult = $this->solutionSource->login($params);			
 				$c = (($this->solutionSource->connexion_valide) ? true : false );				
 			}
 			else {
-				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['sol_name']);		
+				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);		
 				$loginResult = $this->solutionTarget->login($params);			
 				$c = (($this->solutionTarget->connexion_valide) ? true : false );			
 			}
@@ -207,11 +223,11 @@ class rulecore {
 	protected function logoutSolution($type) {
 		try {	
 			if ($type == 'source') {
-				$this->solutionSource = $this->container->get('myddleware_rule.'.$r['sol_name']);		
+				$this->solutionSource = $this->container->get('myddleware_rule.'.$r['name']);		
 				return $this->solutionSource->logout($params);							
 			}
 			else {
-				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['sol_name']);		
+				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);		
 				return $this->solutionTarget->logout($params);				
 			}
 		} catch (\Exception $e) {
@@ -230,8 +246,8 @@ class rulecore {
 				empty($this->ruleParams['disableRead'])
 			&&	(
 					(
-							$this->rule['rule_deleted'] == 0
-						&& $this->rule['rule_active'] == 1	
+							$this->rule['deleted'] == 0
+						&& $this->rule['active'] == 1	
 					)
 					|| (
 						$this->manual == 1
@@ -291,19 +307,19 @@ class rulecore {
 		}
 		// On affiche pas d'erreur si la lecture est désactivée
 		elseif (empty($this->ruleParams['disableRead'])) {
-			$readSource['error'] = 'The rule '.$this->rule['rule_name_slug'].' version '.$this->rule['rule_version'].($this->rule['rule_deleted'] == 1 ? ' is deleted.' : ' is disabled.');
+			$readSource['error'] = 'The rule '.$this->rule['name_slug'].' version '.$this->rule['version'].($this->rule['deleted'] == 1 ? ' is deleted.' : ' is disabled.');
 		}
 		return $readSource;
 	}
 	
 	protected function getJobStatus() {
-		$sqlJobDetail = "SELECT * FROM Job WHERE job_id = :jobId";
+		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
 		$stmt = $this->connection->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $this->jobId);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row
-		if (!empty($job['job_status'])) {
-			return $job['job_status'];
+		if (!empty($job['status'])) {
+			return $job['status'];
 		}
 		return false;
 	}
@@ -311,7 +327,7 @@ class rulecore {
 	// Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible
 	protected function updateReferenceDate() {			
 		$date_ref = $this->dataSource['date_ref'];
-		$sqlDateReference = "UPDATE RuleParams SET rulep_value = :date_ref WHERE rulep_name = 'datereference' AND rule_id = :ruleId";
+		$sqlDateReference = "UPDATE RuleParam SET value = :date_ref WHERE name = 'datereference' AND rule_id = :ruleId";
 		$stmt = $this->connection->prepare($sqlDateReference);
 		$stmt->bindValue(":ruleId", $this->ruleId);
 		$stmt->bindValue(":date_ref", $date_ref);
@@ -320,7 +336,7 @@ class rulecore {
 	
 	protected function readSource() {
 		
-		$read['module'] = $this->rule['rule_module_source'];
+		$read['module'] = $this->rule['module_source'];
 		$read['rule'] = $this->rule;
 		$read['date_ref'] = $this->ruleParams['datereference'];
 		$read['ruleParams'] = $this->ruleParams;
@@ -332,7 +348,7 @@ class rulecore {
 		// Ajout des champs source des relations de la règle
 		if (!empty($this->ruleRelationships)) {
 			foreach ($this->ruleRelationships as $ruleRelationship) {
-				$read['fields'][] = $ruleRelationship['rrs_field_name_source'];
+				$read['fields'][] = $ruleRelationship['field_name_source'];
 			}
 		}
 
@@ -402,7 +418,7 @@ class rulecore {
 
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) {
-			$this->setRuleFilters();
+			$this->setRuleFilter();
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
@@ -428,6 +444,7 @@ class rulecore {
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
+				$param['ruleRelationships'] = $this->ruleRelationships;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->ckeckPredecessorDocument();
 			}			
@@ -451,8 +468,9 @@ class rulecore {
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
+				$param['ruleRelationships'] = $this->ruleRelationships;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->ckeckParentDocument($this->ruleRelationships);
+				$response[$document['id']] = $doc->ckeckParentDocument();
 			}			
 		}			
 		return $response;
@@ -462,6 +480,7 @@ class rulecore {
 	// Si un document n'est pas clos alors le statut du docuement est mis à "pending"
 	public function transformDocuments($documents = null){
 		include_once 'document.php';
+				
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
 	
@@ -471,7 +490,7 @@ class rulecore {
 		}
 		if(!empty($documents)) {
 			// Transformation de tous les docuements sélectionnés
-			foreach ($documents as $document) { 
+			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['ruleFields'] = $this->ruleFields;
 				$param['ruleRelationships'] = $this->ruleRelationships;
@@ -491,6 +510,7 @@ class rulecore {
 	//     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
 	public function getTargetDataDocuments($documents = null) {
 		include_once 'document.php';
+	
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
 		
@@ -527,7 +547,7 @@ class rulecore {
 		if (!empty($this->solutionTarget)) {
 			$loginResult['error'] = $this->solutionTarget->logout();	
 			if (!$loginResult) {
-				$sendTarget .= 'Failed to logout from the target solution';
+				$sendTarget['error'] .= 'Failed to logout from the target solution';
 			}
 		}
 		return $sendTarget;
@@ -555,7 +575,7 @@ class rulecore {
 				return $this->runMyddlewareJob("ERROR");
 				break;
 			case 'runMyddlewareJob':
-				return $this->runMyddlewareJob($this->rule['rule_name_slug']);
+				return $this->runMyddlewareJob($this->rule['name_slug']);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
@@ -627,21 +647,21 @@ class rulecore {
 		try {					
 			// Récupération des règles opposées à la règle en cours de création
 			$queryBidirectionalRules = "SELECT 
-											rule_id, 
-											rule_name
+											id, 
+											name
 										FROM Rule 
 										WHERE 
 												conn_id_source = :conn_id_target
 											AND conn_id_target = :conn_id_source
-											AND rule_module_source = :rule_module_target
-											AND rule_module_target = :rule_module_source
-											AND rule_deleted = 0
+											AND module_source = :module_target
+											AND module_target = :module_source
+											AND deleted = 0
 										";
 			$stmt = $connection->prepare($queryBidirectionalRules);
 			$stmt->bindValue(":conn_id_source", $params['connector']['source']);
 			$stmt->bindValue(":conn_id_target", $params['connector']['cible']);
-			$stmt->bindValue(":rule_module_source", $params['module']['source']);
-			$stmt->bindValue(":rule_module_target", $params['module']['cible']);
+			$stmt->bindValue(":module_source", $params['module']['source']);
+			$stmt->bindValue(":module_target", $params['module']['cible']);
 		    $stmt->execute();	   				
 			$bidirectionalRules = $stmt->fetchAll();
 			
@@ -649,7 +669,7 @@ class rulecore {
 			if (!empty($bidirectionalRules)) {
 				$option[''] = ''; 
 				foreach ($bidirectionalRules as $rule) {
-					$option[$rule['rule_id']] = $rule['rule_name'];
+					$option[$rule['id']] = $rule['name'];
 				}
 				if (!empty($option)) {
 					return array(	
@@ -713,7 +733,7 @@ class rulecore {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
 			
-			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:synchro '.$ruleSlugName.' --env=prod > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -772,8 +792,8 @@ class rulecore {
 			$this->ruleId = $doc->getRuleId();
 			$this->setRule($this->ruleId);
 			$this->setRuleRelationships();
-			$this->setRuleParams();
-			$this->setRuleFields();
+			$this->setRuleParam();
+			$this->setRuleField();
 		}
 		
 		// Si on a pas de job c'est que la relance est faite manuellement, il faut donc créer un job pour le flux relancé
@@ -782,7 +802,7 @@ class rulecore {
 			$manual = true;
 			include_once 'job.php';
 			$job = new job($this->logger, $this->container, $this->connection);
-			if (!$job->initJob($this->rule['rule_name_slug'].' '.$id_document)) {
+			if (!$job->initJob($this->rule['name_slug'].' '.$id_document)) {
 				$session->set( 'error', array($job->message));
 				return null;
 			}
@@ -832,10 +852,10 @@ class rulecore {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
 			}
 		}
-		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_history'))) {
+		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking'))) {
 			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
 			if ($response[$id_document] === true) {
-				if ($this->rule['rule_mode'] == 'S') {
+				if ($this->rule['mode'] == 'S') {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
 				}
 				else {
@@ -843,13 +863,13 @@ class rulecore {
 				}
 			}
 			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_history';
+				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_checking';
 			}
 		}
 		// Si la règle est en mode recherche alors on n'envoie pas de données
 		// Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
 		if (
-				$this->rule['rule_mode'] != 'S'
+				$this->rule['mode'] != 'S'
 			&& (
 					in_array($status,array('Ready_to_send','Error_sending'))
 				|| (
@@ -903,7 +923,32 @@ class rulecore {
 			}
 			return $sendData;
 		}
-	}	
+	}
+	
+	// Check if the rule is a child rule
+	protected function isChild() {
+		try {					
+			$queryChild = "	SELECT Rule.id 
+									FROM RuleRelationShip 
+										INNER JOIN Rule
+											ON Rule.id  = RuleRelationShip.rule_id 
+									WHERE 
+											RuleRelationShip.field_id = :ruleId
+										AND RuleRelationShip.parent = 1
+										AND Rule.deleted = 0
+								";							
+			$stmt = $this->connection->prepare($queryChild);
+			$stmt->bindValue(":ruleId", $this->ruleId);
+		    $stmt->execute();	   				
+			$rules = $stmt->fetchAll();
+			if (!empty($rules)) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+		}
+		return false;
+	}
 	
 	protected function sendTarget($type, $documentId = null) {
 		// Permet de charger dans la classe toutes les relations de la règle
@@ -920,17 +965,25 @@ class rulecore {
 		
 		// Récupération du contenu de la table target pour tous les documents à envoyer à la cible
 		$send['data'] = $this->getSendDocuments($type, $documentId);
-		$send['module'] = $this->rule['rule_module_target'];
-		$send['ruleId'] = $this->rule['rule_id'];
+		$send['module'] = $this->rule['module_target'];
+		$send['ruleId'] = $this->rule['id'];
 		$send['rule'] = $this->rule;
 		$send['ruleFields'] = $this->ruleFields;
 		$send['ruleParams'] = $this->ruleParams;
 		$send['ruleRelationships'] = $this->ruleRelationships;
 		$send['fieldsType'] = $this->fieldsType;
 		$send['jobId'] = $this->jobId;
-		
 		// Si des données sont prêtes à être créées
 		if (!empty($send['data'])) {
+			// If the rule is a child rule, no document is sent. They will be sent with the parent rule.
+			if ($this->isChild()) {
+				foreach($send['data'] as $key => $data) {			
+					// True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
+					$response[$key] = array('id' => true);		
+				}
+				return $response;
+			}
+			
 			// Connexion à la cible
 			$connect = $this->connexionSolution('target');				
 			if ($connect === true) {
@@ -969,7 +1022,7 @@ class rulecore {
 		}
 		
 		$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
-		$nameIdTarget = "id_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_target";
+		$nameIdTarget = "id_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 		$searchDuplicate = array();
 		// Boucle sur chaque donnée qui sera envoyée à la cible
 		foreach ($transformedData AS $rowTransformedData) {
@@ -1025,11 +1078,11 @@ class rulecore {
 	protected function selectDocuments($status, $type = '') {
 		try {					
 			$query_documents = "	SELECT * 
-									FROM Documents 
+									FROM Document 
 									WHERE 
 											rule_id = :ruleId
 										AND status = :status
-									ORDER BY Documents.source_date_modified ASC	
+									ORDER BY Document.source_date_modified ASC	
 									LIMIT $this->limit
 								";							
 			$stmt = $this->connection->prepare($query_documents);
@@ -1045,7 +1098,7 @@ class rulecore {
 	// Permet de récupérer les données d'un document
 	protected function getDocumentData($documentId) {
 		try {			
-			$query_document = "SELECT * FROM Documents WHERE id = :documentId";
+			$query_document = "SELECT * FROM Document WHERE id = :documentId";
 			$stmt = $this->connection->prepare($query_document);
 			$stmt->bindValue(":documentId", $documentId);
 		    $stmt->execute();	   				
@@ -1061,33 +1114,50 @@ class rulecore {
 		}
 	}
 	
-	protected function getSendDocuments($type,$documentId,$table = 'target') {
-		$nameId = "id_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_".$table; 
-		$tableRule = "z_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_".$table;
+	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {
+		$nameId = "id_".$this->rule['name_slug']."_".$this->rule['version']."_".$table; 
+		$tableRule = "z_".$this->rule['name_slug']."_".$this->rule['version']."_".$table;
 		
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
-			$documentFilter = " Documents.id = '$documentId'";
+			$documentFilter = " Document.id = '$documentId'";
+		}
+		elseif (!empty($parentId)) {
+			$documentFilter = " Document.parent_id = '$parentId'";
 		}
 		// Sinon on récupère tous les documents élligible pour l'envoi
 		else {
-			$documentFilter = 	"	Documents.rule_id = '$this->ruleId'
-								AND Documents.status = 'Ready_to_send'
-								AND Documents.type = '$type' ";
+			$documentFilter = 	"	Document.rule_id = '$this->ruleId'
+								AND Document.status = 'Ready_to_send'
+								AND Document.type = '$type' ";
 		}
 		// Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
-		$sql = "SELECT $tableRule.* , Documents.id id_doc_myddleware, Documents.target_id, Documents.source_date_modified
-				FROM Documents
+		$sql = "SELECT $tableRule.* , Document.id id_doc_myddleware, Document.target_id, Document.source_date_modified
+				FROM Document
 					INNER JOIN $tableRule  
-						ON Documents.id = $tableRule.$nameId
+						ON Document.id = $tableRule.$nameId
 				WHERE $documentFilter 
-				ORDER BY Documents.source_date_modified ASC
+				ORDER BY Document.source_date_modified ASC
 				LIMIT $this->limit";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute();	    
 		$documents = $stmt->fetchAll();
-
 		foreach ($documents as $document) {
+			// If the rule is a parent, we have to get the data of all rules child		
+			$childRules = $this->getChildRules();		
+			if (!empty($childRules)) {
+				foreach($childRules as $childRule) {
+					$ruleChildParam['ruleId'] = $childRule['field_id'];
+					$ruleChildParam['jobId'] = $this->jobId;				
+					$childRuleObj = new rule($this->logger, $this->container, $this->connection, $ruleChildParam);					
+					// Recursive call to get all data from all child in status ready to send generated by the method Document=>runChildRule
+					// Child document has the type 'U'				
+					$dataChild = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware']);
+					$childRuleDetail = $childRuleObj->getRule();
+					// Store the submodule data to be send in the parent document					
+					$document[$childRuleDetail['module_target']] = $dataChild;			
+				}
+			}
 			$return[$document['id_doc_myddleware']] = $document;
 		}
 
@@ -1098,12 +1168,12 @@ class rulecore {
 	}
 
 	// Permet de charger tous les champs de la règle
-	protected function setRuleFields() {
+	protected function setRuleField() {
 		
 		try {	
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
-							FROM RuleFields 
+							FROM RuleField 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1113,19 +1183,19 @@ class rulecore {
 			if($this->ruleFields) {
 				foreach ($this->ruleFields as $RuleField) { 
 					// Plusieurs champs source peuvent être utilisé pour un seul champ cible
-					$fields = explode(";", $RuleField['rulef_source_field_name']);
+					$fields = explode(";", $RuleField['source_field_name']);
 					foreach ($fields as $field) {
 						$this->sourceFields[] = ltrim($field);
 					}
-					$this->targetFields[] = ltrim($RuleField['rulef_target_field_name']);
+					$this->targetFields[] = ltrim($RuleField['target_field_name']);
 				}			
 			}
 			
 			// Lecture des relations de la règle
 			if($this->ruleRelationships) {
 				foreach ($this->ruleRelationships as $ruleRelationship) { 
-					$this->sourceFields[] = ltrim($ruleRelationship['rrs_field_name_source']);
-					$this->targetFields[] = ltrim($ruleRelationship['rrs_field_name_target']);
+					$this->sourceFields[] = ltrim($ruleRelationship['field_name_source']);
+					$this->targetFields[] = ltrim($ruleRelationship['field_name_target']);
 				}			
 			} 
 
@@ -1135,10 +1205,9 @@ class rulecore {
 			}
 			if (!empty($this->sourceFields)) {
 				$this->sourceFields = array_unique($this->sourceFields); 				
-			}
-			
+			}			
 			// Récupération des types de champs de la source
-			$sourceTable = "z_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_source";
+			$sourceTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_source";
 			$sqlParams = "SHOW COLUMNS FROM ".$sourceTable;
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
@@ -1150,7 +1219,7 @@ class rulecore {
 			}
 			
 			// Récupération des types de champs de la target
-			$targetTable = "z_".$this->rule['rule_name_slug']."_".$this->rule['rule_version']."_target";
+			$targetTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 			$sqlParams = "SHOW COLUMNS FROM ".$targetTable;
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
@@ -1167,11 +1236,11 @@ class rulecore {
 	}
 	
 	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParams() {
+	protected function setRuleParam() {
 			
 		try {
 			$sqlParams = "SELECT * 
-							FROM RuleParams 
+							FROM RuleParam 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1179,7 +1248,7 @@ class rulecore {
 			$ruleParams = $stmt->fetchAll();
 			if($ruleParams) {
 				foreach ($ruleParams as $ruleParam) {
-					$this->ruleParams[$ruleParam['rulep_name']] = ltrim($ruleParam['rulep_value']);
+					$this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
 				}			
 			}			
 		} catch (\Exception $e) {
@@ -1193,7 +1262,7 @@ class rulecore {
 	protected function setRuleRelationships() {
 		try {					
 			$sqlFields = "SELECT * 
-							FROM RuleRelationShips 
+							FROM RuleRelationShip 
 							WHERE 
 									rule_id = :ruleId
 								AND rule_id IS NOT NULL";
@@ -1207,10 +1276,10 @@ class rulecore {
 	}
     
 	// Permet de charger toutes les filtres de la règle
-	protected function setRuleFilters() {
+	protected function setRuleFilter() {
 		try {					
 			$sqlFields = "SELECT * 
-							FROM RuleFilters 
+							FROM RuleFilter 
 							WHERE 
 								rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlFields);
@@ -1222,6 +1291,25 @@ class rulecore {
 		}
 	}
     
+	// Get the child rules of the current rule
+	// Return the relationships between the parent and the clild rules
+	public function getChildRules() {
+		try {		
+			// get the rule linked to the current rule and check if they have the param child
+			$sqlFields = "SELECT RuleRelationShip.*
+							FROM RuleRelationShip
+							WHERE 
+									RuleRelationShip.rule_id = :ruleId
+								AND RuleRelationShip.parent = 1";
+			$stmt = $this->connection->prepare($sqlFields);			
+			$stmt->bindValue(":ruleId", $this->ruleId);
+		    $stmt->execute();	   				
+			return $stmt->fetchAll();
+		} catch (\Exception $e) {
+			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+		}
+	}
+	
 	// Parametre de la règle choix utilisateur
 	/* 
 	array(
@@ -1240,8 +1328,7 @@ class rulecore {
 	public static function getFieldsParamDefault($idSolutionSource = '',$idSolutionTarget = '') {
 		return array(
 			'active' => false,
-			'RuleParams' => array(
-				'rate' => '5',
+			'RuleParam' => array(
 				'delete' => '60',
 				'datereference' => date('Y-m-d').' 00:00:00'			
 			),

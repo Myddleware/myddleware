@@ -158,23 +158,23 @@ class filecore extends solution {
 		// Récupération de tous les champ référence de la règle liées (= module)	
 		$this->fieldsRelate = array();
 		$sql = "SELECT 	
-					RuleFields.rulef_target_field_name,
-					Rule.rule_name
+					RuleField.target_field_name,
+					Rule.name
 				FROM Rule
-					INNER JOIN RuleFields
-						ON Rule.rule_id = RuleFields.rule_id
+					INNER JOIN RuleField
+						ON Rule.id = RuleField.rule_id
 					WHERE
-							Rule.rule_name = :rule_name
-						AND Rule.rule_deleted = 0	
-						AND RuleFields.rulef_target_field_name LIKE '%_Reference'";
+							Rule.name = :name
+						AND Rule.deleted = 0	
+						AND RuleField.target_field_name LIKE '%_Reference'";
 		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":rule_name", $module);
+		$stmt->bindValue(":name", $module);
 		$stmt->execute();
 		$ruleFields = $stmt->fetchAll();
 		if (!empty($ruleFields)) {
 			foreach ($ruleFields as $ruleField) {
-				$this->fieldsRelate[$ruleField['rulef_target_field_name']] = array(
-																'label' => $ruleField['rulef_target_field_name'].' ('.$ruleField['rule_name'].')',
+				$this->fieldsRelate[$ruleField['target_field_name']] = array(
+																'label' => $ruleField['target_field_name'].' ('.$ruleField['name'].')',
 																'type' => 'varchar(255)',
 																'type_bdd' => 'varchar(255)',
 																'required' => 0,
@@ -209,12 +209,12 @@ class filecore extends solution {
 			$header = explode($this->delimiter, $headerString);
 			$nbCountHeader = count($header);
 			
-			$allRuleFields = $param['fields'];
+			$allRuleField = $param['fields'];
 	
 			// we check if there are same fields in both array
-			$intersectionFields = array_intersect($allRuleFields, $header);
-			if($intersectionFields != $allRuleFields){
-				$difFields = array_diff($allRuleFields, $header);
+			$intersectionFields = array_intersect($allRuleField, $header);
+			if($intersectionFields != $allRuleField){
+				$difFields = array_diff($allRuleField, $header);
 				throw new \Exception('File is not compatible. Missing fields : '.implode(';',$difFields)); 
 			}
 			
@@ -235,7 +235,7 @@ class filecore extends solution {
 				if($nbRowLine != $nbCountHeader){
 					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
 				}
-				foreach($allRuleFields as $field){
+				foreach($allRuleField as $field){
 					$colonne = array_search($field, $header);	
 					$values[$field] = $rowFile[$colonne];
 				}
@@ -285,9 +285,9 @@ class filecore extends solution {
 			$header = explode($this->delimiter, $headerString);
 			$nbCountHeader = count($header);
 			
-			$allRuleFields = $param['fields'];
+			$allRuleField = $param['fields'];
 			// Adding ok fields "fieldId" and "fieldDateRef" of the array $param
-			$allRuleFields[] = $param['ruleParams']['fieldId'];
+			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
 			$new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';stat -c %y '.$file);
@@ -306,7 +306,7 @@ class filecore extends solution {
 			$new_date_ref = $date->format('Y-m-d H:i:s');
 	
 			// we check if there are same fields in both array
-			$intersectionFields = array_intersect($allRuleFields, $header);
+			$intersectionFields = array_intersect($allRuleField, $header);
 			if ($param['ruleParams']['fieldId'] == 'myddleware_generated') {
 				$intersectionFields[] = 'myddleware_generated';
 			}
@@ -343,16 +343,16 @@ class filecore extends solution {
 				if($nbRowLine != $nbCountHeader){
 					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
 				}
-				foreach($allRuleFields as $field){
+				foreach($allRuleField as $field){
 					$colonne = array_search($field, $header);
 					if($field==$param['ruleParams']['fieldId']){
 						if ($field == 'myddleware_generated') {
-							$idRow = $this->generateId($param,$rowFile);
+							$idRow = uniqid('', true);
 						}
 						else {
 							$idRow = $rowFile[$colonne];							
 						}
-						$row['id'] = $idRow;
+						$row['id'] = $rowFile[$colonne];
 					}
 					$row[$field] = $rowFile[$colonne];
 				}
@@ -379,9 +379,8 @@ class filecore extends solution {
 		}
 	} // read($param)
 	
-	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);
@@ -406,11 +405,6 @@ class filecore extends solution {
 		catch (\Exception $e){
 			return array();
 		}
-	}
-	
-	// Generate ID for the document
-	protected function generateId($param,$rowFile) {
-		return uniqid('', true);
 	}
 
 	protected function cleanHeader($str) { 

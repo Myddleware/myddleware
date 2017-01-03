@@ -46,7 +46,7 @@
 		     <tr>
 		     	<td class="solution_block">
 		     		<p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{connector.solution }}.png" alt="" /></p>
-		     		{{connector.0.getLabel}}
+		     		{{connector.0.getName}}
 		     	</td> 
 		     	<td>{{connector.0.getDateCreated|date("d/m/Y") }}
 		     		{% if app.user.getUsername == 'support' %}

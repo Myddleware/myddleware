@@ -70,10 +70,12 @@
 						<th>{{'view_flux.header.rule'|trans}}</th>
 						<th>{{'view_flux.header.version'|trans}}</th>
 						<th>{{'view_flux.header.statut'|trans}}</th>
-						<th>{{'view_flux.header.mode'|trans}}</th>
 						<th>{{'view_flux.header.type'|trans}}</th>
 						<th>{{'view_flux.header.attempt'|trans}}</th>		
 						<th>{{'view_flux.header.gblstatut'|trans}}</th>
+						{% if doc.getParentId %}
+							<th>{{'view_flux.header.parent'|trans}}</th>
+						{% endif %}	
 					</tr>
 					<tr>
 						<td><a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a></td>
@@ -89,7 +91,6 @@
 				     		{% endif %}
 				     		</div>
 						</td>
-						<td class="ctr">{{ doc.getMode }}</td>
 						<td class="ctr">{{ doc.getType }}</td>
 						<td class="ctr">{{ doc.getAttempt }}</td>			
 						<td id="gblstatus" data-gbl="{{ doc.getGlobalStatus|lower }}" class="ctr">
@@ -103,6 +104,9 @@
 				     		{% endif %}
 				     		</div>
 						</td>
+						{% if doc.getParentId %}
+							<td><a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a></td>
+						{% endif %}
 					</tr>
 				</table>
 			{% endif %}
@@ -176,15 +180,82 @@
     	<div class="clr"></div>
     	</div>
 
+		{# ------------- CHILD DOCUMENTS ------------- #}
+		{% if nb_child_documents > 0 %}
+		<div id="fd-title-small" class="left">
+			<p>{{'view_flux.nbChildDocuments'|trans}}<p><span class="nb">{{ nb_child_documents }}</span>
+		</div>
+		<div class="clr"></div>	 
+		{% endif %}   	
+		{# ------------- CHILD DOCUMENTS ------------- #}
+		<div id="message" align="center">
+			{% if nb_child_documents > 0 %}		
+		    	<table class="listepager">
+					{% if entities is not empty %}	
+						<tr>
+							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
+							<th>{{'list_flux.tab.source_id'|trans}}</th>
+							<th>{{'list_flux.tab.target_id'|trans}}</th>
+							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.statut'|trans}}</th>
+						</tr> 
+					   {% for flux in child_documents %}
+						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
+							<td><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td>
+							<td><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a></td>		     				
+							<td>{{ flux.source }}</td>     	
+							<td>{{ flux.target }}</td>     	
+							<td>{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							<td>{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">
+								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
+								{% if flux.globalStatus|lower == 'close' %}
+									<span class="glyphicon glyphicon-ok"></span>
+								{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
+									<span class="glyphicon glyphicon-remove"></span>
+								{% elseif flux.globalStatus|lower == 'open' %}
+									<span class="glyphicon glyphicon-repeat"></span>						
+								{% elseif flux.globalStatus|lower == 'cancel' %}
+									<span class="glyphicon glyphicon-exclamation-sign"></span>
+								{% endif %}
+								</div>
+							</td>	     			     	
+						</tr>			
+						{% endfor %}		
+						<tr>
+							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
+							<th>{{'list_flux.tab.source_id'|trans}}</th>
+							<th>{{'list_flux.tab.target_id'|trans}}</th>
+							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.statut'|trans}}</th>
+						</tr>			
+					{% endif %}
+				</table>
+				<div align="center">
+					{% if pager.haveToPaginate %}
+						<div align="center">
+							{% if pager.haveToPaginate %}
+								{{ pagerfanta(pager, 'twitter_bootstrap3', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+							{% endif %}
+						</div>	 				      
+					{% endif %}
+				</div>		 
+				{% else %}
+				<p>{{'view_flux.empty_log'|trans}}</p>
+				{% endif %}
+    	</div>
 
+    	{# ------------- MESSAGE ------------- #}
 		{% if nb > 0 %}
 		<div id="fd-title-small" class="left">
 			<p>{{'view_flux.nblogs'|trans}}<p><span class="nb">{{ nb }}</span>
 		</div>
 		<div class="clr"></div>	 
 		{% endif %}   	
-
-    	{# ------------- MESSAGE ------------- #}
     	<div id="message" align="center">
 
 			{% if nb > 0 %}		

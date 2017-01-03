@@ -28,7 +28,6 @@ namespace Myddleware\RegleBundle\Classes;
 use Symfony\Bridge\Monolog\Logger; // Gestion des logs
 use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
 use Doctrine\DBAL\Connection; // Connexion BDD
-// use Myddleware\RegleBundle\Encryption\encryption as enCrypt; // Encryption
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // SugarCRM Myddleware
 
 class documentcore { 
@@ -49,6 +48,7 @@ class documentcore {
 	protected $ruleParams;
 	protected $sourceId;
 	protected $targetId;
+	protected $parentId;
 	protected $sourceData;
 	protected $data;
 	protected $type_document;
@@ -79,7 +79,7 @@ class documentcore {
 										'Predecessor_KO' => 'Error',
 										'Relate_KO' => 'Error',
 										'Error_transformed' => 'Error',
-										'Error_history' => 'Error',
+										'Error_checking' => 'Error',
 										'Error_sending' => 'Error'
 								);
 	
@@ -112,7 +112,7 @@ class documentcore {
 			'Predecessor_KO' => 'flux.status.predecessor_ko',
 			'Relate_KO' => 'flux.status.relate_ko',
 			'Error_transformed' => 'flux.status.error_transformed',
-			'Error_history' => 'flux.status.error_history',
+			'Error_checking' => 'flux.status.error_checking',
 			'Error_sending' => 'flux.status.error_sending'		
 		);		
 	}
@@ -138,6 +138,9 @@ class documentcore {
 		}
 		if (!empty($param['fieldsType'])) {
 			$this->fieldsType = $param['fieldsType'];
+		}
+		if (!empty($param['parentId'])) {
+			$this->parentId = $param['parentId'];
 		}	
 
 		// Stop the processus if the job has been manually stopped
@@ -153,25 +156,25 @@ class documentcore {
 				&& $param['mode'] != 'front_office'
 			)
 		) {
-			if (!empty($param['id_doc_myddleware'])) {
+			if (!empty($param['id_doc_myddleware'])) {		
 				$this->setDocument($param['id_doc_myddleware']);
 			}
 			else {
 				$this->id = uniqid('', true);
 				$this->dateCreated = gmdate('Y-m-d H:i:s');
-				$this->ruleName = $param['rule']['rule_name_slug'];
-				$this->ruleVersion = $param['rule']['rule_version'];
-				$this->ruleMode = $param['rule']['rule_mode'];
-				$this->ruleId = $param['rule']['rule_id'];
+				$this->ruleName = $param['rule']['name_slug'];
+				$this->ruleVersion = $param['rule']['version'];
+				$this->ruleMode = $param['rule']['mode'];
+				$this->ruleId = $param['rule']['id'];
 				$this->ruleFields = $param['ruleFields'];
 				$this->data = $param['data'];
 				$this->sourceId = $this->data['id'];
-				$this->userId = $param['rule']['rule_created_by'];
+				$this->userId = $param['rule']['created_by'];
 				$this->status = 'New';
 				$this->attempt = 0;
 			} 
 			// Ajout des paramètre de la règle
-			$this->setRuleParams();
+			$this->setRuleParam();
 		}
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
@@ -184,25 +187,26 @@ class documentcore {
 	}
 	
 	public function setDocument($id_doc) {
-		try {
+		try {		
 			$sqlParams = "	SELECT 
-								Documents.*, 
-								Rule.rule_name_slug,
-								Rule.rule_version,
-								RuleParams.rulep_value rule_mode,
+								Document.*, 
+								Rule.name_slug,
+								Rule.version,
+								RuleParam.value mode,
 								Rule.conn_id_source,
-								Rule.rule_module_source
-							FROM Documents 
+								Rule.module_source
+							FROM Document 
 								INNER JOIN Rule
-									ON Documents.rule_id = Rule.rule_id
-								INNER JOIN RuleParams
-									ON  RuleParams.rule_id = Rule.rule_id
-									AND rulep_name= 'mode'
-							WHERE id = :id_doc";											
+									ON Document.rule_id = Rule.id
+								INNER JOIN RuleParam
+									ON  RuleParam.rule_id = Rule.id
+									AND RuleParam.name= 'mode'
+							WHERE Document.id = :id_doc";											
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":id_doc", $id_doc);
 			$stmt->execute();	   				
 			$this->document_data = $stmt->fetch();
+		
 			if (!empty($this->document_data['id'])) {
 				$this->id = $this->document_data['id'];
 				$this->dateCreated = $this->document_data['date_created'];
@@ -211,11 +215,24 @@ class documentcore {
 				$this->status = $this->document_data['status'];
 				$this->sourceId = $this->document_data['source_id'];
 				$this->targetId = $this->document_data['target_id'];
-				$this->ruleName = $this->document_data['rule_name_slug'];
-				$this->ruleVersion = $this->document_data['rule_version'];
-				$this->ruleMode = $this->document_data['rule_mode'];
+				$this->ruleName = $this->document_data['name_slug'];
+				$this->ruleVersion = $this->document_data['version'];
+				$this->ruleMode = $this->document_data['mode'];
 				$this->type_document = $this->document_data['type'];
 				$this->attempt = $this->document_data['attempt'];
+				// Init the data of the document
+				$sqlData = "SELECT 
+								Document.source_id id, 
+								Document.source_date_modified, 
+								source_table.*
+							FROM Document 
+								INNER JOIN z_".$this->ruleName."_".$this->ruleVersion."_source source_table
+									ON Document.id = source_table.id_".$this->ruleName."_".$this->ruleVersion."_source
+							WHERE Document.id = :id_doc";											
+				$stmt = $this->connection->prepare($sqlData);
+				$stmt->bindValue(":id_doc", $id_doc);
+				$stmt->execute();	   				
+				$this->data = $stmt->fetch();				
 			}
 			else {
 				$this->logger->error( 'Failed to retrieve Document '.$id_doc.'.');
@@ -240,7 +257,7 @@ class documentcore {
 			}
 			
 			// Création du header de la requête 
-			$query_header = "INSERT INTO Documents (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, target_id,source_date_modified, mode, type) VALUES";
+			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, target_id,source_date_modified, mode, type, parent_id) VALUES";
 
 			// Récupération du type de document : vérification de l'existance d'un enregistrement avec le même ID dans Myddleware (passage du type docuement en U ou C)
 			$this->type_document = $this->checkRecordExist($this->sourceId);	
@@ -254,7 +271,7 @@ class documentcore {
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
 			// Encodage en UTF8, nécessaire pour SAP car les id peuvent avoir des accents
-			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$this->targetId','$date_modified','$this->ruleMode','$this->type_document')";
+			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$this->targetId','$date_modified','$this->ruleMode','$this->type_document','$this->parentId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 		
@@ -263,13 +280,7 @@ class documentcore {
 			if (
 					$this->ruleMode == 'C' 
 				&& $this->type_document == 'U'
-				&& (
-						empty($this->ruleParams['group'])
-					|| (
-							!empty($this->ruleParams['group'])
-						&& $this->ruleParams['group'] != 'child'
-					)
-				)
+				&& !$this->isChild()
 			) {
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
@@ -333,8 +344,8 @@ class documentcore {
 			
 				// Boucle sur les filtres
 				foreach ($ruleFilters as $ruleFilter) {			
-					if(!$this->checkFilter($this->sourceData[$ruleFilter['rfi_target']],$ruleFilter['rfi_type'],$ruleFilter['rfi_value'])) {
-						$this->message .= 'This document is filtered. This operation is false : '.$ruleFilter['rfi_target'].' '.$ruleFilter['rfi_type'].' '.$ruleFilter['rfi_value'].'.';
+					if(!$this->checkFilter($this->sourceData[$ruleFilter['target']],$ruleFilter['type'],$ruleFilter['value'])) {
+						$this->message .= 'This document is filtered. This operation is false : '.$ruleFilter['target'].' '.$ruleFilter['type'].' '.$ruleFilter['value'].'.';
 						$this->updateStatus('Filter');
 						$filterOK = -1;
 						break;
@@ -358,13 +369,13 @@ class documentcore {
 	}
 			
 	public function getJobStatus() {
-		$sqlJobDetail = "SELECT * FROM Job WHERE job_id = :jobId";
+		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
 		$stmt = $this->connection->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $this->jobId);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row
-		if (!empty($job['job_status'])) {
-			return $job['job_status'];
+		if (!empty($job['status'])) {
+			return $job['status'];
 		}
 		return false;
 	}
@@ -522,65 +533,64 @@ class documentcore {
 				}
 				// Sinon on fait la recherche du prédécesseur classique
 				else {
-					// Selection des documents antérieurs de la même règle (toute version confondues) avec le même id au statut différent de closed et Cancel
-					$sqlParams = "	SELECT 
-										Documents.id							
-									FROM Documents
-										INNER JOIN Rule
-											ON Documents.rule_id = Rule.rule_id
-											AND Rule.rule_name_slug = :rule_name_slug
-										INNER JOIN Rule Rule_version
-											ON Rule_version.rule_name = Rule.rule_name
-									WHERE 
-											Rule_version.conn_id_source = :conn_id_source 
-										AND Rule_version.rule_module_source = :rule_module_source  	
-										AND Documents.source_id = :source_id 
-										AND Documents.global_status NOT IN ('Close','Cancel') 
-										AND Documents.date_created < :date_created  
-									LIMIT 1";								
-					$stmt = $this->connection->prepare($sqlParams);
-					$stmt->bindValue(":rule_name_slug", $this->document_data['rule_name_slug']);
-					$stmt->bindValue(":conn_id_source", $this->document_data['conn_id_source']);
-					$stmt->bindValue(":source_id", $this->document_data['source_id']);
-					$stmt->bindValue(":rule_module_source", $this->document_data['rule_module_source']);
-					$stmt->bindValue(":date_created", $this->document_data['date_created']);
-					$stmt->execute();	   				
-					$result = $stmt->fetch(); 				
-					
-					// Si aucun prédécesseur en erreur sur la règle en cours on vérifie les document de la règle inverse (bidirectionnelle) si elle existe
-					if (
-							empty($result['id'])
-						&&	!empty($this->ruleParams['bidirectional'])
-					) {
+					$rules[] = $this->document_data['id'];
+					// We check the bidirectionnal rule too if it exists
+					if (!empty($this->ruleParams['bidirectional'])) {
+						$rules[] = $this->ruleParams['bidirectional'];
+					}
+					foreach ($rules as $ruleId) {
+						// Selection des documents antérieurs de la même règle (toute version confondues) avec le même id au statut différent de closed et Cancel
+						// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
 						$sqlParams = "	SELECT 
-											Documents.id							
-										FROM Documents
-											INNER JOIN Rule
-												ON Documents.rule_id = Rule.rule_id
-												AND Rule.rule_id = :bidirectional
-											INNER JOIN Rule Rule_version
-												ON Rule_version.rule_name = Rule.rule_name
+											Document.id,							
+											Document.rule_id,
+											Rule.id rule_parent,
+											Rule.deleted rule_parent_deleted,
+											Document.status,
+											Document.global_status											
+										FROM Document
+											LEFT OUTER JOIN RuleRelationShip
+												ON RuleRelationShip.field_id = Document.rule_id
+												AND RuleRelationShip.parent = 1
+											LEFT OUTER JOIN Rule
+												ON Rule.id = RuleRelationShip.rule_id 									
 										WHERE 
-												Rule_version.conn_id_target = :conn_id_source 
-											AND Rule_version.rule_module_target = :rule_module_source  	
-											AND Documents.target_id = :source_id  
-											AND Documents.global_status NOT IN ('Close','Cancel') 
-											AND Documents.date_created < :date_created  
-										LIMIT 1";
+												Document.rule_id = :rule_id 
+											AND Document.source_id = :source_id 
+											AND Document.date_created < :date_created  
+										HAVING 
+												Rule.deleted != 1
+											AND (
+													global_status = 'Error'
+												OR (
+														global_status = 'OPEN'
+													AND (
+															status != 'Ready_to_send'
+														OR (
+																status = 'Ready_to_send'
+															AND rule_parent IS NULL
+														)
+													)
+												)	
+											)
+										LIMIT 1	
+										";								
 						$stmt = $this->connection->prepare($sqlParams);
-						$stmt->bindValue(":bidirectional", $this->ruleParams['bidirectional']);
-						$stmt->bindValue(":conn_id_source", $this->document_data['conn_id_source']);
-						$stmt->bindValue(":rule_module_source",$this->document_data['rule_module_source']);
-						$stmt->bindValue(":source_id",$this->document_data['source_id']);
-						$stmt->bindValue(":date_created",$this->document_data['date_created']);
+						$stmt->bindValue(":rule_id", $ruleId);
+						$stmt->bindValue(":source_id", $this->document_data['source_id']);
+						$stmt->bindValue(":date_created", $this->document_data['date_created']);
 						$stmt->execute();	   				
 						$result = $stmt->fetch();
-					} 
-				
+						// if id found, we stop to send an error
+						if (!empty($result['id'])) {
+							break;
+						}
+					}
+
 					// Si un prédécesseur non clos est trouvé on passe le document au statut Predecessor_KO
-					if (!empty($result['id'])) {
+					if (!empty($result['id'])) {		
 						$this->docIdRefError = $result['id'];
-						throw new \Exception('Another document for the same record is not close. This document is queued. ');
+						throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
 					}
 					else {
 						// Mise à jour du target id si celui-ci n'était pas renseigné (document précédent sans target id au moment de la creation de ce docuement)
@@ -594,14 +604,8 @@ class documentcore {
 							}
 							// Si on est sur une règle groupée avec un child alors il est possible qu'il n'y ait pas de prédécesseur 
 							// mais que l'on vienne quand même mettre à jour la règle root.
-							elseif (
-									empty($this->ruleParams['group'])
-								|| (
-										!empty($this->ruleParams['group'])
-									&& $this->ruleParams['group'] != 'child'
-								)
-							) {
-								throw new \Exception('Failed to retrieve the target in a parent document. Failed to unblock this update document. ');
+							elseif (!$this->isChild()) {
+								throw new \Exception('Failed to retrieve the target in a parent document. Failed to unlock this update document. ');
 							}
 						}
 					}
@@ -622,30 +626,36 @@ class documentcore {
 	}
 	
 	// Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-	public function ckeckParentDocument($ruleRelationships) {
+	public function ckeckParentDocument() {
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
-		try {
+		try {		
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
-			// alors on contôle les enregistrements parent 
+			// alors on contôle les enregistrements parent 		
 			if (
-					!empty($ruleRelationships)
-				&& empty($this->ruleParams['group'])
+					!empty($this->ruleRelationships)
+				&& !$this->isChild()
 			) {
 				$this->getSourceData();
 				$error = false;
 				// Vérification de chaque relation de la règle
-				foreach ($ruleRelationships as $ruleRelationship) {			
-					if(empty(trim($this->sourceData[$ruleRelationship['rrs_field_name_source']]))) {				
+				foreach ($this->ruleRelationships as $ruleRelationship) {			
+					if(empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {				
 						continue; // S'il n'y a pas de relation, on envoie sans erreur
-					}				
+					}		
+
+					// If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
+					if (!empty($ruleRelationship['parent'])) {
+						continue;
+					}		
+					
 					// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed		
-					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['rrs_field_name_source']]);
-					if (empty($targetId)) {
+					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']]);
+					if (empty($targetId['record_id'])) {
 						$error = true;
 						break;
 					}
@@ -653,21 +663,40 @@ class documentcore {
 				// Si aucun document parent n'est trouvé alors bloque le document
 				if ($error) {
 					// récupération du nom de la règle pour avoir un message plus clair
-					$sqlParams = "	SELECT rule_name FROM Rule WHERE rule_id = :rule_id";								
+					$sqlParams = "	SELECT name FROM Rule WHERE id = :rule_id";								
 					$stmt = $this->connection->prepare($sqlParams);
-					$stmt->bindValue(":rule_id", $ruleRelationship['rrs_field_id']);
+					$stmt->bindValue(":rule_id", $ruleRelationship['field_id']);
 					$stmt->execute();	   				
 					$ruleResult = $stmt->fetch(); 
 					$direction = $this->getRelationshipDirection($ruleRelationship);
-					throw new \Exception( 'Failed to retrieve a related document. No data for the field '.$ruleRelationship['rrs_field_name_source'].'. There is not record with the '.($direction == '-1' ? 'source_id' : 'target_id').' '.$this->sourceData[$ruleRelationship['rrs_field_name_source']].' in the rule '.$ruleResult['rule_name'].'. This document is queued. ');
+					throw new \Exception( 'Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the '.($direction == '-1' ? 'source_id' : 'target_id').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
+				}
+			}
+			// Get the parent document to save it in the table Document for the child document
+			$parentDocumentId = '';
+			
+			if (!empty($targetId['document_id'])) {
+				$parentDocumentId = $targetId['document_id'];
+			}
+			// Check if the status was in relate_KO before we set the status Relate_OK
+			// In this cas, new data has been created in Myddleware. So we check again if the mode of the document is still Create		
+			if (
+					$this->status == 'Relate_KO'
+				AND $this->type_document == 'C'
+			) {			
+				$this->type_document = $this->checkRecordExist($this->sourceId);					
+				if ($this->type_document == 'U') {
+					$this->updateTargetId($this->targetId);
+					$this->updateType('U');
 				}
 			}
 			$this->updateStatus('Relate_OK');
+					
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'No data for the field '.$ruleRelationship['rrs_field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Relate_KO');
 			$this->logger->error($this->message);
@@ -688,9 +717,11 @@ class documentcore {
 			$transformed = $this->updateTargetTable();
 			if ($transformed) {
 				// If the type of this document is Update and the id of the target is missing, we try to get this ID
+				// Except if the rule is a child (no target id is required, it will be send with the parent rule)
 				if (
 						$this->type_document == 'U'
 					&& empty($this->targetId)
+					&& !$this->isChild()
 				) {
 					$this->checkRecordExist($this->document_data['source_id']);
 					if (!empty($this->targetId)) {
@@ -705,7 +736,7 @@ class documentcore {
 			}
 			else {
 				throw new \Exception( 'Failed to transformed data. This document is queued. ' );
-			}
+			}			
 			$this->updateStatus('Transformed');
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
@@ -728,9 +759,15 @@ class documentcore {
 		}	
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
+			// Check if the rule is a parent and run the child data.
+			$this->runChildRule();
 			
 			// Si le document est une modification de données alors on va chercher les données dans la cible avec l'ID
-			if ($this->type_document == 'U') {
+			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
+			if (
+					$this->type_document == 'U'
+				 &&	!$this->isChild()
+			) {
 				// Récupération des données avec l'id de la cible
 				$searchFields = array('id' => $this->targetId);
 				$history = $this->getDocumentHistory($searchFields);
@@ -738,13 +775,9 @@ class documentcore {
 				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
-					$return = true;
 				}
 				else {
-					$this->message .= 'Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
 			// Si on est en mode recherche on récupère la donnée cible avec les paramètre de la source
@@ -752,13 +785,10 @@ class documentcore {
 				$this->getSourceData();
 				if (!empty($this->sourceData)) {
 					// Un seul champ de recherche pour l'instant. Les règle recherche ne peuvent donc n'avoir qu'un seul champ
-					$searchFields[$this->ruleField[0]['rulef_target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
+					$searchFields[$this->ruleField[0]['target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
 				}
 				else {
-					$this->message .= 'Failed to search data because there is no field in the query. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search data because there is no field in the query. This document is queued. ');
 				}
 
 				if(!empty($searchFields)) {
@@ -770,24 +800,17 @@ class documentcore {
 		
 				// Gestion de l'erreur
 				if ($history === -1) {
-					$this->message .= 'Failed to search data because the query is empty. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search data because the query is empty. This document is queued. ');
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
 					$rule = $this->getRule();
-					$this->message .= 'No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['rule_module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ');
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on passe le flux à envoyé car le lien est fait
 				else {
 					$this->updateStatus('Send');
 					$this->updateTargetId($history);
-					$return = true;
 				}
 			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
@@ -798,8 +821,8 @@ class documentcore {
 				// Récupération des valeurs de la source pour chaque champ de recherche
 				foreach($duplicate_fields as $duplicate_field) {
 					foreach ($this->ruleFields as $ruleField) {
-						if($ruleField['rulef_target_field_name'] == $duplicate_field)
-							$sourceDuplicateField = $ruleField['rulef_source_field_name'];
+						if($ruleField['target_field_name'] == $duplicate_field)
+							$sourceDuplicateField = $ruleField['source_field_name'];
 					}
 					// On ne fait pas de recherche dans la cible sur des champs vides. S'ils sont vides, ils sont excluent.
 					if (!empty($sourceDuplicateField)) {
@@ -813,45 +836,88 @@ class documentcore {
 					$history = -1;
 				}
 				if ($history === -1) {
-					$this->message .= 'Failed to search duplicate data in the target system. This document is queued. ';
-					$this->typeError = 'E';
-					$this->updateStatus('Error_history');
-					$return = false;
+					throw new \Exception('Failed to search duplicate data in the target system. This document is queued. ');
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
 					$this->updateStatus('Ready_to_send');
-					$return = true;
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
 					$this->updateStatus('Ready_to_send');
 					$this->updateTargetId($history);
 					$this->updateType('U');
-					$return = true;
 				}
 			}
-			// Sinon on mets directement le document en ready to send
+			// Sinon on mets directement le document en ready to send (example child rule)
 			else {
 				$this->updateStatus('Ready_to_send');
-				$return = true;
 			}
 			
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
 			// Si le document est en type recherche, alors la sible est forcément égal à la source et il ne fait pas annuler le doc. 
-			if ($this->type_document != 'S') {
+			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
+			if (	
+					$this->type_document != 'S' 
+				&&	!$this->isParent()
+			) {
 				$this->checkNoChange();
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
-			return $return;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to get target document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
+			$this->updateStatus('Error_checking');
 			$this->logger->error($this->message);
-			$this->createDocLog();
 			return false;
 		}	
+		return true;
+	}
+	
+	// Get the child rule of the current rule
+	// If child rule exist, we run it
+	protected function runChildRule() {
+	
+		$ruleParam['ruleId'] = $this->ruleId;
+		$ruleParam['jobId'] = $this->jobId;		
+		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
+		// Get the child rules of the current rule
+		$childRuleIds = $parentRule->getChildRules();
+		if (!empty($childRuleIds)) {
+			foreach($childRuleIds as $childRuleId) {
+				// Instantiate the child rule
+				$ruleParam['ruleId'] = $childRuleId['field_id'];
+				$ruleParam['jobId'] = $this->jobId;				
+				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);				
+
+				// Get the data of the current document to build the query in function generateDocuments
+				$this->getSourceData();
+				if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
+					$idQuery = $this->sourceData[$childRuleId['field_name_source']];
+				} else {
+					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+				}
+
+				// Generate documents for the child rule (could be several documents)
+				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_source']);
+				if (!empty($docsChildRule->error)) {
+					throw new \Exception($docsChildRule->error);
+				}
+				// Run documents
+				if (!empty($docsChildRule)) {
+					foreach ($docsChildRule as $doc) {
+						$errors = $childRule->actionDocument($doc->id,'rerun');
+						// If a child is in error, we stop the whole processus : child document not saved (roolback) and parent document in error checking
+						if (!empty($errors)) {									
+							// The error should be clear because the child document won't be saved
+							throw new \Exception( 'Child document in error (rule '.$childRuleId['field_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/'.$this->container->get( 'kernel' )->getEnvironment().'.log) for more information. ');
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
@@ -893,7 +959,7 @@ class documentcore {
 	protected function getDocumentHistory ($searchFields) {	
 		// Permet de renseigner le tableau rule avec les données d'entête
 		$rule = $this->getRule();
-		$read['module'] = $rule['rule_module_target'];
+		$read['module'] = $rule['module_target'];
 		$read['fields'] = $this->getTargetFields();
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
@@ -927,11 +993,11 @@ class documentcore {
 		
 			// Récupération de toutes les sources au statut "New" pour la règle 
 			$sqlSource = "SELECT $table.* 
-							FROM Documents
+							FROM Document
 								INNER JOIN $table 
-									ON Documents.id = $table.$tableId 
+									ON Document.id = $table.$tableId 
 							WHERE 
-									Documents.id = :id				
+									Document.id = :id				
 								";
 								/*statut Predecessor_OK à revoir, sera certainement relate_OK*/ 
 			$stmt = $this->connection->prepare($sqlSource);
@@ -1073,12 +1139,12 @@ class documentcore {
 							$first = false;
 						}
 						else {
-							// Recherche du champ cible ($column['Field']) dans les valeurs de la source ($this->RuleFields) pour le transformer et le sauvegarder dans la table target
+							// Recherche du champ cible ($column['Field']) dans les valeurs de la source ($this->RuleField) pour le transformer et le sauvegarder dans la table target
 							// Boucle sur toutes les champs jusqu'à trouver celle du champ en cours
 							if (!empty($this->ruleFields)) {
 								foreach ($this->ruleFields as $ruleField) {
 									// Si la formule est trouvée
-									if ($ruleField['rulef_target_field_name'] == $column['Field']) {
+									if ($ruleField['target_field_name'] == $column['Field']) {
 										// Transformation du champ
 										$value = $this->getTransformValue($this->sourceData,$ruleField);
 										if ($value === false) {
@@ -1093,7 +1159,7 @@ class documentcore {
 								// Récupération de l'ID target
 								foreach ($this->ruleRelationships as $ruleRelationships) {
 									// Si la formule est trouvée
-									if ($ruleRelationships['rrs_field_name_target'] == $column['Field']) {
+									if ($ruleRelationships['field_name_target'] == $column['Field']) {
 										// Transformation du champ
 										$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
 										if ($value === false) {
@@ -1138,23 +1204,23 @@ class documentcore {
 		=> La définition du champ cible (avec formule et relation) $RuleField, par exemple : 
 		Array
 		(
-			[rulef_id] => 52 								: champ non nécessaire en mode test sur le front office
+			[id] => 52 								: champ non nécessaire en mode test sur le front office
 			[rule_id] => 53500e0bf2d06 						: champ non nécessaire en mode test sur le front office
-			[rulef_target_field_name] => name
-			[rulef_source_field_name] => name
-			[rulef_formula] =>
-			[rulef_related_rule] =>
+			[target_field_name] => name
+			[source_field_name] => name
+			[formula] =>
+			[related_rule] =>
 		)
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
 		try {
 			//--
-			if (!empty($ruleField['rulef_formula'])) {
+			if (!empty($ruleField['formula'])) {
 				// -- -- -- Gestion des formules
 	
 				// préparation des variables	
-				$r = explode(';', $ruleField['rulef_source_field_name']);	
+				$r = explode(';', $ruleField['source_field_name']);	
 				if(count($r) > 1) {
 					foreach ( $r as $listFields ) {
 						// On ne traite pas l'entrée my_value
@@ -1165,22 +1231,22 @@ class documentcore {
 							}
 							else {
 								// Erreur
-								throw new \Exception( 'The field '.$listFields.' is unknow in the formula '.$ruleField['rulef_formula'].'. ' );
+								throw new \Exception( 'The field '.$listFields.' is unknow in the formula '.$ruleField['formula'].'. ' );
 							}
 						}
 					}									
 				}
 				else {
 					// On ne traite pas l'entrée my_value
-					if ($ruleField['rulef_source_field_name'] != 'my_value') {
-						$fieldNameDyn = $ruleField['rulef_source_field_name']; // value : nom de la variable exemple name
-						$$fieldNameDyn = $source[$ruleField['rulef_source_field_name']]; // variable dynamique name = $name									
+					if ($ruleField['source_field_name'] != 'my_value') {
+						$fieldNameDyn = $ruleField['source_field_name']; // value : nom de la variable exemple name
+						$$fieldNameDyn = $source[$ruleField['source_field_name']]; // variable dynamique name = $name									
 					}
 				}
 				// préparation des variables	 
 				
 				$formule = $this->container->get('formula.myddleware'); // service formule myddleware
-				$formule->init($ruleField['rulef_formula']); // mise en place de la règle dans la classe
+				$formule->init($ruleField['formula']); // mise en place de la règle dans la classe
 				$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP
 				
 				// Exécute la règle si pas d'erreur de syntaxe
@@ -1191,49 +1257,44 @@ class documentcore {
 						return $rFormula;
 					}
 					else {
-						throw new \Exception( 'Invalid formula (failed to retrieve formula) : '.$ruleField['rulef_formula'] );	
+						throw new \Exception( 'Invalid formula (failed to retrieve formula) : '.$ruleField['formula'] );	
 					}
 				}
 				else {
-					throw new \Exception( 'Invalid formula (failed to execute) : '.$ruleField['rulef_formula'] );
+					throw new \Exception( 'Invalid formula (failed to execute) : '.$ruleField['formula'] );
 				}
 				// -- -- -- Gestion des formules
 			}
 			// S'il s'agit d'un champ relation
-			elseif (!empty($ruleField['rrs_field_id'])) {	
+			elseif (!empty($ruleField['field_id'])) {	
 				// Si l'id est vide on renvoie vide
-				if(empty(trim($source[$ruleField['rrs_field_name_source']]))){
+				if(empty(trim($source[$ruleField['field_name_source']]))){
 					return null;
 				}
 				
-				// Si on est sur une règle groupée alors l'id à retourner est forcément Myddleware_element_id (seule relation possible pour les règles groupées)
-				if (!empty($this->ruleParams['group'])) {
-					if (!empty($source['Myddleware_element_id'])) {
-						return $source['Myddleware_element_id'];
-					}
-					else {
-						throw new \Exception( 'Failed to get the field Myddleware_element_id for the group rule. ' );
-					}
+				// If the relationship is a parent type, we don't search the id in the child rule now. Data will be read from the child rule when we will send the parent document. So no target id is required now.
+				if (!empty($ruleField['parent'])) {
+					return null;
 				}
 				
 				// Récupération de l'ID de l'enregistrement lié dans la cible avec l'id correspondant dans la source et la correspondance existante dans la règle liée.
-				$targetId = $this->getTargetId($ruleField,$source[$ruleField['rrs_field_name_source']]);
-				if (!empty($targetId)) {
-					return $targetId;
+				$targetId = $this->getTargetId($ruleField,$source[$ruleField['field_name_source']]);
+				if (!empty($targetId['record_id'])) {
+					return $targetId['record_id'];
 				}
 				else {
-					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['rulef_source_field_name']].' of the rule '.$ruleField['rulef_related_rule'] );
+					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['source_field_name']].' of the rule '.$ruleField['related_rule'] );
 				}
 			}
 			// Si le champ est envoyé sans transformation
-			elseif (isset($source[$ruleField['rulef_source_field_name']])) {			
-				return $this->checkField($source[$ruleField['rulef_source_field_name']]);
+			elseif (isset($source[$ruleField['source_field_name']])) {			
+				return $this->checkField($source[$ruleField['source_field_name']]);
 			}
-			elseif (is_null($source[$ruleField['rulef_source_field_name']])) {			
+			elseif (is_null($source[$ruleField['source_field_name']])) {			
 				return null;
 			}
 			else {
-				throw new \Exception( 'Field '.$ruleField['rulef_source_field_name'].' not found in source data.------'.print_r($ruleField,true) );
+				throw new \Exception( 'Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField,true) );
 			}
 		}
 		catch(\Exception $e) {		
@@ -1257,7 +1318,7 @@ class documentcore {
 	protected function getRule() {
 		try {
 			if (!empty($this->ruleId)) {
-				$rule = "SELECT * FROM Rule WHERE rule_id = :ruleId";
+				$rule = "SELECT * FROM Rule WHERE id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
@@ -1270,28 +1331,68 @@ class documentcore {
 		}	
 	}
 	
+	
+	// Check if the document is a child
+	protected function isChild() {	
+		$sqlIsChild = "	SELECT Rule.id 
+									FROM RuleRelationShip 
+										INNER JOIN Rule
+											ON Rule.id  = RuleRelationShip.rule_id 
+									WHERE 
+											RuleRelationShip.field_id = :ruleId
+										AND RuleRelationShip.parent = 1
+										AND Rule.deleted = 0
+								";		
+		$stmt = $this->connection->prepare($sqlIsChild);
+		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->execute();	    
+		$isChild = $stmt->fetch(); // 1 row
+		if (!empty($isChild)) {
+			return true;
+		}
+		return false;;		
+	}
+	
+	// Check if the document is a parent
+	protected function isParent() {	
+		$sqlIsChild = "	SELECT RuleRelationShip.rule_id 
+							FROM RuleRelationShip 				
+							WHERE 
+									RuleRelationShip.rule_id = :ruleId
+								AND RuleRelationShip.parent = 1
+								";		
+		$stmt = $this->connection->prepare($sqlIsChild);
+		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->execute();	    
+		$isChild = $stmt->fetch(); // 1 row
+		if (!empty($isChild)) {
+			return true;
+		}
+		return false;;		
+	}
+	
 	// Permet de récupérer les champs de la cible
 	protected function getTargetFields() {
 		try {
 			if (!empty($this->ruleId)) {
-				$rule = "SELECT * FROM RuleFields WHERE rule_id = :ruleId";
+				$rule = "SELECT * FROM RuleField WHERE rule_id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
 				$ruleFields = $stmt->fetchAll();
 				foreach ($ruleFields AS $ruleField) {
-					$fields[] = $ruleField['rulef_target_field_name'];
+					$fields[] = $ruleField['target_field_name'];
 				}
 				
 				// Ajout des champs de relation s'il y en a
-				$rule = "SELECT * FROM RuleRelationShips WHERE rule_id = :ruleId";
+				$rule = "SELECT * FROM RuleRelationShip WHERE rule_id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
 				$ruleRelationShips = $stmt->fetchAll();
 				if(!empty($ruleRelationShips)){
 					foreach ($ruleRelationShips AS $ruleRelationShip) {
-						$fields[] = $ruleRelationShip['rrs_field_name_target'];
+						$fields[] = $ruleRelationShip['field_name_target'];
 					}
 				}
 				
@@ -1305,10 +1406,10 @@ class documentcore {
 	}
 	
 	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParams() {	
+	protected function setRuleParam() {	
 		try {
 			$sqlParams = "SELECT * 
-							FROM RuleParams 
+							FROM RuleParam 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1316,7 +1417,7 @@ class documentcore {
 			$ruleParams = $stmt->fetchAll();
 			if($ruleParams) {
 				foreach ($ruleParams as $ruleParam) {
-					$this->ruleParams[$ruleParam['rulep_name']] = ltrim($ruleParam['rulep_value']);
+					$this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
 				}			
 			}			
 		} catch (\Exception $e) {
@@ -1328,32 +1429,88 @@ class documentcore {
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {
-		try {	
-			// Si on est sur une règle de type groupe avec la valeur child alors on est focément en update (seule la règle root est autorisée à créer des données)
-			if (
-					!empty($this->ruleParams['group'])
-				&& $this->ruleParams['group'] == 'child'
-			){
-				return 'U';
-			}
-		
-			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
+		try {
+			// Query used in the method several times
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
 			$sqlParamsSoure = "	SELECT 
-								Documents.id, 
-								Documents.target_id 
+								Document.id, 
+								Document.target_id 
 							FROM Rule
 								INNER JOIN Rule Rule_version
-									ON Rule_version.rule_name = Rule.rule_name
-								INNER JOIN Documents 
-									ON Documents.rule_id = Rule_version.rule_id
+									ON Rule_version.name = Rule.name
+								INNER JOIN Document 
+									ON Document.rule_id = Rule_version.id
 							WHERE 
-									Rule.rule_id IN (:ruleId)									
-								AND Documents.global_status != 'Cancel'	
-								AND	Documents.source_id = :id
-								AND Documents.id != :id_doc
+									Rule.id IN (:ruleId)									
+								AND (
+										Document.global_status != 'Cancel'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
+									)
+								)
+								AND	Document.source_id = :id
+								AND Document.id != :id_doc
 							ORDER BY target_id DESC
 							LIMIT 1";
+							
+			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
+			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
+			if (!empty($this->ruleRelationships)) {
+				// Boucle sur les relation
+				foreach ($this->ruleRelationships as $ruleRelationship) {
+					// Si on est sur une relation avec le champ Myddleware_element_id
+					if ($ruleRelationship['field_name_target'] == 'Myddleware_element_id'){						
+						// Si le champs avec l'id source n'est pas vide
+						// S'il s'agit de Myddleware_element_id on teste id
+						if (
+								!empty($this->data[$ruleRelationship['field_name_source']])
+							 || (
+									$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
+								&& !empty($this->data['id'])	
+							 )
+						) {					
+							// On recherche l'id target dans la règle liée
+							$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
+							// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
+							$direction = $this->getRelationshipDirection($ruleRelationship);
+							if ($direction == '-1') {	
+								$stmt = $this->connection->prepare($sqlParamsTarget);
+							}
+							else {
+								$stmt = $this->connection->prepare($sqlParamsSoure);
+							}
+							$stmt->bindValue(":ruleId", $ruleRelationship['field_id']);
+							$stmt->bindValue(":id", $this->sourceId);
+							$stmt->bindValue(":id_doc", $this->id);
+							$stmt->execute();	   				
+							$result = $stmt->fetch();				
+				
+							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
+							if (!empty($result['id'])) {
+								$this->targetId = $result['target_id'];
+							}
+							// Sinon on bloque la création du document 
+							// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
+							elseif (empty($ruleRelationship['parent'])) {
+								$this->message .= 'Failed to get the id target of the current module in the rule linked.';
+							}
+							return 'U';
+						}
+						else {
+							throw new \Exception( 'The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.' );
+						}
+					}
+				}
+			}
+			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
+			if ($this->isChild()){
+				return 'U';
+			}
+	
+			// If no relationship or no child rule
+			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
 			$stmt = $this->connection->prepare($sqlParamsSoure);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 			$stmt->bindValue(":id", $id);
@@ -1364,18 +1521,18 @@ class documentcore {
 			// Si on ne trouve pas d'id alors on prépare la requête pour rechercher dans la partie target
 			if (empty($result['id'])) {
 				$sqlParamsTarget = "	SELECT 
-									Documents.id, 
-									Documents.source_id target_id 
+									Document.id, 
+									Document.source_id target_id 
 								FROM Rule
 									INNER JOIN Rule Rule_version
-										ON Rule_version.rule_name = Rule.rule_name
-									INNER JOIN Documents 
-										ON Documents.rule_id = Rule_version.rule_id
+										ON Rule_version.name = Rule.name
+									INNER JOIN Document 
+										ON Document.rule_id = Rule_version.id
 								WHERE 
-										Rule.rule_id IN (:ruleId)									
-									AND Documents.global_status != 'Cancel'	
-									AND	Documents.target_id = :id
-									AND Documents.id != :id_doc
+										Rule.id IN (:ruleId)									
+									AND Document.global_status != 'Cancel'	
+									AND	Document.target_id = :id
+									AND Document.id != :id_doc
 								ORDER BY target_id DESC
 								LIMIT 1";
 			}
@@ -1392,69 +1549,17 @@ class documentcore {
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
 				$result = $stmt->fetch();
-			}
-			
+			}			
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
 				return 'U';
 			}
-			// Si aucun doc trouvé sur la règle actuelle
-			else {
-				// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
-				// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
-				if (!empty($this->ruleRelationships)) {
-					// Boucle sur les relation
-					foreach ($this->ruleRelationships as $ruleRelationship) {
-						// Si on est sur une relation avec le champ Myddleware_element_id
-						if ($ruleRelationship['rrs_field_name_target'] == 'Myddleware_element_id'){						
-							// Si le champs avec l'id source n'est pas vide
-							// S'il s'agit de Myddleware_element_id on teste id
-							if (
-									!empty($this->data[$ruleRelationship['rrs_field_name_source']])
-								 || (
-										$ruleRelationship['rrs_field_name_source'] == 'Myddleware_element_id'
-									&& !empty($this->data['id'])	
-								 )
-							) {
-								// On recherche l'id target dans la règle liée
-								$this->sourceId = ($ruleRelationship['rrs_field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['rrs_field_name_source']]);
-								// On récupère la direction de la relation pour rechercher dans le target id ou dans le source id
-								$direction = $this->getRelationshipDirection($ruleRelationship);
-								if ($direction == '-1') {	
-									$stmt = $this->connection->prepare($sqlParamsTarget);
-								}
-								else {
-									$stmt = $this->connection->prepare($sqlParamsSoure);
-								}
-								$stmt->bindValue(":ruleId", $ruleRelationship['rrs_field_id']);
-								$stmt->bindValue(":id", $this->sourceId);
-								$stmt->bindValue(":id_doc", $this->id);
-								$stmt->execute();	   				
-								$result = $stmt->fetch();				
-							
-								// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE
-								if (!empty($result['id'])) {
-									$this->targetId = $result['target_id'];
-									return 'U';
-								}
-								// Sinon on bloque la création du document 
-								else {
-									throw new \Exception( 'Failed to get the id target of the current module in the rule linked.' );
-								}
-							}
-							else {
-								throw new \Exception( 'Failed to get the id source of the current module.' );
-							}
-						}
-					}
-				}
-				// Si aucune règle avec relation Myddleware_element_id alors on est en création
-				return 'C';
-			}
+			// Si aucune règle avec relation Myddleware_element_id alors on est en création
+			return 'C';
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$this->logger->error( $this->message );
+			$this->logger->error( $this->message );	
 			return null;
 		}
 	}
@@ -1472,7 +1577,7 @@ class documentcore {
 			if ($globalStatus == 'Error' || $globalStatus == 'Close') {
 				$this->attempt++;
 			}
-			$query = "	UPDATE Documents 
+			$query = "	UPDATE Document 
 								SET 
 									date_modified = :now,
 									global_status = :globalStatus,
@@ -1481,7 +1586,7 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);;				
+			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
@@ -1518,7 +1623,7 @@ class documentcore {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query = "	UPDATE Documents 
+			$query = "	UPDATE Document 
 								SET 
 									date_modified = :now,
 									type = :new_type
@@ -1548,7 +1653,7 @@ class documentcore {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query = "	UPDATE Documents 
+			$query = "	UPDATE Document 
 								SET 
 									date_modified = :now,
 									target_id = :target_id
@@ -1581,18 +1686,18 @@ class documentcore {
 			// depuis la version 1.1.2 on enlève les test sur delete des règles car un document en erreur peut porter sur une ancienne version de règle
 			$sqlParams = "	SELECT 
 								IF(RuleA.conn_id_source = RuleB.conn_id_source, '1', IF(RuleA.conn_id_source = RuleB.conn_id_target, '-1', '1')) direction
-							FROM RuleRelationShips
+							FROM RuleRelationShip
 								INNER JOIN Rule RuleA
-									ON RuleRelationShips.rule_id = RuleA.rule_id
-									#AND RuleA.rule_deleted = 0
+									ON RuleRelationShip.rule_id = RuleA.id
+									#AND RuleA.deleted = 0
 								INNER JOIN Rule RuleB
-									ON RuleRelationShips.rrs_field_id = RuleB.rule_id		
-									#AND RuleB.rule_deleted = 0
+									ON RuleRelationShip.field_id = RuleB.id		
+									#AND RuleB.deleted = 0
 							WHERE  
-								RuleRelationShips.rrs_id = :rrs_id 
+								RuleRelationShip.id = :id 
 						";
 			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->bindValue(":rrs_id", $ruleRelationship['rrs_id']);
+			$stmt->bindValue(":id", $ruleRelationship['id']);
 			$stmt->execute();	   				
 			$result = $stmt->fetch();
 			if (!empty($result['direction'])) {
@@ -1604,56 +1709,60 @@ class documentcore {
 		}
 	}
 	
-	// Permet de récupérer l'id target pour une règle (indépendemment de la version de la règle) et un id source
+	// Permet de récupérer l'id target pour une règle (indépendemment de la version de la règle) et un id source ou l'inverse
 	protected function getTargetId($ruleRelationship,$record_id) {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
 			// En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
 			// Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
 			if ($direction == '-1') {
-				$sqlParams = "	SELECT source_id record_id 
+				$sqlParams = "	SELECT 
+									source_id record_id,
+									Document.id document_id								
 								FROM Rule
 									INNER JOIN Rule Rule_version
-										ON Rule_version.rule_name = Rule.rule_name
-									INNER JOIN Documents 
-										ON Documents.rule_id = Rule_version.rule_id
+										ON Rule_version.name = Rule.name
+									INNER JOIN Document 
+										ON Document.rule_id = Rule_version.id
 								WHERE  
-										Rule.rule_id = :ruleRelateId 
-									AND Documents.source_id != '' 
-									AND Documents.target_id = :record_id 
+										Rule.id = :ruleRelateId 
+									AND Document.source_id != '' 
+									AND Document.target_id = :record_id 
 									AND (
-											Documents.global_status = 'Close' 
-										 OR Documents.status = 'No_send'
+											Document.global_status = 'Close' 
+										 OR Document.status = 'No_send'
 									)	 
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
-				$sqlParams = "	SELECT target_id record_id
+				$sqlParams = "	SELECT 
+									target_id record_id,
+									Document.id document_id
 								FROM Rule
 									INNER JOIN Rule Rule_version
-										ON Rule_version.rule_name = Rule.rule_name
-									INNER JOIN Documents 
-										ON Documents.rule_id = Rule_version.rule_id
+										ON Rule_version.name = Rule.name
+									INNER JOIN Document 
+										ON Document.rule_id = Rule_version.id
 								WHERE  
-										Rule.rule_id = :ruleRelateId 
-									AND Documents.source_id = :record_id 
-									AND Documents.target_id != '' 
+										Rule.id = :ruleRelateId 
+									AND Document.source_id = :record_id 
+									AND Document.target_id != '' 
 									AND (
-											Documents.global_status = 'Close' 
-										 OR Documents.status = 'No_send'
+											Document.global_status = 'Close' 
+										 OR Document.status = 'No_send'
 									)	
 								LIMIT 1";	
 			}
 			else {
-				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['rrs_field_id'].'. ' );
+				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
 			}
 			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->bindValue(":ruleRelateId", $ruleRelationship['rrs_field_id']);
+			$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
 			$stmt->bindValue(":record_id", $record_id);
 			$stmt->execute();	   				
 			$result = $stmt->fetch();
 			if (!empty($result['record_id'])) {
-				return $result['record_id'];
+				return $result;
 			}
 			return null;
 		} catch (\Exception $e) {
@@ -1679,7 +1788,7 @@ class documentcore {
 		try {
 			$now = gmdate('Y-m-d H:i:s');
 			$this->message = substr(str_replace("'","",$this->message),0,1000);
-			$query_header = "INSERT INTO Log (log_created, log_type, log_msg, rule_id, doc_id, ref_doc_id, job_id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
+			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->message = '';

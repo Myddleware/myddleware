@@ -102,6 +102,8 @@ create_rule:
             target: Cible
             rule: Règles
             fields: Champs source
+            parent: Parent
+            yes: Oui
         params:
             duplicate: Champs pour éviter les doublons
             sync: Synchronisation bidirectionnelle
@@ -325,7 +327,7 @@ flux:
         predecessor_ko: Prédécesseur en erreur
         relate_ko: Relation en erreur
         error_transformed: Transformation en erreur
-        error_history: Historique en erreur
+        error_checking: Vérification en erreur
         error_sending: Envoi en erreur
  
 view_flux:
@@ -336,6 +338,7 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
+    nbChildDocuments: Tranferts fils
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
@@ -347,6 +350,7 @@ view_flux:
         attempt: Tentative
         gblstatut: Global Status
         version: Version
+        parent: Parent
     log:
         id: Id
         ref: Référence
@@ -464,7 +468,6 @@ solution:
     params: 
         dateref: Date de référence
         active: Activation
-        rate: Fréquence
         delete: Suppression des données
         activate: Activé
         desactivate: Désactivé
@@ -497,7 +500,12 @@ error:
         target_module_connect: Erreur de connexion du module cible
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
-            
+        edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.		
+        delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
+        delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
+    account:
+        language_change: Impossible de modifier le langage :
+
 title:
     account:
         view: Mon compte

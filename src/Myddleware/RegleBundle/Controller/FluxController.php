@@ -36,8 +36,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 
 use Myddleware\RegleBundle\Entity\Solution;
 use Myddleware\RegleBundle\Entity\Connector;
-use Myddleware\RegleBundle\Entity\ConnectorParams;
-use Myddleware\RegleBundle\Entity\DocumentsAudit;
+use Myddleware\RegleBundle\Entity\DocumentAudit;
 
 use Myddleware\RegleBundle\Classes\document as doc;
 
@@ -59,7 +58,6 @@ class FluxControllerCore extends Controller
 
 		// Detecte si la session est le support ---------
 		$permission =  $this->get('myddleware.permission');
-		
 		if( $permission->isAdmin($this->getUser()->getId()) ) {
 			$list_fields_sql = 
 				array('id' => $id
@@ -76,11 +74,11 @@ class FluxControllerCore extends Controller
 
 		// Infos des flux
 		$rule = $em->getRepository('RegleBundle:Rule')
-                   ->findBy( $list_fields_sql );	
+                   ->findBy( $list_fields_sql );		
 		if($rule) {
-			$myddlewareSession['flux_filter']['c']['rule'] = $rule[0]->getId();
+			$myddlewareSession['flux_filter']['c']['rule'] = $rule[0]->getName();
 			$myddlewareSession['flux_filter']['c']['gblstatus'] = 'Error';			
-			$myddlewareSession['flux_filter']['where'] = "WHERE rule_id='".$rule[0]->getId()."' AND global_status='Error' ";					
+			$myddlewareSession['flux_filter']['where'] = "WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ";					
 		}
 		else {
 			unset($myddlewareSession['flux_filter']);
@@ -135,11 +133,11 @@ class FluxControllerCore extends Controller
 		// Detecte si la session est le support ---------		
 
 		// Liste des règles
-		$lstRuleName = array();
+		$lstRuleName = array();		
 		if($rule) {
 			
 			foreach ($rule as $r) {
-				$lstRuleName[$r->getId()] = $r->getName().' - v'.$r->getVersion();
+				$lstRuleName[$r->getName()] = $r->getName();
 			}	
 			
 			asort($lstRuleName);
@@ -205,7 +203,7 @@ class FluxControllerCore extends Controller
 						'required'=> false	))							
 					 					  
 					->getForm();
-		//
+
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
 		$where = ((isset($myddlewareSession['flux_filter']['where']) ? $myddlewareSession['flux_filter']['where'] : ''));
@@ -216,7 +214,7 @@ class FluxControllerCore extends Controller
 			$where = 'WHERE ';
 			
 			if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
-				$where .= "date_created >= '".$data['date_create_start']."' ";
+				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['date_create_start'] = $data['date_create_start'];							
 			}
@@ -226,7 +224,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['date_create_end'] ) && is_string($data['date_create_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_created <= '".$data['date_create_end']."' ";
+				$where .= "Document.date_created <= '".$data['date_create_end']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_create_end'] = $data['date_create_end'];							
 			}	
@@ -236,7 +234,7 @@ class FluxControllerCore extends Controller
 
 			if(!empty( $data['date_modif_start'] ) && is_string($data['date_modif_start'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_modified >= '".$data['date_modif_start']."' ";
+				$where .= "Document.date_modified >= '".$data['date_modif_start']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_modif_start'] = $data['date_modif_start'];							
 			}
@@ -246,7 +244,7 @@ class FluxControllerCore extends Controller
 							
 			if(!empty( $data['date_modif_end'] ) && is_string($data['date_modif_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "date_modified <= '".$data['date_modif_end']."' ";
+				$where .= "Document.date_modified <= '".$data['date_modif_end']."' ";
 				$conditions++;	
 				$myddlewareSession['flux_filter']['c']['date_modif_end'] = $data['date_modif_end'];					
 			}
@@ -256,7 +254,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['rule'] ) && is_string($data['rule'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "rule_id='".trim($data['rule'])."' ";
+				$where .= "Rule.name='".trim($data['rule'])."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['rule'] = $data['rule'];
 			}				
@@ -266,7 +264,7 @@ class FluxControllerCore extends Controller
 										
 			if(!empty( $data['status'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "status='".$data['status']."' ";
+				$where .= "Document.status='".$data['status']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['status'] = $data['status'];
 			}
@@ -276,7 +274,7 @@ class FluxControllerCore extends Controller
 
 			if(!empty( $data['gblstatus'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "global_status='".$data['gblstatus']."' ";
+				$where .= "Document.global_status='".$data['gblstatus']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['gblstatus'] = $data['gblstatus'];
 			}
@@ -286,7 +284,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['target_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "target_id LIKE '".$data['target_id']."' ";
+				$where .= "Document.target_id LIKE '".$data['target_id']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['target_id'] = $data['target_id'];
 			}
@@ -296,7 +294,7 @@ class FluxControllerCore extends Controller
 			
 			if(!empty( $data['source_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
-				$where .= "source_id LIKE '".$data['source_id']."' ";
+				$where .= "Document.source_id LIKE '".$data['source_id']."' ";
 				$conditions++;
 				$myddlewareSession['flux_filter']['c']['source_id'] = $data['source_id'];
 			}
@@ -341,10 +339,10 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT d.*, u.username, r.rule_version, concat(r.rule_name, 'v', r.rule_version) rule_name
-				FROM Documents d 
-				JOIN users u ON(u.id=d.created_by)
-				JOIN Rule r USING(rule_id) 
+		$sql = "SELECT Document.*, users.username, Rule.version, Rule.name rule_name
+				FROM Document  
+				JOIN users ON(users.id = Document.created_by)
+				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 
 				$user
 				ORDER BY date_modified DESC 
@@ -371,9 +369,9 @@ class FluxControllerCore extends Controller
 			// Si on atteind la limit alors on récupère le nombre total de flux
 			if ($compact['nb'] >= $this->llimitListFlux) {
 				$sql = "SELECT count(*) nb
-						FROM Documents d 
-						JOIN users u ON(u.id=d.created_by)
-						JOIN Rule r USING(rule_id) 
+						FROM Document 
+						JOIN users ON(users.id = Document.created_by)
+						JOIN Rule ON(Rule.id = Document.rule_id)
 						$where 
 						$user";
 				$stmt = $conn->prepare($sql);
@@ -428,7 +426,7 @@ class FluxControllerCore extends Controller
 			$list_fields_sql = array('id' => $id);	
 				
 			// Infos des flux
-			$doc = $em->getRepository('RegleBundle:Documents')
+			$doc = $em->getRepository('RegleBundle:Document')
 	                  ->findById($list_fields_sql);						  
 			if( !$permission->isAdmin($this->getUser()->getId()) ) {		  
 				if(
@@ -455,8 +453,14 @@ class FluxControllerCore extends Controller
 												),				
 				'maxPerPage' => $this->container->getParameter('pager'),
 				'page' => $page
-			),false);;
-			
+			),false);		
+			$childDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
+			// Get the rule name of every child doc
+			$childDocumentsRule = array();
+			foreach ($childDocuments as $childDocument) {
+				$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
+			}
+	
 			$name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
 				$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
 				$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
@@ -478,6 +482,9 @@ class FluxControllerCore extends Controller
 		        'entities' => $compact['entities'],
 		        'pager' => $compact['pager'],
 		        'rule' => $rule,
+		        'child_documents' => $childDocuments,
+		        'child_Documents_Rule' => $childDocumentsRule,
+		        'nb_child_documents' => count($childDocuments),
 		        'ctm_btn' => $list_btn			
 				)
 			);			
@@ -516,7 +523,7 @@ class FluxControllerCore extends Controller
 		      $em = $this->getDoctrine()
 		               ->getManager();	
 			  // Insert in audit			  
-			  $oneDocAudit = new DocumentsAudit();
+			  $oneDocAudit = new DocumentAudit();
 			  $oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
 			  $oneDocAudit->setDateModified( new \DateTime );
 			  $oneDocAudit->setAfter( $value );
@@ -674,9 +681,9 @@ class FluxControllerCore extends Controller
 			$tools = $this->container->get('myddleware_tools.tools');
 			$conn = $this->get( 'database_connection' );	
 		
-			// Documents
+			// Document
 			$stmt = $conn->prepare('SELECT rule_id 
-									FROM Documents 
+									FROM Document 
 									WHERE id = :id');  
 								 
 			$stmt->bindValue('id', $id);  
@@ -684,13 +691,13 @@ class FluxControllerCore extends Controller
 			$flux['source']['champ'] = $stmt->fetch();  
 			
 			// Regle
-			$stmt = $conn->prepare('SELECT rule_name_slug, rule_version 
+			$stmt = $conn->prepare('SELECT name_slug, version 
 									FROM Rule 
-									WHERE rule_id = :id'); 								  
+									WHERE id = :id'); 								  
 			$stmt->bindValue('id', $flux['source']['champ']['rule_id']);  
 			$stmt->execute();
 			$flux['source'] = $stmt->fetch(); 
-			$flux['source']['table'] = $flux['source']['rule_name_slug'].'_'.$flux['source']['rule_version']; 
+			$flux['source']['table'] = $flux['source']['name_slug'].'_'.$flux['source']['version']; 
 			
 			$table = 'z_'.$flux['source']['table'].'_'.$type;
 			$idName = 'id_'.$flux['source']['table'].'_'.$type;  

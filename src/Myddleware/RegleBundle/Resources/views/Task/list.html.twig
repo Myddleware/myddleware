@@ -51,30 +51,30 @@
 			</tr> 
 		     {% for task in entities %}
 		     
-		     {% if task.job_message is not empty %}
+		     {% if task.message is not empty %}
 		    	<tr class="fd_normal">
 		     {% else %}
 		     	<tr>
 			 {% endif %}
-		     	<td><a href="{{ path('task_view',{'id' :task.job_id }) }}">{{ task.job_id }}</a></td>
+		     	<td><a href="{{ path('task_view',{'id' :task.id }) }}">{{ task.id }}</a></td>
 		     	<td class="ctr">	     		
-		     		{% if task.job_status|lower == 'end' %}
-		     		<span class="label label-default">{{ task.job_status }}</span>
+		     		{% if task.status|lower == 'end' %}
+		     		<span class="label label-default">{{ task.status }}</span>
 		     		{% else %}
-					<span class="label label-warning">{{ task.job_status }}</span>
+					<span class="label label-warning">{{ task.status }}</span>
 		     		{% endif %}
 		     	</td>	
 		     	<td>
-					{{ task.job_begin|date("d/m/Y H:i:s") }}
+					{{ task.begin|date("d/m/Y H:i:s") }}
 		     	</td>	
 		     	<td>
-					{{ task.job_end|date("d/m/Y H:i:s") }}
+					{{ task.end|date("d/m/Y H:i:s") }}
 		     	</td>		     	
-		     	<td class="count">{{ task.job_open }}</td>	
-		     	<td class="count">{{ task.job_close }}</td>
-		     	<td class="count">{{ task.job_cancel }}</td> 
-		     	<td class="count">{{ task.job_error }}</td>	
-		     	<td>{{ task.job_message }}</td>			     	
+		     	<td class="count">{{ task.open }}</td>	
+		     	<td class="count">{{ task.close }}</td>
+		     	<td class="count">{{ task.cancel }}</td> 
+		     	<td class="count">{{ task.error }}</td>	
+		     	<td>{{ task.message }}</td>			     	
 			</tr>			
 			{% endfor %}			
 			<tr>

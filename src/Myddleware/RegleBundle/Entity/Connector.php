@@ -39,7 +39,7 @@ class Connector
     /**
      * @var integer
      *
-     * @ORM\Column(name="conn_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
@@ -50,7 +50,7 @@ class Connector
      * @var Solution $solution
      *
      * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
-     * @ORM\JoinColumn(name="sol_id", referencedColumnName="sol_id")
+     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id")
      *
      */
     private $solution;
@@ -66,22 +66,22 @@ class Connector
     /**
      * @var string
      *
-     * @ORM\Column(name="conn_lbl", type="string", length=50, nullable=false)
+     * @ORM\Column(name="name", type="string", length=50, nullable=false)
 	 * 
      */
-    private $label;
+    private $name;
 
    /**
-	 * @Gedmo\Slug(fields={"label"}, separator="_", unique=true)
-	 * @ORM\Column(length=50, nullable=false, name="conn_lbl_slug")
+	 * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
+	 * @ORM\Column(length=50, nullable=false, name="name_slug")
 	 */
-	private $labelSlug;
+	private $nameSlug;
 
     /**
      * @var datetime
      *
 	 * 
-     * @ORM\Column(name="conn_date_created", type="datetime", nullable=false)
+     * @ORM\Column(name="date_created", type="datetime", nullable=false)
 	 * 
      */
     private $dateCreated;
@@ -89,7 +89,7 @@ class Connector
     /**
      * @var datetime
      *
-     * @ORM\Column(name="conn_date_modified", type="datetime", nullable=false)
+     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
 	 * 
      */
     private $dateModified;
@@ -97,7 +97,7 @@ class Connector
     /**
      * @var integer
      *
-	 * @ORM\Column(name="conn_created_by", nullable=false)
+	 * @ORM\Column(name="created_by", nullable=false)
 	 * 
      */
     private $createdBy;
@@ -105,7 +105,7 @@ class Connector
     /**
      * @var integer
      *
-     * @ORM\Column(name="conn_modified_by", nullable=false)
+     * @ORM\Column(name="modified_by", nullable=false)
 	 * 
      */
     private $modifiedBy;
@@ -129,49 +129,49 @@ class Connector
     }
 
     /**
-     * Set label
+     * Set name
      *
-     * @param string $label
+     * @param string $name
      * @return Connector
      */
-    public function setLabel($label)
+    public function setName($name)
     {
-        $this->label = $label;
+        $this->name = $name;
     
         return $this;
     }
 
     /**
-     * Get label
+     * Get name
      *
      * @return string 
      */
-    public function getLabel()
+    public function getName()
     {
-        return $this->label;
+        return $this->name;
     }
 
     /**
-     * Set labelSlug
+     * Set nameSlug
      *
-     * @param string $labelSlug
+     * @param string $nameSlug
      * @return Connector
      */
-    public function setLabelSlug($labelSlug)
+    public function setNameSlug($nameSlug)
     {
-        $this->labelSlug = $labelSlug;
+        $this->nameSlug = $nameSlug;
     
         return $this;
     }
 
     /**
-     * Get labelSlug
+     * Get nameSlug
      *
      * @return string 
      */
-    public function getLabelSlug()
+    public function getNameSlug()
     {
-        return $this->labelSlug;
+        return $this->nameSlug;
     }
 
     /**

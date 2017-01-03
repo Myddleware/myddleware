@@ -141,27 +141,27 @@ class databasecore extends solution {
 			/*
 			// Récupération de toutes les règles avec l'id table en cours qui sont root et qui ont au moins une référence
 			$sql = "SELECT DISTINCT
-						Rule.rule_id,
-						Rule.rule_name,
-						Rule.rule_name_slug
+						Rule.id,
+						Rule.name,
+						Rule.name_slug
 					FROM Rule
-						INNER JOIN RuleFields
-							ON Rule.rule_id = RuleFields.rule_id
-						INNER JOIN RuleParams
-							ON Rule.rule_id = RuleParams.rule_id
+						INNER JOIN RuleField
+							ON Rule.id = RuleField.rule_id
+						INNER JOIN RuleParam
+							ON Rule.id = RuleParam.rule_id
 					WHERE
-							Rule.rule_deleted = 0
+							Rule.deleted = 0
 						AND Rule.conn_id_target = :idConnector
-						AND RuleFields.rulef_target_field_name LIKE '%_Reference'
-						AND RuleParams.rulep_value = 'root'
-						AND RuleParams.rulep_name = 'group'";
+						AND RuleField.target_field_name LIKE '%_Reference'
+						AND RuleParam.value = 'root'
+						AND RuleParam.name = 'group'";
 			$stmt = $this->conn->prepare($sql);
 			$stmt->bindValue(":idConnector", $this->paramConnexion['idConnector']);
 			$stmt->execute();
 			$rules = $stmt->fetchAll();
 			if (!empty($rules)) {
 				foreach ($rules as $rule) {
-					$modules[$rule['rule_name']] = $rule['rule_name'];
+					$modules[$rule['name']] = $rule['name'];
 				}
 			}
 			
@@ -234,23 +234,23 @@ class databasecore extends solution {
 		// Récupération de tous les champ référence de la règle liées (= module)	
 		$this->fieldsRelate = array();
 		$sql = "SELECT 	
-					RuleFields.rulef_target_field_name,
-					Rule.rule_name
+					RuleField.target_field_name,
+					Rule.name
 				FROM Rule
-					INNER JOIN RuleFields
-						ON Rule.rule_id = RuleFields.rule_id
+					INNER JOIN RuleField
+						ON Rule.id = RuleField.rule_id
 					WHERE
-							Rule.rule_name = :rule_name
-						AND Rule.rule_deleted = 0	
-						AND RuleFields.rulef_target_field_name LIKE '%_Reference'";
+							Rule.name = :name
+						AND Rule.deleted = 0	
+						AND RuleField.target_field_name LIKE '%_Reference'";
 		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":rule_name", $module);
+		$stmt->bindValue(":name", $module);
 		$stmt->execute();
 		$ruleFields = $stmt->fetchAll();
 		if (!empty($ruleFields)) {
 			foreach ($ruleFields as $ruleField) {
-				$this->fieldsRelate[$ruleField['rulef_target_field_name']] = array(
-																'label' => $ruleField['rulef_target_field_name'].' ('.$ruleField['rule_name'].')',
+				$this->fieldsRelate[$ruleField['target_field_name']] = array(
+																'label' => $ruleField['target_field_name'].' ('.$ruleField['name'].')',
 																'type' => 'varchar(255)',
 																'type_bdd' => 'varchar(255)',
 																'required' => 0,
@@ -718,7 +718,7 @@ class databasecore extends solution {
 			// On entre dans le IF si on n'est pas sur la 1ère version de la règle
 			// Ou si on est sur une règle child
 			if(
-					$param['rule']['rule_version'] != "001"
+					$param['rule']['version'] != "001"
 				|| (
 						!empty($param['content']['params']['group'])
 					&& $param['content']['params']['group'] == 'child'
@@ -727,29 +727,29 @@ class databasecore extends solution {
 				// Ici on va aller chercher le idTable des versions précédentes			
 				// Cette requette permet de récupérer toutes les règles portant le même nom que la notre ET AYANT un tableID
 				// Les résultats sont triés de la version la plus récente à la plus vieille
-				$sql = "SELECT R1.`rulep_value` , R2.`rule_version` 
-						FROM  `RuleParams` R1,  `Rule` R2
-						WHERE  `rulep_name` =  'tableID'
-						AND R1.`rule_id` = R2.`rule_id` 
-						AND R1.`rule_id` IN (	SELECT  `rule_id` 
+				$sql = "SELECT R1.`value` , R2.`version` 
+						FROM  `RuleParam` R1,  `Rule` R2
+						WHERE  `name` =  'tableID'
+						AND R1.`rule_id` = R2.`id` 
+						AND R1.`rule_id` IN (	SELECT  `id` 
 												FROM  `Rule` 
-												WHERE  `rule_name` =  :rule_name)
-						ORDER BY R2.`rule_version` DESC";
+												WHERE  `name` =  :name)
+						ORDER BY R2.`version` DESC";
 				$stmt = $this->conn->prepare($sql);
-				$stmt->bindValue(":rule_name", $param["rule"]["rule_name"]);
+				$stmt->bindValue(":name", $param["rule"]["name"]);
 				$stmt->execute();
 				
 				// On récupère d'abord le premier résultat afin de vérifier que le tableID n'est pas vide
 				$fetch = $stmt->fetch();
-				if(!empty($fetch['rulep_value'])) {
-					$tableID = $fetch['rulep_value'];
+				if(!empty($fetch['value'])) {
+					$tableID = $fetch['value'];
 				}
 				
 				// Si toutefois il était vide, on prend tous les résultats afin d'en récupérer un non-vide (tjrs dans l'ordre du plus récent au plus vieux)
 				$fetchAll = $stmt->fetchAll();
 				foreach ($fetchAll as $result) {
-					if(!empty($result['rulep_value'])) {
-						$tableID = $result['rulep_value'];
+					if(!empty($result['value'])) {
+						$tableID = $result['value'];
 						break;
 					}
 				}
@@ -774,21 +774,21 @@ class databasecore extends solution {
 					)
 				) {
 					$sql = "SELECT 
-								RuleParams.rulep_value
-							FROM RuleRelationShips
-								INNER JOIN RuleParams
-									ON RuleRelationShips.rrs_field_id = RuleParams.rule_id
+								RuleParam.value
+							FROM RuleRelationShip
+								INNER JOIN RuleParam
+									ON RuleRelationShip.field_id = RuleParam.rule_id
 							WHERE 
-									RuleRelationShips.rule_id = :ruleId
-								AND RuleParams.rulep_name = 'tableID'";
+									RuleRelationShip.rule_id = :ruleId
+								AND RuleParam.name = 'tableID'";
 					$stmt = $this->conn->prepare($sql);
 					$stmt->bindValue(":ruleId", $param["ruleId"]);
 					$stmt->execute();
 					
 					// On récupère d'abord le premier résultat afin de vérifier que le tableID n'est pas vide
 					$fetch = $stmt->fetch();
-					if(!empty($fetch['rulep_value'])) {
-						$tableID = $fetch['rulep_value'];
+					if(!empty($fetch['value'])) {
+						$tableID = $fetch['value'];
 					}
 				}
 				// Si on a pas de table à ce stade alors on renvoie une erreur car on a besoin de l'ID pour faie la modification de cette table
@@ -838,19 +838,19 @@ class databasecore extends solution {
 				$diff = array();
 				$add = array();
 				foreach ($param['ruleFields'] as $ruleField) {
-					$mappingType = $this->getMappingType($ruleField['rulef_target_field_name']);
+					$mappingType = $this->getMappingType($ruleField['target_field_name']);
 					
 					if (empty($mappingType)) {
-						throw new \Exception("Mapping Type unknown for the field ".$ruleField['rulef_target_field_name'].". Failed to create the table in Database");
+						throw new \Exception("Mapping Type unknown for the field ".$ruleField['target_field_name'].". Failed to create the table in Database");
 					}
 					// Récupération du nom d'affichage du champ : nom du champ complet sans le type en fin de nom
-					$fieldName = substr($ruleField['rulef_target_field_name'], 0, strrpos($ruleField['rulef_target_field_name'], '_'));
+					$fieldName = substr($ruleField['target_field_name'], 0, strrpos($ruleField['target_field_name'], '_'));
 
 					// Si le nom du champ Database que l'on veut envoyer existe déjà dans la table actuel alors on ne l'envoie pas.
 					if (!in_array($fieldName, $tableFieldnames)) {
 						$add[] = array("NAME" => $fieldName, "TYPE" => $mappingType);
 					} else {
-						if(!in_array($ruleField['rulef_target_field_name'], $tableFields))
+						if(!in_array($ruleField['target_field_name'], $tableFields))
 							$diff[] = array("NAME" => $fieldName, "TYPE" => $mappingType);
 					}
 				}
@@ -909,7 +909,7 @@ class databasecore extends solution {
 				$dbh = null;
 				
 				// Mise à jour des données de la table créée pour la nouvelle règle dans la base de données 
-				$sqlFields = "INSERT INTO `RuleParams` (`rule_id`,`rulep_name`,`rulep_value`) VALUES (:ruleId, 'tableID', :tableID)";
+				$sqlFields = "INSERT INTO `RuleParam` (`rule_id`,`name`,`value`) VALUES (:ruleId, 'tableID', :tableID)";
 				$stmt = $this->conn->prepare($sqlFields);
 				$stmt->bindValue(":ruleId", $param['ruleId']);
 				$stmt->bindValue(":tableID", $tableID);
@@ -936,24 +936,24 @@ class databasecore extends solution {
 	protected function createDatabaseTable($param) {
 	    $dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
 
-		$sql = "CREATE TABLE `".$param['rule']['rule_name_slug']."` (
+		$sql = "CREATE TABLE `".$param['rule']['name_slug']."` (
 			id INT(6) UNSIGNED AUTO_INCREMENT,
 			date_modified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,";
 
 		
 		if (empty($param['ruleFields'])) {
-			throw new \Exception("Failed to create the table, no field in the Rule ".$param['rule']['rule_name_slug']);
+			throw new \Exception("Failed to create the table, no field in the Rule ".$param['rule']['name_slug']);
 		}
 		// Création du mapping dans Database
 		Foreach ($param['ruleFields'] as $ruleField) {
-			$mappingType = $this->getMappingType($ruleField['rulef_target_field_name']);
+			$mappingType = $this->getMappingType($ruleField['target_field_name']);
 			
 			if (empty($mappingType)) {
-				throw new \Exception("Mapping Type unknown for the field ".$ruleField['rulef_target_field_name'].". Failed to create the table in Database");
+				throw new \Exception("Mapping Type unknown for the field ".$ruleField['target_field_name'].". Failed to create the table in Database");
 			}
 			
 			// Pour les champs date et metric (fixés car obligatoire), on garde le nom de champ source sinon on met le champ saisi par l'utilisateur pour affichage dans Database
-			$tab = explode('_',$ruleField['rulef_target_field_name'], -1);
+			$tab = explode('_',$ruleField['target_field_name'], -1);
 			$fieldName = '';
 			foreach ($tab as $morceau) {
 				$fieldName .= $morceau.'_';
@@ -961,14 +961,14 @@ class databasecore extends solution {
 			$fieldName = substr($fieldName, 0, -1);
 			$sql.= $fieldName." ".$mappingType.",";
 			/*$xml.=		"<mapping>
-							<fileField>".$param['rule']['rule_module_source'].'_'.$ruleField['rulef_target_field_name']."</fileField>
-							<displayName>".(in_array($ruleField['rulef_target_field_name'],array('Metric','Date')) ? $ruleField['rulef_source_field_name'] : $fieldName)."</displayName>
+							<fileField>".$param['rule']['rule_module_source'].'_'.$ruleField['target_field_name']."</fileField>
+							<displayName>".(in_array($ruleField['target_field_name'],array('Metric','Date')) ? $ruleField['source_field_name'] : $fieldName)."</displayName>
 							<mappingType>".$mappingType."</mappingType>
 							".($mappingType == 'DATE' ? "<pattern>dd/MM/yyyy hh:mm</pattern>" : "")."
 						</mapping>";*/
 		}
 		$sql.= "PRIMARY KEY (`id`),
-	    		INDEX `".$param['rule']['rule_name_slug']."_date_modified` (`date_modified`)
+	    		INDEX `".$param['rule']['name_slug']."_date_modified` (`date_modified`)
 				)";
 			   
 		$q = $dbh->prepare($sql);
@@ -979,13 +979,13 @@ class databasecore extends solution {
 			$errorInfo = $dbh->errorInfo();
 			throw new \Exception("Failed to create the table, :" . $errorInfo[2]);
 		}
-		$this->messages[] = array('type' => 'success', 'message' => 'Table '.$param['rule']['rule_name_slug'].' successfully created in Database. ');		
-		return $this->saveConnectorParams($param['ruleId'], $param['rule']['rule_name_slug']);
+		$this->messages[] = array('type' => 'success', 'message' => 'Table '.$param['rule']['name_slug'].' successfully created in Database. ');		
+		return $this->saveConnectorParams($param['ruleId'], $param['rule']['name_slug']);
 	}
 	
 	protected function saveConnectorParams($ruleId, $idTable) {
 		// Mise à jour du connecteur dans la base de données 
-		$sqlFields = "INSERT INTO `RuleParams` (`rule_id`,`rulep_name`,`rulep_value`) VALUES (:ruleId, 'tableID', :tableID)";
+		$sqlFields = "INSERT INTO `RuleParam` (`rule_id`,`name`,`value`) VALUES (:ruleId, 'tableID', :tableID)";
 		$stmt = $this->conn->prepare($sqlFields);
 		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->bindValue(":tableID", $idTable);
@@ -1005,14 +1005,14 @@ class databasecore extends solution {
 		// afin que toutes les données de la ligne en cours soient rensignées
 		// Récupération de toutes les règles liées
 		$sql = "SELECT 
-					RuleRelationShips.rule_id,
-					RuleRelationShips.rrs_field_name_target
-				FROM RuleRelationShips
+					RuleRelationShip.rule_id,
+					RuleRelationShip.field_name_target
+				FROM RuleRelationShip
 					INNER JOIN Rule
-						ON RuleRelationShips.rule_id = Rule.rule_id
+						ON RuleRelationShip.rule_id = Rule.id
 				WHERE 
-						RuleRelationShips.rrs_field_id = :ruleId
-					AND Rule.rule_deleted = 0	
+						RuleRelationShip.field_id = :ruleId
+					AND Rule.deleted = 0	
 				";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue(":ruleId", $param["ruleId"]);
@@ -1024,16 +1024,16 @@ class databasecore extends solution {
 				$param['ruleId'] = $relationship['rule_id'];
 				// Récupération de l'ID correspondant à l'enregistrement de la règle liée dans le système source
 				// Si l'id de l'enregistrement lié est renseigné alors on génère le docuement sinon on ne le genère pas (il n'est pas obligatoirement renseigné)				
-				if (!empty($data[$relationship['rrs_field_name_target']])) {
+				if (!empty($data[$relationship['field_name_target']])) {
 					$rule = new ruleMyddleware($this->logger, $this->container, $this->conn ,$param);
 					// Si un document sur la même règle avec le même id source a déjà été fait dans ce paquet d'envoi alors on ne régénère pas un autre document qui serait doublon
-					if (empty($this->duplicateDoc[$param['ruleId']][$data[$relationship['rrs_field_name_target']]])) {
-						$generateDocument = $rule->generateDocument($data[$relationship['rrs_field_name_target']]);	
+					if (empty($this->duplicateDoc[$param['ruleId']][$data[$relationship['field_name_target']]])) {
+						$generateDocuments = $rule->generateDocuments($data[$relationship['field_name_target']]);	
 						// Si on a eu une erreur alors on arrête de générer les documents child
-						if (!empty($generateDocument->error)) {
-							return $generateDocument->error;
+						if (!empty($generateDocuments->error)) {
+							return $generateDocuments->error;
 						}
-						$this->duplicateDoc[$param['ruleId']][$data[$relationship['rrs_field_name_target']]] = 1;
+						$this->duplicateDoc[$param['ruleId']][$data[$relationship['field_name_target']]] = 1;
 					}
 				}
 			}
@@ -1105,7 +1105,7 @@ class databasecore extends solution {
 	// Permet de récupérer la source ID du document en paramètre
 	protected function getSourceId($idDoc) {
 		// Récupération du source_id
-		$sql = "SELECT `source_id` FROM `Documents` WHERE `id` = :idDoc";
+		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue(":idDoc", $idDoc);
 		$stmt->execute();
@@ -1158,15 +1158,15 @@ class databasecore extends solution {
 			if (!empty($data['oldRule'])) {
 				// Récupération des champs référence de cette ancienne règle qui sont utilisés dans une autre règle
 				$sql = "SELECT
-							Rule.rule_id,
-							Rule.rule_name,
-							RuleRelationShips.rrs_field_name_target
-						FROM RuleRelationShips
+							Rule.id,
+							Rule.name,
+							RuleRelationShip.field_name_target
+						FROM RuleRelationShip
 							INNER JOIN Rule
-								ON RuleRelationShips.rule_id = Rule.rule_id
+								ON RuleRelationShip.rule_id = Rule.id
 						WHERE 
-								RuleRelationShips.rrs_field_id = '".$data['oldRule']."'
-							AND Rule.rule_deleted = 0";
+								RuleRelationShip.field_id = '".$data['oldRule']."'
+							AND Rule.deleted = 0";
 				$stmt = $this->conn->prepare($sql);
 				$stmt->bindValue(":oldRule", $data['oldRule']);
 				$stmt->execute();
@@ -1175,8 +1175,8 @@ class databasecore extends solution {
 				if (!empty($referenceFields)) {
 					foreach ($referenceFields as $referenceField) {
 						// Si le champs est absent alors on génère une erreur.
-						if (empty($data['content']['fields']['name'][$referenceField['rrs_field_name_target']])) {
-							return array('done'=>false, 'message'=> 'The field '.$referenceField['rrs_field_name_target'].' is linked to the rule '.$referenceField['rule_name'].'. Change this rule before removing this field.');
+						if (empty($data['content']['fields']['name'][$referenceField['field_name_target']])) {
+							return array('done'=>false, 'message'=> 'The field '.$referenceField['field_name_target'].' is linked to the rule '.$referenceField['name'].'. Change this rule before removing this field.');
 						}
 					}
 				}		
@@ -1194,13 +1194,13 @@ class databasecore extends solution {
 			// Il ne peut y avoir qu'un relation par règle avec Database
 			if (!empty($data['relationships'])) {
 				$sql = "SELECT rule_id
-						FROM RuleFields
+						FROM RuleField
 						WHERE 
 								rule_id = :rule_id
-							AND rulef_target_field_name = :rulef_target_field_name";
+							AND target_field_name = :target_field_name";
 				$stmt = $this->conn->prepare($sql);
 				$stmt->bindValue(":rule_id", $data['relationships'][0]['rule']);
-				$stmt->bindValue(":rulef_target_field_name", $data['relationships'][0]['target']);
+				$stmt->bindValue(":target_field_name", $data['relationships'][0]['target']);
 				$stmt->execute();
 				$fetch = $stmt->fetch();
 				if(empty($fetch['rule_id'])) {
@@ -1230,7 +1230,7 @@ class databasecore extends solution {
 				}
 				
 				// Récupération des données de la règle
-				$sql = "SELECT * FROM Rule WHERE rule_id = :ruleId";
+				$sql = "SELECT * FROM Rule WHERE id = :ruleId";
 				$stmt = $this->conn->prepare($sql);
 				$stmt->bindValue(":ruleId", $data['ruleId']);
 				$stmt->execute();
@@ -1240,7 +1240,7 @@ class databasecore extends solution {
 				}
 							
 				// Récupération de tous les ruleFields de la règle en cours
-				$sql = "SELECT * FROM RuleFields WHERE rule_id = :ruleId";
+				$sql = "SELECT * FROM RuleField WHERE rule_id = :ruleId";
 				$stmt = $this->conn->prepare($sql);
 				$stmt->bindValue(":ruleId", $data['ruleId']);
 				$stmt->execute();
@@ -1263,7 +1263,7 @@ class databasecore extends solution {
 		return $this->messages;
 	}
 
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);

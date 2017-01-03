@@ -48,7 +48,7 @@ class TaskController extends Controller
 		$conn = $this->get( 'database_connection' );
 		$sql = 'SELECT j.*
 				FROM Job j
-				ORDER BY job_status DESC, job_begin DESC
+				ORDER BY status DESC, begin DESC
 				LIMIT 1000';
 					
 		$r = $conn->executeQuery( $sql )->fetchAll();

@@ -3,8 +3,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  StÃ©phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  StÃ©phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -48,7 +48,8 @@ class LoadSolutionData implements FixtureInterface
 									array('id' => '13', 'name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '14', 'name' => 'moodle',				'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '15', 'name' => 'file',				'active' => 1,'source' => 1,'target' => 0),
-									array('id' => '16', 'name' => 'shop_application',	'active' => 1,'source' => 1,'target' => 1)
+									array('id' => '16', 'name' => 'shop_application',	'active' => 1,'source' => 1,'target' => 1),
+									array('id' => '17', 'name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1)
 							);
  
     public function load(ObjectManager $manager){

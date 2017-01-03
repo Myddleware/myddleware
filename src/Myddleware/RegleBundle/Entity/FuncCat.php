@@ -40,7 +40,7 @@ class FuncCat
     /**
      * @var integer
      *
-     * @ORM\Column(name="fcat_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
@@ -49,9 +49,9 @@ class FuncCat
     /**
      * @var string
      *
-     * @ORM\Column(name="name_yml", type="string", length=100)
+     * @ORM\Column(name="name", type="string", length=100)
      */
-    private $name_yml;
+    private $name;
 
      /**
      * @var ArrayCollection $functions
@@ -78,26 +78,26 @@ class FuncCat
     }
 
     /**
-     * Set name_yml
+     * Set name
      *
      * @param string $nameYml
      * @return FuncCat
      */
-    public function setNameYml($nameYml)
+    public function setName($nameYml)
     {
-        $this->name_yml = $nameYml;
+        $this->name = $nameYml;
     
         return $this;
     }
 
     /**
-     * Get name_yml
+     * Get name
      *
      * @return string 
      */
-    public function getNameYml()
+    public function getName()
     {
-        return $this->name_yml;
+        return $this->name;
     }
 
     /**

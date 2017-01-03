@@ -58,7 +58,7 @@ class eventbritecore  extends solution {
 		parent::login($paramConnexion);
 		try {
 			$parameters = array();
-			$this->token = $paramConnexion['token'];
+			$this->token = $this->paramConnexion['token'];
 			$response = $this->call($this->urlBase.'user_list_organizers', $parameters);
 
 			// Pour tester la validité du token, on vérifie le retour  du webservice user_list_organizers

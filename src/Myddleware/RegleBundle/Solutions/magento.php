@@ -69,8 +69,8 @@ class magentocore extends solution {
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try{			
-			$userData = array("username" => $paramConnexion['login'], "password" => $paramConnexion['password']);
-			$result = $this->call($paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
+			$userData = array("username" => $this->paramConnexion['login'], "password" => $this->paramConnexion['password']);
+			$result = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);	
 			if (!empty($result['message'])) {
 				throw new \Exception($result['message']);
 			}
@@ -431,7 +431,7 @@ class magentocore extends solution {
 			}
 		
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['rule_mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 
 			// Get all data after the reference date
 			$searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';

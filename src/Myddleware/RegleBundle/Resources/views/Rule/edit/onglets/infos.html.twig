@@ -105,6 +105,14 @@
 				<td class="value"><a href="{{ path('regle_open',{'id' : duplicate_target }) }}">{{ duplicate_target }}</a></td>
 			</tr>	
 			{% endif %}	
+			{% if params_suite.customParams is defined and params_suite.customParams is not empty %}	
+				{% for r in params_suite.customParams %}
+					<tr>
+						<td class="title">{{ r.name }}</td>
+						<td class="value"><span class="label label-default">{{ r.value }}</span></td>
+					</tr>	
+				{% endfor %}
+			{% endif %}
 		</table>
 	</div>
 	<div class="left tabinfo">
