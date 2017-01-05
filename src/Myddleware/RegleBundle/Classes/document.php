@@ -899,8 +899,8 @@ class documentcore {
 					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
 				}
 
-				// Generate documents for the child rule (could be several documents)
-				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_source']);
+				// Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule 
+				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_target']);
 				if (!empty($docsChildRule->error)) {
 					throw new \Exception($docsChildRule->error);
 				}

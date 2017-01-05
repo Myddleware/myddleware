@@ -158,26 +158,38 @@ class shopapplicationcore extends solution {
 					$urlApi = $this->url.'orders/status'.$this->apiKey;
 					$return = $this->call($urlApi, 'get', '');	
 					$code = $return->__get('code');
-					/* if ($code == '200') {		
+					if ($code == '200') {		
 						$body = $return->__get('body');
 						if (!empty($body)) {
 							foreach ($body as $status) {
-								$this->fieldsRelate['group_id']['option'][$status->id] = $status->name;
+								$this->moduleFields['status']['option'][$status->id] = $status->multilangual->fr->name;
 							}
 						}
-					} */
+					}
 					// Get currencies
 					$urlApi = $this->url.'currencies'.$this->apiKey;
 					$return = $this->call($urlApi, 'get', '');	
 					$code = $return->__get('code');
 					if ($code == '200') {		
-						$body = $return->__get('body');
+						$body = $return->__get('body');					
 						if (!empty($body)) {
 							foreach ($body as $currency) {
-								$this->fieldsRelate['currency']['option'][$currency->code] = $currency->name;
+								$this->moduleFields['currency']['option'][$currency->code] = $currency->name;
 							}
 						}
 					} 
+					// Get stores
+					/* $urlApi = $this->url.'stores'.$this->apiKey;
+					$return = $this->call($urlApi, 'get', '');	
+					$code = $return->__get('code');
+					if ($code == '200') {		
+						$body = $return->__get('body');					
+						if (!empty($body)) {
+							foreach ($body as $currency) {
+								$this->moduleFields['currency']['option'][$currency->code] = $currency->name;
+							}
+						}
+					}  */
 				} 
 				catch (\Exception $e) {
 				} 			
@@ -361,7 +373,8 @@ class shopapplicationcore extends solution {
 	}
 
 	// Permet de créer un enregistrement
-	public function create($param) {			
+	public function create($param) {
+print_r($param);	
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -377,6 +390,8 @@ class shopapplicationcore extends solution {
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 
+print_r($dataTosSend);	
+return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -384,6 +399,7 @@ class shopapplicationcore extends solution {
 				$code = $return->__get('code');			
 				// Get the data from the response
 				$body = $return->__get('body');	
+print_r($body);	
 
 				// If the call is a success
 				if ($code == '200') {				

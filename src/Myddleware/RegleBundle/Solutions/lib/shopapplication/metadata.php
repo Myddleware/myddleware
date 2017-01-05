@@ -49,11 +49,11 @@ $moduleFields = array (
 							'id' => array('label' => 'ID order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'language' => array('label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
 							'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-							'notes' => array('label' => 'Notes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+							'notes' => array('label' => 'Notes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_modified' => array('label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_finished' => array('label' => 'Date finished', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-							'referer' => array('label' => 'Referer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+							'referer' => array('label' => 'Referer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'currency' => array('label' => 'Currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'shipping__tracking_code' => array('label' => 'Shipping tracking code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'shipping__tracking_url' => array('label' => 'Shipping tracking url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -287,6 +287,7 @@ $fieldsRelate = array (
 						array(
 							'store_id' => array('label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'customer_info__id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),
 					'orders_products' =>
 						array(
