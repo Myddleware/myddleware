@@ -35,6 +35,7 @@ class shopapplicationcore extends solution {
 	protected $apiKey;
 	protected $docIdList;
 	protected $docIdListResult;
+	protected $newChild;
 	
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
@@ -47,6 +48,7 @@ class shopapplicationcore extends solution {
 							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1)),
 							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1)),
 							'products' => array(
+												'products' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
 												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
 												'options_values' 	=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0), // 2nd level possible
 											),
@@ -447,7 +449,9 @@ class shopapplicationcore extends solution {
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
-
+// print_r($data);
+// print_r($dataTosSend);
+// return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -552,7 +556,7 @@ class shopapplicationcore extends solution {
 			}
 			
 			// Jump the first value of the table data (contain the document id)
-			if (!$first) {
+			if (!$first && !is_array($value)) {			
 				// Save all doc ID to change their status to send (child and parent document)
 				$this->docIdList[$value] = array(
 													'id' => '',
@@ -578,9 +582,20 @@ class shopapplicationcore extends solution {
 				foreach($value as $subrecord) {
 					// recursive call in case sub tab exist
 					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
-				
-					// If the deep level is greater than the maximu allowed by the module, we merge data into the maximum level 
-					if ($level > $this->childModuleParameters[$param['module']][$key]['max_level']) {
+					// If we are at the correct level we can add the child generated in the recursive call
+					if (!empty($this->newChild) && $level == $this->childModuleParameters[$param['module']][$key]['max_level']) {
+						foreach ($this->newChild as $child) {
+							$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $child;
+						}
+						$this->newChild = array();
+					}
+					// We create a new record if the key are equals (we could have an sub array with several records)
+					// This record is save to create data in the maximum level
+					if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
+						$this->newChild[] = $dataChild;
+					}
+					// If the deep level is greater than the maximum allowed by the module, we merge data into the maximum level 
+					elseif ($level > $this->childModuleParameters[$param['module']][$key]['max_level']) {
 						$dataTosSend = array_merge($dataTosSend, $dataChild);
 					} else {
 						$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $dataChild;

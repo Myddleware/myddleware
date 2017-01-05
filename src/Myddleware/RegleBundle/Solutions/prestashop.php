@@ -56,10 +56,11 @@ class prestashopcore extends solution {
 
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
-														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','group_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
-														'products_options_values' => array('label' => 'Association product options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
-														'combinations_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('combinaison_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
-														'combinations_images' => array('label' => 'Association product - images', 'fields' => array(), 'relationships' => array('combinaison_id','image_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
+														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
+														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
+														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'combinations_images' => array('label' => 'Association combinations - images', 'fields' => array(), 'relationships' => array('combination_id','images_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
 														);
 	
 	private $webService;
@@ -455,7 +456,6 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
-
 				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
@@ -511,8 +511,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
-// print_r($param);	
+	public function read($param) {	
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -554,13 +553,11 @@ class prestashopcore extends solution {
 				$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
 				$opt['display'] .= ']';
 				
-				$optRuleMode0 = $opt; // On stocke les options sans les filtres pour l'appel en RuleMode 0
-				
 				// Query creation
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
-						// If the key is equal to the name of the module + '_id', so the ky is 'id' (usefull when we use many to many modules) 
+						// If the key is equal to the name of the module + '_id', so the key is 'id' (usefull when we use many to many modules) 
 						if ($key == $param['module'].'_id') {
 							$key = 'id';
 						}
@@ -588,8 +585,7 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}
-				
+				}							
 				// Call				
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();

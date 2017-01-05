@@ -36,9 +36,6 @@ class solutioncore {
 	// Permet d'indiquer que la connexion webservice est valide
 	public $connexion_valide=false;
 	
-	// ??
-	public $allow_modify=true;
-	
 	public $js = 0;
 	public $refresh_token = false;
 	public $callback = false;
@@ -449,6 +446,11 @@ class solutioncore {
 		// If no entry for the module we put default
 		if (empty($this->required_fields[$module])) {
 			$module = 'default';
+		}
+		
+		// Check $fields variable
+		if (empty($fields)) {
+			$fields = array();
 		}
 		
 		// Boucle sur tous les champs obligatoires
