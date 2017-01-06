@@ -102,7 +102,9 @@ create_rule:
             target: Target
             rule: Rules
             fields: Fields source
-            parent: Parent
+            parent_detail_view: Parent
+            parent: Parent relationship to merge several data transfers
+            record_id: Record ID
             yes: Yes
         params:
             duplicate: Fields to avoid duplicates

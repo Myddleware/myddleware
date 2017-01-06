@@ -1429,7 +1429,7 @@ class documentcore {
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {
-		try {
+		try {	
 			// Query used in the method several times
 			// Le tri sur target_id permet de récupérer le target id non vide en premier
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
@@ -1456,7 +1456,7 @@ class documentcore {
 							LIMIT 1";
 							
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
-			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle
+			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle				
 			if (!empty($this->ruleRelationships)) {
 				// Boucle sur les relation
 				foreach ($this->ruleRelationships as $ruleRelationship) {
@@ -1504,10 +1504,6 @@ class documentcore {
 					}
 				}
 			}
-			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
-			if ($this->isChild()){
-				return 'U';
-			}
 	
 			// If no relationship or no child rule
 			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
@@ -1552,6 +1548,11 @@ class documentcore {
 			}			
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
+				return 'U';
+			}
+			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
+			// We check now because we take every chance we can to get the target_id
+			if ($this->isChild()){			
 				return 'U';
 			}
 			// Si aucune règle avec relation Myddleware_element_id alors on est en création

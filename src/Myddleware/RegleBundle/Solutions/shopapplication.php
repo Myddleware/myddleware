@@ -374,7 +374,7 @@ class shopapplicationcore extends solution {
 
 	// Permet de créer un enregistrement
 	public function create($param) {
-print_r($param);	
+// print_r($param);	
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -390,8 +390,9 @@ print_r($param);
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 
+print_r($data);	
 print_r($dataTosSend);	
-return null;
+// return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -465,8 +466,8 @@ print_r($body);
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
-// print_r($data);
-// print_r($dataTosSend);
+print_r($data);
+print_r($dataTosSend);
 // return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
@@ -514,6 +515,7 @@ print_r($body);
 				);
 			}
 		} 		
+// return null;
 		// Change document status
 		if (!empty($result)) {
 			foreach ($result as $key => $value) {
@@ -549,7 +551,7 @@ print_r($body);
 					foreach ($this->childModuleParameters[$param['module']] as $subModule) {			
 						if ($subModule['entry_name'] == $entryName) {				
 							$this->docIdList[$value] = array(
-																	'id' => $data->$subModule['id_name'],
+																	'id' => (!empty($data->$subModule['id_name']) ? $data->$subModule['id_name'] : ''), // Some submodule doesn't returned id (eg : product of an order)
 																	'error' => false
 															); 								
 						}

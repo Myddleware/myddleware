@@ -102,7 +102,9 @@ create_rule:
             target: Cible
             rule: Règles
             fields: Champs source
-            parent: Parent
+            parent_detail_view: Parent
+            parent: Relation parent : fusionn de plusieurs transferts de données
+            record_id: ID enregistrement
             yes: Oui
         params:
             duplicate: Champs pour éviter les doublons

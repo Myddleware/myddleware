@@ -557,10 +557,6 @@ class prestashopcore extends solution {
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
-						// If the key is equal to the name of the module + '_id', so the key is 'id' (usefull when we use many to many modules) 
-						if ($key == $param['module'].'_id') {
-							$key = 'id';
-						}
 						$opt['filter['.$key.']'] = '['.$value.']';
 					}
 				}
@@ -585,7 +581,7 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}							
+				}				
 				// Call				
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();

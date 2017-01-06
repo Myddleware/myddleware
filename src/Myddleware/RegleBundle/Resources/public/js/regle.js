@@ -1238,20 +1238,32 @@ function verifFields(field_id,show) {
 	// Récupère la liste des relations
 	function recup_relation() {
 		var relations = [];	
+		var parent_relations = [];	
 
-		$( '.rel tr.line-relation','#relation' ).each(function(){
-			
-			tr = $(this);
-			
-			$( $(this) ).find( ".title" ).each(function(){
-								
+		$( '.rel tr.line-relation','#relation' ).each(function(){			
+			tr = $(this);		
+			$( $(this) ).find( ".title" ).each(function(){							
 				var name = $( this ).attr('data-value');
 				var valueRule = tr.find('.lst_rule_relate').val();
 				var valueSource = tr.find('.lst_source_relate').val();
-				var valueparent = tr.find('.lst_parent_relate').val();
-
+				var valueparent = 0;
 				if( valueRule != '' && valueSource != '' ) {
-					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent } );
+					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
+				}
+
+			});
+		});
+		
+		$( '.rel tr.line-parent_relation','#relation' ).each(function(){
+			tr = $(this);	
+			$( $(this) ).find( ".parent_search_field" ).each(function(){						
+				var name = tr.find('.parent_search_field').val();
+				var valueRule = tr.find('.parent_rule').val();
+				var valueSource = tr.find('.parent_source_field').val();
+				var valueparent = 1;
+				
+				if( valueRule != '' && valueSource != '' && name != '' ) {
+					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
 				}
 
 			});
@@ -1493,11 +1505,19 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		});	
 	}
 	// Relate
-	if(relate) {			
+	if(relate) {	
+		var i = 0;
+		// We fill the differents field depending if the rule is a parent one or not
 		$.each(relate, function( index, nameR ) {
-			$('#lst_'+ nameR.target).val( nameR.id );
-			$('#lst_source_'+ nameR.target).val( nameR.source );						
-			$('#lst_parent_'+ nameR.target).val( (nameR.parent ? 1 : 0) ); // Convert true/false to 1/0
+			if (nameR.parent == 0) {
+				$('#lst_'+ nameR.target).val( nameR.id );
+				$('#lst_source_'+ nameR.target).val( nameR.source );						
+			} else {	
+				$('#parent_rule_'+ i).val( nameR.id );
+				$('#parent_source_field_'+ i).val( nameR.source );						
+				$('#parent_search_field_'+ i).val( nameR.target );						
+				$i++;
+			}
 		});
 	}
 	
