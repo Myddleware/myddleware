@@ -46,10 +46,13 @@ class shopapplicationcore extends solution {
 	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $childModuleParameters = array(
 							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1)),
-							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1)),
+							'orders' => array(
+											'orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1),
+											'customers_addresses' => array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1),
+										),
 							'products' => array(
 												'products' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
-												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
+												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 0),
 												'options_values' 	=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0), // 2nd level possible
 											),
 							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1)),
@@ -392,7 +395,7 @@ class shopapplicationcore extends solution {
 
 print_r($data);	
 print_r($dataTosSend);	
-// return null;
+return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -468,7 +471,7 @@ print_r($body);
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 print_r($data);
 print_r($dataTosSend);
-// return null;
+return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -564,7 +567,7 @@ print_r($dataTosSend);
 		
 	// Generate the data to send in the create or update POST
 	// Entry_name is the name of the entry in cas the function is call for a child data
-	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = 0) {		
+	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = array()) {		
 		$first = false;	
 		foreach ($data as $key => $value) {		
 			$fieldStructure = '';
@@ -596,24 +599,30 @@ print_r($dataTosSend);
 				continue;
 			}
 			if (is_array($value)) {
-				$level++;
+				if (empty($level[$param['module']][$key])) {
+					$level[$param['module']][$key]  = 0;
+				}
+				$level[$param['module']][$key]++;
 				foreach($value as $subrecord) {
 					// recursive call in case sub tab exist
 					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
 					// If we are at the correct level we can add the child generated in the recursive call
-					if (!empty($this->newChild) && $level == $this->childModuleParameters[$param['module']][$key]['max_level']) {
+					if (!empty($this->newChild) && $level[$param['module']][$key] == $this->childModuleParameters[$param['module']][$key]['max_level']) {
 						foreach ($this->newChild as $child) {
 							$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $child;
 						}
 						$this->newChild = array();
 					}
+echo '$param module : '.$param['module'].chr(10);					
+echo 'key : '.$key.chr(10);		
+print_r($this->childModuleParameters);			
 					// We create a new record if the key are equals (we could have an sub array with several records)
 					// This record is save to create data in the maximum level
 					if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
 						$this->newChild[] = $dataChild;
 					}
 					// If the deep level is greater than the maximum allowed by the module, we merge data into the maximum level 
-					elseif ($level > $this->childModuleParameters[$param['module']][$key]['max_level']) {
+					elseif ($level[$param['module']][$key] > $this->childModuleParameters[$param['module']][$key]['max_level']) {
 						$dataTosSend = array_merge($dataTosSend, $dataChild);
 					} else {
 						$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $dataChild;
