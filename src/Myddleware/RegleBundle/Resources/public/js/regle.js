@@ -1506,17 +1506,17 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 	}
 	// Relate
 	if(relate) {	
-		var i = 0;
+		var cpt = 0;
 		// We fill the differents field depending if the rule is a parent one or not
-		$.each(relate, function( index, nameR ) {
+		$.each(relate, function( index, nameR ) {	
 			if (nameR.parent == 0) {
 				$('#lst_'+ nameR.target).val( nameR.id );
 				$('#lst_source_'+ nameR.target).val( nameR.source );						
-			} else {	
-				$('#parent_rule_'+ i).val( nameR.id );
-				$('#parent_source_field_'+ i).val( nameR.source );						
-				$('#parent_search_field_'+ i).val( nameR.target );						
-				$i++;
+			} 	else {	
+				$('#parent_rule_'+ cpt).val( nameR.id );
+				$('#parent_source_field_'+ cpt).val( nameR.source );						
+				$('#parent_search_field_'+ cpt).val( nameR.target );									
+				cpt++;		
 			}
 		});
 	}
