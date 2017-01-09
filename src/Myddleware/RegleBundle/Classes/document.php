@@ -1333,7 +1333,7 @@ class documentcore {
 	
 	
 	// Check if the document is a child
-	protected function isChild() {	
+	public function isChild() {	
 		$sqlIsChild = "	SELECT Rule.id 
 									FROM RuleRelationShip 
 										INNER JOIN Rule
@@ -1353,6 +1353,21 @@ class documentcore {
 		return false;;		
 	}
 	
+	// Check if the document is a child
+	protected function getChildDocuments() {	
+		try {
+			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId";		
+			$stmt = $this->connection->prepare($sqlGetChilds);
+			$stmt->bindValue(":docId", $this->id);
+			$stmt->execute();	    
+			return $stmt->fetchAll();	
+		} catch (\Exception $e) {
+			$this->typeError = 'E';
+			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( $this->message );
+		}	
+	}
+		
 	// Check if the document is a parent
 	protected function isParent() {	
 		$sqlIsChild = "	SELECT RuleRelationShip.rule_id 
@@ -1428,14 +1443,15 @@ class documentcore {
 	// Permet de déterminer le type de document (Create ou Update)
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
-	protected function checkRecordExist($id) {
+	protected function checkRecordExist($id) {	
 		try {	
 			// Query used in the method several times
-			// Le tri sur target_id permet de récupérer le target id non vide en premier
+			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
-								Document.target_id 
+								Document.target_id, 
+								Document.global_status 
 							FROM Rule
 								INNER JOIN Rule Rule_version
 									ON Rule_version.name = Rule.name
@@ -1452,9 +1468,8 @@ class documentcore {
 								)
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
-							ORDER BY target_id DESC
-							LIMIT 1";
-							
+							ORDER BY target_id DESC, global_status DESC
+							LIMIT 1";						
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
 			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle				
 			if (!empty($this->ruleRelationships)) {
@@ -1495,8 +1510,16 @@ class documentcore {
 							// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
 							elseif (empty($ruleRelationship['parent'])) {
 								$this->message .= 'Failed to get the id target of the current module in the rule linked.';
+							}						
+							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+							if (
+									empty($result['id']) 
+								 || $result['global_status'] == 'Cancel'
+							) {
+								return 'C';
+							} else {
+								return 'U';
 							}
-							return 'U';
 						}
 						else {
 							throw new \Exception( 'The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.' );
@@ -1516,21 +1539,22 @@ class documentcore {
 		
 			// Si on ne trouve pas d'id alors on prépare la requête pour rechercher dans la partie target
 			if (empty($result['id'])) {
-				$sqlParamsTarget = "	SELECT 
-									Document.id, 
-									Document.source_id target_id 
-								FROM Rule
-									INNER JOIN Rule Rule_version
-										ON Rule_version.name = Rule.name
-									INNER JOIN Document 
-										ON Document.rule_id = Rule_version.id
-								WHERE 
-										Rule.id IN (:ruleId)									
-									AND Document.global_status != 'Cancel'	
-									AND	Document.target_id = :id
-									AND Document.id != :id_doc
-								ORDER BY target_id DESC
-								LIMIT 1";
+				$sqlParamsTarget = "SELECT 
+										Document.id, 
+										Document.source_id target_id, 
+										Document.global_status 
+									FROM Rule
+										INNER JOIN Rule Rule_version
+											ON Rule_version.name = Rule.name
+										INNER JOIN Document 
+											ON Document.rule_id = Rule_version.id
+									WHERE 
+											Rule.id IN (:ruleId)									
+										AND Document.global_status != 'Cancel'	
+										AND	Document.target_id = :id
+										AND Document.id != :id_doc
+									ORDER BY target_id DESC, global_status DESC
+									LIMIT 1";
 			}
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
 			// Alors on recherche dans la règle opposée
@@ -1544,11 +1568,16 @@ class documentcore {
 				$stmt->bindValue(":id", $id);
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();
+				$result = $stmt->fetch();				
 			}			
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
-				return 'U';
+				// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+				if ($result['global_status'] == 'Cancel') {
+					return 'C';
+				} else {
+					return 'U';
+				}
 			}
 			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
 			// We check now because we take every chance we can to get the target_id
@@ -1563,6 +1592,24 @@ class documentcore {
 			$this->logger->error( $this->message );	
 			return null;
 		}
+	}
+	
+	public function documentCancel() {
+		// Search if the document has child documents
+		$childDocuments = $this->getChildDocuments();		
+		if (!empty($childDocuments)) {
+			// We cancel each child, but a child document can be a parent document too, so we make a recursive call
+			foreach ($childDocuments as $childDocument) {
+				// We don't Cancel a document if it has been already cancelled
+				if ($childDocument['global_status'] != 'Cancel') {
+					$param['id_doc_myddleware'] = $childDocument['id'];
+					$param['jobId'] = $this->jobId;
+					$docChild = new document($this->logger, $this->container, $this->connection, $param);
+					$docChild->documentCancel();
+				}			
+			}
+		}
+		$this->updateStatus('Cancel'); 
 	}
 	
 	public function updateStatus($new_status) {

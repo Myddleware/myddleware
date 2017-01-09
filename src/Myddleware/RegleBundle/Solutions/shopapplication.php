@@ -50,12 +50,8 @@ class shopapplicationcore extends solution {
 										),
 							'orders' => array(
 											'orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1, 'type' => 'array'),
-										),
-							'orders_delivery_address' => array(
-											'customers_addresses' => array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
-										),
-							'orders_billing_address' => array(
-											'customers_addresses' => array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
+											'orders_delivery_address' => array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
+											'orders_billing_address' => array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
 										),
 							'products' => array(
 												'products' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1, 'type' => 'array'),
@@ -488,7 +484,7 @@ print_r($body);
 print_r($data);
 print_r($dataTosSend);
 print_r($urlApi);
-return null;
+// return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -635,9 +631,9 @@ return null;
 						}
 						$this->newChild = array();
 					}
-// echo '$param module : '.$param['module'].chr(10);					
-// echo 'key : '.$key.chr(10);		
-// print_r($this->childModuleParameters);			
+echo '$param module : '.$param['module'].chr(10);					
+echo 'key : '.$key.chr(10);		
+print_r($this->childModuleParameters);			
 					// We create a new record if the key are equals (we could have an sub array with several records)
 					// This record is save to create data in the maximum level
 					if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
@@ -662,7 +658,7 @@ return null;
 				$key = $newValue['key'];
 				// Structure transformation to an array id needed
 				$fieldStructure = explode('__',$key);	
-print_r($fieldStructure);
+// print_r($fieldStructure);
 				// We exclude Myddleware data
 				if (!in_array($key, array('id_doc_myddleware','source_date_modified'))) {
 					$nbLevel = count($fieldStructure);

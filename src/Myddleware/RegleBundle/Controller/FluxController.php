@@ -520,8 +520,7 @@ class FluxControllerCore extends Controller
 			  $stmt->execute();  			  
 			  
 		      // On récupére l'EntityManager
-		      $em = $this->getDoctrine()
-		               ->getManager();	
+		      $em = $this->getDoctrine()->getManager();	
 			  // Insert in audit			  
 			  $oneDocAudit = new DocumentAudit();
 			  $oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
@@ -544,45 +543,31 @@ class FluxControllerCore extends Controller
 	// Relancer un flux
 	public function fluxRerunAction($id) {
 		try {
-			$request = $this->get('request');
-			$session = $request->getSession();
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-			$rule = $this->container->get('myddleware_rule.rule');
-			$msg = $rule->actionDocument($id,'rerun');
-
-			$myddlewareSession['param']['myddleware']['note'][] = $msg; // alerte
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			if(!empty($id)) {
+				$job = $this->get('myddleware_job.job');	
+				$job->actionMassTransfer('rerun',array($id));			
+			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
-			exit;	
 		}
 		catch(Exception $e) {
 			return $this->redirect($this->generateUrl('flux_list'));
-		}
+		}		
 	}
 
 	// Annuler un flux
-	public function fluxCancelAction($id) {
+	public function fluxCancelAction($id) {	
 		try {
-			$request = $this->get('request');
-			$session = $request->getSession();
-			// $session = $this->container->get('session');
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-			$rule = $this->container->get('myddleware_rule.rule');
-			$msg = $rule->actionDocument($id,'cancel');
-
-			$myddlewareSession['param']['myddleware']['note'][] = $msg; // alerte
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			if(!empty($id)) {
+				$job = $this->get('myddleware_job.job');	
+				$job->actionMassTransfer('cancel',array($id));			
+			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
-			exit;	
 		}
 		catch(Exception $e) {
 			return $this->redirect($this->generateUrl('flux_list'));
-		}
+		}													
 	}
+	
 
 	// Exécute une action d'un bouton dynamique
 	public function fluxBtnDynAction($method,$id,$solution) {
@@ -597,8 +582,7 @@ class FluxControllerCore extends Controller
 		if(isset($_POST['ids']) && count($_POST['ids']) > 0) {
 			$job = $this->get('myddleware_job.job');	
 			$job->actionMassTransfer('cancel',$_POST['ids']);			
-		}							
-							
+		}													
 		exit; 
 	}
 
