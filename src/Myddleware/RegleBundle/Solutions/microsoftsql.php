@@ -33,136 +33,39 @@ class microsoftsqlcore extends database {
 	protected $fieldLabel = 'COLUMN_NAME';
 	protected $fieldType = 'DATA_TYPE';
 	
-	// Convert type from mysql du mssql
-	// https://dev.mysql.com/doc/workbench/en/wb-migration-database-mssql-typemapping.html
-	/* protected $convertType = array(
-		'TINYINT' => 'tinyint',
-		'SMALLINT' => 'smallint',
-		'MEDIUMINT' => 'int',
-		'INT' => 'int',
-		'BIGINT' => 'bigint',
-		'DECIMAL' => 'decimal',
-		'FLOAT' => 'float',
-		'DOUBLE' => 'float',
-		'REAL' => 'float',
-		'DATETIME' => 'datetime2',
-		'DATE' => 'date',
-		'TIME' => 'time',
-		'TIMESTAMP' => 'smalldatetime',
-		'YEAR' => 'smallint',
-		'CHAR' => 'nchar',
-		'VARCHAR' => 'nvarchar',
-		'TINYTEXT' => 'nvarchar',
-		'TEXT' => 'nvarchar',
-		'MEDIUMTEXT' => 'nvarchar',
-		'LONGTEXT' => 'nvarchar',
-		'BINARY' => 'binary',
-		'VARBINARY' => 'binary',
-		'TINYBLOB' => 'binary',
-		'BLOB' => 'binary',
-		'MEDIUMBLOB' => 'binary',
-		'LONGBLOB' => 'binary'
-	); */
+	protected $stringSeparator = '';
 
 	// Query to get all the tables of the database
-	public function get_query_show_tables() {
+	protected function get_query_show_tables() {
 		return 'SELECT table_name FROM information_schema.tables';
 	}
 	
 	// Query to get all the flieds of the table
-	public function get_query_describe_table($table) {
+	protected function get_query_describe_table($table) {
 		return 'SELECT * FROM information_schema.columns WHERE table_name = \''.$table.'\'';
+	}
+	
+	// Get the header of the select query in the read last function
+	protected function get_query_select_header_read_last() {
+		return "SELECT TOP 1 id, date_modified, ";
+	}
+	
+	// Get the limit operator of the select query in the read last function
+	protected function get_query_select_limit_read_last() {
+		return "";
+	}
+	
+	// Get the alter column operator
+	protected function get_query_alter_column() {
+		return " ALTER COLUMN ";
 	}
 	
 	// Get the header of an insert query
 	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE ".$param['rule']['name_slug']." (
+		return  "CREATE TABLE ".$table." (
 			id int not null IDENTITY(1, 1) PRIMARY KEY,
 			date_modified smalldatetime default CURRENT_TIMESTAMP,";
 	}
-	
-	// Get the header of an insert query
-	protected function get_query_insert_header($table) {
-		return  "INSERT INTO ".$table." ("; ;
-	}
-	
-/* 		// Créer un table dans Database
-	protected function createDatabaseTable($param) {
-// $this->logger->error('$paramLogin : '.print_r($paramLogin,true));		
-	    $dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-
-		$sql = "CREATE TABLE ".$param['rule']['name_slug']." (
-			id int not null IDENTITY(1, 1) PRIMARY KEY,
-			date_modified smalldatetime default CURRENT_TIMESTAMP,";
-
-		
-		if (empty($param['ruleFields'])) {
-			throw new \Exception("Failed to create the table, no field in the Rule ".$param['rule']['name_slug']);
-		}
-		// Création du mapping dans Database
-		Foreach ($param['ruleFields'] as $ruleField) {
-			$mappingType = $this->getMappingType($ruleField['target_field_name']);
-			
-			if (empty($mappingType)) {
-				throw new \Exception("Mapping Type unknown for the field ".$ruleField['target_field_name'].". Failed to create the table in Database");
-			}
-			
-			// Pour les champs date et metric (fixés car obligatoire), on garde le nom de champ source sinon on met le champ saisi par l'utilisateur pour affichage dans Database
-			$tab = explode('_',$ruleField['target_field_name'], -1);
-			$fieldName = '';
-			foreach ($tab as $morceau) {
-				$fieldName .= $morceau.'_';
-			}
-			$fieldName = substr($fieldName, 0, -1);
-			$sql.= $fieldName." ".$mappingType.",";
-		}
-		$sql.= " INDEX ".$param['rule']['name_slug']."_date_modified (date_modified))";						   
-	 		
-		$q = $dbh->prepare($sql);
-		$exec = $q->execute();
-		$dbh = null;
-		if(!$exec) { // Si erreur
-			$errorInfo = $dbh->errorInfo();
-			throw new \Exception('Failed to create the table, :' . $errorInfo[2].' - Query : '.$sql);
-			$this->logger->error('Failed to create the table, :' . $errorInfo[2].' - Query : '.$sql);
-		}
-		$this->messages[] = array('type' => 'success', 'message' => 'Table '.$param['rule']['name_slug'].' successfully created in Database. ');		
-		return $this->saveConnectorParams($param['ruleId'], $param['rule']['name_slug']);
-	}
-	 */
-		// Fonction permettant de récupérer le type d'un champ
-/* 	protected function getMappingType($field) {
-		$filedType = parent::getMappingType($field);
-		if (!empty($this->convertType[$filedType])) {
-			return $this->convertType[$filedType];
-		}
-		return null;
-	} */
-	
-	// Fonction permettant de récupérer le type d'un champ
-	/* protected function getMappingType($field) {
-		if (stripos($field, 'TEXT') !== false) {
-			return 'TEXT';
-		}
-		if (stripos($field, 'VARCHAR') !== false) {
-			return 'nvarchar(255)';
-		}
-		// Les champs référence sont considéré comme des filtres et permettent de lier plusieurs règles
-		if (stripos($field, 'INT') !== false) {
-			return 'int';
-		}
-		if (stripos($field, 'BOOL') !== false) {
-			return 'tinyint';
-		}
-		if (stripos($field, 'DATE') !== false) {
-			return 'date';
-		}
-		return null;
-	}
-	 */
-	// public function afterRuleSave($data,$type) {
-		// return parent::afterRuleSave($data,$type);
-	// }
 
 }// class microsoftsqlcore
 

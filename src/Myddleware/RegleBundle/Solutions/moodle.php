@@ -110,8 +110,8 @@ class moodlecore  extends solution {
 	}
 	
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
 			// Pour chaque module, traitement différent
 			switch ($module) {
@@ -346,10 +346,6 @@ class moodlecore  extends solution {
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
-			}
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -384,8 +380,8 @@ class moodlecore  extends solution {
 					$functionname = 'local_myddleware_get_users_last_access';
 					break;	
 				default:
-					$result['done'] = false;
-					return $result;
+					throw new \Exception("Module unknown. ");
+					break;
 			}
 
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			

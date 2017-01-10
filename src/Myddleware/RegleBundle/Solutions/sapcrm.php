@@ -107,58 +107,8 @@ class sapcrmcore extends saproot {
 			);
 		}
 	} // get_modules()
-	
-	public function get_submodules($module, $type = 'source', $param = '') {
-		if ($type == 'source') {
-			switch ($module){
-				case 'CRMD_ORDER':
-					return array('CRMD_ORDER' => array(
-													'ET_ORDERADM_H' => 'Header Order',
-													'ET_ACTIVITY_H' => 'Header Activity',
-													'ET_ORGMAN' => 'Organisation',
-													'ET_SERVICE_OS' => 'Service OS',
-													'ET_PARTNER' => array(
-																		'00000022' => 'User',
-																		'00000009' => 'Business partner',
-																	),
-													'ET_APPOINTMENT' => array(
-																		'A_PLANTOTAL' => 'A_PLANTOTAL',
-																		'ORDERPLANNED' => 'ORDERPLANNED'
-																	),
-													),
-						);
-					break;
-				case 'BU_PARTNER':
-					return array('BU_PARTNER' => array(
-													'ET_BUT000' => 'En tête partenaire',
-													'ET_ADDRESSDATA' => 'Partenaire SAP : structure données d\'adresse',
-													'ET_BAPIADTEL' => 'Téléphone',
-													'ET_BAPIADFAX' => 'Fax',
-													'ET_BAPIADTTX' => 'Télétex',
-													'ET_BAPIADTLX' => 'Télex',
-													'ET_BAPIADSMTP' => 'Email',
-													'ET_BAPIADRML' => 'Adresses RML',
-													'ET_BAPIADX400' => 'dresses X400',
-													'ET_BAPIADRFC' => 'Adresses RFC',
-													'ET_BAPIADPRT' => 'Adresses PRT',
-													'ET_BAPIADSSF' => 'Adresses SSF',
-													'ET_BAPIADURI' => 'Adresses URI',
-													'ET_BAPIADPAG' => 'Numéros de pager',
-													'ET_BAPIAD_REM' => 'Remarques sur l\'adresse',
-													'ET_BAPICOMREM' => 'Remarques sur les types de communication',
-													'ET_ADDRESSUSAGE' => 'Liste d\'utilisation des adresses',
-													'ET_BAPIADVERSORG' => 'Type adr. 1, zones dép. de version int.',
-													'ET_BAPIADVERSPERS' => 'Type adr. 2, zones dép. de version int.',
-													'ET_BAPIADUSE' => 'Utilisations de communication (BAS)',
-													'ET_RETURN' => 'Table retour',
-											)
-										);				
-			}
-		}
-		return parent::get_submodules($module, $type, $param);
-	}	
-	
-	public function get_module_fields($module, $type = 'source', $extension = false) {
+
+	public function get_module_fields($module, $type = 'source') {
 		if ($type == 'target') {
 			switch ($module) {
 			    case 'BU_PARTNER':
@@ -246,7 +196,7 @@ class sapcrmcore extends saproot {
 
 		}
 		else {
-			return parent::get_module_fields($module, $type, $extension);
+			return parent::get_module_fields($module, $type);
 		}
 	}
 	

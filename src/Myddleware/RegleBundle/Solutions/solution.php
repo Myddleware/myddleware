@@ -221,44 +221,17 @@ class solutioncore {
 	public function get_modules($type = 'source') {
 	}
 	
-	// Méthode permettant de récupérer les sous modules du module choisi (utile pour SAP)
-	// Tableau sous la forme : 
-	// array(
-		// nom_module1 => array(
-								// 'sous_module 11' => 'libellé sous_module 11',
-								// 'sous_module 12' => 'libellé sous_module 12',
-								// 'sous_module 13' => array(
-													// 'sous_module 131' => 'libellé sous_module 131',
-													// 'sous_module 132' => 'libellé sous_module 132',
-								// )	
-		// nom_module2 => libellé module 2
-	// )
-	public function get_submodules($module, $type = 'source', $param = '') {
-		return null;
-	}	
-
-	
-	
-	// Méthode permettant de récupérer tous les champs d'un module
-	// Tableau sous la forme : 
-	// array( 	'name' => array(
-							// 'label' => 'nom',
-							// 'type' => 'text',
-							// 'type_bdd' => 'varchar(50)',
-							// 'required' => true
-						// ),  
-				// 'birthday' => array(
-							// 'label' => 'date anniversaire',
-							// 'type' => 'date',
-							// 'type_bdd' => 'date',
-							// 'required' => false
-						// ), 
-	// )
 	// Cette méthode doit remplir les attributs : 
 		// moduleFields avec le tableu ci-dessus
 		// fieldsRelate avec la même structure que moduleFields mais ne contenant que les champs de type relation
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		$this->moduleFields = array();
+	public function get_module_fields($module, $type = 'source') {
+		// The field Myddleware_element_id is ID of the current module. It is always added for the field mapping 
+		$this->moduleFields['Myddleware_element_id'] = array(
+												'label' => 'ID '.$module,
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0
+											);																
 		return $this->moduleFields;
 	}
 
@@ -391,11 +364,6 @@ class solutioncore {
 			);
 	}
 	
-	// Permet d indiquer si o envoi les champs standard ou si on renvoie en plus les champs de relation dans get_module_field
-	public function extendField ($moduleTarget) {
-		return false;
-	}
-	
 	public function setMessageCreateRule($module) {
 	}
 	
@@ -490,7 +458,7 @@ class solutioncore {
 		if (empty($this->fieldsRelate['id'])) {
 			$this->fieldsRelate['Myddleware_element_id'] = array(
 																'label' => 'ID '.$module,
-																'type' => 'text',
+																'type' => 'varchar(255)',
 																'type_bdd' => 'varchar(255)',
 																'required' => false,
 																'required_relationship' => 0

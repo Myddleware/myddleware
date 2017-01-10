@@ -137,9 +137,9 @@ class shopapplicationcore extends solution {
 	} // get_modules()	
 	 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
+	public function get_module_fields($module, $type = 'source') {
 		require_once('lib/shopapplication/metadata.php');		
-		parent::get_module_fields($module, $type, $extension);
+		parent::get_module_fields($module, $type);
 		try{
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
@@ -248,11 +248,7 @@ class shopapplicationcore extends solution {
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
-			}		
+			}	
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){

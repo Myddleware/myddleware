@@ -43,16 +43,26 @@ class mysqlcore extends database {
 		return 'DESCRIBE `'.$table.'`';
 	}
 	
-	// Get the header of an insert query
-	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE ".$param['rule']['name_slug']." (
-			id int not null IDENTITY(1, 1) PRIMARY KEY,
-			date_modified smalldatetime default CURRENT_TIMESTAMP,";
+	// Get the header of the select query in the read last function
+	protected function get_query_select_header_read_last() {
+		return "SELECT id, date_modified, ";
+	}
+	
+	// Get the limit operator of the select query in the read last function
+	protected function get_query_select_limit_read_last() {
+		return " LIMIT 1";
+	}
+	
+	// Get the alter column operator
+	protected function get_query_alter_column() {
+		return " MODIFY COLUMN ";
 	}
 	
 	// Get the header of an insert query
-	protected function get_query_insert_header($table) {
-		return  "INSERT INTO `".$table."` ("; ;
+	protected function get_query_create_table_header($table) {
+		return  "CREATE TABLE ".$table." (
+			id int not null IDENTITY(1, 1) PRIMARY KEY,
+			date_modified smalldatetime default CURRENT_TIMESTAMP,";
 	}
 	
 }// class mysqlcore

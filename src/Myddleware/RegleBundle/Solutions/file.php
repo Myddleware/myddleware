@@ -118,8 +118,8 @@ class filecore extends solution {
 	} 
 	
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
