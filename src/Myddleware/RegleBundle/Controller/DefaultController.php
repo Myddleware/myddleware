@@ -1640,6 +1640,7 @@ class DefaultControllerCore extends Controller
 
 // -------------------	Parent relation 
 			// Search if we can send document merged with the target solution
+			$lstParentFields = array();
 			$allowParentRelationship = $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']);
 			if ($allowParentRelationship) {
 				if (!empty($ruleListRelation)) {

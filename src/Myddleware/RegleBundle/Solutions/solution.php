@@ -602,11 +602,11 @@ class solutioncore {
 	// Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule	
 	protected function getParamLogin($connId) {
 		// RECUPERE LE NOM DE LA SOLUTION			
-		$sql = "SELECT name  
+		$sql = "SELECT Solution.name  
 				FROM Connector
 					INNER JOIN Solution 
 						ON Solution.id  = Connector.sol_id
-				WHERE id = :connId";
+				WHERE Connector.id = :connId";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
 		$stmt->execute();		
