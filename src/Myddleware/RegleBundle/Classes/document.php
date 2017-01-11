@@ -1471,12 +1471,15 @@ class documentcore {
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";						
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
-			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle				
+			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle	
 			if (!empty($this->ruleRelationships)) {
 				// Boucle sur les relation
-				foreach ($this->ruleRelationships as $ruleRelationship) {
-					// Si on est sur une relation avec le champ Myddleware_element_id
-					if ($ruleRelationship['field_name_target'] == 'Myddleware_element_id'){						
+				foreach ($this->ruleRelationships as $ruleRelationship) {		
+					// If the relationship target is Myddleware element id and if the rule relate isn't a child (we don't get target id or define type of a document with a child rule)
+					if (
+							$ruleRelationship['field_name_target'] == 'Myddleware_element_id'
+						AND empty($ruleRelationship['parent'])
+					){						
 						// Si le champs avec l'id source n'est pas vide
 						// S'il s'agit de Myddleware_element_id on teste id
 						if (
@@ -1503,7 +1506,7 @@ class documentcore {
 							$result = $stmt->fetch();				
 				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
-							if (!empty($result['id'])) {
+							if (!empty($result['id'])) {							
 								$this->targetId = $result['target_id'];
 							}
 							// Sinon on bloque la création du document 

@@ -46,17 +46,20 @@ class shopapplicationcore extends solution {
 	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $childModuleParameters = array(
 							'customers' => array(
-											'customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1, 'type' => 'array')
+											'customers_addresses' 		=> array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1, 'type' => 'array')
 										),
 							'orders' => array(
-											'orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1, 'type' => 'array'),
-											'orders_delivery_address' => array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
-											'orders_billing_address' => array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
+											'orders_products' 			=> array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1, 'type' => 'array'),
+											'orders_delivery_address' 	=> array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
+											'orders_billing_address' 	=> array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
 										),
 							'products' => array(
-												'products' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1, 'type' => 'array'),
-												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 0, 'type' => 'array'),
-												'options_values' 	=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0, 'type' => 'array'), // 2nd level possible
+												'products' 				=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1, 'type' => 'array'),
+												'products_options' 		=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 0, 'type' => 'array'),
+												'options_values' 		=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0, 'type' => 'array'), 
+												'products_stock' 		=> array('entry_name' => 'stock', 'id_name' => '', 'max_level' => 1, 'type' => 'array'), 
+												'products_stock_options'=> array('entry_name' => 'stock_options', 'id_name' => '', 'max_level' => 0, 'type' => 'array'), 
+												'products_stock_entries'=> array('entry_name' => 'stock_entries', 'id_name' => '', 'max_level' => 0, 'type' => 'array'), 
 										),
 							'options' => array(
 												'options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1, 'type' => 'array')
@@ -70,9 +73,6 @@ class shopapplicationcore extends solution {
 	);
 	// Modules with language						
 	protected $moduleWithLanguage = array('products','categories','options','options_values');	
-	
-	// Submodule 
-	// protected $childModule = array('customers_addresses','orders_products','options_values');
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -132,6 +132,9 @@ class shopapplicationcore extends solution {
 			'options_values' => 'Options values',
 			'categories' => 'Categories',
 			'brands' => 'Brands',
+			'products_stock' => 'Products stock',	
+			'products_stock_options' => 'Products stock option',
+			'products_stock_entries' => 'Products stock entry'
 		);
 
 	} // get_modules()	
@@ -480,7 +483,7 @@ print_r($body);
 print_r($data);
 print_r($dataTosSend);
 print_r($urlApi);
-// return null;
+return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -627,9 +630,9 @@ print_r($urlApi);
 						}
 						$this->newChild = array();
 					}
-echo '$param module : '.$param['module'].chr(10);					
-echo 'key : '.$key.chr(10);		
-print_r($this->childModuleParameters);			
+// echo '$param module : '.$param['module'].chr(10);					
+// echo 'key : '.$key.chr(10);		
+// print_r($this->childModuleParameters);			
 					// We create a new record if the key are equals (we could have an sub array with several records)
 					// This record is save to create data in the maximum level
 					if (empty(array_diff_key ( $dataChild , $dataTosSend))) {

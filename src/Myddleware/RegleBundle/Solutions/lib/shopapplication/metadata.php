@@ -177,7 +177,7 @@ $moduleFields = array (
 						array(
 							'id' => array('label' => 'ID product', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'reference' => array('label' => 'Reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-							'ean' => array('label' => 'Ean', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'ean' => array('label' => 'stock_ean', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'isbn' => array('label' => 'Isbn', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('0' => 'Désactivé', '1' => 'Activé')),
 							'guarantee' => array('label' => 'Guarantee', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -255,6 +255,20 @@ $moduleFields = array (
 							'multilangual__ISO__value_name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'multilangual__ISO__value_image' => array('label' => 'Image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						),
+					'products_stock' =>
+						array(
+							'stock_reference' => array('label' => 'Reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_ean' => array('label' => 'EAN', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),	
+					'products_stock_options' =>
+						array(
+						),		
+					'products_stock_entries' =>
+						array(
+							'stock_entry_date' => array('label' => 'Entry date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_entry_quantity' => array('label' => 'Entry quantity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_entry_cost' => array('label' => 'Entry cost', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),	
 					'categories' =>
 						array(
 							'id' => array('label' => 'ID category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -330,6 +344,20 @@ $fieldsRelate = array (
 							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock_options' =>
+						array(
+							'stock_reference' => array('label' => 'Stock reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock_entries' =>
+						array(
+							'stock_reference' => array('label' => 'Stock reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock' =>
+						array(
+							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),
 					'options_values' =>
 						array(

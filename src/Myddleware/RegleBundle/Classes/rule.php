@@ -1138,8 +1138,13 @@ class rulecore {
 					// Child document has the type 'U'				
 					$dataChild = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware']);
 					$childRuleDetail = $childRuleObj->getRule();
-					// Store the submodule data to be send in the parent document					
-					$document[$childRuleDetail['module_target']] = $dataChild;			
+					// Store the submodule data to be send in the parent document	
+					// If the structure already exists in the document array, we merge data (several rules can add dsata in the same structure)
+					if (empty($document[$childRuleDetail['module_target']])) {
+						$document[$childRuleDetail['module_target']] = $dataChild;
+					} else {
+						$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
+					}
 				}
 			}
 			$return[$document['id_doc_myddleware']] = $document;
