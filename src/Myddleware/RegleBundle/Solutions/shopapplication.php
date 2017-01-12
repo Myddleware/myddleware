@@ -54,16 +54,31 @@ class shopapplicationcore extends solution {
 											'orders_billing_address' 	=> array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
 										),
 							'products' => array(
-												'products' 				=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1, 'type' => 'array'),
-												'products_options' 		=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 0, 'type' => 'array'),
-												'options_values' 		=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0, 'type' => 'array'), 
-												'products_stock' 		=> array('entry_name' => 'stock', 'id_name' => '', 'max_level' => 1, 'type' => 'array'), 
-												'products_stock_options'=> array('entry_name' => 'stock_options', 'id_name' => '', 'max_level' => 0, 'type' => 'array'), 
-												'products_stock_entries'=> array('entry_name' => 'stock_entries', 'id_name' => '', 'max_level' => 0, 'type' => 'array'), 
+												'products' 				=> array(
+																				'entry_name' => 'options', 
+																				'id_name' => 'option_id', 
+																				'products_options' => array(
+																											'id_name' => 'option_value_id'
+																									)
+																		),
+												'products_stock' 		=> array(
+																				'entry_name' => 'stock', 
+																				'products_options' 		=> array(
+																												'entry_name' => 'stock_options', 
+																												'id_name' => 'option_value_id',
+																												'options_values' => array(
+																																			'id_name' => 'option_value_id'
+																																)
+																										),
+																				'products_stock_entries' => array(
+																												'entry_name' => 'stock_entries'
+																										),
+																				
+																		), 
 										),
 							'options' => array(
 												'options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1, 'type' => 'array')
-										),
+										),		
 							);
 	
 	// there is some fictive module created to beused with Myddleware. Here the correspondence to find the real module to call 
@@ -265,7 +280,7 @@ class shopapplicationcore extends solution {
 		$result = array();
 		try {
 			// No history search for fictive modules we have created
-			if (in_array($param['module'], array('options_values','products_options','orders_delivery_address','orders_billing_address'))) {
+			if (in_array($param['module'], array('options_values','products_options','products_stock_entries','orders_delivery_address','orders_billing_address'))) {
 				$result['done'] = false;					
 				return $result;			
 			}
@@ -396,7 +411,7 @@ class shopapplicationcore extends solution {
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
 				// Preparation of the post
-				$dataTosSendTmp = $this->buildSendingData($param,$data,'C');
+				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'C');
 				
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
@@ -473,16 +488,16 @@ print_r($body);
 				$dataTosSend = '';
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
+print_r($data);
 				// Preparation of the put
-				$dataTosSendTmp = $this->buildSendingData($param,$data,'U');
+				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'U');
 
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL (we get the real module to call if the currente module is a fictive module created for Myddleware
 				$urlApi = $this->url.(!empty($this->callModule[$param['module']]) ? $this->callModule[$param['module']] : $param['module']).$this->apiKey;
-print_r($data);
 print_r($dataTosSend);
-print_r($urlApi);
+// print_r($urlApi);
 return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
@@ -579,8 +594,9 @@ return null;
 		
 	// Generate the data to send in the create or update POST
 	// Entry_name is the name of the entry in cas the function is call for a child data
-	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = array()) {		
+	protected function buildSendingData($param,$data,$childModuleParameters,$mode, $entry_name = '',$level = array()) {		
 		$first = false;		
+		$lockChild = false;
 		foreach ($data as $key => $value) {		
 			$fieldStructure = '';
 			// Replace __ISO__ if the field contains __ISO__
@@ -602,8 +618,8 @@ return null;
 			if ($key == 'target_id') {
 				if ($mode == 'U') {					
 					// If a specific id exist we get it otherwise we put the default value id
-					if (!empty($this->childModuleParameters[$param['module']][$entry_name]['id_name'])) {
-						$dataTosSend[$this->childModuleParameters[$param['module']][$entry_name]['id_name']] = $value;
+					if (!empty($childModuleParameters['id_name'])) {
+						$dataTosSend[$childModuleParameters['id_name']] = $value;
 					} else {
 						$dataTosSend['id'] = $value;
 					}
@@ -616,39 +632,79 @@ return null;
 				}
 				$level[$param['module']][$key]++;
 				foreach($value as $subrecord) {
-					// recursive call in case sub tab exist
-					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
+
+// 'products_stock' 		=> array(
+								// 'entry_name' => 'stock', 
+								// 'max_level' => 1,
+								// 'type' => 'array',
+								// 'products_options' => array(
+																// 'max_level' => 0,
+																// 'entry_name' => 'stock_options', 
+																// 'options_values' => array(
+																			// 'entry_name' => 'stock_options', 
+																			// 'max_level' => 0,
+																// )
+								// ),
+// print_r($childModuleParameters);				
+// echo 'key : '.$key.chr(10).chr(10).chr(10);		
+// ), 			
+					// If we have a sub level, we change the array childModuleParameters, otherwise we keep it and data will be merge inside
+					// if (!empty($childModuleParameters[$key])) {
+						// $childModuleParametersSubLevel = $childModuleParameters[$key];
+					// }
+					// else {
+						// $childModuleParametersSubLevel = $childModuleParameters;
+					// }
+// print_r($childModuleParametersSubLevel);	
+// echo chr(10).chr(10).chr(10).chr(10);				
+					// Recursive call in case sub tab exist
+					// If there is no entry name found in the structure, we merge data inside the current level otherwise we add the array to the result
+					if (!empty($childModuleParameters[$key]['entry_name'])) {
+						$dataTosSend[$childModuleParameters[$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+					} else {
+						$dataChild = $this->buildSendingData($param,$subrecord,$childModuleParameters,$mode,$key,$level);
+						// We create a new record if the key are equals (we could have an sub array with several records)
+						// This record is save to create data in the previous level
+						if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
+							$this->newChild[] = $dataChild;
+							$lockChild = true;
+						} else {
+							$dataTosSend = array_merge($dataTosSend,$dataChild);
+						}
+					}
 					// If we are at the correct level we can add the child generated in the recursive call
-					if (!empty($this->newChild) && $level[$param['module']][$key] == $this->childModuleParameters[$param['module']][$key]['max_level']) {
+					// if (!empty($this->newChild) && $level[$param['module']][$key] == $childModuleParameters['max_level']) {
+					if (!empty($this->newChild) && !$lockChild) {
 						foreach ($this->newChild as $child) {
 							// If the submodule is a new entry in the subarray (2 dimensions) otherwise we just create an array (1 dimension)
-							if ($this->childModuleParameters[$param['module']][$key]['type'] == 'array') {
-								$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $child;
+							if (!empty($childModuleParameters['entry_name'])) {
+								$dataTosSend[$childModuleParameters['entry_name']][] = $child;
 							} else {
-								$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']] = $child;
+								$dataTosSend[] = $child;
 							}
 						}
 						$this->newChild = array();
-					}
+					}  
 // echo '$param module : '.$param['module'].chr(10);					
 // echo 'key : '.$key.chr(10);		
 // print_r($this->childModuleParameters);			
 					// We create a new record if the key are equals (we could have an sub array with several records)
 					// This record is save to create data in the maximum level
-					if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
+					/* if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
 						$this->newChild[] = $dataChild;
 					}
 					// If the deep level is greater than the maximum allowed by the module, we merge data into the maximum level 
-					elseif ($level[$param['module']][$key] > $this->childModuleParameters[$param['module']][$key]['max_level']) {
+					// elseif ($level[$param['module']][$key] > $childModuleParameters['max_level']) {
+					elseif (empty($childModuleParameters[$key])) {
 						$dataTosSend = array_merge($dataTosSend, $dataChild);
 					} else {
 						// If the submodule is a new entry in the subarray (2 dimensions) otherwise we just create an array (1 dimension)
-						if ($this->childModuleParameters[$param['module']][$key]['type'] == 'array') {
-							$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $dataChild;
+						if ($childModuleParameters['type'] == 'array') {
+							$dataTosSend[$childModuleParameters['entry_name']][] = $dataChild;
 						} else {
-							$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']] = $dataChild;
+							$dataTosSend[$childModuleParameters['entry_name']] = $dataChild;
 						}
-					}
+					} */
 				}
 			} else {	
 				// Change value and key if needed
