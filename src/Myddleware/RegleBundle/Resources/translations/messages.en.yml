@@ -502,6 +502,7 @@ error:
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
         edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
+        edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
     account:

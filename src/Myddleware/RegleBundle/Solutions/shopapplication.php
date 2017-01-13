@@ -46,38 +46,44 @@ class shopapplicationcore extends solution {
 	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $childModuleParameters = array(
 							'customers' => array(
-											'customers_addresses' 		=> array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1, 'type' => 'array')
+											'customers_addresses' 		=> array('entry_name' => 'addresses', 'id_name' => 'address_id', 'type'=>'array')
 										),
 							'orders' => array(
-											'orders_products' 			=> array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1, 'type' => 'array'),
-											'orders_delivery_address' 	=> array('entry_name' => 'delivery_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
-											'orders_billing_address' 	=> array('entry_name' => 'billing_address', 'id_name' => 'id', 'max_level' => 1, 'type' => 'structure'),
+											'orders_products' 			=> array('entry_name' => 'products', 'id_name' => 'id', 'type'=>'array'),
+											'orders_delivery_address' 	=> array('entry_name' => 'delivery_address', 'id_name' => 'id', 'type'=>'structure'),
+											'orders_billing_address' 	=> array('entry_name' => 'billing_address', 'id_name' => 'id', 'type'=>'structure'),
 										),
 							'products' => array(
 												'products' 				=> array(
 																				'entry_name' => 'options', 
 																				'id_name' => 'option_id', 
+																				'type'=>'array',
 																				'products_options' => array(
-																											'id_name' => 'option_value_id'
+																											'id_name' => 'option_value_id',
+																											'type'=>'array'
 																									)
 																		),
 												'products_stock' 		=> array(
 																				'entry_name' => 'stock', 
+																				'type'=>'array',
 																				'products_options' 		=> array(
 																												'entry_name' => 'stock_options', 
 																												'id_name' => 'option_value_id',
+																												'type'=>'array',
 																												'options_values' => array(
-																																			'id_name' => 'option_value_id'
+																																			'id_name' => 'option_value_id',
+																																			'type'=>'array'
 																																)
 																										),
 																				'products_stock_entries' => array(
-																												'entry_name' => 'stock_entries'
+																												'entry_name' => 'stock_entries',
+																												'type'=>'array'
 																										),
 																				
 																		), 
 										),
 							'options' => array(
-												'options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1, 'type' => 'array')
+												'options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'type'=>'array')
 										),		
 							);
 	
@@ -403,7 +409,6 @@ class shopapplicationcore extends solution {
 
 	// Permet de créer un enregistrement
 	public function create($param) {
-// print_r($param);	
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -419,9 +424,6 @@ class shopapplicationcore extends solution {
 				// Generate URL
 				$urlApi = $this->url.$param['module'].$this->apiKey;
 
-print_r($data);	
-print_r($dataTosSend);	
-return null;
 				// Creation of the record
 				$return = $this->call($urlApi, 'post', $dataTosSend);	
 				
@@ -429,7 +431,6 @@ return null;
 				$code = $return->__get('code');			
 				// Get the data from the response
 				$body = $return->__get('body');	
-print_r($body);	
 
 				// If the call is a success
 				if ($code == '200') {				
@@ -488,7 +489,7 @@ print_r($body);
 				$dataTosSend = '';
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-print_r($data);
+
 				// Preparation of the put
 				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'U');
 
@@ -496,9 +497,7 @@ print_r($data);
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL (we get the real module to call if the currente module is a fictive module created for Myddleware
 				$urlApi = $this->url.(!empty($this->callModule[$param['module']]) ? $this->callModule[$param['module']] : $param['module']).$this->apiKey;
-print_r($dataTosSend);
-// print_r($urlApi);
-return null;
+
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
 				
@@ -545,7 +544,6 @@ return null;
 				);
 			}
 		} 		
-// return null;
 		// Change document status
 		if (!empty($result)) {
 			foreach ($result as $key => $value) {
@@ -631,36 +629,16 @@ return null;
 					$level[$param['module']][$key]  = 0;
 				}
 				$level[$param['module']][$key]++;
-				foreach($value as $subrecord) {
-
-// 'products_stock' 		=> array(
-								// 'entry_name' => 'stock', 
-								// 'max_level' => 1,
-								// 'type' => 'array',
-								// 'products_options' => array(
-																// 'max_level' => 0,
-																// 'entry_name' => 'stock_options', 
-																// 'options_values' => array(
-																			// 'entry_name' => 'stock_options', 
-																			// 'max_level' => 0,
-																// )
-								// ),
-// print_r($childModuleParameters);				
-// echo 'key : '.$key.chr(10).chr(10).chr(10);		
-// ), 			
-					// If we have a sub level, we change the array childModuleParameters, otherwise we keep it and data will be merge inside
-					// if (!empty($childModuleParameters[$key])) {
-						// $childModuleParametersSubLevel = $childModuleParameters[$key];
-					// }
-					// else {
-						// $childModuleParametersSubLevel = $childModuleParameters;
-					// }
-// print_r($childModuleParametersSubLevel);	
-// echo chr(10).chr(10).chr(10).chr(10);				
+				foreach($value as $subrecord) {			
 					// Recursive call in case sub tab exist
 					// If there is no entry name found in the structure, we merge data inside the current level otherwise we add the array to the result
 					if (!empty($childModuleParameters[$key]['entry_name'])) {
-						$dataTosSend[$childModuleParameters[$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+						// If thetype is an arry we create a new entry, otherwise it is a structure so we just add the struture
+						if ($childModuleParameters[$key]['type'] == 'array') {
+							$dataTosSend[$childModuleParameters[$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+						} else { // structure
+							$dataTosSend[$childModuleParameters[$key]['entry_name']] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+						}
 					} else {
 						$dataChild = $this->buildSendingData($param,$subrecord,$childModuleParameters,$mode,$key,$level);
 						// We create a new record if the key are equals (we could have an sub array with several records)
@@ -678,33 +656,18 @@ return null;
 						foreach ($this->newChild as $child) {
 							// If the submodule is a new entry in the subarray (2 dimensions) otherwise we just create an array (1 dimension)
 							if (!empty($childModuleParameters['entry_name'])) {
-								$dataTosSend[$childModuleParameters['entry_name']][] = $child;
+								// If thetype is an arry we create a new entry, otherwise it is a structure so we just add the struture
+								if ($childModuleParameters[$key]['type'] == 'array') {
+									$dataTosSend[$childModuleParameters['entry_name']][] = $child;
+								} else { // structure
+									$dataTosSend[$childModuleParameters['entry_name']] = $child;
+								}
 							} else {
 								$dataTosSend[] = $child;
 							}
 						}
 						$this->newChild = array();
 					}  
-// echo '$param module : '.$param['module'].chr(10);					
-// echo 'key : '.$key.chr(10);		
-// print_r($this->childModuleParameters);			
-					// We create a new record if the key are equals (we could have an sub array with several records)
-					// This record is save to create data in the maximum level
-					/* if (empty(array_diff_key ( $dataChild , $dataTosSend))) {
-						$this->newChild[] = $dataChild;
-					}
-					// If the deep level is greater than the maximum allowed by the module, we merge data into the maximum level 
-					// elseif ($level[$param['module']][$key] > $childModuleParameters['max_level']) {
-					elseif (empty($childModuleParameters[$key])) {
-						$dataTosSend = array_merge($dataTosSend, $dataChild);
-					} else {
-						// If the submodule is a new entry in the subarray (2 dimensions) otherwise we just create an array (1 dimension)
-						if ($childModuleParameters['type'] == 'array') {
-							$dataTosSend[$childModuleParameters['entry_name']][] = $dataChild;
-						} else {
-							$dataTosSend[$childModuleParameters['entry_name']] = $dataChild;
-						}
-					} */
 				}
 			} else {	
 				// Change value and key if needed
@@ -713,7 +676,6 @@ return null;
 				$key = $newValue['key'];
 				// Structure transformation to an array id needed
 				$fieldStructure = explode('__',$key);	
-// print_r($fieldStructure);
 				// We exclude Myddleware data
 				if (!in_array($key, array('id_doc_myddleware','source_date_modified'))) {
 					$nbLevel = count($fieldStructure);
@@ -741,15 +703,6 @@ return null;
 		}
 		return array('value' => $value, 'key' => $key);
 	}
-	
-/* 	protected function myExplode($value) {
-		$fieldStructure = explode('__',$value);
-		if (is_array($fieldStructure)) {
-			$value = $this->myExplode($fieldStructure);
-		}
-		return $value;
-	} */
-	
 	
 	// Force some module in child
 	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	

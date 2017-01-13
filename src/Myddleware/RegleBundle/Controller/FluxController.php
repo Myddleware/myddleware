@@ -339,7 +339,7 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT Document.*, users.username, Rule.version, Rule.name rule_name
+		$sql = "SELECT Document.*, users.username, Rule.version, CONCAT(Rule.name, ' - ', Rule.version) rule_name
 				FROM Document  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)

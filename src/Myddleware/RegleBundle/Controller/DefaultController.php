@@ -503,7 +503,11 @@ class DefaultControllerCore extends Controller
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Rule')
 	                          ->findOneById( $id );	
-							  
+				if (!empty($rule->getDeleted())) {
+					$session->set( 'error', array($this->get('translator')->trans('error.rule.edit_rule_deleted')));
+					return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
+				}
+				
 				// composition des sessions
 				$myddlewareSession['param']['rule']['rulename_valide'] = true;										
 				$myddlewareSession['param']['rule']['rulename'] = $rule->getName();

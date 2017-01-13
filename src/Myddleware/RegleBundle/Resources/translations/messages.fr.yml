@@ -103,7 +103,7 @@ create_rule:
             rule: Règles
             fields: Champs source
             parent_detail_view: Parent
-            parent: Relation parent : fusionn de plusieurs transferts de données
+            parent: Relation parent : fusion de plusieurs transferts de données
             record_id: ID enregistrement
             yes: Oui
         params:
@@ -502,7 +502,8 @@ error:
         target_module_connect: Erreur de connexion du module cible
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
-        edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.		
+        edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
+        edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
         delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
         delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
     account:
