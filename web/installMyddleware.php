@@ -409,7 +409,7 @@ else {
 </section>	
 <footer>
 <p>© Myddleware 2014-2016</p>
-<p>v2.1.0</p>
+<p>v2.1.1</p>
 </footer>
 </body>
 </html>
