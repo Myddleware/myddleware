@@ -818,17 +818,19 @@ class documentcore {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
 				// Charge les données source du document dans $this->sourceData
 				$this->getSourceData();
+			
 				// Récupération des valeurs de la source pour chaque champ de recherche
 				foreach($duplicate_fields as $duplicate_field) {
 					foreach ($this->ruleFields as $ruleField) {
-						if($ruleField['target_field_name'] == $duplicate_field)
-							$sourceDuplicateField = $ruleField['source_field_name'];
-					}
-					// On ne fait pas de recherche dans la cible sur des champs vides. S'ils sont vides, ils sont excluent.
+						if($ruleField['target_field_name'] == $duplicate_field) {
+							$sourceDuplicateField = $ruleField;
+						}
+					}			
 					if (!empty($sourceDuplicateField)) {
-						$searchFields[$duplicate_field] = $this->sourceData[$sourceDuplicateField];
+						// Get the value of the field (could be a formula)
+						$searchFields[$duplicate_field] = $this->getTransformValue($this->sourceData,$sourceDuplicateField);	
 					}
-				}
+				}			
 				if(!empty($searchFields)) {
 					$history = $this->getDocumentHistory($searchFields);
 				} 
@@ -1469,7 +1471,32 @@ class documentcore {
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
 							ORDER BY target_id DESC, global_status DESC
-							LIMIT 1";						
+							LIMIT 1";
+							
+			// On prépare la requête pour rechercher dans la partie target
+			$sqlParamsTarget = "SELECT 
+								Document.id, 
+								Document.source_id target_id, 
+								Document.global_status 
+							FROM Rule
+								INNER JOIN Rule Rule_version
+									ON Rule_version.name = Rule.name
+								INNER JOIN Document 
+									ON Document.rule_id = Rule_version.id
+							WHERE 
+									Rule.id IN (:ruleId)									
+								AND (
+										Document.global_status != 'Cancel'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
+									)
+								)	
+								AND	Document.target_id = :id
+								AND Document.id != :id_doc
+							ORDER BY target_id DESC, global_status DESC
+							LIMIT 1";	
+					
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
 			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle	
 			if (!empty($this->ruleRelationships)) {
@@ -1540,27 +1567,8 @@ class documentcore {
 		    $stmt->execute();	   				
 			$result = $stmt->fetch();
 		
-			// Si on ne trouve pas d'id alors on prépare la requête pour rechercher dans la partie target
-			if (empty($result['id'])) {
-				$sqlParamsTarget = "SELECT 
-										Document.id, 
-										Document.source_id target_id, 
-										Document.global_status 
-									FROM Rule
-										INNER JOIN Rule Rule_version
-											ON Rule_version.name = Rule.name
-										INNER JOIN Document 
-											ON Document.rule_id = Rule_version.id
-									WHERE 
-											Rule.id IN (:ruleId)									
-										AND Document.global_status != 'Cancel'	
-										AND	Document.target_id = :id
-										AND Document.id != :id_doc
-									ORDER BY target_id DESC, global_status DESC
-									LIMIT 1";
-			}
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
-			// Alors on recherche dans la règle opposée
+			// Alors on recherche dans la règle opposée		
 			if (
 					empty($result['id'])
 				&&	!empty($this->ruleParams['bidirectional'])
@@ -1572,11 +1580,17 @@ class documentcore {
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
 				$result = $stmt->fetch();				
-			}			
+			}
+			
+			// If we found a record
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
 				// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
-				if ($result['global_status'] == 'Cancel') {
+				// Except if the rule is bidirectional, in this case, a no send document in the opposite rule means that the data really exists in the target application
+				if (
+						$result['global_status'] == 'Cancel' 
+					&& empty($this->ruleParams['bidirectional'])
+				) {
 					return 'C';
 				} else {
 					return 'U';
