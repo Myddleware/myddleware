@@ -38,6 +38,7 @@ class prestashopcore extends solution {
 										'product_options' => array('id'),
 										'product_option_values' => array('id'),
 										'combinations' => array('id'),
+										'order_histories' => array('id', 'date_add'),
 								);
 	
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
@@ -56,10 +57,11 @@ class prestashopcore extends solution {
 
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
-														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','group_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
-														'products_options_values' => array('label' => 'Association product options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
-														'combinations_product_options_values' => array('label' => 'Association product - product options values', 'fields' => array(), 'relationships' => array('combinaison_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
-														'combinations_images' => array('label' => 'Association product - images', 'fields' => array(), 'relationships' => array('combinaison_id','image_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
+														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
+														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
+														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'combinations_images' => array('label' => 'Association combinations - images', 'fields' => array(), 'relationships' => array('combination_id','images_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
 														);
 	
 	private $webService;
@@ -254,13 +256,17 @@ class prestashopcore extends solution {
 					}
 				}
 				// Récupération des listes déroulantes
-				if($module == 'orders' && isset($this->moduleFields['id_supply_order_state'])) {
-					$order_states = $this->getList('order_state','order_states');
-					$this->moduleFields['id_supply_order_state']['option'] = $order_states;
+				if($module == 'orders' && isset($this->moduleFields['current_state'])) {
+					$order_states = $this->getList('order_state','order_states');			
+					$this->moduleFields['current_state']['option'] = $order_states;
 				}
-				if($module == 'supply_orders'){
+				if($module == 'order_histories' && isset($this->fieldsRelate['id_order_state'])) {
+					$order_states = $this->getList('order_state','order_states');			
+					$this->fieldsRelate['id_order_state']['option'] = $order_states;
+				}
+				if($module == 'supply_orders' && isset($this->moduleFields['id_supply_order_state'])) {
 					$supply_order_states = $this->getList('supply_order_state','supply_order_states');
-					$this->moduleFields['current_state']['option'] = $supply_order_states;
+					$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
 				}
 				// Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
 				if($module == "customer_messages") {
@@ -406,9 +412,14 @@ class prestashopcore extends solution {
 				
 				// On trie que si la référence est une date
 				if ($this->referenceIsDate($param['module'])) {
-					$opt['sort'] = '[date_upd_DESC]';
+					$dateRefField = $this->getDateRefName($param['module'], '0');
+					if($dateRefField == 'date_add') {
+						$opt['sort'] = '[date_add_ASC]';
+					} else {
+						$opt['sort'] = '[date_upd_ASC]';
+					}
 				}
-			
+
 				// Si le tableau de requête est présent alors construction de la requête
 				if (!empty($param['query'])) {
 					// Building of the option array
@@ -455,7 +466,7 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
-
+					
 				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
@@ -511,8 +522,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
-// print_r($param);	
+	public function read($param) {	
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -521,7 +531,7 @@ class prestashopcore extends solution {
 			}
 			
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -554,23 +564,17 @@ class prestashopcore extends solution {
 				$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
 				$opt['display'] .= ']';
 				
-				$optRuleMode0 = $opt; // On stocke les options sans les filtres pour l'appel en RuleMode 0
-				
 				// Query creation
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
-						// If the key is equal to the name of the module + '_id', so the ky is 'id' (usefull when we use many to many modules) 
-						if ($key == $param['module'].'_id') {
-							$key = 'id';
-						}
 						$opt['filter['.$key.']'] = '['.$value.']';
 					}
 				}
 				else{
 					// Si la référence est une date alors la requête dépend de la date
 					if ($this->referenceIsDate($param['module'])) {
-						if($DateRefField == 'date_add') {
+						if($dateRefField == 'date_add') {
 							$opt['filter[date_add]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							
 							$opt['sort'] = '[date_add_ASC]';
@@ -588,8 +592,7 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}
-				
+				}				
 				// Call				
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
@@ -602,7 +605,7 @@ class prestashopcore extends solution {
 						// Si la clé de référence est une date
 						if (
 								$this->referenceIsDate($param['module'])
-							&& $key == $DateRefField
+							&& $key == $dateRefField
 						) {
 							// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
 							$date_ref = date_create($value);
@@ -678,7 +681,7 @@ class prestashopcore extends solution {
 	protected function readManyToMany($param){
 		try { // try-catch Myddleware	
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);			
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);			
 			try{ // try-catch PrestashopWebservice
 				$result = array();
 				// Init parameter to read in Prestashop
@@ -701,7 +704,7 @@ class prestashopcore extends solution {
 				else{
 					// Si la référence est une date alors la requête dépend de la date
 					if ($this->referenceIsDate($searchModule)) {
-						if($DateRefField == 'date_add') {
+						if($dateRefField == 'date_add') {
 							$opt['filter[date_add]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							
 							$opt['sort'] = '[date_add_ASC]';
@@ -733,7 +736,7 @@ class prestashopcore extends solution {
 						// Si la clé de référence est une date
 						if (
 								$this->referenceIsDate($searchModule)
-							&& $key == $DateRefField
+							&& $key == $dateRefField
 						) {
 							// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
 							$date_ref = date_create($value);

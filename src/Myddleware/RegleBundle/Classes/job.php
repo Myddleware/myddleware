@@ -90,6 +90,8 @@ class jobcore  {
 				throw new \Exception ('Rule '.$name_slug.' is inactive.');
 			}
 			
+			
+			
 			$this->ruleId = $rule['id'];
 			
 			// We instance the rule
@@ -98,6 +100,9 @@ class jobcore  {
 			$param['limit'] = $this->limit;
 			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
+			if ($this->rule->isChild()) {
+				throw new \Exception ('Rule '.$name_slug.' is a child rule. Child rules can only be run by the parent rule.');
+			}
 			return true;
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );

@@ -35,8 +35,11 @@ services:
      myddleware_rule.sap:
          class: Myddleware\RegleBundle\Solutions\sap
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware_rule.database:
-        class: Myddleware\RegleBundle\Solutions\database
+     myddleware_rule.mysql:
+        class: Myddleware\RegleBundle\Solutions\mysql
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]		
+     myddleware_rule.microsoftsql:
+        class: Myddleware\RegleBundle\Solutions\microsoftsql
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]		
      myddleware_rule.magento:
         class: Myddleware\RegleBundle\Solutions\magento

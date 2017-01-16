@@ -49,11 +49,11 @@ $moduleFields = array (
 							'id' => array('label' => 'ID order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'language' => array('label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
 							'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-							'notes' => array('label' => 'Notes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+							'notes' => array('label' => 'Notes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_modified' => array('label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_finished' => array('label' => 'Date finished', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-							'referer' => array('label' => 'Referer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+							'referer' => array('label' => 'Referer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'currency' => array('label' => 'Currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'shipping__tracking_code' => array('label' => 'Shipping tracking code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'shipping__tracking_url' => array('label' => 'Shipping tracking url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -105,6 +105,38 @@ $moduleFields = array (
 							'origin__back_office' => array('label' => 'Origin back office', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'origin__api' => array('label' => 'Origin api', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						),	
+					'orders_delivery_address' =>
+						array(
+							'gender' => array('label' => 'Delivery address gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
+							'name' => array('label' => 'Delivery address name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'company' => array('label' => 'Delivery address company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'phone' => array('label' => 'Delivery address phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'street_address' => array('label' => 'Delivery address street_address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'suburb' => array('label' => 'Delivery address suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'doorcode' => array('label' => 'Delivery address doorcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'floor' => array('label' => 'Delivery address floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'city' => array('label' => 'Delivery address city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'postcode' => array('label' => 'Delivery address postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'state' => array('label' => 'Delivery address state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'country' => array('label' => 'Delivery address country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'country_code' => array('label' => 'Delivery address country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),							
+						),		
+					'orders_billing_address' =>
+						array(
+							'gender' => array('label' => 'Delivery address gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('m' => 'Homme', 'f' => 'Femme')),
+							'name' => array('label' => 'Delivery address name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'company' => array('label' => 'Delivery address company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'phone' => array('label' => 'Delivery address phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'street_address' => array('label' => 'Delivery address street_address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'suburb' => array('label' => 'Delivery address suburb', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'doorcode' => array('label' => 'Delivery address doorcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'floor' => array('label' => 'Delivery address floor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'city' => array('label' => 'Delivery address city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'postcode' => array('label' => 'Delivery address postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'state' => array('label' => 'Delivery address state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'country' => array('label' => 'Delivery address country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'country_code' => array('label' => 'Delivery address country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),								
+						),		
 					'orders_products' =>
 						array(
 							'id' => array('label' => 'ID order product', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -145,7 +177,7 @@ $moduleFields = array (
 						array(
 							'id' => array('label' => 'ID product', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'reference' => array('label' => 'Reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-							'ean' => array('label' => 'Ean', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'ean' => array('label' => 'stock_ean', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'isbn' => array('label' => 'Isbn', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('0' => 'Désactivé', '1' => 'Activé')),
 							'guarantee' => array('label' => 'Guarantee', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -223,6 +255,20 @@ $moduleFields = array (
 							'multilangual__ISO__value_name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'multilangual__ISO__value_image' => array('label' => 'Image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						),
+					'products_stock' =>
+						array(
+							'stock_reference' => array('label' => 'Reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_ean' => array('label' => 'EAN', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),	
+					'products_stock_options' =>
+						array(
+						),		
+					'products_stock_entries' =>
+						array(
+							'stock_entry_date' => array('label' => 'Entry date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_entry_quantity' => array('label' => 'Entry quantity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'stock_entry_cost' => array('label' => 'Entry cost', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						),	
 					'categories' =>
 						array(
 							'id' => array('label' => 'ID category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -287,6 +333,7 @@ $fieldsRelate = array (
 						array(
 							'store_id' => array('label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'customer_info__id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),
 					'orders_products' =>
 						array(
@@ -297,6 +344,20 @@ $fieldsRelate = array (
 							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock_options' =>
+						array(
+							'stock_reference' => array('label' => 'Stock reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'option_id' => array('label' => 'Option ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+							'option_value_id' => array('label' => 'Option value ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock_entries' =>
+						array(
+							'stock_reference' => array('label' => 'Stock reference', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						),
+					'products_stock' =>
+						array(
+							'product_id' => array('label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						),
 					'options_values' =>
 						array(

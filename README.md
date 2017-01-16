@@ -1,6 +1,6 @@
 Welcome to Myddleware community and thanks for joining us !
 
-Myddleware 2.0 is the customisable free open-source platform that facilitates data migration and synchonisation between applications.
+Myddleware 2.1 is the customisable free open-source platform that facilitates data migration and synchonisation between applications.
 
 <img class="alignnone size-large wp-image-447" src="http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png" alt="create_rule_view" width="640" height="373" />
 

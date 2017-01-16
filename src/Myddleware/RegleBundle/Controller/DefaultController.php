@@ -503,7 +503,11 @@ class DefaultControllerCore extends Controller
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Rule')
 	                          ->findOneById( $id );	
-							  
+				if (!empty($rule->getDeleted())) {
+					$session->set( 'error', array($this->get('translator')->trans('error.rule.edit_rule_deleted')));
+					return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
+				}
+				
 				// composition des sessions
 				$myddlewareSession['param']['rule']['rulename_valide'] = true;										
 				$myddlewareSession['param']['rule']['rulename'] = $rule->getName();
@@ -555,16 +559,10 @@ class DefaultControllerCore extends Controller
 				// Paramètre d'une règle
 				if($ruleParams) {
 					foreach ($ruleParams as $ruleParamsObj) {
-						// récupération des submodules 
-						if($ruleParamsObj->getName() == 'structure') {
-							$myddlewareSession['param']['rule']['source']['structure'] = json_decode($ruleParamsObj->getValue(),true);
-						}
-						else {
-							$params[] = array(
-								'name' => $ruleParamsObj->getName(),
-								'value' => $ruleParamsObj->getValue()
-							);							
-						}
+						$params[] = array(
+							'name' => $ruleParamsObj->getName(),
+							'value' => $ruleParamsObj->getValue()
+						);							
 					}										
 					$myddlewareSession['param']['rule']['reload']['params'] = json_encode($params);					
 				}	
@@ -585,13 +583,8 @@ class DefaultControllerCore extends Controller
 				$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 				
 				// SOURCE ----- Récupère la liste des champs source
-				// O récupère le module de la règle et les sous modules s'il y en a 
+				// O récupère le module de la règle 
 				$sourceModule = $rule->getModuleSource();
-				if( $solution_source->get_submodules($rule->getModuleSource(),'source') != null ) {
-					if(isset($myddlewareSession['param']['rule']['source']['structure'])) {
-						$sourceModule = array($sourceModule => $myddlewareSession['param']['rule']['source']['structure']);
-					}				
-				}
 				$sourceFieldsInfo = $solution_source->get_module_fields($sourceModule);
 						
 				// Champs et formules d'une règle
@@ -1415,23 +1408,9 @@ class DefaultControllerCore extends Controller
 			
 			// Récupère la liste des champs cible
 			$rule_fields_target = $solution_cible->get_module_fields($module['cible'],'target');
-
-			// Ajoute des champs supplémentaires à la solution si elle le permet
-			$extend_fields = $solution_cible->extendField($module['cible']);
-			// SOURCE ----- Récupère la liste des champs source
-			if( $solution_source->get_submodules($module['source'],'source') != null ) {
-				if(isset($myddlewareSession['param']['rule']['source']['structure'])) {
-					$module['source'] = array($module['source'] => $myddlewareSession['param']['rule']['source']['structure']);
-				}					
-			}
-			else {
-				if(isset($myddlewareSession['param']['rule']['source']['structure'])) {
-					unset($myddlewareSession['param']['rule']['source']['structure']);
-				}
-			}
-		
+			
 			// Récupère la liste des champs source
-			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source',$extend_fields);
+			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source');
 
 			if($rule_fields_source) {
 				$myddlewareSession['param']['rule']['source']['fields'] = $rule_fields_source;
@@ -1444,23 +1423,11 @@ class DefaultControllerCore extends Controller
 					exit;
 				}
 										
-				// version 1.1.1 submodules	
-				if(isset($myddlewareSession['param']['rule']['source']['structure'])) {
-					foreach ($rule_fields_source as $t => $k) {			
-						foreach ($k as $submodules_name => $info_field) {
-							$source['table'][$t][$submodules_name] = $info_field['label'];
-						}		
-						// Tri des champs sans tenir compte de la casse
-						asort($source['table'][$t], SORT_NATURAL | SORT_FLAG_CASE);	
-					}				
-				}
-				else {
-					foreach ($rule_fields_source as $t => $k) {
-						$source['table'][$module['source']][$t] = $k['label'];
-					}	
-					// Tri des champs sans tenir compte de la casse						
-					asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
+				foreach ($rule_fields_source as $t => $k) {
+					$source['table'][$module['source']][$t] = $k['label'];
 				}	
+				// Tri des champs sans tenir compte de la casse						
+				asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);	
 			}
 
 			// SOURCE ----- Récupère la liste des champs source
@@ -1596,16 +1563,21 @@ class DefaultControllerCore extends Controller
 			// Liste des règles avec les mêmes connecteurs rev 1.07
 			//
 			$stmt = $this->connection->prepare('	
-					SELECT r.id, r.name, r.version 
+					SELECT r.id, r.name, r.module_source
 					FROM Rule r
-					WHERE (conn_id_source=:id_source 
-					AND conn_id_target=:id_target
-					AND r.name != :name
-					AND r.deleted = 0)
-					OR (conn_id_target=:id_source 
-					AND conn_id_source=:id_target
-					AND r.name != :name
-					AND r.deleted = 0)
+					WHERE 
+						(
+								conn_id_source=:id_source 
+							AND conn_id_target=:id_target
+							AND r.name != :name
+							AND r.deleted = 0
+						)
+					OR (
+								conn_id_target=:id_source 
+							AND conn_id_source=:id_target
+							AND r.name != :name
+							AND r.deleted = 0
+					)
 					'); 	  
 			$stmt->bindValue('id_source', (int)$myddlewareSession['param']['rule']['connector']['source'] ); 
 			$stmt->bindValue('id_target', (int)$myddlewareSession['param']['rule']['connector']['cible'] ); 
@@ -1626,12 +1598,38 @@ class DefaultControllerCore extends Controller
 			foreach ($ruleListRelation as $key => $value) {
 				
 				if(!in_array($value['name'],$control) ) {
-					$choice[ $value['id'] ] = $value['name'].' - v'.$value['version'];	
+					$choice[ $value['id'] ] = $value['name'];	
 					$control[] = $value['name'];				
 				}						
 			}
 			
 			asort($choice);
+
+// -------------------	Parent relation 
+			// Search if we can send document merged with the target solution
+			$lstParentFields = array();
+			$allowParentRelationship = $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']);
+			if ($allowParentRelationship) {
+				if (!empty($ruleListRelation)) {
+					// We get all relate fields from every source module
+					foreach ($ruleListRelation as $ruleRelation) {
+						// Get the relate fields from the source module of related rules
+						$rule_fields_source = $solution_source->get_module_fields($ruleRelation['module_source'],'source');
+						$sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source']);
+						if (!empty($sourceRelateFields)) {
+							foreach($sourceRelateFields as $key => $sourceRelateField) {
+								$lstParentFields[$key] = $sourceRelateField['label'];
+							}
+						}
+					}
+					// We allow  to search by the id of the module
+					$lstParentFields['Myddleware_element_id'] = $this->get('translator')->trans('create_rule.step3.relation.record_id');
+				}
+				// No parent relation if no rule to link or no fields related
+				if (empty($lstParentFields)) {
+					$allowParentRelationship = false;
+				}				
+			}
 				
 			// On récupére l'EntityManager
 			$this->getInstanceBdd();	
@@ -1770,7 +1768,6 @@ class DefaultControllerCore extends Controller
 					'rule_params'=>$rule_params, 
 					'lst_relation_target'=>$lst_relation_target_alpha,
 					'lst_relation_source'=>$choice_source,
-					'lst_relation_parent'=>array('1' => $this->get('translator')->trans('create_rule.step3.relation.yes')),
 					'lst_rule' =>$choice,
 					'lst_category' => $lstCategory,
 					'lst_functions' => $lstFunctions,
@@ -1780,13 +1777,14 @@ class DefaultControllerCore extends Controller
 					'opt_target' => $html_list_target,
 					'opt_source' => $html_list_source,
 					'fieldMappingAddListType' => $fieldMappingAdd,
-					'parentRelationships' => $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']),					
+					'parentRelationships' => $allowParentRelationship,					
+					'lst_parent_fields'=> $lstParentFields,
 				);
 			$result = $this->beforeRender($result);
 			
 			// Formatage des listes déroulantes : 
 			$result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-			$result['lst_relation_parent'] = tools::composeListHtml($result['lst_relation_parent'], ' ');
+			$result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 				
@@ -1877,7 +1875,7 @@ class DefaultControllerCore extends Controller
 		// Array with the objects list flush in the database in case we have to rollback
 		$objectToRemove = array();
 		$createTableRule = array();
-			
+	
 	    // On récupére l'EntityManager
 		$this->getInstanceBdd();				   
 			
@@ -2048,11 +2046,7 @@ class DefaultControllerCore extends Controller
 				else {
 					$p = array_merge($param['RuleParam'],$tab_new_rule['params']);
 				}
-				
-				if(isset($myddlewareSession['param']['rule']['source']['structure'])) {				
-					$p['structure'] = json_encode($myddlewareSession['param']['rule']['source']['structure']);
-				}
-												
+																
 				foreach($p  as $key => $value) {
 					
 					$oneRuleParam = new RuleParam();
@@ -2163,8 +2157,11 @@ class DefaultControllerCore extends Controller
 						$oneRuleRelationShip->setFieldNameTarget( $rel['target'] );
 						$oneRuleRelationShip->setFieldId( $rel['rule'] );
 						$oneRuleRelationShip->setParent( $rel['parent'] );
-						
-						$tabRelationShips['target'][] = $rel['target'];
+						// We don't create the field target if the relatiobnship is a parent one 
+						// We only use this field to search in the source application, not to send the data to the target application.
+						if (empty($rel['parent'])) {
+							$tabRelationShips['target'][] = $rel['target'];
+						}
 						$tabRelationShips['source'][] = $rel['source'];
 						
 						$this->em->persist($oneRuleRelationShip);
@@ -2408,141 +2405,11 @@ class DefaultControllerCore extends Controller
 	/* ******************************************************
 	 * ANIMATION
 	 ****************************************************** */
-
+	// No more submodule in Myddleware. We return a response 0 for the js (animation.js
 	public function listSubModulesAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		// Traitement qui sauvegarde les sousmodules dans un array
-		if(isset($_POST['select']) && $_POST['select'] == 1 && isset($_POST['ids'])) {
-			$type = (($_POST['type'] == 'source') ? 'source' : 'target');
-			try {
-				// si la structure n'est pas on va la créer						
-				if(!isset($myddlewareSession['param']['rule'][$type]['structure'])) {
-					$myddlewareSession['param']['rule'][$type]['structure'] = array();
-				}
-								
-				$ids = explode('__', $_POST['ids']);
-
-				$structure = array();
-				// composition des sousmodules sous forme de tableau en fonction des niveaux
-				if(count($ids) == 2) { // 1 niveau
-					$structure[ $ids[0] ] = $ids[1];	
-				
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) ) {						
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ							
-					}
-				}
-				else if(count($ids) == 3) { // 2 niveaux
-					$structure[ $ids[0] ] = array( $ids[2] => $ids[1] );
-				
-					// si un champ est déjà sélectionné on le supprime des sessions
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[2]])) {					
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[2]]);
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						}
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ	
-					}			
-				}
-				else if(count($ids) == 4) { // 3 niveaux
-					$structure[ $ids[0] ] = array( $ids[1] => array( $ids[3] => $ids[2] ) );
-				
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]][$ids[3]]) ) {						
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]][$ids[3]]);
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]]);
-						}	
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						}												
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ							
-					}				
-				}			
-		
-				$fusion = array_merge_recursive($structure,$myddlewareSession['param']['rule'][$type]['structure']);	
-				$myddlewareSession['param']['rule'][$type]['structure'] = $fusion;
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				echo 1; 
-				exit;				
-			}
-			catch(\Exception $e) {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				echo $e->getMessage(); 
-				exit;
-			}
-		}
-		
-		$type = (($_POST['type'] == 'source') ? 'source' : 'cible');	
-		// Traitement qui affiche la liste des sousmodules		
-		$id_connector = (int)$_POST['connector'];
-		
-		$solution = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule'][$type]['solution']);
-		
-		$params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
-		$params_connexion['idConnector'] = $id_connector;
-
-		$solution->login( $params_connexion );	
-		$list_submodules = $solution->get_submodules($_POST['module'], $type);
-
-		if(is_null($list_submodules)) {			
-			return new Response(0);
-		}
-		else {
-			$rows = '<table id="list_submodules">';
-			foreach ($list_submodules as $submodules ) {
-				foreach ($submodules as $name_submodule => $value_submodule) {
-								
-				$rows .='<tr>
-                            <td style="width: 350px;">'.$name_submodule.'</td>
-                            <td>';
-                            
-                            if( !is_array( $value_submodule ) ) {
-                            	$id_span = str_replace(' ', '', $name_submodule.'__'.$value_submodule);
-                            	$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span data-id="'.$id_span.'" class="select glyphicon glyphicon-chevron-right"></span> '.$value_submodule.'</p>';
-                            }
-							else {
-								foreach ($value_submodule as $id => $name) {									
-									if( !is_array( $name ) ) {
-										$id_span = str_replace(' ', '', $name_submodule.'__'.$name.'__'.$id);
-										$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span data-id="'.$id_span.'" class="select glyphicon glyphicon-chevron-right"></span> '.$name.'</p>';
-									}
-									else {										
-										foreach ($name as $id2 => $name2) {							
-											if( !is_array( $name2 ) ) {
-												$id_span = str_replace(' ', '', $name_submodule.'__'.$id.'__'.$name2.'__'.$id2);
-												$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span class="select glyphicon glyphicon-chevron-right"></span> '.$id.' <span data-id="'.$id_span.'" class="glyphicon glyphicon-chevron-right"></span> '.$name2.'</p>';
-											}
-										} 
-									}
-								}
-							}
-                            '</td>
-                         </tr>';
-				}
-			}
-			
-			$rows .= '</table>';
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			return new Response($rows);		
-		}
+		return new Response(0);		
 	} 
-	 	 	 
+	
 	// VALIDATION DE L ANIMATION
 	public function validationAnimationAction() {
 		$request = $this->get('request');

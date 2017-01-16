@@ -200,8 +200,8 @@ class sagecrmcore extends solution {
 	} // get_modules()
 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		
 		// $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
 		$tmp = explode("_", $module, 2);
@@ -301,10 +301,6 @@ class sagecrmcore extends solution {
 				// Ajout des champ relate au mapping des champs 
 				if (!empty($this->fieldsRelate)) {
 					$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-				}
-				// Si l'extension est demandée alors on vide relate 
-				if ($extension) {
-					$this->fieldsRelate = array();
 				}
 				return $fields;
 			}

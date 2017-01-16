@@ -89,6 +89,9 @@ class rulecore {
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();
 			$this->rule = $stmt->fetch();
+			// Set the rule parameters and rule relationships
+			$this->setRuleParam();
+			$this->setRuleRelationships();
 			// Set the rule fields (we use the name_slug in $this->rule)
 			$this->setRuleField();
 		}
@@ -691,12 +694,11 @@ class rulecore {
 	}
 		
 	// Permet d'annuler un docuement 
-	protected function cancel($id_document) {
+	protected function cancel($id_document) {	
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
-		$param['key'] = $this->key;
 		$doc = new document($this->logger, $this->container, $this->connection, $param);
-		$doc->updateStatus('Cancel'); 
+		$doc->documentCancel(); 
 		$session = new Session();
 		$message = $doc->getMessage();
 		
@@ -796,21 +798,6 @@ class rulecore {
 			$this->setRuleField();
 		}
 		
-		// Si on a pas de job c'est que la relance est faite manuellement, il faut donc créer un job pour le flux relancé
-		$manual = false;
-		if (empty($this->jobId)) {
-			$manual = true;
-			include_once 'job.php';
-			$job = new job($this->logger, $this->container, $this->connection);
-			if (!$job->initJob($this->rule['name_slug'].' '.$id_document)) {
-				$session->set( 'error', array($job->message));
-				return null;
-			}
-			else {
-				$this->jobId = $job->id;
-			}
-		}
-	
 		$response[$id_document] = false;
 		// On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
 		if (in_array($status,array('New','Filter_KO'))) {
@@ -896,11 +883,8 @@ class rulecore {
 			}
 		}		
 			
-		// Si le job est manuel alors on clôture le job
-		if ($manual) {
-			if (!$job->closeJob()) {
-				$msg_error[] = 'Failed to update the job ('.$job->id.') : '.$job->message.'</error>';
-			}
+		// If the job is manual, we display error in the UI
+		if ($this->manual) {
 			if (!empty($msg_error)) {
 				$session->set( 'error', $msg_error);
 			}
@@ -926,7 +910,7 @@ class rulecore {
 	}
 	
 	// Check if the rule is a child rule
-	protected function isChild() {
+	public function isChild() {
 		try {					
 			$queryChild = "	SELECT Rule.id 
 									FROM RuleRelationShip 
@@ -1154,8 +1138,13 @@ class rulecore {
 					// Child document has the type 'U'				
 					$dataChild = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware']);
 					$childRuleDetail = $childRuleObj->getRule();
-					// Store the submodule data to be send in the parent document					
-					$document[$childRuleDetail['module_target']] = $dataChild;			
+					// Store the submodule data to be send in the parent document	
+					// If the structure already exists in the document array, we merge data (several rules can add dsata in the same structure)
+					if (empty($document[$childRuleDetail['module_target']])) {
+						$document[$childRuleDetail['module_target']] = $dataChild;
+					} else {
+						$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
+					}
 				}
 			}
 			$return[$document['id_doc_myddleware']] = $document;
@@ -1168,8 +1157,7 @@ class rulecore {
 	}
 
 	// Permet de charger tous les champs de la règle
-	protected function setRuleField() {
-		
+	protected function setRuleField() {	
 		try {	
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
@@ -1190,7 +1178,7 @@ class rulecore {
 					$this->targetFields[] = ltrim($RuleField['target_field_name']);
 				}			
 			}
-			
+		
 			// Lecture des relations de la règle
 			if($this->ruleRelationships) {
 				foreach ($this->ruleRelationships as $ruleRelationship) { 
@@ -1217,7 +1205,7 @@ class rulecore {
 					$this->fieldsType['source'][$sourceFiled['Field']] = $sourceFiled;
 				}
 			}
-			
+		
 			// Récupération des types de champs de la target
 			$targetTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 			$sqlParams = "SHOW COLUMNS FROM ".$targetTable;
