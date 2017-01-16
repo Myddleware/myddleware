@@ -1563,18 +1563,6 @@ class DefaultControllerCore extends Controller
 			// Liste des règles avec les mêmes connecteurs rev 1.07
 			//
 			$stmt = $this->connection->prepare('	
-<<<<<<< HEAD
-					SELECT r.id, r.name, r.version 
-					FROM Rule r
-					WHERE (conn_id_source=:id_source 
-					AND conn_id_target=:id_target
-					AND r.name != :name
-					AND r.deleted = 0)
-					OR (conn_id_target=:id_source 
-					AND conn_id_source=:id_target
-					AND r.name != :name
-					AND r.deleted = 0)
-=======
 					SELECT r.id, r.name, r.module_source
 					FROM Rule r
 					WHERE 
@@ -1590,7 +1578,6 @@ class DefaultControllerCore extends Controller
 							AND r.name != :name
 							AND r.deleted = 0
 					)
->>>>>>> refs/remotes/origin/hotfix
 					'); 	  
 			$stmt->bindValue('id_source', (int)$myddlewareSession['param']['rule']['connector']['source'] ); 
 			$stmt->bindValue('id_target', (int)$myddlewareSession['param']['rule']['connector']['cible'] ); 
@@ -1611,11 +1598,7 @@ class DefaultControllerCore extends Controller
 			foreach ($ruleListRelation as $key => $value) {
 				
 				if(!in_array($value['name'],$control) ) {
-<<<<<<< HEAD
-					$choice[ $value['id'] ] = $value['name'].' - v'.$value['version'];	
-=======
 					$choice[ $value['id'] ] = $value['name'];	
->>>>>>> refs/remotes/origin/hotfix
 					$control[] = $value['name'];				
 				}						
 			}
@@ -1785,7 +1768,6 @@ class DefaultControllerCore extends Controller
 					'rule_params'=>$rule_params, 
 					'lst_relation_target'=>$lst_relation_target_alpha,
 					'lst_relation_source'=>$choice_source,
-					'lst_relation_parent'=>array('1' => $this->get('translator')->trans('create_rule.step3.relation.yes')),
 					'lst_rule' =>$choice,
 					'lst_category' => $lstCategory,
 					'lst_functions' => $lstFunctions,
@@ -1795,22 +1777,14 @@ class DefaultControllerCore extends Controller
 					'opt_target' => $html_list_target,
 					'opt_source' => $html_list_source,
 					'fieldMappingAddListType' => $fieldMappingAdd,
-<<<<<<< HEAD
-					'parentRelationships' => $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']),					
-=======
 					'parentRelationships' => $allowParentRelationship,					
 					'lst_parent_fields'=> $lstParentFields,
->>>>>>> refs/remotes/origin/hotfix
 				);
 			$result = $this->beforeRender($result);
 			
 			// Formatage des listes déroulantes : 
 			$result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-<<<<<<< HEAD
-			$result['lst_relation_parent'] = tools::composeListHtml($result['lst_relation_parent'], ' ');
-=======
 			$result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
->>>>>>> refs/remotes/origin/hotfix
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 				
@@ -2183,16 +2157,11 @@ class DefaultControllerCore extends Controller
 						$oneRuleRelationShip->setFieldNameTarget( $rel['target'] );
 						$oneRuleRelationShip->setFieldId( $rel['rule'] );
 						$oneRuleRelationShip->setParent( $rel['parent'] );
-<<<<<<< HEAD
-						
-						$tabRelationShips['target'][] = $rel['target'];
-=======
 						// We don't create the field target if the relatiobnship is a parent one 
 						// We only use this field to search in the source application, not to send the data to the target application.
 						if (empty($rel['parent'])) {
 							$tabRelationShips['target'][] = $rel['target'];
 						}
->>>>>>> refs/remotes/origin/hotfix
 						$tabRelationShips['source'][] = $rel['source'];
 						
 						$this->em->persist($oneRuleRelationShip);
@@ -2438,141 +2407,7 @@ class DefaultControllerCore extends Controller
 	 ****************************************************** */
 	// No more submodule in Myddleware. We return a response 0 for the js (animation.js
 	public function listSubModulesAction() {
-<<<<<<< HEAD
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		// Traitement qui sauvegarde les sousmodules dans un array
-		if(isset($_POST['select']) && $_POST['select'] == 1 && isset($_POST['ids'])) {
-			$type = (($_POST['type'] == 'source') ? 'source' : 'target');
-			try {
-				// si la structure n'est pas on va la créer						
-				if(!isset($myddlewareSession['param']['rule'][$type]['structure'])) {
-					$myddlewareSession['param']['rule'][$type]['structure'] = array();
-				}
-								
-				$ids = explode('__', $_POST['ids']);
-
-				$structure = array();
-				// composition des sousmodules sous forme de tableau en fonction des niveaux
-				if(count($ids) == 2) { // 1 niveau
-					$structure[ $ids[0] ] = $ids[1];	
-				
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) ) {						
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ							
-					}
-				}
-				else if(count($ids) == 3) { // 2 niveaux
-					$structure[ $ids[0] ] = array( $ids[2] => $ids[1] );
-				
-					// si un champ est déjà sélectionné on le supprime des sessions
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[2]])) {					
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[2]]);
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						}
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ	
-					}			
-				}
-				else if(count($ids) == 4) { // 3 niveaux
-					$structure[ $ids[0] ] = array( $ids[1] => array( $ids[3] => $ids[2] ) );
-				
-					if(isset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]][$ids[3]]) ) {						
-						unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]][$ids[3]]);
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]][$ids[1]]);
-						}	
-						
-						// Supprime son tableau parent si vide
-						if(count($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]) == 0) {
-							unset($myddlewareSession['param']['rule'][$type]['structure'][$ids[0]]);
-						}												
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo 2; 
-						exit; // désélectionne un champ							
-					}				
-				}			
-		
-				$fusion = array_merge_recursive($structure,$myddlewareSession['param']['rule'][$type]['structure']);	
-				$myddlewareSession['param']['rule'][$type]['structure'] = $fusion;
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				echo 1; 
-				exit;				
-			}
-			catch(\Exception $e) {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				echo $e->getMessage(); 
-				exit;
-			}
-		}
-		
-		$type = (($_POST['type'] == 'source') ? 'source' : 'cible');	
-		// Traitement qui affiche la liste des sousmodules		
-		$id_connector = (int)$_POST['connector'];
-		
-		$solution = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule'][$type]['solution']);
-		
-		$params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
-		$params_connexion['idConnector'] = $id_connector;
-
-		$solution->login( $params_connexion );	
-		$list_submodules = $solution->get_submodules($_POST['module'], $type);
-
-		if(is_null($list_submodules)) {			
-			return new Response(0);
-		}
-		else {
-			$rows = '<table id="list_submodules">';
-			foreach ($list_submodules as $submodules ) {
-				foreach ($submodules as $name_submodule => $value_submodule) {
-								
-				$rows .='<tr>
-                            <td style="width: 350px;">'.$name_submodule.'</td>
-                            <td>';
-                            
-                            if( !is_array( $value_submodule ) ) {
-                            	$id_span = str_replace(' ', '', $name_submodule.'__'.$value_submodule);
-                            	$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span data-id="'.$id_span.'" class="select glyphicon glyphicon-chevron-right"></span> '.$value_submodule.'</p>';
-                            }
-							else {
-								foreach ($value_submodule as $id => $name) {									
-									if( !is_array( $name ) ) {
-										$id_span = str_replace(' ', '', $name_submodule.'__'.$name.'__'.$id);
-										$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span data-id="'.$id_span.'" class="select glyphicon glyphicon-chevron-right"></span> '.$name.'</p>';
-									}
-									else {										
-										foreach ($name as $id2 => $name2) {							
-											if( !is_array( $name2 ) ) {
-												$id_span = str_replace(' ', '', $name_submodule.'__'.$id.'__'.$name2.'__'.$id2);
-												$rows .='<p class="sub_module_selected"> '.$name_submodule.' <span class="select glyphicon glyphicon-chevron-right"></span> '.$id.' <span data-id="'.$id_span.'" class="glyphicon glyphicon-chevron-right"></span> '.$name2.'</p>';
-											}
-										} 
-									}
-								}
-							}
-                            '</td>
-                         </tr>';
-				}
-			}
-			
-			$rows .= '</table>';
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			return new Response($rows);		
-		}
-=======
 		return new Response(0);		
->>>>>>> refs/remotes/origin/hotfix
 	} 
 	
 	// VALIDATION DE L ANIMATION

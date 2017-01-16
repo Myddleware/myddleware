@@ -275,13 +275,6 @@ class salesforcecore extends solution {
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}
-<<<<<<< HEAD
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
-			}
-=======
->>>>>>> refs/remotes/origin/hotfix
 			return $this->moduleFields;
 		}
 		catch (\Exception $e) {

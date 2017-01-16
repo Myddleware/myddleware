@@ -1246,12 +1246,6 @@ function verifFields(field_id,show) {
 				var name = $( this ).attr('data-value');
 				var valueRule = tr.find('.lst_rule_relate').val();
 				var valueSource = tr.find('.lst_source_relate').val();
-<<<<<<< HEAD
-				var valueparent = tr.find('.lst_parent_relate').val();
-
-				if( valueRule != '' && valueSource != '' ) {
-					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent } );
-=======
 				var valueparent = 0;
 				if( valueRule != '' && valueSource != '' ) {
 					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
@@ -1270,7 +1264,6 @@ function verifFields(field_id,show) {
 				
 				if( valueRule != '' && valueSource != '' && name != '' ) {
 					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
->>>>>>> refs/remotes/origin/hotfix
 				}
 
 			});
@@ -1512,13 +1505,6 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		});	
 	}
 	// Relate
-<<<<<<< HEAD
-	if(relate) {			
-		$.each(relate, function( index, nameR ) {
-			$('#lst_'+ nameR.target).val( nameR.id );
-			$('#lst_source_'+ nameR.target).val( nameR.source );						
-			$('#lst_parent_'+ nameR.target).val( (nameR.parent ? 1 : 0) ); // Convert true/false to 1/0
-=======
 	if(relate) {	
 		var cpt = 0;
 		// We fill the differents field depending if the rule is a parent one or not
@@ -1532,7 +1518,6 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 				$('#parent_search_field_'+ cpt).val( nameR.target );									
 				cpt++;		
 			}
->>>>>>> refs/remotes/origin/hotfix
 		});
 	}
 	

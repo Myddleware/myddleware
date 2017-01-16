@@ -35,10 +35,7 @@ class shopapplicationcore extends solution {
 	protected $apiKey;
 	protected $docIdList;
 	protected $docIdListResult;
-<<<<<<< HEAD
-=======
 	protected $newChild;
->>>>>>> refs/remotes/origin/hotfix
 	
 	protected $required_fields = array('default' => array('id','date_modified','date_created'));
 	protected $FieldsDuplicate = array('customers' => array('email'));
@@ -48,23 +45,6 @@ class shopapplicationcore extends solution {
 							
 	// Structure of child module : module => childmodule => entry name and id name of the child array in the parent array					
 	protected $childModuleParameters = array(
-<<<<<<< HEAD
-							'customers' => array('customers_addresses' => array('entry_name' => 'addresses', 'id_name' => 'address_id', 'max_level' => 1)),
-							'orders' => array('orders_products' => array('entry_name' => 'products', 'id_name' => 'id', 'max_level' => 1)),
-							'products' => array(
-												'products_options' 	=> array('entry_name' => 'options', 'id_name' => 'option_id', 'max_level' => 1),
-												'options_values' 	=> array('entry_name' => 'options', 'id_name' => 'option_value_id', 'max_level' => 0), // 2nd level possible
-											),
-							'options' => array('options_values' => array('entry_name' => 'values', 'id_name' => 'value_id', 'max_level' => 1)),
-							);
-							
-	// Modules with language						
-	protected $moduleWithLanguage = array('products','categories','options','options_values');	
-	
-	// Submodule 
-	// protected $childModule = array('customers_addresses','orders_products','options_values');
-	
-=======
 							'customers' => array(
 											'customers_addresses' 		=> array('entry_name' => 'addresses', 'id_name' => 'address_id', 'type'=>'array')
 										),
@@ -115,7 +95,6 @@ class shopapplicationcore extends solution {
 	// Modules with language						
 	protected $moduleWithLanguage = array('products','categories','options','options_values');	
 	
->>>>>>> refs/remotes/origin/hotfix
 	// Connection parameters
 	public function getFieldsLogin() {	
         return array(
@@ -166,37 +145,25 @@ class shopapplicationcore extends solution {
 			'customers_addresses' => 'Customers addresses',
 			'orders' => 'Orders',
 			'orders_products' => 'Orders products',
-<<<<<<< HEAD
-=======
 			'orders_delivery_address' => 'Orders delivery address',
 			'orders_billing_address' => 'Orders billing address',
->>>>>>> refs/remotes/origin/hotfix
 			'products' => 'Products',
 			'products_options' => 'Products options',
 			'options' => 'Options',
 			'options_values' => 'Options values',
 			'categories' => 'Categories',
 			'brands' => 'Brands',
-<<<<<<< HEAD
-=======
 			'products_stock' => 'Products stock',	
 			'products_stock_options' => 'Products stock option',
 			'products_stock_entries' => 'Products stock entry'
->>>>>>> refs/remotes/origin/hotfix
 		);
 
 	} // get_modules()	
 	 
 	// Renvoie les champs du module passé en paramètre
-<<<<<<< HEAD
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		require_once('lib/shopapplication/metadata.php');		
-		parent::get_module_fields($module, $type, $extension);
-=======
 	public function get_module_fields($module, $type = 'source') {
 		require_once('lib/shopapplication/metadata.php');		
 		parent::get_module_fields($module, $type);
->>>>>>> refs/remotes/origin/hotfix
 		try{
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
@@ -230,16 +197,6 @@ class shopapplicationcore extends solution {
 					$urlApi = $this->url.'orders/status'.$this->apiKey;
 					$return = $this->call($urlApi, 'get', '');	
 					$code = $return->__get('code');
-<<<<<<< HEAD
-					/* if ($code == '200') {		
-						$body = $return->__get('body');
-						if (!empty($body)) {
-							foreach ($body as $status) {
-								$this->fieldsRelate['group_id']['option'][$status->id] = $status->name;
-							}
-						}
-					} */
-=======
 					if ($code == '200') {		
 						$body = $return->__get('body');
 						if (!empty($body)) {
@@ -248,21 +205,11 @@ class shopapplicationcore extends solution {
 							}
 						}
 					}
->>>>>>> refs/remotes/origin/hotfix
 					// Get currencies
 					$urlApi = $this->url.'currencies'.$this->apiKey;
 					$return = $this->call($urlApi, 'get', '');	
 					$code = $return->__get('code');
 					if ($code == '200') {		
-<<<<<<< HEAD
-						$body = $return->__get('body');
-						if (!empty($body)) {
-							foreach ($body as $currency) {
-								$this->fieldsRelate['currency']['option'][$currency->code] = $currency->name;
-							}
-						}
-					} 
-=======
 						$body = $return->__get('body');					
 						if (!empty($body)) {
 							foreach ($body as $currency) {
@@ -282,7 +229,6 @@ class shopapplicationcore extends solution {
 							}
 						}
 					}  */
->>>>>>> refs/remotes/origin/hotfix
 				} 
 				catch (\Exception $e) {
 				} 			
@@ -326,15 +272,7 @@ class shopapplicationcore extends solution {
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-<<<<<<< HEAD
-			}
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
-			}		
-=======
 			}	
->>>>>>> refs/remotes/origin/hotfix
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -347,13 +285,8 @@ class shopapplicationcore extends solution {
 	public function read_last($param) {	
 		$result = array();
 		try {
-<<<<<<< HEAD
-			// No history search for module options_values
-			if (in_array($param['module'], array('options_values','products_options'))) {
-=======
 			// No history search for fictive modules we have created
 			if (in_array($param['module'], array('options_values','products_options','products_stock_entries','orders_delivery_address','orders_billing_address'))) {
->>>>>>> refs/remotes/origin/hotfix
 				$result['done'] = false;					
 				return $result;			
 			}
@@ -475,11 +408,7 @@ class shopapplicationcore extends solution {
 	}
 
 	// Permet de créer un enregistrement
-<<<<<<< HEAD
-	public function create($param) {			
-=======
 	public function create($param) {
->>>>>>> refs/remotes/origin/hotfix
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
@@ -487,11 +416,7 @@ class shopapplicationcore extends solution {
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
 				// Preparation of the post
-<<<<<<< HEAD
-				$dataTosSendTmp = $this->buildSendingData($param,$data,'C');
-=======
 				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'C');
->>>>>>> refs/remotes/origin/hotfix
 				
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
@@ -564,15 +489,6 @@ class shopapplicationcore extends solution {
 				$dataTosSend = '';
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-<<<<<<< HEAD
-				// Preparation of the put
-				$dataTosSendTmp = $this->buildSendingData($param,$data,'U');
-
-				// Add a dimension for the webservice
-				$dataTosSend[] = $dataTosSendTmp;
-				// Generate URL
-				$urlApi = $this->url.$param['module'].$this->apiKey;
-=======
 
 				// Preparation of the put
 				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'U');
@@ -581,7 +497,6 @@ class shopapplicationcore extends solution {
 				$dataTosSend[] = $dataTosSendTmp;
 				// Generate URL (we get the real module to call if the currente module is a fictive module created for Myddleware
 				$urlApi = $this->url.(!empty($this->callModule[$param['module']]) ? $this->callModule[$param['module']] : $param['module']).$this->apiKey;
->>>>>>> refs/remotes/origin/hotfix
 
 				// Creation of the record
 				$return = $this->call($urlApi, 'put', $dataTosSend);	
@@ -664,11 +579,7 @@ class shopapplicationcore extends solution {
 					foreach ($this->childModuleParameters[$param['module']] as $subModule) {			
 						if ($subModule['entry_name'] == $entryName) {				
 							$this->docIdList[$value] = array(
-<<<<<<< HEAD
-																	'id' => $data->$subModule['id_name'],
-=======
 																	'id' => (!empty($data->$subModule['id_name']) ? $data->$subModule['id_name'] : ''), // Some submodule doesn't returned id (eg : product of an order)
->>>>>>> refs/remotes/origin/hotfix
 																	'error' => false
 															); 								
 						}
@@ -681,14 +592,9 @@ class shopapplicationcore extends solution {
 		
 	// Generate the data to send in the create or update POST
 	// Entry_name is the name of the entry in cas the function is call for a child data
-<<<<<<< HEAD
-	protected function buildSendingData($param,$data,$mode,$entry_name = '',$level = 0) {		
-		$first = false;	
-=======
 	protected function buildSendingData($param,$data,$childModuleParameters,$mode, $entry_name = '',$level = array()) {		
 		$first = false;		
 		$lockChild = false;
->>>>>>> refs/remotes/origin/hotfix
 		foreach ($data as $key => $value) {		
 			$fieldStructure = '';
 			// Replace __ISO__ if the field contains __ISO__
@@ -697,11 +603,7 @@ class shopapplicationcore extends solution {
 			}
 			
 			// Jump the first value of the table data (contain the document id)
-<<<<<<< HEAD
-			if (!$first) {
-=======
 			if (!$first && !is_array($value)) {			
->>>>>>> refs/remotes/origin/hotfix
 				// Save all doc ID to change their status to send (child and parent document)
 				$this->docIdList[$value] = array(
 													'id' => '',
@@ -714,13 +616,8 @@ class shopapplicationcore extends solution {
 			if ($key == 'target_id') {
 				if ($mode == 'U') {					
 					// If a specific id exist we get it otherwise we put the default value id
-<<<<<<< HEAD
-					if (!empty($this->childModuleParameters[$param['module']][$entry_name]['id_name'])) {
-						$dataTosSend[$this->childModuleParameters[$param['module']][$entry_name]['id_name']] = $value;
-=======
 					if (!empty($childModuleParameters['id_name'])) {
 						$dataTosSend[$childModuleParameters['id_name']] = $value;
->>>>>>> refs/remotes/origin/hotfix
 					} else {
 						$dataTosSend['id'] = $value;
 					}
@@ -728,31 +625,6 @@ class shopapplicationcore extends solution {
 				continue;
 			}
 			if (is_array($value)) {
-<<<<<<< HEAD
-				$level++;
-				foreach($value as $subrecord) {
-					// recursive call in case sub tab exist
-					$dataChild = $this->buildSendingData($param,$subrecord,$mode,$key,$level);
-				
-					// If the deep level is greater than the maximu allowed by the module, we merge data into the maximum level 
-					if ($level > $this->childModuleParameters[$param['module']][$key]['max_level']) {
-						$dataTosSend = array_merge($dataTosSend, $dataChild);
-					} else {
-						$dataTosSend[$this->childModuleParameters[$param['module']][$key]['entry_name']][] = $dataChild;
-					}
-				}
-			} else {		
-				// Structure transformation to an array id needed
-				$fieldStructure = explode('__',$key);			
-				$nbLevel = count($fieldStructure);
-				if ($nbLevel == 3) {
-					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]] = $value;
-				}
-				elseif ($nbLevel == 2) {
-					$dataTosSend[$fieldStructure[0]][$fieldStructure[1]] = $value;
-				} else {		
-					$dataTosSend[$key] = $value;
-=======
 				if (empty($level[$param['module']][$key])) {
 					$level[$param['module']][$key]  = 0;
 				}
@@ -815,24 +687,12 @@ class shopapplicationcore extends solution {
 					} else {		
 						$dataTosSend[$key] = $value;
 					}
->>>>>>> refs/remotes/origin/hotfix
 				}
 			}
 		}
 		return $dataTosSend;
 	}
 	
-<<<<<<< HEAD
-	protected function myExplode($value) {
-		$fieldStructure = explode('__',$value);
-		if (is_array($fieldStructure)) {
-			$value = $this->myExplode($fieldStructure);
-		}
-		return $value;
-	}
-	
-	
-=======
 	protected function changeBeforeSend($value, $key, $param, $data, $mode, $entry_name, $level) {
 		// When we get the adresse from the customer module, we delete the prefix address_
 		if (
@@ -844,7 +704,6 @@ class shopapplicationcore extends solution {
 		return array('value' => $value, 'key' => $key);
 	}
 	
->>>>>>> refs/remotes/origin/hotfix
 	// Force some module in child
 	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		$params = array();

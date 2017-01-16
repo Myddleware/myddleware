@@ -90,11 +90,8 @@ class jobcore  {
 				throw new \Exception ('Rule '.$name_slug.' is inactive.');
 			}
 			
-<<<<<<< HEAD
-=======
 			
 			
->>>>>>> refs/remotes/origin/hotfix
 			$this->ruleId = $rule['id'];
 			
 			// We instance the rule

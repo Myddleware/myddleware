@@ -416,14 +416,11 @@ class solutioncore {
 			$module = 'default';
 		}
 		
-<<<<<<< HEAD
-=======
 		// Check $fields variable
 		if (empty($fields)) {
 			$fields = array();
 		}
 		
->>>>>>> refs/remotes/origin/hotfix
 		// Boucle sur tous les champs obligatoires
 		if (!empty($this->required_fields[$module])) {
 			foreach($this->required_fields[$module] as $required_field) {
@@ -573,19 +570,11 @@ class solutioncore {
 	// Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule	
 	protected function getParamLogin($connId) {
 		// RECUPERE LE NOM DE LA SOLUTION			
-<<<<<<< HEAD
-		$sql = "SELECT name  
-				FROM Connector
-					INNER JOIN Solution 
-						ON Solution.id  = Connector.sol_id
-				WHERE id = :connId";
-=======
 		$sql = "SELECT Solution.name  
 				FROM Connector
 					INNER JOIN Solution 
 						ON Solution.id  = Connector.sol_id
 				WHERE Connector.id = :connId";
->>>>>>> refs/remotes/origin/hotfix
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue("connId", $connId);
 		$stmt->execute();		

@@ -37,41 +37,6 @@
 	<tr>
 		<td class="title">{{'create_rule.step3.relation.source'|trans}}</td>
 		<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
-<<<<<<< HEAD
-		<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>
-		{% if parentRelationships %}
-			<td class="title" colspan="3">{{'create_rule.step3.relation.parent'|trans}}</td>
-		{% endif %}		
-	</tr>
-	{% for rule in lst_relation_target %}
-	<tr class="line-relation">
-		<td>			    	
-			<select class="lst_source_relate" id="lst_source_{{ rule.name }}" name="">
-			    {{ lst_relation_source | raw }}
-			</select>
-		</td>
-		<td class="arrow"><img width="20px" src="{{ asset('bundles/regle/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
-		<td>
-	    	<select class="lst_rule_relate" id="lst_{{ rule.name }}" name="">
-	    		{{ lst_rule | raw }}
-	    	</select>
-		</td>
-		<td class="arrow"><img width="20px" src="{{ asset('bundles/regle/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
-		<td>
-    		{% if rule.required %}
-    			<span class="glyphicon glyphicon-star"></span>
-    		{% endif %}		
-			<input readonly="readonly" class="title" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
-		</td>
-		{% if parentRelationships %}
-			<td>
-				<select class="lst_parent_relate" id="lst_parent_{{ rule.name }}" name="">
-					{{ lst_relation_parent | raw }}
-				</select>
-			</td>
-		{% endif %}
-	</tr>
-=======
 		<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
 	</tr>
 	{% for rule in lst_relation_target %}
@@ -95,7 +60,6 @@
 				<input readonly="readonly" class="title" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 			</td>
 		</tr>
->>>>>>> refs/remotes/origin/hotfix
 	{% endfor %}
 </table>
 {% if parentRelationships %}

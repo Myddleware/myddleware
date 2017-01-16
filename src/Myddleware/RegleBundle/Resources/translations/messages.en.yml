@@ -102,13 +102,9 @@ create_rule:
             target: Target
             rule: Rules
             fields: Fields source
-<<<<<<< HEAD
-            parent: Parent
-=======
             parent_detail_view: Parent
             parent: Parent relationship to merge several data transfers
             record_id: Record ID
->>>>>>> refs/remotes/origin/hotfix
             yes: Yes
         params:
             duplicate: Fields to avoid duplicates
@@ -506,10 +502,7 @@ error:
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
         edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
-<<<<<<< HEAD
-=======
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
->>>>>>> refs/remotes/origin/hotfix
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
     account:

@@ -118,38 +118,6 @@ class databasecore extends solution {
 				$modules = array('NewTable' => 'New Table');
 				return $modules;
 			}
-<<<<<<< HEAD
-			/*
-			// Récupération de toutes les règles avec l'id table en cours qui sont root et qui ont au moins une référence
-			$sql = "SELECT DISTINCT
-						Rule.id,
-						Rule.name,
-						Rule.name_slug
-					FROM Rule
-						INNER JOIN RuleField
-							ON Rule.id = RuleField.rule_id
-						INNER JOIN RuleParam
-							ON Rule.id = RuleParam.rule_id
-					WHERE
-							Rule.deleted = 0
-						AND Rule.conn_id_target = :idConnector
-						AND RuleField.target_field_name LIKE '%_Reference'
-						AND RuleParam.value = 'root'
-						AND RuleParam.name = 'group'";
-			$stmt = $this->conn->prepare($sql);
-			$stmt->bindValue(":idConnector", $this->paramConnexion['idConnector']);
-			$stmt->execute();
-			$rules = $stmt->fetchAll();
-			if (!empty($rules)) {
-				foreach ($rules as $rule) {
-					$modules[$rule['name']] = $rule['name'];
-				}
-			}
-			
-			return $modules;
-			*/	
-=======
->>>>>>> refs/remotes/origin/hotfix
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			return $error;			
@@ -658,21 +626,6 @@ class databasecore extends solution {
 		try {
 			// On entre dans le IF si on n'est pas sur la 1ère version de la règle
 			// Ou si on est sur une règle child
-<<<<<<< HEAD
-			if(
-					$param['rule']['version'] != "001"
-				|| (
-						!empty($param['content']['params']['group'])
-					&& $param['content']['params']['group'] == 'child'
-				)
-			) { 
-				// Ici on va aller chercher le idTable des versions précédentes			
-				// Cette requette permet de récupérer toutes les règles portant le même nom que la notre ET AYANT un tableID
-				// Les résultats sont triés de la version la plus récente à la plus vieille
-				$sql = "SELECT R1.`value` , R2.`version` 
-						FROM  `RuleParam` R1,  `Rule` R2
-						WHERE  `name` =  'tableID'
-=======
 			if($param['rule']['version'] != "001") { 
 				// Ici on va aller chercher le idTable des versions précédentes			
 				// Cette requette permet de récupérer toutes les règles portant le même nom que la notre ET AYANT un tableID
@@ -680,7 +633,6 @@ class databasecore extends solution {
 				$sql = "SELECT R1.`value` , R2.`version` 
 						FROM  `RuleParam` R1,  `Rule` R2
 						WHERE  R1.`name` =  'tableID'
->>>>>>> refs/remotes/origin/hotfix
 						AND R1.`rule_id` = R2.`id` 
 						AND R1.`rule_id` IN (	SELECT  `id` 
 												FROM  `Rule` 
@@ -707,45 +659,6 @@ class databasecore extends solution {
 	
 				// Dernier test, si on a tjrs rien dans $tableID et que l'on est pas sur une règle child (jamais de création de table pour une règle child)
 				// alors on crée une nouvelle table
-<<<<<<< HEAD
-				if(
-						empty($tableID)
-					&&	(
-							$param['content']['params']['group'] != 'child'
-						|| empty($param['content']['params']['group'])
-					)
-				) {
-					return $this->createDatabaseTable($param);
-				}
-				// Récupération de la table dans la règle root
-				elseif (
-						empty($tableID)
-					&&	(
-							!empty($param['content']['params']['group'])
-						&&	$param['content']['params']['group'] == 'child'
-					)
-				) {
-					$sql = "SELECT 
-								RuleParam.value
-							FROM RuleRelationShip
-								INNER JOIN RuleParam
-									ON RuleRelationShip.field_id = RuleParam.rule_id
-							WHERE 
-									RuleRelationShip.rule_id = :ruleId
-								AND RuleParam.name = 'tableID'";
-					$stmt = $this->conn->prepare($sql);
-					$stmt->bindValue(":ruleId", $param["ruleId"]);
-					$stmt->execute();
-					
-					// On récupère d'abord le premier résultat afin de vérifier que le tableID n'est pas vide
-					$fetch = $stmt->fetch();
-					if(!empty($fetch['value'])) {
-						$tableID = $fetch['value'];
-					}
-				}
-				// Si on a pas de table à ce stade alors on renvoie une erreur car on a besoin de l'ID pour faie la modification de cette table
-=======
->>>>>>> refs/remotes/origin/hotfix
 				if(empty($tableID)) {
 					return $this->createDatabaseTable($param);
 				}
@@ -872,16 +785,7 @@ class databasecore extends solution {
 	
 	// Créer un table dans Database
 	protected function createDatabaseTable($param) {
-<<<<<<< HEAD
-	    $dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-
-		$sql = "CREATE TABLE `".$param['rule']['name_slug']."` (
-			id INT(6) UNSIGNED AUTO_INCREMENT,
-			date_modified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,";
-
-=======
 	    $sql = $this->get_query_create_table_header($param['rule']['name_slug']);
->>>>>>> refs/remotes/origin/hotfix
 		
 		if (empty($param['ruleFields'])) {
 			throw new \Exception("Failed to create the table, no field in the Rule ".$param['rule']['name_slug']);
@@ -902,24 +806,9 @@ class databasecore extends solution {
 			}
 			$fieldName = substr($fieldName, 0, -1);
 			$sql.= $fieldName." ".$mappingType.",";
-<<<<<<< HEAD
-			/*$xml.=		"<mapping>
-							<fileField>".$param['rule']['rule_module_source'].'_'.$ruleField['target_field_name']."</fileField>
-							<displayName>".(in_array($ruleField['target_field_name'],array('Metric','Date')) ? $ruleField['source_field_name'] : $fieldName)."</displayName>
-							<mappingType>".$mappingType."</mappingType>
-							".($mappingType == 'DATE' ? "<pattern>dd/MM/yyyy hh:mm</pattern>" : "")."
-						</mapping>";*/
-		}
-		$sql.= "PRIMARY KEY (`id`),
-	    		INDEX `".$param['rule']['name_slug']."_date_modified` (`date_modified`)
-				)";
-			   
-		$q = $dbh->prepare($sql);
-=======
 		}
 		$sql.= " INDEX ".$this->stringSeparator.$param['rule']['name_slug']."_date_modified".$this->stringSeparator." (date_modified))";						   
 		$q = $this->pdo->prepare($sql);
->>>>>>> refs/remotes/origin/hotfix
 		$exec = $q->execute();
 		
 		if(!$exec) { // Si erreur
@@ -940,88 +829,6 @@ class databasecore extends solution {
 		$stmt->execute();	   				
 		return $idTable;
 	}
-<<<<<<< HEAD
-	
-	// Permet d indiquer si on envoie les champs standard ou si on renvoie en plus les champs de relation dans get_module_field
-	public function extendField ($moduleTarget) {
-		return true;
-	}
-	
-	// Permet de générer un document d'une règle child
-	protected function generateChildDocument($param,$data) {
-		// Si on est en create c'est que l'on est forcément sur une règle root (les child ne fond que de l'update)
-		// Si des règles child pointe sur la règle en cours il faut générer des documents sur les autres règles 
-		// afin que toutes les données de la ligne en cours soient rensignées
-		// Récupération de toutes les règles liées
-		$sql = "SELECT 
-					RuleRelationShip.rule_id,
-					RuleRelationShip.field_name_target
-				FROM RuleRelationShip
-					INNER JOIN Rule
-						ON RuleRelationShip.rule_id = Rule.id
-				WHERE 
-						RuleRelationShip.field_id = :ruleId
-					AND Rule.deleted = 0	
-				";
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":ruleId", $param["ruleId"]);
-		$stmt->execute();
-		$relationships = $stmt->fetchAll();
-		if (!empty($relationships)) {
-			// Pour chaque relationship, création d'un document
-			foreach ($relationships as $relationship) {
-				$param['ruleId'] = $relationship['rule_id'];
-				// Récupération de l'ID correspondant à l'enregistrement de la règle liée dans le système source
-				// Si l'id de l'enregistrement lié est renseigné alors on génère le docuement sinon on ne le genère pas (il n'est pas obligatoirement renseigné)				
-				if (!empty($data[$relationship['field_name_target']])) {
-					$rule = new ruleMyddleware($this->logger, $this->container, $this->conn ,$param);
-					// Si un document sur la même règle avec le même id source a déjà été fait dans ce paquet d'envoi alors on ne régénère pas un autre document qui serait doublon
-					if (empty($this->duplicateDoc[$param['ruleId']][$data[$relationship['field_name_target']]])) {
-						$generateDocuments = $rule->generateDocuments($data[$relationship['field_name_target']]);	
-						// Si on a eu une erreur alors on arrête de générer les documents child
-						if (!empty($generateDocuments->error)) {
-							return $generateDocuments->error;
-						}
-						$this->duplicateDoc[$param['ruleId']][$data[$relationship['field_name_target']]] = 1;
-					}
-				}
-			}
-		}
-		return true;
-	}
-	
-	//function to make cURL request	
-	protected function call($method, $parameters = array()){		
-	 	ob_start();
-		
-		$curl_request = curl_init($this->url);
-
-		curl_setopt($curl_request, CURLOPT_CUSTOMREQUEST, $method); // On construit une requête de type $method (GET ou POST)
-		curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); // Ne vérifie pas le certificat SSL
-		curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
-		curl_setopt($curl_request, CURLOPT_HEADER, false); // !important, permet d'enlever le header http de la réponse
-	
-		$headers = array(             
-					"Content-type: application/xml",
-					"charset=\"utf-8\"", 
-					"token:".$this->paramConnexion['token']
-				); 
-				
-				
-		curl_setopt($curl_request, CURLOPT_HTTPHEADER, $headers);
-		if (!empty($parameters)) {
-			curl_setopt($curl_request, CURLOPT_POSTFIELDS, $parameters); 
-		}
-		$result = curl_exec($curl_request); // Exécute le cURL
-		curl_close($curl_request);	
-		
-		$xml = new \SimpleXMLElement($result); // Transforme la réponse en élément XML
-		
-		$result = (json_decode(json_encode((array)$xml), true)); // Encode en json (avec une convertion en array) puis le décode afin d'obtenir un array correctement traitable
-		if(empty($result))	throw new \Exception ("Call returned an empty response."); // Traitement d'erreur si on a une réponse vide
-=======
->>>>>>> refs/remotes/origin/hotfix
 		
 	// Function de conversion de datetime format Myddleware à un datetime format solution
 	protected function dateTimeFromMyddleware($dateTime) {
@@ -1047,22 +854,7 @@ class databasecore extends solution {
 			return $result;
 		}
 	}// dateTimeFromMyddleware($dateTime)   
-<<<<<<< HEAD
-	
-	
-	// Permet de récupérer la source ID du document en paramètre
-	protected function getSourceId($idDoc) {
-		// Récupération du source_id
-		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc";
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":idDoc", $idDoc);
-		$stmt->execute();
-		$sourceId = $stmt->fetch();		
-		return $sourceId['source_id'];
-	}
-=======
 
->>>>>>> refs/remotes/origin/hotfix
 	
 	// Fonction permettant de récupérer le type d'un champ
 	protected function getMappingType($field) {
@@ -1101,78 +893,6 @@ class databasecore extends solution {
 		return false;
 	}
 	
-<<<<<<< HEAD
-	// Ajout de contrôle lors d'un sauvegarde de la règle
-	public function beforeRuleSave($data,$type) {
-		if($type == "target") {
-			// Vérification de la suppression d'un champ référence
-			// Si on est sur une édition 'oldRule' existe
-			if (!empty($data['oldRule'])) {
-				// Récupération des champs référence de cette ancienne règle qui sont utilisés dans une autre règle
-				$sql = "SELECT
-							Rule.id,
-							Rule.name,
-							RuleRelationShip.field_name_target
-						FROM RuleRelationShip
-							INNER JOIN Rule
-								ON RuleRelationShip.rule_id = Rule.id
-						WHERE 
-								RuleRelationShip.field_id = '".$data['oldRule']."'
-							AND Rule.deleted = 0";
-				$stmt = $this->conn->prepare($sql);
-				$stmt->bindValue(":oldRule", $data['oldRule']);
-				$stmt->execute();
-				$referenceFields = $stmt->fetchAll();
-				// Pour tous les champs trouvés, on vérifie qu'ils sont toujours existant dans la nouvelle règle
-				if (!empty($referenceFields)) {
-					foreach ($referenceFields as $referenceField) {
-						// Si le champs est absent alors on génère une erreur.
-						if (empty($data['content']['fields']['name'][$referenceField['field_name_target']])) {
-							return array('done'=>false, 'message'=> 'The field '.$referenceField['field_name_target'].' is linked to the rule '.$referenceField['name'].'. Change this rule before removing this field.');
-						}
-					}
-				}		
-			}
-			
-			// Si le module d'entrée Database n'est pas Container alors on est sur une règle Child. On vérifie que la relation est donc bien présente dans la règle
-			if (
-					$data['module']['target']['name'] != 'NewTable'
-				&& empty($data['relationships'])
-			) {
-				return array('done'=>false, 'message'=>'Failed to save the rule. You have to create a relationship with the Table '.$data['module']['target']['name'].' that you selected in the first step.');
-			}
-		
-			// Pour Database, les relations sont un peu plus manuelles donc on vérifie que le champ de la relation appartien bien à la règle sélectionnée
-			// Il ne peut y avoir qu'un relation par règle avec Database
-			if (!empty($data['relationships'])) {
-				$sql = "SELECT rule_id
-						FROM RuleField
-						WHERE 
-								rule_id = :rule_id
-							AND target_field_name = :target_field_name";
-				$stmt = $this->conn->prepare($sql);
-				$stmt->bindValue(":rule_id", $data['relationships'][0]['rule']);
-				$stmt->bindValue(":target_field_name", $data['relationships'][0]['target']);
-				$stmt->execute();
-				$fetch = $stmt->fetch();
-				if(empty($fetch['rule_id'])) {
-					return array('done'=>false, 'message'=>'Failed to save the relationship. The field '.$data['relationships'][0]['target'].' doesn\'t belong to the selected rule ('.$data['relationships'][0]['rule'].'). Change the relationShip to save this rule. ');
-				}
-				// Ajout du paramètre child à la règle puisqu'une relation existe
-				return array('done'=>true, 'message'=>'', 'params' => array('group' => 'child'));
-			}
-			else {
-				// Ajout du paramètre root à la règle puisqu'aucune relation n'existe
-				return array('done'=>true, 'message'=>'', 'params' => array('group' => 'root'));
-			}
-			return array('done'=>true, 'message'=>'');
-		}
-		return array('done'=>true, 'message'=>'');
-	}
-	
-	
-=======
->>>>>>> refs/remotes/origin/hotfix
 	// Après la sauvegarde d'une règle Database (en cible) on crée ou modifie la table Database
 	public function afterRuleSave($data,$type) {
 		try {
