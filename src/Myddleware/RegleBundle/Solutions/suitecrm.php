@@ -198,8 +198,8 @@ class suitecrmcore  extends solution {
 	}
 	
 	// Permet de récupérer tous les champs d'un module
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try {
 			$this->moduleFields = array();
 
@@ -237,14 +237,7 @@ class suitecrmcore  extends solution {
 						if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
 							continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
 					}
-					// Ces champs doivent être exclus de la liste des modules car ce sont des champs relations qui sont gérés par les champs se terminant par ID
-					/* if (
-							substr($field->name,-5) == '_name'
-						&&	!in_array($field->name,array('first_name','last_name'))
-						&& $extension == false
-					){
-						continue; 
-					}	 */				
+		
 					if (!in_array($field->type,$this->type_valide)) { 
 						if(isset($this->exclude_field_list[$module])){
 							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
@@ -337,10 +330,6 @@ class suitecrmcore  extends solution {
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
 			}
 			return $this->moduleFields;					
 		}	

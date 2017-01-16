@@ -103,30 +103,11 @@ class saprootcore extends solution {
 
 	
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
+	public function get_module_fields($module, $type = 'source') {
 		try{
 			try{	
 				$multistructure = false;
-				// En cas de structure multiple, la variable module peut être un tableau 
-				if (is_array($module)) {					
-					$multistructure = true;
-					// récupération de la première clé du tableau 
-					$moduleKey = array_keys($module)[0];
-					if (!empty($module[$moduleKey])) {
-						// On force la récupération des champs header même si la structure n'a pas été selectionnée. La structure est en première
-						// Pour cela on réupère la structure de base dans get_submodules
-						$subModule = $this->get_submodules($moduleKey, $type);				
-						$module[$moduleKey] = array(array_keys($subModule[$moduleKey])[0]=>array_keys($subModule[$moduleKey])[0]) + $module[$moduleKey];			
-						// Construction du paramètre d'entrée du webservice
-						foreach ($module[$moduleKey] as $key => $value) {
-							$structures .= $key.';';
-						}
-					}
-				}
-				else {
-					// Si on est sur un module simple alors on l'ajoute dans la strutcure
-					$structures = $module;	
-				}
+				$structures = $module;	
 				$params = array('IvStructures' => $structures);
 				// Récupération de toutes les structures dans SAP 
 				$response = $this->client->ZmydGetFields($params);

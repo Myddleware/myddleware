@@ -81,37 +81,6 @@ class sapecccore extends sap {
 						'ET_ACCIT' => 'FI Interface avec la gestion comptable : information poste (ET_ACCIT)'
 		);
 	} // get_modules()
-	
-	public function get_submodules($module, $type = 'source', $param = '') {
-		 if ($type == 'source') {
-			switch ($module ){
-				case 'ET_BKPF':
-					// Le module ET_BKPF n'est multiple que pour le read. Pour le get_module_fields ce module est simple (le multiple est gérées avec les règles filles)
-					if (
-							!empty($param['action'])
-						&& $param['action'] == 'read'
-					) {
-						return array('ET_BKPF' => array(
-															'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
-															'ET_BSEG' => 'FI Segment de pièce comptabilité (ET_BSEG)',
-															'ET_ABUZ' => 'FI Lignes d\'écriture générées automatiquement (ET_ABUZ)',
-															'ET_ACCHD' => 'FI Table transgert infos d\'en-tête pr documents FI-CO (ET_ACCHD)',
-															'ET_ACCCR' => 'FI Interface ds la gestion comptable : information devise (ET_ACCCR)',
-															'ET_ACCIT' => 'FI Interface avec la gestion comptable : information poste (ET_ACCIT)'
-														),
-							);
-					}
-					break;
-				case 'BU_PARTNER':
-					return array('BU_PARTNER' => array(
-													'ET_BUT000' => 'Header Partner'
-												)
-										);
-					break;					
-			}
-		}
-		return parent::get_submodules($module, $type, $read ); 
-	}	
 
 	
 	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	

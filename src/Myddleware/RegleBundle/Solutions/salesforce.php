@@ -183,8 +183,8 @@ class salesforcecore extends solution {
 	} // get_modules()
 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
 		// Accès au service de SalesForce renvoyant la liste des champs du module passé en paramètre
@@ -275,10 +275,13 @@ class salesforcecore extends solution {
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}
+<<<<<<< HEAD
 			// Si l'extension est demandée alors on vide relate 
 			if ($extension) {
 				$this->fieldsRelate = array();
 			}
+=======
+>>>>>>> refs/remotes/origin/hotfix
 			return $this->moduleFields;
 		}
 		catch (\Exception $e) {

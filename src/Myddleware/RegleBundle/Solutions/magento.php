@@ -109,8 +109,8 @@ class magentocore extends solution {
 	
 	
 		// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
 			// Pour chaque module, traitement différent
 			switch ($module) {
@@ -259,10 +259,6 @@ class magentocore extends solution {
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			// Si l'extension est demandée alors on vide relate 
-			if ($extension) {
-				$this->fieldsRelate = array();
 			}
 			
 			// Add list here (field could exist in several fields or was part of a rrelate field)

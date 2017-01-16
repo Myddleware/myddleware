@@ -818,17 +818,26 @@ class documentcore {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
 				// Charge les données source du document dans $this->sourceData
 				$this->getSourceData();
+			
 				// Récupération des valeurs de la source pour chaque champ de recherche
 				foreach($duplicate_fields as $duplicate_field) {
 					foreach ($this->ruleFields as $ruleField) {
+<<<<<<< HEAD
 						if($ruleField['target_field_name'] == $duplicate_field)
 							$sourceDuplicateField = $ruleField['source_field_name'];
 					}
 					// On ne fait pas de recherche dans la cible sur des champs vides. S'ils sont vides, ils sont excluent.
+=======
+						if($ruleField['target_field_name'] == $duplicate_field) {
+							$sourceDuplicateField = $ruleField;
+						}
+					}			
+>>>>>>> refs/remotes/origin/hotfix
 					if (!empty($sourceDuplicateField)) {
-						$searchFields[$duplicate_field] = $this->sourceData[$sourceDuplicateField];
+						// Get the value of the field (could be a formula)
+						$searchFields[$duplicate_field] = $this->getTransformValue($this->sourceData,$sourceDuplicateField);	
 					}
-				}
+				}			
 				if(!empty($searchFields)) {
 					$history = $this->getDocumentHistory($searchFields);
 				} 
@@ -899,8 +908,13 @@ class documentcore {
 					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
 				}
 
+<<<<<<< HEAD
 				// Generate documents for the child rule (could be several documents)
 				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_source']);
+=======
+				// Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule 
+				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_target']);
+>>>>>>> refs/remotes/origin/hotfix
 				if (!empty($docsChildRule->error)) {
 					throw new \Exception($docsChildRule->error);
 				}
@@ -1333,7 +1347,11 @@ class documentcore {
 	
 	
 	// Check if the document is a child
+<<<<<<< HEAD
 	protected function isChild() {	
+=======
+	public function isChild() {	
+>>>>>>> refs/remotes/origin/hotfix
 		$sqlIsChild = "	SELECT Rule.id 
 									FROM RuleRelationShip 
 										INNER JOIN Rule
@@ -1353,6 +1371,24 @@ class documentcore {
 		return false;;		
 	}
 	
+<<<<<<< HEAD
+=======
+	// Check if the document is a child
+	protected function getChildDocuments() {	
+		try {
+			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId";		
+			$stmt = $this->connection->prepare($sqlGetChilds);
+			$stmt->bindValue(":docId", $this->id);
+			$stmt->execute();	    
+			return $stmt->fetchAll();	
+		} catch (\Exception $e) {
+			$this->typeError = 'E';
+			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( $this->message );
+		}	
+	}
+		
+>>>>>>> refs/remotes/origin/hotfix
 	// Check if the document is a parent
 	protected function isParent() {	
 		$sqlIsChild = "	SELECT RuleRelationShip.rule_id 
@@ -1428,6 +1464,7 @@ class documentcore {
 	// Permet de déterminer le type de document (Create ou Update)
 	// En entrée : l'id de l'enregistrement source
 	// En sortie : le type de docuement (C ou U)
+<<<<<<< HEAD
 	protected function checkRecordExist($id) {
 		try {
 			// Query used in the method several times
@@ -1436,6 +1473,17 @@ class documentcore {
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id 
+=======
+	protected function checkRecordExist($id) {	
+		try {	
+			// Query used in the method several times
+			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			$sqlParamsSoure = "	SELECT 
+								Document.id, 
+								Document.target_id, 
+								Document.global_status 
+>>>>>>> refs/remotes/origin/hotfix
 							FROM Rule
 								INNER JOIN Rule Rule_version
 									ON Rule_version.name = Rule.name
@@ -1452,6 +1500,7 @@ class documentcore {
 								)
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
+<<<<<<< HEAD
 							ORDER BY target_id DESC
 							LIMIT 1";
 							
@@ -1462,6 +1511,45 @@ class documentcore {
 				foreach ($this->ruleRelationships as $ruleRelationship) {
 					// Si on est sur une relation avec le champ Myddleware_element_id
 					if ($ruleRelationship['field_name_target'] == 'Myddleware_element_id'){						
+=======
+							ORDER BY target_id DESC, global_status DESC
+							LIMIT 1";
+							
+			// On prépare la requête pour rechercher dans la partie target
+			$sqlParamsTarget = "SELECT 
+								Document.id, 
+								Document.source_id target_id, 
+								Document.global_status 
+							FROM Rule
+								INNER JOIN Rule Rule_version
+									ON Rule_version.name = Rule.name
+								INNER JOIN Document 
+									ON Document.rule_id = Rule_version.id
+							WHERE 
+									Rule.id IN (:ruleId)									
+								AND (
+										Document.global_status != 'Cancel'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
+									)
+								)	
+								AND	Document.target_id = :id
+								AND Document.id != :id_doc
+							ORDER BY target_id DESC, global_status DESC
+							LIMIT 1";	
+					
+			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
+			// En effet ce champ indique que l'on va modifié un enregistrement créé par une autre règle	
+			if (!empty($this->ruleRelationships)) {
+				// Boucle sur les relation
+				foreach ($this->ruleRelationships as $ruleRelationship) {		
+					// If the relationship target is Myddleware element id and if the rule relate isn't a child (we don't get target id or define type of a document with a child rule)
+					if (
+							$ruleRelationship['field_name_target'] == 'Myddleware_element_id'
+						AND empty($ruleRelationship['parent'])
+					){						
+>>>>>>> refs/remotes/origin/hotfix
 						// Si le champs avec l'id source n'est pas vide
 						// S'il s'agit de Myddleware_element_id on teste id
 						if (
@@ -1488,15 +1576,32 @@ class documentcore {
 							$result = $stmt->fetch();				
 				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
+<<<<<<< HEAD
 							if (!empty($result['id'])) {
+=======
+							if (!empty($result['id'])) {							
+>>>>>>> refs/remotes/origin/hotfix
 								$this->targetId = $result['target_id'];
 							}
 							// Sinon on bloque la création du document 
 							// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data
 							elseif (empty($ruleRelationship['parent'])) {
 								$this->message .= 'Failed to get the id target of the current module in the rule linked.';
+<<<<<<< HEAD
 							}
 							return 'U';
+=======
+							}						
+							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+							if (
+									empty($result['id']) 
+								 || $result['global_status'] == 'Cancel'
+							) {
+								return 'C';
+							} else {
+								return 'U';
+							}
+>>>>>>> refs/remotes/origin/hotfix
 						}
 						else {
 							throw new \Exception( 'The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.' );
@@ -1504,10 +1609,13 @@ class documentcore {
 					}
 				}
 			}
+<<<<<<< HEAD
 			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
 			if ($this->isChild()){
 				return 'U';
 			}
+=======
+>>>>>>> refs/remotes/origin/hotfix
 	
 			// If no relationship or no child rule
 			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
@@ -1518,6 +1626,7 @@ class documentcore {
 		    $stmt->execute();	   				
 			$result = $stmt->fetch();
 		
+<<<<<<< HEAD
 			// Si on ne trouve pas d'id alors on prépare la requête pour rechercher dans la partie target
 			if (empty($result['id'])) {
 				$sqlParamsTarget = "	SELECT 
@@ -1536,8 +1645,10 @@ class documentcore {
 								ORDER BY target_id DESC
 								LIMIT 1";
 			}
+=======
+>>>>>>> refs/remotes/origin/hotfix
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
-			// Alors on recherche dans la règle opposée
+			// Alors on recherche dans la règle opposée		
 			if (
 					empty($result['id'])
 				&&	!empty($this->ruleParams['bidirectional'])
@@ -1548,10 +1659,33 @@ class documentcore {
 				$stmt->bindValue(":id", $id);
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
+<<<<<<< HEAD
 				$result = $stmt->fetch();
 			}			
 			if (!empty($result['id'])) {
 				$this->targetId = $result['target_id'];
+=======
+				$result = $stmt->fetch();				
+			}
+			
+			// If we found a record
+			if (!empty($result['id'])) {
+				$this->targetId = $result['target_id'];
+				// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+				// Except if the rule is bidirectional, in this case, a no send document in the opposite rule means that the data really exists in the target application
+				if (
+						$result['global_status'] == 'Cancel' 
+					&& empty($this->ruleParams['bidirectional'])
+				) {
+					return 'C';
+				} else {
+					return 'U';
+				}
+			}
+			// Si on est sur une règle child alors on est focément en update (seule la règle root est autorisée à créer des données)
+			// We check now because we take every chance we can to get the target_id
+			if ($this->isChild()){			
+>>>>>>> refs/remotes/origin/hotfix
 				return 'U';
 			}
 			// Si aucune règle avec relation Myddleware_element_id alors on est en création
@@ -1562,6 +1696,24 @@ class documentcore {
 			$this->logger->error( $this->message );	
 			return null;
 		}
+	}
+	
+	public function documentCancel() {
+		// Search if the document has child documents
+		$childDocuments = $this->getChildDocuments();		
+		if (!empty($childDocuments)) {
+			// We cancel each child, but a child document can be a parent document too, so we make a recursive call
+			foreach ($childDocuments as $childDocument) {
+				// We don't Cancel a document if it has been already cancelled
+				if ($childDocument['global_status'] != 'Cancel') {
+					$param['id_doc_myddleware'] = $childDocument['id'];
+					$param['jobId'] = $this->jobId;
+					$docChild = new document($this->logger, $this->container, $this->connection, $param);
+					$docChild->documentCancel();
+				}			
+			}
+		}
+		$this->updateStatus('Cancel'); 
 	}
 	
 	public function updateStatus($new_status) {

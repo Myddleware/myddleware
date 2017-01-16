@@ -95,7 +95,7 @@ class sapcore extends saproot {
 	} // get_modules()
 	
 	// On appelle la fonction get_module_fields de SAP standard et on ajoute les champ de relation spécifique
-	public function get_module_fields($module, $type = 'source', $extension = false) {
+	public function get_module_fields($module, $type = 'source') {
 		// Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
 		if ($module == 'ET_BSEG') {
 			$this->fieldsRelate['ET_BKPF'] = array(
@@ -105,7 +105,7 @@ class sapcore extends saproot {
 												'required_relationship' => true
 											);
 		}
-		return parent::get_module_fields($module, $type, $extension);
+		return parent::get_module_fields($module, $type);
 	}
 	
 	// Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
@@ -134,6 +134,7 @@ class sapcore extends saproot {
 		return null;
 	}
 	
+<<<<<<< HEAD
 	
 	public function get_submodules($module, $type = 'source', $param = '') {
 		 if ($type == 'source') {
@@ -167,6 +168,8 @@ class sapcore extends saproot {
 	}	
 
 	
+=======
+>>>>>>> refs/remotes/origin/hotfix
 	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
 		try {
 			$params = array();

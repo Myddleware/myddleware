@@ -35,34 +35,25 @@ class databasecore extends solution {
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
-	private $driver;
-	private $host;
-	private $port;
-	private $dbname;
-	private $login;
-	private $password;
+	protected $driver;
+	protected $pdo;
+	
+	protected $stringSeparator = '`';
 
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {
 			try {
-			    $dbh = new \PDO($this->paramConnexion['driver'].':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
-			    $dbh = null;
-				$this->driver = $this->paramConnexion['driver'];
-				$this->host = $this->paramConnexion['host'];
-				$this->port = $this->paramConnexion['port'];
-				$this->dbname = $this->paramConnexion['database_name'];
-				$this->login = $this->paramConnexion['login'];
-				$this->password = $this->paramConnexion['password'];
-				$this->connexion_valide = true;
+			    $this->pdo = new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
+			    $this->connexion_valide = true;	
 			} catch (\PDOException $e) {
-				$error = 'Failed to login to Database : '.$e->getMessage();
+				$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 				echo $error . ';';
 				$this->logger->error($error);
 				return array('error' => $error);
 			}
 		} catch (\Exception $e) {
-			$error = 'Failed to login to Database : '.$e->getMessage();
+			$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
@@ -93,11 +84,6 @@ class databasecore extends solution {
                             'label' => 'solution.fields.dbname'
                         ),
 					array(
-                            'name' => 'driver',
-                            'type' => 'text',
-                            'label' => 'solution.fields.dbdriver'
-                        ),
-					array(
                             'name' => 'port',
                             'type' => 'text',
                             'label' => 'solution.fields.dbport'
@@ -106,27 +92,21 @@ class databasecore extends solution {
 	}
 	
 	// Renvoie les modules passés en paramètre
-	public function get_modules($type = 'source') {
+	public function get_modules($type = 'source') {		
 		try{
 			if($type == 'source') {
 				$modules = array();
 				
-				// Création de l'objet PDO
-				$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-
-				// On récupère les tables de bd
-				$sql = "SHOW TABLES FROM ".$this->dbname;
-				
 				// Appel de la requête
-				$q = $dbh->prepare($sql);
+				$q = $this->pdo->prepare($this->get_query_show_tables());
 				$exec = $q->execute();
 				
 				if(!$exec) {
-					$errorInfo = $dbh->errorInfo();
+					$errorInfo = $this->pdo->errorInfo();
 					throw new \Exception('Show Tables: '.$errorInfo[2]);
 				}
 				$fetchAll = $q->fetchAll();
-				
+			
 				foreach ($fetchAll as $table) {
 					if(isset($table[0]))
 						$modules[$table[0]] = $table[0];
@@ -138,6 +118,7 @@ class databasecore extends solution {
 				$modules = array('NewTable' => 'New Table');
 				return $modules;
 			}
+<<<<<<< HEAD
 			/*
 			// Récupération de toutes les règles avec l'id table en cours qui sont root et qui ont au moins une référence
 			$sql = "SELECT DISTINCT
@@ -167,52 +148,48 @@ class databasecore extends solution {
 			
 			return $modules;
 			*/	
+=======
+>>>>>>> refs/remotes/origin/hotfix
 		} catch (\Exception $e) {
-			$error = $e->getMessage();
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			return $error;			
 		}
-	} 
+	} 	
 	
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $extension = false) {
-		parent::get_module_fields($module, $type, $extension);
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
 			if($type == 'source') {
 				// Création de l'objet PDO (DESCRIBE + ALTER TABLE)
-				$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-				$dbh->beginTransaction();
-				
-				// Récupération des champs de la table actuelle
-				$sql = "DESCRIBE `".$module."`";
-				$q = $dbh->prepare($sql);
+				$this->pdo->beginTransaction();
+
+				// Récupération des champs de la table actuelle			
+				$q = $this->pdo->prepare($this->get_query_describe_table($module));
 				$exec = $q->execute();
 				
 				if(!$exec) {
-					$errorInfo = $dbh->errorInfo();
+					$errorInfo = $this->pdo->errorInfo();
 					throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
 				}
 				
 				$fetchAll = $q->fetchAll();
-				
+
 				// Parcours des champs de la table sélectionnée
 				foreach ($fetchAll as $field) {
-					$this->moduleFields[$field['Field']] = array(
-							'label' => $field['Field'],
-							'type' => $field['Type'],
+					$this->moduleFields[$field[$this->fieldName]] = array(
+							'label' => $field[$this->fieldLabel],
+							'type' => $field[$this->fieldType],
 							'type_bdd' => 'varchar(255)',
 							'required' => false
 					);
-					$this->fieldsRelate[$field['Field']] = array(
-							'label' => $field['Field'],
-							'type' => $field['Type'],
+					$this->fieldsRelate[$field[$this->fieldName]] = array(
+							'label' => $field[$this->fieldLabel],
+							'type' => $field[$this->fieldType],
 							'type_bdd' => 'varchar(255)',
 							'required' => false,
 							'required_relationship' => 0
 					);
-				}
-				// Si l'extension est demandée alors on vide relate UNIQUEMENT puisque ce sont les mêmes
-				if ($extension) {
-					$this->fieldsRelate = array();
 				}
 				return $this->moduleFields;
 			} else {
@@ -221,7 +198,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e){
-			$error = $e->getMessage();
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			return false;
 		}
 	} // get_module_fields($module) 
@@ -229,8 +206,9 @@ class databasecore extends solution {
 	
 	// Redéfinition de la méthode pour ne plus renvoyer la relation Myddleware_element_id
 	public function get_module_fields_relate($module) {
-		// if(isset($module))
-			// $this->addRequiredRelationship($module);
+		if(isset($module)) {
+			$this->addRequiredRelationship($module);
+		}
 		// Récupération de tous les champ référence de la règle liées (= module)	
 		$this->fieldsRelate = array();
 		$sql = "SELECT 	
@@ -297,11 +275,8 @@ class databasecore extends solution {
 				$param['fields'] = array_values($param['fields']);
 				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 				
-				// Création de l'objet PDO
-				$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-				
 				// Construction de la requête SQL
-				$requestSQL = "SELECT id, date_modified, ";
+				$requestSQL = $this->get_query_select_header_read_last();
 				
 				// Tableau des noms de champs cible de la forme 'targetField' => 'myddlewareField_TYPE'
 				$targetFields = array();
@@ -326,14 +301,14 @@ class databasecore extends solution {
 				$requestSQL .= $query; // $query vaut '' s'il n'y a pas, ça enlève une condition inutile.
 					
 				$requestSQL .= " ORDER BY date_modified DESC"; // Tri par date de modification
-				$requestSQL .= " LIMIT 1"; // Ajout de la limite souhaitée
+				$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée
 				
 				// Appel de la requête
-				$q = $dbh->prepare($requestSQL);
+				$q = $this->pdo->prepare($requestSQL);
 				$exec = $q->execute();
 				
 				if(!$exec) {
-					$errorInfo = $dbh->errorInfo();
+					$errorInfo = $this->pdo->errorInfo();
 					throw new \Exception('ReadLast: '.$errorInfo[2]);
 				}
 				$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
@@ -376,15 +351,12 @@ class databasecore extends solution {
 					$param['fields'] = array();
 				}
 				$param['fields'] = array_unique($param['fields']);
-				// !important $param['fields'] = $this->addRequiredField($param['fields']);
+				$param['fields'] = $this->addRequiredField($param['fields']);
 				$param['fields'] = array_values($param['fields']);
 				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 				
-				// Création de l'objet PDO
-				$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-				
 				// Construction de la requête SQL
-				$requestSQL = "SELECT ";
+				$requestSQL = $this->get_query_select_header_read_last();
 				// TODO Ajout des champs id et date de l'utilisateur
 				
 				foreach ($param['fields'] as $field){
@@ -398,16 +370,18 @@ class databasecore extends solution {
 				$requestSQL .= $query; // $query vaut '' s'il n'y a pas, ça enlève une condition inutile.
 				
 				// $requestSQL .= " ORDER BY date_modified DESC"; // Tri par date de modification TODO
-				$requestSQL .= " LIMIT 1"; // Ajout de la limite souhaitée			
+				$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
+				
 				// Appel de la requête
-				$q = $dbh->prepare($requestSQL);
+				$q = $this->pdo->prepare($requestSQL);
 				$exec = $q->execute();
 				
 				if(!$exec) {
-					$errorInfo = $dbh->errorInfo();
+					$errorInfo = $this->pdo->errorInfo();
 					throw new \Exception('ReadLast: '.$errorInfo[2]);
 				}
-				$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);			
+				$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);	
+				
 				$row = array();
 				if(!empty($fetchAll[0])) {
 					foreach ($fetchAll[0] as $key => $value) {
@@ -447,6 +421,7 @@ class databasecore extends solution {
 			$result['done'] = -1;
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 		}
+// print_r($result);			
 		return $result;
 	} // read_last($param)
 	
@@ -472,9 +447,6 @@ class databasecore extends solution {
 			$param['fields'] = array_values($param['fields']);
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
-			// Création de l'objet PDO
-			$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-			
 			// Construction de la requête SQL
 			$requestSQL = "SELECT ";
 			// TODO Ajout des champs id et date de l'utilisateur
@@ -490,15 +462,14 @@ class databasecore extends solution {
 			$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
 			
 			$requestSQL .= " ORDER BY ".$param['ruleParams']['fieldDateRef']. " ASC"; // Tri par date utilisateur
-			$requestSQL .= (!empty($param['limit']) ? " LIMIT ".$param['limit'] : ""); // Ajout de la limite souhaitée
 			
 			// Appel de la requête
-			$q = $dbh->prepare($requestSQL);
+			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
 			
 			if(!$exec) {
-				$errorInfo = $dbh->errorInfo();
-				throw new \Exception('ReadLast: '.$errorInfo[2]);
+				$errorInfo = $this->pdo->errorInfo();
+				throw new \Exception('Read: '.$errorInfo[2]);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
 			
@@ -538,20 +509,15 @@ class databasecore extends solution {
 			if (empty($param['ruleParams']['tableID'])) {
 				throw new \Exception("No table in Database for the Rule. ");
 			}
-			$tableID = $param['ruleParams']['tableID'];
-			
-			// Création de l'objet PDO (CREATE)
-			$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-			
+			$tableID = $param['ruleParams']['tableID'];						
 			// Boucle sur chaque document en entrée
-			foreach($param['data'] as $data) {
+			foreach($param['data'] as $idDoc => $data) {					
 				try {
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
 					// Construction de la requête
-					$sql = "INSERT INTO `".$tableID."` ("; 
+					$sql = "INSERT INTO ".$this->stringSeparator.$tableID.$this->stringSeparator." (";
 					$first = true;
-					$idDoc  = '';
 					
 					$values = "(";
 					// Boucle sur chaque champ du document
@@ -559,57 +525,43 @@ class databasecore extends solution {
 						// Saut de la première ligne qui contient l'id du document
 						if ($first) {
 							$first = false;
-							$idDoc = $value;
 							continue;
 						}
-						
 						if($key == "target_id") {
 							continue;
 						}
+					
 						$fieldName = substr($key, 0, strrpos($key, '_'));
 						$mappingType = $this->getMappingType($key);
 						$sql .= $fieldName.",";
-						// A décommenter si un jour les quotes posent problème avec un type précis (INT ou autre)
-						/*if($mappingType == 'INT')
-							$values .= $value.",";
-						else
-							$values .= "'".$value."',";
-						*/
 						$values .= "'".$value."',";
 					}
 					
 					$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
-					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
-					
-					$q = $dbh->prepare($sql);
+					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)						
+					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					
 					if(!$exec) {
-						$errorInfo = $dbh->errorInfo();
+						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Create: '.$errorInfo[2]);
 					}
 					
-					if(empty($dbh->lastInsertId())) {
+					if(empty($this->pdo->lastInsertId())) {
 						throw new \Exception('Create: No ID returned.');
 					}
 					
-					$idTarget = $dbh->lastInsertId();
+					$idTarget = $this->pdo->lastInsertId();
 					
-
-					// Pour chaque donnée envoyée, on génère le ou les documents fils permettant de renseigner les données qui ne corespondent pas au module en cours
-					$generateChildDocument = $this->generateChildDocument($param,$data);
-					if ($generateChildDocument!==true) {
-						throw new \Exception("Failed to create child document : ".$generateChildDocument.". This document est locked. ");		
-					}
 					$result[$idDoc] = array(
 											'id' => $idTarget,
 											'error' => false
 									);
 				}
 				catch (\Exception $e) {
-					$error = $e->getMessage();
+					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -620,7 +572,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error
@@ -638,18 +590,14 @@ class databasecore extends solution {
 			}
 			$tableID = $param['ruleParams']['tableID'];
 			
-			// Création de l'objet PDO (CREATE)
-			$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-			
 			// Boucle sur chaque document en entrée
-			foreach($param['data'] as $data) {
+			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Construction de la requête
-					$sql = "UPDATE `".$tableID."` SET "; 
+					$sql = "UPDATE ".$this->stringSeparator.$tableID.$this->stringSeparator." SET "; 
 					$first = true;
-					$idDoc  = '';
 					
 					//$values = "(";
 					// Boucle sur chaque champ du document
@@ -657,42 +605,35 @@ class databasecore extends solution {
 						// Saut de la première ligne qui contient l'id du document
 						if ($first) {
 							$first = false;
-							$idDoc = $value;
 							continue;
 						}
-						
 						if($key == "target_id") {
 							$idTarget = $value;
 							continue;
 						}
+						
 						$fieldName = substr($key, 0, strrpos($key, '_'));
 						$mappingType = $this->getMappingType($key);
 						$sql .= $fieldName."='".$value."',";
 					}
 					
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE id='".$idTarget."'";;
-					
-					$q = $dbh->prepare($sql);
+					$sql .= " WHERE id='".$idTarget."'";;					
+					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					
 					if(!$exec) {
-						$errorInfo = $dbh->errorInfo();
+						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Create: '.$errorInfo[2]);
 					}
 
-					// Pour chaque donnée envoyée, on génère le ou les documents fils permettant de renseigner les données qui ne corespondent pas au module en cours
-					$generateChildDocument = $this->generateChildDocument($param,$data);
-					if ($generateChildDocument!==true) {
-						throw new \Exception("Failed to create child document : ".$generateChildDocument.". This document est locked. ");		
-					}
 					$result[$idDoc] = array(
 											'id' => $idTarget,
 											'error' => false
 									);
 				}
 				catch (\Exception $e) {
-					$error = $e->getMessage();
+					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -703,7 +644,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error
@@ -711,12 +652,13 @@ class databasecore extends solution {
 		}
 		return $result;
 	}
-		
+	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
 	protected function checkTable($param) {
 		try {
 			// On entre dans le IF si on n'est pas sur la 1ère version de la règle
 			// Ou si on est sur une règle child
+<<<<<<< HEAD
 			if(
 					$param['rule']['version'] != "001"
 				|| (
@@ -730,6 +672,15 @@ class databasecore extends solution {
 				$sql = "SELECT R1.`value` , R2.`version` 
 						FROM  `RuleParam` R1,  `Rule` R2
 						WHERE  `name` =  'tableID'
+=======
+			if($param['rule']['version'] != "001") { 
+				// Ici on va aller chercher le idTable des versions précédentes			
+				// Cette requette permet de récupérer toutes les règles portant le même nom que la notre ET AYANT un tableID
+				// Les résultats sont triés de la version la plus récente à la plus ancienne
+				$sql = "SELECT R1.`value` , R2.`version` 
+						FROM  `RuleParam` R1,  `Rule` R2
+						WHERE  R1.`name` =  'tableID'
+>>>>>>> refs/remotes/origin/hotfix
 						AND R1.`rule_id` = R2.`id` 
 						AND R1.`rule_id` IN (	SELECT  `id` 
 												FROM  `Rule` 
@@ -756,6 +707,7 @@ class databasecore extends solution {
 	
 				// Dernier test, si on a tjrs rien dans $tableID et que l'on est pas sur une règle child (jamais de création de table pour une règle child)
 				// alors on crée une nouvelle table
+<<<<<<< HEAD
 				if(
 						empty($tableID)
 					&&	(
@@ -792,49 +744,43 @@ class databasecore extends solution {
 					}
 				}
 				// Si on a pas de table à ce stade alors on renvoie une erreur car on a besoin de l'ID pour faie la modification de cette table
+=======
+>>>>>>> refs/remotes/origin/hotfix
 				if(empty($tableID)) {
-					$this->messages[] = array('type' => 'error', 'message' => 'Failed to find the table in Database for this Rule. The table is not updated in Database.');
+					return $this->createDatabaseTable($param);
 				}
+				
 				/*
 				* 		MAJ du connecteur avec le nouveau mapping
 				*/
 				$tableID = mb_strtolower($tableID);
-				try {
-					// Création de l'objet PDO (DESCRIBE + ALTER TABLE)
-					$dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
-					$dbh->beginTransaction();
-					
-					// Récupération des champs de la table actuelle
-					$sql = "DESCRIBE `".$tableID."`";
-					$q = $dbh->prepare($sql);
-					$exec = $q->execute();
-					
+				try {				
+					// Récupération des champs de la table actuelle				
+					$q = $this->pdo->prepare($this->get_query_describe_table($tableID));
+					$exec = $q->execute();			
 					if(!$exec) {
-						$errorInfo = $dbh->errorInfo();
+						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
 					}
 					
 					$fetchAll = $q->fetchAll();
 				} catch (\PDOException $e) {
-					$error = 'CheckTable: (Describe) '.$e->getMessage();
-					$this->messages[] = array('type' => 'error', 'message' => 'CheckTable: (Describe) '.$e->getMessage());
+					$error = 'CheckTable: Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$this->messages[] = array('type' => 'error', 'message' => $error);
 					$this->logger->error($error);
 					return null;
-				}				
-
+				}			
 				$tableFields = array();
-				foreach ($fetchAll as $fetch) {
-					$Type = $this->getMappingType(mb_strtoupper($fetch['Type']));
-					if($Type == 'VARCHAR(255)')
+				foreach ($fetchAll as $fetch) {					
+					$Type = $this->getMappingType(mb_strtoupper($fetch[$this->fieldType]));
+					if($Type == 'VARCHAR(255)') {
 						$Type = 'VARCHAR';
-					$tableFieldnames[] = $fetch['Field'];
-					$tableFields[] = $fetch['Field'].'_'.$Type;
+					}
+					$tableFieldnames[] = $fetch[$this->fieldName];
+					$tableFields[] = $fetch[$this->fieldName].'_'.$Type;
 				}
 				
-				 /*
-				  * 		COMPARAISON DES CHAMPS
-				  */
-				
+				// COMPARAISON DES CHAMPS			
 				$diff = array();
 				$add = array();
 				foreach ($param['ruleFields'] as $ruleField) {
@@ -855,7 +801,6 @@ class databasecore extends solution {
 					}
 				}
 				if(empty($diff) && empty($add)) {
-					$dbh = null;
 					$this->messages[] = array('type' => 'success', 'message' => 'No added or modified field on your rule. The table has not been changed in Database. ');
 					return $this->saveConnectorParams($param['ruleId'], $tableID);
 				} 
@@ -863,50 +808,45 @@ class databasecore extends solution {
 				$fieldstext = '';
 				
 				try {
+					$this->pdo->beginTransaction();
 					if(!empty($diff)) {
 						foreach ($diff as $fieldDiff) {
 							$fieldstext .= $fieldDiff['NAME'].' ';  
 							// Création de la requête
-							$sql= "ALTER TABLE `".$tableID."`
-								   MODIFY COLUMN ".$fieldDiff['NAME']." ".$fieldDiff['TYPE'];
+							$sql= "ALTER TABLE ".$this->stringSeparator.$tableID.$this->stringSeparator.$this->get_query_alter_column().$fieldDiff['NAME']." ".$fieldDiff['TYPE'];						
+							$q = $this->pdo->prepare($sql);
+							$exec = $q->execute();
 							
-						}
-						$q = $dbh->prepare($sql);
-						$exec = $q->execute();
-						
-						if(!$exec) {
-							throw new \Exception("Error AlterTable (Modify): Please check the FieldName.");
+							if(!$exec) {
+								throw new \Exception("Error AlterTable (Modify): Please check the FieldName.");
+							}
 						}
 					}
 					if(!empty($add)) {
 						foreach ($add as $fieldAdd) {
 							$fieldstext .= $fieldAdd['NAME'].' ';  
 							// Création de la requête
-							$sql= "ALTER TABLE `".$tableID."`
-								   ADD ".$fieldAdd['NAME']." ".$fieldAdd['TYPE'];
+							$sql= "ALTER TABLE ".$this->stringSeparator.$tableID.$this->stringSeparator." ADD ".$fieldAdd['NAME']." ".$fieldAdd['TYPE'];								
+							$q = $this->pdo->prepare($sql);
+							$exec = $q->execute();
 							
-						}
-						$q = $dbh->prepare($sql);
-						$exec = $q->execute();
-						
-						if(!$exec) {
-							$errorInfo = $dbh->errorInfo();
-							throw new \Exception("Error AlterTable (Add): ".$errorInfo[2]);
+							if(!$exec) {
+								$errorInfo = $this->pdo->errorInfo();
+								throw new \Exception("Error AlterTable (Add): ".$errorInfo[2]);
+							}
 						}
 					}
-				
+					// Commit
+					$this->pdo->commit();	
 				} catch (\PDOException $e) {
-					if(!empty($dbh))
-						$dbh->rollBack();
-					$error = 'CheckTable: '.$e->getMessage();
-					$this->messages[] = array('type' => 'error', 'message' => 'CheckTable: (Modify)'.$e->getMessage());
+					if(!empty($this->pdo)) {
+						$this->pdo->rollBack();
+					}
+					$error = 'CheckTable: Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$this->messages[] = array('type' => 'error', 'message' => 'CheckTable: (Modify)'.$error);
 					$this->logger->error($error);
 					return null;
 				}
-				// Commit
-				$dbh->commit();
-				// Suppression de l'objet PDO
-				$dbh = null;
 				
 				// Mise à jour des données de la table créée pour la nouvelle règle dans la base de données 
 				$sqlFields = "INSERT INTO `RuleParam` (`rule_id`,`name`,`value`) VALUES (:ruleId, 'tableID', :tableID)";
@@ -923,10 +863,8 @@ class databasecore extends solution {
 			} 
 			return null;
 		} catch (\Exception $e) {
-			if(!empty($dbh))
-				$dbh->rollBack();
-			$error = 'CheckTable: '.$e->getMessage();
-			$this->messages[] = array('type' => 'error', 'message' => 'CheckTable: '.$e->getMessage());
+			$error = 'CheckTable: Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->messages[] = array('type' => 'error', 'message' => $error);
 			$this->logger->error($error);
 			return null;
 		}
@@ -934,12 +872,16 @@ class databasecore extends solution {
 	
 	// Créer un table dans Database
 	protected function createDatabaseTable($param) {
+<<<<<<< HEAD
 	    $dbh = new \PDO($this->driver.':host='.$this->host.';port='.$this->port.';dbname='.$this->dbname, $this->login, $this->password);
 
 		$sql = "CREATE TABLE `".$param['rule']['name_slug']."` (
 			id INT(6) UNSIGNED AUTO_INCREMENT,
 			date_modified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,";
 
+=======
+	    $sql = $this->get_query_create_table_header($param['rule']['name_slug']);
+>>>>>>> refs/remotes/origin/hotfix
 		
 		if (empty($param['ruleFields'])) {
 			throw new \Exception("Failed to create the table, no field in the Rule ".$param['rule']['name_slug']);
@@ -960,6 +902,7 @@ class databasecore extends solution {
 			}
 			$fieldName = substr($fieldName, 0, -1);
 			$sql.= $fieldName." ".$mappingType.",";
+<<<<<<< HEAD
 			/*$xml.=		"<mapping>
 							<fileField>".$param['rule']['rule_module_source'].'_'.$ruleField['target_field_name']."</fileField>
 							<displayName>".(in_array($ruleField['target_field_name'],array('Metric','Date')) ? $ruleField['source_field_name'] : $fieldName)."</displayName>
@@ -972,12 +915,17 @@ class databasecore extends solution {
 				)";
 			   
 		$q = $dbh->prepare($sql);
+=======
+		}
+		$sql.= " INDEX ".$this->stringSeparator.$param['rule']['name_slug']."_date_modified".$this->stringSeparator." (date_modified))";						   
+		$q = $this->pdo->prepare($sql);
+>>>>>>> refs/remotes/origin/hotfix
 		$exec = $q->execute();
 		
-		$dbh = null;
 		if(!$exec) { // Si erreur
-			$errorInfo = $dbh->errorInfo();
-			throw new \Exception("Failed to create the table, :" . $errorInfo[2]);
+			$errorInfo = $this->pdo->errorInfo();
+			throw new \Exception('Failed to create the table, :' . $errorInfo[2].' - Query : '.$sql);
+			$this->logger->error('Failed to create the table, :' . $errorInfo[2].' - Query : '.$sql);
 		}
 		$this->messages[] = array('type' => 'success', 'message' => 'Table '.$param['rule']['name_slug'].' successfully created in Database. ');		
 		return $this->saveConnectorParams($param['ruleId'], $param['rule']['name_slug']);
@@ -992,6 +940,7 @@ class databasecore extends solution {
 		$stmt->execute();	   				
 		return $idTable;
 	}
+<<<<<<< HEAD
 	
 	// Permet d indiquer si on envoie les champs standard ou si on renvoie en plus les champs de relation dans get_module_field
 	public function extendField ($moduleTarget) {
@@ -1071,11 +1020,9 @@ class databasecore extends solution {
 		
 		$result = (json_decode(json_encode((array)$xml), true)); // Encode en json (avec une convertion en array) puis le décode afin d'obtenir un array correctement traitable
 		if(empty($result))	throw new \Exception ("Call returned an empty response."); // Traitement d'erreur si on a une réponse vide
+=======
+>>>>>>> refs/remotes/origin/hotfix
 		
-		ob_end_flush();
-		return $result;	// Renvoie le résultat de call()
-    }
-	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
 	protected function dateTimeFromMyddleware($dateTime) {
 		try {
@@ -1096,10 +1043,11 @@ class databasecore extends solution {
 			}
 			return $date->format('d/m/Y H:i');
 		} catch (\Exception $e) {
-			$result['error'] = $e->getMessage();
+			$result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			return $result;
 		}
 	}// dateTimeFromMyddleware($dateTime)   
+<<<<<<< HEAD
 	
 	
 	// Permet de récupérer la source ID du document en paramètre
@@ -1112,6 +1060,9 @@ class databasecore extends solution {
 		$sourceId = $stmt->fetch();		
 		return $sourceId['source_id'];
 	}
+=======
+
+>>>>>>> refs/remotes/origin/hotfix
 	
 	// Fonction permettant de récupérer le type d'un champ
 	protected function getMappingType($field) {
@@ -1126,7 +1077,7 @@ class databasecore extends solution {
 			return 'INT';
 		}
 		if (stripos($field, 'BOOL') !== false) {
-			return 'BOOL';
+			return 'TINYINT';
 		}
 		if (stripos($field, 'DATE') !== false) {
 			return 'DATE';
@@ -1150,6 +1101,7 @@ class databasecore extends solution {
 		return false;
 	}
 	
+<<<<<<< HEAD
 	// Ajout de contrôle lors d'un sauvegarde de la règle
 	public function beforeRuleSave($data,$type) {
 		if($type == "target") {
@@ -1219,6 +1171,8 @@ class databasecore extends solution {
 	}
 	
 	
+=======
+>>>>>>> refs/remotes/origin/hotfix
 	// Après la sauvegarde d'une règle Database (en cible) on crée ou modifie la table Database
 	public function afterRuleSave($data,$type) {
 		try {
@@ -1257,8 +1211,8 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
-			$this->messages[] = array('type' => 'error', 'message' => 'Failed to create the table in Database : '.$e->getMessage());
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->messages[] = array('type' => 'error', 'message' => 'Failed to create the table in Database : '.$error);
 		}
 		return $this->messages;
 	}
@@ -1295,7 +1249,6 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e){
 			return array();
-			//return $e->getMessage();
 		}
 	}
 

@@ -43,13 +43,23 @@ class LoadSolutionData implements FixtureInterface
 									array('id' => '8', 'name' => 'bittle',				'active' => 1,'source' => 0,'target' => 1),
 									array('id' => '9', 'name' => 'sagecrm',				'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '10', 'name' => 'sapcrm',				'active' => 0,'source' => 1,'target' => 1),
+<<<<<<< HEAD
 									array('id' => '11', 'name' => 'database',			'active' => 1,'source' => 1,'target' => 1),
+=======
+									array('id' => '11', 'name' => 'mysql',				'active' => 1,'source' => 1,'target' => 1),
+>>>>>>> refs/remotes/origin/hotfix
 									array('id' => '12', 'name' => 'sapecc',				'active' => 0,'source' => 1,'target' => 0),
 									array('id' => '13', 'name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '14', 'name' => 'moodle',				'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '15', 'name' => 'file',				'active' => 1,'source' => 1,'target' => 0),
+<<<<<<< HEAD
 									array('id' => '16', 'name' => 'shop_application',	'active' => 1,'source' => 1,'target' => 1),
 									array('id' => '17', 'name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1)
+=======
+									array('id' => '16', 'name' => 'shopapplication',	'active' => 1,'source' => 1,'target' => 1),
+									array('id' => '17', 'name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1),
+									array('id' => '18', 'name' => 'microsoftsql',		'active' => 1,'source' => 1,'target' => 1),
+>>>>>>> refs/remotes/origin/hotfix
 							);
  
     public function load(ObjectManager $manager){
