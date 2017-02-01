@@ -442,9 +442,9 @@ class FluxControllerCore extends Controller
 	                   ->findOneById($doc[0]->getRule());						   
 					   
 			// Chargement des tables source, target, history
-			$source = $this->listeFluxTable($id,'source');			
-			$target = $this->listeFluxTable($id,'target');						
-			$history = $this->listeFluxTable($id,'history');
+			$source = $this->listeFluxTable($id,'S');			
+			$target = $this->listeFluxTable($id,'T');						
+			$history = $this->listeFluxTable($id,'H');
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
 	                   						  ->findBy(
@@ -471,12 +471,11 @@ class FluxControllerCore extends Controller
 				$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
 				$solution_source = (($solution_source == NULL) ? array() : $solution_source );
 		
-			$list_btn = array_merge( $solution_target, $solution_source );	
-													
+			$list_btn = array_merge( $solution_target, $solution_source );													
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
-				'source' => $source[0],
-				'target' => $target[0],
-				'history' => $history[0],
+				'source' => $source,
+				'target' => $target,
+				'history' => $history,
 				'doc' => $doc[0],
 		        'nb' => $compact['nb'],
 		        'entities' => $compact['entities'],
@@ -660,54 +659,18 @@ class FluxControllerCore extends Controller
 
 	// Liste tous les flux d'un type
 	private function listeFluxTable($id,$type) {
-		
-		try {
-			$tools = $this->container->get('myddleware_tools.tools');
-			$conn = $this->get( 'database_connection' );	
-		
-			// Document
-			$stmt = $conn->prepare('SELECT rule_id 
-									FROM Document 
-									WHERE id = :id');  
-								 
-			$stmt->bindValue('id', $id);  
-			$stmt->execute();  
-			$flux['source']['champ'] = $stmt->fetch();  
-			
-			// Regle
-			$stmt = $conn->prepare('SELECT name_slug, version 
-									FROM Rule 
-									WHERE id = :id'); 								  
-			$stmt->bindValue('id', $flux['source']['champ']['rule_id']);  
-			$stmt->execute();
-			$flux['source'] = $stmt->fetch(); 
-			$flux['source']['table'] = $flux['source']['name_slug'].'_'.$flux['source']['version']; 
-			
-			$table = 'z_'.$flux['source']['table'].'_'.$type;
-			$idName = 'id_'.$flux['source']['table'].'_'.$type;  
-			$stmt = $conn->prepare("SELECT * 
-									FROM $table
-									WHERE $idName = :id");  	  
-			$stmt->bindValue(':id', $id);  
-			$stmt->execute();  
-			$flux['source']['data'] = $stmt->fetchAll(); 
-			$first = true;
-			// Récupération des types de champs pour la table en cours
-			$fieldsDetail = $tools->describeTable($table);
-
-			foreach ($flux['source']['data'] as $indice => $line) {		  	
-				foreach ($line as $field => $value) {
-					if($first) {
-						$first = false;
-						$flux['source']['data'][$indice][$field] = $value;
-						continue;
-					}
-					else {		 	
-						$flux['source']['data'][$indice][$field] = $value;
-					}				
-				}
+		try {		
+			// Get document data
+			$documentDataEntity = $this->getDoctrine()->getManager()->getRepository('RegleBundle:DocumentData')
+										->findOneBy( array(
+											'doc_id' => $id,
+											'type' => $type
+											)
+										);
+			if(!empty($documentDataEntity)) {							
+				return json_decode($documentDataEntity->getData(),true);	
 			}
-			return array($flux['source']['data'],$id);			
+			return null;			
 		}
 		catch(Exception $e) {
 			return false;

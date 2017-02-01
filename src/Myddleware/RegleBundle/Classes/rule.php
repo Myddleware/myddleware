@@ -46,7 +46,6 @@ class rulecore {
 	protected $ruleParams;
 	protected $sourceFields;
 	protected $targetFields;
-	protected $fieldsType;
 	protected $ruleRelationships;
 	protected $ruleFilters;
 	protected $solutionSource;
@@ -286,7 +285,6 @@ class rulecore {
 							$i++;
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
-							$param['fieldsType'] = $this->fieldsType;
 							$document = new document($this->logger, $this->container, $this->connection, $param);
 							$createDocument = $document->createDocument();
 							if (!$createDocument) {
@@ -955,7 +953,6 @@ class rulecore {
 		$send['ruleFields'] = $this->ruleFields;
 		$send['ruleParams'] = $this->ruleParams;
 		$send['ruleRelationships'] = $this->ruleRelationships;
-		$send['fieldsType'] = $this->fieldsType;
 		$send['jobId'] = $this->jobId;
 		// Si des données sont prêtes à être créées
 		if (!empty($send['data'])) {
@@ -1193,30 +1190,7 @@ class rulecore {
 			}
 			if (!empty($this->sourceFields)) {
 				$this->sourceFields = array_unique($this->sourceFields); 				
-			}			
-			// Récupération des types de champs de la source
-			$sourceTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_source";
-			$sqlParams = "SHOW COLUMNS FROM ".$sourceTable;
-			$stmt = $this->connection->prepare($sqlParams);
-		    $stmt->execute();	   				
-			$sourceFields = $stmt->fetchAll();
-			if (!empty($sourceFields)) {
-				foreach ($sourceFields as $sourceFiled) {
-					$this->fieldsType['source'][$sourceFiled['Field']] = $sourceFiled;
-				}
-			}
-		
-			// Récupération des types de champs de la target
-			$targetTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_target";
-			$sqlParams = "SHOW COLUMNS FROM ".$targetTable;
-			$stmt = $this->connection->prepare($sqlParams);
-		    $stmt->execute();	   				
-			$targetFileds = $stmt->fetchAll();
-			if (!empty($targetFileds)) {
-				foreach ($targetFileds as $targetField) {
-					$this->fieldsType['target'][$targetField['Field']] = $targetField;
-				}
-			}			
+			}						
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
 		}

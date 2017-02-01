@@ -1874,7 +1874,6 @@ class DefaultControllerCore extends Controller
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 		// Array with the objects list flush in the database in case we have to rollback
 		$objectToRemove = array();
-		$createTableRule = array();
 	
 	    // On récupére l'EntityManager
 		$this->getInstanceBdd();				   
@@ -2099,22 +2098,15 @@ class DefaultControllerCore extends Controller
 			}
 			
 			//------------------------------- Create rule fields ------------------- 
-			$fields_source = array();
-			$fields_target = array();	
 			$debug = array();
 					
-			if(isset($tab_new_rule['fields'])) {
-				
-				foreach ($tab_new_rule['fields']['name'] as $field_target => $c) {
-					
-					$fields_target[] = trim($field_target);		
+			if(isset($tab_new_rule['fields'])) {			
+				foreach ($tab_new_rule['fields']['name'] as $field_target => $c) {	
 					$field_source ="";	
 					if(isset($c['champs'])) {						
 						foreach ($c['champs'] as $name) {
 							$field_source .= $name.";";
-							$fields_source[] = $name;
-						}	
-						
+						}						
 						$field_source = trim($field_source,";");					
 					}
 
@@ -2185,51 +2177,12 @@ class DefaultControllerCore extends Controller
 				    $this->em->flush(); 
 				}
 			}
-					
-			//------------------------------- ADD TABLE SOURCE -------------------
-
-			$fields_source = array_unique($fields_source);	
-			$ps = array(
-				'name' => $nameRule,
-				'version' => $version,
-				'fields_rule' => array_merge($fields_source,((isset($tabRelationShips['source'])) ? $tabRelationShips['source'] : array())),
-				'fields_all' => ((isset($myddlewareSession['param']['rule']['source']['fields']) ? $myddlewareSession['param']['rule']['source']['fields'] : '')),
-				'type' => 'source'			
-			);				
-			$createTableRule[] = $this->createTableRule( $ps );
-				
-			//------------------------------- ADD TABLE TARGET -------------------
-			$fields_target_tab = ((isset($myddlewareSession['param']['rule']['target']['fields'])) ? $myddlewareSession['param']['rule']['target']['fields'] : array() );
-			$fields_target_rule = array_merge($fields_target,((isset($tabRelationShips['target'])) ? $tabRelationShips['target'] : array()));
-			$fields_target = array_unique($fields_target);
-			$pt = array(
-				'name' => $nameRule,
-				'version' => $version,
-				'fields_rule' => $fields_target_rule,
-				'fields_all' => $fields_target_tab,
-				'type' => 'target',	
-			);
 			
-			$createTableRule[] = $this->createTableRule( $pt );
-
-			//------------------------------- ADD TABLE TARGET HISTORY-------------------
-			
-			$ph = array(
-				'name' => $nameRule,
-				'version' => $version,
-				'fields_rule' => $fields_target_rule,
-				'fields_all' => $fields_target_tab,
-				'type' => 'history',			
-			);
-			
-			$createTableRule[] = $this->createTableRule( $ph );	
-					
-			$job = $this->get('myddleware_job.job');		
-			$job->orderRules();
-				
-
 			
 			// --------------------------------------------------------------------------------------------------
+			// Order all rules
+			$job = $this->get('myddleware_job.job');		
+			$job->orderRules();
 			
 			// notification 
 			$solution_source = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['source']['solution']);
@@ -2240,8 +2193,7 @@ class DefaultControllerCore extends Controller
 			// notification
 			
 			// --------------------------------------------------------------------------------------------------	
-			
-			
+				
 			// Détection règle root ou child rev 1.08 ----------------------
 			// On réactualise les paramètres
 			$tab_new_rule['content']['params'] = $p;
@@ -2285,12 +2237,6 @@ class DefaultControllerCore extends Controller
 				}
 				$this->em->flush();
 				$this->em->close();	
-				// Suppression des tables créées
-				if (!empty($createTableRule)) {		
-					foreach($createTableRule as $table) {		
-						$this->connection->executeQuery( "DROP TABLE IF EXISTS z_".$table);
-					}
-				}
 				$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
 				echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
 				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
@@ -2743,40 +2689,6 @@ class DefaultControllerCore extends Controller
 		}		
 	}
 
-	// Crée une table dans la base de données
-	private function createTableRule($p) {
-		$this->getInstanceBdd();
-		// $encryption =  $this->container->getParameter('encryption');
-
-		$name_table = $p['name'].'_'.$p['version'].'_'.$p['type'];
-	
-		// Creation de la table document
-		$sql_create = "
-		CREATE TABLE IF NOT EXISTS z_$name_table (
-									id_$name_table varchar(255),";
-		
-		// Boucle sur tous les champs de la source pour creer la table
-		if($p['fields_rule']) {	
-			// Dédoublonage des tableau dans le cas où le champ est plusieurs fois (ticket 522)
-			$p['fields_rule'] = array_unique($p['fields_rule']);
-			foreach ($p['fields_rule'] as $field) {
-					
-				if(isset($p['fields_all'][trim($field)]['type_bdd'])) {
-					$sql_create.= $field." ".$p['fields_all'][trim($field)]['type_bdd'].",";	
-				}
-				else {
-					$sql_create.= $field." varchar(255),";		
-				}	
-			}
-		}
-		
-		$sql_create.= "PRIMARY KEY (id_$name_table)) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;";
-					
-		$this->connection->executeQuery( $sql_create );	
-		
-		return $name_table;
-	}
-	
 	// Décrypte les paramètres de connexion d'une solution
 	private function decrypt_params($tab_params) {
 		// Instanciate object to decrypte data

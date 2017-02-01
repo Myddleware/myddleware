@@ -122,14 +122,12 @@
 			<ul id="flux_source">
 			<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getSource }}</span></li>
 	    	{% if source %}
-				{% for champs in source %} 
-					{% for key, value  in champs %}
-						{% if value != doc.getId  %}
-						 <li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
-						{% endif %}
-					{% endfor %}
-					<hr/>
-				{% endfor %} 
+				{% for key, value  in source %}
+					{% if value != doc.getId  %}
+					 <li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
+					{% endif %}
+				{% endfor %}
+				<hr/>
 			{% else %}	  
 				{{'view_flux.empty'|trans}}
 			{% endif %}
@@ -143,14 +141,12 @@
     		<p class="ctr">{{'view_flux.target'|trans}}</p>
 			<ul id="flux_target" data-id="{{doc.getId}}" data-rule="{{ doc.getRule }}">
 	    	{% if target %}
-				{% for champs in target %}
-					<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getTarget }}</span></li>
-					{% for key, value  in champs %}
-						{% if value != doc.getId  %}
-							<li class="{{ key }}"><span class="field">{{ key }}</span><span class="value">{{ value }}</span></li>
-						{% endif %}
-					{% endfor %}
-				{% endfor %} 
+				<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getTarget }}</span></li>
+				{% for key, value  in target %}
+					{% if value != doc.getId  %}
+						<li class="{{ key }}"><span class="field">{{ key }}</span><span class="value">{{ value }}</span></li>
+					{% endif %}
+				{% endfor %}
 			{% else %}	  
 				{{'view_flux.empty'|trans}}
 			{% endif %} 
@@ -163,15 +159,13 @@
     		<p class="ctr"><img src="{{ asset('bundles/regle/images/template/') }}history.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></p>
     		<p class="ctr">{{'view_flux.history'|trans}}</p>
 	    	{% if history %}
-				{% for champs in history %} 
-					<ul id="flux_history">
-					    {% for key, value  in champs %}
-					    	{% if value != doc.getId  %}
-					        	<li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
-					        {% endif %}
-					    {% endfor %}
-					</ul>
-				{% endfor %} 
+				<ul id="flux_history">
+					{% for key, value  in history %}
+						{% if value != doc.getId  %}
+							<li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
+						{% endif %}
+					{% endfor %}
+				</ul>
 			{% else %}	  
 			{{'view_flux.empty'|trans}}
 			{% endif %} 
