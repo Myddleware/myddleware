@@ -933,6 +933,7 @@ class rulecore {
 	}
 	
 	protected function sendTarget($type, $documentId = null) {
+echo 'tztztztz '.$type.chr(10);	
 		// Permet de charger dans la classe toutes les relations de la règle
 		$response = array();
 		$response['error'] = '';
@@ -940,13 +941,16 @@ class rulecore {
 		// Le type peut-être vide das le cas d'un relancement de flux après une erreur
 		if (empty($type)) {
 			$documentData = $this->getDocumentData($documentId);
+print_r($documentData);			
 			if (!empty($documentData['type'])) {
 				$type = $documentData['type'];
 			}
 		}
 		
 		// Récupération du contenu de la table target pour tous les documents à envoyer à la cible
+echo '000'.chr(10);			
 		$send['data'] = $this->getSendDocuments($type, $documentId);
+echo '001'.chr(10);			
 		$send['module'] = $this->rule['module_target'];
 		$send['ruleId'] = $this->rule['id'];
 		$send['rule'] = $this->rule;
@@ -977,6 +981,7 @@ class rulecore {
 				}
 				// Modification des données dans la cible
 				elseif ($type == 'U') {
+echo 'AAA'.chr(10);				
 					$send['data'] = $this->clearSendData($send['data']);
 					// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
 					$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
@@ -1096,6 +1101,7 @@ class rulecore {
 	}
 	
 	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {
+	
 		$nameId = "id_".$this->rule['name_slug']."_".$this->rule['version']."_".$table; 
 		$tableRule = "z_".$this->rule['name_slug']."_".$this->rule['version']."_".$table;
 		

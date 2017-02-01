@@ -438,13 +438,31 @@ class FluxControllerCore extends Controller
 			}											
 			// Detecte si la session est le support ---------
 
-			$rule = $em->getRepository('RegleBundle:Rule')
-	                   ->findOneById($doc[0]->getRule());						   
-					   
+			// Get rule object
+			$rule = $em->getRepository('RegleBundle:Rule')->findOneById($doc[0]->getRule());						   
+				
 			// Chargement des tables source, target, history
-			$source = $this->listeFluxTable($id,'S');			
+			$source = $this->listeFluxTable($id,'S');	
 			$target = $this->listeFluxTable($id,'T');						
 			$history = $this->listeFluxTable($id,'H');
+
+			// Get rulefield object
+			$ruleFields	= $em->getRepository('RegleBundle:RuleField')->findByRule($doc[0]->getRule());
+			// Get each data for each rule fields
+			$historyData = array();
+			foreach($ruleFields as $ruleField) {
+				// We keep only the fields in the rule 
+				// It could be several fields in the source fields (in case of formula)
+				$sourceFields = explode(";",$ruleField->getSource());
+				foreach ($sourceFields as $sourceField) {
+					$sourceData[$sourceField] = $source[$sourceField];
+				}
+				$targetField = $ruleField->getTarget();
+				$targetData[$targetField] = $target[$targetField];
+				if (!empty($history)) {
+					$historyData[$targetField] = $history[$targetField];
+				}
+			}		
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
 	                   						  ->findBy(
@@ -473,9 +491,9 @@ class FluxControllerCore extends Controller
 		
 			$list_btn = array_merge( $solution_target, $solution_source );													
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
-				'source' => $source,
-				'target' => $target,
-				'history' => $history,
+				'source' => $sourceData,
+				'target' => $targetData,
+				'history' => $historyData,
 				'doc' => $doc[0],
 		        'nb' => $compact['nb'],
 		        'entities' => $compact['entities'],

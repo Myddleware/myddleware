@@ -147,34 +147,28 @@ class documentcore {
 			$this->jobActive = false;
 		}		
 		
-		// Si le mode est Front office alors on n'initialise pas les attributs de l'objet document
-		if(
-				empty($param['mode']) 
-			 || (
-					!empty($param['mode'])
-				&& $param['mode'] != 'front_office'
-			)
-		) {
-			if (!empty($param['id_doc_myddleware'])) {		
-				$this->setDocument($param['id_doc_myddleware']);
-			}
-			else {
-				$this->id = uniqid('', true);
-				$this->dateCreated = gmdate('Y-m-d H:i:s');
-				$this->ruleName = $param['rule']['name_slug'];
-				$this->ruleVersion = $param['rule']['version'];
-				$this->ruleMode = $param['rule']['mode'];
-				$this->ruleId = $param['rule']['id'];
-				$this->ruleFields = $param['ruleFields'];
-				$this->data = $param['data'];
-				$this->sourceId = $this->data['id'];
-				$this->userId = $param['rule']['created_by'];
-				$this->status = 'New';
-				$this->attempt = 0;
-			} 
-			// Ajout des paramètre de la règle
-			$this->setRuleParam();
+		// Init attribut of the class Document
+		if (!empty($param['id_doc_myddleware'])) {	
+			// Instanciate attribut sourceData
+			$this->setDocument($param['id_doc_myddleware']);
 		}
+		else {
+			$this->id = uniqid('', true);
+			$this->dateCreated = gmdate('Y-m-d H:i:s');
+			$this->ruleName = $param['rule']['name_slug'];
+			$this->ruleVersion = $param['rule']['version'];
+			$this->ruleMode = $param['rule']['mode'];
+			$this->ruleId = $param['rule']['id'];
+			$this->ruleFields = $param['ruleFields'];
+			$this->data = $param['data'];
+			$this->sourceId = $this->data['id'];
+			$this->userId = $param['rule']['created_by'];
+			$this->status = 'New';
+			$this->attempt = 0;
+		} 
+		// Ajout des paramètre de la règle
+		$this->setRuleParam();
+
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
 			$this->ruleFields = $param['ruleFields'];
@@ -220,8 +214,8 @@ class documentcore {
 				$this->type_document = $this->document_data['type'];
 				$this->attempt = $this->document_data['attempt'];
 				
-				// Instanciate attribut sourceData
-				$this->getDocumentData('S');
+				// Get source data and create data attribut
+				$this->sourceData = $this->getDocumentData('S');			  
 				$this->data = $this->sourceData;
 				// Get document header 				
  			 	$documentEntity = $this->em
@@ -334,10 +328,7 @@ class documentcore {
 		try {
 			$filterOK = true;
 			// Si des filtres sont présents 
-			if (!empty($ruleFilters)) {
-				// Récupération des données source
-				$this->getDocumentData('S');
-			
+			if (!empty($ruleFilters)) {		
 				// Boucle sur les filtres
 				foreach ($ruleFilters as $ruleFilter) {			
 					if(!$this->checkFilter($this->sourceData[$ruleFilter['target']],$ruleFilter['type'],$ruleFilter['value'])) {
@@ -636,7 +627,6 @@ class documentcore {
 					!empty($this->ruleRelationships)
 				&& !$this->isChild()
 			) {
-				$this->getDocumentData('S');
 				$error = false;
 				// Vérification de chaque relation de la règle
 				foreach ($this->ruleRelationships as $ruleRelationship) {			
@@ -778,7 +768,6 @@ class documentcore {
 			}
 			// Si on est en mode recherche on récupère la donnée cible avec les paramètre de la source
 			elseif ($this->type_document == 'S') {
-				$this->getDocumentData('S');
 				if (!empty($this->sourceData)) {
 					// Un seul champ de recherche pour l'instant. Les règle recherche ne peuvent donc n'avoir qu'un seul champ
 					$searchFields[$this->ruleField[0]['target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
@@ -812,8 +801,6 @@ class documentcore {
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
-				// Charge les données source du document dans $this->sourceData
-				$this->getDocumentData('S');
 			
 				// Récupération des valeurs de la source pour chaque champ de recherche
 				foreach($duplicate_fields as $duplicate_field) {
@@ -889,8 +876,7 @@ class documentcore {
 				$ruleParam['jobId'] = $this->jobId;				
 				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);				
 
-				// Get the data of the current document to build the query in function generateDocuments
-				$this->getDocumentData('S');
+				// Build the query in function generateDocuments
 				if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
 					$idQuery = $this->sourceData[$childRuleId['field_name_source']];
 				} else {
@@ -920,44 +906,28 @@ class documentcore {
 	
 	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
 	protected function checkNoChange() {
-echo 'checkNoChange '.$this->id.chr(10);	
+		// Get target data 
 		$target = $this->getDocumentData('T');
-echo 'tata '.$this->id.chr(10);	
-print_r($target);		
+	
+		// Get data in the target solution (if exists) before we update it
 		$history = $this->getDocumentData('H');
-print_r($history);		
-// Peut etre faire, pour tous les champs de rulefiled target, si les champs sont égaux dans les 2 tableaux alors no change ... A réfléchir
-		// Récupération des données à envoyer
-		$tableTarget = "z_".$this->ruleName."_".$this->ruleVersion."_target";
-		$sendQuery = "SELECT * FROM $tableTarget WHERE id_".$this->ruleName."_".$this->ruleVersion."_target = '$this->id'";		
-		$stmt = $this->connection->prepare($sendQuery);
-		$stmt->execute();	   				
-		$send = $stmt->fetch();
 
-		// Récupération des données actuele de la cible
-		$tableHistory = "z_".$this->ruleName."_".$this->ruleVersion."_history";
-		$currentQuery = "SELECT * FROM $tableHistory WHERE id_".$this->ruleName."_".$this->ruleVersion."_history = '$this->id'";		
-		$stmt = $this->connection->prepare($currentQuery);
-		$stmt->execute();	   				
-		$history = $stmt->fetch();
-		
-		// Comparaison des tableau
-		if (
-				!empty($history)
-			&& !empty($send)
-		) {
-			$diff1 = array_diff($history, $send);
-			$diff2 = array_diff($send, $history);
-			// Si aucun changement alors clôture directe du document sans envoi à la cible
+		// For each target fields, we compare the data we want to send and the data already in the target solution
+		// If one is different we stop the function
+		foreach ($this->ruleFields as $field) {
 			if (
-					empty($diff1)
-				&&	empty($diff2)
-			) {
-				$this->message .= 'Identical data to the target system. This document is canceled. ';
-				$this->typeError = 'W';
-				$this->updateStatus('No_send');
+					!isset($target[$field['target_field_name']])
+				 ||	!isset($history[$field['target_field_name']])
+				 ||	$history[$field['target_field_name']] != $target[$field['target_field_name']]
+			){
+				return false;
 			}
-		}
+		}		
+		// If all fields are equal, no need to update, so we cancel the document
+		$this->message .= 'Identical data to the target system. This document is canceled. ';
+		$this->typeError = 'W';
+		$this->updateStatus('No_send');
+		return true;
 	}
 	
 	// Récupération des données dans la cible et sauvegarde dans la table d'historique
@@ -992,7 +962,7 @@ print_r($history);
 
 	// Permet de charger les données du système source pour ce document
 	protected function getDocumentData($type) {
-		try {
+		try {	
 			// if (empty($this->sourceData)) {
 				// Get document data
 				$documentDataEntity = $this->em
@@ -1003,9 +973,9 @@ print_r($history);
 											)
 									);
 				// Generate data array
-				if ($type == 'S') {
-					$this->sourceData = json_decode($documentDataEntity->getData(),true);
-				} else {
+				if (!empty($documentDataEntity)) {
+					// $this->sourceData = json_decode($documentDataEntity->getData(),true);
+				// } else {
 					return json_decode($documentDataEntity->getData(),true);
 				}
 			// }
@@ -1014,6 +984,7 @@ print_r($history);
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}		
+		return false;
 	}
 	
 	
@@ -1028,8 +999,7 @@ print_r($history);
 			$documentData->setType($type); // Source
 			$documentData->setData(json_encode($data)); // Encode in JSON
 			$this->em->persist($documentData);
-			$this->em->flush();
-echo 'titi : '.$documentData->getId().chr(10);			
+			$this->em->flush();		
 			if (empty($documentData->getId())) {
 				throw new \Exception( 'Failed to insert data source in table Document Data.' );
 			}
@@ -1046,9 +1016,6 @@ echo 'titi : '.$documentData->getId().chr(10);
 	
 	// Mise à jour de la table des données source
 	protected function updateHistoryTable($dataTarget) {
-echo 'toto'.chr(10);	
-print_r($dataTarget);	
-echo 'toto2'.chr(10);	
 		if (!empty($dataTarget)) {
 			try{	
 				if (!$this->insertDataTable($dataTarget,'H')) {
@@ -1063,13 +1030,10 @@ echo 'toto2'.chr(10);
 			}		
 		}
 		return false;
-
 	}
 	
 	// Mise à jour de la table des données cibles
 	protected function updateTargetTable() {
-		// Charge les données source du document dans $this->sourceData
-		$this->getDocumentData('S');
 		if (!empty($this->sourceData)) {
 			try{			
 				// Loop on every target field and calculate the value
