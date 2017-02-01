@@ -457,12 +457,27 @@ class FluxControllerCore extends Controller
 				foreach ($sourceFields as $sourceField) {
 					$sourceData[$sourceField] = $source[$sourceField];
 				}
+				// Target and history
 				$targetField = $ruleField->getTarget();
 				$targetData[$targetField] = $target[$targetField];
 				if (!empty($history)) {
 					$historyData[$targetField] = $history[$targetField];
 				}
-			}		
+			}	
+			// Get RuleRelationShip object
+			$RuleRelationShips = $em->getRepository('RegleBundle:RuleRelationShip')->findByRule($doc[0]->getRule());
+			// Get each data for each rule relationship
+			foreach($RuleRelationShips as $RuleRelationShip) {
+				$sourceField = $RuleRelationShip->getFieldNameSource();
+				$sourceData[$sourceField] = $source[$sourceField];
+				// Target and history
+				$targetField = $RuleRelationShip->getFieldNameTarget();
+				$targetData[$targetField] = $target[$targetField];
+				if (!empty($history)) {
+					$historyData[$targetField] = $history[$targetField];
+				}
+			}	
+
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
 	                   						  ->findBy(

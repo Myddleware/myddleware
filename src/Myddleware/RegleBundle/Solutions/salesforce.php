@@ -555,20 +555,12 @@ class salesforcecore extends solution {
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for create');
 		}
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 				$parameters = '';
 			    foreach ($data as $key => $value) {
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
 						continue;
@@ -642,22 +634,14 @@ class salesforcecore extends solution {
 	public function update($param) {		
 		$parameters = array();
 		if(!(isset($param['data']))) throw new \Exception ('Data missing for update');
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 				$parameters = '';
 			    foreach ($data as $key => $value) {
 			    	// Instanciation de l'URL d'appel
 			    	$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 					// On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
 						continue;

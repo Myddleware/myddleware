@@ -963,22 +963,17 @@ class documentcore {
 	// Permet de charger les données du système source pour ce document
 	protected function getDocumentData($type) {
 		try {	
-			// if (empty($this->sourceData)) {
-				// Get document data
-				$documentDataEntity = $this->em
-								->getRepository('RegleBundle:DocumentData')
-								->findOneBy( array(
-											'doc_id' => $this->id,
-											'type' => $type
-											)
-									);
-				// Generate data array
-				if (!empty($documentDataEntity)) {
-					// $this->sourceData = json_decode($documentDataEntity->getData(),true);
-				// } else {
-					return json_decode($documentDataEntity->getData(),true);
-				}
-			// }
+			$documentDataEntity = $this->em
+							->getRepository('RegleBundle:DocumentData')
+							->findOneBy( array(
+										'doc_id' => $this->id,
+										'type' => $type
+										)
+								);
+			// Generate data array
+			if (!empty($documentDataEntity)) {
+				return json_decode($documentDataEntity->getData(),true);
+			}
 		} catch (\Exception $e) {
 			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
@@ -991,13 +986,37 @@ class documentcore {
 	// Insert source data in table documentData
 	protected function insertDataTable($data,$type) {
 		try {	
+			// We save only fields which belong to the rule
+			if (!empty($this->ruleFields)) {
+				foreach ($this->ruleFields as $ruleField) {
+					if ($type == 'S') {
+						// It could be several fields in the source fields (in case of formula)
+						$sourceFields = explode(";",$ruleField['source_field_name']);
+						foreach ($sourceFields as $sourceField) {
+							$dataInsert[$sourceField] = $data[$sourceField];
+						}
+					} else {	
+						$dataInsert[$ruleField['target_field_name']] = $data[$ruleField['target_field_name']];
+					}
+				}
+			}
+			// We save the relationship field too 
+			if (!empty($this->ruleRelationships)) {
+				foreach ($this->ruleRelationships as $ruleRelationship) {
+					if ($type == 'S') {
+						$dataInsert[$ruleRelationship['field_name_source']] = $data[ruleRelationship['field_name_source']];
+					} else {	
+						$dataInsert[$ruleRelationship['field_name_target']] = $data[ruleRelationship['field_name_target']];
+					}
+				}
+			}
 			$documentEntity = $this->em
 	                          ->getRepository('RegleBundle:Document')
 	                          ->findOneById( $this->id );	
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
 			$documentData->setType($type); // Source
-			$documentData->setData(json_encode($data)); // Encode in JSON
+			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->em->persist($documentData);
 			$this->em->flush();		
 			if (empty($documentData->getId())) {

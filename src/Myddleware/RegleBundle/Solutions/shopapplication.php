@@ -416,7 +416,7 @@ class shopapplicationcore extends solution {
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
 				// Preparation of the post
-				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'C');
+				$dataTosSendTmp = $this->buildSendingData($param,$idDoc,$data,$this->childModuleParameters[$param['module']],'C');
 				
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
@@ -444,8 +444,7 @@ class shopapplicationcore extends solution {
 												'id' => $body[0]->id,
 												'error' => false
 										);											
-						// Set all id from the childs documents in the array $this->docIdList
-						$this->getTargetIds($param,$body[0]);										
+						// Set all id from the childs documents in the array $this->docIdList										
 						if (!empty($this->docIdList)) {
 							$result = array_merge($this->docIdList,$result);
 						}											
@@ -482,7 +481,7 @@ class shopapplicationcore extends solution {
 
 	
 		// Permet de créer un enregistrement
-	public function update($param) {	
+	public function update($param) {		
 		// For each record to send
 		foreach($param['data'] as $idDoc => $data) {
 			try {		
@@ -491,7 +490,7 @@ class shopapplicationcore extends solution {
 				$data = $this->checkDataBeforeUpdate($param, $data);
 
 				// Preparation of the put
-				$dataTosSendTmp = $this->buildSendingData($param,$data,$this->childModuleParameters[$param['module']],'U');
+				$dataTosSendTmp = $this->buildSendingData($param,$idDoc,$data,$this->childModuleParameters[$param['module']],'U');
 
 				// Add a dimension for the webservice
 				$dataTosSend[] = $dataTosSendTmp;
@@ -519,7 +518,6 @@ class shopapplicationcore extends solution {
 												'error' => false
 										);
 						// Set all id from the childs documents in the array $this->docIdList
-						$this->getTargetIds($param,$body[0]);
 						if (!empty($this->docIdList)) {
 							$result = array_merge($this->docIdList,$result);
 						}
@@ -553,65 +551,21 @@ class shopapplicationcore extends solution {
 		return $result;			
 	}	
 	
-	// Get the child target id from the response
-	protected function getTargetIds($param,$data,$entryName = '') {
-		if (!empty($data)) {
-			$idDocMyddlewareTemp = '';			
-			foreach($data as $key => $value) {				
-				if (
-						is_array($value)
-					 ||	is_object($value)
-				) {
-					// We don't keep numreric entry name because it is only the index of tab. 
-					// Exemple : for module optons_values we want to keep the entry name values
-					if (!is_numeric($key)) {
-						$newEntryName = $key;
-					}
-					else {
-						$newEntryName  = $entryName;
-					}
-					// Recursiv call
-					$this->getTargetIds($param,$value,$newEntryName);
-				}
-				// Save the document id
-				elseif ($key == 'id_doc_myddleware') {
-					// We have the entry_name, we search the id name
-					foreach ($this->childModuleParameters[$param['module']] as $subModule) {			
-						if ($subModule['entry_name'] == $entryName) {				
-							$this->docIdList[$value] = array(
-																	'id' => (!empty($data->$subModule['id_name']) ? $data->$subModule['id_name'] : ''), // Some submodule doesn't returned id (eg : product of an order)
-																	'error' => false
-															); 								
-						}
-					}						
-				}
-			}
-		}
-	}
-	
 		
 	// Generate the data to send in the create or update POST
 	// Entry_name is the name of the entry in cas the function is call for a child data
-	protected function buildSendingData($param,$data,$childModuleParameters,$mode, $entry_name = '',$level = array()) {		
-		$first = false;		
+	protected function buildSendingData($param,$idDoc,$data,$childModuleParameters,$mode, $entry_name = '',$level = array()) {		
 		$lockChild = false;
+		// Save all doc ID to change their status to send (child and parent document)
+		$this->docIdList[$idDoc] = array('id' => '','error' => false); 	
+		// For each fields of the record
 		foreach ($data as $key => $value) {		
 			$fieldStructure = '';
 			// Replace __ISO__ if the field contains __ISO__
 			if (!empty($param['ruleParams']['language'])) {
 				$key = str_replace('__ISO__', '__'.$param['ruleParams']['language'].'__', $key);
 			}
-			
-			// Jump the first value of the table data (contain the document id)
-			if (!$first && !is_array($value)) {			
-				// Save all doc ID to change their status to send (child and parent document)
-				$this->docIdList[$value] = array(
-													'id' => '',
-													'error' => false
-											); 	
-				$first = true;
-				continue;
-			}
+
 			// Target id isn't a shop-application field (it is used by Myddleware)
 			if ($key == 'target_id') {
 				if ($mode == 'U') {					
@@ -629,18 +583,18 @@ class shopapplicationcore extends solution {
 					$level[$param['module']][$key]  = 0;
 				}
 				$level[$param['module']][$key]++;
-				foreach($value as $subrecord) {			
+				foreach($value as $idDocSubrecord => $subrecord) {			
 					// Recursive call in case sub tab exist
 					// If there is no entry name found in the structure, we merge data inside the current level otherwise we add the array to the result
 					if (!empty($childModuleParameters[$key]['entry_name'])) {
 						// If thetype is an arry we create a new entry, otherwise it is a structure so we just add the struture
 						if ($childModuleParameters[$key]['type'] == 'array') {
-							$dataTosSend[$childModuleParameters[$key]['entry_name']][] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+							$dataTosSend[$childModuleParameters[$key]['entry_name']][] = $this->buildSendingData($param,$idDocSubrecord,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
 						} else { // structure
-							$dataTosSend[$childModuleParameters[$key]['entry_name']] = $this->buildSendingData($param,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
+							$dataTosSend[$childModuleParameters[$key]['entry_name']] = $this->buildSendingData($param,$idDocSubrecord,$subrecord,$childModuleParameters[$key],$mode,$key,$level);
 						}
 					} else {
-						$dataChild = $this->buildSendingData($param,$subrecord,$childModuleParameters,$mode,$key,$level);
+						$dataChild = $this->buildSendingData($param,$idDocSubrecord,$subrecord,$childModuleParameters,$mode,$key,$level);
 						// We create a new record if the key are equals (we could have an sub array with several records)
 						// This record is save to create data in the previous level
 						if (empty(array_diff_key ( $dataChild , $dataTosSend))) {

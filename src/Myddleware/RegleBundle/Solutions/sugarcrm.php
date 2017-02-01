@@ -414,7 +414,9 @@ class sugarcrmcore  extends solution {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
-			$result['date_ref'] = $param['date_ref'];
+			if (empty($param['offset'])) {
+				$param['offset'] = 0;
+			}
 			$currentCount = 0;		
 			$query = '';
 			if (empty($param['limit'])) {
@@ -435,7 +437,26 @@ class sugarcrmcore  extends solution {
 			$param['fields'] = array_unique($param['fields']);
 			
 			// Construction de la requête pour SugarCRM
-			if (empty($param['query'])) {
+			// if a specific query is requeted we don't use date_ref
+			if (!empty($param['query'])) {
+				foreach ($param['query'] as $key => $value) {
+					if (!empty($query)) {
+						$query .= ' AND ';
+					}
+					if ($key == 'email1') {
+						$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+					}
+					else {	
+						// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
+						if($param['module'] == 'ProspectLists') {	
+							$query .= "prospect_lists.".$key." = '".$value."' ";
+						}
+						else {
+							$query .= strtolower($param['module']).".".$key." = '".$value."' ";
+						}
+					}
+				}
+			} else {
 				// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
 				if($param['module'] == 'ProspectLists') {	
 					$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
@@ -479,7 +500,13 @@ class sugarcrmcore  extends solution {
 							$record[$value->name] = $value->value;
 							if (
 									$value->name == $DateRefField
-								&&	$result['date_ref'] < $value->value
+								&&	(
+										empty($result['date_ref'])
+									|| (
+											!empty($result['date_ref'])
+										&&	$result['date_ref'] < $value->value
+									)
+								)
 							) {
 								$result['date_ref'] = $value->value;
 							}
@@ -594,14 +621,8 @@ class sugarcrmcore  extends solution {
 			try {
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = true;
 				$dataSugar = array();
 				foreach ($data as $key => $value) {
-					// Saut de la première ligne qui contient l'id du document
-					if ($first) {
-						$first = false;
-						continue;
-					}
 					if($key == 'Birthdate' && $value == '0000-00-00') {
 						continue;
 					}
@@ -702,14 +723,8 @@ class sugarcrmcore  extends solution {
 			try {	
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-				$first = true;
 				$dataSugar = array();
 				foreach ($data as $key => $value) {
-					// Saut de la première ligne qui contient l'id du document
-					if ($first) {
-						$first = false;
-						continue;
-					}
 					// Important de renommer le champ id pour que SugarCRM puisse effectuer une modification et non une création
 					if ($key == 'target_id') {
 						$key = 'id';

@@ -613,21 +613,13 @@ class sagecrmcore extends solution {
 		$client->__setSoapHeaders(array($session_header));
 
 		if(!(isset($param['data']))) throw new \Exception ('Data missing for create');
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc =>$data) {
 			try{
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 			    $record = array();
 			    $object = array();
 			    foreach ($data as $key => $value) {
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 			        if ($key == 'target_id') {
 			            continue;
 			        }
@@ -714,21 +706,13 @@ class sagecrmcore extends solution {
 		$client->__setSoapHeaders(array($session_header));
 
 		if(!(isset($param['data']))) throw new \Exception ('Data missing for create');
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 			    $record = array();
 			    $object = array();
 			    foreach ($data as $key => $value) {
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 			        if ($key == 'target_id') {
 			        	$target_id = $value;
 			            continue;

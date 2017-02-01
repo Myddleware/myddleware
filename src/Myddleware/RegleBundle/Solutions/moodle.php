@@ -355,7 +355,7 @@ class moodlecore  extends solution {
 	} // get_module_fields($module)	 
 
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {	
+	public function read_last($param) {		
 		$query = '';
 		try {
 			// Si le tableau de requête est présent alors construction de la requête
@@ -380,7 +380,8 @@ class moodlecore  extends solution {
 					$functionname = 'local_myddleware_get_users_last_access';
 					break;	
 				default:
-					throw new \Exception("Module unknown. ");
+					$result['done'] = false;					
+					return $result;	
 					break;
 			}
 
@@ -504,15 +505,9 @@ class moodlecore  extends solution {
 			try {
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = true;
 				$dataSugar = array();
 				$obj = new \stdClass();
 				foreach ($data as $key => $value) {
-					// Saut de la première ligne qui contient l'id du document
-					if ($first) {
-						$first = false;
-						continue;
-					}
 					if (!empty($value)) {
 						$obj->$key = $value;
 					}
@@ -619,16 +614,10 @@ class moodlecore  extends solution {
 			try {
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-				$first = true;
 				$dataSugar = array();
 				$obj = new \stdClass();
 				foreach ($data as $key => $value) {
-					// Saut de la première ligne qui contient l'id du document
-					if ($first) {
-						$first = false;
-						continue;
-					}
-					elseif ($key == 'target_id') {
+					if ($key == 'target_id') {
 						continue;
 					}
 					if (!empty($value)) {

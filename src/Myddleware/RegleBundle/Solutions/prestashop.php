@@ -807,7 +807,7 @@ class prestashopcore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			// Check control before create
 			$data = $this->checkDataBeforeCreate($param, $data);
 			// on ajoute le token pour le module customer_threads 
@@ -816,17 +816,7 @@ class prestashopcore extends solution {
 			}
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
-				    $first = true;
-				    $idDoc  = '';
-				    $fields = array();
-				    foreach ($data as $key => $value) {
-				        // Récupération de l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
-					}							
+				    $fields = array();						
 					$opt = array(
 					    'resource' => $param['module'].'?schema=blank',
 					);
@@ -903,22 +893,12 @@ class prestashopcore extends solution {
 	
 	// Permet de modifier des données
 	public function update($param) {
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
-				    $first = true;
-				    $idDoc  = '';
-				    $fields = array();
-				    foreach ($data as $key => $value) {
-				        // Récupération de l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
-					}							
+				    $fields = array();							
 					$opt = array(
 					    'resource' => $param['module'],
 					    'id' => (int) $data['target_id']

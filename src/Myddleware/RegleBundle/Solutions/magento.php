@@ -524,14 +524,8 @@ class magentocore extends solution {
 			try {		
 				// Check control before update
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = false;
 				$dataMagento = array();
 				foreach ($data as $key => $value) {				
-					// Jump the first value of the table data (contain the document id)
-					if (!$first) {
-						$first = true;
-						continue;
-					}
 					// Target id isn't a field for Magento (it is used for Myddleware)
 					if ($key == 'target_id') {
 						continue;
@@ -589,14 +583,8 @@ class magentocore extends solution {
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
 				$target_id = '';
-				$first = false;
 				$dataMagento = array();
 				foreach ($data as $key => $value) {				
-					// Jump the first value of the table data (contain the document id)
-					if (!$first) {
-						$first = true;
-						continue;
-					}
 					// Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
 					if ($key == 'target_id') {
 						$target_id = $value;
