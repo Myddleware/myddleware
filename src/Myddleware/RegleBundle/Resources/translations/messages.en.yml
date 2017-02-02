@@ -154,7 +154,8 @@ view_rule:
         id: Id
         name: Name
         version: Version
-        datecreated: Date of creation
+        datecreated: Creation date
+        datemodified: Modification date
         mode: Mode
         bidirectional: Bidirectional
         duplicate_fields: Fields to avoid duplicates

@@ -308,7 +308,7 @@ class rulecore {
 		}
 		// On affiche pas d'erreur si la lecture est désactivée
 		elseif (empty($this->ruleParams['disableRead'])) {
-			$readSource['error'] = 'The rule '.$this->rule['name_slug'].' version '.$this->rule['version'].($this->rule['deleted'] == 1 ? ' is deleted.' : ' is disabled.');
+			$readSource['error'] = 'The rule '.$this->rule['name_slug'].($this->rule['deleted'] == 1 ? ' is deleted.' : ' is disabled.');
 		}
 		return $readSource;
 	}
@@ -529,6 +529,7 @@ class rulecore {
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['solutionTarget'] = $this->solutionTarget;
 				$param['ruleFields'] = $this->ruleFields;
+				$param['ruleRelationships'] = $this->ruleRelationships;
 				$param['jobId'] = $this->jobId;
 				$param['key'] = $this->key;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
@@ -587,7 +588,6 @@ class rulecore {
 	// Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
 	// data est de la forme : 
 		// [ruleName] => nom
-		// [ruleVersion] => 001
 		// [oldRule] => id de la règle précédente
 		// [connector] => Array ( [source] => 3 [cible] => 30 ) 
 		// [content] => Array ( 
@@ -1102,11 +1102,7 @@ class rulecore {
 		}
 	}
 	
-	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {
-	
-		// $nameId = "id_".$this->rule['name_slug']."_".$this->rule['version']."_".$table; 
-		// $tableRule = "z_".$this->rule['name_slug']."_".$this->rule['version']."_".$table;
-		
+	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {	
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
 			$documentFilter = " Document.id = '$documentId'";
@@ -1149,12 +1145,9 @@ class rulecore {
 						$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
 					}
 				}
-			}
-print_r($document);			
+			}	
 			$data = $this->getDocumentData($document['id_doc_myddleware'], 'T');
-			$return[$document['id_doc_myddleware']] = array_merge($document,$data);
-		
-print_r($data);			
+			$return[$document['id_doc_myddleware']] = array_merge($document,$data);		
 		}
 
 		if (!empty($return)) {

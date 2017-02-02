@@ -24,21 +24,17 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Entity;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity; // unique
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentData
+ * RuleAudit
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\DocumentDataRepository")
- * @ORM\Table(indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_job_id_type", columns={"doc_id","type"})
- *})
+ * @ORM\Entity 
+ * @ORM\Table(indexes={@ORM\Index(name="index_ruleid", columns={"rule_id"})}) 
  */
-class DocumentData
+class RuleAudit
 {
     /**
      * @var integer
@@ -48,25 +44,25 @@ class DocumentData
 	 * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-	/**
+	
+    /**
      * @var string
      *
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="id")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
+	 * 
+     * @ORM\Column(name="rule_id", type="string", nullable=false)
 	 * 
      */
-    private $doc_id;
-
-
+    private $rule;
+	
 	/**
-	 * @var string
+     * @var datetime
      *
-	 * @ORM\Column(name="type", type="string", length=1, nullable=false)
-     */ 
-    private $type;
-
-  
+	 * 
+     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+	 * 
+     */
+    private $dateCreated;
+	
    /**
      * @var array
      *
@@ -85,67 +81,51 @@ class DocumentData
     {
         return $this->id;
     }
-
-    /**
-     * Set doc_id
+	
+	/**
+     * Get rule
      *
-     * @param string $doc_id
-     * @return DocumentData
+     * @return string 
      */
-    public function setDocId($doc_id)
+    public function getRule()
     {
-        $this->doc_id = $doc_id;
-    
+        return $this->rule;
+    }
+	
+    /**
+     * Set rule
+     *
+     * @param string $rule
+     * @return RuleAudit
+     */
+    public function setRule($rule)
+    {
+        $this->rule = $rule;  
         return $this;
     }
 
     /**
-     * Get doc_id
+     * Get dateCreated
      *
-     * @return string 
+     * @return \DateTime 
      */
-    public function getDocId()
+    public function getDateCreated()
     {
-        return $this->doc_id;
-    }
-	
-	
-    /**
-     * Set type
-     *
-     * @param string $type
-     * @return DocumentData
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-    
-        return $this;
-    }
-
-    /**
-     * Get type
-     *
-     * @return string 
-     */
-    public function getType()
-    {
-        return $this->type;
+        return $this->dateCreated;
     }
 	
 	/**
-     * Set data
+     * Set dateCreated
      *
-     * @param string $data
-     * @return DocumentData
+     * @param \DateTime $dateCreated
+     * @return RuleAudit
      */
-    public function setData($data)
+    public function setDateCreated($dateCreated)
     {
-        $this->data = $data;
-    
+        $this->dateCreated = $dateCreated; 
         return $this;
     }
-
+	
     /**
      * Get data
      *
@@ -155,5 +135,17 @@ class DocumentData
     {
         return $this->data;
     }
-
+ 	
+	/**
+     * Set data
+     *
+     * @param string $data
+     * @return RuleAudit
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+    
+        return $this;
+    }
 }

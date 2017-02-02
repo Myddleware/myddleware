@@ -63,8 +63,9 @@ class jobcore  {
 		$this->setManual();
 	}
 		
-	/*Permet de charger toutes les données de la règle (en paramètre)*/
-	public function setRule($name_slug) {
+	// Permet de charger toutes les données de la règle (en paramètre)
+	// $filter peut être le rule name slug ou bien l'id de la règle
+	public function setRule($filter) {
 		try {
 			include_once 'rule.php';
 			
@@ -72,28 +73,28 @@ class jobcore  {
 		    $sqlRule = "SELECT * 
 		    		FROM Rule 
 		    		WHERE 
-							name_slug = :name_slug
+							(
+								name_slug = :filter
+							 OR id = :filter	
+							)
 						AND deleted = 0
 					";
 		    $stmt = $this->connection->prepare($sqlRule);
-			$stmt->bindValue("name_slug", $name_slug);
+			$stmt->bindValue("filter", $filter);
 		    $stmt->execute();	    
 			$rule = $stmt->fetch(); // 1 row
 			if (empty($rule['id'])) {
-				throw new \Exception ('Rule '.$name_slug.' doesn\'t exist or is deleted.');
+				throw new \Exception ('Rule '.$filter.' doesn\'t exist or is deleted.');
 			}
 			// Error if the rule is inactive and if we try to run it from a job (not manually)
 			elseif(
 					empty($rule['active'])
 				&& $this->manual == 0
 			) {
-				throw new \Exception ('Rule '.$name_slug.' is inactive.');
-			}
+				throw new \Exception ('Rule '.$filter.' is inactive.');
+			}		
 			
-			
-			
-			$this->ruleId = $rule['id'];
-			
+			$this->ruleId = $rule['id'];		
 			// We instance the rule
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
@@ -101,7 +102,7 @@ class jobcore  {
 			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			if ($this->rule->isChild()) {
-				throw new \Exception ('Rule '.$name_slug.' is a child rule. Child rules can only be run by the parent rule.');
+				throw new \Exception ('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
 			}
 			return true;
 		} catch (\Exception $e) {

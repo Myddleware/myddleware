@@ -57,7 +57,6 @@
 			<tr>
 				<th>{{'rule.source'|trans}}</th>
 				<th>{{'rule.target'|trans}}</th>
-				<th>{{'list_rule.th.version'|trans}}</th>
 				<th>{{'list_rule.th.name'|trans}}</th>
 				<th>{{'list_rule.th.active'|trans}}</th>
 				<th>{{'list_rule.th.date_created'|trans}}</th>
@@ -73,7 +72,6 @@
 		     		<p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}" /></p>
 		     		{{rule.lbl_target }}
 		     	</td>
-		     	<td><span class="label label-default">v{{ rule.version }}</span></td>
 		     	<td class="lft"><a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">{{rule.name }}</a></td>
 		     	<td>
 			    <div class="onoffswitch">
@@ -105,7 +103,6 @@
 			<tr>
 				<th>{{'rule.source'|trans}}</th>
 				<th>{{'rule.target'|trans}}</th>
-				<th>{{'list_rule.th.version'|trans}}</th>
 				<th>{{'list_rule.th.name'|trans}}</th>
 				<th>{{'list_rule.th.active'|trans}}</th>
 				<th>{{'list_rule.th.date_created'|trans}}</th>

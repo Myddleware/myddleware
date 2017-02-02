@@ -41,7 +41,6 @@ class documentcore {
 	protected $dateCreated;
 	protected $connection;
 	protected $ruleName;
-	protected $ruleVersion;
 	protected $ruleMode;
 	protected $ruleId;
 	protected $ruleFields;
@@ -156,7 +155,6 @@ class documentcore {
 			$this->id = uniqid('', true);
 			$this->dateCreated = gmdate('Y-m-d H:i:s');
 			$this->ruleName = $param['rule']['name_slug'];
-			$this->ruleVersion = $param['rule']['version'];
 			$this->ruleMode = $param['rule']['mode'];
 			$this->ruleId = $param['rule']['id'];
 			$this->ruleFields = $param['ruleFields'];
@@ -184,7 +182,6 @@ class documentcore {
 			$sqlParams = "	SELECT 
 								Document.*, 
 								Rule.name_slug,
-								Rule.version,
 								RuleParam.value mode,
 								Rule.conn_id_source,
 								Rule.module_source
@@ -209,7 +206,6 @@ class documentcore {
 				$this->sourceId = $this->document_data['source_id'];
 				$this->targetId = $this->document_data['target_id'];
 				$this->ruleName = $this->document_data['name_slug'];
-				$this->ruleVersion = $this->document_data['version'];
 				$this->ruleMode = $this->document_data['mode'];
 				$this->type_document = $this->document_data['type'];
 				$this->attempt = $this->document_data['attempt'];
@@ -526,7 +522,7 @@ class documentcore {
 						$rules[] = $this->ruleParams['bidirectional'];
 					}
 					foreach ($rules as $ruleId) {
-						// Selection des documents antérieurs de la même règle (toute version confondues) avec le même id au statut différent de closed et Cancel
+						// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed et Cancel
 						// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
 						$sqlParams = "	SELECT 
 											Document.id,							
@@ -922,7 +918,18 @@ class documentcore {
 			){
 				return false;
 			}
-		}		
+		}
+		
+		// We check relationship fields as well
+		foreach ($this->ruleRelationships as $ruleRelationship) {
+			if (
+					!isset($target[$ruleRelationship['field_name_target']])
+				 ||	!isset($history[$ruleRelationship['field_name_target']])
+				 ||	$history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
+			){
+				return false;
+			}
+		}	
 		// If all fields are equal, no need to update, so we cancel the document
 		$this->message .= 'Identical data to the target system. This document is canceled. ';
 		$this->typeError = 'W';
@@ -948,7 +955,7 @@ class documentcore {
 			return -1;
 		}
 		else {
-			$updateHistory = $this->updateHistoryTable($dataTarget['values']);
+			$updateHistory = $this->updateHistoryTable($dataTarget['values']);		
 			if ($updateHistory === true) {
 				return $dataTarget['values']['id'];
 			}
@@ -1003,13 +1010,14 @@ class documentcore {
 			// We save the relationship field too 
 			if (!empty($this->ruleRelationships)) {
 				foreach ($this->ruleRelationships as $ruleRelationship) {
+					// if field = Myddleware_element_id then we take the id record in the osurce application
 					if ($type == 'S') {
-						$dataInsert[$ruleRelationship['field_name_source']] = $data[ruleRelationship['field_name_source']];
+						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_source']]);
 					} else {	
-						$dataInsert[$ruleRelationship['field_name_target']] = $data[ruleRelationship['field_name_target']];
+						$dataInsert[$ruleRelationship['field_name_target']] = ($ruleRelationship['field_name_target'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_target']]);
 					}
 				}
-			}
+			}		
 			$documentEntity = $this->em
 	                          ->getRepository('RegleBundle:Document')
 	                          ->findOneById( $this->id );	
@@ -1073,7 +1081,6 @@ class documentcore {
 						if ($value === false) {
 							throw new \Exception( 'Failed to transform relationship data.' );
 						}
-						$query_data .= "'".addslashes($value)."',";
 						$targetField[$ruleRelationships['field_name_target']] = $value;
 					}
 				}
@@ -1360,10 +1367,8 @@ class documentcore {
 								Document.target_id, 
 								Document.global_status 
 							FROM Rule
-								INNER JOIN Rule Rule_version
-									ON Rule_version.name = Rule.name
 								INNER JOIN Document 
-									ON Document.rule_id = Rule_version.id
+									ON Document.rule_id = Rule.id
 							WHERE 
 									Rule.id IN (:ruleId)									
 								AND (
@@ -1384,10 +1389,8 @@ class documentcore {
 								Document.source_id target_id, 
 								Document.global_status 
 							FROM Rule
-								INNER JOIN Rule Rule_version
-									ON Rule_version.name = Rule.name
 								INNER JOIN Document 
-									ON Document.rule_id = Rule_version.id
+									ON Document.rule_id = Rule.id
 							WHERE 
 									Rule.id IN (:ruleId)									
 								AND (
@@ -1464,7 +1467,7 @@ class documentcore {
 			}
 	
 			// If no relationship or no child rule
-			// Recherche d'un enregitsrement avec un target id sur la même source quelques soit la version de la règle
+			// Recherche d'un enregitsrement avec un target id sur la même source
 			$stmt = $this->connection->prepare($sqlParamsSoure);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 			$stmt->bindValue(":id", $id);
@@ -1653,7 +1656,6 @@ class documentcore {
 	protected function getRelationshipDirection($ruleRelationship) {
 		try {
 			// Calcul du sens de la relation. Si on ne trouve pas (exemple des relations custom) alors on met 1 par défaut.
-			// depuis la version 1.1.2 on enlève les test sur delete des règles car un document en erreur peut porter sur une ancienne version de règle
 			$sqlParams = "	SELECT 
 								IF(RuleA.conn_id_source = RuleB.conn_id_source, '1', IF(RuleA.conn_id_source = RuleB.conn_id_target, '-1', '1')) direction
 							FROM RuleRelationShip
@@ -1679,7 +1681,7 @@ class documentcore {
 		}
 	}
 	
-	// Permet de récupérer l'id target pour une règle (indépendemment de la version de la règle) et un id source ou l'inverse
+	// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
 	protected function getTargetId($ruleRelationship,$record_id) {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
@@ -1690,10 +1692,8 @@ class documentcore {
 									source_id record_id,
 									Document.id document_id								
 								FROM Rule
-									INNER JOIN Rule Rule_version
-										ON Rule_version.name = Rule.name
 									INNER JOIN Document 
-										ON Document.rule_id = Rule_version.id
+										ON Document.rule_id = Rule.id
 								WHERE  
 										Rule.id = :ruleRelateId 
 									AND Document.source_id != '' 
@@ -1709,10 +1709,8 @@ class documentcore {
 									target_id record_id,
 									Document.id document_id
 								FROM Rule
-									INNER JOIN Rule Rule_version
-										ON Rule_version.name = Rule.name
 									INNER JOIN Document 
-										ON Document.rule_id = Rule_version.id
+										ON Document.rule_id = Rule.id
 								WHERE  
 										Rule.id = :ruleRelateId 
 									AND Document.source_id = :record_id 

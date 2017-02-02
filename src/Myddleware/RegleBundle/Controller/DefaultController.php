@@ -42,6 +42,7 @@ use Myddleware\RegleBundle\Entity\RuleParam;
 use Myddleware\RegleBundle\Entity\RuleFilter;
 use Myddleware\RegleBundle\Entity\RuleField;
 use Myddleware\RegleBundle\Entity\RuleRelationShip;
+use Myddleware\RegleBundle\Entity\RuleAudit;
 use Myddleware\RegleBundle\Entity\Functions;
 use Myddleware\RegleBundle\Entity\FunctionsRelationShips;
 use Myddleware\RegleBundle\Entity\FuncCat;
@@ -246,11 +247,6 @@ class DefaultControllerCore extends Controller
 							$this->em->flush();
 						}					
 					}
-	
-					// - - - 	
-					$this->connection->executeQuery( 'DROP TABLE IF EXISTS z_'.$rule->getNameSlug().'_'.$rule->getVersion().'_source' );
-					$this->connection->executeQuery( 'DROP TABLE IF EXISTS z_'.$rule->getNameSlug().'_'.$rule->getVersion().'_target' );
-					$this->connection->executeQuery( 'DROP TABLE IF EXISTS z_'.$rule->getNameSlug().'_'.$rule->getVersion().'_history' );
 				
 					$stmt = $this->connection->prepare('DELETE FROM RuleRelationShip WHERE id =:id'); 	  
 					$stmt->bindValue('id', $rule->getId() ); 
@@ -513,17 +509,6 @@ class DefaultControllerCore extends Controller
 				$myddlewareSession['param']['rule']['rulename'] = $rule->getName();
 				$myddlewareSession['param']['rule']['connector']['source'] = (string)$rule->getConnectorSource()->getId();				
 				$myddlewareSession['param']['rule']['connector']['cible'] = (string)$rule->getConnectorTarget()->getId();
-
-				$version = (int)$rule->getVersion();
-				$version++;
-				if(strlen($version) == 1) {
-					$version = "00".$version;
-				}
-				else if(strlen($version) == 2) {
-					$version = "0".$version;
-				}
-				
-				$myddlewareSession['param']['rule']['version'] = $version;
 				$myddlewareSession['param']['rule']['last_version_id'] = $rule->getId();
 
 				// Connector source -------------------
@@ -1872,14 +1857,11 @@ class DefaultControllerCore extends Controller
 		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 		// We always add data again in session because these data are removed after the call of the get
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		// Array with the objects list flush in the database in case we have to rollback
-		$objectToRemove = array();
 	
 	    // On récupére l'EntityManager
 		$this->getInstanceBdd();				   
-			
-		try {
-			$request = $this->get('request');
+		$this->em->getConnection()->beginTransaction();
+		try {	
 			
 			// retourne un tableau prêt à l'emploi
 			$tab_new_rule = $this->createListeParamsRule(
@@ -1891,8 +1873,7 @@ class DefaultControllerCore extends Controller
 			// fields relate
 			if(!empty( $this->getRequest()->request->get('duplicate') )) {
 				$tab_new_rule['params']['rule']['duplicate_fields']	= implode($this->getRequest()->request->get('duplicate'),';');
-			} 
-			
+			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
 			if(strlen($myddlewareSession['param']['rule']['rulename']) < 3 || $myddlewareSession['param']['rule']['rulename_valide'] == false) {
 				echo 0;	
@@ -1900,15 +1881,6 @@ class DefaultControllerCore extends Controller
 			}
 			
 			//------------ Create rule
-			
-			
-			if(isset($myddlewareSession['param']['rule']['version']) && !empty($myddlewareSession['param']['rule']['version'])) {
-				$version = $myddlewareSession['param']['rule']['version'];
-			}
-			else {
-				$version = '001';
-			}
-			
   			$connector_source = $this->getDoctrine()
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Connector')
@@ -1920,36 +1892,39 @@ class DefaultControllerCore extends Controller
 	                          ->findOneById( $myddlewareSession['param']['rule']['connector']['cible'] );
 			
 			$param = RuleClass::getFieldsParamDefault();
-					  			
-			$oneRule = new Rule();
-			$oneRule->setConnectorSource( $connector_source );	
-			$oneRule->setConnectorTarget( $connector_target );				
-			$oneRule->setDateCreated(new \DateTime);
-			$oneRule->setDateModified(new \DateTime);
-			$oneRule->setCreatedBy( $this->getUser()->getId() );
-			$oneRule->setModifiedBy( $this->getUser()->getId() );	
-			$oneRule->setModuleSource( $myddlewareSession['param']['rule']['source']['module'] );	
-			$oneRule->setModuleTarget( $myddlewareSession['param']['rule']['cible']['module'] );	
-			$oneRule->setDeleted( 0 );
-			$oneRule->setActive( (int)$param['active'] );
-			$oneRule->setName( $myddlewareSession['param']['rule']['rulename'] );
-			$oneRule->setVersion( $version );
 			
+			// Get the id of the rule if we edit a rule
+			// Generate Rule object (create a new one or instanciate the existing one
+			if (!empty($myddlewareSession['param']['rule']['last_version_id'])) {
+				$oneRule = $this->em->getRepository('RegleBundle:Rule')->find($myddlewareSession['param']['rule']['last_version_id']);
+				$oneRule->setDateModified(new \DateTime);
+				$oneRule->setModifiedBy( $this->getUser()->getId() );	
+			} else {
+				$oneRule = new Rule();
+				$oneRule->setConnectorSource( $connector_source );	
+				$oneRule->setConnectorTarget( $connector_target );				
+				$oneRule->setDateCreated(new \DateTime);
+				$oneRule->setDateModified(new \DateTime);
+				$oneRule->setCreatedBy( $this->getUser()->getId() );
+				$oneRule->setModifiedBy( $this->getUser()->getId() );	
+				$oneRule->setModuleSource( $myddlewareSession['param']['rule']['source']['module'] );	
+				$oneRule->setModuleTarget( $myddlewareSession['param']['rule']['cible']['module'] );	
+				$oneRule->setDeleted( 0 );
+				$oneRule->setActive( (int)$param['active'] );
+				$oneRule->setName( $myddlewareSession['param']['rule']['rulename'] );
+			}
 		    $this->em->persist($oneRule);
-			$objectToRemove[] = $oneRule;
 			// On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
 		    $this->em->flush(); 
 			
-			$myddlewareSession['rule']['newid'] = $oneRule->getId();
-			
-			$nameRule = $oneRule->getNameSlug();
-			
+			$myddlewareSession['rule']['newid'] = $oneRule->getId();			
+			$nameRule = $oneRule->getNameSlug();		
+
 			// BEFORE SAVE rev 1.08 ----------------------
 			$relationshipsBeforeSave = $this->getRequest()->request->get('relations');
 			$before_save = RuleClass::beforeSave($this->container,
 				array('ruleName' => $nameRule,
-					  'ruleVersion' => $version,
-					  'oldRule' => (empty($myddlewareSession['param']['rule']['last_version_id']) ? '' : $myddlewareSession['param']['rule']['last_version_id']),
+					  'RuleId' => $oneRule->getId(),
 					  'connector' => $myddlewareSession['param']['rule']['connector'],
 					  'content' => $tab_new_rule,
 					  'relationships' => $relationshipsBeforeSave,
@@ -1979,55 +1954,52 @@ class DefaultControllerCore extends Controller
 					$tab_new_rule['params'] = array_merge($tab_new_rule['params'],$before_save['params']);
 				}
 			}
-			// Détection règle root ou child rev 1.08 ----------------------
-			
-			
-			// mode update
-			if($oneRule->getId() && isset($myddlewareSession['param']['rule']['last_version_id'])) {
-								
-				foreach (json_decode($myddlewareSession['param']['rule']['reload']['params']) as $p) {
-					if($p->name == 'datereference') {
-						$date_reference = $p->value; // recup ancienne date de référence	
+					
+			// Edit mode
+			if(!empty($myddlewareSession['param']['rule']['last_version_id'])) {
+				// We delete every data of the rule before we create them again
+				// Rule fields
+				$ruleFields = $this->em->getRepository('RegleBundle:RuleField')->findByRule($oneRule->getId());
+				if($ruleFields) {
+					foreach ($ruleFields as $ruleField) {
+						$this->em->remove($ruleField);
+						$this->em->flush();
 					}
 				}
-				// On met l'ancienne version à deleted !
-				$lastRuleVersion = $this->em->getRepository('RegleBundle:Rule')->find($myddlewareSession['param']['rule']['last_version_id']);
-				$lastRuleVersion->setDeleted( 1 );
-				$lastRuleVersion->setActive( 0 );
-				$this->em->persist($lastRuleVersion);
-				$objectToRemove[] = $lastRuleVersion;				  
-				$this->em->flush(); 	
-			  
-				// On adapte les relations
-				$updRuleRelationShip = $this->em->getRepository('RegleBundle:RuleRelationShip')->findByfieldId($myddlewareSession['param']['rule']['last_version_id']);
-				if(count($updRuleRelationShip) > 0 ) {
-					foreach ($updRuleRelationShip as $index => $field) {				
-						$id = $updRuleRelationShip[$index]->getId();
-						$updRuleRelationShipTemp = $this->em->getRepository('RegleBundle:RuleRelationShip')->find( $id );
-						$updRuleRelationShipTemp->setFieldId( $myddlewareSession['rule']['newid'] );
-						$this->em->persist($updRuleRelationShipTemp);
-						$objectToRemove[] = $updRuleRelationShipTemp;
-						$this->em->flush();	
-					} 		  	
-				}		
-			  	// If current rule has a child or a bidrectiobnal rule, we update the parameters
-				$stmt = $this->connection->prepare('
-							UPDATE RuleParam 
-								SET value = :value_new 
-								WHERE 
-										value = :value_old
-									AND ( 
-											name = "bidirectional"
-										 OR	name = "child"
-									)
-						'); 
-				$stmt->bindValue(":value_new", $oneRule->getId());
-				$stmt->bindValue(":value_old", $myddlewareSession['param']['rule']['last_version_id']);
-				$stmt->execute();	
-				// rev 1.07 Bidirectionnel	        
+				
+				// Rule RelationShips
+				$ruleRelationShips = $this->em->getRepository('RegleBundle:RuleRelationShip')->findByRule($oneRule->getId());
+				if($ruleRelationShips) {				
+					foreach ($ruleRelationShips as $ruleRelationShip) {
+						$this->em->remove($ruleRelationShip);
+						$this->em->flush();
+					}
+				}
+				
+				// Rule Filters
+				$ruleFilters = $this->em->getRepository('RegleBundle:RuleFilter')->findByRule($oneRule->getId());
+				if($ruleFilters) {				
+					foreach ($ruleFilters as $ruleFilter) {
+						$this->em->remove($ruleFilter);
+						$this->em->flush();
+					}
+				}
+
+				// Rule Params
+				$ruleParams = $this->em->getRepository('RegleBundle:RuleParam')->findByRule($oneRule->getId());
+				if($ruleParams) {				
+					foreach ($ruleParams as $ruleParam) {
+						// Save reference date						
+						if ($ruleParam->getName() == 'datereference') {
+							$date_reference = $ruleParam->getValue();
+						}
+						$this->em->remove($ruleParam);
+						$this->em->flush();
+					}
+				}   
 			}
+			// Create mode
 			else {
-				// mode create
 				if(isset($myddlewareSession['param']['rule']['source']['datereference']) && $myddlewareSession['param']['rule']['source']['datereference']) {				
 					$date_reference = date('Y-m-d 00:00:00');
 				}
@@ -2056,8 +2028,7 @@ class DefaultControllerCore extends Controller
 						$oneRuleParam->setName( 'duplicate_fields' );
 						$oneRuleParam->setValue( $value['duplicate_fields'] );
 					}
-					else {
-						
+					else {				
 						$oneRuleParam->setName( $key );
 						if($key == 'datereference') {
 							// date de référence change en fonction create ou update
@@ -2067,32 +2038,7 @@ class DefaultControllerCore extends Controller
 							$oneRuleParam->setValue( $value );
 						}	
 					} 
-					// Update the opposite rule if birectional rule
-					if($key == 'bidirectional') {
-						// Check if the parameter already exist
-						$stmt = $this->connection->prepare('
-							SELECT * FROM RuleParam 
-							WHERE 
-									name	= :name
-								AND id 	= :rule_id
-								AND value	= :value'); 	  
-						$stmt->bindValue('name', 'bidirectional'); 					
-						$stmt->bindValue('rule_id', $value); 					
-						$stmt->bindValue('value', $oneRule->getId()); 					
-						$stmt->execute();
-						$ruleParamBidirectional = $stmt->fetch();
-						if (empty($ruleParamBidirectional)) {
-							$bidirectionaleRuleParam = new RuleParam();
-							$bidirectionaleRuleParam->setRule( $value );
-							$bidirectionaleRuleParam->setName( $key );
-							$bidirectionaleRuleParam->setValue( $oneRule->getId() );
-							$this->em->persist($bidirectionaleRuleParam);
-							$objectToRemove[] = $bidirectionaleRuleParam;
-						}
-					}
-
 				    $this->em->persist($oneRuleParam);
-					$objectToRemove[] = $oneRuleParam;
 				    $this->em->flush();						
 				}					
 			}
@@ -2129,7 +2075,6 @@ class DefaultControllerCore extends Controller
 					$oneRuleField->setSource( ((!empty($field_source)) ? $field_source : 'my_value' ) );	
 					$oneRuleField->setFormula( ((!empty($formule)) ? trim($formule) : NULL ) );	
 				    $this->em->persist($oneRuleField);
-					$objectToRemove[] = $oneRuleField;
 				    $this->em->flush(); 	
 				}		
 			}
@@ -2157,7 +2102,6 @@ class DefaultControllerCore extends Controller
 						$tabRelationShips['source'][] = $rel['source'];
 						
 						$this->em->persist($oneRuleRelationShip);
-						$objectToRemove[] = $oneRuleRelationShip;
 						$this->em->flush(); 
 					}
 				}
@@ -2173,7 +2117,6 @@ class DefaultControllerCore extends Controller
 					$oneRuleFilter->setType( $filter['filter'] );
 					$oneRuleFilter->setValue( $filter['value'] );
 				    $this->em->persist($oneRuleFilter);
-					$objectToRemove[] = $oneRuleFilter;
 				    $this->em->flush(); 
 				}
 			}
@@ -2183,6 +2126,27 @@ class DefaultControllerCore extends Controller
 			// Order all rules
 			$job = $this->get('myddleware_job.job');		
 			$job->orderRules();
+			
+			// --------------------------------------------------------------------------------------------------
+			// Create rule history in order to follow all modifications
+			// Encode every rule parameters
+			$ruledata = json_encode(
+							array(
+								'ruleName' => $nameRule,
+								'datereference' => $date_reference,
+								'content' => $tab_new_rule,
+								'filters' => $this->getRequest()->request->get('filter'),
+								'relationships' => $relationshipsBeforeSave,
+							)
+						);
+			// Save the rule audit			
+			$oneRuleAudit = new RuleAudit();
+			$oneRuleAudit->setRule($oneRule->getId());
+			$oneRuleAudit->setDateCreated(new \DateTime);
+			$oneRuleAudit->setData($ruledata);			
+			$this->em->persist($oneRuleAudit);
+			$this->em->flush();			
+
 			
 			// notification 
 			$solution_source = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['source']['solution']);
@@ -2200,7 +2164,6 @@ class DefaultControllerCore extends Controller
 			RuleClass::afterSave($this->container,	array(
 						'ruleId' => $oneRule->getId(),
 						'ruleName' => $nameRule,
-						'ruleVersion' => $version,
 						'oldRule' => (empty($myddlewareSession['param']['rule']['last_version_id']) ? '' : $myddlewareSession['param']['rule']['last_version_id']),
 						'datereference' => $date_reference,
 						'connector' => $myddlewareSession['param']['rule']['connector'],
@@ -2222,32 +2185,17 @@ class DefaultControllerCore extends Controller
 			 );		
 			if(isset($myddlewareSession['param']['rule'])) {
 				unset( $myddlewareSession['param']['rule'] );
-			}	
-			$this->em->close();	
+			}			
+			$this->em->getConnection()->commit();
 			echo 1;
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			exit;
 		}catch(\Exception $e) {
-			try {
-				// Suppression des objets doctrine créés
-				if (!empty($objectToRemove)) {
-					foreach($objectToRemove as $object) {	
-						$this->em->remove($object);
-					}
-				}
-				$this->em->flush();
-				$this->em->close();	
-				$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
-				echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				exit;
-			}catch(\Exception $e2) {
-				$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
-				$this->get('logger')->error('2;'.htmlentities($e2->getMessage().' (line '.$e2->getLine().')'));
-				echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			}
+			$this->em->getConnection()->rollBack();
+			$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
+			echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
 		} 	
+		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		$this->em->close();	
+		exit;
 	}
 
 	/* ******************************************************

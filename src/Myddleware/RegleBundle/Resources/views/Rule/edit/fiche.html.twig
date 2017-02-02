@@ -23,8 +23,8 @@
 *********************************************************************************/ #} 
 
 {% extends '::base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.rule.view'|trans}} {{rule.getName}} {{rule.getVersion}}{% endblock %}
-{% block titlesm %}<a href="{{ path('regle_list') }}">{{'breadcrumb.rule_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.rule.view'|trans}} {{rule.getName}} {{rule.getVersion}} {% endblock titlesm %}  
+{% block title %}{{parent()}} | {{'title.rule.view'|trans}} {{rule.getName}}{% endblock %}
+{% block titlesm %}<a href="{{ path('regle_list') }}">{{'breadcrumb.rule_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.rule.view'|trans}} {{rule.getName}} {% endblock titlesm %}  
 {% block body %}
     <div id="rule">
 		<div id="tabs">	

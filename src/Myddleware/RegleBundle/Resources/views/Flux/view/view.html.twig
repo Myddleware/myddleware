@@ -68,7 +68,6 @@
 				<table id="headertab" class="listepager">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>
-						<th>{{'view_flux.header.version'|trans}}</th>
 						<th>{{'view_flux.header.statut'|trans}}</th>
 						<th>{{'view_flux.header.type'|trans}}</th>
 						<th>{{'view_flux.header.attempt'|trans}}</th>		
@@ -79,7 +78,6 @@
 					</tr>
 					<tr>
 						<td><a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a></td>
-						<td class="ctr">{{ rule.getVersion }}</td>
 						<td class="ctr">
 				     		<div class="gblstatus_{{ doc.getGlobalStatus|lower }}">{{ doc.getStatus }}
 				     		{% if doc.getGlobalStatus|lower == 'close' %}

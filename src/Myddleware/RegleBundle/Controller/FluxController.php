@@ -339,7 +339,7 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT Document.*, users.username, Rule.version, CONCAT(Rule.name, ' - ', Rule.version) rule_name
+		$sql = "SELECT Document.*, users.username, Rule.name rule_name
 				FROM Document  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)
@@ -467,13 +467,14 @@ class FluxControllerCore extends Controller
 			// Get RuleRelationShip object
 			$RuleRelationShips = $em->getRepository('RegleBundle:RuleRelationShip')->findByRule($doc[0]->getRule());
 			// Get each data for each rule relationship
-			foreach($RuleRelationShips as $RuleRelationShip) {
+			foreach($RuleRelationShips as $RuleRelationShip) {		
 				$sourceField = $RuleRelationShip->getFieldNameSource();
 				$sourceData[$sourceField] = $source[$sourceField];
 				// Target and history
 				$targetField = $RuleRelationShip->getFieldNameTarget();
 				$targetData[$targetField] = $target[$targetField];
-				if (!empty($history)) {
+				// Only if history exists and if the field exist in history
+				if (!empty($history[$targetField])) {
 					$historyData[$targetField] = $history[$targetField];
 				}
 			}	
@@ -530,46 +531,46 @@ class FluxControllerCore extends Controller
 
 	// Sauvegarde flux
 	public function fluxSaveAction() {
-				
 		$request = $this->get('request');
-		
 		if($request->getMethod()=='POST') {
-		
-  		  $rule = $this->getDoctrine()
-                       ->getManager()
-                       ->getRepository('RegleBundle:Rule')
-                       ->findOneById( $this->getRequest()->request->get('rule') );
-		
-		  $conn = $this->get( 'database_connection' );				
-		  $name = $rule->getNameSlug().'_'.$rule->getVersion().'_target';
-		  $fields = strip_tags($this->getRequest()->request->get('fields'));
-		  $value = strip_tags($this->getRequest()->request->get('value'));
-		  
-		  if(!empty($value)) {
-			  $stmt = $conn->prepare('UPDATE z_'.$name.' SET '.$fields.' = :value WHERE id_'.$name.' = :id'); 	  
-			  $stmt->bindValue('value', $value ); 
-			  $stmt->bindValue('id', $this->getRequest()->request->get('flux') ); 	 		  
-			  $stmt->execute();  			  
-			  
-		      // On récupére l'EntityManager
-		      $em = $this->getDoctrine()->getManager();	
-			  // Insert in audit			  
-			  $oneDocAudit = new DocumentAudit();
-			  $oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
-			  $oneDocAudit->setDateModified( new \DateTime );
-			  $oneDocAudit->setAfter( $value );
-			  $oneDocAudit->setByUser( $this->getUser()->getId() );
-			  $oneDocAudit->setName( $fields );				
-		      $em->persist($oneDocAudit);
-		      $em->flush();
-		  }
-		  echo $value;	
-		  exit;
+			// Get the field and value from the request
+			$fields = strip_tags($this->getRequest()->request->get('fields'));
+			$value = strip_tags($this->getRequest()->request->get('value'));
 
+			if(isset($value)) {
+				// get the EntityManager
+				$em = $this->getDoctrine()->getManager();	
+				// Get target data for the document
+				$documentDataEntity = $em->getRepository('RegleBundle:DocumentData')
+											->findOneBy( array(
+												'doc_id' => $this->getRequest()->request->get('flux'),
+												'type' => 'T'
+												)
+										);
+				if(!empty($documentDataEntity)) {							
+					$target = json_decode($documentDataEntity->getData(),true);	
+					$beforeValue = $target[$fields]; 
+					// Change the value 
+					$target[$fields] = $value;
+					// Save the modification
+					$documentDataEntity->setData(json_encode($target)); // Encode in JSON		  
+
+					// Insert in audit			  
+					$oneDocAudit = new DocumentAudit();
+					$oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
+					$oneDocAudit->setDateModified( new \DateTime );
+					$oneDocAudit->setBefore( $beforeValue );
+					$oneDocAudit->setAfter( $value );
+					$oneDocAudit->setByUser( $this->getUser()->getId() );
+					$oneDocAudit->setName( $fields );				
+					$em->persist($oneDocAudit);
+					$em->flush();
+					echo $value;	
+					exit;
+				}
+			} 
 		}		
-		else {
-			throw $this->createNotFoundException('Error');
-		}		
+		throw $this->createNotFoundException('Failed to modify the field '.$fields);	
 	}
 
 	// Relancer un flux

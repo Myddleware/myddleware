@@ -155,6 +155,7 @@ view_rule:
         name: Nom
         version: Version
         datecreated: Date de création
+        datemodified: Date de modification
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
