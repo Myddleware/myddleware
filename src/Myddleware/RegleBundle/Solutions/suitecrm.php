@@ -773,8 +773,7 @@ class suitecrmcore  extends solution {
 			}
 			// Modification du statut du flux
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}
-print_r($result);		
+		}	
 		return $result;			
 	}
 	

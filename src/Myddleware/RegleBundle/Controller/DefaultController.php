@@ -2370,8 +2370,9 @@ class DefaultControllerCore extends Controller
 		// We always add data again in session because these data are removed after the call of the get
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);		
 		$template = $this->get('myddleware.template');	
-		$template->setIdConnectorSource( (int)$myddlewareSession['param']['rule']['connector']['source'] );
-		$template->setIdConnectorTarget( (int)$myddlewareSession['param']['rule']['connector']['cible'] );
+	
+		$template->setSolutionSource($myddlewareSession['param']['rule']['source']['solution']);
+		$template->setSolutionTarget($myddlewareSession['param']['rule']['cible']['solution']);
 		$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 		$template->setIdUser( $this->getUser()->getId() );
 

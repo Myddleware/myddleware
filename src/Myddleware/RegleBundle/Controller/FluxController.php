@@ -451,6 +451,10 @@ class FluxControllerCore extends Controller
 			// Get each data for each rule fields
 			$historyData = array();
 			foreach($ruleFields as $ruleField) {
+				// There is no field in source when we use my_value, just a formula
+				if ($ruleField->getSource()=='my_value') {
+					continue;
+				}			
 				// We keep only the fields in the rule 
 				// It could be several fields in the source fields (in case of formula)
 				$sourceFields = explode(";",$ruleField->getSource());

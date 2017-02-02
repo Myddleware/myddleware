@@ -1008,12 +1008,10 @@ class rulecore {
 		if (empty($this->ruleParams['duplicate_fields'])) {
 			return $transformedData;
 		}
-		
 		$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
-		$nameIdTarget = "id_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 		$searchDuplicate = array();
 		// Boucle sur chaque donnée qui sera envoyée à la cible
-		foreach ($transformedData AS $rowTransformedData) {
+		foreach ($transformedData AS $docId => $rowTransformedData) {
 			// Stocke la valeur des champs duplicate concaténée
 			$concatduplicate = '';
 
@@ -1021,7 +1019,7 @@ class rulecore {
 			foreach($duplicate_fields as $duplicate_field) {
 				$concatduplicate .= $rowTransformedData[$duplicate_field];
 			}
-			$searchDuplicate[$rowTransformedData[$nameIdTarget]] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
+			$searchDuplicate[$docId] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
 		}
 
 		// Recherche de doublons dans le tableau searchDuplicate

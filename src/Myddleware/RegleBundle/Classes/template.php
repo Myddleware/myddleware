@@ -34,26 +34,28 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class templatecore {
 
 	protected $lang;
-	protected $idConnectorSource;
-	protected $idConnectorTarget;
+	protected $solutionSource;
+	protected $solutionTarget;
 	protected $idUser;
 	protected $prefixRuleName;
+	protected $templateDir;
 	
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param = false) {
     	$this->logger = $logger;
 		$this->container = $container;
 		$this->connection = $dbalConnection;	
+		$this->templateDir = $this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/';
 		if (!empty($param['lang'])) {
 			$this->lang = $param['lang'];
 		}
 		else {
 			$this->lang = 'EN';
 		}
-		if (!empty($param['idConnectorSource'])) {
-			$this->idConnectorSource = $param['idConnectorSource'];
+		if (!empty($param['solutionSource'])) {
+			$this->solutionSource = $param['solutionSource'];
 		}
-		if (!empty($param['idConnectorTarget'])) {
-			$this->idConnectorTarget = $param['idConnectorTarget'];
+		if (!empty($param['solutionTarget'])) {
+			$this->solutionTarget = $param['solutionTarget'];
 		}
 		if (!empty($param['prefixRuleName'])) {
 			$this->setPrefixRuleName($param['prefixRuleName']);
@@ -66,12 +68,12 @@ class templatecore {
 		}
 	}
 	
-	public function setIdConnectorSource($idConnectorSource) {
-		$this->idConnectorSource = $idConnectorSource;
+	public function setSolutionSource($solutionSource) {
+		$this->solutionSource = $solutionSource;
 	}
 	
-	public function setIdConnectorTarget($idConnectorTarget) {
-		$this->idConnectorTarget = $idConnectorTarget;
+	public function setSolutionTarget($solutionTarget) {
+		$this->solutionTarget = $solutionTarget;
 	}
 	
 	public function setIdUser($idUser) {
@@ -90,6 +92,12 @@ class templatecore {
 	
 	// Permet de lister les templates pour les connecteurs selectionnés idConnectorSource et idConnectorTarget
 	public function getTemplates() {
+		echo $this->templateDir.$this->solutionSource.'_'.$this->solutionTarget.'*.yml';
+		echo '<BR>';
+		foreach (glob($this->templateDir.$this->solutionSource.'_'.$this->solutionTarget.'*.yml') as $filename) {
+			echo "$filename occupe " . filesize($filename) . "\n";
+			echo '<BR>';
+		}
 		return null;
 	}
 	

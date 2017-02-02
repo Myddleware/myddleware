@@ -997,6 +997,10 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					if ($type == 'S') {
+						// We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
+						if ($ruleField['source_field_name']=='my_value') {
+							continue;
+						}
 						// It could be several fields in the source fields (in case of formula)
 						$sourceFields = explode(";",$ruleField['source_field_name']);
 						foreach ($sourceFields as $sourceField) {
