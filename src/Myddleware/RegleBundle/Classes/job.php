@@ -483,45 +483,30 @@ class jobcore  {
 	
 	public function generateTemplate($nomTemplate,$descriptionTemplate,$rulesId) {
 		include_once 'template.php';
-		$templateString = '';	
-		if (!empty($rulesId)) {
-			$first = true;
-			$guidTemplate = uniqid();
-			$template = new template($this->logger, $this->container, $this->connection);
-			foreach($rulesId as $ruleId) {
-				if ($first === true) {
-					$templateString .= $template->generateTemplateHeader($nomTemplate,$descriptionTemplate,$ruleId,$guidTemplate);
-					$first = false;
+		try {
+			// Init array
+			$templateArray = array(
+								'name' => $nomTemplate,
+								'description' => $descriptionTemplate
+							);
+			if (!empty($rulesId)) {
+				$template = new template($this->logger, $this->container, $this->connection);
+				$rulesOrderIds = $template->setRules($rulesId);
+
+				foreach($rulesOrderIds as $rulesOrderId) {	
+					// Generate array with all rules parameters
+					$templateArray['rules'][] = $template->extractRule($rulesOrderId['rule_id']);
 				}
-				$generateTemplate = $template->generateTemplateRule($ruleId,$guidTemplate);
-				if (empty($generateTemplate['error'])) {
-					$templateString .= $generateTemplate['sql'];
-				}
-				else {
-					return array('done' => false, 'error' => $generateTemplate['error']);
-				}
+				// Ecriture du fichier
+				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
+				file_put_contents($this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
-			// Ecriture du fichier
-			$file = __DIR__.'/../Templates/'.$nomTemplate.'.sql';
-			$fp = fopen($file, 'wb');
-			if ($fp === false) {
-				return array('done' => false, 'error' => 'Failed to open the file');
-			}
-			$fw = fwrite($fp,utf8_encode($templateString));
-			if ($fw === false) {
-				return array('done' => false, 'error' => 'Failed to write into the file');
-			}
-			else {
-				return array('done' => true, 'error' => '');
-			}
-		}
-		return $templateString;
-	}
-	
-	public function refreshTemplate() {
-		include_once 'template.php';
-		$template = new template($this->logger, $this->container, $this->connection);
-		return $template->refreshTemplate();
+		} catch (\Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error($this->message);
+			return false;
+		}	
+		return true;
 	}
 	
 	// Permet d'indiquer que le job est lancé manuellement

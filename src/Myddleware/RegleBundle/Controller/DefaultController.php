@@ -2330,7 +2330,6 @@ class DefaultControllerCore extends Controller
 					return new Response('module');
 				}
 				else if($_POST['choice_select'] == 'template') {
-					$myddlewareSession['param']['rule']['template']['id'] = $_POST['template'];
 					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					//--
 					$template = $this->get('myddleware.template');	
@@ -2338,9 +2337,8 @@ class DefaultControllerCore extends Controller
 					$template->setIdConnectorTarget( (int)$myddlewareSession['param']['rule']['connector']['cible'] );
 					$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 					$template->setIdUser( $this->getUser()->getId() );	
-					$template->setPrefixRuleName( $myddlewareSession['param']['rule']['rulename'] );	
-					
-					$convertTemplate = $template->convertTemplate($myddlewareSession['param']['rule']['template']['id']);
+					// Rule creation with the template selected in parameter
+					$convertTemplate = $template->convertTemplate($_POST['template']);
 					if($convertTemplate === true) {
 						return new Response('template');
 					}	
@@ -2371,19 +2369,18 @@ class DefaultControllerCore extends Controller
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);		
 		$template = $this->get('myddleware.template');	
 	
-		$template->setSolutionSource($myddlewareSession['param']['rule']['source']['solution']);
+		$template->setsolutionSourceName($myddlewareSession['param']['rule']['source']['solution']);
 		$template->setSolutionTarget($myddlewareSession['param']['rule']['cible']['solution']);
 		$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 		$template->setIdUser( $this->getUser()->getId() );
-
-		if( count($template->getTemplates()) > 0 ) {
+		$templates = $template->getTemplates();
+		if(!empty($templates)) {
 			$rows='';
-			foreach ($template->getTemplates() as $t) {
-			
+			foreach ($templates as $t) {			
 				$rows .='<tr>
-                            <td><span data-id="'.$t['tplt_id'].'" class="glyphicon glyphicon-th-list"></span></td>
-                            <td>'.$t['tpll_name'].'</td>
-                            <td>'.$t['tpll_description'].'</td>
+                            <td><span data-id="'.$t['name'].'" class="glyphicon glyphicon-th-list"></span></td>
+                            <td>'.$t['name'].'</td>
+                            <td>'.$t['description'].'</td>
                          </tr>';
 			}
 				

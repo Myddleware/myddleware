@@ -29,21 +29,33 @@ use Symfony\Bridge\Monolog\Logger; // Gestion des logs
 use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
 use Doctrine\DBAL\Connection; // Connexion BDD
 use Symfony\Component\HttpFoundation\Session\Session;
-
+use Myddleware\RegleBundle\Entity\Rule;
+use Myddleware\RegleBundle\Entity\RuleParam;
+use Myddleware\RegleBundle\Entity\RuleFilter;
+use Myddleware\RegleBundle\Entity\RuleField;
+use Myddleware\RegleBundle\Entity\RuleRelationShip;
 
 class templatecore {
 
 	protected $lang;
-	protected $solutionSource;
+	protected $solutionSourceName;
 	protected $solutionTarget;
+	protected $connectorSource;
+	protected $connectorTarget;
 	protected $idUser;
 	protected $prefixRuleName;
 	protected $templateDir;
+	protected $rules;
+	protected $ruleNameSlugArray;
+	protected $em;
+	protected $sourceSolution;
+	protected $targetSolution;
 	
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param = false) {
     	$this->logger = $logger;
 		$this->container = $container;
 		$this->connection = $dbalConnection;	
+		$this->em = $this->container->get('doctrine')->getEntityManager();
 		$this->templateDir = $this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/';
 		if (!empty($param['lang'])) {
 			$this->lang = $param['lang'];
@@ -51,14 +63,11 @@ class templatecore {
 		else {
 			$this->lang = 'EN';
 		}
-		if (!empty($param['solutionSource'])) {
-			$this->solutionSource = $param['solutionSource'];
+		if (!empty($param['solutionSourceName'])) {
+			$this->solutionSourceName = $param['solutionSourceName'];
 		}
 		if (!empty($param['solutionTarget'])) {
 			$this->solutionTarget = $param['solutionTarget'];
-		}
-		if (!empty($param['prefixRuleName'])) {
-			$this->setPrefixRuleName($param['prefixRuleName']);
 		}
 		if (!empty($param['idUser'])) {
 			$this->idUser = $param['idUser'];
@@ -68,8 +77,26 @@ class templatecore {
 		}
 	}
 	
-	public function setSolutionSource($solutionSource) {
-		$this->solutionSource = $solutionSource;
+	public function setIdConnectorSource($connectorSource) {
+		$this->connectorSource = $this->container->get('doctrine')
+								  ->getEntityManager()
+								  ->getRepository('RegleBundle:Connector')
+								  ->findOneById($connectorSource);
+		// When the the connector is set, we set the solution too
+		$this->solutionSourceName = $this->connectorSource->getSolution()->getName();
+	}
+	
+	public function setIdConnectorTarget($connectorTarget) {
+		$this->connectorTarget = $this->container->get('doctrine')
+								  ->getEntityManager()
+								  ->getRepository('RegleBundle:Connector')
+								  ->findOneById($connectorTarget);
+		// When the the connector is set, we set the solution too
+		$this->solutionTarget = $this->connectorTarget->getSolution()->getName();
+	}
+	
+	public function setsolutionSourceName($solutionSourceName) {
+		$this->solutionSourceName = $solutionSourceName;
 	}
 	
 	public function setSolutionTarget($solutionTarget) {
@@ -84,391 +111,325 @@ class templatecore {
 		$this->lang = $lang;
 	}
 	
-	// On enlève tous les caractères spéciaux du nom prefixRuleName
-	public function setPrefixRuleName($prefixRuleName) {
-		include_once 'tools.php';
-		$this->prefixRuleName = tools::post_slug($prefixRuleName);
+	// Sort rule (rule parent first)
+	public function setRules($rules) {
+		$this->rules = $rules;
+		$rulesString = trim(implode(',',$rules));
+		$query = "SELECT rule_id FROM RuleOrder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY RuleOrder.order ASC";
+		$stmt = $this->connection->prepare($query);
+		$stmt->bindValue("rules", $rulesString);
+		$stmt->execute();	    		
+		return $stmt->fetchALL();
 	}
+
 	
-	// Permet de lister les templates pour les connecteurs selectionnés idConnectorSource et idConnectorTarget
+	// Permet de lister les templates pour les connecteurs selectionnés 
 	public function getTemplates() {
-		echo $this->templateDir.$this->solutionSource.'_'.$this->solutionTarget.'*.yml';
-		echo '<BR>';
-		foreach (glob($this->templateDir.$this->solutionSource.'_'.$this->solutionTarget.'*.yml') as $filename) {
-			echo "$filename occupe " . filesize($filename) . "\n";
-			echo '<BR>';
+		$templates = '';
+		// Read in the directory template, we read files  corresponding to the selected solutions
+		foreach (glob($this->templateDir.$this->solutionSourceName.'_'.$this->solutionTarget.'*.yml') as $filename) {
+			$template = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($filename));
+			$templates[] = $template;
 		}
-		return null;
+		return $templates;
 	}
 	
-	// Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template
-	public function convertTemplate($idTemplate) {
-		// Récupération des requêtes correspondant au template sélectionné
-		$queryTemplate = "SELECT tplq_query FROM TemplateQuery WHERE tplt_id = '$idTemplate'";
-		$stmt = $this->connection->prepare($queryTemplate);
-		$stmt->execute();		
-		$queries = $stmt->fetchall();
-		$nbRule = 0;
-		
-		// Lancement de toutes les requêtes du template
-		if(!empty($queries)) {
-			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
-			try{
-				foreach($queries as $query) {
-					// Changement d'id rule à chaque nouvelle règle. La requête d'insertion de la règle est toujours la première
-					if (substr($query['tplq_query'],0,18) == 'INSERT INTO `Rule`') {
-						$idRule = uniqid();
-						$nbRule++;
-					}
-					// Si la règle contient une relation, on récupère l'id de la règle créée pour mettre à jour la relation
-					if (substr($query['tplq_query'],0,31) == 'INSERT INTO `RuleRelationShip`') {
-						// Récupération du name_slug
-						$marqueurDebut = "#BEG#"; 
-						$debutLien = strpos( $query['tplq_query'], $marqueurDebut ) + strlen( $marqueurDebut ); 
-						$marqueurFin = "#END#"; 
-						$finLien = strpos( $query['tplq_query'], $marqueurFin ); 
-						$name_slug = substr( $query['tplq_query'], $debutLien, $finLien - $debutLien ); 
-						// Ajout du prefix de la règle
-						$name_slug_prefix = $this->prefixRuleName.'_'.$name_slug;
-						
-						// Récupération de l'id de la règle
-						$querySlug = "	SELECT Rule.id FROM Rule WHERE name_slug = :name_slug_prefix";
-						$stmt = $this->connection->prepare($querySlug);
-						$stmt->bindValue("name_slug_prefix", $name_slug_prefix);
-						$stmt->execute();	    		
-						$rule = $stmt->fetch();
-
-						// remplacement de name_slug par l'id de la règle dans le Myddleware en cours
-						$query['tplq_query'] = str_replace($marqueurDebut.$name_slug.$marqueurFin, $rule['id'],$query['tplq_query']);
-					}
-					// Remplacement des variables pour que les règles soient adaptées à la configuration de Myddleware du client
-					$query['tplq_query'] = str_replace('idConnectorSource', $this->idConnectorSource,$query['tplq_query']);
-					$query['tplq_query'] = str_replace('idConnectorTarget', $this->idConnectorTarget,$query['tplq_query']);
-					$query['tplq_query'] = str_replace('idUser', $this->idUser,$query['tplq_query']);
-					$query['tplq_query'] = str_replace('idRule', $idRule,$query['tplq_query']);
-					$query['tplq_query'] = str_replace('prefixRuleName', $this->prefixRuleName,$query['tplq_query']);
-					$stmt = $this->connection->prepare($query['tplq_query']);
-					$stmt->execute();	
-				}
-				
-				// On rafraichit la table order après la création des règles
-				include_once 'job.php';
-				$job = new job($this->logger, $this->container, $this->connection);
-				$job->orderRules();
-				
-				$this->connection->commit(); // -- COMMIT TRANSACTION
-				$session = new Session();
-				$session->set( 'info', array("Nous vous recommandons de vous référer à <u><a href=\"http://www.myddleware.fr/index.php/fr/blog/16-tutoriel-fr/13-modeles-predefinis\" target=_blank>l'article suivant</a></u> afin de vous aider à activer ".($nbRule == 1 ? "la règle générée" : "les ".$nbRule." règles générées")." par le modèle prédéfini choisi."));
-			} catch (\Exception $e) {
-				$session = new Session();
-				$session->set( 'error', array("Erreur lors de le génération du template. Contactez le support <A HREF=\"mailto:support@crmconsult.fr\">support@crmconsult.fr</A>",'Failed to generate template : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'));
-				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->logger->error( 'Failed to generate template : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			}		
-		}
-		else {
-			$this->logger->error( 'Failed to create rule. There is no query for this template : '.$idTemplate.'.' );
-		}
-		return true;
-	}
-	
-	public function generateTemplateHeader($nomTemplate,$descriptionTemplate,$ruleId,$guidTemplate) {
-		$sql = '';
-		// Récupération des données de la règle
-		$query = "	SELECT 
-						Rule.*,
-						Connector_source.sol_id sol_source,
-						Connector_target.sol_id sol_target
-					FROM Rule
-						INNER JOIN Connector Connector_source
-							ON Rule.conn_id_source = Connector_source.id
-						INNER JOIN Connector Connector_target
-							ON Rule.conn_id_target = Connector_target.id							
-					WHERE 
-						id = :ruleId";
-		$stmt = $this->connection->prepare($query);
-		$stmt->bindValue("ruleId", $ruleId);
-		$stmt->execute();	    		
-		$rule = $stmt->fetch();
+	// Extract all the data of the rule
+	public function extractRule($ruleId) {
+		// General data
+		$rule = $this->em->getRepository('RegleBundle:Rule')->findOneBy(array('id' => $ruleId));
 		if (empty($rule)) {
-			return array('sql' => '', 'error' => 'Failed to load the rule');
+			throw new \Exception('Failed to get general data from the rule '.$ruleId);
 		}
-			
-		// Génération du dump de la table template
-		$sql .= "INSERT INTO Template VALUES ('$guidTemplate','$rule[sol_source]','$rule[sol_target]');".chr(10).chr(10);
-		$sql .= "INSERT INTO TemplateLang (`tpll_lang`, `tplt_id`, `tpll_name`, `tpll_description`) VALUES ('FR','$guidTemplate','$nomTemplate','$descriptionTemplate');".chr(10).chr(10);
-		return $sql;
-	}
-	
-	public function generateTemplateRule($ruleId,$guidTemplate) {
-		$sql = '';
-		$query = "	SELECT 
-						Rule.*,
-						Connector_source.sol_id sol_source,
-						Connector_target.sol_id sol_target
-					FROM Rule
-						INNER JOIN Connector Connector_source
-							ON Rule.conn_id_source = Connector_source.id
-						INNER JOIN Connector Connector_target
-							ON Rule.conn_id_target = Connector_target.id							
-					WHERE 
-						id = :ruleId";
-		$stmt = $this->connection->prepare($query);
-		$stmt->bindValue("ruleId", $ruleId);
-		$stmt->execute();	    		
-		$rule = $stmt->fetch();
+		$data['name'] = $rule->getName();
+		$data['nameSlug'] = $rule->getNameSlug();
+		$data['sourceSolution'] = $rule->getConnectorSource()->getSolution()->getName();
+		$data['targetSolution'] = $rule->getConnectorTarget()->getSolution()->getName();
+		$data['sourceModule'] = $rule->getModuleSource();
+		$data['targetModule'] = $rule->getModuleTarget();
 		
-		// Export table Rule
-		$sqlRule = $this->getSqlDump('Rule', $ruleId, $guidTemplate);
-		if (empty($sqlRule)) {
-			return array('sql' => '', 'error' => 'Failed to generate dump of table Rule');
-		}
-		$sql .= $sqlRule;
-		
-		// Export table RuleParam
-		$sqlRuleParam = $this->getSqlDump('RuleParam', $ruleId, $guidTemplate);
-		if (empty($sqlRuleParam)) {
-			return array('sql' => '', 'error' => 'Failed to generate dump of table RuleParam');
-		}
-		$sql .= $sqlRuleParam;
-		
-		// Export table RuleFilter	
-		$sqlRuleFilter = $this->getSqlDump('RuleFilter', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleFilter)) {
-			$sql .= $sqlRuleFilter;
+		// Save all rule name slug to be able to create relationship without keeping the rule id
+		$this->ruleNameSlugArray[$ruleId] = $data['nameSlug'];
+
+		// Rule fields
+		$ruleFields = $this->em->getRepository('RegleBundle:RuleField')->findByRule($ruleId);
+		if($ruleFields) {
+			foreach ($ruleFields as $ruleField) {
+				$field['target'] = $ruleField->getTarget();
+				$field['source'] = $ruleField->getSource();
+				$field['formula'] = $ruleField->getFormula();
+				$data['fields'][] = $field;
+			}
 		}
 		
-		// Export table RuleRelationShip	
-		$sqlRuleRelationShip = $this->getSqlDump('RuleRelationShip', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleRelationShip)) {
-			$sql .= $sqlRuleRelationShip;
+		// Rule RelationShips
+		$ruleRelationShips = $this->em->getRepository('RegleBundle:RuleRelationShip')->findByRule($ruleId);
+		if($ruleRelationShips) {				
+			foreach ($ruleRelationShips as $ruleRelationShip) {
+				$relationship['fieldNameSource'] = $ruleRelationShip->getFieldNameSource();
+				$relationship['fieldNameTarget'] = $ruleRelationShip->getFieldNameTarget();
+				if (!empty($this->ruleNameSlugArray[$ruleRelationShip->getFieldId()])) {
+					$relationship['fieldId'] = $this->ruleNameSlugArray[$ruleRelationShip->getFieldId()];
+				} else {
+					throw new \Exception('Failed to generate relationship for the rule '.$ruleId);
+				}
+				$relationship['parent'] = $ruleRelationShip->getParent();
+				$data['relationships'][] = $relationship;
+			}
+		}
+		
+		// Rule Filters
+		$ruleFilters = $this->em->getRepository('RegleBundle:RuleFilter')->findByRule($ruleId);
+		if($ruleFilters) {				
+			foreach ($ruleFilters as $ruleFilter) {
+				$filter['target'] = $ruleFilter->getTarget();
+				$filter['type'] = $ruleFilter->getType();
+				$filter['value'] = $ruleFilter->getValue();
+				$data['filters'][] = $filter;
+			}
 		}
 
-		// Export table RuleField
-		$sqlRuleField = $this->getSqlDump('RuleField', $ruleId, $guidTemplate);
-		if (!empty($sqlRuleField)) {
-			$sql .= $sqlRuleField;
-		}
-		
-		$prefixTable = 'z_'.$rule['name_slug'].'_'.$rule['version'].'_';
-		
-		// Récupération de la table source 
-		$query = "SHOW CREATE TABLE ".$prefixTable.'source';
-		$stmt = $this->connection->prepare($query);
-		$stmt->execute();	    		
-		$tableSource = $stmt->fetch();
-		if (empty($tableSource['Create Table'])) {
-			return array('sql' => '', 'error' => 'Failed to load the table source');
-		}
-		// Remplacement du nom de la règle
-		$sqlSource = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableSource['Create Table']).';';
-		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlSource');".chr(10).chr(10);
-		
-		// Récupération de la table target 
-		$query = "SHOW CREATE TABLE ".$prefixTable.'target';
-		$stmt = $this->connection->prepare($query);
-		$stmt->execute();	    		
-		$tableTarget = $stmt->fetch();
-		if (empty($tableTarget['Create Table'])) {
-			return array('sql' => '', 'error' => 'Failed to load the table target');
-		}
-		// Remplacement du nom de la règle
-		$sqlTarget = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableTarget['Create Table']).';';
-		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlTarget');".chr(10).chr(10);
-		
-		// Récupération de la table history 
-		$query = "SHOW CREATE TABLE ".$prefixTable.'history';
-		$stmt = $this->connection->prepare($query);
-		$stmt->execute();	    		
-		$tableHistory = $stmt->fetch();
-		if (empty($tableHistory['Create Table'])) {
-			return array('sql' => '', 'error' => 'Failed to load the table history');
-		}
-		$sqlHistory = str_replace($rule['name_slug'],'prefixRuleName_'.$rule['name_slug'],$tableHistory['Create Table']).';';
-		$sql .= "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', '$sqlHistory');".chr(10).chr(10);
-		
-		return array('sql' => $sql, 'error' => '');
-	}
-	
-	// Extraction des données d'un règle
-	protected function getSqlDump($table, $ruleId, $guidTemplate) {
-		$sql = '';
-		$values = '';
-		$break = false;
-		$nextDateReference = false;
-		$query = "SELECT * FROM $table WHERE id = :ruleId";
-		$stmt = $this->connection->prepare($query);
-		$stmt->bindValue("ruleId", $ruleId);
-		$stmt->execute();	    		
-		$rows = $stmt->fetchall();
-		if (!empty($rows)) {
-			$firstRow = true;
-			$fields = '';
-			foreach ($rows as $row) {
-				// Prise en compte du cas où on n'a qu'une seule ligne dans le résultat de requête, on remet alors la ligne complète dans $row poru que la boucle suivant puisse écrire la requpete
-				if (is_string($row)) {
-					$row = $rows;
-					$break = true;
+		// Rule Params
+		$ruleParams = $this->em->getRepository('RegleBundle:RuleParam')->findByRule($ruleId);
+		if($ruleParams) {				
+			foreach ($ruleParams as $ruleParam) {
+				$param['name'] = $ruleParam->getName();
+				// If reference date we set it far in the past or to 0 if it is a numeric
+				if ($param['name'] == 'datereference') {
+					if (is_numeric($ruleParam->getValue())) {
+						$param['value'] = 0;
+					} else { // date
+						$param['value'] = '1970-01-01 00:00:00';
+					}
+				} else {
+					$param['value'] = $ruleParam->getValue();
 				}
-				$firstfield = true;
-				$values .= '(';
-				//Ajout de tous les champs dans le dump
-				foreach ($row as $key => $value) {
-					// Si on est sur une table autre que Rule, on ne garde pas le premier paramètre qui est un id qui doit s'incrémenter
-					if ($firstfield && $table != 'Rule') {
-						$firstfield = false;
-						continue;
-					}
-					// Si on est sur la première ligne, on sauvegarde le header
-					if ($firstRow) {
-						$fields .= "`$key`,";
-					}
-					// Pour certaine données on insère la clé et non la valeur car ces données seront des paramètres
-					if ($key == 'id') {
-						$values .= "'idRule',";
-					}
-					elseif ($key == 'conn_id_source') {
-						$values .= "'idConnectorSource',";
-					}
-					elseif ($key == 'conn_id_target') {
-						$values .= "'idConnectorTarget',";
-					}
-					// Par défaut une règle est inactive
-					elseif ($key == 'active') {
-						$values .= "'0',";
-					}
-					elseif ($key == 'name') {
-						$values .= "'prefixRuleName_".$row['name_slug']."',";
-					}
-					elseif ($key == 'name_slug') {
-						$values .= "'prefixRuleName_".$row['name_slug']."',";
-					} 
-					elseif (in_array($key, array('created_by','modified_by'))) {
-						$values .= "'idUser',";
-					}
-					// Les dates doivent être dynamiques
-					elseif(in_array($key, array('date_created','date_modified'))) {
-						$values .= "NOW(),";
-					}
-					// La date de référence est égale à aujourd'hui à minuit
-					elseif ($nextDateReference) {
-						$values .= "CONCAT( CURDATE( ),' 00:00:00' ),";
-						$nextDateReference = false;
-					}
-					// Il faut gérer les " dans les formule
-					elseif($key == 'formula') {
-						$values .= "'".addslashes($value)."',";
-					}
-					// S'il s'agit d'une relation il faut mettre un code pour pouvoir mettre l'id de la règle lié
-					elseif($key == 'field_id') {
-						// Récupération du name_slug de la règle liée
-						$query = "	SELECT Rule.name_slug FROM Rule WHERE id = :ruleId";
-						$stmt = $this->connection->prepare($query);
-						$stmt->bindValue("ruleId", $value);
-						$stmt->execute();	    		
-						$rule = $stmt->fetch();
-						$values .= "'#BEG#$rule[name_slug]#END#',";
-					}
-					else {
-						$values .= "'".$value."',";
-					}
-					// Gestion de la date de référence
-					if ($value == 'datereference' && $table == 'RuleParam') {
-						$nextDateReference = true;
-					}
-				}
-				$firstRow = false;
-				// Suppression de la dernière virgule er gestion de la fin de ligne
-				$values = rtrim($values,','); 
-				$values .= '),'.chr(10);
-				if ($break) {
-					break;
-				}
+				$data['params'][] = $param;
 			}
-			// Suppression de la dernière virgule er gestion de la fin de requête
-			$values = rtrim($values,chr(10)); 
-			$values = rtrim($values,','); 
-			$fields = rtrim($fields,','); 
-			$sql = "INSERT INTO `$table` ($fields) VALUES $values ";
-			
-			// Création de la requête finale
-			$sql = "INSERT INTO `TemplateQuery` (`tplt_id`, `tplq_query`) VALUES ('$guidTemplate', \"$sql\");".chr(10).chr(10);
 		}
-		return $sql;
+		return $data;
 	}
 	
-	public function refreshTemplate() {
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
-		try {
-			// Suppression des données dans les tables template
-			$clearTable = $this->clearTable();
-			if ($clearTable['done'] === false) {
-				throw new \Exception( $clearTable['error'] );
+	protected function initSolutions() {
+		// Init source solution
+		$this->sourceSolution = $this->container->get('myddleware_rule.'.$this->solutionSourceName);	
+		$connectorParams = $this->em->getRepository('RegleBundle:ConnectorParam')->findByConnector($this->connectorSource);	
+		foreach ($connectorParams as $connectorParam) {
+			$params[$connectorParam->getName()] = $connectorParam->getValue();
+		}	
+		// Throw exception in the login in case the connection doesn't work
+		$this->sourceSolution->login($params);
+	
+		// Init source solution	
+		$this->targetSolution = $this->container->get('myddleware_rule.'.$this->solutionTarget);	
+		$connectorParams = $this->em->getRepository('RegleBundle:ConnectorParam')->findByConnector($this->connectorTarget);	
+		foreach ($connectorParams as $connectorParam) {
+			$params[$connectorParam->getName()] = $connectorParam->getValue();
+		}	
+		// Throw exception in the login in case the connection doesn't work
+		$this->targetSolution->login($params);
+	}
+
+	// Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template
+	public function convertTemplate($templateName) {
+		$this->em->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION
+		try{
+			// Get the template array
+			$template = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->templateDir.$templateName.'.yml'));
+			if (empty($template['rules'])) {
+				throw new \Exception('No rule found in the template. ');
 			}
 			
-			// Permet de charger tous les templates
-			$loadTemplates = $this->loadTemplates();
-			if ($loadTemplates['done'] === false) {
-				throw new \Exception( $loadTemplates['error'] );
-			}
-		
-			$this->connection->commit(); // -- COMMIT TRANSACTION
-			return array('done' => true, 'error' => '');
-		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			return array('done' => false, 'error' => $e->getMessage());
-		}
-	}
-	
-	// Suppression des données dans les tables template
-	protected function clearTable() {
-		try {
-			$query = "DELETE FROM Template";
-			$stmt = $this->connection->prepare($query);
-			$stmt->execute();	
-
-			$query = "DELETE FROM TemplateLang";
-			$stmt = $this->connection->prepare($query);
-			$stmt->execute();
-
-			$query = "DELETE FROM TemplateQuery";
-			$stmt = $this->connection->prepare($query);
-			$stmt->execute();
-			return array('done' => true, 'error' => '');
-		} catch (\Exception $e) {
-			return array('done' => false, 'error' => $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');
-		}
-	}
-	
-	// Permet de charger tous les templates
-	protected function loadTemplates() {
-		try {
-			$dir = __DIR__.'/../Templates/';
-			$d = dir($file = $dir); 
-			while ($entry = $d->read()) { 
-				if(!empty($entry)){ 
-					$queryFile = file_get_contents($dir.$entry);
-					$queries = explode(";\n", $queryFile);
-					if (!empty($queries)) {
-						foreach ($queries as $query) {
-							if (!empty($query) && $query != chr(10)) {
-								$stmt = $this->connection->prepare($query);
-								$stmt->execute();
+			// Login to the source and target solution
+			$sourceModule = $this->initSolutions();
+			
+			// Get list of module for each solution for source and target
+			$sourceModuleListSource = $this->sourceSolution->get_modules('source');
+			$sourceModuleListTarget = $this->sourceSolution->get_modules('target');
+			$targetModuleListSource = $this->targetSolution->get_modules('source');
+			$targetModuleListTarget = $this->targetSolution->get_modules('target');
+			
+			foreach($template['rules'] as $rule) {
+				// Rule creation
+				// General data
+				$ruleObject = new Rule();
+				$ruleObject->setName($rule['name']);
+				$ruleObject->setNameSlug($rule['nameSlug']);
+				// It is possible that the templatte contains opposite rules, so we test it first. If solution are opposite, we set opposite connectors too
+				if ($rule['sourceSolution'] == $this->solutionSourceName) {
+					$ruleObject->setConnectorSource($this->connectorSource);
+					// Check the access to the module
+					if (empty($sourceModuleListSource[$rule['sourceModule']])) {
+						throw new \Exception('Module '.$rule['sourceModule'].' not found in '.$rule['sourceSolution'].'. Please make sure that you have access to this module. ');
+					}
+				} elseif ($rule['sourceSolution'] == $this->solutionTarget) {
+					$ruleObject->setConnectorSource($this->connectorTarget);
+					// Check the access to the module, in case we are in an opposite rule, we search in the target module list for source module
+					if (empty($targetModuleListSource[$rule['sourceModule']])) {
+						throw new \Exception('Module '.$rule['sourceModule'].' not found in '.$rule['sourceSolution'].'. Please make sure that you have access to this module. ');
+					}										
+				}else {
+					throw new \Exception('No correspondance between source solutions. ');
+				}
+				
+				// The same for target connector 
+				if ($rule['targetSolution'] == $this->solutionTarget) {
+					$ruleObject->setConnectorTarget($this->connectorTarget);
+					// Check the access to the module
+					if (empty($targetModuleListTarget[$rule['targetModule']])) {
+						throw new \Exception('Module '.$rule['targetModule'].' not found in '.$rule['targetSolution'].'. Please make sure that you have access to this module. ');
+					}
+				} elseif ($rule['targetSolution'] == $this->solutionSourceName) {
+					$ruleObject->setConnectorTarget($this->connectorSource);	
+					// Check the access to the module, in case we are in an opposite rule, we search in the source module list for target module
+					if (empty($sourceModuleListTarget[$rule['targetModule']])) {
+						throw new \Exception('Module '.$rule['targetModule'].' not found in '.$rule['targetSolution'].'. Please make sure that you have access to this module. ');
+					}
+				} else {
+					throw new \Exception('No correspondance between source solutions. ');
+				}
+				
+				$ruleObject->setDateCreated(new \DateTime);
+				$ruleObject->setDateModified(new \DateTime);
+				$ruleObject->setCreatedBy((int)$this->idUser);
+				$ruleObject->setModifiedBy((int)$this->idUser);	
+				$ruleObject->setModuleSource($rule['sourceModule']);
+				$ruleObject->setModuleTarget($rule['targetModule']);	
+				$ruleObject->setDeleted(0);
+				$ruleObject->setActive(0);
+				$this->em->persist($ruleObject);
+// echo 'toto : '.$this->connectorTarget->getId();				
+				$this->em->flush(); 				
+				// We save the rule to be able to create relationship in the orther rules
+				$this->ruleNameSlugArray[$rule['nameSlug']] = $ruleObject->getId();
+				
+				$sourceFieldsList = '';
+				$targetFieldsList = '';
+				// Get the field list for source and target solution
+				if (
+						$rule['sourceSolution'] == $this->solutionSourceName
+					 && $rule['targetSolution'] == $this->solutionTarget	
+				) {
+					$sourceFieldsList = $this->sourceSolution->get_module_fields($rule['sourceModule']);
+					$targetFieldsList = $this->targetSolution->get_module_fields($rule['targetModule']);
+				}
+				elseif (
+						$rule['sourceSolution'] == $this->solutionSourceName
+					 && $rule['targetSolution'] == $this->solutionTarget	
+				) {
+					$sourceFieldsList = $this->targetSolution->get_module_fields($rule['sourceModule']);
+					$targetFieldsList = $this->sourceSolution->get_module_fields($rule['targetModule']);
+				} else {
+					throw new \Exception('No correspondance between source solutions. Failed to get the field list. ');
+				}
+	// print_r($sourceFieldsList);		
+	// print_r($targetFieldsList);		
+// throw new \Exception('No corres');				
+				// Create rule fields
+				if (!empty($rule['fields'])) {
+					foreach ($rule['fields'] as $field) {
+						// Check that all fields are available
+						// Check source, several fields can be store in source in cas of formula
+						$sourceFields = explode(';',$field['source']);
+						foreach($sourceFields as $sourceField) {
+							if (
+									empty($sourceFieldsList[$sourceField])
+								 && $sourceField != 'my_value'	
+							) {
+								throw new \Exception('Field '.$sourceField.' not found in the module '.$rule['sourceModule'].'. Please make sure that you have access to this field. ');
 							}
 						}
+						// Check target field
+						if (
+								empty($targetFieldsList[$field['target']])
+							 && $field['target'] != 'my_value'	
+						) {
+							throw new \Exception('Field '.$field['target'].' not found in the module '.$rule['targetModule'].'. Please make sure that you have access to this field. ');
+						}
+						$fieldObject = new RuleField();
+						$fieldObject->setRule($ruleObject);
+						$fieldObject->setTarget($field['target']);	
+						$fieldObject->setSource($field['source']);	
+						$fieldObject->setFormula($field['formula']);	
+						$this->em->persist($fieldObject);
 					}
-				} 
-			} 
-			// Permet de rattraper une erreur généré par 2 guillements dans les create table
-			$query = "UPDATE TemplateQuery SET tplq_query = REPLACE(tplq_query, 'NOT NULL DEFAULT \'', 'NOT NULL DEFAULT \'\'')";
-			$stmt = $this->connection->prepare($query);
-			$stmt->execute();
-			$d->close();
-			return array('done' => true, 'error' => '');
+				}
+				
+				// Create rule relationship
+				if (!empty($rule['relationships'])) {
+					foreach ($rule['relationships'] as $relationship) {				
+						// Check source field				
+						if (
+								empty($sourceFieldsList[$relationship['fieldNameSource']])
+							 && $relationship['fieldNameSource'] != 'Myddleware_element_id'	
+						) {				
+							throw new \Exception('Field '.$relationship['fieldNameSource'].' not found in the module '.$rule['sourceModule'].'. Please make sure that you have access to this field. ');
+						}
+						// Check target field
+						if (
+								empty($targetFieldsList[$relationship['fieldNameTarget']])
+							 && $relationship['fieldNameTarget'] != 'Myddleware_element_id'		
+						) {
+							throw new \Exception('Field '.$relationship['fieldNameTarget'].' not found in the module '.$rule['targetModule'].'. Please make sure that you have access to this field. ');
+						}
+						$relationshipObjecy = new RuleRelationShip();
+						$relationshipObjecy->setRule($ruleObject);
+						$relationshipObjecy->setFieldNameSource($relationship['fieldNameSource']);
+						$relationshipObjecy->setFieldNameTarget($relationship['fieldNameTarget']);
+						// fieldId contains the nameSlug, we have to change it with the id of the relate rule 					
+						$relationshipObjecy->setFieldId($this->ruleNameSlugArray[$relationship['fieldId']]); 
+						$relationshipObjecy->setParent($relationship['parent']);
+						$this->em->persist($relationshipObjecy);
+					}
+				}
+				
+				// Create rule filter
+				if (!empty($rule['filters'])) {
+					foreach ($rule['filters'] as $filter) {
+						$ruleFilterObject = new RuleFilter();	
+						$ruleFilterObject->setRule($ruleObject);
+						$ruleFilterObject->setTarget($filter['target']);
+						$ruleFilterObject->setType($filter['type']);
+						$ruleFilterObject->setValue($filter['value']);
+						$this->em->persist($ruleFilterObject);
+					}
+				}
+				
+				// Create rule param
+				if (!empty($rule['params'])) {
+					foreach ($rule['params'] as $param) {
+						$ruleParamObject = new RuleParam();	
+						$ruleParamObject->setRule($ruleObject);
+						$ruleParamObject->setName($param['name']);
+						$ruleParamObject->setValue($param['value']);
+						$this->em->persist($ruleParamObject);
+					}
+				}
+				
+			}
+	// print_r($rule);
+			
+			// On rafraichit la table order après la création des règles
+			include_once 'job.php';
+			$job = new job($this->logger, $this->container, $this->connection);
+			$job->orderRules();
+			
+			$this->em->flush(); 
+	throw new \Exception('test');
+			$this->connection->commit(); // -- COMMIT TRANSACTION
+			$session = new Session();
+			$session->set( 'info', array("Nous vous recommandons de vous référer à <u><a href=\"http://www.myddleware.fr/index.php/fr/blog/16-tutoriel-fr/13-modeles-predefinis\" target=_blank>l'article suivant</a></u> afin de vous aider à activer ".($nbRule == 1 ? "la règle générée" : "les ".$nbRule." règles générées")." par le modèle prédéfini choisi."));
 		} catch (\Exception $e) {
-			return array('done' => false, 'error' => $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');
-		}
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			$session = new Session();
+			$session->set( 'error', array("Erreur lors de le génération du template. Contactez le support <A HREF=\"mailto:contact@myddleware.com\">contact@myddleware.com</A>",'Failed to generate template : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'));
+			$error = 'Failed to generate rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'; 
+			$this->logger->error($error);
+			return $error;
+		}		
+		return true;
 	}
+
 }
 
 
