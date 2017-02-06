@@ -506,9 +506,12 @@ error:
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
+        delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
     account:
         language_change: Failed to change the language :
-
+    template:
+        creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
+  
 title:
     account:
         view: My account
@@ -623,7 +626,10 @@ messages:
         open_running_task: Click here if you want to open the running task.
         another_task_running: Failed to create the task because another task is already running. Please wait for the end of this task or you can stop it manually.
         failed_create_directory: An error occured while creating your directory.
-
+    template:
+        nb_rule: Number of generated rules: 
+        help: Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
+  
 email_notification:
     subject: Myddleware notification
     hello: Hello, 

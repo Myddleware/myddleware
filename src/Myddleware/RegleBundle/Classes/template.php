@@ -248,13 +248,13 @@ class templatecore {
 			$sourceModuleListTarget = $this->sourceSolution->get_modules('target');
 			$targetModuleListSource = $this->targetSolution->get_modules('source');
 			$targetModuleListTarget = $this->targetSolution->get_modules('target');
-			
+			$nbRule = 0;
 			foreach($template['rules'] as $rule) {
 				// Rule creation
 				// General data
 				$ruleObject = new Rule();
-				$ruleObject->setName($rule['name']);
-				$ruleObject->setNameSlug($rule['nameSlug']);
+				$ruleObject->setName((string)$rule['name']);
+				$ruleObject->setNameSlug((string)$rule['nameSlug']);
 				// It is possible that the templatte contains opposite rules, so we test it first. If solution are opposite, we set opposite connectors too
 				if ($rule['sourceSolution'] == $this->solutionSourceName) {
 					$ruleObject->setConnectorSource($this->connectorSource);
@@ -293,17 +293,20 @@ class templatecore {
 				$ruleObject->setDateModified(new \DateTime);
 				$ruleObject->setCreatedBy((int)$this->idUser);
 				$ruleObject->setModifiedBy((int)$this->idUser);	
-				$ruleObject->setModuleSource($rule['sourceModule']);
-				$ruleObject->setModuleTarget($rule['targetModule']);	
+				$ruleObject->setModuleSource((string)$rule['sourceModule']);
+				$ruleObject->setModuleTarget((string)$rule['targetModule']);	
 				$ruleObject->setDeleted(0);
-				$ruleObject->setActive(0);
+				if (!empty($rule['active'])) {
+					$ruleObject->setActive(1);
+				} else {
+					$ruleObject->setActive(0);
+				}
 				$this->em->persist($ruleObject);
-// echo 'toto : '.$this->connectorTarget->getId();				
-				$this->em->flush(); 				
+		
 				// We save the rule to be able to create relationship in the orther rules
 				$this->ruleNameSlugArray[$rule['nameSlug']] = $ruleObject->getId();
 				
-				$sourceFieldsList = '';
+			 	$sourceFieldsList = '';
 				$targetFieldsList = '';
 				// Get the field list for source and target solution
 				if (
@@ -322,9 +325,7 @@ class templatecore {
 				} else {
 					throw new \Exception('No correspondance between source solutions. Failed to get the field list. ');
 				}
-	// print_r($sourceFieldsList);		
-	// print_r($targetFieldsList);		
-// throw new \Exception('No corres');				
+				
 				// Create rule fields
 				if (!empty($rule['fields'])) {
 					foreach ($rule['fields'] as $field) {
@@ -347,7 +348,7 @@ class templatecore {
 							throw new \Exception('Field '.$field['target'].' not found in the module '.$rule['targetModule'].'. Please make sure that you have access to this field. ');
 						}
 						$fieldObject = new RuleField();
-						$fieldObject->setRule($ruleObject);
+						$fieldObject->setRule($ruleObject->getId());
 						$fieldObject->setTarget($field['target']);	
 						$fieldObject->setSource($field['source']);	
 						$fieldObject->setFormula($field['formula']);	
@@ -373,7 +374,7 @@ class templatecore {
 							throw new \Exception('Field '.$relationship['fieldNameTarget'].' not found in the module '.$rule['targetModule'].'. Please make sure that you have access to this field. ');
 						}
 						$relationshipObjecy = new RuleRelationShip();
-						$relationshipObjecy->setRule($ruleObject);
+						$relationshipObjecy->setRule($ruleObject->getId());
 						$relationshipObjecy->setFieldNameSource($relationship['fieldNameSource']);
 						$relationshipObjecy->setFieldNameTarget($relationship['fieldNameTarget']);
 						// fieldId contains the nameSlug, we have to change it with the id of the relate rule 					
@@ -387,7 +388,7 @@ class templatecore {
 				if (!empty($rule['filters'])) {
 					foreach ($rule['filters'] as $filter) {
 						$ruleFilterObject = new RuleFilter();	
-						$ruleFilterObject->setRule($ruleObject);
+						$ruleFilterObject->setRule($ruleObject->getId());
 						$ruleFilterObject->setTarget($filter['target']);
 						$ruleFilterObject->setType($filter['type']);
 						$ruleFilterObject->setValue($filter['value']);
@@ -399,30 +400,30 @@ class templatecore {
 				if (!empty($rule['params'])) {
 					foreach ($rule['params'] as $param) {
 						$ruleParamObject = new RuleParam();	
-						$ruleParamObject->setRule($ruleObject);
+						$ruleParamObject->setRule($ruleObject->getId());
 						$ruleParamObject->setName($param['name']);
 						$ruleParamObject->setValue($param['value']);
 						$this->em->persist($ruleParamObject);
 					}
-				}
-				
+				} 
+				$nbRule++;
 			}
-	// print_r($rule);
 			
-			// On rafraichit la table order après la création des règles
+			// Refresh table order
 			include_once 'job.php';
 			$job = new job($this->logger, $this->container, $this->connection);
-			$job->orderRules();
-			
-			$this->em->flush(); 
-	throw new \Exception('test');
-			$this->connection->commit(); // -- COMMIT TRANSACTION
+			$job->orderRules();		
+			// Set the message in Myddleware UI
 			$session = new Session();
-			$session->set( 'info', array("Nous vous recommandons de vous référer à <u><a href=\"http://www.myddleware.fr/index.php/fr/blog/16-tutoriel-fr/13-modeles-predefinis\" target=_blank>l'article suivant</a></u> afin de vous aider à activer ".($nbRule == 1 ? "la règle générée" : "les ".$nbRule." règles générées")." par le modèle prédéfini choisi."));
+			$session->set( 'info', array($this->container->get('translator')->trans('messages.template.nb_rule').$nbRule, $this->container->get('translator')->trans('messages.template.help')));
+			// Commit the rules in the database
+			$this->em->flush();
+			$this->em->getConnection()->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			// Rollback in case of error
+			$this->em->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
 			$session = new Session();
-			$session->set( 'error', array("Erreur lors de le génération du template. Contactez le support <A HREF=\"mailto:contact@myddleware.com\">contact@myddleware.com</A>",'Failed to generate template : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'));
+			$session->set( 'error', array($this->container->get('translator')->trans('error.template.creation'),$e->getMessage()));
 			$error = 'Failed to generate rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'; 
 			$this->logger->error($error);
 			return $error;
