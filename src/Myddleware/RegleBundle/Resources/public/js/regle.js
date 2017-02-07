@@ -1333,21 +1333,8 @@ function verifFields(field_id,show) {
 	
 	// Détecte les relations non remplis
 	function require_relate() {
-		error = 0;
-		$( 'td input','#relation' ).each(function() {	
-				
-			if( $(this).attr('data-required') == '1' ) {
-										
-				id = $(this).attr('data-value');
-				
-				if( $("#lst_source_"+id+ " option:selected").val() == '' ) {
-					error++;
-				}
-			}
-
-		});	
-		
-		return ((error == 0) ? true : false );							
+		// We don't test the fields anymore because fields relate required could be filled in the field mapping
+		return true;				
 	}
 
 	// test si le champ à été selectionné pour pouvoir être utilisé comme référence afin d'éviter les doublons
