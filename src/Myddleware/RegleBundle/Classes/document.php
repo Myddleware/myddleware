@@ -145,28 +145,36 @@ class documentcore {
 		if ($this->getJobStatus() != 'Start') {
 			$this->jobActive = false;
 		}		
-		
-		// Init attribut of the class Document
-		if (!empty($param['id_doc_myddleware'])) {	
-			// Instanciate attribut sourceData
-			$this->setDocument($param['id_doc_myddleware']);
-		}
-		else {
-			$this->id = uniqid('', true);
-			$this->dateCreated = gmdate('Y-m-d H:i:s');
-			$this->ruleName = $param['rule']['name_slug'];
-			$this->ruleMode = $param['rule']['mode'];
-			$this->ruleId = $param['rule']['id'];
-			$this->ruleFields = $param['ruleFields'];
-			$this->data = $param['data'];
-			$this->sourceId = $this->data['id'];
-			$this->userId = $param['rule']['created_by'];
-			$this->status = 'New';
-			$this->attempt = 0;
-		} 
-		// Ajout des paramètre de la règle
-		$this->setRuleParam();
 
+		// If mode isn't front ofice => only when the user click on "Simulation" during the rule creation
+		if(
+				empty($param['mode']) 
+			 || (
+					!empty($param['mode'])
+				&& $param['mode'] != 'front_office'
+			)
+		) {
+			// Init attribut of the class Document
+			if (!empty($param['id_doc_myddleware'])) {	
+				// Instanciate attribut sourceData
+				$this->setDocument($param['id_doc_myddleware']);
+			}
+			else {
+				$this->id = uniqid('', true);
+				$this->dateCreated = gmdate('Y-m-d H:i:s');
+				$this->ruleName = $param['rule']['name_slug'];
+				$this->ruleMode = $param['rule']['mode'];
+				$this->ruleId = $param['rule']['id'];
+				$this->ruleFields = $param['ruleFields'];
+				$this->data = $param['data'];
+				$this->sourceId = $this->data['id'];
+				$this->userId = $param['rule']['created_by'];
+				$this->status = 'New';
+				$this->attempt = 0;
+			} 
+			// Ajout des paramètre de la règle
+			$this->setRuleParam();
+		}
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
 			$this->ruleFields = $param['ruleFields'];
@@ -833,8 +841,7 @@ class documentcore {
 			// Sinon on mets directement le document en ready to send (example child rule)
 			else {
 				$this->updateStatus('Ready_to_send');
-			}
-			
+			}		
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
 			// Si le document est en type recherche, alors la sible est forcément égal à la source et il ne fait pas annuler le doc. 
 			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
@@ -843,7 +850,7 @@ class documentcore {
 				&&	!$this->isParent()
 			) {
 				$this->checkNoChange();
-			}
+			}		
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -907,29 +914,33 @@ class documentcore {
 	
 		// Get data in the target solution (if exists) before we update it
 		$history = $this->getDocumentData('H');
-
+		
 		// For each target fields, we compare the data we want to send and the data already in the target solution
 		// If one is different we stop the function
-		foreach ($this->ruleFields as $field) {
-			if (
-					!isset($target[$field['target_field_name']])
-				 ||	!isset($history[$field['target_field_name']])
-				 ||	$history[$field['target_field_name']] != $target[$field['target_field_name']]
-			){
-				return false;
+		if (!empty($this->ruleFields)) {
+			foreach ($this->ruleFields as $field) {
+				if (
+						!isset($target[$field['target_field_name']])
+					 ||	!isset($history[$field['target_field_name']])
+					 ||	$history[$field['target_field_name']] != $target[$field['target_field_name']]
+				){
+					return false;
+				}
 			}
 		}
 		
 		// We check relationship fields as well
-		foreach ($this->ruleRelationships as $ruleRelationship) {
-			if (
-					!isset($target[$ruleRelationship['field_name_target']])
-				 ||	!isset($history[$ruleRelationship['field_name_target']])
-				 ||	$history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
-			){
-				return false;
+		if (!empty($this->ruleRelationships)) {
+			foreach ($this->ruleRelationships as $ruleRelationship) {
+				if (
+						!isset($target[$ruleRelationship['field_name_target']])
+					 ||	!isset($history[$ruleRelationship['field_name_target']])
+					 ||	$history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
+				){
+					return false;
+				}
 			}
-		}	
+		}
 		// If all fields are equal, no need to update, so we cancel the document
 		$this->message .= 'Identical data to the target system. This document is canceled. ';
 		$this->typeError = 'W';
