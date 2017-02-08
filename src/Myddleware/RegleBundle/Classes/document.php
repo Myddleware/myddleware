@@ -1024,12 +1024,12 @@ class documentcore {
 			}
 			// We save the relationship field too 
 			if (!empty($this->ruleRelationships)) {
-				foreach ($this->ruleRelationships as $ruleRelationship) {
+				foreach ($this->ruleRelationships as $ruleRelationship) {			
 					// if field = Myddleware_element_id then we take the id record in the osurce application
 					if ($type == 'S') {
 						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_source']]);
 					} else {	
-						$dataInsert[$ruleRelationship['field_name_target']] = ($ruleRelationship['field_name_target'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_target']]);
+						$dataInsert[$ruleRelationship['field_name_target']] = $ruleRelationship['field_name_target'];
 					}
 				}
 			}		
@@ -1456,8 +1456,9 @@ class documentcore {
 							$result = $stmt->fetch();				
 				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
-							if (!empty($result['id'])) {							
+							if (!empty($result['target_id'])) {							
 								$this->targetId = $result['target_id'];
+								return 'U';
 							}
 							// Sinon on bloque la création du document 
 							// Except if the rule is parent, no need of target_id, the target id will be retrived when we will send the data

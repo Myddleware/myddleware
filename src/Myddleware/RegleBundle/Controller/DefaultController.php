@@ -2041,9 +2041,13 @@ class DefaultControllerCore extends Controller
 				else {
 					$p = array_merge($param['RuleParam'],$tab_new_rule['params']);
 				}
-																
+		
+				$bidirectional = '';												
 				foreach($p  as $key => $value) {
-					
+					// Value could be empty, for bidirectional parameter for example (we don't test empty because mode could be equal 0)
+					if ($value == '') {
+						continue;
+					}
 					$oneRuleParam = new RuleParam();
 					$oneRuleParam->setRule( $oneRule->getId() );
 										
@@ -2062,10 +2066,46 @@ class DefaultControllerCore extends Controller
 							$oneRuleParam->setValue( $value );
 						}	
 					} 
+					
+					// Save the parameter
+					if($key == 'bidirectional') {
+						$bidirectional = $value;
+					}
+					
 				    $this->em->persist($oneRuleParam);
 				    $this->em->flush();						
-				}					
-			}
+				}
+				
+				// If a bidirectional parameter exist, we check if the opposite one exists too
+				if (!empty($bidirectional)) {
+					// Update the opposite rule if birectional rule
+					$ruleParamBidirectionalOpposite = $this->em->getRepository('RegleBundle:RuleParam')
+														->findOneBy( array(
+																'rule' => $bidirectional,
+																'name' => 'bidirectional',
+																'value' => $oneRule->getId()
+															));			
+					// If the bidirectional parameter doesn't exist on the opposite rule we create it
+					if (empty($ruleParamBidirectionalOpposite)) {
+						$ruleParamBidirectionalOpposite = new RuleParam();
+						$ruleParamBidirectionalOpposite->setRule( $bidirectional );
+						$ruleParamBidirectionalOpposite->setName( 'bidirectional' );
+						$ruleParamBidirectionalOpposite->setValue( $oneRule->getId() );
+						$this->em->persist($ruleParamBidirectionalOpposite);
+					}
+				} else {	
+					// If no bidirectional parameter on the rule and if the bidirectional parametr exist on an opposite rule, we delete it
+					$ruleParamBidirectionalDelete = $this->em->getRepository('RegleBundle:RuleParam')
+										->findOneBy( array(
+												'value' => $oneRule->getId(),
+												'name' => 'bidirectional'
+											));				
+					if (!empty($ruleParamBidirectionalDelete)) {
+						$this->em->remove($ruleParamBidirectionalDelete);
+						$this->em->flush();
+					}
+				}
+			}			
 			
 			//------------------------------- Create rule fields ------------------- 
 			$debug = array();
