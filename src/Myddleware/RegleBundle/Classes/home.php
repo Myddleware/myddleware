@@ -66,7 +66,7 @@ class homecore {
 							ON  Rule.id = Document.rule_id
 							AND Document.global_status IN ('Open','Error')
 					$where 
-					GROUP BY Rule.name
+					GROUP BY Rule.name, Rule.id
 					HAVING cpt > 0
 					ORDER BY cpt DESC";
 		    $stmt = $this->connection->prepare($sql);

@@ -1029,7 +1029,7 @@ class documentcore {
 					if ($type == 'S') {
 						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_source']]);
 					} else {	
-						$dataInsert[$ruleRelationship['field_name_target']] = $ruleRelationship['field_name_target'];
+						$dataInsert[$ruleRelationship['field_name_target']] = (!empty($data[$ruleRelationship['field_name_target']]) ? $data[$ruleRelationship['field_name_target']] : '');
 					}
 				}
 			}		
