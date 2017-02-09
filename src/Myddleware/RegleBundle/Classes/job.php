@@ -63,8 +63,9 @@ class jobcore  {
 		$this->setManual();
 	}
 		
-	/*Permet de charger toutes les données de la règle (en paramètre)*/
-	public function setRule($name_slug) {
+	// Permet de charger toutes les données de la règle (en paramètre)
+	// $filter peut être le rule name slug ou bien l'id de la règle
+	public function setRule($filter) {
 		try {
 			include_once 'rule.php';
 			
@@ -72,28 +73,28 @@ class jobcore  {
 		    $sqlRule = "SELECT * 
 		    		FROM Rule 
 		    		WHERE 
-							name_slug = :name_slug
+							(
+								name_slug = :filter
+							 OR id = :filter	
+							)
 						AND deleted = 0
 					";
 		    $stmt = $this->connection->prepare($sqlRule);
-			$stmt->bindValue("name_slug", $name_slug);
+			$stmt->bindValue("filter", $filter);
 		    $stmt->execute();	    
 			$rule = $stmt->fetch(); // 1 row
 			if (empty($rule['id'])) {
-				throw new \Exception ('Rule '.$name_slug.' doesn\'t exist or is deleted.');
+				throw new \Exception ('Rule '.$filter.' doesn\'t exist or is deleted.');
 			}
 			// Error if the rule is inactive and if we try to run it from a job (not manually)
 			elseif(
 					empty($rule['active'])
 				&& $this->manual == 0
 			) {
-				throw new \Exception ('Rule '.$name_slug.' is inactive.');
-			}
+				throw new \Exception ('Rule '.$filter.' is inactive.');
+			}		
 			
-			
-			
-			$this->ruleId = $rule['id'];
-			
+			$this->ruleId = $rule['id'];		
 			// We instance the rule
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
@@ -101,7 +102,7 @@ class jobcore  {
 			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			if ($this->rule->isChild()) {
-				throw new \Exception ('Rule '.$name_slug.' is a child rule. Child rules can only be run by the parent rule.');
+				throw new \Exception ('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
 			}
 			return true;
 		} catch (\Exception $e) {
@@ -482,45 +483,30 @@ class jobcore  {
 	
 	public function generateTemplate($nomTemplate,$descriptionTemplate,$rulesId) {
 		include_once 'template.php';
-		$templateString = '';	
-		if (!empty($rulesId)) {
-			$first = true;
-			$guidTemplate = uniqid();
-			$template = new template($this->logger, $this->container, $this->connection);
-			foreach($rulesId as $ruleId) {
-				if ($first === true) {
-					$templateString .= $template->generateTemplateHeader($nomTemplate,$descriptionTemplate,$ruleId,$guidTemplate);
-					$first = false;
+		try {
+			// Init array
+			$templateArray = array(
+								'name' => $nomTemplate,
+								'description' => $descriptionTemplate
+							);
+			if (!empty($rulesId)) {
+				$template = new template($this->logger, $this->container, $this->connection);
+				$rulesOrderIds = $template->setRules($rulesId);
+
+				foreach($rulesOrderIds as $rulesOrderId) {	
+					// Generate array with all rules parameters
+					$templateArray['rules'][] = $template->extractRule($rulesOrderId['rule_id']);
 				}
-				$generateTemplate = $template->generateTemplateRule($ruleId,$guidTemplate);
-				if (empty($generateTemplate['error'])) {
-					$templateString .= $generateTemplate['sql'];
-				}
-				else {
-					return array('done' => false, 'error' => $generateTemplate['error']);
-				}
+				// Ecriture du fichier
+				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
+				file_put_contents($this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
-			// Ecriture du fichier
-			$file = __DIR__.'/../Templates/'.$nomTemplate.'.sql';
-			$fp = fopen($file, 'wb');
-			if ($fp === false) {
-				return array('done' => false, 'error' => 'Failed to open the file');
-			}
-			$fw = fwrite($fp,utf8_encode($templateString));
-			if ($fw === false) {
-				return array('done' => false, 'error' => 'Failed to write into the file');
-			}
-			else {
-				return array('done' => true, 'error' => '');
-			}
-		}
-		return $templateString;
-	}
-	
-	public function refreshTemplate() {
-		include_once 'template.php';
-		$template = new template($this->logger, $this->container, $this->connection);
-		return $template->refreshTemplate();
+		} catch (\Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error($this->message);
+			return false;
+		}	
+		return true;
 	}
 	
 	// Permet d'indiquer que le job est lancé manuellement
@@ -715,19 +701,18 @@ class jobcore  {
 	// Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
 	public function clearData() {
 		//Get the table list 
-		$sqlTables = "SHOW TABLES";
-		$stmt = $this->connection->prepare($sqlTables);
-		$stmt->execute();	   				
-		$tablesQuery = $stmt->fetchAll();
-		foreach ($tablesQuery as $key => $table) {
-			$tables[] = current($table);
-		}
+		// $sqlTables = "SHOW TABLES";
+		// $stmt = $this->connection->prepare($sqlTables);
+		// $stmt->execute();	   				
+		// $tablesQuery = $stmt->fetchAll();
+		// foreach ($tablesQuery as $key => $table) {
+			// $tables[] = current($table);
+		// }
 	
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
 							Rule.id,
 							Rule.name_slug,
-							Rule.version,
 							RuleParam.value days
 						FROM Rule
 							INNER JOIN RuleParam
@@ -736,107 +721,81 @@ class jobcore  {
 							RuleParam.name = 'delete'";
 		$stmt = $this->connection->prepare($sqlParams);
 		$stmt->execute();	   				
-		$rules = $stmt->fetchAll();
-		
+		$rules = $stmt->fetchAll();	
 		if (!empty($rules)) {
-			// Boucle sur toutes les règles
-			foreach ($rules as $rule) {
-				$tableId = array();
-				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_source',$tables)) {
-					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_source'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_source';
-				}
-				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_target',$tables)) {
-					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_target'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_target';
-				}
-				if (in_array('z_'.$rule['name_slug'].'_'.$rule['version'].'_history',$tables)) {
-					$tableId['z_'.$rule['name_slug'].'_'.$rule['version'].'_history'] = 'id_'.$rule['name_slug'].'_'.$rule['version'].'_history';
-				}
-				
-				if (!empty($tableId)) {
-					foreach ($tableId as $table => $id) {
-						$this->connection->beginTransaction();						
-						try {
-							$deleteSource = "
-								DELETE $table
-								FROM Document
-									INNER JOIN $table
-										ON Document.id = $table.$id
-								WHERE 
-										Document.rule_id = '$rule[id]'
-									AND Document.global_status IN ('Close','Cancel')
-									AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= $rule[days]
-							";							
-							$stmt = $this->connection->prepare($deleteSource);
-							$stmt->execute();
-							$this->connection->commit(); // -- COMMIT TRANSACTION
-						} catch (\Exception $e) {
-							$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-							$this->message .= 'Failed to clear data for the rule '.$rule['id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-							$this->logger->error($this->message);	
-						}
-					}
-				}
-				
-				// Delete log for these rule
-				$this->connection->beginTransaction();						
-				try {
+			$this->connection->beginTransaction();						
+			try {
+				// Boucle sur toutes les règles
+				foreach ($rules as $rule) {	
+					// Delete document data
+					$deleteSource = "
+						DELETE DocumentData
+						FROM Document
+							INNER JOIN DocumentData
+								ON Document.id = DocumentData.doc_id
+						WHERE 
+								Document.rule_id = :ruleId
+							AND Document.global_status IN ('Close','Cancel')
+							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= :days
+					";							
+					$stmt = $this->connection->prepare($deleteSource);
+					$stmt->bindValue("ruleId", $rule['id']);
+					$stmt->bindValue("days", $rule['days']);
+					$stmt->execute();
+
+					// Delete log for these rule	
 					$deleteLog = "
 						DELETE Log
 						FROM Log
 							INNER JOIN Document
 								ON Log.doc_id = Document.id
 						WHERE 
-								Log.rule_id = '$rule[id]'
+								Log.rule_id = :ruleId
 							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
 							AND Document.global_status IN ('Close','Cancel')
-							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= $rule[days]
+							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= :days
 					";						
 					$stmt = $this->connection->prepare($deleteLog);
-					$stmt->execute();
-					$this->connection->commit(); // -- COMMIT TRANSACTION
-				} catch (\Exception $e) {
-					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$this->message .= 'Failed to clear logs for the rule '.$rule['id'].' : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-					$this->logger->error($this->message);	
+					$stmt->bindValue("ruleId", $rule['id']);
+					$stmt->bindValue("days", $rule['days']);
+					$stmt->execute(); 
+					
 				}
-			}
+				// Suppression des jobs de transfert vide et des autres jobs qui datent de plus de nbDayClearJob jours
+				$deleteJob = " 	
+					DELETE 
+					FROM Job
+					WHERE 
+							status = 'End'
+						AND (
+								(
+										param NOT IN ('cleardata', 'backup', 'notification')
+									AND message IN ('', 'Another job is running. Failed to start job. ')
+									AND open = 0
+									AND close = 0
+									AND cancel = 0
+									AND error = 0
+								)
+							OR 	(
+									param IN ('cleardata', 'backup', 'notification')
+									AND message = ''
+									AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
+								)
+							)
+				";	
+				$stmt = $this->connection->prepare($deleteJob);
+				$stmt->bindValue("nbDayClearJob", $this->nbDayClearJob);
+				$stmt->execute();
+				
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->logger->error($this->message);	
+			}	
 		}
-		$this->clearJob();
 	}
 	
-	// Permet de vider les log vides
-	protected function clearJob() {
-		$this->connection->beginTransaction();			
-		try {
-			// Suppression des jobs de transfert vide et des autres jobs qui datent de plus de nbDayClearJob jours
-			$deleteJob = " 	DELETE FROM Job
-							WHERE 
-									status = 'End'
-								AND (
-										(
-											param NOT IN ('cleardata', 'backup', 'notification')
-											AND message IN ('', 'Another job is running. Failed to start job. ')
-											AND open = 0
-											AND close = 0
-											AND cancel = 0
-											AND error = 0
-										)
-									OR 	(
-											param IN ('cleardata', 'backup', 'notification')
-											AND message = ''
-											AND DATEDIFF(CURRENT_DATE( ),end) > '$this->nbDayClearJob'
-										)
-									)
-			";	
-			$stmt = $this->connection->prepare($deleteJob);
-			$stmt->execute();
-			$this->connection->commit(); // -- COMMIT TRANSACTION
-		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to clear data in table Job: '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$this->logger->error($this->message);	
-		}
-	}
 	
  	// Récupération des données du job
 	protected function getLogData() {

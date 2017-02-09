@@ -155,6 +155,7 @@ view_rule:
         name: Nom
         version: Version
         datecreated: Date de création
+        datemodified: Date de modification
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
@@ -506,9 +507,12 @@ error:
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
         delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
         delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
+        delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: 
     account:
         language_change: Impossible de modifier le langage :
-
+    template:
+        creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
+         
 title:
     account:
         view: Mon compte
@@ -624,6 +628,9 @@ messages:
         open_running_task: Vous pouvez ouvrir la tâche en cours en cliquant ici.
         another_task_running: Impossible de créer la tâche car une autre tâche est en cours. Veuillez attendre la fin de son exécution ou vous pouvez l'arrêter.
         failed_create_directory: Erreur lors de la création du repertoire temporaire.
+    template:
+        nb_rule: Nombre de règle générées: 
+        help: Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
 
 email_notification:
     subject: Notification Myddleware

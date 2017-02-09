@@ -60,7 +60,6 @@ class RuleRepository extends EntityRepository
 					->addSelect('r.dateCreated')
 					->addSelect('r.name')
 					->addSelect('r.active')
-					->addSelect('r.version')
 					->addSelect('r.nameSlug')	
 					->addSelect('r.createdBy')						
 					->addSelect('cs.name lbl_source')

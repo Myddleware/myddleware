@@ -339,7 +339,7 @@ class FluxControllerCore extends Controller
 		$conn = $this->get( 'database_connection' );
 		
 		// Le nombre de flux affichés est limité
-		$sql = "SELECT Document.*, users.username, Rule.version, CONCAT(Rule.name, ' - ', Rule.version) rule_name
+		$sql = "SELECT Document.*, users.username, Rule.name rule_name
 				FROM Document  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)
@@ -438,13 +438,50 @@ class FluxControllerCore extends Controller
 			}											
 			// Detecte si la session est le support ---------
 
-			$rule = $em->getRepository('RegleBundle:Rule')
-	                   ->findOneById($doc[0]->getRule());						   
-					   
+			// Get rule object
+			$rule = $em->getRepository('RegleBundle:Rule')->findOneById($doc[0]->getRule());						   
+				
 			// Chargement des tables source, target, history
-			$source = $this->listeFluxTable($id,'source');			
-			$target = $this->listeFluxTable($id,'target');						
-			$history = $this->listeFluxTable($id,'history');
+			$source = $this->listeFluxTable($id,'S');	
+			$target = $this->listeFluxTable($id,'T');						
+			$history = $this->listeFluxTable($id,'H');
+
+			// Get rulefield object
+			$ruleFields	= $em->getRepository('RegleBundle:RuleField')->findByRule($doc[0]->getRule());
+			// Get each data for each rule fields
+			$historyData = array();
+			foreach($ruleFields as $ruleField) {
+				// There is no field in source when we use my_value, just a formula
+				if ($ruleField->getSource()!='my_value') {		
+					// We keep only the fields in the rule 
+					// It could be several fields in the source fields (in case of formula)
+					$sourceFields = explode(";",$ruleField->getSource());
+					foreach ($sourceFields as $sourceField) {
+						$sourceData[$sourceField] = $source[$sourceField];
+					}
+				}
+				// Target and history
+				$targetField = $ruleField->getTarget();
+				$targetData[$targetField] = $target[$targetField];
+				if (!empty($history)) {
+					$historyData[$targetField] = $history[$targetField];
+				}
+			}	
+			// Get RuleRelationShip object
+			$RuleRelationShips = $em->getRepository('RegleBundle:RuleRelationShip')->findByRule($doc[0]->getRule());
+			// Get each data for each rule relationship
+			foreach($RuleRelationShips as $RuleRelationShip) {		
+				$sourceField = $RuleRelationShip->getFieldNameSource();
+				$sourceData[$sourceField] = $source[$sourceField];
+				// Target and history
+				$targetField = $RuleRelationShip->getFieldNameTarget();
+				$targetData[$targetField] = $target[$targetField];
+				// Only if history exists and if the field exist in history
+				if (!empty($history[$targetField])) {
+					$historyData[$targetField] = $history[$targetField];
+				}
+			}	
+
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
 	                   						  ->findBy(
@@ -471,12 +508,11 @@ class FluxControllerCore extends Controller
 				$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
 				$solution_source = (($solution_source == NULL) ? array() : $solution_source );
 		
-			$list_btn = array_merge( $solution_target, $solution_source );	
-													
+			$list_btn = array_merge( $solution_target, $solution_source );													
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
-				'source' => $source[0],
-				'target' => $target[0],
-				'history' => $history[0],
+				'source' => $sourceData,
+				'target' => $targetData,
+				'history' => $historyData,
 				'doc' => $doc[0],
 		        'nb' => $compact['nb'],
 		        'entities' => $compact['entities'],
@@ -498,46 +534,46 @@ class FluxControllerCore extends Controller
 
 	// Sauvegarde flux
 	public function fluxSaveAction() {
-				
 		$request = $this->get('request');
-		
 		if($request->getMethod()=='POST') {
-		
-  		  $rule = $this->getDoctrine()
-                       ->getManager()
-                       ->getRepository('RegleBundle:Rule')
-                       ->findOneById( $this->getRequest()->request->get('rule') );
-		
-		  $conn = $this->get( 'database_connection' );				
-		  $name = $rule->getNameSlug().'_'.$rule->getVersion().'_target';
-		  $fields = strip_tags($this->getRequest()->request->get('fields'));
-		  $value = strip_tags($this->getRequest()->request->get('value'));
-		  
-		  if(!empty($value)) {
-			  $stmt = $conn->prepare('UPDATE z_'.$name.' SET '.$fields.' = :value WHERE id_'.$name.' = :id'); 	  
-			  $stmt->bindValue('value', $value ); 
-			  $stmt->bindValue('id', $this->getRequest()->request->get('flux') ); 	 		  
-			  $stmt->execute();  			  
-			  
-		      // On récupére l'EntityManager
-		      $em = $this->getDoctrine()->getManager();	
-			  // Insert in audit			  
-			  $oneDocAudit = new DocumentAudit();
-			  $oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
-			  $oneDocAudit->setDateModified( new \DateTime );
-			  $oneDocAudit->setAfter( $value );
-			  $oneDocAudit->setByUser( $this->getUser()->getId() );
-			  $oneDocAudit->setName( $fields );				
-		      $em->persist($oneDocAudit);
-		      $em->flush();
-		  }
-		  echo $value;	
-		  exit;
+			// Get the field and value from the request
+			$fields = strip_tags($this->getRequest()->request->get('fields'));
+			$value = strip_tags($this->getRequest()->request->get('value'));
 
+			if(isset($value)) {
+				// get the EntityManager
+				$em = $this->getDoctrine()->getManager();	
+				// Get target data for the document
+				$documentDataEntity = $em->getRepository('RegleBundle:DocumentData')
+											->findOneBy( array(
+												'doc_id' => $this->getRequest()->request->get('flux'),
+												'type' => 'T'
+												)
+										);
+				if(!empty($documentDataEntity)) {							
+					$target = json_decode($documentDataEntity->getData(),true);	
+					$beforeValue = $target[$fields]; 
+					// Change the value 
+					$target[$fields] = $value;
+					// Save the modification
+					$documentDataEntity->setData(json_encode($target)); // Encode in JSON		  
+
+					// Insert in audit			  
+					$oneDocAudit = new DocumentAudit();
+					$oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
+					$oneDocAudit->setDateModified( new \DateTime );
+					$oneDocAudit->setBefore( $beforeValue );
+					$oneDocAudit->setAfter( $value );
+					$oneDocAudit->setByUser( $this->getUser()->getId() );
+					$oneDocAudit->setName( $fields );				
+					$em->persist($oneDocAudit);
+					$em->flush();
+					echo $value;	
+					exit;
+				}
+			} 
 		}		
-		else {
-			throw $this->createNotFoundException('Error');
-		}		
+		throw $this->createNotFoundException('Failed to modify the field '.$fields);	
 	}
 
 	// Relancer un flux
@@ -660,54 +696,18 @@ class FluxControllerCore extends Controller
 
 	// Liste tous les flux d'un type
 	private function listeFluxTable($id,$type) {
-		
-		try {
-			$tools = $this->container->get('myddleware_tools.tools');
-			$conn = $this->get( 'database_connection' );	
-		
-			// Document
-			$stmt = $conn->prepare('SELECT rule_id 
-									FROM Document 
-									WHERE id = :id');  
-								 
-			$stmt->bindValue('id', $id);  
-			$stmt->execute();  
-			$flux['source']['champ'] = $stmt->fetch();  
-			
-			// Regle
-			$stmt = $conn->prepare('SELECT name_slug, version 
-									FROM Rule 
-									WHERE id = :id'); 								  
-			$stmt->bindValue('id', $flux['source']['champ']['rule_id']);  
-			$stmt->execute();
-			$flux['source'] = $stmt->fetch(); 
-			$flux['source']['table'] = $flux['source']['name_slug'].'_'.$flux['source']['version']; 
-			
-			$table = 'z_'.$flux['source']['table'].'_'.$type;
-			$idName = 'id_'.$flux['source']['table'].'_'.$type;  
-			$stmt = $conn->prepare("SELECT * 
-									FROM $table
-									WHERE $idName = :id");  	  
-			$stmt->bindValue(':id', $id);  
-			$stmt->execute();  
-			$flux['source']['data'] = $stmt->fetchAll(); 
-			$first = true;
-			// Récupération des types de champs pour la table en cours
-			$fieldsDetail = $tools->describeTable($table);
-
-			foreach ($flux['source']['data'] as $indice => $line) {		  	
-				foreach ($line as $field => $value) {
-					if($first) {
-						$first = false;
-						$flux['source']['data'][$indice][$field] = $value;
-						continue;
-					}
-					else {		 	
-						$flux['source']['data'][$indice][$field] = $value;
-					}				
-				}
+		try {		
+			// Get document data
+			$documentDataEntity = $this->getDoctrine()->getManager()->getRepository('RegleBundle:DocumentData')
+										->findOneBy( array(
+											'doc_id' => $id,
+											'type' => $type
+											)
+										);
+			if(!empty($documentDataEntity)) {							
+				return json_decode($documentDataEntity->getData(),true);	
 			}
-			return array($flux['source']['data'],$id);			
+			return null;			
 		}
 		catch(Exception $e) {
 			return false;

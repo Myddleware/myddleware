@@ -34,16 +34,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity; // unique
  * 
  * @ORM\Entity(repositoryClass="Myddleware\RegleBundle\Entity\RuleRepository")
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(name="Rule",
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(
- *             name="unique_namev",
- *             columns={"name", "version"}
- *         )
- *     }
- * )
- * 
- * @UniqueEntity(fields={"name", "version"}, message="my.unique_namev.unique")
+ *
  * @ORM\Table(indexes={@ORM\Index(name="Krule_name", columns={"name"})})
  */
  
@@ -160,16 +151,7 @@ class Rule
 	 * @ORM\Column(length=50, nullable=false, name="name_slug")
 	 */
 	private $nameSlug;	
-	
-	
-    /**
-     * @var string
-     *
-	 * @ORM\Column(name="version", type="string", length=3, nullable=false)
-	 * 
-     */
-    private $version;  	
-    
+
 
     /**
      * Set id
@@ -422,29 +404,6 @@ class Rule
     public function getNameSlug()
     {
         return $this->nameSlug;
-    }
-
-    /**
-     * Set version
-     *
-     * @param string $version
-     * @return Rule
-     */
-    public function setVersion($version)
-    {
-        $this->version = $version;
-
-        return $this;
-    }
-
-    /**
-     * Get version
-     *
-     * @return string 
-     */
-    public function getVersion()
-    {
-        return $this->version;
     }
 
     /**

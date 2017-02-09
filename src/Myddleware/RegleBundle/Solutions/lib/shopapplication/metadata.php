@@ -41,6 +41,7 @@ $moduleFields = array (
 							'reward_points' => array('label' => 'Reward points', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'password' => array('label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'date_created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'date_modified' => array('label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'auto_connect_url' => array('label' => 'Auto connect url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 							'photo' => array('label' => 'Photo', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 						),

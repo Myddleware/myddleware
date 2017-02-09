@@ -485,16 +485,10 @@ class databasecore extends solution {
 					$data = $this->checkDataBeforeCreate($param, $data);
 					// Construction de la requête
 					$sql = "INSERT INTO ".$this->stringSeparator.$tableID.$this->stringSeparator." (";
-					$first = true;
 					
 					$values = "(";
 					// Boucle sur chaque champ du document
 					foreach ($data as $key => $value) {				
-						// Saut de la première ligne qui contient l'id du document
-						if ($first) {
-							$first = false;
-							continue;
-						}
 						if($key == "target_id") {
 							continue;
 						}
@@ -565,16 +559,10 @@ class databasecore extends solution {
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Construction de la requête
 					$sql = "UPDATE ".$this->stringSeparator.$tableID.$this->stringSeparator." SET "; 
-					$first = true;
 					
 					//$values = "(";
 					// Boucle sur chaque champ du document
 					foreach ($data as $key => $value) {				
-						// Saut de la première ligne qui contient l'id du document
-						if ($first) {
-							$first = false;
-							continue;
-						}
 						if($key == "target_id") {
 							$idTarget = $value;
 							continue;

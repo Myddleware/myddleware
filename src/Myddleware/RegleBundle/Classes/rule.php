@@ -46,7 +46,6 @@ class rulecore {
 	protected $ruleParams;
 	protected $sourceFields;
 	protected $targetFields;
-	protected $fieldsType;
 	protected $ruleRelationships;
 	protected $ruleFilters;
 	protected $solutionSource;
@@ -286,7 +285,6 @@ class rulecore {
 							$i++;
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
-							$param['fieldsType'] = $this->fieldsType;
 							$document = new document($this->logger, $this->container, $this->connection, $param);
 							$createDocument = $document->createDocument();
 							if (!$createDocument) {
@@ -310,7 +308,7 @@ class rulecore {
 		}
 		// On affiche pas d'erreur si la lecture est désactivée
 		elseif (empty($this->ruleParams['disableRead'])) {
-			$readSource['error'] = 'The rule '.$this->rule['name_slug'].' version '.$this->rule['version'].($this->rule['deleted'] == 1 ? ' is deleted.' : ' is disabled.');
+			$readSource['error'] = 'The rule '.$this->rule['name_slug'].($this->rule['deleted'] == 1 ? ' is deleted.' : ' is disabled.');
 		}
 		return $readSource;
 	}
@@ -531,6 +529,7 @@ class rulecore {
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['solutionTarget'] = $this->solutionTarget;
 				$param['ruleFields'] = $this->ruleFields;
+				$param['ruleRelationships'] = $this->ruleRelationships;
 				$param['jobId'] = $this->jobId;
 				$param['key'] = $this->key;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
@@ -589,7 +588,6 @@ class rulecore {
 	// Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
 	// data est de la forme : 
 		// [ruleName] => nom
-		// [ruleVersion] => 001
 		// [oldRule] => id de la règle précédente
 		// [connector] => Array ( [source] => 3 [cible] => 30 ) 
 		// [content] => Array ( 
@@ -875,11 +873,12 @@ class rulecore {
 			if (
 					!empty($response[$id_document]['id']) 
 				&&	empty($response[$id_document]['error'])
+				&&	empty($response['error']) // Error can be on the document or can be a general error too
 			) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';			
 			}
 			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.$response[$id_document]['error'];				
+				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);				
 			}
 		}		
 			
@@ -935,67 +934,72 @@ class rulecore {
 	}
 	
 	protected function sendTarget($type, $documentId = null) {
-		// Permet de charger dans la classe toutes les relations de la règle
-		$response = array();
-		$response['error'] = '';
+		try {	
+			// Permet de charger dans la classe toutes les relations de la règle
+			$response = array();
+			$response['error'] = '';
 
-		// Le type peut-être vide das le cas d'un relancement de flux après une erreur
-		if (empty($type)) {
-			$documentData = $this->getDocumentData($documentId);
-			if (!empty($documentData['type'])) {
-				$type = $documentData['type'];
-			}
-		}
-		
-		// Récupération du contenu de la table target pour tous les documents à envoyer à la cible
-		$send['data'] = $this->getSendDocuments($type, $documentId);
-		$send['module'] = $this->rule['module_target'];
-		$send['ruleId'] = $this->rule['id'];
-		$send['rule'] = $this->rule;
-		$send['ruleFields'] = $this->ruleFields;
-		$send['ruleParams'] = $this->ruleParams;
-		$send['ruleRelationships'] = $this->ruleRelationships;
-		$send['fieldsType'] = $this->fieldsType;
-		$send['jobId'] = $this->jobId;
-		// Si des données sont prêtes à être créées
-		if (!empty($send['data'])) {
-			// If the rule is a child rule, no document is sent. They will be sent with the parent rule.
-			if ($this->isChild()) {
-				foreach($send['data'] as $key => $data) {			
-					// True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
-					$response[$key] = array('id' => true);		
+			// Le type peut-être vide das le cas d'un relancement de flux après une erreur
+			if (empty($type)) {
+				$documentData = $this->getDocumentHeader($documentId);		
+				if (!empty($documentData['type'])) {
+					$type = $documentData['type'];
 				}
-				return $response;
 			}
 			
-			// Connexion à la cible
-			$connect = $this->connexionSolution('target');				
-			if ($connect === true) {
-				// Création des données dans la cible
-				if ($type == 'C') {
-					// Permet de vérifier que l'on ne va pas créer un doublon dans la cible
-					$send['data'] = $this->checkDuplicate($send['data']);
-					$send['data'] = $this->clearSendData($send['data']);
-					$response = $this->solutionTarget->create($send);
+			// Récupération du contenu de la table target pour tous les documents à envoyer à la cible	
+			$send['data'] = $this->getSendDocuments($type, $documentId);		
+			$send['module'] = $this->rule['module_target'];
+			$send['ruleId'] = $this->rule['id'];
+			$send['rule'] = $this->rule;
+			$send['ruleFields'] = $this->ruleFields;
+			$send['ruleParams'] = $this->ruleParams;
+			$send['ruleRelationships'] = $this->ruleRelationships;
+			$send['jobId'] = $this->jobId;
+			// Si des données sont prêtes à être créées
+			if (!empty($send['data'])) {
+				// If the rule is a child rule, no document is sent. They will be sent with the parent rule.
+				if ($this->isChild()) {
+					foreach($send['data'] as $key => $data) {			
+						// True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
+						$response[$key] = array('id' => true);		
+					}
+					return $response;
 				}
-				// Modification des données dans la cible
-				elseif ($type == 'U') {
-					$send['data'] = $this->clearSendData($send['data']);
-					// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-					$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-					$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
-					$response = $this->solutionTarget->update($send);
+				
+				// Connexion à la cible
+				$connect = $this->connexionSolution('target');				
+				if ($connect === true) {
+					// Création des données dans la cible
+					if ($type == 'C') {
+						// Permet de vérifier que l'on ne va pas créer un doublon dans la cible
+						$send['data'] = $this->checkDuplicate($send['data']);
+						$send['data'] = $this->clearSendData($send['data']);
+						$response = $this->solutionTarget->create($send);
+					}
+					// Modification des données dans la cible
+					elseif ($type == 'U') {			
+						$send['data'] = $this->clearSendData($send['data']);
+						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
+						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
+						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
+						$response = $this->solutionTarget->update($send);
+					}
+					else {
+						$response[$documentId] = false;
+						$doc->setMessage('Type transfer '.$type.' unknown. ');
+					}
 				}
 				else {
 					$response[$documentId] = false;
-					$doc->setMessage('Type transfer '.$type.' unknown. ');
+					$response['error'] = $connect['error'];
 				}
 			}
-			else {
-				$response[$documentId] = false;
-				$response['error'] = $connect['error'];
-			}
-		}
+		} catch (\Exception $e) {
+			$response['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			echo $response['error'];
+			$this->logger->error( $response['error'] );
+		}	
 		return $response;
 	}
 	
@@ -1004,12 +1008,10 @@ class rulecore {
 		if (empty($this->ruleParams['duplicate_fields'])) {
 			return $transformedData;
 		}
-		
 		$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
-		$nameIdTarget = "id_".$this->rule['name_slug']."_".$this->rule['version']."_target";
 		$searchDuplicate = array();
 		// Boucle sur chaque donnée qui sera envoyée à la cible
-		foreach ($transformedData AS $rowTransformedData) {
+		foreach ($transformedData AS $docId => $rowTransformedData) {
 			// Stocke la valeur des champs duplicate concaténée
 			$concatduplicate = '';
 
@@ -1017,7 +1019,7 @@ class rulecore {
 			foreach($duplicate_fields as $duplicate_field) {
 				$concatduplicate .= $rowTransformedData[$duplicate_field];
 			}
-			$searchDuplicate[$rowTransformedData[$nameIdTarget]] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
+			$searchDuplicate[$docId] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
 		}
 
 		// Recherche de doublons dans le tableau searchDuplicate
@@ -1080,7 +1082,7 @@ class rulecore {
 	}
 	
 	// Permet de récupérer les données d'un document
-	protected function getDocumentData($documentId) {
+	protected function getDocumentHeader($documentId) {
 		try {			
 			$query_document = "SELECT * FROM Document WHERE id = :documentId";
 			$stmt = $this->connection->prepare($query_document);
@@ -1098,10 +1100,7 @@ class rulecore {
 		}
 	}
 	
-	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {
-		$nameId = "id_".$this->rule['name_slug']."_".$this->rule['version']."_".$table; 
-		$tableRule = "z_".$this->rule['name_slug']."_".$this->rule['version']."_".$table;
-		
+	protected function getSendDocuments($type,$documentId,$table = 'target',$parentId = '') {	
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
 			$documentFilter = " Document.id = '$documentId'";
@@ -1116,17 +1115,15 @@ class rulecore {
 								AND Document.type = '$type' ";
 		}
 		// Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
-		$sql = "SELECT $tableRule.* , Document.id id_doc_myddleware, Document.target_id, Document.source_date_modified
+		$sql = "SELECT Document.id id_doc_myddleware, Document.target_id, Document.source_date_modified
 				FROM Document
-					INNER JOIN $tableRule  
-						ON Document.id = $tableRule.$nameId
 				WHERE $documentFilter 
 				ORDER BY Document.source_date_modified ASC
 				LIMIT $this->limit";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute();	    
 		$documents = $stmt->fetchAll();
-		foreach ($documents as $document) {
+		foreach ($documents as $document) {		
 			// If the rule is a parent, we have to get the data of all rules child		
 			$childRules = $this->getChildRules();		
 			if (!empty($childRules)) {
@@ -1146,8 +1143,9 @@ class rulecore {
 						$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
 					}
 				}
-			}
-			$return[$document['id_doc_myddleware']] = $document;
+			}	
+			$data = $this->getDocumentData($document['id_doc_myddleware'], 'T');
+			$return[$document['id_doc_myddleware']] = array_merge($document,$data);		
 		}
 
 		if (!empty($return)) {
@@ -1193,30 +1191,7 @@ class rulecore {
 			}
 			if (!empty($this->sourceFields)) {
 				$this->sourceFields = array_unique($this->sourceFields); 				
-			}			
-			// Récupération des types de champs de la source
-			$sourceTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_source";
-			$sqlParams = "SHOW COLUMNS FROM ".$sourceTable;
-			$stmt = $this->connection->prepare($sqlParams);
-		    $stmt->execute();	   				
-			$sourceFields = $stmt->fetchAll();
-			if (!empty($sourceFields)) {
-				foreach ($sourceFields as $sourceFiled) {
-					$this->fieldsType['source'][$sourceFiled['Field']] = $sourceFiled;
-				}
-			}
-		
-			// Récupération des types de champs de la target
-			$targetTable = "z_".$this->rule['name_slug']."_".$this->rule['version']."_target";
-			$sqlParams = "SHOW COLUMNS FROM ".$targetTable;
-			$stmt = $this->connection->prepare($sqlParams);
-		    $stmt->execute();	   				
-			$targetFileds = $stmt->fetchAll();
-			if (!empty($targetFileds)) {
-				foreach ($targetFileds as $targetField) {
-					$this->fieldsType['target'][$targetField['Field']] = $targetField;
-				}
-			}			
+			}						
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
 		}
@@ -1296,6 +1271,28 @@ class rulecore {
 		} catch (\Exception $e) {
 			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
 		}
+	}
+	
+	// Permet de charger les données du système source pour ce document
+	protected function getDocumentData($documentId, $type) {
+		try {	
+			$documentDataEntity = $this->em
+							->getRepository('RegleBundle:DocumentData')
+							->findOneBy( array(
+										'doc_id' => $documentId,
+										'type' => $type
+										)
+								);
+			// Generate data array
+			if (!empty($documentDataEntity)) {
+				return json_decode($documentDataEntity->getData(),true);
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->logger->error( $this->message );
+		}		
+		return false;
 	}
 	
 	// Parametre de la règle choix utilisateur

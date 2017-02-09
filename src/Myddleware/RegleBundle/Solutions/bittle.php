@@ -188,7 +188,7 @@ class bittlecore extends solution {
 			$connector = $this->call("GET", '');// Donc ici envoi de la row
 			
 			// Boucle sur chaque document en entrée
-			foreach($param['data'] as $data) {
+			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
@@ -198,13 +198,11 @@ class bittlecore extends solution {
 					$rows = "<Rows><Row";
 					$c = 1;
 					$first = true;
-					$idDoc  = '';
 					// Boucle sur chaque champ du document
 					foreach ($data as $key => $value) {				
 						// Saut de la première ligne qui contient l'id du document
 						if ($first) {
 							$first = false;
-							$idDoc = $value;
 							// Récupération du source_id. Bittle ne renvoie pas d'ID donc nous récupérons l'ID de la source
 							$sourceId = $this->getSourceId($idDoc);
 						
@@ -334,12 +332,11 @@ class bittlecore extends solution {
 			}
 		
 			// Boucle sur chaque document en entrée
-			foreach($param['data'] as $data) {	
+			foreach($param['data'] as $idDoc => $data) {	
 				try {
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					$first = true;
-					$idDoc  = '';
 					$conditionChild = '';
 				
 					// Boucle sur chaque champ du document
@@ -347,7 +344,6 @@ class bittlecore extends solution {
 						// Saut de la première ligne qui contient l'id du document
 						if ($first) {
 							$first = false;
-							$idDoc = $value;
 							// Récupération du source_id. Bittle ne renvoie pas d'ID donc nous récupérons l'ID de la source
 							$sourceId = $this->getSourceId($idDoc);
 							

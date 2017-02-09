@@ -555,20 +555,14 @@ class salesforcecore extends solution {
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for create');
 		}
-		foreach($param['data'] as $data) {
+		// Get the type of each fields by calling Salesforce
+		$moduleFields = $this->get_module_fields($param['module'],'target');
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 				$parameters = '';
 			    foreach ($data as $key => $value) {
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
 						continue;
@@ -589,7 +583,7 @@ class salesforcecore extends solution {
 						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen
-					elseif ($param['fieldsType']['target'][$key]['Type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
 						if (!empty($value)) {
 							$parameters[$key] = true;
 						}
@@ -641,23 +635,19 @@ class salesforcecore extends solution {
 	// Permet de modifier des données
 	public function update($param) {		
 		$parameters = array();
-		if(!(isset($param['data']))) throw new \Exception ('Data missing for update');
-		foreach($param['data'] as $data) {
+		if(!(isset($param['data']))) {
+			throw new \Exception ('Data missing for update');
+		}
+		// Get the type of each fields by calling Salesforce
+		$moduleFields = $this->get_module_fields($param['module'],'target');		
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-			    $first = true;
-			    $idDoc  = '';
 				$parameters = '';
+				// Instanciation de l'URL d'appel				
+				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
-			    	// Instanciation de l'URL d'appel
-			    	$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
-			        // Saut de la première ligne qui contient l'id du document
-			        if ($first) {
-			            $first = false;
-			            $idDoc = $value;
-			            continue;
-			        }
 					// On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
 						continue;
@@ -665,7 +655,7 @@ class salesforcecore extends solution {
 			        elseif ($key == 'target_id') {
 			        	$target_id = $value;
 						// Ajout de l'ID à l'URL pour la modification
-            			$query_url .= $value . '/';
+            			$query_url .= $value . '/';				
 			            continue;
 			        }
 					elseif($key == 'Birthdate') {		
@@ -681,7 +671,7 @@ class salesforcecore extends solution {
 						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen				
-					elseif ($param['fieldsType']['target'][$key]['Type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
 						if (!empty($value)) {
 							$parameters[$key] = true;						
 						}
@@ -700,7 +690,7 @@ class salesforcecore extends solution {
 					&& !empty($param['ruleParams']['Pricebook2Id'])
 				) {
 					$parameters['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
-				}			
+				}				
 				$parameters = json_encode($parameters);
 				
 				// Appel de la requête				
@@ -728,7 +718,7 @@ class salesforcecore extends solution {
 			}
 			// Modification du statut du flux
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}	
+		}			
 		return $result;
 	} // update($param)	
 	

@@ -520,40 +520,34 @@ class ConnectorController extends Controller
 	// FICHE D UN CONNECTEUR
 	public function connectorOpenAction($id) {
 		$request = $this->get('request');
-		
+		// On récupére l'EntityManager
+		$em = $this->getDoctrine()->getManager();
+		// If the connector has been changed
 		if($request->getMethod()=='POST') {
 			// SAVE
-			try {
-			    // On récupére l'EntityManager
-			    $em = $this->getDoctrine()
-			               ->getManager();	
-						   						   
-			// Detecte si la session est le support ---------
-			$permission =  $this->get('myddleware.permission');
-			
-			if( $permission->isAdmin($this->getUser()->getId()) ) {
-				$list_fields_sql = 
-					array('id' => (int)$id
-				);			
-			}
-			else {
-				$list_fields_sql = 
-					array(
-					'id' => (int)$id,
-					'createdBy' => $this->getUser()->getId()
-				);				
-			}
-			// Detecte si la session est le support ---------						   
+			try {					   						   
+				// Detecte si la session est le support ---------
+				$permission =  $this->get('myddleware.permission');
+				if( $permission->isAdmin($this->getUser()->getId()) ) {
+					$list_fields_sql = 
+						array('id' => (int)$id
+					);			
+				}
+				else {
+					$list_fields_sql = 
+						array(
+						'id' => (int)$id,
+						'createdBy' => $this->getUser()->getId()
+					);				
+				}
+				// Detecte si la session est le support ---------						   
 			 
 				// SAVE NOM CONNECTEUR
 				$connector = $em->getRepository('RegleBundle:Connector')
-		                        ->findBy( $list_fields_sql );	
-								
-													   
-									   
+		                        ->findBy( $list_fields_sql );						   
 				$connector[0]->setName( $_POST['nom'] );	
 			    $em->persist($connector[0]);
-			    $em->flush();	
+			    $em->flush();					
 				
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($_POST['params']) > 0) {
@@ -569,21 +563,44 @@ class ConnectorController extends Controller
 					    $em->persist($param);
 					    $em->flush();											
 					}	
+					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
+					$session = $request->getSession();
+					$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
+					// We always add data again in session because these data are removed after the call of the get
+					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+					if (
+							!empty($myddlewareSession['param']['myddleware']['connector']['solution']['callback']) // Confirm Oath 2
+						 &&	!empty($myddlewareSession['param']['connector']['source']['token'])
+					) {
+						// Get the param with the token_get_all
+						$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
+														'connector' => $connector[0],
+														'name' => 'token'
+													));				
+						// If not connector param for the token, we create one (should never happen)							
+						if (empty($connectorParam)) {
+							$connectorParam = new ConnectorParam();		
+							$connectorParam->setConnector($connector[0]->getId());
+							$connectorParam->setName('token');
+						}
+						// Save the token in the connector param
+						$connectorParam->setValue($encrypter->encrypt($myddlewareSession['param']['connector']['source']['token']));
+						$em->persist($connectorParam);
+						$em->flush(); 				
+					}
 					return new Response($this->generateUrl('regle_connector_list'));					
 				}
 				else {
 					return new Response(0);
 				}		   
-	
 			}
 			catch(Exception $e) {
 				return new Response($e->getMessage());
 			}
 			// SAVE
 		}
+		// Display the connector
 		else {
-			// FICHE
-
 			// Detecte si la session est le support ---------
 			$permission =  $this->get('myddleware.permission');
 			
@@ -600,10 +617,7 @@ class ConnectorController extends Controller
 				);				
 			}
 			// Detecte si la session est le support ---------			
-			
-						
-			$em = $this->getDoctrine()->getManager();
-			
+		
 			// Infos du connecteur
 			$connectorP = $em->getRepository('RegleBundle:ConnectorParam')
 	                        ->findByConnector( $id );

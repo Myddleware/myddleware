@@ -57,11 +57,11 @@ class generateTemplateCommand extends ContainerAwareCommand
 		// Récupération du Job
 		$job = $this->getContainer()->get('myddleware_job.job');
 		$result = $job->generateTemplate($nomTemplate,$descriptionTemplate,$rulesId);
-		if ($result['done']) {
+		if ($result) {
 			$output->writeln( 'Template '.$nomTemplate.' generated.' );
 		}
 		else {
-			$output->writeln( '<error>Failed to generate template '.$nomTemplate.' : '.$result['error'].'</error>' );
+			$output->writeln( '<error>Failed to generate template '.$nomTemplate.' : '.$job->message.'</error>' );
 		}
 	}
 }

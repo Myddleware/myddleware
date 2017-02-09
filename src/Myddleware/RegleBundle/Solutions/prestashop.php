@@ -351,7 +351,8 @@ class prestashopcore extends solution {
 			$state = json_decode(json_encode((array) $simplexml->children()->children()), true);		
 			// S'il y a une langue on prends la liste dans le bon language
 			if (!empty($state['name']['language'])) {
-				$list[$record['@attributes']['id']] = $state['name']['language'];
+				// We don't know the language here because the user doesn't chose it yet. So we take the first one.
+				$list[$record['@attributes']['id']] = current($state['name']['language']);
 			}
 			// Sinon on prend sans la langue (utile pour la liste language par exemple)
 			elseif (!empty($state['name'])) {
@@ -806,7 +807,7 @@ class prestashopcore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			// Check control before create
 			$data = $this->checkDataBeforeCreate($param, $data);
 			// on ajoute le token pour le module customer_threads 
@@ -815,17 +816,7 @@ class prestashopcore extends solution {
 			}
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
-				    $first = true;
-				    $idDoc  = '';
-				    $fields = array();
-				    foreach ($data as $key => $value) {
-				        // Récupération de l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
-					}							
+				    $fields = array();						
 					$opt = array(
 					    'resource' => $param['module'].'?schema=blank',
 					);
@@ -902,22 +893,12 @@ class prestashopcore extends solution {
 	
 	// Permet de modifier des données
 	public function update($param) {
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
-				    $first = true;
-				    $idDoc  = '';
-				    $fields = array();
-				    foreach ($data as $key => $value) {
-				        // Récupération de l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
-					}							
+				    $fields = array();							
 					$opt = array(
 					    'resource' => $param['module'],
 					    'id' => (int) $data['target_id']

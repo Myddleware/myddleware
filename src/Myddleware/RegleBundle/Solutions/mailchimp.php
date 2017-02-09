@@ -63,17 +63,17 @@ class mailchimpcore  extends solution {
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {
-			// $session->start();
-			$session = $this->container->get('session');
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-			$myddlewareSession['param']['myddleware']['connector']['mailchimp'][$paramConnexion['redirect_uri']]['paramConnexion'] = $paramConnexion;
-			$myddlewareSession['param']['myddleware']['connector']['solution']['callback'] = 'mailchimp';		
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			
-			$this->init($paramConnexion);
-			if (!empty($paramConnexion['token'])) {	
+			$this->init($this->paramConnexion);
+			// If we don't have the token, we are in the process of login otherwise we just connect to Mailchimp to read/write data
+			if (empty($this->paramConnexion['token'])) {
+				$session = $this->container->get('session');
+				$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
+				// We always add data again in session because these data are removed after the call of the get
+				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+				$myddlewareSession['param']['myddleware']['connector']['mailchimp'][$paramConnexion['redirect_uri']]['paramConnexion'] = $this->paramConnexion;
+				$myddlewareSession['param']['myddleware']['connector']['solution']['callback'] = 'mailchimp';		
+				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+			} else {	
 				// Call Mailchimp to get the api endpoint
 				$metadata = $this->call('https://login.mailchimp.com/oauth2/metadata', 'POST', array('oauth_token' => $this->access_token));				
 				if (empty($metadata['api_endpoint'])) {
@@ -260,6 +260,16 @@ class mailchimpcore  extends solution {
 			// Ajout des champ relate au mapping des champs 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+			// Add list of list in the field list_id
+			if (!empty($this->moduleFields['list_id'])) {
+				$dataMailchimp['count'] = 100;
+				$mailchimpLists = $this->call($this->api_endpoint.'/3.0/lists?count=100','GET');
+				if (!empty($mailchimpLists['lists'])) {
+					foreach($mailchimpLists['lists'] as $mailchimpList) {
+						$this->moduleFields['list_id']['option'][$mailchimpList['id']] = $mailchimpList['name'];
+					}
+				}			
 			}
 			return $this->moduleFields;
 		}
@@ -452,7 +462,6 @@ class mailchimpcore  extends solution {
      * @return array          Assoc array of decoded result
      */   
     protected function call($url, $method = 'GET', $args=array(), $timeout = 10){   
-	
 	 if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);

@@ -2116,21 +2116,13 @@ class dolistcore extends solution {
 			'Key' => $this->token
 		);
 		
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				try{
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
-				    $first = true;
-				    $idDoc  = '';
 				    $fields = array();
 				    foreach ($data as $key => $value) {
-				        // Saut de la première ligne qui contient l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
 						$fields[] = array(
 								'Name' => $key,
 								'Value' => $value);
@@ -2217,21 +2209,13 @@ class dolistcore extends solution {
 			'Key' => $this->token
 		);
 		
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try{
 				try{
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
-				    $first = true;
-				    $idDoc  = '';
 					$CampaignEmail = array();
 				    foreach ($data as $key => $value) {
-				        // Saut de la première ligne qui contient l'id du document
-				        if ($first) {
-				            $first = false;
-				            $idDoc = $value;
-				            continue;
-				        }
 						if($key == 'target_id') continue;
 						if($key == 'Message') {
 							$CampaignEmail['Message']['Id'] = $value;

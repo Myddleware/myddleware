@@ -389,20 +389,12 @@ class sapcrmcore extends saproot {
 	public function create($param) {	
 
 		// Transformation du tableau d'entrée pour être compatible webservice SAP CRM
-		foreach($param['data'] as $data) {
+		foreach($param['data'] as $idDoc => $data) {
 			try {
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$first = true;
-				$idDoc  = '';
 				$dataSugar = array();
 				foreach ($data as $key => $value) {
-					// Saut de la première ligne qui contient l'id du document
-					if ($first) {
-						$first = false;
-						$idDoc = $value;
-						continue;
-					}
 					$tabValue = explode ('__',$key);			
 					if (
 							empty($tabValue[0])
@@ -483,7 +475,6 @@ class sapcrmcore extends saproot {
 			try {
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-				$first = true;
 				$dataSugar = array();
 				// Récupération des modifications seulement
 				$diff = array_diff ($data, $param['dataHistory'][$idDoc]);		
