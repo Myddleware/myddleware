@@ -257,7 +257,7 @@ class prestashopcore extends solution {
 				}
 				// Récupération des listes déroulantes
 				if($module == 'orders' && isset($this->moduleFields['current_state'])) {
-					$order_states = $this->getList('order_state','order_states');			
+					$order_states = $this->getList('order_state','order_states');				
 					$this->moduleFields['current_state']['option'] = $order_states;
 				}
 				if($module == 'order_histories' && isset($this->fieldsRelate['id_order_state'])) {
@@ -348,11 +348,12 @@ class prestashopcore extends solution {
 			$xml = $this->webService->get($opt);
 			$xml = $xml->asXML();
 			$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-			$state = json_decode(json_encode((array) $simplexml->children()->children()), true);		
+			$state = json_decode(json_encode((array) $simplexml->children()->children()), true);	
+		
 			// S'il y a une langue on prends la liste dans le bon language
 			if (!empty($state['name']['language'])) {
 				// We don't know the language here because the user doesn't chose it yet. So we take the first one.
-				$list[$record['@attributes']['id']] = current($state['name']['language']);
+				$list[$record['@attributes']['id']] = (is_array($state['name']['language']) ? current($state['name']['language']) : $state['name']['language']);
 			}
 			// Sinon on prend sans la langue (utile pour la liste language par exemple)
 			elseif (!empty($state['name'])) {

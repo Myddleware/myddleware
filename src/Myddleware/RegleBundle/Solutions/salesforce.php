@@ -583,7 +583,7 @@ class salesforcecore extends solution {
 						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen
-					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'boolean') {
 						if (!empty($value)) {
 							$parameters[$key] = true;
 						}
@@ -671,7 +671,7 @@ class salesforcecore extends solution {
 						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen				
-					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'boolean') {
 						if (!empty($value)) {
 							$parameters[$key] = true;						
 						}

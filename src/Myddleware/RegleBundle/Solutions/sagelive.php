@@ -34,43 +34,6 @@ class sagelivecore extends salesforce {
 										'default' => array('Name')
 									  );
 
-	// Redefine this method because no need of tokenb for SageLive
-	public function getFieldsLogin() {	
-        return array(
-                    array(
-                            'name' => 'login',
-                            'type' => 'text',
-                            'label' => 'solution.fields.login'
-					),
-                    array(
-                            'name' => 'password',
-                            'type' => 'password',
-                            'label' => 'solution.fields.password'
-					),
-                    array(
-                            'name' => 'consumerkey',
-                            'type' => 'password',
-                            'label' => 'solution.fields.consumerkey'
-					),
-                    array(
-                            'name' => 'consumersecret',
-                            'type' => 'password',
-                            'label' => 'solution.fields.consumersecret'
-					),
-					array(
-                            'name' => 'sandbox',
-                            'type' => 'text',
-                            'label' => 'solution.fields.sandbox'
-					)
-        );
-	} // getFieldsLogin()
-	
-	// Connect to SageLive
-    public function login($paramConnexion) {
-		// No token in SageLive
-		$paramConnexion['token'] = '';
-		parent::login($paramConnexion);	
-	} // login($paramConnexion)
 	
 }// class sagelivecore
 

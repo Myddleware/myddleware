@@ -646,10 +646,7 @@ class sugarcrmcore  extends solution {
 									);
 				}
 				else  {
-					$result[$idDoc] = array(
-											'id' => '-1',
-											'error' => '01'
-									);
+					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
 				}
 			}
 			catch (\Exception $e) {
@@ -753,10 +750,7 @@ class sugarcrmcore  extends solution {
 									);
 				}
 				else  {
-					$result[$idDoc] = array(
-											'id' => '-1',
-											'error' => '01'
-									);
+					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
 				} 
 			}
 			catch (\Exception $e) {
