@@ -316,35 +316,31 @@ class DefaultControllerCore extends Controller
 	
 	// ACTIVE UNE REGLE
 	public function ruleUpdActiveAction($id) {
-		
 		try {
-			
+			return new Response('test');	
+			// throw new \Exception ("Getting label (reload): Field ".$field_source." not found.");
 		    // On récupére l'EntityManager
-		    $this->getInstanceBdd();				
-			
-			
+		    $this->getInstanceBdd();						
 			$rule = $this->getDoctrine()
 	                     ->getManager()
 	                     ->getRepository('RegleBundle:Rule')
 	                     ->findOneById( $id );	
 			
 			if($rule->getActive()) {
-				$r = 0;
-				$rule->setActive( $r );	
+				$rule->setActive(0);	
 			}
 			else {
-				$r = 1;
-				$rule->setActive( $r );
+				$rule->setActive(1);
 			}	
 
 			$this->em->persist($rule);
 			$this->em->flush(); 
 			
-			return new Response($r);		
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return new Response($e->getMessage());		
 		}			 		
+		return new Response(1);		
 	}
 
 	// Executer une règle manuellement

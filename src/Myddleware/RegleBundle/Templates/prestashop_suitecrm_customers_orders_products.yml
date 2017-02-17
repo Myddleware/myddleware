@@ -1,0 +1,138 @@
+name: prestashop_suitecrm_customers_orders_products
+description: 'Customer, orders and products from Prestashop to SsuiteCRM'
+rules:
+    -
+        name: Customers
+        nameSlug: customers
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: customers
+        targetModule: Contacts
+        fields:
+            - { target: last_name, source: lastname, formula: null }
+            - { target: birthdate, source: birthday, formula: null }
+            - { target: email1, source: email, formula: null }
+            - { target: first_name, source: firstname, formula: null }
+            - { target: newsletter_c, source: newsletter, formula: null }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: email1 }
+    -
+        name: 'Product categories'
+        nameSlug: product_categories
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: categories
+        targetModule: AOS_Product_Categories
+        fields:
+            - { target: name, source: name, formula: null }
+            - { target: description, source: description, formula: null }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Addresses
+        nameSlug: addresses
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: addresses
+        targetModule: Contacts
+        fields:
+            - { target: phone_home, source: phone, formula: null }
+            - { target: phone_mobile, source: phone_mobile, formula: null }
+            - { target: primary_address_city, source: city, formula: null }
+            - { target: primary_address_postalcode, source: postcode, formula: null }
+            - { target: primary_address_street, source: address1, formula: null }
+            - { target: primary_address_street_2, source: address2, formula: null }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: customers, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Product categories parent'
+        nameSlug: product_categories_parent
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: categories
+        targetModule: AOS_Product_Categories
+        fields:
+            - { target: is_parent, source: id_parent, formula: '( {id_parent} != "" ? "0" : "1" )' }
+        relationships:
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: Myddleware_element_id, fieldId: product_categories, parent: false }
+            - { fieldNameSource: id_parent, fieldNameTarget: parent_category_id, fieldId: product_categories, parent: false }
+        filters:
+            - { target: id_parent, type: gt, value: '0' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Products
+        nameSlug: products
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: products
+        targetModule: AOS_Products
+        fields:
+            - { target: name, source: name, formula: null }
+            - { target: price, source: price, formula: null }
+            - { target: description, source: description, formula: null }
+            - { target: category, source: my_value, formula: '"Opportunities"' }
+        relationships:
+            - { fieldNameSource: id_category_default, fieldNameTarget: aos_product_category_id, fieldId: product_categories, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Orders
+        nameSlug: orders
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: orders
+        targetModule: AOS_Quotes
+        fields:
+            - { target: name, source: reference, formula: '"Order : ".{reference}' }
+            - { target: stage, source: current_state, formula: "({current_state}==\"5\"?\"Delivered\":\n    ({current_state}==\"2\"?\"Closed Accepted\":\n        ({current_state}==\"4\"?\"Confirmed\":\n            ({current_state}==\"12\"?\"Closed Accepted\":\n                ({current_state}==\"6\"?\"Closed Dead\":\n                    ({current_state}==\"7\"?\"Closed Dead\":\n                        ({current_state}==\"9\"?\"Closed Accepted\":\n                            \"On Hold\"\n                        )\n                    )\n                )\n            )\n        )\n    )\n)" }
+            - { target: description, source: gift_message, formula: null }
+            - { target: shipping_amount, source: total_shipping_tax_excl, formula: null }
+            - { target: shipping_tax_amt, source: total_discounts_tax_excl;total_discounts_tax_incl, formula: '{total_discounts_tax_incl}-{total_discounts_tax_excl}' }
+            - { target: tax_amount, source: total_paid_tax_incl;total_paid_tax_excl, formula: '{total_paid_tax_incl}-{total_paid_tax_excl}' }
+            - { target: total_amount, source: total_paid_tax_incl, formula: null }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: billing_contact_id, fieldId: customers, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: name }
+    -
+        name: 'Order products'
+        nameSlug: order_products
+        sourceSolution: prestashop
+        targetSolution: suitecrm
+        sourceModule: order_details
+        targetModule: AOS_Products_Quotes
+        fields:
+            - { target: name, source: product_name, formula: null }
+            - { target: product_total_price, source: total_price_tax_excl, formula: null }
+            - { target: product_unit_price, source: unit_price_tax_excl, formula: null }
+            - { target: vat_amt, source: total_price_tax_incl;total_price_tax_excl, formula: '{total_price_tax_incl}-{total_price_tax_excl}' }
+            - { target: discount, source: reduction_amount_tax_incl, formula: null }
+            - { target: product_discount_amount, source: reduction_amount_tax_excl, formula: null }
+            - { target: product_list_price, source: product_price, formula: null }
+            - { target: product_qty, source: product_quantity, formula: null }
+            - { target: parent_type, source: my_value, formula: '"AOS_Quotes"' }
+            - { target: vat, source: my_value, formula: '"0.0"' }
+        relationships:
+            - { fieldNameSource: id_order, fieldNameTarget: parent_id, fieldId: orders, parent: false }
+            - { fieldNameSource: product_id, fieldNameTarget: product_id, fieldId: products, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: 0 }
+            - { name: mode, value: '0' }

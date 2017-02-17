@@ -415,6 +415,8 @@ class jobcore  {
 					FROM Rule
 						LEFT OUTER JOIN RuleRelationShip
 							ON Rule.id = RuleRelationShip.rule_id
+					WHERE
+						Rule.deleted = 0
 					GROUP BY Rule.id";
 			$stmt = $this->connection->prepare($sql);
 			$stmt->execute();	    
