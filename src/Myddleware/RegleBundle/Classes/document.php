@@ -478,7 +478,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'is':
+			case 'equal':
 				if (strtoupper($fieldValue) == strtoupper($filterValue)) {
 					return true;
 				}
@@ -486,7 +486,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'not':
+			case 'different':	
 				if (strtoupper($fieldValue) != strtoupper($filterValue)) {
 					return true;
 				}

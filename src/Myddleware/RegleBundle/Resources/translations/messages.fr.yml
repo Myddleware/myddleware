@@ -118,8 +118,8 @@ filter:
     end: se termine par
     gt: est supérieur à
     lt: est inférieur à
-    is: est égale à
-    unlike: est différent de
+    equal: est égale à
+    different: est différent de
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des ;

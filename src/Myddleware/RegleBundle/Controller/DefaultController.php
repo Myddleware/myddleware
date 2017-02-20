@@ -316,31 +316,35 @@ class DefaultControllerCore extends Controller
 	
 	// ACTIVE UNE REGLE
 	public function ruleUpdActiveAction($id) {
+		
 		try {
-			return new Response('test');	
-			// throw new \Exception ("Getting label (reload): Field ".$field_source." not found.");
+			
 		    // On récupére l'EntityManager
-		    $this->getInstanceBdd();						
+		    $this->getInstanceBdd();				
+			
+			
 			$rule = $this->getDoctrine()
 	                     ->getManager()
 	                     ->getRepository('RegleBundle:Rule')
 	                     ->findOneById( $id );	
 			
 			if($rule->getActive()) {
-				$rule->setActive(0);	
+				$r = 0;
+				$rule->setActive( $r );	
 			}
 			else {
-				$rule->setActive(1);
+				$r = 1;
+				$rule->setActive( $r );
 			}	
 
 			$this->em->persist($rule);
 			$this->em->flush(); 
 			
+			return new Response($r);		
 		}
 		catch(Exception $e) {
-			return new Response($e->getMessage());		
+			echo $e->getMessage();
 		}			 		
-		return new Response(1);		
 	}
 
 	// Executer une règle manuellement
@@ -1658,8 +1662,8 @@ class DefaultControllerCore extends Controller
 						 'end' => $this->get('translator')->trans('filter.end'),
 						 'gt' => $this->get('translator')->trans('filter.gt'),
 						 'lt' => $this->get('translator')->trans('filter.lt'),
-						 'is' => $this->get('translator')->trans('filter.is'),
-						 'unlike'=> $this->get('translator')->trans('filter.unlike'),
+						 'equal' => $this->get('translator')->trans('filter.equal'),
+						 'different'=> $this->get('translator')->trans('filter.different'),
 						 'gteq' => $this->get('translator')->trans('filter.gteq'),
 						 'lteq' => $this->get('translator')->trans('filter.lteq'),
 						 'in' => $this->get('translator')->trans('filter.in'),

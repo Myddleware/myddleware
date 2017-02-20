@@ -118,8 +118,8 @@ filter:
     end: ends with
     gt: is greater than 
     lt: is less than
-    is: is equal to 
-    unlike: is different from
+    equal: is equal to 
+    different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
     in: is included in the following table separated by;

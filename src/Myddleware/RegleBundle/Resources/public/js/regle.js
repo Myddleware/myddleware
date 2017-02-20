@@ -1188,9 +1188,8 @@ function verifFields(field_id,show) {
 			field_value = '';
 			$( $(this) ).find( "input" ).each(function(){
 				field_value = $.trim($(this).val());
-			});						
-								
-			if(field_filter != '' && field_value != '') {
+			});											
+			if(field_filter != '') {
 				filter.push( {target: field_target, filter: field_filter, value: field_value } );
 			}
 		});
