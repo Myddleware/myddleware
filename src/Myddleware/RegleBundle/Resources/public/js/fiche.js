@@ -57,9 +57,6 @@ $( document ).ready(function() {
 			type: "POST",
 			url: path_fiche_update,						
 				success: function(data){
-					if(data != 1) {	
-						location.reload(); 
-					}
 			}			
 		});	
 	});
