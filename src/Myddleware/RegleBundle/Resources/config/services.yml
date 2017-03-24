@@ -56,6 +56,12 @@ services:
      myddleware_rule.sagelive:
         class: Myddleware\RegleBundle\Solutions\sagelive
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.ringcentral:
+        class: Myddleware\RegleBundle\Solutions\ringcentral
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.cirrusshield:
+        class: Myddleware\RegleBundle\Solutions\cirrusshield
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']
