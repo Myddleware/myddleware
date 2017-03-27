@@ -30,6 +30,8 @@ class cirrusshieldcore  extends solution {
 
 	protected $url = 'https://www.cirrus-shield.net/RestApi/';
 	protected $token;
+	
+	protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
 
 	public function getFieldsLogin() {	
 		return array(
@@ -171,14 +173,23 @@ class cirrusshieldcore  extends solution {
 			} 
 // $query = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
 $query_av_error = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account';
-$query_OK = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
-$query = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797 ';
+$query_OK = 'SELECT ModificationDate,Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
+$query_date = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE ModificationDate = '2017-03-24 16:58:58' ";
+$query_email_OK = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Email = 'stephanefaure@myddleware.com' ";
+$query_limit = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Id=1477692868289104797 LIMIT 1 ";
 // $query = urlencode('SELECT Name FROM Account WHERE Id=1477692868289104797');
-			$result = $this->call($this->url.'Query?authToken='.$this->token.'&selectQuery='.urlencode($query));
-			
-echo '<pre>';
-print_r($query);
-print_r($result);
+
+
+			$selectparam = ["authToken" 	=> $this->token,
+							"selectQuery" 	=> $query_date,
+							];
+			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
+			$result = $this->call($url);
+			// $result = $this->call($this->url.'Query?authToken='.$this->token.'&selectQuery='.urlencode($query));
+// echo '<pre>';
+// print_r($query);
+// print_r($result);
+throw new \Exception('test read last');
 die();
 			/* // Ajout des champs obligatoires pour 
 			$get_entry_list_parameters = array(
@@ -221,12 +232,87 @@ die();
 		}	
 	}
 	
-	protected function call($url, $method = 'GET', $args=array(), $timeout = 10){   
+	
+	// Create data in the target solution
+	public function create($param) {	
+		foreach($param['data'] as $idDoc => $data) {
+			try {
+				 // Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);
+				
+				// XML creation
+				$xmlData = '<Data><'.$param['module'].'>';
+				foreach ($data as $key => $value) {
+					// Field only used for the update and contains the ID of the record in the target solution
+					if ($key=='target_id') {
+						continue;
+					}
+					$xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
+				}
+				$xmlData .= '</'.$param['module'].'></Data>';
+				
+				// Set parameters to send data to teh solution
+				$selectparam = ["authToken" 		=> $this->token,
+								"action" 			=> 'insert',
+								"matchingFieldName" => 'Id',
+							];
+				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
+
+				// Send data to the target solution
+				$dataSent = $this->call($url,'POST',$xmlData);	
+				
+				// General error
+				if (!empty($dataSent['Message'])) {
+					throw new \Exception($dataSent['Message']);
+				}
+				// Error managment for the record creation
+				if (!empty($dataSent[$param['module']]['Success'])) {
+					if ($dataSent[$param['module']]['Success'] == 'False') {
+						throw new \Exception($dataSent[$param['module']]['ErrorMessage']);
+					} else {
+						$result[$idDoc] = array(
+											'id' => $dataSent[$param['module']]['GUID'],
+											'error' => false
+									);
+					}
+				} else {
+					throw new \Exception('No success flag returned by Cirrus Shield');
+				}
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Transfert status update
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}				
+		return $result;
+	}
+	
+	protected function call($url, $method = 'GET', $xmlData='', $timeout = 10){   
 	 if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
 			
-			curl_setopt($ch, CURLOPT_VERBOSE, true);
+			// curl_setopt($ch, CURLOPT_VERBOSE, true);
 			curl_setopt($ch, CURLOPT_URL, $url);
+			
+			
+			
+			if ($method=='POST') {
+				$headers = array(
+								"Content-Type: application/x-www-form-urlencoded",
+								"charset=utf-8",
+								//"Accept: application/json",
+								);
+				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, "=".$xmlData);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+				curl_setopt($ch, CURLOPT_SSLVERSION, 6);
+			}
            /* curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json\r\n'));  
             curl_setopt($ch, CURLOPT_USERAGENT, 'oauth2-draft-v10');
@@ -248,10 +334,18 @@ die();
             }*/
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $result = curl_exec($ch);
-print_r($result);			
+// print_r($result);			
             curl_close($ch);
-            
-            return $result ? json_decode($result, true) : false; 
+			if ($method=='POST') {
+				$xml = simplexml_load_string($result);
+				// print_r($xml); 
+				$json = json_encode($xml);
+				// print_r($json);
+				return json_decode($json,TRUE);   
+				// print_r($array);   
+			} else {    
+				return json_decode($result, true); 
+			}
         }
         throw new \Exception('curl extension is missing!');
     }	
