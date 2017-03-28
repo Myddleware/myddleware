@@ -440,6 +440,7 @@ function:
 solution:
     fields:
         login: User
+        username: Username
         password: Password
         url: Url
         token: Token
