@@ -59,7 +59,7 @@ class cirrusshieldcore  extends solution {
 			$url = sprintf("%s?%s", $this->url."AuthToken", http_build_query($login));
 			
 			// Get the token
-			$this->token = $this->call($url);
+			$this->token = $this->call($url,'login');
 			if (empty($this->token)) {
 				throw new \Exception('login error');	
 			}
@@ -138,9 +138,10 @@ class cirrusshieldcore  extends solution {
 
 	// Get the last data in the application
 	public function read_last($param) {
+print_r($param);	
 		try {
 			$param['fields'] = $this->addRequiredField($param['fields']);
-			
+				
 			$query = 'SELECT ';
 			// Build the SELECT 
 			if (!empty($param['fields'])) {
@@ -148,7 +149,7 @@ class cirrusshieldcore  extends solution {
 					$query .= $field.',';
 				}
 				// Delete the last coma 
-				$query .= rtrim($field, ',');
+				$query = rtrim($query, ',');
 			} else {
 				$query .= ' * ';
 			}
@@ -167,62 +168,64 @@ class cirrusshieldcore  extends solution {
 					} else {
 						$query .= ' AND ';
 					}
+					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+					if ($key == 'id') {
+						$key = 'Id';
+					}
 					// Add the condition
 					$query .= $key." = '".$value."' ";
 				}
 			} 
+// echo $query.chr(10);			
 // $query = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
-$query_av_error = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account';
-$query_OK = 'SELECT ModificationDate,Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
-$query_date = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE ModificationDate = '2017-03-24 16:58:58' ";
-$query_email_OK = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Email = 'stephanefaure@myddleware.com' ";
-$query_limit = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Id=1477692868289104797 LIMIT 1 ";
+// $query_av_error = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account';
+// $query_OK = 'SELECT ModificationDate,Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
+// $query_date = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE ModificationDate = '2017-03-24 16:58:58' ";
+// $query_email_OK = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Email = 'stephanefaure@myddleware.com' ";
+// $query_limit = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name, ModificationDate FROM Account WHERE Id=1477692868289104797 LIMIT 1 ";
 // $query = urlencode('SELECT Name FROM Account WHERE Id=1477692868289104797');
-
+// $query = "SELECT Name,Email,First_Name,Last_Name,OwnerId,Id,CreationDate,ModificationDate FROM Contact  WHERE ModificationDate > '2015-03-24 16:58:58'";
+// $query = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name, ModificationDate FROM Account WHERE ModificationDate > '2000-01-01 20:51:05'";
+echo $query.chr(10);			
 
 			$selectparam = ["authToken" 	=> $this->token,
-							"selectQuery" 	=> $query_date,
+							"selectQuery" 	=> $query,
 							];
 			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			$result = $this->call($url);
-			// $result = $this->call($this->url.'Query?authToken='.$this->token.'&selectQuery='.urlencode($query));
+			$resultQuery = $this->call($url);
+			
+			// If the query return an error 
+			if (!empty($resultQuery['Message'])) {
+				throw new \Exception($resultQuery['Message']);	
+			}	
+			// If no result
+			if (empty($resultQuery)) {
+				$result['done'] = false;
+			}
+			// Format the result
+			$record = current($resultQuery);
+			
+			foreach($param['fields'] as $field) {
+				// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+				if(!empty($record[strtolower($field)])) {
+					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+					if ($field == 'Id') {
+						$field = 'id';
+					}
+					$result['values'][$field] = $record[strtolower($field)];
+				}
+			}
+			$result['done'] = true;
 // echo '<pre>';
 // print_r($query);
+// echo 'BBBBBB'.chr(10)	;
 // print_r($result);
-throw new \Exception('test read last');
-die();
-			/* // Ajout des champs obligatoires pour 
-			$get_entry_list_parameters = array(
-											'session' => $this->session,
-											'module_name' => $param['module'],
-											'query' => $query,
-											'order_by' => "date_entered DESC",
-											'offset' => '0',
-											'select_fields' => $param['fields'],
-											'link_name_to_fields_array' => '',
-											'max_results' => '1',
-											'deleted' => 0,
-											'Favorites' => '',
-										);										
-			$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
-			// Si as d'erreur
-			if (isset($get_entry_list_result->result_count)) {
-				// Si pas de résultat
-				if(!isset($get_entry_list_result->entry_list[0])) {
-					$result['done'] = false;
-				}
-				else {
-					foreach ($get_entry_list_result->entry_list[0]->name_value_list as $key => $value) {
-						$result['values'][$key] = $value->value;
-					}
-					$result['done'] = true;
-				}
-			}	
-			// Si erreur
-			else {
-				$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				$result['done'] = false;
-			}			 */									
+// print_r($param['fields']);
+// print_r($record);
+// print_r($result);
+// throw new \Exception('test read last');
+// die();
+								
 			return $result;		
 		}
 		catch (\Exception $e) {
@@ -234,7 +237,9 @@ die();
 	
 	
 	// Create data in the target solution
-	public function create($param) {	
+	public function create($param) {
+// print_r($param);
+// return null;	
 		foreach($param['data'] as $idDoc => $data) {
 			try {
 				 // Check control before create
@@ -245,7 +250,12 @@ die();
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
-						continue;
+						// If updade then we change the key in Id
+						if (!empty($value)) {
+							$key = 'Id';
+						} else { // If creation, we skip this field
+							continue;
+						}
 					}
 					$xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
 				}
@@ -253,17 +263,22 @@ die();
 				
 				// Set parameters to send data to teh solution
 				$selectparam = ["authToken" 		=> $this->token,
-								"action" 			=> 'insert',
+								"action" 			=> 'upsert',
 								"matchingFieldName" => 'Id',
 							];
 				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
 
 				// Send data to the target solution
 				$dataSent = $this->call($url,'POST',$xmlData);	
-				
+// print_r($xmlData);
+// print_r($dataSent);
+// return null;					
 				// General error
 				if (!empty($dataSent['Message'])) {
 					throw new \Exception($dataSent['Message']);
+				}
+				if (!empty($dataSent['ErrorMessage'])) {
+					throw new \Exception($dataSent['ErrorMessage']);
 				}
 				// Error managment for the record creation
 				if (!empty($dataSent[$param['module']]['Success'])) {
@@ -292,60 +307,50 @@ die();
 		return $result;
 	}
 	
+	// Cirrus Shield use the same function for record's creation and modification
+	public function update($param) {	
+		return $this->create($param);
+	}
+	
 	protected function call($url, $method = 'GET', $xmlData='', $timeout = 10){   
-	 if (function_exists('curl_init') && function_exists('curl_setopt')) {
+		if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
-			
-			// curl_setopt($ch, CURLOPT_VERBOSE, true);
 			curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			
-			
-			
+			// Some additional parameters are required for POST 
 			if ($method=='POST') {
 				$headers = array(
 								"Content-Type: application/x-www-form-urlencoded",
-								"charset=utf-8",
-								//"Accept: application/json",
+								"charset=utf-8"
 								);
 				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, "=".$xmlData);
 				curl_setopt($ch, CURLOPT_POST, true);
 				curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 				curl_setopt($ch, CURLOPT_SSLVERSION, 6);
+				curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 			}
-           /* curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json\r\n'));  
-            curl_setopt($ch, CURLOPT_USERAGENT, 'oauth2-draft-v10');
-            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			if (!empty($this->access_token) and empty($args['oauth_token'])) {
-				curl_setopt($ch, CURLOPT_USERPWD, "user:".$this->access_token.'-'.$this->dc);
-            }
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-			// For metadata and authentificate call only
-			if (!empty($args['oauth_token']) || !empty($args['grant_type'])) {
-				$value = http_build_query($args); //params is an array	
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $value);
-			}
-            elseif (!empty($args)) {
-                $jsonData = json_encode($args);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            }*/
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $result = curl_exec($ch);
-// print_r($result);			
+// echo 'AAAA'.chr(10);
+            $result = curl_exec($ch);	
+				// print_r($result); 
             curl_close($ch);
-			if ($method=='POST') {
-				$xml = simplexml_load_string($result);
-				// print_r($xml); 
-				$json = json_encode($xml);
-				// print_r($json);
-				return json_decode($json,TRUE);   
+			// The login function return a string not an XML
+			if ($method=='login') {
+				return $result ? json_decode($result, true) : false;
+			} else {
+				if (@simplexml_load_string($result)) {
+					$xml = simplexml_load_string($result);
+					// print_r($xml); 
+					$json = json_encode($xml);
+					// print_r($json);
+					return json_decode($json,TRUE);   
+				// The result can be a json directly, in case of an error of query call (read last for example)
+				} else {
+					return json_decode($result,TRUE); 
+				}
 				// print_r($array);   
-			} else {    
-				return json_decode($result, true); 
-			}
+			} 
         }
         throw new \Exception('curl extension is missing!');
     }	
