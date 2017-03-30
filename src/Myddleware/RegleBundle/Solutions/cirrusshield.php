@@ -30,6 +30,7 @@ class cirrusshieldcore  extends solution {
 
 	protected $url = 'https://www.cirrus-shield.net/RestApi/';
 	protected $token;
+	protected $update;
 	
 	protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
 
@@ -94,10 +95,17 @@ class cirrusshieldcore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			$apiFields = $this->call($this->url.'Describe/'.$module.'?authToken='.$this->token);
+			$apiFields = $this->call($this->url.'Describe/'.$module.'?authToken='.$this->token);	
 			if (!empty($apiFields['Fields'])) {
 				// Add each field in the right list (relate fields or normal fields)
 				foreach($apiFields['Fields'] as $field) {
+					// Field not editable can't be display on the target side
+					if (
+							empty($field['IsEditable'])
+						AND $type == 'target'
+					){
+						continue;
+					}
 					// If the fields is a relationship
 					if ($field['DataType'] == 'LookupRelationship') {
 						$this->fieldsRelate[$field['Name']] = array(
@@ -138,7 +146,7 @@ class cirrusshieldcore  extends solution {
 
 	// Get the last data in the application
 	public function read_last($param) {
-print_r($param);	
+// print_r($param);	
 		try {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 				
@@ -175,7 +183,12 @@ print_r($param);
 					// Add the condition
 					$query .= $key." = '".$value."' ";
 				}
-			} 
+			// The function is called for a simulation (rule creation) if there is no query
+			} else {
+				// $query .= " WHERE ModificationDate < '".date('Y-m-d H:i:s')."'" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				$query .= " WHERE ModificationDate < '2018-01-01 00:00:00'" ; // Need to add 'limit 1' here when the command LIMIT will be available
+			}
+			
 // echo $query.chr(10);			
 // $query = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account WHERE Id=1477692868289104797';
 // $query_av_error = 'SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name,Name FROM Account';
@@ -186,14 +199,15 @@ print_r($param);
 // $query = urlencode('SELECT Name FROM Account WHERE Id=1477692868289104797');
 // $query = "SELECT Name,Email,First_Name,Last_Name,OwnerId,Id,CreationDate,ModificationDate FROM Contact  WHERE ModificationDate > '2015-03-24 16:58:58'";
 // $query = "SELECT Website,Shipping_ZIP,Shipping_State,Shipping_ZIP,Shipping_Google_Maps,Shipping_City,Rating,Phone,Industry,Email,Description,Billing_Street,Billing_State,Billing_ZIP,Billing_Country,Billing_City,Type,Name, ModificationDate FROM Account WHERE ModificationDate > '2000-01-01 20:51:05'";
-echo $query.chr(10);			
+// echo $query.chr(10);			
 
 			$selectparam = ["authToken" 	=> $this->token,
 							"selectQuery" 	=> $query,
 							];
 			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
 			$resultQuery = $this->call($url);
-			
+
+// echo '<pre>';			
 			// If the query return an error 
 			if (!empty($resultQuery['Message'])) {
 				throw new \Exception($resultQuery['Message']);	
@@ -203,7 +217,163 @@ echo $query.chr(10);
 				$result['done'] = false;
 			}
 			// Format the result
-			$record = current($resultQuery);
+			// If several results, we take the first one
+			if (!empty($resultQuery[$param['module']][0])) {
+				$record = $resultQuery[$param['module']][0];	
+			// If one result we take the first one
+			} else {
+				$record = $resultQuery[$param['module']];
+			}
+// print_r($record);
+			
+			foreach($param['fields'] as $field) {
+				// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+				if(isset($record[strtolower($field)])) {
+					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+					if ($field == 'Id') {
+						$field = 'id';
+					}
+					// Cirrus return an array when the data is empty
+					if (is_array($record[strtolower($field)])) {
+						$result['values'][$field] = '';
+					} else {
+						$result['values'][$field] = $record[strtolower($field)];
+					}
+				}
+			}
+			$result['done'] = true;
+
+// print_r($query);
+// echo 'BBBBBB'.chr(10)	;
+// print_r($result);
+// print_r($param['fields']);
+// print_r($record);
+// print_r($result);
+// throw new \Exception('test read last');
+// die();
+		}
+		catch (\Exception $e) {
+		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$result['done'] = -1;
+		}	
+		return $result;
+	}
+
+	public function read($param) {
+print_r($param);	
+		try {
+			$result['date_ref'] = $param['date_ref'];
+			$result['count'] = 0;
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			
+			// Get the reference date field name
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+				
+			$query = 'SELECT ';
+			// Build the SELECT 
+			if (!empty($param['fields'])) {
+				foreach ($param['fields'] as $field) {
+					$query .= $field.',';
+				}
+				// Delete the last coma 
+				$query = rtrim($query, ',');
+			} else {
+				$query .= ' * ';
+			}
+			
+			// Add the FROM
+			$query .= ' FROM '.$param['module'].' ';
+			
+			// Generate the WHERE
+			// if a specific query is requeted we don't use date_ref (used for child document)
+			if (!empty($param['query'])) {
+				$query .= ' WHERE ';
+				$first = true;
+				foreach ($param['query'] as $key => $value) {
+					// Add the AND only if we are not on the first condition
+					if ($first) {
+						$first = false;
+					} else {
+						$query .= ' AND ';
+					}
+					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+					if ($key == 'id') {
+						$key = 'Id';
+					}
+					// Add the condition
+					$query .= $key." = '".$value."' ";
+				}
+			// Function called as a standard read, we use the reference date
+			} else {
+				$query .= " WHERE ".$dateRefField." > ".$param['date_ref'].""; 
+			}		
+
+			// Buid the parameters to call the solution
+			$selectparam = ["authToken" 	=> $this->token,
+							"selectQuery" 	=> $query,
+							];
+			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
+			$resultQuery = $this->call($url);
+
+// echo '<pre>';			
+			// If the query return an error 
+			if (!empty($resultQuery['Message'])) {
+				throw new \Exception($resultQuery['Message']);	
+			}	
+			// If no result
+			if (!empty($resultQuery[$param['module']])) {
+				// If only one record, we add a dimension to be able to use the foreach below
+				if (empty($resultQuery[$param['module']][0])) {
+					$tmp[$param['module']][0] = $resultQuery[$param['module']];
+					$resultQuery = $tmp;
+				}
+				// For each records
+				foreach($resultQuery[$param['module']] as $record) {
+					// For each fields expected
+					foreach($param['fields'] as $field) {
+						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+						if(isset($record[strtolower($field)])) {
+							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+							if ($field == 'Id') {
+								$field = 'id';
+							} elseif ($field == $dateRefField) {
+								$row['date_modified'] = $record[strtolower($field)];
+							}
+							
+							// Cirrus return an array when the data is empty
+							if (is_array($record[strtolower($field)])) {
+								$row[$field] = '';
+							} else {
+								$row[$field] = $record[strtolower($field)];
+							}
+						}
+					}
+					if (
+							!empty($record[strtolower($dateRefField)])
+						&&	$result['date_ref'] < $record[strtolower($dateRefField)]
+					) {
+						$result['date_ref'] =  $record[strtolower($dateRefField)];
+					}
+					$result['values'][$record['id']] = $row;
+					$result['count']++;
+					$row = array();
+				}
+echo $query;	
+// print_r($result);
+print_r($resultQuery);
+// return null;
+
+			}
+			/* // Format the result
+			// If several results, we take the first one
+			if (!empty($resultQuery[$param['module']][0])) {
+				$record = $resultQuery[$param['module']][0];	
+			// If one result we take the first one
+			} else {
+				$record = $resultQuery[$param['module']];
+			}
+// print_r($record);
 			
 			foreach($param['fields'] as $field) {
 				// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
@@ -214,9 +384,8 @@ echo $query.chr(10);
 					}
 					$result['values'][$field] = $record[strtolower($field)];
 				}
-			}
-			$result['done'] = true;
-// echo '<pre>';
+			} */
+
 // print_r($query);
 // echo 'BBBBBB'.chr(10)	;
 // print_r($result);
@@ -225,16 +394,12 @@ echo $query.chr(10);
 // print_r($result);
 // throw new \Exception('test read last');
 // die();
-								
-			return $result;		
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-			return $result;
 		}	
-	}
-	
+		return $result;
+	}	
 	
 	// Create data in the target solution
 	public function create($param) {
@@ -261,9 +426,9 @@ echo $query.chr(10);
 				}
 				$xmlData .= '</'.$param['module'].'></Data>';
 				
-				// Set parameters to send data to teh solution
+				// Set parameters to send data to the target solution (creation or modification)
 				$selectparam = ["authToken" 		=> $this->token,
-								"action" 			=> 'upsert',
+								"action" 			=> ($this->update ? 'update' : 'insert'),
 								"matchingFieldName" => 'Id',
 							];
 				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
@@ -308,8 +473,23 @@ echo $query.chr(10);
 	}
 	
 	// Cirrus Shield use the same function for record's creation and modification
-	public function update($param) {	
+	public function update($param) {
+		$this->update = true;
 		return $this->create($param);
+	}
+	
+	// retrun the reference date field name
+	public function getDateRefName($moduleSource, $RuleMode) {
+		// Creation and modification mode
+		if($RuleMode == "0") {
+			return "ModificationDate";
+		// Creation mode only
+		} else if ($RuleMode == "C"){
+			return "CreationDate";
+		} else {
+			throw new \Exception ("$RuleMode is not a correct Rule mode.");
+		}
+		return null;
 	}
 	
 	protected function call($url, $method = 'GET', $xmlData='', $timeout = 10){   
