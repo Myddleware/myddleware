@@ -111,7 +111,8 @@ class ringcentralcore  extends solution {
 	public function get_modules($type = 'source') {
 		try{		
 			$modules = array(	
-								'call-log' => 'Call log',
+								'call-log'		=> 'Call log',
+								'message-store'	=> 'Messages',
 							);
 			return $modules;			
 		} catch (\Exception $e) {
@@ -124,127 +125,15 @@ class ringcentralcore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			// Pour chaque module, traitement différent
-			switch ($module) {
-				// case 'call-log':	
-					// Si on a le module list en target alors on est en mode search. Il faut juste faire le lien entre le nom de la source et le nom de la liste
-					/* $this->moduleFields = array(
-						'name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__company' => array('label' => 'Contact - Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__address1' => array('label' => 'Contact - Adsress1', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__address2' => array('label' => 'Contact - address2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'contact__city' => array('label' => 'Contact - city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__state' => array('label' => 'Contact - state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__zip' => array('label' => 'Contact - zip', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__country' => array('label' => 'Contact - country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__phone' => array('label' => 'Contact - phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'permission_reminder' => array('label' => 'Permission reminder', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'use_archive_bar' => array('label' => 'Use archive bar', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'campaign_defaults__from_name' => array('label' => 'Campaign defaults from name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__from_email' => array('label' => 'Campaign defaults from email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__subject' => array('label' => 'Campaign defaults subject', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__language' => array('label' => 'Campaign defaults language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'notify_on_subscribe' => array('label' => 'Notify on subscribe', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'notify_on_unsubscribe' => array('label' => 'Notify on unsubscribe', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'email_type_option' => array('label' => 'Email type option', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 1),
-						'visibility' => array('label' => 'Visibility', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					); */
-					// break;
-				case 'call-log':	
-					$this->moduleFields = array(
-						'id' => array('label' => 'id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'uri' => array('label' => 'uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'sessionId' => array('label' => 'Session Id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'from__phoneNumber' => array('label' => 'From phone number', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'from__extensionNumber' => array('label' => 'From extension number', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'from__location' => array('label' => 'From location', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'from__name' => array('label' => 'From name', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						// 'from__device__id' => array('label' => 'From device id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						// 'from__device__uri' => array('label' => 'From device uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'to__phoneNumber' => array('label' => 'To phone number', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'to__extensionNumber' => array('label' => 'To extension number', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'to__location' => array('label' => 'To location', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'to__name' => array('label' => 'To name', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						// 'to__device__id' => array('label' => 'To device id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						// 'to__device__uri' => array('label' => 'To device uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'type' => array('label' => 'Type', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Voice' => 'Voice','Fax' => 'Fax')),
-						'direction' => array('label' => 'Direction', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Inbound' => 'Inbound','Outbound' => 'Outbound')),
-						'action' => array('label' => 'Action', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array(
-																																			'Unknown' => 'Unknown',
-																																			'Phone Call' => 'Phone Call',
-																																			'Phone Login' => 'Phone Login',
-																																			'Incoming Fax' => 'Incoming Fax',
-																																			'Accept Call' => 'Accept Call',
-																																			'FindMe' => 'FindMe',
-																																			'FollowMe' => 'FollowMe',
-																																			'Outgoing Fax' => 'Outgoing Fax',
-																																			'Call Return' => 'Call Return',
-																																			'Calling Card' => 'Calling Card',
-																																			'Ring Directly' => 'Ring Directly',
-																																			'RingOut Web' => 'RingOut Web',
-																																			'VoIP Call' => 'VoIP Call',
-																																			'RingOut PC' => 'RingOut PC',
-																																			'RingMe' => 'RingMe',
-																																			'Transfer' => 'Transfer',
-																																			'411 Info' => '411 Info',
-																																			'Emergency' => 'Emergency',
-																																			'E911 Update' => 'E911 Update',
-																																			'Support' => 'Support',
-																																			'RingOut Mobile'  => 'RingOut Mobile',
-																																			)),
-						'result' => array('label' => 'result', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array(
-																																			'Unknown' => 'Unknown',
-																																			'ResultInProgress' => 'ResultInProgress',
-																																			'Missed' => 'Missed',
-																																			'Call accepted' => 'Call accepted',
-																																			'Voicemail' => 'Voicemail',
-																																			'Rejected' => 'Rejected',
-																																			'Reply' => 'Reply',
-																																			'Received' => 'Received',
-																																			'Receive Error' => 'Receive Error',
-																																			'Fax on Demand' => 'Fax on Demand',
-																																			'Partial Receive' => 'Partial Receive',
-																																			'Blocked' => 'Blocked',
-																																			'Call connected' => 'Call connected',
-																																			'No Answer' => 'No Answer',
-																																			'International Disabled' => 'International Disabled',
-																																			'Busy' => 'Busy',
-																																			'Send Error' => 'Send Error',
-																																			'Sent' => 'Sent',
-																																			'No fax machine' => 'No fax machine',
-																																			'ResultEmpty' => 'ResultEmpty',
-																																			'Account ' => 'Account ',
-																																			'Suspended' => 'Suspended',
-																																			'Call Failed' => 'Call Failed',
-																																			'Call Failure' => 'Call Failure',
-																																			'Internal Error' => 'Internal Error',
-																																			'IP Phone offline' => 'IP Phone offline',
-																																			'Restricted Number' => 'Restricted Number',
-																																			'Wrong Number' => 'Wrong Number',
-																																			'Stopped' => 'Stopped',
-																																			'Hang up' => 'Hang up',
-																																			'Poor Line Quality' => 'Poor Line Quality',
-																																			'Partially Sent' => 'Partially Sent',
-																																			'International Restriction' => 'International Restriction',
-																																			'Abandoned' => 'Abandoned',
-																																			'Declined' => 'Declined',
-																																			'Fax Receipt Error' => 'Fax Receipt Error',
-																																			'Fax Send Error'  => 'Fax Send Error' ,
-																																			)),
-						'startTime' => array('label' => 'Start Time', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'duration' => array('label' => 'Duration', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'recording__id' => array('label' => 'Recording id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'recording__uri' => array('label' => 'Recording uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'recording__type' => array('label' => 'Recording type', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Automatic' => 'Automatic','OnDemand' => 'OnDemand')),
-						'recording__contentUri' => array('label' => 'Recording contentUri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						'lastModifiedTime' => array('label' => 'Last modified time', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),
-						// 'legs' => array('label' => 'Last modified time', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),				
-					);
-					break;	
-				default:
-					throw new \Exception("Fields unreadable");
-					break;
+			require_once('lib/ringcentral/metadata.php');	
+			if (!empty($moduleFields[$module])) {
+				$this->moduleFields = $moduleFields[$module];
 			}
+
+			if (!empty($fieldsRelate[$module])) {
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}	
+		
 			// Add relate field in the field mapping 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
@@ -268,13 +157,15 @@ class ringcentralcore  extends solution {
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			$args['dateFrom'] = '2016-03-10T18:07:52.534Z';
 			// 2010-04-07T00:00:00+01:00
-	echo 'date 1 : '.$param['date_ref'].chr(10);
+	// echo 'date 1 : '.$param['date_ref'].chr(10);
 	
 	
-$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
-	echo 'date 2 : '.$dateRef.chr(10);
+			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
+	// echo 'date 2 : '.$dateRef.chr(10);
 			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
+// $records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/address-book/contact");
 print_r($records);
+return null;
 // print_r($param['fields']);
 			
 			if(!empty($records->errorCode)) {
