@@ -503,7 +503,7 @@ class databasecore extends solution {
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
 					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)	
-echo $sql;					
+				
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					
