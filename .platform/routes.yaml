@@ -1,4 +1,4 @@
-"http://www.myddleware.com/":
+"http://{default}/":
     type: upstream
     # the first part should be your project name
-    upstream: "myddleware:php"
+    upstream: "myddleware:http"

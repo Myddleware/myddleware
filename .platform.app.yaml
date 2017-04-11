@@ -2,7 +2,7 @@
 # in the same project.
 
 # The name of this app. Must be unique within a project.
-name: app
+name: myddleware
 
 # The type of the application to build.
 type: php:7.0
