@@ -495,14 +495,15 @@ class databasecore extends solution {
 					
 						$fieldName = substr($key, 0, strrpos($key, '_'));
 						$mappingType = $this->getMappingType($key);
-						$sql .= $fieldName.",";
+						$sql .= $this->stringSeparator.$fieldName.$this->stringSeparator.",";
 						$values .= "'".$value."',";
 					}
 					
 					$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
-					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)						
+					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)	
+echo $sql;					
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					
@@ -511,11 +512,11 @@ class databasecore extends solution {
 						throw new \Exception('Create: '.$errorInfo[2]);
 					}
 					
-					if(empty($this->pdo->lastInsertId())) {
+					$idTarget = $this->pdo->lastInsertId();
+					if(!isset($idTarget)) { // could be 0
 						throw new \Exception('Create: No ID returned.');
 					}
 					
-					$idTarget = $this->pdo->lastInsertId();
 					
 					$result[$idDoc] = array(
 											'id' => $idTarget,
@@ -614,11 +615,11 @@ class databasecore extends solution {
 		try {
 			// On entre dans le IF si on n'est pas sur la 1ère version de la règle
 			// Ou si on est sur une règle child
-			if($param['rule']['version'] != "001") { 
+			// if($param['rule']['version'] != "001") { 
 				// Ici on va aller chercher le idTable des versions précédentes			
 				// Cette requette permet de récupérer toutes les règles portant le même nom que la notre ET AYANT un tableID
 				// Les résultats sont triés de la version la plus récente à la plus ancienne
-				$sql = "SELECT R1.`value` , R2.`version` 
+/* 				$sql = "SELECT R1.`value` , R2.`version` 
 						FROM  `RuleParam` R1,  `Rule` R2
 						WHERE  R1.`name` =  'tableID'
 						AND R1.`rule_id` = R2.`id` 
@@ -643,8 +644,10 @@ class databasecore extends solution {
 						$tableID = $result['value'];
 						break;
 					}
-				}
-	
+				} */
+
+// AJOUTER CONTROLE SI TABLE EXISTE
+				
 				// Dernier test, si on a tjrs rien dans $tableID et que l'on est pas sur une règle child (jamais de création de table pour une règle child)
 				// alors on crée une nouvelle table
 				if(empty($tableID)) {
@@ -758,10 +761,10 @@ class databasecore extends solution {
 				
 				$this->messages[] = array('type' => 'success', 'message' => 'Table '.$tableID.' successfully updated in Database. Fields added / modified : '.$fieldstext.'.');
 				return $tableID;
-			}
-			else {
-				return $this->createDatabaseTable($param);
-			} 
+			// }
+			// else {
+				// return $this->createDatabaseTable($param);
+			// } 
 			return null;
 		} catch (\Exception $e) {
 			$error = 'CheckTable: Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';

@@ -42,7 +42,11 @@ class ringcentralcore  extends solution {
 	protected $token;
 	protected $server;
 	
-	protected $required_fields = array('default' => array('id','startTime'));
+	protected $required_fields = array(
+										'default' => array('id'),
+										'call-log' => array('id','startTime'),
+										'message-store' => array('id','lastModifiedTime'),
+									);
 	
 	public function getFieldsLogin() {	
 		return array(
@@ -144,28 +148,36 @@ class ringcentralcore  extends solution {
 			return false;
 		}
 	} // get_module_fields($module)	 
-	
-	
-	public function read($param) {
+		
+		
+	public function read_last($param) {
 		try {
-			$result['date_ref'] = $param['date_ref'];
-			$result['count'] = 0;
+ 
 			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			
+// print_r($param['fields']);			
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+// print_r($param['fields']);			
 			// Get the reference date field name
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			$args['dateFrom'] = '2016-03-10T18:07:52.534Z';
+			// $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			// $args['dateFrom'] = '2016-03-10T18:07:52.534Z';
 			// 2010-04-07T00:00:00+01:00
 	// echo 'date 1 : '.$param['date_ref'].chr(10);
 	
-	
-			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
+			// Generate the WHERE
+			if (!empty($param['query'])) {
+				
+			// The function is called for a simulation (rule creation) if there is no query
+			} else {
+				$date = new \DateTime();
+				$date = date_modify($date, '-1 month');	
+				$where = "dateFrom=".$date->format('Y-m-d\TH:i:s.Z\Z');
+			}
+			// $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
 	// echo 'date 2 : '.$dateRef.chr(10);
-			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
+			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?perPage=1&".$where);
 // $records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/address-book/contact");
-print_r($records);
-return null;
+// print_r($records);
+// return null;
 // print_r($param['fields']);
 			
 			if(!empty($records->errorCode)) {
@@ -177,6 +189,7 @@ return null;
 				foreach($records->records as $record) {
 					// For each fields expected
 					foreach($param['fields'] as $field) {
+// echo 'field : '.$field.chr(10);
 						// The field could be a structure from_phoneNumber for example
 						$fieldStructure = explode('__',$field);
 						// If 2 dimensions						
@@ -187,11 +200,78 @@ return null;
 						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
 						if(isset($record->$field)) {
 							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-							if ($field == 'Id') {
-								$field = 'id';
-							} elseif ($field == $dateRefField) {
+							// if ($field == $dateRefField) {
 // echo 'date deb : '.$record->$field.chr(10);
-							$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
+								// $dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
+// echo 'date fin : '.$dateMyddlewareFormat.chr(10);
+								// $row['date_modified'] = $dateMyddlewareFormat;
+							// }
+							$result['values'][$field] = $record->$field;
+						} else {
+							$result['values'][$field] = '';
+						}
+						$result['done'] = true;
+					}
+				}
+			} else {
+				$result['done'] = false;
+			} 
+		}
+		catch (\Exception $e) {
+		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$result['done'] = -1;
+		}	
+// print_r($result);	
+// return null;	
+		return $result;
+	}	
+	
+	public function read($param) {
+		try {
+			$result['date_ref'] = $param['date_ref'];
+			$result['count'] = 0;
+			// Add required fields
+// print_r($param['fields']);			
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+// print_r($param['fields']);			
+			// Get the reference date field name
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			// $args['dateFrom'] = '2016-03-10T18:07:52.534Z';
+			// 2010-04-07T00:00:00+01:00
+	// echo 'date 1 : '.$param['date_ref'].chr(10);
+	
+	
+			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
+	// echo 'date 2 : '.$dateRef.chr(10);
+			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
+// $records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/address-book/contact");
+// print_r($records);
+// return null;
+// print_r($param['fields']);
+			
+			if(!empty($records->errorCode)) {
+				throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
+			}
+			
+			if (!empty($records->records)) {
+				// For each records
+				foreach($records->records as $record) {
+					// For each fields expected
+					foreach($param['fields'] as $field) {
+// echo 'field : '.$field.chr(10);
+						// The field could be a structure from_phoneNumber for example
+						$fieldStructure = explode('__',$field);
+						// If 2 dimensions						
+						if (!empty($fieldStructure[1])) {
+							// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
+							$record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
+						}
+						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+						if(isset($record->$field)) {
+							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+							if ($field == $dateRefField) {
+// echo 'date deb : '.$record->$field.chr(10);
+								$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
 // echo 'date fin : '.$dateMyddlewareFormat.chr(10);
 								$row['date_modified'] = $dateMyddlewareFormat;
 							}
@@ -218,14 +298,18 @@ return null;
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 		}	
-print_r($result);	
+// print_r($result);	
 // return null;	
 		return $result;
 	}	
 	
 	// retrun the reference date field name
 	public function getDateRefName($moduleSource, $RuleMode) {
-		return 'startTime';
+		if ($moduleSource == 'call-log') {
+			return 'startTime';
+		} elseif ($moduleSource == 'message-store') {
+			return 'lastModifiedTime';
+		}
 	}	
 	
 	

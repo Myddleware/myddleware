@@ -60,9 +60,9 @@ class mysqlcore extends database {
 	
 	// Get the header of an insert query
 	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE ".$table." (
-			id int not null IDENTITY(1, 1) PRIMARY KEY,
-			date_modified smalldatetime default CURRENT_TIMESTAMP,";
+		return  "CREATE TABLE IF NOT EXISTS ".$table." (
+			id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			date_modified datetime default CURRENT_TIMESTAMP,";
 	}
 	
 }// class mysqlcore
