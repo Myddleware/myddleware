@@ -1,4 +1,4 @@
 "http://{default}/":
     type: upstream
     # the first part should be your project name
-    upstream: "myddleware:http"
+    upstream: "myddleware:php"
