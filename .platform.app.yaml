@@ -39,8 +39,7 @@ hooks:
     build: |
         rm web/app_dev.php
         php app/console --env=prod assets:install --no-debug
-        php app/console --env=prod assets:update --no-debug
     deploy: |
         php app/console --env=prod cache:clear
         php app/console --env=prod assetic:dump
-        php app/console --env=prod assets:install
+        php app/console --env=prod assets:install web
