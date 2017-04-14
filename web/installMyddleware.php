@@ -214,7 +214,7 @@ else {
 	$userCreated = 0;
 
 	// Add secret, require for Symfony
-	if (empty($myddlewareParameters['parameters']['secret'])) {
+	if ($myddlewareParameters['parameters']['secret'] == 'ThisTokenIsNotSoSecretChangeIt') {
 		$myddlewareParameters['parameters']['secret']= md5(rand(0,10000).date('YmdHis').'myddlewa');		
 		$new_yaml = \Symfony\Component\Yaml\Yaml::dump($myddlewareParameters, 4);
 		file_put_contents($kernel->getRootDir() .'/config/parameters.yml', $new_yaml);

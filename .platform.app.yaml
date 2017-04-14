@@ -38,6 +38,8 @@ mounts:
 hooks:
     build: |
         rm web/app_dev.php
-        bin/console --env=prod assets:install --no-debug
+        php app/console --env=prod assets:install --no-debug
     deploy: |
-        bin/console --env=prod cache:clear
+        php app/console --env=prod cache:clear
+        php app/console --env=prod assetic:dump
+        php app/console --env=prod assets:install web
