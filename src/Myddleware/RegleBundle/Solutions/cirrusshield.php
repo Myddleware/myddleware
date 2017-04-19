@@ -31,6 +31,7 @@ class cirrusshieldcore  extends solution {
 	protected $url = 'https://www.cirrus-shield.net/RestApi/';
 	protected $token;
 	protected $update;
+	protected $organizationTimezoneOffset;
 	
 	protected $required_fields = array('default' => array('id','creationdate','modificationdate'));
 
@@ -64,6 +65,8 @@ class cirrusshieldcore  extends solution {
 			if (empty($this->token)) {
 				throw new \Exception('login error');	
 			}
+			
+			$this->getOrganizationTimezone();
 			// Connection validation
 			$this->connexion_valide = true; 
 		}
@@ -74,6 +77,40 @@ class cirrusshieldcore  extends solution {
 			return array('error' => $error);
 		}
 	} // login($paramConnexion)
+	
+	protected function getOrganizationTimezone() {
+		// Get the organization in Cirrus
+		$query = 'SELECT DefaultTimeZoneSidKey FROM Organization';
+		// Buid the parameters to call the solution
+		$selectparam = ["authToken" 	=> $this->token,
+						"selectQuery" 	=> $query,
+						];
+		$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
+		$resultQuery = $this->call($url);
+		if (empty($resultQuery['Organization']['DefaultTimeZoneSidKey'])) {
+			throw new \Exception('Failed to retrieve the organisation timezone : no organization found '.$resultQuery['Organization']['DefaultTimeZoneSidKey'].'. ');	
+		}
+		
+		// Get the list of timeZone  Cirrus
+		$organizationFields = $this->call($this->url.'Describe/Organization?authToken='.$this->token);
+		
+		if (!empty($organizationFields['Fields'])) {
+			// Get the content of the field DefaultTimeZoneSidKey
+			$timezoneFieldKey = array_search('DefaultTimeZoneSidKey', array_column($organizationFields['Fields'], 'Name'));
+			if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'])) {
+				// Get the key of the timezone of the organization
+				$timezoneOrganizationKey = array_search($resultQuery['Organization']['DefaultTimeZoneSidKey'], array_column($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'], 'Id'));
+				if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'])) {
+					// Get the offset of the timezone formatted like (GMT-05:00) Eastern Standard Time (America/New_York)
+					$this->organizationTimezoneOffset = substr($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], strpos($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], 'GMT')+3, 3);
+				}
+			}
+		}
+		// Error management
+		if (empty($this->organizationTimezoneOffset)) {
+			throw new \Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');	
+		}
+	}
 	
 	// Get the modules available
 	public function get_modules($type = 'source') {
@@ -146,6 +183,7 @@ class cirrusshieldcore  extends solution {
 
 	// Get the last data in the application
 	public function read_last($param) {
+// return null;	
 // print_r($param);	
 		try {
 			$param['fields'] = $this->addRequiredField($param['fields']);
@@ -302,7 +340,7 @@ class cirrusshieldcore  extends solution {
 				}
 			// Function called as a standard read, we use the reference date
 			} else {
-				$query .= " WHERE ".$dateRefField." > ".$param['date_ref'].""; 
+				$query .= " WHERE ".$dateRefField." > ".$param['date_ref'].$this->organizationTimezoneOffset; 
 			}		
 
 			// Buid the parameters to call the solution
@@ -315,6 +353,7 @@ class cirrusshieldcore  extends solution {
 // echo '<pre>';			
 // print_r($url);
 // print_r($resultQuery);
+// print_r($param['fields']);				
 // return null;
 			// If the query return an error 
 			if (!empty($resultQuery['Message'])) {
@@ -329,22 +368,27 @@ class cirrusshieldcore  extends solution {
 				}
 				// For each records
 				foreach($resultQuery[$param['module']] as $record) {
-// print_r($record);				
-// print_r($param['fields']);				
+print_r($record);				
 					// For each fields expected
 					foreach($param['fields'] as $field) {
+						if ($field == 'id') {
+							$field = 'Id';
+						}
+echo '$field : '.$field.' : '.$record[$field].chr(10);						
 						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
 						if(isset($record[$field])) {
 							// If we are on the date ref field, we add the entry date_modified (put to lower case because ModificationDate in the where is modificationdate int the select
 							if ($field == strtolower($dateRefField)) {
 								$row['date_modified'] = $record[$field];
-							}
-							
-							// Cirrus return an array when the data is empty
-							if (is_array($record[$field])) {
-								$row[$field] = '';
+							} elseif ($field == 'Id') {
+								$row['id'] = $record[$field];
 							} else {
-								$row[$field] = $record[$field];
+								// Cirrus return an array when the data is empty
+								if (is_array($record[$field])) {
+									$row[$field] = '';
+								} else {
+									$row[$field] = $record[$field];
+								}
 							}
 						}
 					}
@@ -354,13 +398,13 @@ class cirrusshieldcore  extends solution {
 					) {
 						$result['date_ref'] =  $record[strtolower($dateRefField)];
 					}
-					$result['values'][$record['id']] = $row;
+					$result['values'][$row['id']] = $row;
 					$result['count']++;
 					$row = array();
 				}
-// echo $query;	
-// print_r($result);
-// return null;
+echo $query;	
+print_r($result);
+return null;
 
 			}
 		}
