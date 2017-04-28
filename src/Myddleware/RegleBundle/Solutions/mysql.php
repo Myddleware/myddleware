@@ -35,7 +35,7 @@ class mysqlcore extends database {
 	
 	// Generate query
 	protected function get_query_show_tables() {
-		return 'SHOW TABLES FROM '.$this->dbname;
+		return 'SHOW TABLES FROM '.$this->paramConnexion['database_name'];
 	}
 	
 	// Query to get all the flieds of the table
