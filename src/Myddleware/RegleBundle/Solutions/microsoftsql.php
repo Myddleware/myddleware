@@ -47,7 +47,7 @@ class microsoftsqlcore extends database {
 	
 	// Get the header of the select query in the read last function
 	protected function get_query_select_header_read_last() {
-		return "SELECT TOP 1 id, date_modified, ";
+		return "SELECT TOP 1 ";
 	}
 	
 	// Get the limit operator of the select query in the read last function

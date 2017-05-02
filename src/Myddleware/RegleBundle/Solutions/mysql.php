@@ -45,7 +45,7 @@ class mysqlcore extends database {
 	
 	// Get the header of the select query in the read last function
 	protected function get_query_select_header_read_last() {
-		return "SELECT id, date_modified, ";
+		return "SELECT ";
 	}
 	
 	// Get the limit operator of the select query in the read last function

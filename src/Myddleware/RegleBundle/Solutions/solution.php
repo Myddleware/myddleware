@@ -225,6 +225,8 @@ class solutioncore {
 		// moduleFields avec le tableu ci-dessus
 		// fieldsRelate avec la même structure que moduleFields mais ne contenant que les champs de type relation
 	public function get_module_fields($module, $type = 'source') {
+		$this->moduleFields = array();
+		$this->fieldsRelate = array();
 		// The field Myddleware_element_id is ID of the current module. It is always added for the field mapping 
 		$this->moduleFields['Myddleware_element_id'] = array(
 												'label' => 'ID '.$module,

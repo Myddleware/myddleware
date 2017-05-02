@@ -414,7 +414,16 @@ class DefaultControllerCore extends Controller
 								    	'name' => 'datereference'
 								    ))
 								->getValue();
-
+								
+			// Get the other rule params					
+			$connectorParams  = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:RuleParam')
+							 ->findByRule( $id );	
+			foreach ($connectorParams as $connectorParam) {
+				$param['ruleParams'][ $connectorParam->getName() ] = $connectorParam->getValue();
+			}
+			
 			// Infos Rule
 			$rule = $this->getDoctrine()
 	                     ->getManager()
@@ -1349,53 +1358,12 @@ class DefaultControllerCore extends Controller
 			} 
 			// ---- Mode update ----
 			
-			// Connexion au service de la solution source
-			$solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];			
-			$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);			
-			$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
+			// Get all data from the target solution first		
+			$solution_cible = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['cible']['solution']);
 			
-			// Contrôle que la connexion est valide
-			if($solution_source->connexion_valide == false) {
-				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
-				exit;
-			}
-
-			$modules = $solution_source->get_modules('source');
-			
-			// SOURCE ------------------------------------------------------------------
-			if($this->getRequest()->request->get('source_module')) {
-				$module['source'] = $this->getRequest()->request->get('source_module'); // mode create <<----
-			}
-			else {
-				$module['source'] = $myddlewareSession['param']['rule']['source']['module']; // mode update <<----
-			}
-			
-			// Met en mémoire la façon de traiter la date de référence
-			$myddlewareSession['param']['rule']['source']['datereference'] = $solution_source->referenceIsDate($module['source']);
-			
-			// Ajoute des champs source pour la validation
-			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source'],$myddlewareSession);
-			
-			// CIBLE ------------------------------------------------------------------	
-			// Si la solution est la même que la précèdente on récupère les infos
-			if($myddlewareSession['param']['rule']['source']['solution'] != $myddlewareSession['param']['rule']['cible']['solution']) {			
-				$solution_cible_nom = $myddlewareSession['param']['rule']['cible']['solution'];			
-				$solution_cible = $this->get('myddleware_rule.'.$solution_cible_nom);
-			}
-			else {
-				$solution_cible = $solution_source;
-				$solution_cible_nom = $solution_source_nom;
-				
-				if(empty($solution_cible->connexion_valide)) {
-					$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect');	
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-					return $this->redirect($this->generateUrl('regle_stepone_animation'));								
-				}				
-			}
-
-			// Connexion vers la cible
+			// TARGET ------------------------------------------------------------------	
+			// We retriev first all data from the target application and the from the source application
+			// We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
 			$solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
 			
 			if($solution_cible->connexion_valide == false) {
@@ -1417,6 +1385,45 @@ class DefaultControllerCore extends Controller
 			
 			// Récupère la liste des champs cible
 			$rule_fields_target = $solution_cible->get_module_fields($module['cible'],'target');
+
+			// Récupération de tous les modes de règle possibles pour la cible et la source
+			$targetMode = $solution_cible->getRuleMode($module['cible'],'target');		
+					
+			$fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
+			
+			// Liste des relations TARGET
+			$relation = $solution_cible->get_module_fields_relate($module['cible']);
+			
+			$allowParentRelationship = $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']);
+			
+			// Champs pour éviter les doublons
+			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($myddlewareSession['param']['rule']['cible']['module']);
+			
+			// SOURCE ------------------------------------------------------------------
+			// Connexion au service de la solution source			
+			$solution_source = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['source']['solution']);			
+			$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
+			
+			// Contrôle que la connexion est valide
+			if($solution_source->connexion_valide == false) {
+				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
+				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
+				exit;
+			}
+			$modules = $solution_source->get_modules('source');
+			if($this->getRequest()->request->get('source_module')) {
+				$module['source'] = $this->getRequest()->request->get('source_module'); // mode create <<----
+			}
+			else {
+				$module['source'] = $myddlewareSession['param']['rule']['source']['module']; // mode update <<----
+			}
+			
+			// Met en mémoire la façon de traiter la date de référence
+			$myddlewareSession['param']['rule']['source']['datereference'] = $solution_source->referenceIsDate($module['source']);
+			
+			// Ajoute des champs source pour la validation
+			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source'],$myddlewareSession);
 			
 			// Récupère la liste des champs source
 			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source');
@@ -1442,8 +1449,7 @@ class DefaultControllerCore extends Controller
 			// SOURCE ----- Récupère la liste des champs source
 			
 			// Type de synchronisation	
-			// Récupération de tous les modes de règle possibles pour la cible et la source
-			$targetMode = $solution_cible->getRuleMode($module['cible'],'target');			
+			// Récupération de tous les modes de règle possibles pour la source		
 			$sourceMode = $solution_source->getRuleMode($module['source'],'source');
 			// Si la target à le type S (search) alors on l'ajoute à la source pour qu'il soit préservé par l'intersection
 			if (array_key_exists('S', $targetMode)) {
@@ -1492,8 +1498,6 @@ class DefaultControllerCore extends Controller
 			else {
 				$cible['table'][$module['cible']] = array(); // rev 1.1.1
 			}
-		
-			$fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
 			
 			// On ajoute des champs personnalisés à notre mapping
 			if($fieldMappingAdd && isset($myddlewareSession['param']['rule']['last_version_id'])) {
@@ -1517,11 +1521,7 @@ class DefaultControllerCore extends Controller
 				ksort($cible['table'][$module['cible']]);		
 			}
 						
-// -------------------	TARGET
-
-			// Liste des relations TARGET
-			$relation = $solution_cible->get_module_fields_relate($module['cible']);
-			
+// -------------------	TARGET		
 			$lst_relation_target = array();
 			$lst_relation_target_alpha = array();
 			if($relation) {
@@ -1617,7 +1617,6 @@ class DefaultControllerCore extends Controller
 // -------------------	Parent relation 
 			// Search if we can send document merged with the target solution
 			$lstParentFields = array();
-			$allowParentRelationship = $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']);
 			if ($allowParentRelationship) {
 				if (!empty($ruleListRelation)) {
 					// We get all relate fields from every source module
@@ -1650,9 +1649,6 @@ class DefaultControllerCore extends Controller
 			// Récupère toutes les functions
 			$lstFunctions = $this->em->getRepository('RegleBundle:Functions')
 						   ->findAll();			
-			
-			// Champs pour éviter les doublons
-			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($myddlewareSession['param']['rule']['cible']['module']);
 			
 			// Les filtres		
 			$lst_filter = array(

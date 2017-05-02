@@ -4,7 +4,7 @@
 
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -29,11 +29,6 @@ use Symfony\Bridge\Monolog\Logger;
 use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
 
 class databasecore extends solution { 
-	// Protected $baseUrl;
-	// Protected $messages = array();
-	// Protected $duplicateDoc = array();
-	
-	// protected $required_fields =  array('default' => array('id','date_modified'));
 
 	protected $driver;
 	protected $pdo;
@@ -120,6 +115,9 @@ class databasecore extends solution {
 	// Get all fields from the table selected
 	public function get_module_fields($module, $type = 'source') {
 		try{
+			$this->moduleFields = array();
+			$this->fieldsRelate = array();
+			// parent::get_module_fields($module, $type);
 			// Get all fields of the table in input	
 			$q = $this->pdo->prepare($this->get_query_describe_table($module));
 			$exec = $q->execute();
@@ -157,6 +155,16 @@ class databasecore extends solution {
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}		
+			// Add field current ID in the relationships
+			if ($type == 'target') {
+				$this->fieldsRelate['Myddleware_element_id'] = array(
+										'label' => 'ID '.$module,
+										'type' => 'varchar(255)',
+										'type_bdd' => 'varchar(255)',
+										'required' => false,
+										'required_relationship' => 0
+									);
+			}
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -166,192 +174,128 @@ class databasecore extends solution {
 	} // get_module_fields($module) 
 		
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
+	public function read_last($param) {		
 		$result = array();
 		$result['error'] = '';
 		try {
-			$query = '';
-			// Si le tableau de requête est présent alors construction de la requête
+			// Add requiered fields
+			if(!empty($param['ruleParams']['fieldId'])) {
+				$this->required_fields =  array('default' => array($param['ruleParams']['fieldId']));	
+			} elseif(!empty($param['ruleParams']['targetFieldId'])) {
+				$this->required_fields =  array('default' => array($param['ruleParams']['targetFieldId']));	
+			}
+			
+			$where = '';
+			// Generate the WHERE
 			if (!empty($param['query'])) {
 				foreach ($param['query'] as $key => $value) {
 					if (!empty($query)) {
-						$query .= ' AND ';
+						$where .= ' AND ';
 					} else {
-						$query .= ' WHERE ';
+						$where .= ' WHERE ';
 					}
-					$query .= $key." = '".$value."'";
+					// If key is id, it has to be replaced by the real name of the id in the target table 
+					if ($key == 'id') {
+						if(!empty($param['ruleParams']['targetFieldId'])) {
+							$key = $param['ruleParams']['targetFieldId'];
+						}
+						else {
+							throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
+						}
+					}
+					$where .= $key." = '".$value."'";
 				}
-			}
+			} // else the function is called for a simulation (rule creation), the limit is manage in the query creation
 			
-			// ************************************************************************** TARGET
-			if($param['module'] == 'NewTable') {
-				// Si on a pas de table Database alors on renvoie une erreur
-				if (empty($param['ruleParams']['tableID'])) {
-					throw new \Exception("No table in Database for the Rule. ");
-				}
-				$tableID = $param['ruleParams']['tableID'];
-				$tableID = mb_strtolower($tableID); // On s'assure que le nom de la règle est bien le slug en miniscule
-				
-				if(!isset($param['fields'])) {
-					$param['fields'] = array();
-				}
-				$param['fields'] = array_unique($param['fields']);
-				// !important $param['fields'] = $this->addRequiredField($param['fields']);
-				$param['fields'] = array_values($param['fields']);
-				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-				
-				// Construction de la requête SQL
-				$requestSQL = $this->get_query_select_header_read_last();
-				
-				// Tableau des noms de champs cible de la forme 'targetField' => 'myddlewareField_TYPE'
-				$targetFields = array();
-				
-				foreach ($param['fields'] as $field){
-					// On enlève le type pour avoir le nom du champ Source
-					$tab = explode('_',$field, -1);
-					$fieldName = '';
-					foreach ($tab as $morceau) {
-						$fieldName .= $morceau.'_';
+			if(!isset($param['fields'])) {
+				$param['fields'] = array();
+			}
+		
+			$param['fields'] = array_unique($param['fields']);	
+			$param['fields'] = $this->addRequiredField($param['fields']);	
+			$param['fields'] = array_values($param['fields']);		
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);	
+			
+			// Construction de la requête SQL
+			$requestSQL = $this->get_query_select_header_read_last();		
+			foreach ($param['fields'] as $field){
+				// If key is id, it has to be replaced by the real name of the id in the target table 
+				if ($field == 'id') {			
+					if(!empty($param['ruleParams']['targetFieldId'])) {
+						$field = $param['ruleParams']['targetFieldId'];			
 					}
-					$fieldName = substr($fieldName, 0, -1);
-					$targetFields[$fieldName] = $field;
-					// $field = str_replace(" ", "", $field); // Solution si JQuery ajoute un espace, à n'utiliser qu'en dernier recours car fonctionne pas bien
-				    $requestSQL .= $fieldName . ", "; // Ajout de chaque champ souhaité
-				}
-				// Suppression de la dernière virgule en laissant le +
-				$requestSQL = rtrim($requestSQL,' '); 
-				$requestSQL = rtrim($requestSQL,',').' '; 
-				$requestSQL .= "FROM ".$tableID;
-
-				$requestSQL .= $query; // $query vaut '' s'il n'y a pas, ça enlève une condition inutile.
-					
-				$requestSQL .= " ORDER BY date_modified DESC"; // Tri par date de modification
-				$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée
-				
-				// Appel de la requête
-				$q = $this->pdo->prepare($requestSQL);
-				$exec = $q->execute();
-				
-				if(!$exec) {
-					$errorInfo = $this->pdo->errorInfo();
-					throw new \Exception('ReadLast: '.$errorInfo[2]);
-				}
-				$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
-				$row = array();
-				if(!empty($fetchAll[0])) {
-					foreach ($fetchAll[0] as $key => $value) {
-						if($key === 'id') {
-							$row[$key] = $value;
-							continue;
-						} elseif($key === 'date_modified') {
-							$row[$key] = $value;
-							continue;
-						} elseif(in_array($key, array_keys($targetFields))) {
-							// Si $key existe dans les clés du tableau, on enregistre sa valeur dans $row à la clé $myddlewareField_TYPE correspondant
-							$row[$targetFields[$key]] = $value;
-						}
-				    }
-					$result['values'] = $row;
-					$result['done'] = true;
-				} 
-				else {
-					$result['done'] = false;
-					$result['error'] = "No data found in ".$tableID;
-				}
-			} else { // **************************************************************** SOURCE
-				// Si le tableau de requête est présent alors construction de la requête
-				if (!empty($param['query'])) {
-					$query = '';
-					foreach ($param['query'] as $key => $value) {
-						if (!empty($query)) {
-							$query .= ' AND ';
-						} else {
-							$query .= ' WHERE ';
-						}
-						$query .= $key." = '".$value."'";
+					else {
+						throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
 					}
 				}
-				
-				if(!isset($param['fields'])) {
-					$param['fields'] = array();
-				}
-				$param['fields'] = array_unique($param['fields']);
-				$param['fields'] = $this->addRequiredField($param['fields']);
-				$param['fields'] = array_values($param['fields']);
-				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-				
-				// Construction de la requête SQL
-				$requestSQL = $this->get_query_select_header_read_last();
-				// TODO Ajout des champs id et date de l'utilisateur
-				
-				foreach ($param['fields'] as $field){
-				    $requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
-				}
-				// Suppression de la dernière virgule en laissant le +
-				$requestSQL = rtrim($requestSQL,' '); 
-				$requestSQL = rtrim($requestSQL,',').' '; 
-				$requestSQL .= "FROM ".$param['module'];
-	
-				$requestSQL .= $query; // $query vaut '' s'il n'y a pas, ça enlève une condition inutile.
-				
-				// $requestSQL .= " ORDER BY date_modified DESC"; // Tri par date de modification TODO
-				$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
-				
-				// Appel de la requête
-				$q = $this->pdo->prepare($requestSQL);
-				$exec = $q->execute();
-				
-				if(!$exec) {
-					$errorInfo = $this->pdo->errorInfo();
-					throw new \Exception('ReadLast: '.$errorInfo[2]);
-				}
-				$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);	
-				
-				$row = array();
-				if(!empty($fetchAll[0])) {
-					foreach ($fetchAll[0] as $key => $value) {
-						// Could be ampty when we use simulation for example
-						if(
+				$requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
+			}
+			// Remove the last coma/space
+			$requestSQL = rtrim($requestSQL,' '); 
+			$requestSQL = rtrim($requestSQL,',').' '; 
+			$requestSQL .= "FROM ".$param['module'];
+			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
+			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
+		
+			// Appel de la requête
+			$q = $this->pdo->prepare($requestSQL);
+			$exec = $q->execute();
+			
+			if(!$exec) {
+				$errorInfo = $this->pdo->errorInfo();
+				throw new \Exception('ReadLast: '.$errorInfo[2]);
+			}
+			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);			
+			$row = array();
+			if(!empty($fetchAll[0])) {
+				foreach ($fetchAll[0] as $key => $value) {
+					// Could be ampty when we use simulation for example
+					if(
+							(
 								!empty($param['ruleParams']['fieldId'])
 							&& $key === $param['ruleParams']['fieldId']
-						) { // ID non trouvé
-							$row[$key] = $value;
-							$row['id'] = $value;
-						} 
-						if(
-								!empty($param['ruleParams']['fieldDateRef'])
-							&& $key === $param['ruleParams']['fieldDateRef']
-						) {
-							$row[$key] = $value;
-							$row['date_modified'] = $value;
-						} 
-						// On doit faire le continue de façon extérieur car le fieldId peut être égal au fieldDateRef
-						if (!empty($row[$key])) {
-							continue;
-						}
-						if(in_array($key, $param['fields'])) {
-							$row[$key] = $value;
-						}
-				    }
-					$result['values'] = $row;
-					$result['done'] = true;
-				} 
-				else {
-					$result['done'] = false;
-					$result['error'] = "No data found in ".$tableID;
+							)
+						OR
+							(
+								!empty($param['ruleParams']['targetFieldId'])
+							&& $key === $param['ruleParams']['targetFieldId']						
+							)
+					) { // ID non trouvé
+						$row[$key] = $value;
+						$row['id'] = $value;
+					} 
+					if(
+							!empty($param['ruleParams']['fieldDateRef'])
+						&& $key === $param['ruleParams']['fieldDateRef']
+					) {
+						$row[$key] = $value;
+						$row['date_modified'] = $value;
+					} 
+					// On doit faire le continue de façon extérieur car le fieldId peut être égal au fieldDateRef
+					if (!empty($row[$key])) {
+						continue;
+					}
+					if(in_array($key, $param['fields'])) {
+						$row[$key] = $value;
+					}
 				}
+				$result['values'] = $row;
+				$result['done'] = true;
+			} 
+			else {
+				$result['done'] = false;
+				$result['error'] = "No data found in ".$tableID;
 			}
 		}
 		catch (\Exception $e) {
 			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}
-// print_r($result);			
+		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';					
+		}					
 		return $result;
 	} // read_last($param)
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function read($param) {	
 		$result = array();
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
@@ -359,9 +303,13 @@ class databasecore extends solution {
 				$param['date_ref'] = 0;
 			}
 			
-			// On contrôle que les champs "id" et "date_modified" ont bien été renseignés
-			if(!isset($param['ruleParams']['fieldId'])) throw new \Exception('FieldId has to be specified for the read.');
-			if(!isset($param['ruleParams']['fieldDateRef'])) throw new \Exception('"fieldDateRef" has to be specified for the read.');
+			// Add requiered fields
+			if(!isset($param['ruleParams']['fieldId'])) {
+				throw new \Exception('FieldId has to be specified for the read.');
+			}
+			if(!isset($param['ruleParams']['fieldDateRef'])) {
+				throw new \Exception('"fieldDateRef" has to be specified for the read.');
+			}
 			$this->required_fields =  array('default' => array($param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']));
 			
 			if(!isset($param['fields'])) {
@@ -417,9 +365,6 @@ class databasecore extends solution {
 					$result['values'][$row['id']] = $row;
 				}
 			} 
-			else {
-				$result['error'] = "No Results";
-			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
@@ -429,10 +374,16 @@ class databasecore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {	
-		try {					
+		try {			
+			// Get the target reference field
+			if(!isset($param['ruleParams']['targetFieldId'])) {
+				throw new \Exception('targetFieldId has to be specified for the data creation.');
+			}
+		
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {					
 				try {
+					unset($idTarget);
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
 					// Query init
@@ -442,24 +393,31 @@ class databasecore extends solution {
 					foreach ($data as $key => $value) {				
 						if($key == "target_id") {
 							continue;
+						// If the target reference field is in data sent, we save it to update the document	
+						} elseif($key == $param['ruleParams']['targetFieldId']) {
+							$idTarget = $value;
 						}
 						$sql .= $this->stringSeparator.$key.$this->stringSeparator.",";
 						$values .= "'".$value."',";
 					}
+					
 					// Remove the last coma
 					$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
 					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)				
 					$q = $this->pdo->prepare($sql);
-					$exec = $q->execute();
-					
+					$exec = $q->execute();	
 					if(!$exec) {
 						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Create: '.$errorInfo[2]);
 					}
 					
-					$idTarget = $this->pdo->lastInsertId();
+					// If the target reference field isn't in data sent
+					if (!isset($idTarget)) {
+						// If the target reference field is a primary key auto increment, we retrive the value here
+						$idTarget = $this->pdo->lastInsertId();
+					}
 					if(!isset($idTarget)) { // could be 0
 						throw new \Exception('Create: No ID returned.');
 					}
@@ -506,18 +464,21 @@ class databasecore extends solution {
 						if($key == "target_id") {
 							$idTarget = $value;
 							continue;
-						}				
+						// Myddleware_element_id is a Myddleware field, it doesn't exist in the target database	
+						} elseif ($key == "Myddleware_element_id") {
+							continue;
+						}								
 						$sql .= $key."='".$value."',";
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE ".$param['ruleParams']['targetfieldId']."='".$idTarget."'";	
+					$sql .= " WHERE ".$param['ruleParams']['targetFieldId']."='".$idTarget."'";						
 					// Execute the query
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					if(!$exec) {
-						$errorInfo = $this->pdo->errorInfo();
-						throw new \Exception('Create: '.$errorInfo[2]);
+						$errorInfo = $this->pdo->errorInfo();						
+						throw new \Exception('Update: '.$errorInfo[2]);
 					}
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
@@ -580,7 +541,7 @@ class databasecore extends solution {
 				} else {
 					$idParam = array(
 								'id' => 'targetFieldId',
-								'name' => 'targetfieldId',
+								'name' => 'targetFieldId',
 								'type' => 'option',
 								'label' => 'Primary key in your target table',
 								'required'	=> true
