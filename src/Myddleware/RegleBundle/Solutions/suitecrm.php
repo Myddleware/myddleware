@@ -26,6 +26,8 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 class suitecrmcore  extends solution { 
+
+	protected $urlSuffix = '/service/v4/rest.php';
 	
     protected $required_fields = array('default' => array('id','date_modified','date_entered'));
 	
@@ -110,6 +112,10 @@ class suitecrmcore  extends solution {
 			), 
 			'application_name' => 'myddleware',
 			); 
+			// remove index.php in the url
+			$this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+			// Add the suffix with rest parameters to the url
+			$this->paramConnexion['url'] .= $this->urlSuffix;
 
 			$result = $this->call('login',$login_paramaters,$this->paramConnexion['url']); 
 			
