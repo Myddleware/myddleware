@@ -92,7 +92,7 @@ class Document
      * @var string
      *
 	 * 
-     * @ORM\Column(name="status", type="string", nullable=false)
+     * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
 	 * 
      */
     private $status;
@@ -100,7 +100,7 @@ class Document
     /**
 	* @var string
     *
-	* @ORM\Column(name="source_id", type="string", nullable=false)
+	* @ORM\Column(name="source_id", type="string", nullable=true, options={"default":NULL})
 	* 
     */
     private $source;		
@@ -108,14 +108,14 @@ class Document
     /**
 	* @var string
     *
-	* @ORM\Column(name="target_id", type="string", nullable=false)
+	* @ORM\Column(name="target_id", type="string",  nullable=true, options={"default":NULL})
     */
     private $target;	
 
     /**
      * @var datetime
      *
-     * @ORM\Column(name="source_date_modified", type="datetime", nullable=false)
+     * @ORM\Column(name="source_date_modified", type="datetime",  nullable=true, options={"default":NULL})
 	 * 
      */
     private $sourceDateModified;
@@ -123,21 +123,21 @@ class Document
     /**
 	* @var string
     *
-	* @ORM\Column(name="mode", type="string", length=1, nullable=false)
+	* @ORM\Column(name="mode", type="string", length=1,  nullable=true, options={"default":NULL})
     */
     private $mode;	
 	
     /**
 	* @var string
     *
-	* @ORM\Column(name="type", type="string", length=1, nullable=false)
+	* @ORM\Column(name="type", type="string", length=1,  nullable=true, options={"default":NULL})
     */
     private $type;
 	
     /**
      * @var integer
      *
-	 * @ORM\Column(name="attempt", type="integer", length=5, nullable=false)
+	 * @ORM\Column(name="attempt", type="integer", length=5,  nullable=false, options={"default":0})
 	 * 
      */
     private $attempt;
@@ -145,7 +145,7 @@ class Document
     /**
      * @var integer
      *
-	 * @ORM\Column(name="global_status", type="string", nullable=false)
+	 * @ORM\Column(name="global_status", type="string",  nullable=false, options={"default":0})
 	 * 
      */
     private $globalStatus;	
@@ -153,7 +153,7 @@ class Document
 	/**
      * @var string
      *
-     * @ORM\Column(name="parent_id", type="string", nullable=false)
+     * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
      */
     private $parentId;	
 

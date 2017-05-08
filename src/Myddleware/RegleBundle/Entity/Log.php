@@ -76,7 +76,7 @@ class Log
     /**
      * @var string
      *
-     * @ORM\Column(name="rule_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="rule_id", type="string", length=255,  nullable=true, options={"default":NULL})
 	 * 
      */
     private $rule;

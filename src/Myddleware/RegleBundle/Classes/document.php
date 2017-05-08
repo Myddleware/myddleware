@@ -478,7 +478,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'equal':
+			case 'is':
 				if (strtoupper($fieldValue) == strtoupper($filterValue)) {
 					return true;
 				}
@@ -486,7 +486,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'different':	
+			case 'not':
 				if (strtoupper($fieldValue) != strtoupper($filterValue)) {
 					return true;
 				}
@@ -909,43 +909,40 @@ class documentcore {
 	
 	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
 	protected function checkNoChange() {
-		// Get target data 
-		$target = $this->getDocumentData('T');
-	
-		// Get data in the target solution (if exists) before we update it
-		$history = $this->getDocumentData('H');
+		try {
+			// Get target data 
+			$target = $this->getDocumentData('T');
 		
-		// For each target fields, we compare the data we want to send and the data already in the target solution
-		// If one is different we stop the function
-		if (!empty($this->ruleFields)) {
-			foreach ($this->ruleFields as $field) {
-				if (
-						!isset($target[$field['target_field_name']])
-					 ||	!isset($history[$field['target_field_name']])
-					 ||	$history[$field['target_field_name']] != $target[$field['target_field_name']]
-				){
-					return false;
+			// Get data in the target solution (if exists) before we update it
+			$history = $this->getDocumentData('H');
+			
+			// For each target fields, we compare the data we want to send and the data already in the target solution
+			// If one is different we stop the function
+			if (!empty($this->ruleFields)) {
+				foreach ($this->ruleFields as $field) {
+					if (trim($history[$field['target_field_name']]) != trim($target[$field['target_field_name']])){
+						return false;
+					}
 				}
 			}
-		}
-		
-		// We check relationship fields as well
-		if (!empty($this->ruleRelationships)) {
-			foreach ($this->ruleRelationships as $ruleRelationship) {
-				if (
-						!isset($target[$ruleRelationship['field_name_target']])
-					 ||	!isset($history[$ruleRelationship['field_name_target']])
-					 ||	$history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
-				){
-					return false;
+			
+			// We check relationship fields as well
+			if (!empty($this->ruleRelationships)) {
+				foreach ($this->ruleRelationships as $ruleRelationship) {
+					if ($history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]){
+						return false;
+					}
 				}
 			}
-		}
-		// If all fields are equal, no need to update, so we cancel the document
-		$this->message .= 'Identical data to the target system. This document is canceled. ';
-		$this->typeError = 'W';
-		$this->updateStatus('No_send');
-		return true;
+			// If all fields are equal, no need to update, so we cancel the document
+			$this->message .= 'Identical data to the target system. This document is canceled. ';
+			$this->typeError = 'W';
+			$this->updateStatus('No_send');
+			return true;
+		} catch (\Exception $e) {
+			// If something wrong happen (e.g. a field isn't set) the we return false
+			return false;
+		}			
 	}
 	
 	// Récupération des données dans la cible et sauvegarde dans la table d'historique
