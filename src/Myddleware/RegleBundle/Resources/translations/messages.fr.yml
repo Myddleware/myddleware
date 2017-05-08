@@ -32,8 +32,13 @@ panel:
         title: Nombre de transferts par statut
     list_error:
         nb: Nombre d'erreurs par règle
+    list_job:
+        title: Détail des derniers jobs	
+        duration: seconde(s)		
     graph_histo:
         title: Historique des transferts
+    graph_job_histo:
+        title: Historique des jobs
 create_rule:
     tabs:
         one: Connexion
@@ -441,7 +446,6 @@ function:
 solution:
     fields:
         login: Utilisateur
-        username: Nom utilisateur
         password: Mot de passe
         url: Url
         token: Jeton

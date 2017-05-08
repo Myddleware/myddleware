@@ -32,8 +32,13 @@ panel:
         title: Number of transfers by statut
     list_error:
         nb: Number of errors by rule
+    list_job:
+        title: Last jobs details
+        duration: second(s)
     graph_histo:
         title: Transfer historic
+    graph_job_histo:
+        title: Job historic
 create_rule:
     tabs:
         one: Connection
@@ -440,7 +445,6 @@ function:
 solution:
     fields:
         login: User
-        username: Username
         password: Password
         url: Url
         token: Token

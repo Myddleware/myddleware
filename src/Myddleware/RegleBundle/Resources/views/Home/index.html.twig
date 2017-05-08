@@ -50,13 +50,30 @@
 	            <h3>{{'panel.graph_error.title'|trans}} ({{ nbFlux }})</h3>
 	            <div id="pie_chart_error_doc" style="width: 448px; height: 300px;"></div>
 	        </div>        
+			<div class="info">
+	            <h3>{{ 'panel.graph_job_histo.title'|trans }}</h3>
+	             <div id="column_chart_job_histo" style="width: 448px; height: 300px;"></div>
+	        </div>
 	        <div class="info">
 	            <h3>{{ 'panel.graph_histo.title'|trans }}</h3>
 	             <div id="column_chart_histo" style="width: 448px; height: 300px;"></div>
 	        </div>
+			<div class="info">
+	            <h3>{{'panel.list_job.title'|trans}}</h3>
+	            <ul class="list-group">
+	                {% for job in listJobDetail %} 
+	                  <li class="list-group-item">
+	                    <a href="{{ path('task_view',{'id' : job.id }) }}">{{ job.begin }}</span></a>
+	                    <span> | {{ job.duration }} {{'panel.list_job.duration'|trans}}</span>
+	                    <span> | {{ job.status }}</span>
+	                    <span> | {{ job.message }}</span>
+	                  </li>
+	                {% endfor %}
+	            </ul>
+	        </div>
 	        <div class="info">
 	            {% if errorByRule %}
-	            <h3>{{'panel.list_error.nb'|trans}}</h3>
+	            <h3>{{'panel.list_job.nb'|trans}}</h3>
 	            <ul class="list-group">
 	                {% for rule in errorByRule %} 
 	                  <li class="list-group-item">
@@ -78,6 +95,7 @@
         var path_graph_type_error_doc = "{{ path('graph_type_error_doc') }}";
         var path_graph_type_transfer_rule = "{{ path('graph_type_transfer_rule') }}";
         var path_graph_type_transfer_histo = "{{ path('graph_type_transfer_histo') }}";
+        var path_graph_type_job_histo = "{{ path('graph_type_job_histo') }}";
     </script>
     {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

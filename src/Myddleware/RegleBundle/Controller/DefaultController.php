@@ -2298,6 +2298,7 @@ class DefaultControllerCore extends Controller
 		
 	 	return $this->render('RegleBundle:Home:index.html.twig',array(
 	 			'errorByRule' => $home->errorByRule($isAdmin, $this->getUser()->getId()),
+	 			'listJobDetail' => $home->listJobDetail(),
 				'nbFlux' => $nbFlux,
 				'solutions' => $lstArray,
 				'locale' => $language
@@ -2347,6 +2348,23 @@ class DefaultControllerCore extends Controller
 		$countTransferRule = array();
 		$i=1;
 		foreach ($home->countTransferHisto($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) as $field => $value) {
+			if($i == 1) {
+				$countTransferRule[] = array('date',$tools->getTranslation(array('flux', 'gbl_status', 'open')),$tools->getTranslation(array('flux', 'gbl_status', 'error')),$tools->getTranslation(array('flux', 'gbl_status', 'cancel')),$tools->getTranslation(array('flux', 'gbl_status', 'close')));	
+			} 
+			
+			$countTransferRule[] = array($value['date'],(int)$value['open'],(int)$value['error'],(int)$value['cancel'],(int)$value['close']);
+			$i++;
+		}
+		return new Response(json_encode($countTransferRule));			
+	} 
+	
+	public function graphJobHistoAction() {
+		$tools = new tools($this->get('logger'), $this->container, $this->get('database_connection'));	
+		$home = $this->get('myddleware.home');
+		$permission =  $this->get('myddleware.permission');
+		$countTransferRule = array();
+		$i=1;
+		foreach ($home->countJobHisto($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) as $field => $value) {
 			if($i == 1) {
 				$countTransferRule[] = array('date',$tools->getTranslation(array('flux', 'gbl_status', 'open')),$tools->getTranslation(array('flux', 'gbl_status', 'error')),$tools->getTranslation(array('flux', 'gbl_status', 'cancel')),$tools->getTranslation(array('flux', 'gbl_status', 'close')));	
 			} 

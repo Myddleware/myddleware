@@ -37,6 +37,7 @@ class homecore {
 	protected $logger;
 	
 	protected $historicDays = 7;
+	protected $nbHistoricJobs = 5;
 	protected $historicDateFormat = 'M-d';
 
 	
@@ -69,6 +70,18 @@ class homecore {
 					GROUP BY Rule.name, Rule.id
 					HAVING cpt > 0
 					ORDER BY cpt DESC";
+		    $stmt = $this->connection->prepare($sql);
+		    $stmt->execute();	    
+			$result = $stmt->fetchAll();
+			return $result; 			
+		} catch (\Exception $e) {
+			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+		}	
+	}
+		
+	public function listJobDetail() {
+		try {	
+			$sql = "SELECT id, begin, end, status, message, TIMESTAMPDIFF(SECOND,begin,end) duration FROM Job ORDER BY begin DESC LIMIT ".$this->nbHistoricJobs;	
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();
@@ -193,7 +206,6 @@ class homecore {
 			$endDate = date('Y-m-d');
 			// Init array
 			while (strtotime($startDate) < strtotime($endDate)) {
-				// echo "$startDate\n   ";
 				$startDateFromat = date ($this->historicDateFormat, strtotime('+1 day', strtotime($startDate)));
 				$startDate = date ("Y-m-d", strtotime('+1 day', strtotime($startDate)));
 				$historic[$startDate] = array('date' => $startDateFromat,'open' => 0,'error' => 0,'cancel' => 0,'close' => 0);
@@ -202,16 +214,35 @@ class homecore {
 			$where = '';
 			if($isAdmin == false) {
 				$where = ' AND created_by='.$id;
-			}		
-		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, Document.* FROM Document WHERE date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where;				
+			}	
+			
+			// Select the number of transfert per day
+		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, global_status, count(*) nb FROM Document WHERE date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where." GROUP BY date, global_status";		
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
-			$result = $stmt->fetchAll();
+			$result = $stmt->fetchAll();		
 			if (!empty($result)) {
 				foreach ($result as $row) {
-					if (isset($historic[$row['date']][strtolower($row['global_status'])])) {
-						$historic[$row['date']][strtolower($row['global_status'])]++;
-					}
+					$historic[$row['date']][strtolower($row['global_status'])] = $row['nb'];
+				}
+			}
+			return $historic; 			
+		} catch (\Exception $e) {
+			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+		}
+	}
+	
+	public function countJobHisto($isAdmin, $id) {
+		try {
+			$historic = array();
+			// Select last jobs
+		    $sql = "SELECT begin date, open, close, cancel, error FROM Job ORDER BY begin DESC LIMIT ".$this->nbHistoricJobs;		
+		    $stmt = $this->connection->prepare($sql);
+		    $stmt->execute();	    
+			$result = $stmt->fetchAll();			
+			if (!empty($result)) {
+				foreach ($result as $row) {
+					$historic[$row['date']] = array('date' => $row['date'],'open' => $row['open'],'error' => $row['error'],'cancel' => $row['cancel'],'close' => $row['close']);
 				}
 			}
 			return $historic; 			
