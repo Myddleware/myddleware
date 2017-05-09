@@ -108,8 +108,22 @@ class filecore extends solution {
 	// Renvoie les modules passés en paramètre
 	public function get_modules($type = 'source') {
 		try{
+			// Get the subfolders of the current directory
+			$stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';ls -d */');
+			stream_set_blocking($stream, true);
+			$output = stream_get_contents($stream);	
+			// Transform the directory list in an array
+			$directories = explode(chr(10),trim($output));
+
 			$modules = array();
-			$modules['File'] = 'Files in directory '.$this->paramConnexion['directory'];
+			// Add the current directory
+			$modules[$this->paramConnexion['directory']] = $this->paramConnexion['directory'];
+			// Add the sub directories if exist
+			if (!empty($directories)) {
+				foreach($directories as $directory) {
+					$modules[$this->paramConnexion['directory'].'/'.$directory] = $this->paramConnexion['directory'].'/'.$directory;
+				}
+			}
 			return $modules;
 		} catch (\Exception $e) {
 			$error = $e->getMessage();
@@ -119,12 +133,12 @@ class filecore extends solution {
 	
 	// Renvoie les champs du module passé en paramètre
 	public function get_module_fields($module, $type = 'source') {
-		parent::get_module_fields($module, $type);
+		parent::get_module_fields($module, $type);	
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
-				$file = $this->get_last_file('1970-01-01 00:00:00');		
-				$fileName = trim($this->paramConnexion['directory'].'/'.$file);			
+				$file = $this->get_last_file($module,'1970-01-01 00:00:00');		
+				$fileName = trim($module.'/'.$file);			
 				$sftp = intval(ssh2_sftp($this->connection));
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
@@ -155,35 +169,7 @@ class filecore extends solution {
 	
 	// Redéfinition de la méthode pour ne plus renvoyer la relation Myddleware_element_id
 	public function get_module_fields_relate($module) {
-		// Récupération de tous les champ référence de la règle liées (= module)	
-		$this->fieldsRelate = array();
-		$sql = "SELECT 	
-					RuleField.target_field_name,
-					Rule.name
-				FROM Rule
-					INNER JOIN RuleField
-						ON Rule.id = RuleField.rule_id
-					WHERE
-							Rule.name = :name
-						AND Rule.deleted = 0	
-						AND RuleField.target_field_name LIKE '%_Reference'";
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":name", $module);
-		$stmt->execute();
-		$ruleFields = $stmt->fetchAll();
-		if (!empty($ruleFields)) {
-			foreach ($ruleFields as $ruleField) {
-				$this->fieldsRelate[$ruleField['target_field_name']] = array(
-																'label' => $ruleField['target_field_name'].' ('.$ruleField['name'].')',
-																'type' => 'varchar(255)',
-																'type_bdd' => 'varchar(255)',
-																'required' => 0,
-																'required_relationship' => 0
-															);
-			}
-		}
-		
-		return $this->fieldsRelate;
+		return parent::get_module_fields_relate($module);	
 	}
 	
 	
@@ -201,8 +187,8 @@ class filecore extends solution {
 		$result = array();
 		try {
 			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
-			$file = $this->get_last_file("1970-01-01 00:00:00");
-			$fileName = $this->paramConnexion['directory'].'/'.trim($file);
+			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
+			$fileName = $param['module'].'/'.trim($file);
 			$sftp = intval(ssh2_sftp($this->connection));
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
@@ -267,18 +253,18 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function read($param) {	
 		$count = 0;
 		$result = array();
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($param['date_ref']);
+			$file = $this->get_last_file($param['module'],$param['date_ref']);
 			// If there is no file
 			if(empty($file)){
 				return null;
 			}
 			
-			$fileName = $this->paramConnexion['directory'].'/'.trim($file);
+			$fileName = $param['module'].'/'.trim($file);
 			$sftp = intval(ssh2_sftp($this->connection));
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
@@ -290,7 +276,7 @@ class filecore extends solution {
 			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
-			$new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';stat -c %y '.$file);
+			$new_date_ref = ssh2_exec($this->connection, 'cd '.$param['module'].';stat -c %y '.$file);
 			stream_set_blocking($new_date_ref, true);
 			$new_date_ref = stream_get_contents($new_date_ref);
 			$new_date_ref = trim($new_date_ref);
@@ -431,8 +417,8 @@ class filecore extends solution {
 		return true;
 	}
 	
-	protected function get_last_file($date_ref){	
-		$stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
+	protected function get_last_file($directory,$date_ref){	
+		$stream = ssh2_exec($this->connection, 'cd '.$directory.';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
 		stream_set_blocking($stream, true);
 		$file = stream_get_contents($stream);	
 		$file = ltrim($file,'./'); // The filename can have ./ at the beginning
