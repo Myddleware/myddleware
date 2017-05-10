@@ -424,7 +424,7 @@ function:
             trim:  Supprime les espaces (ou d'autres caractères) en début et fin de chaîne 
             lower: Met tous les caractères en minuscules  
             upper: Met tous les caractères en majuscules 
-            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue
+            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple changeValue( {FIELD},"('A':'1','B':'2')")
             substr: substr ( string $string , int $start [, int $length ] ) /  Retourne un segment de chaîne.
             striptags: striptags( string $str [, string $allowable_tags ] ) /  Supprime les balises HTML et PHP d'une chaîne
             htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convertit toutes les entités HTML en caractères normaux
