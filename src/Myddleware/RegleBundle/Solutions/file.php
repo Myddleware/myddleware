@@ -152,7 +152,22 @@ class filecore extends solution {
 							'type_bdd' => 'varchar(255)',
 							'required' => false
 					);
-				}
+					// If the field contains the id indicator, we add it to the fieldsRelate list
+					$idFields = $this->getIdFields($module,$type);	
+					if (!empty($idFields)) {
+						foreach ($idFields as $idField) {	
+							if (strpos($field,$idField) !== false) {
+								$this->fieldsRelate[$field] = array(
+										'label' => $field,
+										'type' => 'varchar(255)',
+										'type_bdd' => 'varchar(255)',
+										'required' => false,
+										'required_relationship' => 0
+								);
+							}
+						}
+					}
+				}				
 				return $this->moduleFields;
 			} else {
 				$this->moduleFields = array();
@@ -272,7 +287,7 @@ class filecore extends solution {
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
-			// Adding ok fields "fieldId" and "fieldDateRef" of the array $param
+			// Adding id fields "fieldId" and "fieldDateRef" of the array $param
 			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
@@ -360,7 +375,7 @@ class filecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}
+		}	
 		return $result;
 	} // read($param)
 	
@@ -423,6 +438,12 @@ class filecore extends solution {
 		$file = stream_get_contents($stream);	
 		$file = ltrim($file,'./'); // The filename can have ./ at the beginning
 		return $file;
+	}
+	
+	// Get the strings which can identify what field is an id in the table
+	protected function getIdFields($module,$type) {
+		// default is id
+		return array('id');
 	}
 }
 
