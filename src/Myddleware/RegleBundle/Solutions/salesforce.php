@@ -885,7 +885,10 @@ class salesforcecore extends solution {
 	    $query_response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if (($query_response_code<200)||($query_response_code>=300)||empty($query_request_body)){
              $query_request_data = json_decode($query_request_body, true);	
-			if($query_request_data['hasErrors'] == true) {
+			if(
+					!empty($query_request_data['hasErrors'])
+				 &&	$query_request_data['hasErrors'] == true
+			) {
 				return $query_request_data;
 			} elseif(isset($query_request_data['error_description'])) {
             	throw new \Exception(ucfirst($query_request_data['error_description']));

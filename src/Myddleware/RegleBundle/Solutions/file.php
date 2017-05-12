@@ -146,7 +146,8 @@ class filecore extends solution {
 				
 				// Parcours des champs de la table sélectionnée
 				foreach ($header as $field) {
-					$this->moduleFields[$field] = array(
+					// Spaces aren't accepted in a field name
+					$this->moduleFields[str_replace(' ', '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
@@ -157,7 +158,7 @@ class filecore extends solution {
 					if (!empty($idFields)) {
 						foreach ($idFields as $idField) {	
 							if (strpos($field,$idField) !== false) {
-								$this->fieldsRelate[$field] = array(
+								$this->fieldsRelate[str_replace(' ', '', $field)] = array(
 										'label' => $field,
 										'type' => 'varchar(255)',
 										'type_bdd' => 'varchar(255)',
@@ -207,9 +208,9 @@ class filecore extends solution {
 			$sftp = intval(ssh2_sftp($this->connection));
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			$header = explode($this->delimiter, $headerString);
-			$nbCountHeader = count($header);
-			
+			// Spaces aren't accepted in a field name
+			$header = explode($this->delimiter, str_replace(' ', '', $headerString));
+			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
 			// we check if there are same fields in both array
@@ -246,12 +247,11 @@ class filecore extends solution {
 							'values'=>$values,
 							'done' => true
 			);					
-			return $result;
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
-			return $result;
-		}
+		}	
+		return $result;
 	}
 
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
@@ -283,7 +283,8 @@ class filecore extends solution {
 			$sftp = intval(ssh2_sftp($this->connection));
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			$header = explode($this->delimiter, $headerString);
+			// Spaces aren't accepted in a field name
+			$header = explode($this->delimiter, str_replace(' ', '', $headerString));
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
