@@ -478,7 +478,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'is':
+			case 'equal':
 				if (strtoupper($fieldValue) == strtoupper($filterValue)) {
 					return true;
 				}
@@ -486,7 +486,7 @@ class documentcore {
 					return false;
 				}
 				break;
-			case 'not':
+			case 'different':	
 				if (strtoupper($fieldValue) != strtoupper($filterValue)) {
 					return true;
 				}
@@ -1000,7 +1000,7 @@ class documentcore {
 	
 	// Insert source data in table documentData
 	protected function insertDataTable($data,$type) {
-		try {	
+		try {		
 			// We save only fields which belong to the rule
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
@@ -1014,7 +1014,14 @@ class documentcore {
 						foreach ($sourceFields as $sourceField) {
 							$dataInsert[$sourceField] = $data[$sourceField];
 						}
-					} else {	
+					} else {
+						// Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
+						if (
+								empty($data[$ruleField['target_field_name']])
+							 && $type == 'H'	
+						) { 				
+							continue;
+						}				
 						$dataInsert[$ruleField['target_field_name']] = $data[$ruleField['target_field_name']];
 					}
 				}

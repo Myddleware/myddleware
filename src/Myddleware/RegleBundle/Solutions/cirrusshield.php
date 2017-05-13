@@ -473,13 +473,13 @@ class cirrusshieldcore  extends solution {
 			$timezoneFieldKey = array_search('DefaultTimeZoneSidKey', array_column($organizationFields['Fields'], 'Name'));
 			if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'])) {
 				// Get the key of the timezone of the organization
-				$timezoneOrganizationKey = array_search($resultQuery['Organization']['DefaultTimeZoneSidKey'], array_column($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'], 'Id'));
+				$timezoneOrganizationKey = array_search($resultQuery['Organization']['DefaultTimeZoneSidKey'], array_column($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'], 'Name'));		
 				if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'])) {
 					// Get the offset of the timezone formatted like (GMT-05:00) Eastern Standard Time (America/New_York)
 					$this->organizationTimezoneOffset = substr($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], strpos($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], 'GMT')+3, 3);
 				}
 			}
-		}
+		}	
 		// Error management
 		if (empty($this->organizationTimezoneOffset)) {
 			throw new \Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');	

@@ -662,12 +662,12 @@ class moodlecore  extends solution {
 						break;
 				}			
 				$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;
-				$response = $this->moodleClient->post($serverurl, $params);					
+				$response = $this->moodleClient->post($serverurl, $params);			
 				$xml = simplexml_load_string($response);
 		
 				// Réponse standard pour les modules avec retours
 				if (!empty($xml->ERRORCODE)) {
-					throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
+					throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' Debug : '.$xml->DEBUGINFO : ''));
 				}
 				// Si pas d'erreur et module sans retour alors on génère l'id
 				elseif(in_array($param['module'],array('manual_enrol_users'))) {
