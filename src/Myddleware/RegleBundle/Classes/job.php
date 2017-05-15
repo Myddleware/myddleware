@@ -258,6 +258,26 @@ class jobcore  {
 		}
 	}
 	
+	// Myddleware upgrade
+	public function myddlewareUpgrade() {
+		try{
+			// Read the file parameters.yml.dist with the new version of Myddleware
+			$myddlewareNewParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
+			if (!empty($myddlewareNewParameters['parameters']['myd_version'])) {
+				// Read the file parameters.yml and change the version of Myddleware
+				$myddlewareParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));
+				$myddlewareParameters['parameters']['myd_version'] = $myddlewareNewParameters['parameters']['myd_version'];
+				$new_yaml = \Symfony\Component\Yaml\Yaml::dump($myddlewareParameters, 4);
+				file_put_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml', $new_yaml);
+			} else {
+				throw new \Exception ('No version in the file parameters.yml.dist. Failed to update the version of Myddleware.');
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( $this->message );
+		}	
+	}
+	
 	// Lancement d'un job manuellement en arrière plan 
 	protected function runBackgroundJob($job,$param) {
 		try{

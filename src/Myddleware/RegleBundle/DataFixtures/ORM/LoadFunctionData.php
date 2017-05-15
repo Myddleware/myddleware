@@ -56,14 +56,33 @@ class LoadFunctionData implements FixtureInterface
     }
  
     private function newEntity($cat,$functions) {
-        $funcCat = new FuncCat();
-        $funcCat->setName($cat);
-        $this->manager->persist($funcCat);
+	
+		// Check if the function category doesn't exist in Myddleware we create it
+		$funcCat = $this->manager
+					 ->getRepository('RegleBundle:FuncCat')
+					 ->findOneByName($cat);
+		if (
+				empty($funcCat)
+			 || empty($funcCat->getId()	)
+		) {	
+			$funcCat = new FuncCat();
+			$funcCat->setName($cat);
+			$this->manager->persist($funcCat);
+		}	
 		foreach($functions as $function) {
-			$func = new Functions();
+			// Check if the function  doesn't exist in Myddleware we create it else we update it
+			$func = $this->manager
+						 ->getRepository('RegleBundle:Functions')
+						 ->findOneByName($function);
+			if (
+					empty($func)
+				 || empty($func->getId()	)
+			) {	
+				$func = new Functions();
+			}
 			$func->setName($function);
 			$func->setCategorieId($funcCat);
 			$this->manager->persist($func);
-		}
+		} 
     }
 }
