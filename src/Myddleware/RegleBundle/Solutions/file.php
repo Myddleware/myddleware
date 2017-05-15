@@ -147,7 +147,7 @@ class filecore extends solution {
 				// Parcours des champs de la table sélectionnée
 				foreach ($header as $field) {
 					// Spaces aren't accepted in a field name
-					$this->moduleFields[str_replace(' ', '', $field)] = array(
+					$this->moduleFields[str_replace(array(' ','/','\''), '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
@@ -158,7 +158,7 @@ class filecore extends solution {
 					if (!empty($idFields)) {
 						foreach ($idFields as $idField) {	
 							if (strpos($field,$idField) !== false) {
-								$this->fieldsRelate[str_replace(' ', '', $field)] = array(
+								$this->fieldsRelate[str_replace(array(' ','/','\''), '', $field)] = array(
 										'label' => $field,
 										'type' => 'varchar(255)',
 										'type_bdd' => 'varchar(255)',
@@ -209,7 +209,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(' ', '', $headerString));
+			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -268,7 +268,7 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {		
 		$count = 0;
 		$result = array();
 		try {
@@ -284,7 +284,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(' ', '', $headerString));
+			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
@@ -298,6 +298,9 @@ class filecore extends solution {
 			$new_date_ref = trim($new_date_ref);
 			// Detelete microseconds 2016-10-21 12:38:23.219635731 +0200
 			$new_date_ref = substr($new_date_ref,0,19).substr($new_date_ref,29,6);
+			if (empty($new_date_ref)) {
+				throw new \Exception('Failed to get the reference date from the modification date of the file. '); 
+			}
 			
 			// Create date with timezone
 			$date = date_create_from_format('Y-m-d H:i:s O', $new_date_ref);
@@ -376,7 +379,7 @@ class filecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
+		}		
 		return $result;
 	} // read($param)
 	
