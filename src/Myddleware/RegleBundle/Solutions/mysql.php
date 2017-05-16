@@ -35,7 +35,7 @@ class mysqlcore extends database {
 	
 	// Generate query
 	protected function get_query_show_tables() {
-		return 'SHOW TABLES FROM '.$this->dbname;
+		return 'SHOW TABLES FROM '.$this->paramConnexion['database_name'];
 	}
 	
 	// Query to get all the flieds of the table
@@ -45,7 +45,7 @@ class mysqlcore extends database {
 	
 	// Get the header of the select query in the read last function
 	protected function get_query_select_header_read_last() {
-		return "SELECT id, date_modified, ";
+		return "SELECT ";
 	}
 	
 	// Get the limit operator of the select query in the read last function
@@ -60,9 +60,9 @@ class mysqlcore extends database {
 	
 	// Get the header of an insert query
 	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE ".$table." (
-			id int not null IDENTITY(1, 1) PRIMARY KEY,
-			date_modified smalldatetime default CURRENT_TIMESTAMP,";
+		return  "CREATE TABLE IF NOT EXISTS ".$table." (
+			id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			date_modified datetime default CURRENT_TIMESTAMP,";
 	}
 	
 }// class mysqlcore

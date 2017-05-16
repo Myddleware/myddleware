@@ -32,8 +32,13 @@ panel:
         title: Nombre de transferts par statut
     list_error:
         nb: Nombre d'erreurs par règle
+    list_job:
+        title: Détail des derniers jobs	
+        duration: seconde(s)		
     graph_histo:
         title: Historique des transferts
+    graph_job_histo:
+        title: Historique des jobs
 create_rule:
     tabs:
         one: Connexion
@@ -118,8 +123,8 @@ filter:
     end: se termine par
     gt: est supérieur à
     lt: est inférieur à
-    is: est égale à
-    unlike: est différent de
+    equal: est égale à
+    different: est différent de
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des ;
@@ -419,7 +424,7 @@ function:
             trim:  Supprime les espaces (ou d'autres caractères) en début et fin de chaîne 
             lower: Met tous les caractères en minuscules  
             upper: Met tous les caractères en majuscules 
-            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue
+            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple changeValue( {FIELD},"('A':'1','B':'2')")
             substr: substr ( string $string , int $start [, int $length ] ) /  Retourne un segment de chaîne.
             striptags: striptags( string $str [, string $allowable_tags ] ) /  Supprime les balises HTML et PHP d'une chaîne
             htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convertit toutes les entités HTML en caractères normaux

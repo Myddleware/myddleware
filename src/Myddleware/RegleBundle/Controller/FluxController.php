@@ -463,7 +463,10 @@ class FluxControllerCore extends Controller
 				// Target and history
 				$targetField = $ruleField->getTarget();
 				$targetData[$targetField] = $target[$targetField];
-				if (!empty($history)) {
+				if (
+						!empty($history[$targetField])
+					 &&	!empty($history)
+				) {
 					$historyData[$targetField] = $history[$targetField];
 				}
 			}	

@@ -74,7 +74,7 @@ class Job
     /**
      * @var datetime
      *
-	 * @ORM\Column(name="end", type="datetime", nullable=false)
+	 * @ORM\Column(name="end", type="datetime",  nullable=true, options={"default":NULL})
 	 * 
      */
     private $end;
@@ -83,7 +83,7 @@ class Job
     /**
      * @var string
      *
-	 * @ORM\Column(name="message", type="text", nullable=false)
+	 * @ORM\Column(name="message", type="text",  nullable=true, options={"default":NULL})
 	 * 
      */
     private $message;	
@@ -92,7 +92,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="open", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="open", type="integer", length=6,  nullable=true, options={"default":0})
 	 * 
      */
     private $open;
@@ -100,7 +100,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="close", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="close", type="integer", length=6,  nullable=true, options={"default":0})
 	 * 
      */
     private $close;	
@@ -108,7 +108,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="cancel", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="cancel", type="integer", length=6,  nullable=true, options={"default":0})
 	 * 
      */
     private $cancel;
@@ -116,7 +116,7 @@ class Job
      /**
      * @var boolean
      *
-	 * @ORM\Column(name="manual", type="boolean", nullable=false)
+	 * @ORM\Column(name="manual", type="boolean",  nullable=true, options={"default":0})
 	 * 
      */
     private $manual;
@@ -124,7 +124,7 @@ class Job
     /**
      * @var integer
      *
-	 * @ORM\Column(name="error", type="integer", length=6, nullable=false)
+	 * @ORM\Column(name="error", type="integer", length=6,  nullable=true, options={"default":0})
 	 * 
      */
     private $error;	

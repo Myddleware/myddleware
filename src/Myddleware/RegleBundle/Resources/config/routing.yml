@@ -52,6 +52,10 @@ graph_type_transfer_histo:
     pattern:  /graph/type/transfer/histo
     defaults: { _controller: RegleBundle:Default:graphTransferHisto }    
 
+graph_type_job_histo:
+    pattern:  /graph/type/job/histo
+    defaults: { _controller: RegleBundle:Default:graphJobHisto }  	
+
 regle_template:
     pattern:  /list/template/
     defaults: { _controller: RegleBundle:Default:listTemplate }

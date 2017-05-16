@@ -108,8 +108,22 @@ class filecore extends solution {
 	// Renvoie les modules passés en paramètre
 	public function get_modules($type = 'source') {
 		try{
+			// Get the subfolders of the current directory
+			$stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';ls -d */');
+			stream_set_blocking($stream, true);
+			$output = stream_get_contents($stream);	
+			// Transform the directory list in an array
+			$directories = explode(chr(10),trim($output));
+
 			$modules = array();
-			$modules['File'] = 'Files in directory '.$this->paramConnexion['directory'];
+			// Add the current directory
+			$modules[$this->paramConnexion['directory']] = $this->paramConnexion['directory'];
+			// Add the sub directories if exist
+			if (!empty($directories)) {
+				foreach($directories as $directory) {
+					$modules[$this->paramConnexion['directory'].'/'.$directory] = $this->paramConnexion['directory'].'/'.$directory;
+				}
+			}
 			return $modules;
 		} catch (\Exception $e) {
 			$error = $e->getMessage();
@@ -119,26 +133,47 @@ class filecore extends solution {
 	
 	// Renvoie les champs du module passé en paramètre
 	public function get_module_fields($module, $type = 'source') {
-		parent::get_module_fields($module, $type);
+		parent::get_module_fields($module, $type);	
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
-				$file = $this->get_last_file('1970-01-01 00:00:00');		
-				$fileName = trim($this->paramConnexion['directory'].'/'.$file);
-				$sftp = ssh2_sftp($this->connection);
+				$file = $this->get_last_file($module,'1970-01-01 00:00:00');
+				$fileName = trim($module.'/'.$file);	
+				// The behaviour of pp is different after version 5.6.27
+				if (version_compare(phpversion(), '5.6.27', '<')) { 
+					$sftp = ssh2_sftp($this->connection);
+				} else {
+					$sftp = intval(ssh2_sftp($this->connection));
+				}
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
 				$header = explode($this->delimiter, $headerString);
 				
 				// Parcours des champs de la table sélectionnée
 				foreach ($header as $field) {
-					$this->moduleFields[$field] = array(
+					// Spaces aren't accepted in a field name
+					$this->moduleFields[str_replace(array(' ','/','\''), '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
 							'required' => false
 					);
-				}
+					// If the field contains the id indicator, we add it to the fieldsRelate list
+					$idFields = $this->getIdFields($module,$type);	
+					if (!empty($idFields)) {
+						foreach ($idFields as $idField) {	
+							if (strpos($field,$idField) !== false) {
+								$this->fieldsRelate[str_replace(array(' ','/','\''), '', $field)] = array(
+										'label' => $field,
+										'type' => 'varchar(255)',
+										'type_bdd' => 'varchar(255)',
+										'required' => false,
+										'required_relationship' => 0
+								);
+							}
+						}
+					}
+				}				
 				return $this->moduleFields;
 			} else {
 				$this->moduleFields = array();
@@ -155,35 +190,7 @@ class filecore extends solution {
 	
 	// Redéfinition de la méthode pour ne plus renvoyer la relation Myddleware_element_id
 	public function get_module_fields_relate($module) {
-		// Récupération de tous les champ référence de la règle liées (= module)	
-		$this->fieldsRelate = array();
-		$sql = "SELECT 	
-					RuleField.target_field_name,
-					Rule.name
-				FROM Rule
-					INNER JOIN RuleField
-						ON Rule.id = RuleField.rule_id
-					WHERE
-							Rule.name = :name
-						AND Rule.deleted = 0	
-						AND RuleField.target_field_name LIKE '%_Reference'";
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bindValue(":name", $module);
-		$stmt->execute();
-		$ruleFields = $stmt->fetchAll();
-		if (!empty($ruleFields)) {
-			foreach ($ruleFields as $ruleField) {
-				$this->fieldsRelate[$ruleField['target_field_name']] = array(
-																'label' => $ruleField['target_field_name'].' ('.$ruleField['name'].')',
-																'type' => 'varchar(255)',
-																'type_bdd' => 'varchar(255)',
-																'required' => 0,
-																'required_relationship' => 0
-															);
-			}
-		}
-		
-		return $this->fieldsRelate;
+		return parent::get_module_fields_relate($module);	
 	}
 	
 	
@@ -201,14 +208,19 @@ class filecore extends solution {
 		$result = array();
 		try {
 			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
-			$file = $this->get_last_file("1970-01-01 00:00:00");
-			$fileName = $this->paramConnexion['directory'].'/'.trim($file);
-			$sftp = ssh2_sftp($this->connection);
+			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
+			$fileName = $param['module'].'/'.trim($file);
+			// The behaviour of pp is different after version 5.6.27
+			if (version_compare(phpversion(), '5.6.27', '<')) { 
+				$sftp = ssh2_sftp($this->connection);
+			} else {
+				$sftp = intval(ssh2_sftp($this->connection));
+			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			$header = explode($this->delimiter, $headerString);
-			$nbCountHeader = count($header);
-			
+			// Spaces aren't accepted in a field name
+			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
+			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
 			// we check if there are same fields in both array
@@ -245,12 +257,11 @@ class filecore extends solution {
 							'values'=>$values,
 							'done' => true
 			);					
-			return $result;
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
-			return $result;
-		}
+		}	
+		return $result;
 	}
 
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
@@ -267,35 +278,44 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function read($param) {		
 		$count = 0;
 		$result = array();
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($param['date_ref']);
+			$file = $this->get_last_file($param['module'],$param['date_ref']);
 			// If there is no file
 			if(empty($file)){
 				return null;
 			}
 			
-			$fileName = $this->paramConnexion['directory'].'/'.trim($file);
-			$sftp = ssh2_sftp($this->connection);
+			$fileName = $param['module'].'/'.trim($file);
+			// The behaviour of pp is different after version 5.6.27
+			if (version_compare(phpversion(), '5.6.27', '<')) { 
+				$sftp = ssh2_sftp($this->connection);
+			} else {
+				$sftp = intval(ssh2_sftp($this->connection));
+			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			$header = explode($this->delimiter, $headerString);
+			// Spaces aren't accepted in a field name
+			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
-			// Adding ok fields "fieldId" and "fieldDateRef" of the array $param
+			// Adding id fields "fieldId" and "fieldDateRef" of the array $param
 			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
-			$new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';stat -c %y '.$file);
+			$new_date_ref = ssh2_exec($this->connection, 'cd '.$param['module'].';stat -c %y '.$file);
 			stream_set_blocking($new_date_ref, true);
 			$new_date_ref = stream_get_contents($new_date_ref);
 			$new_date_ref = trim($new_date_ref);
 			// Detelete microseconds 2016-10-21 12:38:23.219635731 +0200
 			$new_date_ref = substr($new_date_ref,0,19).substr($new_date_ref,29,6);
+			if (empty($new_date_ref)) {
+				throw new \Exception('Failed to get the reference date from the modification date of the file. '); 
+			}
 			
 			// Create date with timezone
 			$date = date_create_from_format('Y-m-d H:i:s O', $new_date_ref);
@@ -347,7 +367,7 @@ class filecore extends solution {
 					$colonne = array_search($field, $header);
 					if($field==$param['ruleParams']['fieldId']){
 						if ($field == 'myddleware_generated') {
-							$idRow = uniqid('', true);
+							$idRow = $this->generateId($param,$rowFile);
 						}
 						else {
 							$idRow = $rowFile[$colonne];							
@@ -371,12 +391,11 @@ class filecore extends solution {
 							'date_ref'=>$new_date_ref,
 							'values'=>$values
 			);
-			return $result;
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			return $result;
-		}
+		}		
+		return $result;
 	} // read($param)
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
@@ -397,8 +416,8 @@ class filecore extends solution {
 					}
 					$idParam['option']['myddleware_generated'] = 'Generated by Myddleware';
 					$params[] = $idParam;
+					return $params;
 				}
-				return $params;
 			}
 			return array();
 		}
@@ -406,6 +425,11 @@ class filecore extends solution {
 			return array();
 		}
 	}
+	
+	// Generate ID for the document
+	protected function generateId($param,$rowFile) {
+		return uniqid('', true);
+	}	
 
 	protected function cleanHeader($str) { 
 		$str = strtr($str, utf8_decode('ÁÀÂÄÃÅÇÉÈÊËÍÏÎÌÑÓÒÔÖÕÚÙÛÜÝ'), utf8_decode('AAAAAACEEEEEIIIINOOOOOUUUUY'));
@@ -427,11 +451,18 @@ class filecore extends solution {
 		return true;
 	}
 	
-	protected function get_last_file($date_ref){	
-		$stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
+	protected function get_last_file($directory,$date_ref){	
+		$stream = ssh2_exec($this->connection, 'cd '.$directory.';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
 		stream_set_blocking($stream, true);
-		$file = stream_get_contents($stream);		
+		$file = stream_get_contents($stream);	
+		$file = ltrim($file,'./'); // The filename can have ./ at the beginning
 		return $file;
+	}
+	
+	// Get the strings which can identify what field is an id in the table
+	protected function getIdFields($module,$type) {
+		// default is id
+		return array('id');
 	}
 }
 

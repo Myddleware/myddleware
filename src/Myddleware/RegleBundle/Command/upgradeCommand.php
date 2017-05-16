@@ -23,30 +23,43 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-namespace Myddleware\RegleBundle\Solutions;
+namespace Myddleware\RegleBundle\Command;
 
-class sagelivecore extends salesforce {
-	
-	protected $FieldsDuplicate = array(
-										'Contact' => array('s2cor__Email_address__c','LastName'),
-										'Lead' => array('s2cor__Email_address__c','LastName'),
-										'Account' => array('s2cor__Email_address__c', 'Name'),
-										'default' => array('Name')
-									  );
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-	
-}// class sagelivecore
+class upgradeCommand extends ContainerAwareCommand
+{
+    protected function configure()
+    {
+        $this
+            ->setName('myddleware:upgrade')
+            ->setDescription('Upgrade of Myddleware')
+        ;
+    }
 
-/* * * * * * * *  * * * * * *  * * * * * * 
-	si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sagelive.php';
-if(file_exists($file)){
-	require_once($file);
-}
-else {
-	//Sinon on met la classe suivante
-	class sagelive extends sagelivecore {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+		$logger = $this->getContainer()->get('logger');
 		
+		$job = $this->getContainer()->get('myddleware_job.job');
+				
+		if ($job->initJob('upgrade Myddleware')) {
+			$job->myddlewareUpgrade();
+		}
+		
+		// Close job if it has been created
+		if($job->createdJob === true) {
+			$job->closeJob();
+		}
+		
+		// Display message on the console
+		if (!empty($job->message)) {
+			$output->writeln('<error>'.$job->message.'</error>');
+			$logger->error($job->message);
+		} 	
 	}
-} 
+
+
+}

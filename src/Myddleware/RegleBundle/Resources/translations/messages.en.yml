@@ -32,8 +32,13 @@ panel:
         title: Number of transfers by statut
     list_error:
         nb: Number of errors by rule
+    list_job:
+        title: Last jobs details
+        duration: second(s)
     graph_histo:
         title: Transfer historic
+    graph_job_histo:
+        title: Job historic
 create_rule:
     tabs:
         one: Connection
@@ -118,8 +123,8 @@ filter:
     end: ends with
     gt: is greater than 
     lt: is less than
-    is: is equal to 
-    unlike: is different from
+    equal: is equal to 
+    different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
     in: is included in the following table separated by;
@@ -418,7 +423,7 @@ function:
             trim:  Delete the spaces (or other characters) at the beginning and the end of each string 
             lower: Put all in lower-case characters  
             upper: Put all in upper-case characters 
-            changeValue: changeValue($var, $arrayKeyToValue) / Replace the value of $var by the corresponding value on the $arrayKeyToValue
+            changeValue: changeValue($var, $arrayKeyToValue) / Replace the value of $var by the corresponding value on the $arrayKeyToValue. Example changeValue( {FIELD},"('A':'1','B':'2')")
             substr: substr( string $string , int $start [, int $length ] ) /  Return part of a string
             striptags: striptags( string $str [, string $allowable_tags ] ) / Strip HTML and PHP tags from a string
             htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convert all HTML entities to their applicable characters

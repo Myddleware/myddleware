@@ -67,11 +67,27 @@ function drawChart() {
 			chart.draw(data, options);			
 		}			
 	});  
+	
+	$.ajax({
+		type: "POST",
+		url: path_graph_type_job_histo,						
+		success: function(dataServ){
+			var data = google.visualization.arrayToDataTable(JSON.parse(dataServ));	 
+			var options = {
+			  is3D: true,
+			  isStacked: true,
+			};
+		
+			var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_job_histo'));
+			chart.draw(data, options);			
+		}			
+	});  
 }    
 //--------------
 
 $( document ).ready(function() {
-	
+	// Refresh home page every 5 minutes
+	setTimeout(function() { window.location=window.location;},300000);
 	
 	if($('#listing-solutions','#panel').length != 0) {
 		$('#listing-solutions','#panel').scrollbox({

@@ -27,7 +27,7 @@ namespace Myddleware\RegleBundle\Classes;
 
 class myddlewareFormulaFunctionscore {
 
-	private $names = array('changeTimeZone', 'changeFormatDate');
+	private $names = array('changeTimeZone', 'changeFormatDate', 'changeValue');
 
 	private $path = "Myddleware\RegleBundle\Classes\myddlewareFormulaFunctions::";
 
@@ -66,6 +66,8 @@ class myddlewareFormulaFunctionscore {
 	}
 
 	public static function changeValue($var, $arrayKeyToValue) {
+		// Transform string into an array
+		$arrayKeyToValue = json_decode(str_replace(array('(',')','\''),array('{','}','"'),$arrayKeyToValue),true);
 		if(in_array($var, array_keys($arrayKeyToValue))) {
 			$var = $arrayKeyToValue[$var];
 			return $var;

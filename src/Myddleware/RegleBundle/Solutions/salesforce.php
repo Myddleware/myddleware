@@ -27,6 +27,8 @@ namespace Myddleware\RegleBundle\Solutions;
 
 class salesforcecore extends solution {
 
+	protected $limitCall = 100;
+
 	protected $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
 	protected $FieldsDuplicate = array(
@@ -550,19 +552,25 @@ class salesforcecore extends solution {
 	// Permet de créer des données
 	public function create($param) {
 		$parameters = array();
-		$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
+		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for create');
 		}
 		// Get the type of each fields by calling Salesforce
 		$moduleFields = $this->get_module_fields($param['module'],'target');
-		foreach($param['data'] as $idDoc => $data) {
-			try{
+		try{
+			$parameters = '';
+			$i=0;
+			$nb_record = count($param['data']);			
+			foreach($param['data'] as $idDoc => $data) {
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				$parameters = '';
-			    foreach ($data as $key => $value) {
+				// Generate a reference and store it in an array
+				$i++;	
+				$idDocReference['Ref'.$i] = $idDoc;
+				$parameter['attributes'] = array('type' => $param['module'], 'referenceId' => 'Ref'.$i);
+			    foreach ($data as $key => $value) {		
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
 						continue;
@@ -577,22 +585,22 @@ class salesforcecore extends solution {
 						if(!date_create_from_format('Y-m-d', $value)) {
 							throw new \Exception ("Birthdate format is not compatible with Salesforce.");
 						}
-						$parameters[$key] = $value;
+						$parameter[$key] = $value;
 					}
 					elseif($key == 'CreatedDate') { // Champs dateTime
-						$parameters[$key] = $this->dateTimeFromMyddleware($value);
+						$parameter[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen
-					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'boolean') {
 						if (!empty($value)) {
-							$parameters[$key] = true;
+							$parameter[$key] = true;
 						}
 						else{
-							$parameters[$key] = false;
+							$parameter[$key] = false;
 						} 
 					}
 					else {
-						$parameters[$key] = $value;
+						$parameter[$key] = $value;
 					}
 			    }
 				// Si le module est PricebookEntry alors il faut ajouter le catalogue qui est dans les paramètre
@@ -600,35 +608,57 @@ class salesforcecore extends solution {
 						$param['module'] == 'PricebookEntry'
 					&& !empty($param['ruleParams']['Pricebook2Id'])
 				) {
-					$parameters['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
-				}		
-				$parameters = json_encode($parameters);
+					$parameter['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
+				}			
+				$parameters['records'][] = $parameter;
 				
-				// Appel de la requête
-				$query_request_data = $this->call($query_url, $parameters);
-				if (!empty($query_request_data['id'])) {
-					$result[$idDoc] = array(
-											'id' => $query_request_data['id'],
-											'error' => false
-									);
+				// If we have finished to read all data or if the package is full we send the data to Sallesforce
+				if (
+						$nb_record == $i
+					 || $i % $this->limitCall  == 0
+				) {			
+					$parameters = json_encode($parameters);
+					// Call to Salesforce
+					$query_request_data = $this->call($query_url, $parameters);					
+					if (!empty($query_request_data['results'])) {
+						foreach ($query_request_data['results'] as $result_record) {	
+							// Check that we have the document id
+							if (empty($idDocReference[$result_record['referenceId']])) {
+								throw new \Exception ('Failed to get the id doc with the reference id '.$result_record['referenceId'].'. WARNING : the record is probably already created in Saleforce. Check it before restart this data transfer to avoid duplicate data. ');
+							}
+							// Detection of the error with the field hasErrors
+							if (!empty($query_request_data['hasErrors'])) {
+								$result[$idDocReference[$result_record['referenceId']]] = array(
+														'id' => -1,
+														'error' => print_r($result_record['errors'],true)
+													);
+							// No error
+							} elseif (!empty($result_record['id'])) {
+								// Generate the result. Detection of the error with the field hasErrors
+								$result[$idDocReference[$result_record['referenceId']]] = array(
+														'id' => $result_record['id'],
+														'error' => false
+													);
+							}
+							else  {
+								throw new \Exception ('No id found in the response of Salesforce call : '.print_r($result_record,true));
+							}
+							// Modification du statut du flux
+							$this->updateDocumentStatus($idDocReference[$result_record['referenceId']],$result[$idDocReference[$result_record['referenceId']]],$param);	
+						}
+					}
+					$query_request_data = '';
+					$parameters = '';
 				}
-				else  {
-					$result[$idDoc] = array(
-											'id' => '-1',
-											'error' => 'Failed to create Data in Salesforce : '.print_r($query_request_data['errors'],true)
-									);
-				}
-			}
-			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Modification du statut du flux
+			}			
+		} catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}		
+		}					
 		return $result;
 	} // create($param)
 	
@@ -671,7 +701,7 @@ class salesforcecore extends solution {
 						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen				
-					elseif ($moduleFields[$key]['type'] == 'tinyint(1)') {
+					elseif ($moduleFields[$key]['type'] == 'boolean') {
 						if (!empty($value)) {
 							$parameters[$key] = true;						
 						}
@@ -854,11 +884,17 @@ class salesforcecore extends solution {
 		
 	    $query_response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if (($query_response_code<200)||($query_response_code>=300)||empty($query_request_body)){
-             $query_request_data = json_decode($query_request_body, true);
-			if(isset($query_request_data['error_description']))
+             $query_request_data = json_decode($query_request_body, true);	
+			if(
+					!empty($query_request_data['hasErrors'])
+				 &&	$query_request_data['hasErrors'] == true
+			) {
+				return $query_request_data;
+			} elseif(isset($query_request_data['error_description'])) {
             	throw new \Exception(ucfirst($query_request_data['error_description']));
-			else
+			} else {
 				throw new \Exception("Call failed - " . $query_response_code . ' ' . $query_request_body);
+			}
         }
 
 	    $query_request_data = json_decode($query_request_body, true);

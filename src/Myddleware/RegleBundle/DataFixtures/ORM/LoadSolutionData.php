@@ -33,24 +33,26 @@ class LoadSolutionData implements FixtureInterface
 {
     private $manager; 
 	protected $solutionData = array(
-									array('id' => '1', 'name' => 'sugarcrm',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '2', 'name' => 'salesforce',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '3', 'name' => 'prestashop',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '4', 'name' => 'dolist',				'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '5', 'name' => 'eventbrite',			'active' => 1,'source' => 1,'target' => 0),
-									array('id' => '6', 'name' => 'suitecrm',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '7', 'name' => 'mailchimp',			'active' => 1,'source' => 0,'target' => 1),
-									array('id' => '8', 'name' => 'bittle',				'active' => 1,'source' => 0,'target' => 1),
-									array('id' => '9', 'name' => 'sagecrm',				'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '10', 'name' => 'sapcrm',				'active' => 0,'source' => 1,'target' => 1),
-									array('id' => '11', 'name' => 'mysql',				'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '12', 'name' => 'sapecc',				'active' => 0,'source' => 1,'target' => 0),
-									array('id' => '13', 'name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '14', 'name' => 'moodle',				'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '15', 'name' => 'file',				'active' => 1,'source' => 1,'target' => 0),
-									array('id' => '16', 'name' => 'shopapplication',	'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '17', 'name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1),
-									array('id' => '18', 'name' => 'microsoftsql',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'sugarcrm',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'eventbrite',		'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'suitecrm',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'mailchimp',		'active' => 1,'source' => 0,'target' => 1),
+									array('name' => 'bittle',			'active' => 1,'source' => 0,'target' => 1),
+									array('name' => 'sagecrm',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'sapcrm',			'active' => 0,'source' => 1,'target' => 1),
+									array('name' => 'mysql',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'sapecc',			'active' => 0,'source' => 1,'target' => 0),
+									array('name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'moodle',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'file',				'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'shopapplication',	'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'microsoftsql',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'ringcentral',		'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'cirrusshield',		'active' => 1,'source' => 1,'target' => 1),
 							);
  
     public function load(ObjectManager $manager){
@@ -58,19 +60,24 @@ class LoadSolutionData implements FixtureInterface
         $this->generateEntities(); 
         $this->manager->flush();
     }
- 
-    public function getOrder() {
-        return 1; 
-    }
- 
+
     private function generateEntities() {
         foreach($this->solutionData as $solution) {
-			$sol = new Solution();
+			// Check if the solution doesn't exist in Myddleware we create it else we update it
+			$sol = $this->manager
+						 ->getRepository('RegleBundle:Solution')
+						 ->findOneByName($solution['name']);
+			if (
+					empty($sol)
+				 || empty($sol->getId()	)
+			) {	
+				$sol = new Solution();
+			}
 			$sol->setName($solution['name']);
 			$sol->setActive($solution['active']);
 			$sol->setSource($solution['source']);
 			$sol->setTarget($solution['target']);
-			$this->manager->persist($sol);
+			$this->manager->persist($sol); 
         }
     }
  
