@@ -137,9 +137,14 @@ class filecore extends solution {
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
-				$file = $this->get_last_file($module,'1970-01-01 00:00:00');		
-				$fileName = trim($module.'/'.$file);			
-				$sftp = intval(ssh2_sftp($this->connection));
+				$file = $this->get_last_file($module,'1970-01-01 00:00:00');
+				$fileName = trim($module.'/'.$file);	
+				// The behaviour of pp is different after version 5.6.27
+				if (version_compare(phpversion(), '5.6.27', '<')) { 
+					$sftp = ssh2_sftp($this->connection);
+				} else {
+					$sftp = intval(ssh2_sftp($this->connection));
+				}
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
 				$header = explode($this->delimiter, $headerString);
@@ -205,7 +210,12 @@ class filecore extends solution {
 			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
 			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
 			$fileName = $param['module'].'/'.trim($file);
-			$sftp = intval(ssh2_sftp($this->connection));
+			// The behaviour of pp is different after version 5.6.27
+			if (version_compare(phpversion(), '5.6.27', '<')) { 
+				$sftp = ssh2_sftp($this->connection);
+			} else {
+				$sftp = intval(ssh2_sftp($this->connection));
+			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
@@ -280,7 +290,12 @@ class filecore extends solution {
 			}
 			
 			$fileName = $param['module'].'/'.trim($file);
-			$sftp = intval(ssh2_sftp($this->connection));
+			// The behaviour of pp is different after version 5.6.27
+			if (version_compare(phpversion(), '5.6.27', '<')) { 
+				$sftp = ssh2_sftp($this->connection);
+			} else {
+				$sftp = intval(ssh2_sftp($this->connection));
+			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
