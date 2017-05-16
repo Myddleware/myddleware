@@ -13,7 +13,7 @@ parameters:
     mailer_password: 
     mailer_email:
     mailer_name: 
-    secret: 
+    secret: ThisTokenIsNotSoSecretChangeIt
     myddleware_support: 0
     param:
         mode: front_office
