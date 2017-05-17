@@ -152,7 +152,7 @@ class filecore extends solution {
 				// Parcours des champs de la table sélectionnée
 				foreach ($header as $field) {
 					// Spaces aren't accepted in a field name
-					$this->moduleFields[str_replace(array(' ','/','\''), '', $field)] = array(
+					$this->moduleFields[str_replace(array(' ','/','\'','.'), '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
@@ -163,7 +163,7 @@ class filecore extends solution {
 					if (!empty($idFields)) {
 						foreach ($idFields as $idField) {	
 							if (strpos($field,$idField) !== false) {
-								$this->fieldsRelate[str_replace(array(' ','/','\''), '', $field)] = array(
+								$this->fieldsRelate[str_replace(array(' ','/','\'','.'), '', $field)] = array(
 										'label' => $field,
 										'type' => 'varchar(255)',
 										'type_bdd' => 'varchar(255)',
@@ -219,7 +219,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
+			$header = explode($this->delimiter, str_replace(array(' ','/','\'','.'), '', $headerString));
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -260,7 +260,7 @@ class filecore extends solution {
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
-		}	
+		}		
 		return $result;
 	}
 
@@ -299,7 +299,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
+			$header = explode($this->delimiter, str_replace(array(' ','/','\'','.'), '', $headerString));
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];

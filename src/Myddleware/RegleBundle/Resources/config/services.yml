@@ -62,6 +62,9 @@ services:
      myddleware_rule.cirrusshield:
         class: Myddleware\RegleBundle\Solutions\cirrusshield
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.zuora:
+        class: Myddleware\RegleBundle\Solutions\zuora
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']
