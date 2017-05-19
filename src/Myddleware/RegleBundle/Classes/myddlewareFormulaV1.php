@@ -154,7 +154,7 @@ class myddlewareFormulaV1core {
 		$pathFunctions = $this->functions->getPathFunctions();
 		
 		// array("pow","exp","abs","sin","cos","tan"); MATHS
-		$array = array('mb_strtolower','trim','mb_strtoupper','round','ceil','abs','mb_substr','str_replace','preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode','html_entity_decode','htmlentities','htmlspecialchars');
+		$array = array('mb_strtolower','trim','mb_strtoupper','round','ceil','abs','mb_substr','str_replace','preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode','html_entity_decode','htmlentities','htmlspecialchars','strlen');
 		$const = array('ENT_COMPAT','ENT_QUOTES','ENT_NOQUOTES','ENT_HTML401','ENT_XML1','ENT_XHTML','ENT_HTML5');
 
 		return array_merge($array, $const, $pathFunctions);
@@ -169,8 +169,8 @@ class myddlewareFormulaV1core {
 		$string = str_replace('utf8encode(', 'utf8_encode(', $string);
 		$string = str_replace('utf8decode(', 'utf8_decode(', $string);
 		$string = str_replace('htmlEntityDecode(', 'html_entity_decode(', $string);
-		$string = str_replace('htmlentities (', 'htmlentities (', $string);
-		$string = str_replace('htmlspecialchars (', 'htmlspecialchars (', $string);
+		$string = str_replace('htmlentities(', 'htmlentities(', $string);
+		$string = str_replace('htmlspecialchars(', 'htmlspecialchars(', $string);
 		return $string;		
 	}
 	
@@ -309,7 +309,7 @@ class myddlewareFormulaV1core {
 		$this->remplaceFunction(); // remplace les vrais fonctions
 		$this->getFields(); // contrôle sur les champs		
 		$this->getText(); // contrôle sur les chaines
-		$this->getMethode(); // contrôle sur les méthodes
+		// $this->getMethode(); // contrôle sur les méthodes
 		$this->secureFormule(); // niveau securité		
 	}
 }
