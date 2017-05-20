@@ -747,6 +747,7 @@ class documentcore {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
+		$history = false;
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Check if the rule is a parent and run the child data.
@@ -804,8 +805,7 @@ class documentcore {
 			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
-				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);
-			
+				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);		
 				// Récupération des valeurs de la source pour chaque champ de recherche
 				foreach($duplicate_fields as $duplicate_field) {
 					foreach ($this->ruleFields as $ruleField) {
@@ -815,15 +815,17 @@ class documentcore {
 					}			
 					if (!empty($sourceDuplicateField)) {
 						// Get the value of the field (could be a formula)
-						$searchFields[$duplicate_field] = $this->getTransformValue($this->sourceData,$sourceDuplicateField);	
+						$searchFieldValue = $this->getTransformValue($this->sourceData,$sourceDuplicateField);
+						// Add filed in duplicate search only if not empty
+						if (!empty($searchFieldValue)) {
+							$searchFields[$duplicate_field] = $searchFieldValue;
+						}
 					}
-				}			
+				}					
 				if(!empty($searchFields)) {
 					$history = $this->getDocumentHistory($searchFields);
 				} 
-				else {
-					$history = -1;
-				}
+	
 				if ($history === -1) {
 					throw new \Exception('Failed to search duplicate data in the target system. This document is queued. ');
 				}

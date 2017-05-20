@@ -34,6 +34,7 @@ class filecore extends solution {
 	Protected $duplicateDoc = array();
 	Protected $connection;
 	Protected $delimiter = ';';
+	Protected $removeChar = array(' ','/','\'','.','(',')');
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -152,7 +153,7 @@ class filecore extends solution {
 				// Parcours des champs de la table sélectionnée
 				foreach ($header as $field) {
 					// Spaces aren't accepted in a field name
-					$this->moduleFields[str_replace(array(' ','/','\'','.'), '', $field)] = array(
+					$this->moduleFields[str_replace($this->removeChar, '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
@@ -163,7 +164,7 @@ class filecore extends solution {
 					if (!empty($idFields)) {
 						foreach ($idFields as $idField) {	
 							if (strpos($field,$idField) !== false) {
-								$this->fieldsRelate[str_replace(array(' ','/','\'','.'), '', $field)] = array(
+								$this->fieldsRelate[str_replace($this->removeChar, '', $field)] = array(
 										'label' => $field,
 										'type' => 'varchar(255)',
 										'type_bdd' => 'varchar(255)',
@@ -219,7 +220,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\'','.'), '', $headerString));
+			$header = explode($this->delimiter, str_replace($this->removeChar, '', $headerString));
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -299,7 +300,7 @@ class filecore extends solution {
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 			$headerString = $this->cleanHeader(trim(fgets($stream)));
 			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\'','.'), '', $headerString));
+			$header = explode($this->delimiter, str_replace($this->removeChar, '', $headerString));
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
