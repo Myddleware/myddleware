@@ -587,9 +587,6 @@ class salesforcecore extends solution {
 						}
 						$parameter[$key] = $value;
 					}
-					elseif($key == 'CreatedDate') { // Champs dateTime
-						$parameter[$key] = $this->dateTimeFromMyddleware($value);
-					}
 					// Gestion des champs de type booleen
 					elseif ($moduleFields[$key]['type'] == 'boolean') {
 						if (!empty($value)) {
@@ -696,9 +693,6 @@ class salesforcecore extends solution {
 							throw new \Exception ("Birthdate format is not compatible with Salesforce.");
 						}
 						$parameters[$key] = $value;
-					}
-					elseif($key == 'CreatedDate') {// Champs dateTime
-						$parameters[$key] = $this->dateTimeFromMyddleware($value);
 					}
 					// Gestion des champs de type booleen				
 					elseif ($moduleFields[$key]['type'] == 'boolean') {
@@ -925,7 +919,7 @@ class salesforcecore extends solution {
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
 	protected function dateTimeFromMyddleware($dateTime) {
-		$tab = explode(' ', $date);
+		$tab = explode(' ', $dateTime);
 		$date = $tab[0] . 'T' . $tab[1];
 		$date .= '+00:00';
 		return $date;
