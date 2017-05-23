@@ -449,6 +449,7 @@ class FluxControllerCore extends Controller
 			// Get rulefield object
 			$ruleFields	= $em->getRepository('RegleBundle:RuleField')->findByRule($doc[0]->getRule());
 			// Get each data for each rule fields
+			$targetData = array();
 			$historyData = array();
 			foreach($ruleFields as $ruleField) {
 				// There is no field in source when we use my_value, just a formula
@@ -462,12 +463,14 @@ class FluxControllerCore extends Controller
 				}
 				// Target and history
 				$targetField = $ruleField->getTarget();
-				$targetData[$targetField] = $target[$targetField];
-				if (
-						!empty($history[$targetField])
-					 &&	!empty($history)
-				) {
-					$historyData[$targetField] = $history[$targetField];
+				if (!empty($target[$targetField])) {
+					$targetData[$targetField] = $target[$targetField];
+					if (
+							!empty($history[$targetField])
+						 &&	!empty($history)
+					) {
+						$historyData[$targetField] = $history[$targetField];
+					}
 				}
 			}	
 			// Get RuleRelationShip object
