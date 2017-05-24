@@ -142,12 +142,13 @@ class zuoracore  extends solution {
 		}
 	} // get_module_fields($module)	 
 	
-/*
 	// Get the last data in the application
 	public function read_last($param) {	
 		try {
 			$param['fields'] = $this->addRequiredField($param['fields']);
-				
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			
 			$query = 'SELECT ';
 			// Build the SELECT 
 			if (!empty($param['fields'])) {
@@ -183,16 +184,26 @@ class zuoracore  extends solution {
 				}
 			// The function is called for a simulation (rule creation) if there is no query
 			} else {
-				$query .= " WHERE ModificationDate < '".date('Y-m-d H:i:s')."'" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				$query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
 			}
-		
+	
 			// Buid the input parameter
-			$selectparam = ["authToken" 	=> $this->token,
-							"selectQuery" 	=> $query,
-							];
-			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			$resultQuery = $this->call($url);
-			
+			// $selectparam = ["authToken" 	=> $this->token,
+							// "selectQuery" 	=> $query,
+							// ];
+			// $url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
+			// $resultQuery = $this->call($url);
+			\ZuoraAPIHelper::$client = $this->client;
+			\ZuoraAPIHelper::$header = $this->header;
+			// $query = "select Id, ProductRatePlanId from ProductRatePlanCharge";
+echo $query.'<BR><PRE>';
+$query = htmlentities($query);
+echo $query.'<BR><PRE>';
+			$resultat = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
+print_r($resultat);		
+\ZuoraAPIHelper::getQueryResponseFieldValues
+die();			
+		
 			// If the query return an error 
 			if (!empty($resultQuery['Message'])) {
 				throw new \Exception($resultQuery['Message']);	
@@ -226,15 +237,49 @@ class zuoracore  extends solution {
 					}
 				}
 			}
-			$result['done'] = true;
+			if (!empty($result['values'])) {
+				$result['done'] = true;
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
-		}	
+		}			
 		return $result;
 	}
 
+	/* // Get the last data in the application
+	public function read_last($param) {	
+		try {
+		 	$param['fields'] = $this->addRequiredField($param['fields']);
+print_r($this->header);			
+			var_dump("IN");
+			// $query = "select Id, ProductRatePlanId from ProductRatePlanCharge where AccountingCode = '$accountingCode'";
+$query = 
+"<ns1:query>
+ <ns1:queryString>selectId, AccountNumber, EndDateTime, Quantity, RbeStatus, SourceName, SourceType, StartDateTime, SubmissionDateTime, UOM from Usage where AccountId = '4028e485225d1d5f0122662fd6b249c8'</ns1:queryString>
+</ns1:query>";
+			
+			\ZuoraAPIHelper::$client = $this->client;
+			\ZuoraAPIHelper::$header = $this->header;
+			$query = "select Id, ProductRatePlanId from ProductRatePlanCharge";
+			$resultat = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
+	               // $resultat = \ZuoraAPIHelper::callAPIWithClient($this->client, $this->header, $query, $this->debug);
+				  // $resultat =  \ZuoraAPIHelper::queryAPI($this->paramConnexion['wsdl'], $this->paramConnexion['login'], $this->paramConnexion['password'], $query, $this->debug);
+		     $result['value'] = $resultat;
+		     $result['done'] = true;
+echo '<pre>';			 
+print_r($result);
+		 }
+		catch (\Exception $e) {
+			$result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$result['done'] = -1;
+		// var_dump($result);
+		}
+		// var_dump($result);
+		return $result;
+	} */
+/*
 	public function read($param) {
 		try {
 			$result['date_ref'] = $param['date_ref'];
