@@ -155,7 +155,9 @@ class cirrusshieldcore  extends solution {
 	public function read_last($param) {	
 		try {
 			$param['fields'] = $this->addRequiredField($param['fields']);
-				
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			
 			$query = 'SELECT ';
 			// Build the SELECT 
 			if (!empty($param['fields'])) {
@@ -193,14 +195,14 @@ class cirrusshieldcore  extends solution {
 			} else {
 				$query .= " WHERE ModificationDate < '".date('Y-m-d H:i:s')."'" ; // Need to add 'limit 1' here when the command LIMIT will be available
 			}
-		
+	
 			// Buid the input parameter
 			$selectparam = ["authToken" 	=> $this->token,
 							"selectQuery" 	=> $query,
 							];
 			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
 			$resultQuery = $this->call($url);
-			
+		
 			// If the query return an error 
 			if (!empty($resultQuery['Message'])) {
 				throw new \Exception($resultQuery['Message']);	
@@ -234,12 +236,14 @@ class cirrusshieldcore  extends solution {
 					}
 				}
 			}
-			$result['done'] = true;
+			if (!empty($result['values'])) {
+				$result['done'] = true;
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
-		}	
+		}			
 		return $result;
 	}
 
@@ -249,6 +253,8 @@ class cirrusshieldcore  extends solution {
 			$result['count'] = 0;
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
 			// Get the reference date field name
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
