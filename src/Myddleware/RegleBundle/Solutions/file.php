@@ -35,6 +35,7 @@ class filecore extends solution {
 	Protected $connection;
 	Protected $delimiter = ';';
 	Protected $removeChar = array(' ','/','\'','.','(',')');
+	protected $readLimit = 1000;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -215,7 +216,7 @@ class filecore extends solution {
 		try {
 			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
 			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
-			$fileName = $param['module'].'/'.trim($file);
+			$fileName = $param['module'].'/'.$file;
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -284,9 +285,10 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {	
 		$count = 0;
-		$result = array();
+		$offset = 0;
+		$result = array();	
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
 			$file = $this->get_last_file($param['module'],$param['date_ref']);
@@ -294,8 +296,12 @@ class filecore extends solution {
 			if(empty($file)){
 				return null;
 			}
+			// If the file has already been read, we get the offset to read from this line
+			if (!empty($param['ruleParams'][$file])) {
+				$offset = $param['ruleParams'][$file];
+			}
 			
-			$fileName = $param['module'].'/'.trim($file);
+			$fileName = $param['module'].'/'.$file;
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -350,8 +356,15 @@ class filecore extends solution {
 			}		
 			//Control all lines of the file
 			$values = array();
-			while (($buffer = fgets($stream)) !== false) {
+			$lineNumber = 2; // We count the header
+			while (($buffer = fgets($stream)) !== false) {		
 				$idRow = '';
+				// We don't read again line already read in a previous call
+				if ($lineNumber < $offset) {
+					$lineNumber++;
+					continue;
+				}			
+				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
 					continue;
@@ -385,20 +398,25 @@ class filecore extends solution {
 				if($validateRow == false){
 					continue;
 				}
-				$count++;
+				$count++; // Save the number of line read
+				$lineNumber++; // Save the line number
 				$values[$idRow] = $row;
+				// If we have reached the limit we stop to read
+				if ($count >= $this->readLimit) {
+					break;
+				}
 			}
-
 			// la première ligne te donne les nom des champs, les lignes suivantes te donne leur valeur
 			$result = array(
 							'count'=>$count,
-							'date_ref'=>$new_date_ref,
-							'values'=>$values
+							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
+							'values'=>$values,
+							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber))
 			);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}			
+		}		
 		return $result;
 	} // read($param)
 	
@@ -487,7 +505,7 @@ class filecore extends solution {
 		stream_set_blocking($stream, true);
 		$file = stream_get_contents($stream);	
 		$file = ltrim($file,'./'); // The filename can have ./ at the beginning
-		return $file;
+		return trim($file);
 	}
 	
 	// Get the strings which can identify what field is an id in the table
