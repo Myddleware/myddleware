@@ -147,11 +147,16 @@ class filecore extends solution {
 					$sftp = intval(ssh2_sftp($this->connection));
 				}
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-				$headerString = $this->cleanHeader(trim(fgets($stream)));
-				$header = explode($this->delimiter, $headerString);
+				$headerString = $this->cleanHeader(trim(fgets($stream)));			
+				$header = explode($this->getDelimiter(array('module'=>$module)), $headerString);
 				
 				// Parcours des champs de la table sélectionnée
+				$i=1;			
 				foreach ($header as $field) {
+					// In case the field name is empty
+					if(empty($field)) {
+						$field = 'Column_'.$i;
+					}
 					// Spaces aren't accepted in a field name
 					$this->moduleFields[str_replace($this->removeChar, '', $field)] = array(
 							'label' => $field,
@@ -174,12 +179,12 @@ class filecore extends solution {
 							}
 						}
 					}
+					$i++;
 				}				
-				return $this->moduleFields;
 			} else {
 				$this->moduleFields = array();
-				return $this->moduleFields;
 			}
+			return $this->moduleFields;
 		}
 		catch (\Exception $e){
 			$error = $e->getMessage();
@@ -218,9 +223,8 @@ class filecore extends solution {
 				$sftp = intval(ssh2_sftp($this->connection));
 			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace($this->removeChar, '', $headerString));
+			$header = $this->getFileHeader($stream,$param);
+		
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -240,7 +244,8 @@ class filecore extends solution {
 					continue; 
 				};
 				
-				$rowFile = explode($this->delimiter, $buffer);
+				// Transform the buffer in an array of field
+				$rowFile = $this->transformRow($buffer,$param);
 				$nbRowLine = count($rowFile); 
 				$count++;
 				
@@ -257,11 +262,11 @@ class filecore extends solution {
 			$result = array(
 							'values'=>$values,
 							'done' => true
-			);					
+			);	
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
-		}		
+		}					
 		return $result;
 	}
 
@@ -298,9 +303,8 @@ class filecore extends solution {
 				$sftp = intval(ssh2_sftp($this->connection));
 			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace($this->removeChar, '', $headerString));
+			$header = $this->getFileHeader($stream,$param);
+
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
@@ -353,12 +357,11 @@ class filecore extends solution {
 					continue;
 				};
 				
-				$rowFile = explode($this->delimiter, $buffer);
-				$checkRow = $this->checkRow($buffer);
+				$rowFile = $this->transformRow($buffer,$param);
+				$checkRow = $this->checkRow($rowFile);
 				if($checkRow == false){
 					continue;
-				}
-				
+				}				
 				//If there are not the good number of columns, display an error
 				$nbRowLine = count($rowFile); 
 				if($nbRowLine != $nbCountHeader){
@@ -395,9 +398,26 @@ class filecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}		
+		}			
 		return $result;
 	} // read($param)
+	
+	// Convert the first line of the file to an array with all fields
+	protected function getFileHeader($stream,$param) {
+		$headerString = $this->cleanHeader(trim(fgets($stream)));
+		// Spaces aren't accepted in a field name
+		$fields = explode($this->getDelimiter($param), str_replace($this->removeChar, '', $headerString));
+		$i = 1;
+		foreach($fields as $field) {
+			if (empty($field)) {
+				$header[] = 'Column_'.$i;
+			} else {
+				$header[] = $field;
+			}
+			$i++;
+		}	
+		return $header;
+	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
 	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
@@ -438,8 +458,18 @@ class filecore extends solution {
 		return $str;
 	} 
 	
-	protected function checkRow($buffer){
+	protected function checkRow($rowFile){
 		return true;
+	}
+	
+	// Transformm the buffer to and array of fields
+	protected function transformRow($buffer,$param){
+		return explode($this->getDelimiter($param), $buffer);
+	}
+	
+	// Get the delimiter
+	protected function getDelimiter($param){
+		return $this->delimiter;
 	}
 	
 	protected function validateRow($row, $idRow, $rowNumber){

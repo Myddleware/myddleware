@@ -54,6 +54,7 @@ class rulecore {
 	protected $manual;
 	protected $key;
 	protected $limit = 100;
+	protected $limitReadCommit = 100;
 	protected $tools;
 	
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param) {
@@ -277,7 +278,7 @@ class rulecore {
 
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
-							if ($i >= 1000){
+							if ($i >= $this->limitReadCommit){
 								$this->connection->commit(); // -- COMMIT TRANSACTION
 								$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 								$i = 0;
