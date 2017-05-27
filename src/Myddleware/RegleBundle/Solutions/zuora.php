@@ -243,7 +243,7 @@ class zuoracore  extends solution {
 	}
 
 	// Create data in the target solution
-	public function create($param) {
+	public function create($param) {	
 		// Get the action because we use the create function to update data as well
 		$action = ($this->update ? 'update' : 'create');
 		try {
@@ -286,24 +286,23 @@ class zuoracore  extends solution {
 					
 					// Transform the SOAP xml to an array
 					$responseArray = $this->SoapXmlToArray($operation['response']);
-
 					 // General error
-					if (empty($responseArray['soapenvBody']['ns1updateResponse']['ns1result'])) {
+					if (empty($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'])) {
 						throw new \Exception('No response from Zuora. ');
 					}
 					// If only on document sent, we add a dimension to keep the compatibility with the code
 					if (count($idDocArray) == 1) {
-						$responseArrayTmp = array($responseArray['soapenvBody']['ns1updateResponse']['ns1result']);
-						$responseArray['soapenvBody']['ns1updateResponse']['ns1result'] = $responseArrayTmp;
+						$responseArrayTmp = array($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']);
+						$responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'] = $responseArrayTmp;
 					}
 					
 					// Check the number result
-					if (count($responseArray['soapenvBody']['ns1updateResponse']['ns1result']) <> count($idDocArray)) {
-						throw new \Exception('The number of result from Zuora ('.count($responseArray['soapenvBody']['ns1updateResponse']['ns1result']).') is different of the number of data sent to Zuora ('.count($idDocArray).'). Myddleware is not able to analyse the result. ');
+					if (count($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']) <> count($idDocArray)) {
+						throw new \Exception('The number of result from Zuora ('.count($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']).') is different of the number of data sent to Zuora ('.count($idDocArray).'). Myddleware is not able to analyse the result. ');
 					}
 					// Get the response for each records
 					$j = 0;
-					foreach($responseArray['soapenvBody']['ns1updateResponse']['ns1result'] as $recordResponse) {
+					foreach($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'] as $recordResponse) {
 						if ($recordResponse['ns1Success'] == 'true') {
 							if (empty($recordResponse['ns1Id'])) {
 								$result[$idDocArray[$j]] = array(
@@ -336,7 +335,7 @@ class zuoracore  extends solution {
 		catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getLine();
 			$result['error'] = $error;
-		}
+		}	
 		return $result;
 	}
 

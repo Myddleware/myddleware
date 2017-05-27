@@ -576,7 +576,9 @@ class rulecore {
 		// Création des données dans la cible
 		$sendTarget = $this->sendTarget('C');
 		// Modification des données dans la cible
-		$sendTarget = $this->sendTarget('U');
+		if (empty($sendTarget['error'])) {
+			$sendTarget = $this->sendTarget('U');
+		}
 		// Logout target solution
 		if (!empty($this->solutionTarget)) {
 			$loginResult['error'] = $this->solutionTarget->logout();	
