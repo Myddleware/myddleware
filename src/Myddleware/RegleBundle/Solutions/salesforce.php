@@ -650,11 +650,7 @@ class salesforcecore extends solution {
 			}			
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$result[$idDoc] = array(
-					'id' => '-1',
-					'error' => $error
-			);
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			$result['error'] = $error;
 		}					
 		return $result;
 	} // create($param)

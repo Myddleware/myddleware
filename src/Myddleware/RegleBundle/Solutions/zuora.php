@@ -40,6 +40,9 @@ class zuoracore  extends solution {
 	protected $defaultObjectNamespace = "ns2";
 	protected $defaultObjectNamespaceURL = "http://object.api.zuora.com/";
 	protected $update = false;
+	protected $limitCall = 10; // Maw limit : 50
+	
+	protected $required_fields =  array('default' => array('Id','UpdatedDate', 'CreatedDate'));
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -146,7 +149,7 @@ class zuoracore  extends solution {
 			return false;
 		}
 	} // get_module_fields($module)	 
-/* 	
+ 	
 	// Get the last data in the application
 	public function read_last($param) {	
 		try {
@@ -189,52 +192,37 @@ class zuoracore  extends solution {
 				}
 			// The function is called for a simulation (rule creation) if there is no query
 			} else {
-				// $query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
-				$query .= " WHERE status = 'Draft'" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				$query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
 			}
 	
-			// Buid the input parameter
-			// $selectparam = ["authToken" 	=> $this->token,
-							// "selectQuery" 	=> $query,
-							// ];
-			// $url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			// $resultQuery = $this->call($url);
+			// Prepare the static class for the API call
 			\ZuoraAPIHelper::$client = $this->client;
 			\ZuoraAPIHelper::$header = $this->header;
-			// $query = "select Id, ProductRatePlanId from ProductRatePlanCharge";
-echo $query.'<BR><PRE>';
-$query = htmlentities($query);
-echo $query.'<BR><PRE>';
-			$resultat = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
-print_r($resultat);		
-// \ZuoraAPIHelper::getQueryResponseFieldValues
-die();			
-		
-			// If the query return an error 
-			if (!empty($resultQuery['Message'])) {
-				throw new \Exception($resultQuery['Message']);	
-			}	
-			// If no result
-			if (empty($resultQuery)) {
-				$result['done'] = false;
-			}
-			// Format the result
-			// If several results, we take the first one
-			if (!empty($resultQuery[$param['module']][0])) {
-				$record = $resultQuery[$param['module']][0];	
-			// If one result we take the first one
-			} else {
-				$record = $resultQuery[$param['module']];
-			}
 			
-			foreach($param['fields'] as $field) {
-				// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-				if(isset($record[$field])) {
-					// Cirrus return an array when the data is empty
-					if (is_array($record[$field])) {
-						$result['values'][$field] = '';
-					} else {
-						// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+			// API call to Zuora
+			$xmlRecord = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
+			$responseArray = $this->SoapXmlToArray($xmlRecord);
+
+			// If the query return an error 
+			if (!empty($responseArray['soapenvBody']['soapenvFault'])) {
+				throw new \Exception(print_r($responseArray['soapenvBody']['soapenvFault'],true));	
+			}	
+			
+			// If no result
+			if (
+					$responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1done'] == 'true'
+				AND	$responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1size'] == '0'
+			) {
+				$result['done'] = false;
+			} elseif (!empty($responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1records'])) {
+				// Transform response 
+				foreach($responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1records'] as $xmlKey => $xmlValue) {
+					$record[str_replace($this->defaultObjectNamespace,'',$xmlKey)] = $xmlValue;
+				}
+				foreach($param['fields'] as $field) {
+					// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+					if(isset($record[$field])) {
+						// The field id in Zuora  as a capital letter for the I, not in Myddleware
 						if ($field == 'Id') {
 							$result['values']['id'] = $record[$field];
 						} else {
@@ -242,183 +230,34 @@ die();
 						}
 					}
 				}
-			}
-			if (!empty($result['values'])) {
-				$result['done'] = true;
+				if (!empty($result['values'])) {
+					$result['done'] = true;
+				}
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
-		}			
+		}				
 		return $result;
 	}
- */
-	/* // Get the last data in the application
-	public function read_last($param) {	
-		try {
-		 	$param['fields'] = $this->addRequiredField($param['fields']);
-print_r($this->header);			
-			var_dump("IN");
-			// $query = "select Id, ProductRatePlanId from ProductRatePlanCharge where AccountingCode = '$accountingCode'";
-$query = 
-"<ns1:query>
- <ns1:queryString>selectId, AccountNumber, EndDateTime, Quantity, RbeStatus, SourceName, SourceType, StartDateTime, SubmissionDateTime, UOM from Usage where AccountId = '4028e485225d1d5f0122662fd6b249c8'</ns1:queryString>
-</ns1:query>";
-			
-			\ZuoraAPIHelper::$client = $this->client;
-			\ZuoraAPIHelper::$header = $this->header;
-			$query = "select Id, ProductRatePlanId from ProductRatePlanCharge";
-			$resultat = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
-	               // $resultat = \ZuoraAPIHelper::callAPIWithClient($this->client, $this->header, $query, $this->debug);
-				  // $resultat =  \ZuoraAPIHelper::queryAPI($this->paramConnexion['wsdl'], $this->paramConnexion['login'], $this->paramConnexion['password'], $query, $this->debug);
-		     $result['value'] = $resultat;
-		     $result['done'] = true;
-echo '<pre>';			 
-print_r($result);
-		 }
-		catch (\Exception $e) {
-			$result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-		// var_dump($result);
-		}
-		// var_dump($result);
-		return $result;
-	} */
-/*
-	public function read($param) {
-		try {
-			$result['date_ref'] = $param['date_ref'];
-			$result['count'] = 0;
-			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			
-			// Get the reference date field name
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
-			// Get the organization timezone
-			if (empty($this->organizationTimezoneOffset)) {
-				$this->getOrganizationTimezone();
-				// If the organization timezone is still empty, we generate an error
-				if (empty($this->organizationTimezoneOffset)) {
-					throw new \Exception('Failed to get the organization Timezone. This timezone is requierd to save the reference date.');
-				}
-			}
-			
-			$query = 'SELECT ';
-			// Build the SELECT 
-			if (!empty($param['fields'])) {
-				foreach ($param['fields'] as $field) {
-					$query .= $field.',';
-				}
-				// Delete the last coma 
-				$query = rtrim($query, ',');
-			} else {
-				$query .= ' * ';
-			}
-			
-			// Add the FROM
-			$query .= ' FROM '.$param['module'].' ';
-			
-			// Generate the WHERE
-			// if a specific query is requeted we don't use date_ref (used for child document)
-			if (!empty($param['query'])) {
-				$query .= ' WHERE ';
-				$first = true;
-				foreach ($param['query'] as $key => $value) {
-					// Add the AND only if we are not on the first condition
-					if ($first) {
-						$first = false;
-					} else {
-						$query .= ' AND ';
-					}
-					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-					if ($key == 'id') {
-						$key = 'Id';
-					}
-					// Add the condition
-					$query .= $key." = '".$value."' ";
-				}
-			// Function called as a standard read, we use the reference date
-			} else {
-				$query .= " WHERE ".$dateRefField." > ".$param['date_ref'].$this->organizationTimezoneOffset; 
-				// $query .= " WHERE ".$dateRefField." > 2017-03-30 14:42:35-05 "; 
-			}		
 
-			// Buid the parameters to call the solution
-			$selectparam = ["authToken" 	=> $this->token,
-							"selectQuery" 	=> $query,
-							];
-			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			$resultQuery = $this->call($url);
-
-			// If the query return an error 
-			if (!empty($resultQuery['Message'])) {
-				throw new \Exception($resultQuery['Message']);	
-			}	
-			// If no result
-			if (!empty($resultQuery[$param['module']])) {
-				// If only one record, we add a dimension to be able to use the foreach below
-				if (empty($resultQuery[$param['module']][0])) {
-					$tmp[$param['module']][0] = $resultQuery[$param['module']];
-					$resultQuery = $tmp;
-				}
-				// For each records
-				foreach($resultQuery[$param['module']] as $record) {				
-					// For each fields expected
-					foreach($param['fields'] as $field) {
-						if ($field == 'id') {
-							$field = 'Id';
-						}					
-						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-						if(isset($record[$field])) {
-							// If we are on the date ref field, we add the entry date_modified (put to lower case because ModificationDate in the where is modificationdate int the select
-							if ($field == $dateRefField) {
-								$row['date_modified'] = $record[$field];
-							} elseif ($field == 'Id') {
-								$row['id'] = $record[$field];
-							} else {
-								// Cirrus return an array when the data is empty
-								if (is_array($record[$field])) {
-									$row[$field] = '';
-								} else {
-									$row[$field] = $record[$field];
-								}
-							}
-						}
-					}
-					if (
-							!empty($record[$dateRefField])
-						&&	$result['date_ref'] < $record[$dateRefField]
-					) {								
-						// Transform the date with the organization timezone
-						$dateRef = new \DateTime($record[$dateRefField]);
-						$dateRef->modify($this->organizationTimezoneOffset.' hours');
-						$result['date_ref'] = $dateRef->format('Y-m-d H:i:s');
-					}
-					$result['values'][$row['id']] = $row;
-					$result['count']++;
-					$row = array();
-				}
-			}
-		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
-		return $result;
-	}	
-*/	
 	// Create data in the target solution
 	public function create($param) {
-// print_r($param);
+		// Get the action because we use the create function to update data as well
 		$action = ($this->update ? 'update' : 'create');
 		try {
+			$idDocArray = '';
+			$i = 0;
+			$first = true;
+			$nb_record = count($param['data']);		
 			foreach($param['data'] as $idDoc => $data) {
+				$i++;
+				// Save all idoc in the right order
+				$idDocArray[]= $idDoc;
 				 // Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				
-				// XML creation
-				// $xmlData = '<Data><'.$param['module'].'>';
+
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
@@ -429,181 +268,90 @@ print_r($result);
 							continue;
 						} 
 					}
-					$fieldList[] = $key;
+					// Init the array $fieldList oly one time
+					if ($first == true) {
+						$fieldList[] = $key;
+					}
 					$val[$key] = $value;
-					// $xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
 				}	
+				$first = false;
 				$values[] = $val;
-			}	
+				// If we have finished to read all data or if the package is full we send the data to Sallesforce
+				if (
+						$nb_record == $i
+					 || $i % $this->limitCall  == 0
+				) {
+					$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
+					$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
+					
+					// Transform the SOAP xml to an array
+					$responseArray = $this->SoapXmlToArray($operation['response']);
 
-print_r($values);
-			$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
-
-			$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
- 
-
- 
- $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $operation['response']);
-$xml2 = new \SimpleXMLElement($response);
-$array = json_decode(json_encode((array)$xml2), TRUE); 
- print_r($array);
-
-			 // General error
-			if (!empty($operation['errorList'])) {
-				throw new \Exception(print_r($operation['errorList'][0],true));
+					 // General error
+					if (empty($responseArray['soapenvBody']['ns1updateResponse']['ns1result'])) {
+						throw new \Exception('No response from Zuora. ');
+					}
+					// If only on document sent, we add a dimension to keep the compatibility with the code
+					if (count($idDocArray) == 1) {
+						$responseArrayTmp = array($responseArray['soapenvBody']['ns1updateResponse']['ns1result']);
+						$responseArray['soapenvBody']['ns1updateResponse']['ns1result'] = $responseArrayTmp;
+					}
+					
+					// Check the number result
+					if (count($responseArray['soapenvBody']['ns1updateResponse']['ns1result']) <> count($idDocArray)) {
+						throw new \Exception('The number of result from Zuora ('.count($responseArray['soapenvBody']['ns1updateResponse']['ns1result']).') is different of the number of data sent to Zuora ('.count($idDocArray).'). Myddleware is not able to analyse the result. ');
+					}
+					// Get the response for each records
+					$j = 0;
+					foreach($responseArray['soapenvBody']['ns1updateResponse']['ns1result'] as $recordResponse) {
+						if ($recordResponse['ns1Success'] == 'true') {
+							if (empty($recordResponse['ns1Id'])) {
+								$result[$idDocArray[$j]] = array(
+										'id' => '-1',
+										'error' => 'No Id in the response of Zuora. '
+										);									
+							} else {
+								$result[$idDocArray[$j]] = array(
+											'id' => $recordResponse['ns1Id'],
+											'error' => false
+											);
+							}
+						} else {
+							$result[$idDocArray[$j]] = array(
+											'id' => '-1',
+											'error' => (empty($recordResponse['ns1Errors']) ? 'No error returned by Zuora.' : print_r($recordResponse['ns1Errors'],true))
+											);	
+						}
+						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
+						$j++;
+					}
+					// Init variable
+					$values = '';
+					$operation = '';
+					$responseArray = '';
+					$idDocArray = '';
+				}
 			}
-			if (empty($operation['response'])) {
-				throw new \Exception('No response from Zuora. ');
-			}
- // $xml_obj = new \SimpleXMLElement($operation['response']);
-        // $xml_obj->registerXPathNamespace($this->defaultApiNamespace,$this->defaultApiNamespaceURL);
-        // $xml_obj->registerXPathNamespace($this->defaultObjectNamespace,$this->defaultObjectNamespaceURL);
-
-/* 
-foreach ($operation['response'] as $myXml) {
-echo chr(10).chr(10).'$successCount'.chr(10); 
-// $xml   = simplexml_load_string($buffer);
-// $array = $this->XML2Array($myXml);
-// print_r( $array);
-// $array = array($xml->getName() => $array);
-$array = json_decode(json_encode((array)$myXml), TRUE);
-print_r( $array);
-}
-// $array = json_decode(json_encode((array)simplexml_load_string($operation['response'])),1);
- */
-//invalid xml file
-// $xmldata = $operation['response'];
-// $xmlparser = xml_parser_create();
-// xml_parse_into_struct($xmlparser,$xmldata,$values);
-// xml_parser_free($xmlparser);
-// print_r($values);
-
-			$result[$idDoc] = array(
-									'id' => $dataSent[$param['module']]['GUID'],
-									'error' => false
-							);
-			// Transfert status update
-			// $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
-			$result[$idDoc] = array(
-					'id' => '-1',
-					'error' => $error
-			);
+			$error = $e->getMessage().' '.$e->getLine();
+			$result['error'] = $error;
 		}
-print_r($result);		
-return null;	
 		return $result;
 	}
-	
-protected function XML2Array($parent)
-{
-    $array = array();
 
-    foreach ($parent as $name => $element) {
-        ($node = & $array[$name])
-            && (1 === count($node) ? $node = array($node) : 1)
-            && $node = & $node[];
-
-        $node = $element->count() ? XML2Array($element) : trim($element);
-    }
-
-    return $array;
-}
 	// Cirrus Shield use the same function for record's creation and modification
 	public function update($param) {
 		$this->update = true;
 		return $this->create($param);
 	}
-/*		
-	// retrun the reference date field name
-	public function getDateRefName($moduleSource, $RuleMode) {
-		// Creation and modification mode
-		if($RuleMode == "0") {
-			return "ModificationDate";
-		// Creation mode only
-		} else if ($RuleMode == "C"){
-			return "CreationDate";
-		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
-		}
-		return null;
-	}
 	
-	protected function getOrganizationTimezone() {
-		// Get the organization in Cirrus
-		$query = 'SELECT DefaultTimeZoneSidKey FROM Organization';
-		// Buid the parameters to call the solution
-		$selectparam = ["authToken" 	=> $this->token,
-						"selectQuery" 	=> $query,
-						];
-		$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-		$resultQuery = $this->call($url);
-		if (empty($resultQuery['Organization']['DefaultTimeZoneSidKey'])) {
-			throw new \Exception('Failed to retrieve the organisation timezone : no organization found '.$resultQuery['Organization']['DefaultTimeZoneSidKey'].'. ');	
-		}
-		
-		// Get the list of timeZone  Cirrus
-		$organizationFields = $this->call($this->url.'Describe/Organization?authToken='.$this->token);
-		
-		if (!empty($organizationFields['Fields'])) {
-			// Get the content of the field DefaultTimeZoneSidKey
-			$timezoneFieldKey = array_search('DefaultTimeZoneSidKey', array_column($organizationFields['Fields'], 'Name'));
-			if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'])) {
-				// Get the key of the timezone of the organization
-				$timezoneOrganizationKey = array_search($resultQuery['Organization']['DefaultTimeZoneSidKey'], array_column($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'], 'Name'));		
-				if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'])) {
-					// Get the offset of the timezone formatted like (GMT-05:00) Eastern Standard Time (America/New_York)
-					$this->organizationTimezoneOffset = substr($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], strpos($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], 'GMT')+3, 3);
-				}
-			}
-		}	
-		// Error management
-		if (empty($this->organizationTimezoneOffset)) {
-			throw new \Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');	
-		}
+	// Transform the SOAP xml to an array
+	protected function SoapXmlToArray($soapXml){
+		$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $soapXml);
+		$xml2 = new \SimpleXMLElement($response);
+		return json_decode(json_encode((array)$xml2), TRUE); 
 	}
-
-	
-	protected function call($url, $method = 'GET', $xmlData='', $timeout = 10){   
-		if (function_exists('curl_init') && function_exists('curl_setopt')) {
-            $ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			
-			// Some additional parameters are required for POST 
-			if ($method=='POST') {
-				$headers = array(
-								"Content-Type: application/x-www-form-urlencoded",
-								"charset=utf-8"
-								);
-				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, "=".$xmlData);
-				curl_setopt($ch, CURLOPT_POST, true);
-				curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-				curl_setopt($ch, CURLOPT_SSLVERSION, 6);
-				curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-			}
-            $result = curl_exec($ch);	
-            curl_close($ch);
-			// The login function return a string not an XML
-			if ($method=='login') {
-				return $result ? json_decode($result, true) : false;
-			} else {
-				if (@simplexml_load_string($result)) {
-					$xml = simplexml_load_string($result);
-					$json = json_encode($xml);
-					return json_decode($json,TRUE);   
-				// The result can be a json directly, in case of an error of query call (read last for example)
-				} else {
-					return json_decode($result,TRUE); 
-				}
-			} 
-        }
-        throw new \Exception('curl extension is missing!');
-    }	
-	  */
 	 
 	// Build the header because it can't be created in lib_zuora.php
 	protected function getHeader($sessionId){
