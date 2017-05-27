@@ -34,7 +34,12 @@ class zuoracore  extends solution {
 	protected $sessionId;
 	protected $debug = 0;
 	protected $header;
-	protected $defaultApiNamespaceURL = 'http://api.zuora.com/';
+	protected $defaultApiNamespaceURL = 'http://api.zuora.com/';	
+	protected $maxZObjectCount = 50;
+	protected $defaultApiNamespace = "ns1";
+	protected $defaultObjectNamespace = "ns2";
+	protected $defaultObjectNamespaceURL = "http://object.api.zuora.com/";
+	protected $update = false;
 	
 	// Connection parameters
 	public function getFieldsLogin() {	
@@ -141,7 +146,7 @@ class zuoracore  extends solution {
 			return false;
 		}
 	} // get_module_fields($module)	 
-	
+/* 	
 	// Get the last data in the application
 	public function read_last($param) {	
 		try {
@@ -184,7 +189,8 @@ class zuoracore  extends solution {
 				}
 			// The function is called for a simulation (rule creation) if there is no query
 			} else {
-				$query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				// $query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				$query .= " WHERE status = 'Draft'" ; // Need to add 'limit 1' here when the command LIMIT will be available
 			}
 	
 			// Buid the input parameter
@@ -201,7 +207,7 @@ $query = htmlentities($query);
 echo $query.'<BR><PRE>';
 			$resultat = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
 print_r($resultat);		
-\ZuoraAPIHelper::getQueryResponseFieldValues
+// \ZuoraAPIHelper::getQueryResponseFieldValues
 die();			
 		
 			// If the query return an error 
@@ -247,7 +253,7 @@ die();
 		}			
 		return $result;
 	}
-
+ */
 	/* // Get the last data in the application
 	public function read_last($param) {	
 		try {
@@ -401,16 +407,18 @@ print_r($result);
 		}	
 		return $result;
 	}	
-	
+*/	
 	// Create data in the target solution
 	public function create($param) {
-		foreach($param['data'] as $idDoc => $data) {
-			try {
+// print_r($param);
+		$action = ($this->update ? 'update' : 'create');
+		try {
+			foreach($param['data'] as $idDoc => $data) {
 				 // Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
 				
 				// XML creation
-				$xmlData = '<Data><'.$param['module'].'>';
+				// $xmlData = '<Data><'.$param['module'].'>';
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
@@ -419,62 +427,96 @@ print_r($result);
 							$key = 'Id';
 						} else { // If creation, we skip this field
 							continue;
-						}
+						} 
 					}
-					$xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
-				}
-				$xmlData .= '</'.$param['module'].'></Data>';
-				
-				// Set parameters to send data to the target solution (creation or modification)
-				$selectparam = ["authToken" 		=> $this->token,
-								"action" 			=> ($this->update ? 'update' : 'insert'),
-								"matchingFieldName" => 'Id',
-							];
-				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
+					$fieldList[] = $key;
+					$val[$key] = $value;
+					// $xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
+				}	
+				$values[] = $val;
+			}	
 
-				// Send data to the target solution
-				$dataSent = $this->call($url,'POST',$xmlData);	
-				
-				// General error
-				if (!empty($dataSent['Message'])) {
-					throw new \Exception($dataSent['Message']);
-				}
-				if (!empty($dataSent['ErrorMessage'])) {
-					throw new \Exception($dataSent['ErrorMessage']);
-				}
-				// Error managment for the record creation
-				if (!empty($dataSent[$param['module']]['Success'])) {
-					if ($dataSent[$param['module']]['Success'] == 'False') {
-						throw new \Exception($dataSent[$param['module']]['ErrorMessage']);
-					} else {
-						$result[$idDoc] = array(
-											'id' => $dataSent[$param['module']]['GUID'],
-											'error' => false
-									);
-					}
-				} else {
-					throw new \Exception('No success flag returned by Cirrus Shield');
-				}
+print_r($values);
+			$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
+
+			$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
+ 
+
+ 
+ $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $operation['response']);
+$xml2 = new \SimpleXMLElement($response);
+$array = json_decode(json_encode((array)$xml2), TRUE); 
+ print_r($array);
+
+			 // General error
+			if (!empty($operation['errorList'])) {
+				throw new \Exception(print_r($operation['errorList'][0],true));
 			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
-				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
+			if (empty($operation['response'])) {
+				throw new \Exception('No response from Zuora. ');
 			}
+ // $xml_obj = new \SimpleXMLElement($operation['response']);
+        // $xml_obj->registerXPathNamespace($this->defaultApiNamespace,$this->defaultApiNamespaceURL);
+        // $xml_obj->registerXPathNamespace($this->defaultObjectNamespace,$this->defaultObjectNamespaceURL);
+
+/* 
+foreach ($operation['response'] as $myXml) {
+echo chr(10).chr(10).'$successCount'.chr(10); 
+// $xml   = simplexml_load_string($buffer);
+// $array = $this->XML2Array($myXml);
+// print_r( $array);
+// $array = array($xml->getName() => $array);
+$array = json_decode(json_encode((array)$myXml), TRUE);
+print_r( $array);
+}
+// $array = json_decode(json_encode((array)simplexml_load_string($operation['response'])),1);
+ */
+//invalid xml file
+// $xmldata = $operation['response'];
+// $xmlparser = xml_parser_create();
+// xml_parse_into_struct($xmlparser,$xmldata,$values);
+// xml_parser_free($xmlparser);
+// print_r($values);
+
+			$result[$idDoc] = array(
+									'id' => $dataSent[$param['module']]['GUID'],
+									'error' => false
+							);
 			// Transfert status update
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}				
+			// $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
+		catch (\Exception $e) {
+			$error = $e->getMessage();
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
+		}
+print_r($result);		
+return null;	
 		return $result;
 	}
 	
+protected function XML2Array($parent)
+{
+    $array = array();
+
+    foreach ($parent as $name => $element) {
+        ($node = & $array[$name])
+            && (1 === count($node) ? $node = array($node) : 1)
+            && $node = & $node[];
+
+        $node = $element->count() ? XML2Array($element) : trim($element);
+    }
+
+    return $array;
+}
 	// Cirrus Shield use the same function for record's creation and modification
 	public function update($param) {
 		$this->update = true;
 		return $this->create($param);
 	}
-	
+/*		
 	// retrun the reference date field name
 	public function getDateRefName($moduleSource, $RuleMode) {
 		// Creation and modification mode

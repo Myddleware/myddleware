@@ -722,7 +722,7 @@ class ZuoraAPIHelper {
           $timeBefore = microtime(true);
           $batchResponse = ZuoraAPIHelper::callAPIWithClient($client, $header, $soapRequest, $debug);
           $timeAfter = microtime(true);
-
+		  $result['response'] = $batchResponse; // Added by Myddleware to get the Ids
           print " " . ($timeAfter - $timeBefore) . " secs - Done.";
 	  if ($htmlOutput) {
 	     print "<br/>";
