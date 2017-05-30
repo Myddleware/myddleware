@@ -456,14 +456,21 @@ class FluxControllerCore extends Controller
 				if ($ruleField->getSource()!='my_value') {		
 					// We keep only the fields in the rule 
 					// It could be several fields in the source fields (in case of formula)
-					$sourceFields = explode(";",$ruleField->getSource());
+					$sourceFields = explode(";",$ruleField->getSource());				
 					foreach ($sourceFields as $sourceField) {
-						$sourceData[$sourceField] = $source[$sourceField];
+						// Fields can be absent in case the rule have changed since the data tranfer has been sent
+						if (isset($source[$sourceField])) {
+							$sourceData[$sourceField] = $source[$sourceField];
+						}
 					}
 				}
 				// Target and history
 				$targetField = $ruleField->getTarget();
-				if (!empty($target[$targetField])) {
+
+				if (
+						isset($target[$targetField]) 
+					|| 	$target[$targetField] == null
+				) {			
 					$targetData[$targetField] = $target[$targetField];
 					if (
 							!empty($history[$targetField])
@@ -472,7 +479,7 @@ class FluxControllerCore extends Controller
 						$historyData[$targetField] = $history[$targetField];
 					}
 				}
-			}	
+			}					
 			// Get RuleRelationShip object
 			$RuleRelationShips = $em->getRepository('RegleBundle:RuleRelationShip')->findByRule($doc[0]->getRule());
 			// Get each data for each rule relationship
