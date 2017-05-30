@@ -34,6 +34,8 @@ class filecore extends solution {
 	Protected $duplicateDoc = array();
 	Protected $connection;
 	Protected $delimiter = ';';
+	Protected $enclosure = '"';
+	Protected $escape = '';
 	Protected $removeChar = array(' ','/','\'','.','(',')');
 	protected $readLimit = 1000;
 	
@@ -149,7 +151,7 @@ class filecore extends solution {
 				}
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));			
-				$header = explode($this->getDelimiter(array('module'=>$module)), $headerString);
+				$header = str_getcsv($headerString, $this->getDelimiter(array('module'=>$module)), $this->getEnclosure(array('module'=>$module)), $this->getEscape(array('module'=>$module)));
 				
 				// Parcours des champs de la table sélectionnée
 				$i=1;			
@@ -201,7 +203,7 @@ class filecore extends solution {
 	}
 	
 	
-		// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux ou pour réchercher un doublon dans la cible)
+	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux ou pour réchercher un doublon dans la cible)
 	// Param contient : 
 	//	module : le module appelé 
 	//	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
@@ -357,7 +359,7 @@ class filecore extends solution {
 			//Control all lines of the file
 			$values = array();
 			$lineNumber = 2; // We count the header
-			while (($buffer = fgets($stream)) !== false) {		
+			while (($buffer = fgets($stream)) !== false) {				
 				$idRow = '';
 				// We don't read again line already read in a previous call
 				if ($lineNumber < $offset) {
@@ -367,18 +369,20 @@ class filecore extends solution {
 				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
+					$lineNumber++;
 					continue;
 				};
 				
 				$rowFile = $this->transformRow($buffer,$param);
-				$checkRow = $this->checkRow($rowFile);
+				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
+					$lineNumber++;
 					continue;
 				}				
 				//If there are not the good number of columns, display an error
-				$nbRowLine = count($rowFile); 
+				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
-					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
+					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
 				}
 				foreach($allRuleField as $field){
 					$colonne = array_search($field, $header);
@@ -389,13 +393,14 @@ class filecore extends solution {
 						else {
 							$idRow = $rowFile[$colonne];							
 						}
-						$row['id'] = $rowFile[$colonne];
+						$row['id'] = $idRow;
 					}
 					$row[$field] = $rowFile[$colonne];
 				}
 				$row['date_modified'] = $new_date_ref;
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
+					$lineNumber++;
 					continue;
 				}
 				$count++; // Save the number of line read
@@ -416,7 +421,7 @@ class filecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}		
+		}			
 		return $result;
 	} // read($param)
 	
@@ -424,7 +429,7 @@ class filecore extends solution {
 	protected function getFileHeader($stream,$param) {
 		$headerString = $this->cleanHeader(trim(fgets($stream)));
 		// Spaces aren't accepted in a field name
-		$fields = explode($this->getDelimiter($param), str_replace($this->removeChar, '', $headerString));
+		$fields = str_getcsv(str_replace($this->removeChar, '', $headerString), $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
 		$i = 1;
 		foreach($fields as $field) {
 			if (empty($field)) {
@@ -476,18 +481,28 @@ class filecore extends solution {
 		return $str;
 	} 
 	
-	protected function checkRow($rowFile){
+	protected function checkRow($rowFile,$param){
 		return true;
 	}
 	
 	// Transformm the buffer to and array of fields
 	protected function transformRow($buffer,$param){
-		return explode($this->getDelimiter($param), $buffer);
+		return str_getcsv($buffer, $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
 	}
 	
 	// Get the delimiter
 	protected function getDelimiter($param){
 		return $this->delimiter;
+	}
+	
+	// Get the enclosure
+	protected function getEnclosure($param){
+		return $this->enclosure;
+	}
+	
+	// Get the escape
+	protected function getEscape($param){
+		return $this->escape;
 	}
 	
 	protected function validateRow($row, $idRow, $rowNumber){
