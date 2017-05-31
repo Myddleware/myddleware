@@ -24,7 +24,8 @@ class AppKernel extends Kernel
             // Myddleware
             new Myddleware\LoginBundle\LoginBundle(),
             new Myddleware\RegleBundle\RegleBundle(),   
-            new Myddleware\UserBundle\UserBundle(),          
+            new Myddleware\UserBundle\UserBundle(), 
+            new FOS\JsRoutingBundle\FOSJsRoutingBundle(), // Expose routes on JS
 			
         );
 

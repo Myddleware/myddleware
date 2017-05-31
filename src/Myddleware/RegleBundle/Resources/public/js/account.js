@@ -23,6 +23,8 @@
 *********************************************************************************/
 
 $( document ).ready(function() {
+    
+    var path_locale = Routing.generate('account_locale');
 	
 	positionningPopup('#myd_change_locale','#user_account');
 	
