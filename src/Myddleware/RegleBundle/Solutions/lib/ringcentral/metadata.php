@@ -153,6 +153,22 @@ $moduleFields = array (
 							'type' => array('label' => 'Type', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Fax' => 'Fax','SMS' => 'SMS','VoiceMail' => 'VoiceMail','Pager' => 'Pager','Text' => 'Text')),	
 							'vmTranscriptionStatus' => array('label' => 'VM transcription status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('NotAvailable' => 'NotAvailable','InProgress' => 'InProgress','TimedOut' => 'TimedOut','Completed' => 'Completed','CompletedPartially' => 'CompletedPartially','Failed' => 'Failed')),	
 						),
+					'presence' =>
+						array(
+							'id' => array('label' => 'Id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),	
+							'uri' => array('label' => 'Uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'dndStatus' => array('label' => 'Do not Disturb status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('TakeAllCalls' => 'TakeAllCalls','DoNotAcceptAnyCalls' => 'DoNotAcceptAnyCalls','DoNotAcceptDepartmentCalls' => 'DoNotAcceptDepartmentCalls','TakeDepartmentCallsOnly' => 'TakeDepartmentCallsOnly')),	
+							'extension__id' => array('label' => 'Extension id', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'extension__uri' => array('label' => 'Extension uri', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'extension__extensionNumber' => array('label' => 'Extension Number', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'message' => array('label' => 'Message', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'presenceStatus' => array('label' => 'Presence Status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Offline' => 'Offline','Busy' => 'Busy','Available' => 'Available')),	
+							'allowSeeMyPresence' => array('label' => 'Allow See My Presence', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'pickUpCallsOnHold' => array('label' => 'Pick Up Calls On Hold', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'ringOnMonitoredCall' => array('label' => 'Ring On Monitored Call', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0),		
+							'telephonyStatus' => array('label' => 'Telephony status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('NoCall' => 'NoCall','CallConnected' => 'CallConnected','Ringing' => 'Ringing','OnHold' => 'OnHold','ParkedCall' => 'ParkedCall')),	
+							'userStatus' => array('label' => 'User status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => array('Offline' => 'Offline','Busy' => 'Busy','Available' => 'Available')),		
+						)
 					);
 		
 $fieldsRelate = array (
