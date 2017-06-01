@@ -446,6 +446,7 @@ function:
 solution:
     fields:
         login: Utilisateur
+        username: Utilisateur
         password: Mot de passe
         url: Url
         token: Jeton
