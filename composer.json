@@ -1,4 +1,4 @@
-	{
+{
     "name": "symfony/framework-standard-edition",
     "license": "MIT",
     "type": "project",
@@ -30,7 +30,8 @@
 		"white-october/pagerfanta-bundle": "dev-master",
 		"pagerfanta/pagerfanta": "dev-master",
 		"raulfraile/ladybug-bundle": "~1.0",        
-		"illuminate/encryption": "5.3.*@dev"     
+		"illuminate/encryption": "5.3.*@dev",
+        "friendsofsymfony/jsrouting-bundle": "^1.6"     
     },
     "repositories": [   
         {
