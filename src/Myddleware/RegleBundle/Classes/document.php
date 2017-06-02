@@ -524,7 +524,7 @@ class documentcore {
 				}
 				// Sinon on fait la recherche du prédécesseur classique
 				else {
-					$rules[] = $this->document_data['id'];
+					$rules[] = $this->document_data['rule_id'];
 					// We check the bidirectionnal rule too if it exists
 					if (!empty($this->ruleParams['bidirectional'])) {
 						$rules[] = $this->ruleParams['bidirectional'];
@@ -536,7 +536,7 @@ class documentcore {
 											Document.id,							
 											Document.rule_id,
 											Rule.id rule_parent,
-											Rule.deleted rule_parent_deleted,
+											if(Rule.deleted=1,1,0) rule_parent_deleted,
 											Document.status,
 											Document.global_status											
 										FROM Document
@@ -550,7 +550,7 @@ class documentcore {
 											AND Document.source_id = :source_id 
 											AND Document.date_created < :date_created  
 										HAVING 
-												Rule.deleted != 1
+												rule_parent_deleted != 1
 											AND (
 													global_status = 'Error'
 												OR (
@@ -571,7 +571,7 @@ class documentcore {
 						$stmt->bindValue(":source_id", $this->document_data['source_id']);
 						$stmt->bindValue(":date_created", $this->document_data['date_created']);
 						$stmt->execute();	   				
-						$result = $stmt->fetch();
+						$result = $stmt->fetch();						
 						// if id found, we stop to send an error
 						if (!empty($result['id'])) {
 							break;
@@ -659,7 +659,7 @@ class documentcore {
 					$stmt->execute();	   				
 					$ruleResult = $stmt->fetch(); 
 					$direction = $this->getRelationshipDirection($ruleRelationship);
-					throw new \Exception( 'Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the '.($direction == '-1' ? 'source_id' : 'target_id').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
+					throw new \Exception( 'Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the ID '.($direction == '1' ? 'source' : 'target').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
 				}
 			}
 			// Get the parent document to save it in the table Document for the child document
@@ -1693,7 +1693,7 @@ class documentcore {
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":id", $ruleRelationship['id']);
 			$stmt->execute();	   				
-			$result = $stmt->fetch();
+			$result = $stmt->fetch();		
 			if (!empty($result['direction'])) {
 				return $result['direction'];
 			}	

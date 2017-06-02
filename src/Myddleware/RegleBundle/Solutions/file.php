@@ -257,8 +257,13 @@ class filecore extends solution {
 					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
 				}
 				foreach($allRuleField as $field){
-					$colonne = array_search($field, $header);	
-					$values[$field] = $rowFile[$colonne];
+					$column = array_search($field, $header);	
+					// If the column isn't found we skip it
+					if ($column === false) {
+						$values[$field] = '';
+						continue;
+					}
+					$values[$field] = $rowFile[$column];
 				}
 				$done=true;
 			}
@@ -383,21 +388,29 @@ class filecore extends solution {
 				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
 					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
-				}
+				}			
 				foreach($allRuleField as $field){
-					$colonne = array_search($field, $header);
+					$column = array_search($field, $header);
+					// If the column isn't found we skip it
+					if (
+							$column === false
+						AND $field != 'myddleware_generated'
+					) {
+						$row[$field] = '';
+						continue;
+					}
 					if($field==$param['ruleParams']['fieldId']){
-						if ($field == 'myddleware_generated') {
+						if ($field == 'myddleware_generated') {				
 							$idRow = $this->generateId($param,$rowFile);
 						}
 						else {
-							$idRow = $rowFile[$colonne];							
+							$idRow = $rowFile[$column];							
 						}
 						$row['id'] = $idRow;
 					}
-					$row[$field] = $rowFile[$colonne];
-				}
-				$row['date_modified'] = $new_date_ref;
+					$row[$field] = $rowFile[$column];
+				}			
+				$row['date_modified'] = $new_date_ref;			
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
 					$lineNumber++;
