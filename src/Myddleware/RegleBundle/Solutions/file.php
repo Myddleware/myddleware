@@ -118,14 +118,13 @@ class filecore extends solution {
 			$output = stream_get_contents($stream);	
 			// Transform the directory list in an array
 			$directories = explode(chr(10),trim($output));
-
 			$modules = array();
 			// Add the current directory
-			$modules[$this->paramConnexion['directory']] = $this->paramConnexion['directory'];
+			$modules['/'] = 'Root directory';
 			// Add the sub directories if exist
 			if (!empty($directories)) {
 				foreach($directories as $directory) {
-					$modules[$this->paramConnexion['directory'].'/'.$directory] = $this->paramConnexion['directory'].'/'.$directory;
+					$modules[$directory] = $directory;
 				}
 			}
 			return $modules;
@@ -141,8 +140,9 @@ class filecore extends solution {
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
-				$file = $this->get_last_file($module,'1970-01-01 00:00:00');
-				$fileName = trim($module.'/'.$file);	
+				$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module,'1970-01-01 00:00:00');
+				$fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);	
+			
 				// The behaviour of pp is different after version 5.6.27
 				if (version_compare(phpversion(), '5.6.27', '<')) { 
 					$sftp = ssh2_sftp($this->connection);
@@ -152,7 +152,7 @@ class filecore extends solution {
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));			
 				$header = str_getcsv($headerString, $this->getDelimiter(array('module'=>$module)), $this->getEnclosure(array('module'=>$module)), $this->getEscape(array('module'=>$module)));
-				
+		
 				// Parcours des champs de la table sélectionnée
 				$i=1;			
 				foreach ($header as $field) {
@@ -216,9 +216,10 @@ class filecore extends solution {
 		$done = false;
 		$result = array();
 		try {
-			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
-			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
-			$fileName = $param['module'].'/'.$file;
+			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".	
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],'1970-01-01 00:00:00');
+			$fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
+			
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -298,7 +299,7 @@ class filecore extends solution {
 		$result = array();	
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($param['module'],$param['date_ref']);
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],$param['date_ref']);
 			// If there is no file
 			if(empty($file)){
 				return null;
@@ -308,7 +309,7 @@ class filecore extends solution {
 				$offset = $param['ruleParams'][$file];
 			}
 			
-			$fileName = $param['module'].'/'.$file;
+			$fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -325,7 +326,7 @@ class filecore extends solution {
 			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
-			$new_date_ref = ssh2_exec($this->connection, 'cd '.$param['module'].';stat -c %y '.$file);
+			$new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].'/'.$param['module'].';stat -c %y '.$file);
 			stream_set_blocking($new_date_ref, true);
 			$new_date_ref = stream_get_contents($new_date_ref);
 			$new_date_ref = trim($new_date_ref);
@@ -434,7 +435,7 @@ class filecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}			
+		}				
 		return $result;
 	} // read($param)
 	

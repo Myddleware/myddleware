@@ -198,11 +198,15 @@ class zuoracore  extends solution {
 			// Prepare the static class for the API call
 			\ZuoraAPIHelper::$client = $this->client;
 			\ZuoraAPIHelper::$header = $this->header;
-			
+// $query = 'SELECT CreatedDate,SubscriptionId,ProductRatePlanId,Id,UpdatedDate FROM RatePlan LIMIT 1';			
+// $query = "SELECT ProductId,UpdatedDate,Name,EffectiveStartDate,EffectiveEndDate,Description,Id,CreatedDate FROM ProductRatePlan WHERE Name = 'E-COMMERCE : Abonnement mensuel'";			
+// $query = "SELECT Id,Name FROM ProductRatePlanCharge WHERE Number = 'C-00007233'";
+// $query = "SELECT ProductRatePlanId,Name,Description,Id,UpdatedDate,CreatedDate FROM ProductRatePlanCharge WHERE name = 'SITE ECOMMERCE : ABONNEMENT MENSUEL'";			
+// echo '<pre>$query'.$query;			
 			// API call to Zuora
 			$xmlRecord = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
 			$responseArray = $this->SoapXmlToArray($xmlRecord);
-
+// print_r($responseArray);
 			// If the query return an error 
 			if (!empty($responseArray['soapenvBody']['soapenvFault'])) {
 				throw new \Exception(print_r($responseArray['soapenvBody']['soapenvFault'],true));	
@@ -242,6 +246,16 @@ class zuoracore  extends solution {
 		return $result;
 	}
 
+	protected function getSoapVar($array,$object = 'zObject')
+    {
+        return new \SoapVar(
+            (array)$array,
+            SOAP_ENC_OBJECT,
+            $object,
+            'http://object.api.zuora.com/'
+        );
+    }
+	
 	// Create data in the target solution
 	public function create($param) {	
 		// Get the action because we use the create function to update data as well
@@ -250,7 +264,8 @@ class zuoracore  extends solution {
 			$idDocArray = '';
 			$i = 0;
 			$first = true;
-			$nb_record = count($param['data']);		
+			$nb_record = count($param['data']);	
+// print_r($param['data']);			
 			foreach($param['data'] as $idDoc => $data) {
 				$i++;
 				// Save all idoc in the right order
@@ -261,7 +276,7 @@ class zuoracore  extends solution {
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
-						// If updade then we change the key in Id
+						// If update then we change the key in Id
 						if (!empty($value)) {
 							$key = 'Id';
 						} else { // If creation, we skip this field
@@ -281,12 +296,44 @@ class zuoracore  extends solution {
 						$nb_record == $i
 					 || $i % $this->limitCall  == 0
 				) {
+		/* 			if (
+							$param['module'] == 'Subscription'
+						AND (
+								$action = 'create'	
+							 OR $action = 'subscribe'
+						)
+					) {
+						$action = 'subscribe';
+						
+					}
+
+// print_r($param);				
+// $action = 'subscribe';				
+		$subscribeRequest = array(
+            'Account'=>array('AccountId'=>'2c92c0f85c48f335015c56eb44450455'),
+            'BillToContact'=>array('ContactId'=>'2c92c0f95c490174015c56f0659e3e22'),
+			// 'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'), 'RatePlanCharge'=>array('Name' => 'test', 'ProductRatePlanChargeId' => '2c92c0f857bc72b90157becc0292347d'))),
+			'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'))),
+        );
+					
+print_r(array($subscribeRequest));					
+					// try {
+						$result = $this->client->__soapCall("subscribe", array('zObjects'=>array($subscribeRequest)), null, $this->header);   
+					// } catch (\SoapFault $fault) {
+						// throw new \Exception($fault->getMessage());
+					// }
+// print_r($operation);					
+// echo 'AAAA'.chr(10);					
+print_r($result->result);
+return null;			 */		
 					$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
 					$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
-					
 					// Transform the SOAP xml to an array
 					$responseArray = $this->SoapXmlToArray($operation['response']);
 					 // General error
+					if (!empty($responseArray['soapenvBody']['soapenvFault'])) {
+						throw new \Exception(print_r($responseArray['soapenvBody']['soapenvFault'],true));
+					}
 					if (empty($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'])) {
 						throw new \Exception('No response from Zuora. ');
 					}
@@ -333,9 +380,11 @@ class zuoracore  extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage().' '.$e->getLine();
+			$error = $e->getMessage().' '.$e->getFile().' line '.$e->getLine();
+			// $error = $e->getMessage();
 			$result['error'] = $error;
 		}	
+// print_r($result);		
 		return $result;
 	}
 

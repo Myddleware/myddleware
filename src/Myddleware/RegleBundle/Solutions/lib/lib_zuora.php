@@ -742,8 +742,8 @@ class ZuoraAPIHelper {
               $errorCount = count($batchNodes);
               for ($i = 0; $i < count($batchNodes); $i++) {
                  $faultCode = $xml_obj2->xpath("//SOAP-ENV:Envelope/SOAP-ENV:Body/SOAP-ENV:Fault/faultstring");
-                 $faultMessage = $xml_obj2->xpath("//SOAP-ENV:Envelope/SOAP-ENV:Body/SOAP-ENV:Fault/detail/Exception");
-                 array_push($result["errorList"], array("index" => ($lowerBound + $i), "code" => (string)$faultCode[0], "message" => (string)$faultMessage[0]));
+                 $faultMessage = $xml_obj2->xpath("//SOAP-ENV:Envelope/SOAP-ENV:Body/SOAP-ENV:Fault/detail/Exception");			 
+                 array_push($result["errorList"], array("index" => ($lowerBound + $i), "code" => (string)$faultCode[0], "message" => (!empty($faultMessage[0]) ? (string)$faultMessage[0] : '')));	
               }
               array_push($result["batchList"], array("start" => $lowerBound, "end" => $upperBound, "size" => count($batchNodes), "successCount" => $successCount, "errorCount" => $errorCount));
           } else {
