@@ -430,12 +430,13 @@ class filecore extends solution {
 							'count'=>$count,
 							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
 							'values'=>$values,
-							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber))
+							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber)),
+							'notRecall' => true // Stop the recall in the function Rule->readSource()
 			);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}				
+		}	
 		return $result;
 	} // read($param)
 	

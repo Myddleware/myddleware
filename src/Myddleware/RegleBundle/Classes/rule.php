@@ -400,6 +400,7 @@ class rulecore {
 					while (
 							$dataSource['count'] == $this->limit
 						&& $dataSource['date_ref'] == $value['date_modified']
+						&& empty($dataSource['whileStop']) // Force stop in some case (example connector file where all recoe
 					) {
 						// Gestion de l'offset
 						$i++;
