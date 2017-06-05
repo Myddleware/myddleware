@@ -26,11 +26,13 @@
 namespace Myddleware\RegleBundle\Solutions;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-require_once('lib/lib_zuora.php');
+
+require_once('lib/zuora/API.php');
 
 class zuoracore  extends solution { 
 	
 	protected $client;
+	protected $instance;
 	protected $sessionId;
 	protected $debug = 0;
 	protected $header;
@@ -71,7 +73,17 @@ class zuoracore  extends solution {
 		try{
 			// Get the wsdl (temporary solution)
 			$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/zuora/wsdl/zuora.a.85.0.wsdl';		
-			// Create the soap client
+			
+			$config = new \stdClass();
+			$config->wsdl = $this->paramConnexion['wsdl'];
+			$this->instance = \Zuora_API::getInstance($config);
+			
+			$this->instance->setLocation('https://apisandbox.zuora.com/apps/services/a/85.0');
+			$this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
+			
+			
+			
+			/* // Create the soap client
 			$this->client = createClient($this->paramConnexion['wsdl'], $this->debug);
 			// Connection to Zuora
 			$this->sessionId = login($this->client, $this->paramConnexion['login'], $this->paramConnexion['password'], $this->debug);
@@ -81,8 +93,8 @@ class zuoracore  extends solution {
 				// Header creation
 				$this->header = $this->getHeader($this->sessionId);
 			} else {
-				throw new \Exception("No SessionID. Logon failed.");
-			} 
+				throw new \ Exception("No SessionID. Logon failed.");
+			} */
 			$this->connexion_valide = true; 
 		}
 		catch (\Exception $e) {
@@ -97,6 +109,7 @@ class zuoracore  extends solution {
 	// Get the modules available
 	public function get_modules($type = 'source') {
 		try{	
+			require_once('lib/lib_zuora.php');
 			// Get all modules from te wsdl
 			$zuoraModules = getObjectListFromWSDL($this->paramConnexion['wsdl'], $this->debug);		
 			if (!empty($zuoraModules)) {
@@ -116,6 +129,7 @@ class zuoracore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
+			require_once('lib/lib_zuora.php');
 			$zupraFields = \ZuoraAPIHelper::getFieldList($this->paramConnexion['wsdl'], $module);	
 			if (!empty($zupraFields)) {
 				// Add each field in the right list (relate fields or normal fields)
@@ -192,45 +206,25 @@ class zuoracore  extends solution {
 				}
 			// The function is called for a simulation (rule creation) if there is no query
 			} else {
-				$query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."' LIMIT 1" ; // Need to add 'limit 1' here when the command LIMIT will be available
+				$query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."'" ; // Need to add 'limit 1' here when the command LIMIT will be available
 			}
-	
-			// Prepare the static class for the API call
-			\ZuoraAPIHelper::$client = $this->client;
-			\ZuoraAPIHelper::$header = $this->header;
-// $query = 'SELECT CreatedDate,SubscriptionId,ProductRatePlanId,Id,UpdatedDate FROM RatePlan LIMIT 1';			
-// $query = "SELECT ProductId,UpdatedDate,Name,EffectiveStartDate,EffectiveEndDate,Description,Id,CreatedDate FROM ProductRatePlan WHERE Name = 'E-COMMERCE : Abonnement mensuel'";			
-// $query = "SELECT Id,Name FROM ProductRatePlanCharge WHERE Number = 'C-00007233'";
-// $query = "SELECT ProductRatePlanId,Name,Description,Id,UpdatedDate,CreatedDate FROM ProductRatePlanCharge WHERE name = 'SITE ECOMMERCE : ABONNEMENT MENSUEL'";			
-// echo '<pre>$query'.$query;			
-			// API call to Zuora
-			$xmlRecord = \ZuoraAPIHelper::queryAPIWithSession($query, $this->debug);
-			$responseArray = $this->SoapXmlToArray($xmlRecord);
-// print_r($responseArray);
-			// If the query return an error 
-			if (!empty($responseArray['soapenvBody']['soapenvFault'])) {
-				throw new \Exception(print_r($responseArray['soapenvBody']['soapenvFault'],true));	
-			}	
-			
+			// limit to 1 result
+			$this->instance->setQueryOptions(1);
+			// Call Zuora
+			$resultQuery = $this->instance->query($query);
+
 			// If no result
-			if (
-					$responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1done'] == 'true'
-				AND	$responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1size'] == '0'
-			) {
+			if (empty($resultQuery->result->records)) {
 				$result['done'] = false;
-			} elseif (!empty($responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1records'])) {
-				// Transform response 
-				foreach($responseArray['soapenvBody']['ns1queryResponse']['ns1result']['ns1records'] as $xmlKey => $xmlValue) {
-					$record[str_replace($this->defaultObjectNamespace,'',$xmlKey)] = $xmlValue;
-				}
+			} else {		
 				foreach($param['fields'] as $field) {
 					// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-					if(isset($record[$field])) {
+					if(isset($resultQuery->result->records->$field)) {
 						// The field id in Zuora  as a capital letter for the I, not in Myddleware
 						if ($field == 'Id') {
-							$result['values']['id'] = $record[$field];
+							$result['values']['id'] = $resultQuery->result->records->$field;
 						} else {
-							$result['values'][$field] = $record[$field];
+							$result['values'][$field] = $resultQuery->result->records->$field;
 						}
 					}
 				}
@@ -242,7 +236,7 @@ class zuoracore  extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
-		}				
+		}		
 		return $result;
 	}
 
@@ -257,22 +251,25 @@ class zuoracore  extends solution {
     }
 	
 	// Create data in the target solution
-	public function create($param) {	
+	public function create($param) {
 		// Get the action because we use the create function to update data as well
 		$action = ($this->update ? 'update' : 'create');
 		try {
 			$idDocArray = '';
 			$i = 0;
-			$first = true;
+			// $first = true;
 			$nb_record = count($param['data']);	
-// print_r($param['data']);			
+print_r($param['data']);			
 			foreach($param['data'] as $idDoc => $data) {
 				$i++;
 				// Save all idoc in the right order
 				$idDocArray[]= $idDoc;
 				 // Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-
+print_r($data);				
+				$obj = 'Zuora_'.$param['module'];
+				$zObject = new $obj();
+			
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
@@ -284,48 +281,74 @@ class zuoracore  extends solution {
 						} 
 					}
 					// Init the array $fieldList oly one time
-					if ($first == true) {
-						$fieldList[] = $key;
-					}
-					$val[$key] = $value;
+					// if ($first == true) {
+						// $fieldList[] = $key;
+					// }
+					
+					// $zAccount = new Zuora_Account();
+    // $zAccount->AllowInvoiceEdit = 1;
+    // $zAccount->AutoPay = 0;
+    // $zAccount->Batch = 'Batch1';
+    // $zAccount->BillCycleDay = 1;
+    // $zAccount->Currency = $currency;
+    // $zAccount->Name = $name;    
+    // $zAccount->PaymentTerm = 'Due Upon Receipt';
+    // $zAccount->Status = $status;
+
+		//$zAccount->CrmId = 'SFDC-1223471249003';
+		//$zAccount->PurchaseOrderNumber = 'PO-1223471249003';
+		// return $zAccount;
+					$zObject->$key = $value;
+					// $val[$key] = $value;
 				}	
-				$first = false;
-				$values[] = $val;
+// print_r($zObject);				
+// return null;					
+				// $first = false;
+				$zObjects[] = $zObject;
+				unset($zObject);
 				// If we have finished to read all data or if the package is full we send the data to Sallesforce
 				if (
 						$nb_record == $i
 					 || $i % $this->limitCall  == 0
 				) {
-		/* 			if (
-							$param['module'] == 'Subscription'
-						AND (
-								$action = 'create'	
-							 OR $action = 'subscribe'
-						)
-					) {
-						$action = 'subscribe';
-						
-					}
-
+	 			if (
+						$param['module'] == 'Subscription'
+					AND (
+							$action = 'create'	
+						 OR $action = 'subscribe'
+					)
+				) {
+					$action = 'subscribe';
+				}
+				
+print_r($zObjects);	
+				$resultUpsert = $this->instance->create($zObjects);
+print_r($resultUpsert);	
+					
+					
+return null;	
+// $val['Number'] = 'A-S00000041';
 // print_r($param);				
 // $action = 'subscribe';				
-		$subscribeRequest = array(
+	/* 	$subscribeRequest = array(
+            // 'SubscriptionNumber'=>'A-S99000041',
             'Account'=>array('AccountId'=>'2c92c0f85c48f335015c56eb44450455'),
             'BillToContact'=>array('ContactId'=>'2c92c0f95c490174015c56f0659e3e22'),
 			// 'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'), 'RatePlanCharge'=>array('Name' => 'test', 'ProductRatePlanChargeId' => '2c92c0f857bc72b90157becc0292347d'))),
 			'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'))),
         );
-					
-print_r(array($subscribeRequest));					
+					*/		
+	$subscribeRequest[$param['module']] = $val;				
+print_r(array($subscribeRequest));		 	
 					// try {
-						$result = $this->client->__soapCall("subscribe", array('zObjects'=>array($subscribeRequest)), null, $this->header);   
+						$result = $this->client->__soapCall($action, array('zObjects'=>array($subscribeRequest)), null, $this->header);   
 					// } catch (\SoapFault $fault) {
 						// throw new \Exception($fault->getMessage());
 					// }
 // print_r($operation);					
 // echo 'AAAA'.chr(10);					
 print_r($result->result);
-return null;			 */		
+return null;					
 					$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
 					$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
 					// Transform the SOAP xml to an array
@@ -390,9 +413,88 @@ return null;			 */
 
 	// Cirrus Shield use the same function for record's creation and modification
 	public function update($param) {
-		$this->update = true;
-		return $this->create($param);
+		// Get the action because we use the create function to update data as well
+		$action = ($this->update ? 'update' : 'create');
+		try {
+			$idDocArray = '';
+			$i = 0;
+			// $first = true;
+			$nb_record = count($param['data']);				
+			foreach($param['data'] as $idDoc => $data) {
+				$i++;
+				// Save all idoc in the right order
+				$idDocArray[]= $idDoc;
+				 // Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);		
+				$obj = 'Zuora_'.$param['module'];
+				$zObject = new $obj();
+			
+				foreach ($data as $key => $value) {
+					// Field only used for the update and contains the ID of the record in the target solution
+					if ($key=='target_id') {
+						// If update then we change the key in Id
+						if (!empty($value)) {
+							$key = 'Id';
+						} else { // If creation, we skip this field
+							continue;
+						} 
+					}
+					$zObject->$key = $value;
+				}	
+				// Create the object collection
+				$zObjects[] = $zObject;
+				unset($zObject);
+				// If we have finished to read all data or if the package is full we send the data to Sallesforce
+				if (
+						$nb_record == $i
+					 || $i % $this->limitCall  == 0
+				) {
+					$resultUpdate = $this->instance->update($zObjects);
+					if (empty($resultUpdate)) {
+						throw new \Exception('No response from Zuora. ');
+					}
+					// If only one result, we add a dimension
+					if (isset($resultUpdate->result->Id)) {
+						$resultUpdate->result = array($resultUpdate->result);
+					}
+
+					// Get the response for each records
+					$j = 0;
+					foreach($resultUpdate->result as $record) {
+						if ($record->Success) {
+							if (empty($record->Id)) {
+								$result[$idDocArray[$j]] = array(
+										'id' => '-1',
+										'error' => 'No Id in the response of Zuora. '
+										);									
+							} else {					
+								$result[$idDocArray[$j]] = array(
+											'id' => $record->Id,
+											'error' => false
+											);
+							}
+						} else {
+							$result[$idDocArray[$j]] = array(
+											'id' => '-1',
+											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+											);	
+						}
+						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
+						$j++;
+					}
+					// Init variable
+					$idDocArray = '';
+					unset($zObjects);
+				}
+			}
+		}
+		catch (\Exception $e) {
+			$error = $e->getMessage();
+			$result['error'] = $error;
+		}	
+		return $result;
 	}
+
 	
 	// Transform the SOAP xml to an array
 	protected function SoapXmlToArray($soapXml){
@@ -409,6 +511,63 @@ return null;			 */
     				$sessionVal);
        return $header;
     }
+	
+	
+	
+	protected function queryAll($query){
+
+		$moreCount = 0;
+		$recordsArray = array();
+		$totalStart = time();
+
+		$start = time();
+		$result = $this->instance->query($query);
+	
+		$end = time();
+		$elapsed = $end - $start;
+
+		$done = $result->result->done;
+		$size = $result->result->size;
+		$records = $result->result->records;
+
+		if ($size == 0){
+		} else if ($size == 1){
+			array_push($recordsArray, $records);
+		} else {
+
+			$locator = $result->result->queryLocator;
+			$newRecords = $result->result->records;
+			$recordsArray = array_merge($recordsArray, $newRecords);
+			while (!$done && $locator && $moreCount == 0){
+			
+				$start = time();
+				$result = $this->instance->queryMore($locator);
+				$end = time();
+				$elapsed = $end - $start;
+		
+				$done = $result->result->done;
+				$size = $result->result->size;
+				$locator = $result->result->queryLocator;
+				print "\nqueryMore";
+
+				$newRecords = $result->result->records;
+				$count = count($newRecords);
+				if ($count == 1){
+					array_push($recordsArray, $newRecords);
+				} else {
+					$recordsArray = array_merge($recordsArray, $newRecords);
+				}
+		
+			}
+		}
+
+		$totalEnd = time();
+		$totalElapsed = $totalEnd - $totalStart;
+
+		return $recordsArray;
+
+	}
+
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
