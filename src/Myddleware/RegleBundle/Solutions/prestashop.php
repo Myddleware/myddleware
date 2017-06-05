@@ -524,7 +524,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -595,7 +595,7 @@ class prestashopcore extends solution {
 						$opt['sort'] = '[id_ASC]';
 					}
 				}				
-				// Call				
+				// Call						
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
 				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);							
@@ -603,62 +603,64 @@ class prestashopcore extends solution {
 				
 				$record = array();
 				foreach ($simplexml->children()->children() as $data) {
-					foreach ($data as $key => $value) {
-						// Si la clé de référence est une date
-						if (
-								$this->referenceIsDate($param['module'])
-							&& $key == $dateRefField
-						) {
-							// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
-							$date_ref = date_create($value);
-							date_modify($date_ref, '+1 seconde');							
-							$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
+					if (!empty($data)) {			
+						foreach ($data as $key => $value) {
+							// Si la clé de référence est une date
+							if (
+									$this->referenceIsDate($param['module'])
+								&& $key == $dateRefField
+							) {
+								// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
+								$date_ref = date_create($value);
+								date_modify($date_ref, '+1 seconde');							
+								$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
 
-							$record['date_modified'] = (string)$value;
-							continue;
-						}
-						// Si la clé de référence est un id et que celui-ci est supérieur alors on sauvegarde cette référence
-						elseif (
-								!$this->referenceIsDate($param['module'])
-							&& $key == 'id'
-							&& (
-									empty($result['date_ref'])
-								 || (
-										!empty($result['date_ref'])
-									&&	$value >= $result['date_ref']
+								$record['date_modified'] = (string)$value;
+								continue;
+							}
+							// Si la clé de référence est un id et que celui-ci est supérieur alors on sauvegarde cette référence
+							elseif (
+									!$this->referenceIsDate($param['module'])
+								&& $key == 'id'
+								&& (
+										empty($result['date_ref'])
+									 || (
+											!empty($result['date_ref'])
+										&&	$value >= $result['date_ref']
+									)
 								)
-							)
-						) {
-							// Ajout de 1 car le filtre de la requête inclus la valeur minimum
-							$result['date_ref'] = $value + 1;
-							// Une date de modification est mise artificiellement car il n'en existe pas dans le module
-							$record['date_modified'] = (string)date('Y-m-d H:i:s');
-						}
-						if(isset($value->language)){
-							$record[$key] = (string) $value->language;
-						} else {
-							$record[$key] = (string)$value;
-						}
-						
-					}	
-					// Récupération du statut courant de la commande si elle est demandée
-					if ($getCurrentState) {
-						$optState['limit'] = 1;
-						$optState['resource'] = 'order_histories&date=1';
-						$optState['display'] = '[id_order_state]';
-						$optState['filter[id_order]'] = '['.$data->id.']';
-						$optState['sort'] = '[date_add_DESC]';
-						$xml = $this->webService->get($optState);
-						$xml = $xml->asXML();
-						$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+							) {
+								// Ajout de 1 car le filtre de la requête inclus la valeur minimum
+								$result['date_ref'] = $value + 1;
+								// Une date de modification est mise artificiellement car il n'en existe pas dans le module
+								$record['date_modified'] = (string)date('Y-m-d H:i:s');
+							}
+							if(isset($value->language)){
+								$record[$key] = (string) $value->language;
+							} else {
+								$record[$key] = (string)$value;
+							}
+							
+						}	
+						// Récupération du statut courant de la commande si elle est demandée
+						if ($getCurrentState) {
+							$optState['limit'] = 1;
+							$optState['resource'] = 'order_histories&date=1';
+							$optState['display'] = '[id_order_state]';
+							$optState['filter[id_order]'] = '['.$data->id.']';
+							$optState['sort'] = '[date_add_DESC]';
+							$xml = $this->webService->get($optState);
+							$xml = $xml->asXML();
+							$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 
-						$currentState = $simplexml->children()->children();
-						if (!empty($currentState)) {
-							$record['current_state'] = (string)$currentState->order_history->id_order_state;
-						}
-					}				
-					$result['values'][(string)$data->id] = $record;
-					$record = array();
+							$currentState = $simplexml->children()->children();
+							if (!empty($currentState)) {
+								$record['current_state'] = (string)$currentState->order_history->id_order_state;
+							}
+						}				
+						$result['values'][(string)$data->id] = $record;
+						$record = array();
+					}
 				}					
 			}
 			catch (\PrestaShopWebserviceException $e)
@@ -675,7 +677,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}			
+		}	
 		return $result;
 	} // read($param)
 	
