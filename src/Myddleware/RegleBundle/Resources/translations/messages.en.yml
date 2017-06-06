@@ -127,8 +127,8 @@ filter:
     different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
-    in: is included in the following table separated by;
-    notin: is not included in the following table separated by ;      
+    in: is included in the following table separated by semicolon
+    notin: is not included in the following table separated by semicolon
 
 view_rule:
     action:

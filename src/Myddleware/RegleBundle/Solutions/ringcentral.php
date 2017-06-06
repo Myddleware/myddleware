@@ -46,6 +46,7 @@ class ringcentralcore  extends solution {
 										'default' => array('id'),
 										'call-log' => array('id','startTime'),
 										'message-store' => array('id','lastModifiedTime'),
+										'presence' => array('id','date_modified'),
 									);
 	
 	public function getFieldsLogin() {	
@@ -117,6 +118,7 @@ class ringcentralcore  extends solution {
 			$modules = array(	
 								'call-log'		=> 'Call log',
 								'message-store'	=> 'Messages',
+								'presence'		=> 'Presence',
 							);
 			return $modules;			
 		} catch (\Exception $e) {
@@ -152,18 +154,12 @@ class ringcentralcore  extends solution {
 		
 	public function read_last($param) {
 		try {
- 
-			// Add required fields
-// print_r($param['fields']);			
+			// Add required fields			
 			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
-// print_r($param['fields']);			
-			// Get the reference date field name
-			// $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			// $args['dateFrom'] = '2016-03-10T18:07:52.534Z';
-			// 2010-04-07T00:00:00+01:00
-	// echo 'date 1 : '.$param['date_ref'].chr(10);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 	
-			// Generate the WHERE
+			// Generate the WHERE // no nedd because Ringcentral is used in source application only
 			if (!empty($param['query'])) {
 				
 			// The function is called for a simulation (rule creation) if there is no query
@@ -172,24 +168,26 @@ class ringcentralcore  extends solution {
 				$date = date_modify($date, '-1 month');	
 				$where = "dateFrom=".$date->format('Y-m-d\TH:i:s.Z\Z');
 			}
-			// $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
-	// echo 'date 2 : '.$dateRef.chr(10);
+			// Call the function to Ringcentral
 			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?perPage=1&".$where);
-// $records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/address-book/contact");
-// print_r($records);
-// return null;
-// print_r($param['fields']);
-			
+		
+			// Error managment
 			if(!empty($records->errorCode)) {
 				throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
 			}
 			
+			// Transform result by adding a dimension for the presence module (only one record for each call)
+			if ($param['module'] == 'presence') {
+				$recordsObj = new \stdClass();
+				$recordsObj->records = array($records);
+				$records = $recordsObj;
+			}
+			
 			if (!empty($records->records)) {
 				// For each records
-				foreach($records->records as $record) {
+				foreach($records->records as $record) {			
 					// For each fields expected
 					foreach($param['fields'] as $field) {
-// echo 'field : '.$field.chr(10);
 						// The field could be a structure from_phoneNumber for example
 						$fieldStructure = explode('__',$field);
 						// If 2 dimensions						
@@ -197,19 +195,7 @@ class ringcentralcore  extends solution {
 							// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
 							$record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
 						}
-						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-						if(isset($record->$field)) {
-							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-							// if ($field == $dateRefField) {
-// echo 'date deb : '.$record->$field.chr(10);
-								// $dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
-// echo 'date fin : '.$dateMyddlewareFormat.chr(10);
-								// $row['date_modified'] = $dateMyddlewareFormat;
-							// }
-							$result['values'][$field] = $record->$field;
-						} else {
-							$result['values'][$field] = '';
-						}
+						$result['values'][$field] = $record->$field;
 						$result['done'] = true;
 					}
 				}
@@ -221,8 +207,6 @@ class ringcentralcore  extends solution {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
 		}	
-// print_r($result);	
-// return null;	
 		return $result;
 	}	
 	
@@ -230,27 +214,31 @@ class ringcentralcore  extends solution {
 		try {
 			$result['date_ref'] = $param['date_ref'];
 			$result['count'] = 0;
-			// Add required fields
-// print_r($param['fields']);			
+			// Add required fields			
 			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
-// print_r($param['fields']);			
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+		
 			// Get the reference date field name
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			// $args['dateFrom'] = '2016-03-10T18:07:52.534Z';
-			// 2010-04-07T00:00:00+01:00
-	// echo 'date 1 : '.$param['date_ref'].chr(10);
-	
-	
 			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
-	// echo 'date 2 : '.$dateRef.chr(10);
-			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
-// $records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/address-book/contact");
-// print_r($records);
-// return null;
-// print_r($param['fields']);
 			
+			// Call RingCEntral
+			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
+
+			// Error managment
 			if(!empty($records->errorCode)) {
 				throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
+			}
+			
+			// Transform result by adding a dimension for the presence module (only one record for each call)
+			if ($param['module'] == 'presence') {
+				$recordsObj = new \stdClass();
+				// No/date ref id in the presence module
+				$records->id = uniqid('', true).'_'.$records->extension->extensionNumber;
+				$records->$dateRefField = date('Y-m-d H:i:s');
+				$recordsObj->records = array($records);
+				$records = $recordsObj;
 			}
 			
 			if (!empty($records->records)) {
@@ -258,7 +246,6 @@ class ringcentralcore  extends solution {
 				foreach($records->records as $record) {
 					// For each fields expected
 					foreach($param['fields'] as $field) {
-// echo 'field : '.$field.chr(10);
 						// The field could be a structure from_phoneNumber for example
 						$fieldStructure = explode('__',$field);
 						// If 2 dimensions						
@@ -270,9 +257,7 @@ class ringcentralcore  extends solution {
 						if(isset($record->$field)) {
 							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
 							if ($field == $dateRefField) {
-// echo 'date deb : '.$record->$field.chr(10);
 								$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
-// echo 'date fin : '.$dateMyddlewareFormat.chr(10);
 								$row['date_modified'] = $dateMyddlewareFormat;
 							}
 							$row[$field] = $record->$field;
@@ -283,10 +268,10 @@ class ringcentralcore  extends solution {
 					// date à gérer
 					if (
 							!empty($row['date_modified'])
-						&&	$result['date_ref'] < $row['date_modified']
+						&&	$result['date_ref'] <= $row['date_modified']
 					) {
-						$date = new \DateTime($row['date_modified']);
-						$date = date_modify($date, '+1 seconde');	
+						$date = new \DateTime($row['date_modified']);					
+						$date = date_modify($date, '+1 seconde');						
 						$result['date_ref'] = $date->format('Y-m-d H:i:s');
 					}
 					$result['values'][$record->id] = $row;
@@ -298,8 +283,6 @@ class ringcentralcore  extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 		}	
-// print_r($result);	
-// return null;	
 		return $result;
 	}	
 	
@@ -309,6 +292,8 @@ class ringcentralcore  extends solution {
 			return 'startTime';
 		} elseif ($moduleSource == 'message-store') {
 			return 'lastModifiedTime';
+		}elseif ($moduleSource == 'presence') {
+			return 'date_modified';
 		}
 	}	
 	
@@ -321,7 +306,7 @@ class ringcentralcore  extends solution {
 								'name' => 'extensionId',
 								'type' => 'text',
 								'label' => 'Extension Id',
-								'required'	=> true
+								'required'	=> false
 							);	
 			return $params;
 		}
@@ -363,19 +348,11 @@ class ringcentralcore  extends solution {
     // HTTP Request function
     function makeRequest( $server, $token, $path, $args = null, $method = 'GET', $data = null ) {
       if (function_exists('curl_init') && function_exists('curl_setopt')) {
-			// Make sure base path is always included
-			// $basePath = '/^\/restapi\//';
-			// if( 1 !== preg_match( $basePath, $path ) ) {
-				// $path = "/restapi/" . $path;
-			// }
-
 			// The URL to use
 			$ch = curl_init( $server . $path );
 			// Make sure params is empty or an array
 			if( !empty($args) ) {
-				// $value = http_build_query($args); //args is an array	
-				$value = json_encode($args);
-// echo '$value : '.$value.chr(10).chr(10).chr(10).chr(10);				
+				$value = json_encode($args);			
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $value);
 			}
 			// Set authorization header properly

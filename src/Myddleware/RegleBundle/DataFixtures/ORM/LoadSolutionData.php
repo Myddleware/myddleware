@@ -53,6 +53,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'microsoftsql',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'ringcentral',		'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'cirrusshield',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'zuora',			'active' => 1,'source' => 1,'target' => 1),
 							);
  
     public function load(ObjectManager $manager){

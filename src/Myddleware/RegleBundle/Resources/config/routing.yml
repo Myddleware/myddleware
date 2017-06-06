@@ -240,7 +240,9 @@ my_account:
               
 account_locale:
     pattern:  /account/locale/
-    defaults: { _controller: RegleBundle:Account:changeLocale } 
+    defaults: { _controller: RegleBundle:Account:changeLocale }
+    options:
+        expose: true
       
 task_list:
     pattern:  /task/list/

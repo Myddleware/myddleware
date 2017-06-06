@@ -1,4 +1,4 @@
-	{
+{
     "name": "symfony/framework-standard-edition",
     "license": "MIT",
     "type": "project",
@@ -8,10 +8,11 @@
     },
     "require": {
         "php": ">=5.5.0",
-        "symfony/symfony": "2.8.9",
+        "symfony/symfony": "2.8.21",
         "doctrine/orm": "~2.2,>=2.2.3",
         "doctrine/doctrine-bundle": "~1.2",
         "twig/extensions": "~1.0",
+		"twig/twig": "^1.0",
         "symfony/assetic-bundle": "~2.3",
         "symfony/swiftmailer-bundle": "~2.3",
         "symfony/monolog-bundle": "~2.4",
@@ -29,7 +30,8 @@
 		"white-october/pagerfanta-bundle": "dev-master",
 		"pagerfanta/pagerfanta": "dev-master",
 		"raulfraile/ladybug-bundle": "~1.0",        
-		"illuminate/encryption": "5.3.*@dev"     
+		"illuminate/encryption": "5.3.*@dev",
+        "friendsofsymfony/jsrouting-bundle": "^1.6"     
     },
     "repositories": [   
         {

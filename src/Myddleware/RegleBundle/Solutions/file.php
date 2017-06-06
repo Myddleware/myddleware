@@ -34,6 +34,10 @@ class filecore extends solution {
 	Protected $duplicateDoc = array();
 	Protected $connection;
 	Protected $delimiter = ';';
+	Protected $enclosure = '"';
+	Protected $escape = '';
+	Protected $removeChar = array(' ','/','\'','.','(',')');
+	protected $readLimit = 1000;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -114,14 +118,13 @@ class filecore extends solution {
 			$output = stream_get_contents($stream);	
 			// Transform the directory list in an array
 			$directories = explode(chr(10),trim($output));
-
 			$modules = array();
 			// Add the current directory
-			$modules[$this->paramConnexion['directory']] = $this->paramConnexion['directory'];
+			$modules['/'] = 'Root directory';
 			// Add the sub directories if exist
 			if (!empty($directories)) {
 				foreach($directories as $directory) {
-					$modules[$this->paramConnexion['directory'].'/'.$directory] = $this->paramConnexion['directory'].'/'.$directory;
+					$modules[$directory] = $directory;
 				}
 			}
 			return $modules;
@@ -137,8 +140,9 @@ class filecore extends solution {
 		try{
 			if($type == 'source') {
 				// Get the file with the way of this file
-				$file = $this->get_last_file($module,'1970-01-01 00:00:00');
-				$fileName = trim($module.'/'.$file);	
+				$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module,'1970-01-01 00:00:00');
+				$fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);	
+			
 				// The behaviour of pp is different after version 5.6.27
 				if (version_compare(phpversion(), '5.6.27', '<')) { 
 					$sftp = ssh2_sftp($this->connection);
@@ -146,13 +150,18 @@ class filecore extends solution {
 					$sftp = intval(ssh2_sftp($this->connection));
 				}
 				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-				$headerString = $this->cleanHeader(trim(fgets($stream)));
-				$header = explode($this->delimiter, $headerString);
-				
+				$headerString = $this->cleanHeader(trim(fgets($stream)));			
+				$header = str_getcsv($headerString, $this->getDelimiter(array('module'=>$module)), $this->getEnclosure(array('module'=>$module)), $this->getEscape(array('module'=>$module)));
+		
 				// Parcours des champs de la table sélectionnée
+				$i=1;			
 				foreach ($header as $field) {
+					// In case the field name is empty
+					if(empty($field)) {
+						$field = 'Column_'.$i;
+					}
 					// Spaces aren't accepted in a field name
-					$this->moduleFields[str_replace(array(' ','/','\''), '', $field)] = array(
+					$this->moduleFields[str_replace($this->removeChar, '', $field)] = array(
 							'label' => $field,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
@@ -163,7 +172,7 @@ class filecore extends solution {
 					if (!empty($idFields)) {
 						foreach ($idFields as $idField) {	
 							if (strpos($field,$idField) !== false) {
-								$this->fieldsRelate[str_replace(array(' ','/','\''), '', $field)] = array(
+								$this->fieldsRelate[str_replace($this->removeChar, '', $field)] = array(
 										'label' => $field,
 										'type' => 'varchar(255)',
 										'type_bdd' => 'varchar(255)',
@@ -173,12 +182,12 @@ class filecore extends solution {
 							}
 						}
 					}
+					$i++;
 				}				
-				return $this->moduleFields;
 			} else {
 				$this->moduleFields = array();
-				return $this->moduleFields;
 			}
+			return $this->moduleFields;
 		}
 		catch (\Exception $e){
 			$error = $e->getMessage();
@@ -194,7 +203,7 @@ class filecore extends solution {
 	}
 	
 	
-		// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux ou pour réchercher un doublon dans la cible)
+	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux ou pour réchercher un doublon dans la cible)
 	// Param contient : 
 	//	module : le module appelé 
 	//	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
@@ -207,9 +216,10 @@ class filecore extends solution {
 		$done = false;
 		$result = array();
 		try {
-			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".
-			$file = $this->get_last_file($param['module'],"1970-01-01 00:00:00");
-			$fileName = $param['module'].'/'.trim($file);
+			// Get the file with the way of this file. But we take the odlest file of the folder. We put "0000-00-00 00:00:00" to have a date but it's because "read_last" doesn't know "$param['date_ref']".	
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],'1970-01-01 00:00:00');
+			$fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
+			
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -217,9 +227,8 @@ class filecore extends solution {
 				$sftp = intval(ssh2_sftp($this->connection));
 			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
+			$header = $this->getFileHeader($stream,$param);
+		
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -239,7 +248,8 @@ class filecore extends solution {
 					continue; 
 				};
 				
-				$rowFile = explode($this->delimiter, $buffer);
+				// Transform the buffer in an array of field
+				$rowFile = $this->transformRow($buffer,$param);
 				$nbRowLine = count($rowFile); 
 				$count++;
 				
@@ -248,19 +258,24 @@ class filecore extends solution {
 					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
 				}
 				foreach($allRuleField as $field){
-					$colonne = array_search($field, $header);	
-					$values[$field] = $rowFile[$colonne];
+					$column = array_search($field, $header);	
+					// If the column isn't found we skip it
+					if ($column === false) {
+						$values[$field] = '';
+						continue;
+					}
+					$values[$field] = $rowFile[$column];
 				}
 				$done=true;
 			}
 			$result = array(
 							'values'=>$values,
 							'done' => true
-			);					
+			);	
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
-		}	
+		}					
 		return $result;
 	}
 
@@ -278,18 +293,23 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {	
 		$count = 0;
-		$result = array();
+		$offset = 0;
+		$result = array();	
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($param['module'],$param['date_ref']);
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],$param['date_ref']);
 			// If there is no file
 			if(empty($file)){
 				return null;
 			}
+			// If the file has already been read, we get the offset to read from this line
+			if (!empty($param['ruleParams'][$file])) {
+				$offset = $param['ruleParams'][$file];
+			}
 			
-			$fileName = $param['module'].'/'.trim($file);
+			$fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
 			// The behaviour of pp is different after version 5.6.27
 			if (version_compare(phpversion(), '5.6.27', '<')) { 
 				$sftp = ssh2_sftp($this->connection);
@@ -297,9 +317,8 @@ class filecore extends solution {
 				$sftp = intval(ssh2_sftp($this->connection));
 			}
 			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
-			$headerString = $this->cleanHeader(trim(fgets($stream)));
-			// Spaces aren't accepted in a field name
-			$header = explode($this->delimiter, str_replace(array(' ','/','\''), '', $headerString));
+			$header = $this->getFileHeader($stream,$param);
+
 			$nbCountHeader = count($header);
 			
 			$allRuleField = $param['fields'];
@@ -307,7 +326,7 @@ class filecore extends solution {
 			$allRuleField[] = $param['ruleParams']['fieldId'];
 
 			// Get the date of modification of the file
-			$new_date_ref = ssh2_exec($this->connection, 'cd '.$param['module'].';stat -c %y '.$file);
+			$new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].'/'.$param['module'].';stat -c %y '.$file);
 			stream_set_blocking($new_date_ref, true);
 			$new_date_ref = stream_get_contents($new_date_ref);
 			$new_date_ref = trim($new_date_ref);
@@ -345,58 +364,98 @@ class filecore extends solution {
 			}		
 			//Control all lines of the file
 			$values = array();
-			while (($buffer = fgets($stream)) !== false) {
+			$lineNumber = 2; // We count the header
+			while (($buffer = fgets($stream)) !== false) {				
 				$idRow = '';
+				// We don't read again line already read in a previous call
+				if ($lineNumber < $offset) {
+					$lineNumber++;
+					continue;
+				}			
+				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
+					$lineNumber++;
 					continue;
 				};
 				
-				$rowFile = explode($this->delimiter, $buffer);
-				$checkRow = $this->checkRow($buffer);
+				$rowFile = $this->transformRow($buffer,$param);
+				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
+					$lineNumber++;
 					continue;
-				}
-				
+				}				
 				//If there are not the good number of columns, display an error
-				$nbRowLine = count($rowFile); 
+				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
-					throw new \Exception('File is rejected because there are not the good number of columns at the line '.$count);
-				}
+					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
+				}			
 				foreach($allRuleField as $field){
-					$colonne = array_search($field, $header);
+					$column = array_search($field, $header);
+					// If the column isn't found we skip it
+					if (
+							$column === false
+						AND $field != 'myddleware_generated'
+					) {
+						$row[$field] = '';
+						continue;
+					}
 					if($field==$param['ruleParams']['fieldId']){
-						if ($field == 'myddleware_generated') {
+						if ($field == 'myddleware_generated') {				
 							$idRow = $this->generateId($param,$rowFile);
 						}
 						else {
-							$idRow = $rowFile[$colonne];							
+							$idRow = $rowFile[$column];							
 						}
-						$row['id'] = $rowFile[$colonne];
+						$row['id'] = $idRow;
 					}
-					$row[$field] = $rowFile[$colonne];
-				}
-				$row['date_modified'] = $new_date_ref;
+					$row[$field] = $rowFile[$column];
+				}			
+				$row['date_modified'] = $new_date_ref;			
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
+					$lineNumber++;
 					continue;
 				}
-				$count++;
+				$count++; // Save the number of line read
+				$lineNumber++; // Save the line number
 				$values[$idRow] = $row;
+				// If we have reached the limit we stop to read
+				if ($count >= $this->readLimit) {
+					break;
+				}
 			}
-
 			// la première ligne te donne les nom des champs, les lignes suivantes te donne leur valeur
 			$result = array(
 							'count'=>$count,
-							'date_ref'=>$new_date_ref,
-							'values'=>$values
+							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
+							'values'=>$values,
+							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber)),
+							'notRecall' => true // Stop the recall in the function Rule->readSource()
 			);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}		
+		}	
 		return $result;
 	} // read($param)
+	
+	// Convert the first line of the file to an array with all fields
+	protected function getFileHeader($stream,$param) {
+		$headerString = $this->cleanHeader(trim(fgets($stream)));
+		// Spaces aren't accepted in a field name
+		$fields = str_getcsv(str_replace($this->removeChar, '', $headerString), $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
+		$i = 1;
+		foreach($fields as $field) {
+			if (empty($field)) {
+				$header[] = 'Column_'.$i;
+			} else {
+				$header[] = $field;
+			}
+			$i++;
+		}	
+		return $header;
+	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
 	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
@@ -437,8 +496,28 @@ class filecore extends solution {
 		return $str;
 	} 
 	
-	protected function checkRow($buffer){
+	protected function checkRow($rowFile,$param){
 		return true;
+	}
+	
+	// Transformm the buffer to and array of fields
+	protected function transformRow($buffer,$param){
+		return str_getcsv($buffer, $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
+	}
+	
+	// Get the delimiter
+	protected function getDelimiter($param){
+		return $this->delimiter;
+	}
+	
+	// Get the enclosure
+	protected function getEnclosure($param){
+		return $this->enclosure;
+	}
+	
+	// Get the escape
+	protected function getEscape($param){
+		return $this->escape;
 	}
 	
 	protected function validateRow($row, $idRow, $rowNumber){
@@ -456,7 +535,7 @@ class filecore extends solution {
 		stream_set_blocking($stream, true);
 		$file = stream_get_contents($stream);	
 		$file = ltrim($file,'./'); // The filename can have ./ at the beginning
-		return $file;
+		return trim($file);
 	}
 	
 	// Get the strings which can identify what field is an id in the table

@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // Tools
+use Myddleware\RegleBundle\Entity\RuleParam;
 
 class rulecore {
 	
@@ -54,6 +55,7 @@ class rulecore {
 	protected $manual;
 	protected $key;
 	protected $limit = 100;
+	protected $limitReadCommit = 1000;
 	protected $tools;
 	
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param) {
@@ -277,7 +279,7 @@ class rulecore {
 
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
-							if ($i >= 1000){
+							if ($i >= $this->limitReadCommit){
 								$this->connection->commit(); // -- COMMIT TRANSACTION
 								$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 								$i = 0;
@@ -335,8 +337,7 @@ class rulecore {
 		$stmt->execute();			
 	}
 	
-	protected function readSource() {
-		
+	protected function readSource() {		
 		$read['module'] = $this->rule['module_source'];
 		$read['rule'] = $this->rule;
 		$read['date_ref'] = $this->ruleParams['datereference'];
@@ -358,6 +359,30 @@ class rulecore {
 			$connect = $this->connexionSolution('source');
 			if ($connect === true) {
 				$this->dataSource = $this->solutionSource->read($read);
+									
+				// If params has been added in the outup of the rule we saved it
+				if (!empty($this->dataSource['ruleParams'])) {
+					foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
+						// Search to check if the param already exists
+						 $paramEntity = $this->em->getRepository('RegleBundle:RuleParam')
+							   ->findOneBy( array(
+											'rule' => $this->ruleId, 
+											'name' => $ruleParam['name']
+										)
+								);	
+						// Update or create the new param		
+						if (!empty($paramEntity)) {
+							$paramEntity->setValue( $ruleParam['value'] );
+						} else {
+							$paramEntity = new RuleParam();		
+							$paramEntity->setRule($this->ruleId);
+							$paramEntity->setName($ruleParam['name']);
+							$paramEntity->setValue($ruleParam['value']); 						
+						}
+						$this->em->persist($paramEntity);
+						$this->em->flush();				
+					}
+				}				
 				// Si on a $this->limit résultats et que la date de référence n'a pas changée alors on récupère les enregistrements suivants
 				// Récupération de la date de modification du premier enregistrement
 				$value['date_modified'] = '';
@@ -375,19 +400,27 @@ class rulecore {
 					while (
 							$dataSource['count'] == $this->limit
 						&& $dataSource['date_ref'] == $value['date_modified']
+						&& empty($dataSource['whileStop']) // Force stop in some case (example connector file where all recoe
 					) {
 						// Gestion de l'offset
 						$i++;
 						$read['offset'] = $i*$this->limit;
 						// On récupère les enregistrements suivants
 						$dataSource = $this->solutionSource->read($read);
-						if(empty($dataSource) || $dataSource['count'] == 0) break;
+						if(
+								empty($dataSource) 
+							 || $dataSource['count'] == 0
+						) {
+							break;
+						}
 						// Sauvegarde des élément dans le tableau final
 						$this->dataSource['values'] = array_merge($this->dataSource['values'],$dataSource['values']);
 						$this->dataSource['count'] += $dataSource['count'];
 						$this->dataSource['date_ref'] = $dataSource['date_ref'];
+
+					
 					}
-				}
+				}			
 				// Logout (source solution)
 				if (!empty($this->solutionSource)) {
 					$loginResult = $this->solutionSource->logout();	
@@ -544,7 +577,9 @@ class rulecore {
 		// Création des données dans la cible
 		$sendTarget = $this->sendTarget('C');
 		// Modification des données dans la cible
-		$sendTarget = $this->sendTarget('U');
+		if (empty($sendTarget['error'])) {
+			$sendTarget = $this->sendTarget('U');
+		}
 		// Logout target solution
 		if (!empty($this->solutionTarget)) {
 			$loginResult['error'] = $this->solutionTarget->logout();	
