@@ -80,21 +80,7 @@ class zuoracore  extends solution {
 			
 			$this->instance->setLocation('https://apisandbox.zuora.com/apps/services/a/85.0');
 			$this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
-			
-			
-			
-			/* // Create the soap client
-			$this->client = createClient($this->paramConnexion['wsdl'], $this->debug);
-			// Connection to Zuora
-			$this->sessionId = login($this->client, $this->paramConnexion['login'], $this->paramConnexion['password'], $this->debug);
-			
-			// error managment
-			if(!empty($this->sessionId)) {
-				// Header creation
-				$this->header = $this->getHeader($this->sessionId);
-			} else {
-				throw new \ Exception("No SessionID. Logon failed.");
-			} */
+
 			$this->connexion_valide = true; 
 		}
 		catch (\Exception $e) {
@@ -109,7 +95,7 @@ class zuoracore  extends solution {
 	// Get the modules available
 	public function get_modules($type = 'source') {
 		try{	
-			require_once('lib/lib_zuora.php');
+			require_once('lib/zuora/lib_zuora.php');
 			// Get all modules from te wsdl
 			$zuoraModules = getObjectListFromWSDL($this->paramConnexion['wsdl'], $this->debug);		
 			if (!empty($zuoraModules)) {
@@ -129,7 +115,7 @@ class zuoracore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			require_once('lib/lib_zuora.php');
+			require_once('lib/zuora/lib_zuora.php');
 			$zupraFields = \ZuoraAPIHelper::getFieldList($this->paramConnexion['wsdl'], $module);	
 			if (!empty($zupraFields)) {
 				// Add each field in the right list (relate fields or normal fields)
@@ -212,7 +198,7 @@ class zuoracore  extends solution {
 			$this->instance->setQueryOptions(1);
 			// Call Zuora
 			$resultQuery = $this->instance->query($query);
-
+			
 			// If no result
 			if (empty($resultQuery->result->records)) {
 				$result['done'] = false;
@@ -240,181 +226,20 @@ class zuoracore  extends solution {
 		return $result;
 	}
 
-	protected function getSoapVar($array,$object = 'zObject')
-    {
-        return new \SoapVar(
-            (array)$array,
-            SOAP_ENC_OBJECT,
-            $object,
-            'http://object.api.zuora.com/'
-        );
-    }
-	
-	// Create data in the target solution
-	public function create($param) {
-		// Get the action because we use the create function to update data as well
-		$action = ($this->update ? 'update' : 'create');
-		try {
-			$idDocArray = '';
-			$i = 0;
-			// $first = true;
-			$nb_record = count($param['data']);	
-print_r($param['data']);			
-			foreach($param['data'] as $idDoc => $data) {
-				$i++;
-				// Save all idoc in the right order
-				$idDocArray[]= $idDoc;
-				 // Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
-print_r($data);				
-				$obj = 'Zuora_'.$param['module'];
-				$zObject = new $obj();
-			
-				foreach ($data as $key => $value) {
-					// Field only used for the update and contains the ID of the record in the target solution
-					if ($key=='target_id') {
-						// If update then we change the key in Id
-						if (!empty($value)) {
-							$key = 'Id';
-						} else { // If creation, we skip this field
-							continue;
-						} 
-					}
-					// Init the array $fieldList oly one time
-					// if ($first == true) {
-						// $fieldList[] = $key;
-					// }
-					
-					// $zAccount = new Zuora_Account();
-    // $zAccount->AllowInvoiceEdit = 1;
-    // $zAccount->AutoPay = 0;
-    // $zAccount->Batch = 'Batch1';
-    // $zAccount->BillCycleDay = 1;
-    // $zAccount->Currency = $currency;
-    // $zAccount->Name = $name;    
-    // $zAccount->PaymentTerm = 'Due Upon Receipt';
-    // $zAccount->Status = $status;
-
-		//$zAccount->CrmId = 'SFDC-1223471249003';
-		//$zAccount->PurchaseOrderNumber = 'PO-1223471249003';
-		// return $zAccount;
-					$zObject->$key = $value;
-					// $val[$key] = $value;
-				}	
-// print_r($zObject);				
-// return null;					
-				// $first = false;
-				$zObjects[] = $zObject;
-				unset($zObject);
-				// If we have finished to read all data or if the package is full we send the data to Sallesforce
-				if (
-						$nb_record == $i
-					 || $i % $this->limitCall  == 0
-				) {
-	 			if (
-						$param['module'] == 'Subscription'
-					AND (
-							$action = 'create'	
-						 OR $action = 'subscribe'
-					)
-				) {
-					$action = 'subscribe';
-				}
-				
-print_r($zObjects);	
-				$resultUpsert = $this->instance->create($zObjects);
-print_r($resultUpsert);	
-					
-					
-return null;	
-// $val['Number'] = 'A-S00000041';
-// print_r($param);				
-// $action = 'subscribe';				
-	/* 	$subscribeRequest = array(
-            // 'SubscriptionNumber'=>'A-S99000041',
-            'Account'=>array('AccountId'=>'2c92c0f85c48f335015c56eb44450455'),
-            'BillToContact'=>array('ContactId'=>'2c92c0f95c490174015c56f0659e3e22'),
-			// 'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'), 'RatePlanCharge'=>array('Name' => 'test', 'ProductRatePlanChargeId' => '2c92c0f857bc72b90157becc0292347d'))),
-			'SubscriptionData'=>array('Subscription' => $val, 'RatePlanData' => array('RatePlan' => array('ProductRatePlanId'=>'2c92c0f957bc82720157becaa2d61655'))),
-        );
-					*/		
-	$subscribeRequest[$param['module']] = $val;				
-print_r(array($subscribeRequest));		 	
-					// try {
-						$result = $this->client->__soapCall($action, array('zObjects'=>array($subscribeRequest)), null, $this->header);   
-					// } catch (\SoapFault $fault) {
-						// throw new \Exception($fault->getMessage());
-					// }
-// print_r($operation);					
-// echo 'AAAA'.chr(10);					
-print_r($result->result);
-return null;					
-					$xml = \ZuoraAPIHelper::printXMLWithNS($action, $param['module'], $fieldList, $values, $this->debug, 0, $this->defaultApiNamespace, $this->defaultObjectNamespace, false);
-					$operation = \ZuoraAPIHelper::bulkOperation($this->client, $this->header, $action, $xml, count($values), $this->debug);
-					// Transform the SOAP xml to an array
-					$responseArray = $this->SoapXmlToArray($operation['response']);
-					 // General error
-					if (!empty($responseArray['soapenvBody']['soapenvFault'])) {
-						throw new \Exception(print_r($responseArray['soapenvBody']['soapenvFault'],true));
-					}
-					if (empty($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'])) {
-						throw new \Exception('No response from Zuora. ');
-					}
-					// If only on document sent, we add a dimension to keep the compatibility with the code
-					if (count($idDocArray) == 1) {
-						$responseArrayTmp = array($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']);
-						$responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'] = $responseArrayTmp;
-					}
-					
-					// Check the number result
-					if (count($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']) <> count($idDocArray)) {
-						throw new \Exception('The number of result from Zuora ('.count($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result']).') is different of the number of data sent to Zuora ('.count($idDocArray).'). Myddleware is not able to analyse the result. ');
-					}
-					// Get the response for each records
-					$j = 0;
-					foreach($responseArray['soapenvBody']['ns1'.$action.'Response']['ns1result'] as $recordResponse) {
-						if ($recordResponse['ns1Success'] == 'true') {
-							if (empty($recordResponse['ns1Id'])) {
-								$result[$idDocArray[$j]] = array(
-										'id' => '-1',
-										'error' => 'No Id in the response of Zuora. '
-										);									
-							} else {
-								$result[$idDocArray[$j]] = array(
-											'id' => $recordResponse['ns1Id'],
-											'error' => false
-											);
-							}
-						} else {
-							$result[$idDocArray[$j]] = array(
-											'id' => '-1',
-											'error' => (empty($recordResponse['ns1Errors']) ? 'No error returned by Zuora.' : print_r($recordResponse['ns1Errors'],true))
-											);	
-						}
-						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
-						$j++;
-					}
-					// Init variable
-					$values = '';
-					$operation = '';
-					$responseArray = '';
-					$idDocArray = '';
-				}
-			}
-		}
-		catch (\Exception $e) {
-			$error = $e->getMessage().' '.$e->getFile().' line '.$e->getLine();
-			// $error = $e->getMessage();
-			$result['error'] = $error;
-		}	
-// print_r($result);		
-		return $result;
-	}
-
 	// Cirrus Shield use the same function for record's creation and modification
-	public function update($param) {
+	public function create($param) {
+		
 		// Get the action because we use the create function to update data as well
-		$action = ($this->update ? 'update' : 'create');
+		if ($this->update) {
+			$action = 'update';
+		// If creation and subscription, we use function subscrbe and we limit the call by one
+		} elseif ($param['module'] == 'Subscription') {
+			$action = 'subscribe';
+			$this->limitCall = 1;
+		} else {
+			$action = 'create';
+		}
+
 		try {
 			$idDocArray = '';
 			$i = 0;
@@ -440,79 +265,117 @@ return null;
 						} 
 					}
 					$zObject->$key = $value;
+					if ($key=='AccountId') {
+						if ($action == 'subscribe') {
+							$zAccount = new \Zuora_Account();
+							$zAccount->AccountId = $value;
+						}
+					}
+					if ($key=='AccountId') {
+						if ($action == 'subscribe') {
+							$zBillToContact = new \Zuora_Contact();
+							$zBillToContact->ContactId = '2c92c0f85c656dbf015c7a5ef4617b73';
+						}
+					}
 				}	
+				// Create objects for the subscribe function 
+				if ($action == 'subscribe') {
+					$zSubscriptionData = new \Zuora_SubscriptionData($zObject);
+					unset($zObject);
+					$zRatePlan = new \Zuora_RatePlan();
+					$zRatePlan->ProductRatePlanId = '2c92c0f85c48f2ef015c5f099d5b5a04';
+					$zRatePlanData = new \Zuora_RatePlanData($zRatePlan);
+					unset($zRatePlan);
+					$zSubscriptionData->addRatePlanData($zRatePlanData);
+					unset($zRatePlanData); 
 				// Create the object collection
-				$zObjects[] = $zObject;
-				unset($zObject);
+				} else {
+					$zObjects[] = $zObject;
+					unset($zObject);
+				}
 				// If we have finished to read all data or if the package is full we send the data to Sallesforce
 				if (
 						$nb_record == $i
 					 || $i % $this->limitCall  == 0
 				) {
-					$resultUpdate = $this->instance->update($zObjects);
-					if (empty($resultUpdate)) {
+					// Manage differents calls (subscripe, create and update
+					if ($action == 'subscribe') {
+						$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zBillToContact);
+						unset($zAccount);
+						unset($zSubscriptionData);
+						unset($zBillToContact);
+					} elseif ($action == 'create') {
+						$resultCall = $this->instance->create($zObjects);
+					} else {
+						$resultCall = $this->instance->update($zObjects);
+					}
+					
+					// General error
+					if (empty($resultCall)) {
 						throw new \Exception('No response from Zuora. ');
 					}
-					// If only one result, we add a dimension
-					if (isset($resultUpdate->result->Id)) {
-						$resultUpdate->result = array($resultUpdate->result);
-					}
-
-					// Get the response for each records
+					
+					// Manage results
 					$j = 0;
-					foreach($resultUpdate->result as $record) {
-						if ($record->Success) {
-							if (empty($record->Id)) {
-								$result[$idDocArray[$j]] = array(
-										'id' => '-1',
-										'error' => 'No Id in the response of Zuora. '
-										);									
-							} else {					
-								$result[$idDocArray[$j]] = array(
-											'id' => $record->Id,
-											'error' => false
-											);
-							}
-						} else {
+					if ($action == 'subscribe') {			
+						if (!empty($resultCall->result->Errors)) {
 							$result[$idDocArray[$j]] = array(
-											'id' => '-1',
-											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
-											);	
+												'id' => '-1',
+												'error' => (empty($resultCall->result->Errors) ? 'No error returned by Zuora.' : print_r($resultCall->result->Errors,true))
+												);	
+						// Succes of the subscription
+						} else {
+						
 						}
 						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
-						$j++;
+					} else {
+						// If only one result, we add a dimension
+						if (isset($resultCall->result->Id)) {
+							$resultCall->result = array($resultCall->result);
+						}
+
+						// Get the response for each records
+						foreach($resultCall->result as $record) {
+							if ($record->Success) {
+								if (empty($record->Id)) {
+									$result[$idDocArray[$j]] = array(
+											'id' => '-1',
+											'error' => 'No Id in the response of Zuora. '
+											);									
+								} else {					
+									$result[$idDocArray[$j]] = array(
+												'id' => $record->Id,
+												'error' => false
+												);
+								}
+							} else {
+								$result[$idDocArray[$j]] = array(
+												'id' => '-1',
+												'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+												);	
+							}
+							$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
+							$j++;
+						}
+						// Init variable
+						unset($zObjects);
 					}
-					// Init variable
-					$idDocArray = '';
-					unset($zObjects);
 				}
+				$idDocArray = '';
 			}
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-		}	
+		}			
 		return $result;
 	}
-
 	
-	// Transform the SOAP xml to an array
-	protected function SoapXmlToArray($soapXml){
-		$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $soapXml);
-		$xml2 = new \SimpleXMLElement($response);
-		return json_decode(json_encode((array)$xml2), TRUE); 
+	// We use the create function to update data
+	public function update($param) {	
+		$this->update = true;
+		return $this->create($param);
 	}
-	 
-	// Build the header because it can't be created in lib_zuora.php
-	protected function getHeader($sessionId){
-       $sessionVal = array('session'=>$sessionId);
-       $header = new \SoapHeader($this->defaultApiNamespaceURL,
-    				'SessionHeader',
-    				$sessionVal);
-       return $header;
-    }
-	
-	
 	
 	protected function queryAll($query){
 
