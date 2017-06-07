@@ -3489,9 +3489,8 @@ function verifFields(field_id,show) {
 			field_value = '';
 			$( $(this) ).find( "input" ).each(function(){
 				field_value = $.trim($(this).val());
-			});						
-								
-			if(field_filter != '' && field_value != '') {
+			});											
+			if(field_filter != '') {
 				filter.push( {target: field_target, filter: field_filter, value: field_value } );
 			}
 		});
@@ -3539,19 +3538,32 @@ function verifFields(field_id,show) {
 	// Récupère la liste des relations
 	function recup_relation() {
 		var relations = [];	
+		var parent_relations = [];	
 
-		$( '.rel tr.line-relation','#relation' ).each(function(){
-			
-			tr = $(this);
-			
-			$( $(this) ).find( ".title" ).each(function(){
-								
+		$( '.rel tr.line-relation','#relation' ).each(function(){			
+			tr = $(this);		
+			$( $(this) ).find( ".title" ).each(function(){							
 				var name = $( this ).attr('data-value');
 				var valueRule = tr.find('.lst_rule_relate').val();
 				var valueSource = tr.find('.lst_source_relate').val();
-
+				var valueparent = 0;
 				if( valueRule != '' && valueSource != '' ) {
-					relations.push( {target: name, rule: valueRule, source: valueSource } );
+					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
+				}
+
+			});
+		});
+		
+		$( '.rel tr.line-parent_relation','#relation' ).each(function(){
+			tr = $(this);	
+			$( $(this) ).find( ".parent_search_field" ).each(function(){						
+				var name = tr.find('.parent_search_field').val();
+				var valueRule = tr.find('.parent_rule').val();
+				var valueSource = tr.find('.parent_source_field').val();
+				var valueparent = 1;
+				
+				if( valueRule != '' && valueSource != '' && name != '' ) {
+					relations.push( {target: name, rule: valueRule, source: valueSource, parent: valueparent} );
 				}
 
 			});
@@ -3621,21 +3633,8 @@ function verifFields(field_id,show) {
 	
 	// Détecte les relations non remplis
 	function require_relate() {
-		error = 0;
-		$( 'td input','#relation' ).each(function() {	
-				
-			if( $(this).attr('data-required') == '1' ) {
-										
-				id = $(this).attr('data-value');
-				
-				if( $("#lst_source_"+id+ " option:selected").val() == '' ) {
-					error++;
-				}
-			}
-
-		});	
-		
-		return ((error == 0) ? true : false );							
+		// We don't test the fields anymore because fields relate required could be filled in the field mapping
+		return true;				
 	}
 
 	// test si le champ à été selectionné pour pouvoir être utilisé comme référence afin d'éviter les doublons
@@ -3793,10 +3792,19 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		});	
 	}
 	// Relate
-	if(relate) {			
-		$.each(relate, function( index, nameR ) {
-			$('#lst_'+ nameR.target).val( nameR.id );
-			$('#lst_source_'+ nameR.target).val( nameR.source );						
+	if(relate) {	
+		var cpt = 0;
+		// We fill the differents field depending if the rule is a parent one or not
+		$.each(relate, function( index, nameR ) {	
+			if (nameR.parent == 0) {
+				$('#lst_'+ nameR.target).val( nameR.id );
+				$('#lst_source_'+ nameR.target).val( nameR.source );						
+			} 	else {	
+				$('#parent_rule_'+ cpt).val( nameR.id );
+				$('#parent_source_field_'+ cpt).val( nameR.source );						
+				$('#parent_search_field_'+ cpt).val( nameR.target );									
+				cpt++;		
+			}
 		});
 	}
 	
