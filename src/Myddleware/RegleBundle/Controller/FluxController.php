@@ -461,16 +461,15 @@ class FluxControllerCore extends Controller
 						// Fields can be absent in case the rule have changed since the data tranfer has been sent
 						if (isset($source[$sourceField])) {
 							$sourceData[$sourceField] = $source[$sourceField];
+						} else {
+							$sourceData[$sourceField] = '';
 						}
 					}
 				}
 				// Target and history
 				$targetField = $ruleField->getTarget();
 
-				if (
-						isset($target[$targetField]) 
-					|| 	$target[$targetField] == null
-				) {			
+				if (isset($target[$targetField])) {			
 					$targetData[$targetField] = $target[$targetField];
 					if (
 							!empty($history[$targetField])
@@ -478,6 +477,8 @@ class FluxControllerCore extends Controller
 					) {
 						$historyData[$targetField] = $history[$targetField];
 					}
+				} else {
+					$targetData[$targetField] = '';
 				}
 			}					
 			// Get RuleRelationShip object
@@ -485,10 +486,14 @@ class FluxControllerCore extends Controller
 			// Get each data for each rule relationship
 			foreach($RuleRelationShips as $RuleRelationShip) {		
 				$sourceField = $RuleRelationShip->getFieldNameSource();
-				$sourceData[$sourceField] = $source[$sourceField];
+				if (isset($source[$sourceField])) {
+					$sourceData[$sourceField] = $source[$sourceField];
+				}
 				// Target and history
 				$targetField = $RuleRelationShip->getFieldNameTarget();
-				$targetData[$targetField] = $target[$targetField];
+				if (isset($target[$targetField])) {
+					$targetData[$targetField] = $target[$targetField];
+				}
 				// Only if history exists and if the field exist in history
 				if (!empty($history[$targetField])) {
 					$historyData[$targetField] = $history[$targetField];
