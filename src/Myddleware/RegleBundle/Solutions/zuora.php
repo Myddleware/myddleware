@@ -197,8 +197,10 @@ class zuoracore  extends solution {
 			// limit to 1 result
 			$this->instance->setQueryOptions(1);
 			// Call Zuora
+// $query = "SELECT Name,Id,UpdatedDate,CreatedDate FROM ProductRatePlan WHERE UpdatedDate > '2017-05-15T21:59:46'";
+// echo '<pre>';	
 			$resultQuery = $this->instance->query($query);
-			
+// print_r($resultQuery);			
 			// If no result
 			if (empty($resultQuery->result->records)) {
 				$result['done'] = false;
@@ -225,17 +227,17 @@ class zuoracore  extends solution {
 		}		
 		return $result;
 	}
+	
 
-	// Cirrus Shield use the same function for record's creation and modification
-	public function create($param) {
-		
+	public function create($param) {	
 		// Get the action because we use the create function to update data as well
 		if ($this->update) {
 			$action = 'update';
 		// If creation and subscription, we use function subscrbe and we limit the call by one
 		} elseif ($param['module'] == 'Subscription') {
-			$action = 'subscribe';
-			$this->limitCall = 1;
+			return $this->subscribe($param);
+		} elseif ($param['module'] == 'Amendment') {
+			return $this->amend($param);
 		} else {
 			$action = 'create';
 		}
@@ -265,51 +267,21 @@ class zuoracore  extends solution {
 						} 
 					}
 					$zObject->$key = $value;
-					if ($key=='AccountId') {
-						if ($action == 'subscribe') {
-							$zAccount = new \Zuora_Account();
-							$zAccount->AccountId = $value;
-						}
-					}
-					if ($key=='AccountId') {
-						if ($action == 'subscribe') {
-							$zBillToContact = new \Zuora_Contact();
-							$zBillToContact->ContactId = '2c92c0f85c656dbf015c7a5ef4617b73';
-						}
-					}
 				}	
-				// Create objects for the subscribe function 
-				if ($action == 'subscribe') {
-					$zSubscriptionData = new \Zuora_SubscriptionData($zObject);
-					unset($zObject);
-					$zRatePlan = new \Zuora_RatePlan();
-					$zRatePlan->ProductRatePlanId = '2c92c0f85c48f2ef015c5f099d5b5a04';
-					$zRatePlanData = new \Zuora_RatePlanData($zRatePlan);
-					unset($zRatePlan);
-					$zSubscriptionData->addRatePlanData($zRatePlanData);
-					unset($zRatePlanData); 
-				// Create the object collection
-				} else {
-					$zObjects[] = $zObject;
-					unset($zObject);
-				}
+				$zObjects[] = $zObject;
+				unset($zObject);
+
 				// If we have finished to read all data or if the package is full we send the data to Sallesforce
 				if (
 						$nb_record == $i
 					 || $i % $this->limitCall  == 0
-				) {
-					// Manage differents calls (subscripe, create and update
-					if ($action == 'subscribe') {
-						$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zBillToContact);
-						unset($zAccount);
-						unset($zSubscriptionData);
-						unset($zBillToContact);
-					} elseif ($action == 'create') {
+				) {		
+					// Manage calls create and update			
+					if ($action == 'create') {
 						$resultCall = $this->instance->create($zObjects);
 					} else {
 						$resultCall = $this->instance->update($zObjects);
-					}
-					
+					}							
 					// General error
 					if (empty($resultCall)) {
 						throw new \Exception('No response from Zuora. ');
@@ -317,51 +289,38 @@ class zuoracore  extends solution {
 					
 					// Manage results
 					$j = 0;
-					if ($action == 'subscribe') {			
-						if (!empty($resultCall->result->Errors)) {
-							$result[$idDocArray[$j]] = array(
-												'id' => '-1',
-												'error' => (empty($resultCall->result->Errors) ? 'No error returned by Zuora.' : print_r($resultCall->result->Errors,true))
-												);	
-						// Succes of the subscription
+					// If only one result, we add a dimension
+					if (isset($resultCall->result->Id)) {
+						$resultCall->result = array($resultCall->result);
+					}
+
+					// Get the response for each records
+					foreach($resultCall->result as $record) {
+						if ($record->Success) {
+							if (empty($record->Id)) {
+								$result[$idDocArray[$j]] = array(
+										'id' => '-1',
+										'error' => 'No Id in the response of Zuora. '
+										);									
+							} else {					
+								$result[$idDocArray[$j]] = array(
+											'id' => $record->Id,
+											'error' => false
+											);
+							}
 						} else {
-						
+							$result[$idDocArray[$j]] = array(
+											'id' => '-1',
+											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+											);	
 						}
 						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
-					} else {
-						// If only one result, we add a dimension
-						if (isset($resultCall->result->Id)) {
-							$resultCall->result = array($resultCall->result);
-						}
-
-						// Get the response for each records
-						foreach($resultCall->result as $record) {
-							if ($record->Success) {
-								if (empty($record->Id)) {
-									$result[$idDocArray[$j]] = array(
-											'id' => '-1',
-											'error' => 'No Id in the response of Zuora. '
-											);									
-								} else {					
-									$result[$idDocArray[$j]] = array(
-												'id' => $record->Id,
-												'error' => false
-												);
-								}
-							} else {
-								$result[$idDocArray[$j]] = array(
-												'id' => '-1',
-												'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
-												);	
-							}
-							$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
-							$j++;
-						}
-						// Init variable
-						unset($zObjects);
+						$j++;
 					}
+					// Init variable
+					unset($zObjects);
+					$idDocArray = '';
 				}
-				$idDocArray = '';
 			}
 		}
 		catch (\Exception $e) {
@@ -375,6 +334,222 @@ class zuoracore  extends solution {
 	public function update($param) {	
 		$this->update = true;
 		return $this->create($param);
+	}
+	
+	// Specific function for amend action
+	protected function amend($param) {
+		try {			
+			foreach($param['data'] as $idDoc => $data) {
+				// Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);				
+				$obj = 'Zuora_'.$param['module'];
+				$amendment = new $obj();
+				foreach ($data as $key => $value) {
+					// Field only used for the update and contains the ID of the record in the target solution
+					if ($key=='target_id') {
+						continue;
+					}
+					$amendment->$key = $value;
+				}
+				// Amend the souscription
+				$resultCall = $this->instance->amend($amendment,null,null);
+				// Manage results		
+				if (!empty($resultCall->results->Errors)) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => (empty($resultCall->results->Errors) ? 'No error returned by Zuora.' : print_r($resultCall->results->Errors,true))
+										);	
+				// Succes of the subscription
+				} elseif (empty($resultCall->results->AmendmentIds)) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => 'Failed do get the AmendmentIds. No error sent by Zuora. '
+										);	
+				} else {
+					$result[$idDoc] = array(
+										'id' => $resultCall->results->AmendmentIds,
+										'error' => false
+										);
+				}
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);				
+			}
+		} catch (\Exception $e) {
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['error'] = $error;
+		}
+		return $result;	
+	}
+	
+	// Specific function for subscribe action
+	protected function subscribe($param) {
+		try {			
+			foreach($param['data'] as $idDoc => $data) {
+				// Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);				
+				$obj = 'Zuora_'.$param['module'];
+				$zObject = new $obj();
+			
+				foreach ($data as $key => $value) {
+					// Field only used for the update and contains the ID of the record in the target solution
+					if ($key=='target_id') {
+						// If update then we change the key in Id
+						if (!empty($value)) {
+							$key = 'Id';
+						} else { // If creation, we skip this field
+							continue;
+						} 
+					}
+					if ($key=='AccountId') {
+						$zAccount = new \Zuora_Account();
+						$zAccount->Id = $value;
+					} elseif ($key=='RatePlan') {
+						foreach ($value as $docIdRatePlan => $valueRatePlan) {
+							$docIdArray[$idDoc][$docIdRatePlan] = array('type' => 'RatePlan', 'ProductRatePlanId' => $valueRatePlan['ProductRatePlanId']);
+							$zRatePlan = new \Zuora_RatePlan();
+							foreach($valueRatePlan as $ratePlankey => $ratePlanValue) {
+								// RatePlanCharge and RatePlanChargeTier are added after
+								if (!in_array($ratePlankey,array('RatePlanChargeTier','RatePlanCharge'))) {
+									$zRatePlan->$ratePlankey = $ratePlanValue;
+								}
+							}
+							// RatePlanCharge
+							if (!empty($valueRatePlan['RatePlanCharge'])) {							
+								foreach ($valueRatePlan['RatePlanCharge'] as $docIdRatePlanCharge => $valueRatePlanCharge) {
+									$docIdArray[$idDoc][$docIdRatePlanCharge] = array(
+																						'type' 						=> 'RatePlanCharge', 
+																						'ProductRatePlanId' 		=> $valueRatePlan['ProductRatePlanId'], 
+																						'ProductRatePlanChargeId' 	=> $valueRatePlanCharge['ProductRatePlanChargeId']
+																				);
+									$zRatePlanCharge = new \Zuora_RatePlanCharge();
+									foreach($valueRatePlanCharge as $ratePlanChargeKey => $ratePlanChargeValue) {
+										$zRatePlanCharge->$ratePlanChargeKey = $ratePlanChargeValue;
+									}
+									// RatePlanChargeData to store the RatePlanCharge
+									$zRatePlanChargeData = new \Zuora_RatePlanChargeData($zRatePlanCharge);								
+									unset($zRatePlanCharge);
+								}
+							}
+							// RatePlanChargeTiers
+							if (!empty($valueRatePlan['RatePlanChargeTier'])) {							
+								foreach ($valueRatePlan['RatePlanChargeTier'] as $docIdRatePlanChargeTier => $valueRatePlanChargeTier) {
+									$docIdArray[$idDoc][$docIdRatePlanChargeTier] = '';
+									$zRatePlanChargeTier = new \Zuora_RatePlanChargeTier();
+									foreach($valueRatePlanChargeTier as $ratePlanChargeTierKey => $ratePlanChargeTierValue) {
+										$zRatePlanChargeTier->$ratePlanChargeTierKey = $ratePlanChargeTierValue;
+									}
+								}
+								$zRatePlanChargeData->addRatePlanChargeTier($zRatePlanChargeTier);
+							}
+							$zRatePlanData = new \Zuora_RatePlanData($zRatePlan);
+							if (!empty($zRatePlanChargeData)) {
+								$zRatePlanData->addRatePlanChargeData($zRatePlanChargeData);
+							}
+							$zRatePlanDatas[] = $zRatePlanData;
+						}						
+					} else {
+						$zObject->$key = $value;
+					}
+				}	
+				// Create objects for the subscribe function 
+				$zSubscriptionData = new \Zuora_SubscriptionData($zObject);
+				unset($zObject);
+				if (!empty($zRatePlanDatas)) {
+					foreach($zRatePlanDatas as $zRatePlanData) {
+						$zSubscriptionData->addRatePlanData($zRatePlanData);
+					}
+				}
+				unset($zRatePlanDatas); 
+		
+				// Manage differents calls (subscripe, create and update	
+				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
+				$zSContact = new \Zuora_Contact();
+				$zPaymentMethod = new \Zuora_PaymentMethod();
+				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);						
+				unset($zAccount);
+				unset($zSubscriptionData);
+
+				// General error
+				if (empty($resultCall)) {
+					throw new \Exception('No response from Zuora. ');
+				}
+				
+				// Manage results		
+				if (!empty($resultCall->result->Errors)) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => (empty($resultCall->result->Errors) ? 'No error returned by Zuora.' : print_r($resultCall->result->Errors,true))
+										);	
+				// Succes of the subscription
+				} elseif (empty($resultCall->result->SubscriptionId)) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => 'Failed do get the SubscriptionId. No error sent by Zuora. '
+										);	
+				} else {
+					$result[$idDoc] = array(
+										'id' => $resultCall->result->SubscriptionId,
+										'error' => false
+										);
+					if (!empty($docIdArray[$idDoc])) {
+						foreach($docIdArray[$idDoc] as $idSubDoc => $values) {	
+							// Get the RatePlanID
+							if ($values['type'] == 'RatePlan') {						
+								$query = "SELECT Id FROM RatePlan WHERE SubscriptionId = '".$resultCall->result->SubscriptionId."' AND ProductRatePlanId = '".$values['ProductRatePlanId']."'";							
+								$resultQuery = $this->instance->query($query);							
+								if (!empty($resultQuery->result->records->Id)) {
+									$result[$idSubDoc] = array(
+											'id' => $resultQuery->result->records->Id,
+											'error' => false
+										);
+									// Save RatePlanId in case we have RatePlanChargeId to get from Zuora
+									$arrayRatePlanId[$values['ProductRatePlanId']] = $resultQuery->result->records->Id;	
+								} else {
+									$result[$idSubDoc] = array(
+											'id' => '-1',
+											'error' => 'Failed do get the RatePlanId from Zuora. '
+										);	
+								}
+							// Get the RatePlanCharge	
+							} elseif ($values['type'] == 'RatePlanCharge') {						
+								$query = "SELECT Id FROM RatePlanCharge WHERE RatePlanId = '".$arrayRatePlanId[$values['ProductRatePlanId']]."' AND ProductRatePlanChargeId = '".$values['ProductRatePlanChargeId']."'";							
+								$resultQuery = $this->instance->query($query);						
+								if (!empty($resultQuery->result->records->Id)) {
+									$result[$idSubDoc] = array(
+											'id' => $resultQuery->result->records->Id,
+											'error' => false
+										);
+								} else {
+									$result[$idSubDoc] = array(
+											'id' => '-1',
+											'error' => 'Failed do get theRatePlanChargeId from Zuora. '
+										);	
+								}
+							}
+							unset($resultQuery);	
+							$this->updateDocumentStatus($idSubDoc,$result[$idSubDoc],$param);	
+						}
+					}
+				}
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
+		}
+		catch (\Exception $e) {
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['error'] = $error;
+		}	
+// print_r($result);		
+// print_r($docIdArray);		
+// return null;
+		return $result;
+	}
+	
+	// The function return true if we can display the column parent in the rule view, relationship tab
+	// We display the parent column when module is subscription
+	public function allowParentRelationship($module) {
+		if (in_array($module, array('Subscription','RatePlan'))) {
+			return true;
+		}
+		return false;
 	}
 	
 	protected function queryAll($query){
