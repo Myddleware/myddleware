@@ -196,11 +196,9 @@ class zuoracore  extends solution {
 			}
 			// limit to 1 result
 			$this->instance->setQueryOptions(1);
-			// Call Zuora
-// $query = "SELECT Name,Id,UpdatedDate,CreatedDate FROM ProductRatePlan WHERE UpdatedDate > '2017-05-15T21:59:46'";
-// echo '<pre>';	
+			// Call Zuora	
 			$resultQuery = $this->instance->query($query);
-// print_r($resultQuery);			
+		
 			// If no result
 			if (empty($resultQuery->result->records)) {
 				$result['done'] = false;
@@ -388,7 +386,7 @@ class zuoracore  extends solution {
 				$data = $this->checkDataBeforeCreate($param, $data);				
 				$obj = 'Zuora_'.$param['module'];
 				$zObject = new $obj();
-			
+print_r($data);			
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
@@ -464,15 +462,16 @@ class zuoracore  extends solution {
 				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
 				$zSContact = new \Zuora_Contact();
 				$zPaymentMethod = new \Zuora_PaymentMethod();
-				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);						
+print_r($zSubscriptionData);				
+				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+print_r($resultCall);				
 				unset($zAccount);
 				unset($zSubscriptionData);
 
 				// General error
 				if (empty($resultCall)) {
 					throw new \Exception('No response from Zuora. ');
-				}
-				
+				}	
 				// Manage results		
 				if (!empty($resultCall->result->Errors)) {
 					$result[$idDoc] = array(
@@ -485,24 +484,31 @@ class zuoracore  extends solution {
 										'id' => '-1',
 										'error' => 'Failed do get the SubscriptionId. No error sent by Zuora. '
 										);	
-				} else {
+				} else {							
 					$result[$idDoc] = array(
 										'id' => $resultCall->result->SubscriptionId,
 										'error' => false
 										);
 					if (!empty($docIdArray[$idDoc])) {
-						foreach($docIdArray[$idDoc] as $idSubDoc => $values) {	
+						foreach($docIdArray[$idDoc] as $idSubDoc => $values) {								
 							// Get the RatePlanID
-							if ($values['type'] == 'RatePlan') {						
+							if ($values['type'] == 'RatePlan') {													
 								$query = "SELECT Id FROM RatePlan WHERE SubscriptionId = '".$resultCall->result->SubscriptionId."' AND ProductRatePlanId = '".$values['ProductRatePlanId']."'";							
-								$resultQuery = $this->instance->query($query);							
-								if (!empty($resultQuery->result->records->Id)) {
+								$resultQuery = $this->instance->query($query);	
+								$resultId = '';
+								if ($resultQuery->result->size == 1) {
+									$resultId = $resultQuery->result->records->Id;
+								} elseif ($resultQuery->result->size > 1) { 
+									$resultId = $resultQuery->result->records[0]->Id;
+								}
+								if (!empty($resultId)) {						
+									// If there is several records, we take the first one
 									$result[$idSubDoc] = array(
-											'id' => $resultQuery->result->records->Id,
+											'id' => $resultId,
 											'error' => false
 										);
-									// Save RatePlanId in case we have RatePlanChargeId to get from Zuora
-									$arrayRatePlanId[$values['ProductRatePlanId']] = $resultQuery->result->records->Id;	
+									// Save RatePlanId in case we have RatePlanChargeId to get from Zuora							
+									$arrayRatePlanId[$values['ProductRatePlanId']] = $resultId;	
 								} else {
 									$result[$idSubDoc] = array(
 											'id' => '-1',
@@ -510,36 +516,41 @@ class zuoracore  extends solution {
 										);	
 								}
 							// Get the RatePlanCharge	
-							} elseif ($values['type'] == 'RatePlanCharge') {						
+							} elseif ($values['type'] == 'RatePlanCharge') {													
 								$query = "SELECT Id FROM RatePlanCharge WHERE RatePlanId = '".$arrayRatePlanId[$values['ProductRatePlanId']]."' AND ProductRatePlanChargeId = '".$values['ProductRatePlanChargeId']."'";							
-								$resultQuery = $this->instance->query($query);						
-								if (!empty($resultQuery->result->records->Id)) {
+								$resultQuery = $this->instance->query($query);	
+								$resultId = '';
+								if ($resultQuery->result->size == 1) {
+									$resultId = $resultQuery->result->records->Id;
+								} elseif ($resultQuery->result->size > 1) { 
+									$resultId = $resultQuery->result->records[0]->Id;
+								}
+								if (!empty($resultId)) {					
+									// If there is several records, we take the first one
 									$result[$idSubDoc] = array(
-											'id' => $resultQuery->result->records->Id,
+											'id' => $resultId,
 											'error' => false
-										);
-								} else {
+										);						
+								} else {						
 									$result[$idSubDoc] = array(
 											'id' => '-1',
 											'error' => 'Failed do get theRatePlanChargeId from Zuora. '
 										);	
 								}
-							}
+							}						
 							unset($resultQuery);	
-							$this->updateDocumentStatus($idSubDoc,$result[$idSubDoc],$param);	
+							$this->updateDocumentStatus($idSubDoc,$result[$idSubDoc],$param);								
 						}
 					}
-				}
+				}						
 				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 			}
 		}
 		catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-		}	
+		}								
 // print_r($result);		
-// print_r($docIdArray);		
-// return null;
 		return $result;
 	}
 	

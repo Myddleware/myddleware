@@ -151,8 +151,9 @@ class rulecore {
 					}
 					$documents[] = $document;
 				}
+				return $documents;
 			}
-			return $documents;
+			return null;
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
@@ -1177,12 +1178,16 @@ class rulecore {
 					if (empty($document[$childRuleDetail['module_target']])) {
 						$document[$childRuleDetail['module_target']] = $dataChild;
 					} else {
-						$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
+						if (!empty($dataChild)) {
+							$document[$childRuleDetail['module_target']] = array_merge($document[$childRuleDetail['module_target']], $dataChild);
+						}
 					}
 				}
 			}	
 			$data = $this->getDocumentData($document['id_doc_myddleware'], 'T');
-			$return[$document['id_doc_myddleware']] = array_merge($document,$data);		
+			if (!empty($data)) {
+				$return[$document['id_doc_myddleware']] = array_merge($document,$data);
+			}
 		}
 
 		if (!empty($return)) {
