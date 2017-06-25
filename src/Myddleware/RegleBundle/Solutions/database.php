@@ -233,7 +233,7 @@ class databasecore extends solution {
 			// Remove the last coma/space
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$param['module'];
+			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
 		
@@ -284,7 +284,7 @@ class databasecore extends solution {
 			} 
 			else {
 				$result['done'] = false;
-				$result['error'] = "No data found in ".$tableID;
+				$result['error'] = "No data found in ".$param['module'];
 			}
 		}
 		catch (\Exception $e) {
@@ -330,7 +330,7 @@ class databasecore extends solution {
 			// Suppression de la dernière virgule en laissant le +
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$param['module'];
+			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
 
 			$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
 			
@@ -483,8 +483,8 @@ class databasecore extends solution {
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
 											'id' => $idTarget,
-											'error' => false
-									);
+											'error' => ($q->rowCount() ? false : 'There is no error but 0 row has been updated.')
+									);									
 				}
 				catch (\Exception $e) {
 					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
