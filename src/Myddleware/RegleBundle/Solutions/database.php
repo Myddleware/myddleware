@@ -40,7 +40,7 @@ class databasecore extends solution {
 		parent::login($paramConnexion);
 		try {
 			try {
-			    $this->pdo = new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+				$this->pdo = $this->generatePdo();
 			    $this->connexion_valide = true;	
 			} catch (\PDOException $e) {
 				$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';

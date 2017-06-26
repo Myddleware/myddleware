@@ -33,6 +33,10 @@ class mysqlcore extends database {
 	protected $fieldLabel = 'Field';
 	protected $fieldType = 'Type';
 	
+	protected function generatePdo() {		    
+		return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+	}
+	
 	// Generate query
 	protected function get_query_show_tables() {
 		return 'SHOW TABLES FROM '.$this->paramConnexion['database_name'];
@@ -51,18 +55,6 @@ class mysqlcore extends database {
 	// Get the limit operator of the select query in the read last function
 	protected function get_query_select_limit_read_last() {
 		return " LIMIT 1";
-	}
-	
-	// Get the alter column operator
-	protected function get_query_alter_column() {
-		return " MODIFY COLUMN ";
-	}
-	
-	// Get the header of an insert query
-	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE IF NOT EXISTS ".$table." (
-			id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-			date_modified datetime default CURRENT_TIMESTAMP,";
 	}
 	
 }// class mysqlcore
