@@ -66,10 +66,11 @@ class RuleRepository extends EntityRepository
 					->addSelect('ct.name lbl_target')
 					->addSelect('Solution_source.name solution_source')
 					->addSelect('Solution_target.name solution_target')					
-					->addOrderBy('r.active', 'DESC')
-					->addOrderBy('cs.name', 'DESC')
-					->addOrderBy('ct.name', 'DESC')
-					->addOrderBy('r.name', 'ASC');
+					// ->addOrderBy('r.active', 'DESC')
+					// ->addOrderBy('cs.name', 'DESC')
+					// ->addOrderBy('ct.name', 'DESC')
+					// ->addOrderBy('r.name', 'ASC')
+					;
 							
 		// si ce n'est pas le support alors on affecte l'id client sinon on affiche tout			
 		if($is_support == false) {
