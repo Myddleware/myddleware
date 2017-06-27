@@ -38,6 +38,7 @@ class filecore extends solution {
 	Protected $escape = '';
 	Protected $removeChar = array(' ','/','\'','.','(',')');
 	protected $readLimit = 1000;
+	protected $lineNumber = 0;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -293,13 +294,14 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {		
 		$count = 0;
 		$offset = 0;
 		$result = array();	
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],$param['date_ref']);
+			// If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],(!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
 			// If there is no file
 			if(empty($file)){
 				return null;
@@ -364,31 +366,32 @@ class filecore extends solution {
 			}		
 			//Control all lines of the file
 			$values = array();
-			$lineNumber = 2; // We count the header
+			$this->lineNumber = 2; // We count the header
 			while (($buffer = fgets($stream)) !== false) {				
 				$idRow = '';
 				// We don't read again line already read in a previous call
-				if ($lineNumber < $offset) {
-					$lineNumber++;
+				if ($this->lineNumber < $offset) {
+					$this->lineNumber++;
 					continue;
 				}			
 				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				};
 				
 				$rowFile = $this->transformRow($buffer,$param);
+			
 				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				}				
 				//If there are not the good number of columns, display an error
 				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
-					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
+					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$this->lineNumber.'. '.$nbCountHeader.' columns are expected.');
 				}			
 				foreach($allRuleField as $field){
 					$column = array_search($field, $header);
@@ -414,31 +417,64 @@ class filecore extends solution {
 				$row['date_modified'] = $new_date_ref;			
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
+				}				
+				$this->lineNumber++; // Save the line number				
+				// In case of query not empty, we filter the output data
+				if (!empty($param['query'])) {
+					$skip = false;
+					foreach($param['query'] as $key => $value) {
+						if (
+								empty($row[$key])
+							OR 	$row[$key] != $value
+						) {
+							$skip = true;
+							break;
+						}
+					}
+					if ($skip) {
+						continue;
+					}
 				}
-				$count++; // Save the number of line read
-				$lineNumber++; // Save the line number
-				$values[$idRow] = $row;
+				$count++; // Save the number of lines read
+				$values[$idRow] = $row;				
 				// If we have reached the limit we stop to read
-				if ($count >= $this->readLimit) {
+				if ($this->limitReached($param,$count)) {
 					break;
 				}
 			}
-			// la première ligne te donne les nom des champs, les lignes suivantes te donne leur valeur
-			$result = array(
-							'count'=>$count,
-							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
-							'values'=>$values,
-							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber)),
-							'notRecall' => true // Stop the recall in the function Rule->readSource()
-			);
+			// Generate result
+			$result = $this->generateReadResult($param,$count,$values,$new_date_ref);
+			
+			// Add the parameter only when it is a standard call (not an query call)
+			if (empty($param['query'])) {
+				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 		}	
 		return $result;
 	} // read($param)
+	
+	// Transform the result
+	protected function generateReadResult($param,$count,$values,$new_date_ref) {
+		return array(
+					'count'=>$count,
+					'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
+					'values'=>$values,
+					'notRecall' => true // Stop the recall in the function Rule->readSource()
+		);
+	}
+	
+	// Check if teh limit has been reached
+	protected function limitReached($param,$count) {
+		if ($count >= $this->readLimit) {
+			return true;
+		}
+		return false;
+	}
 	
 	// Convert the first line of the file to an array with all fields
 	protected function getFileHeader($stream,$param) {
