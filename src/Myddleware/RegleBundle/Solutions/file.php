@@ -293,13 +293,14 @@ class filecore extends solution {
 	// 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {		
 		$count = 0;
 		$offset = 0;
 		$result = array();	
 		try {
 			// Get the file with the way of this file. But we take the oldest file of the folder
-			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],$param['date_ref']);
+			// If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
+			$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'],(!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
 			// If there is no file
 			if(empty($file)){
 				return null;
@@ -380,6 +381,7 @@ class filecore extends solution {
 				};
 				
 				$rowFile = $this->transformRow($buffer,$param);
+			
 				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
 					$lineNumber++;
@@ -416,9 +418,25 @@ class filecore extends solution {
 				if($validateRow == false){
 					$lineNumber++;
 					continue;
+				}				
+				$lineNumber++; // Save the line number				
+				// In case of query not empty, we filter the output data
+				if (!empty($param['query'])) {
+					$skip = false;
+					foreach($param['query'] as $key => $value) {
+						if (
+								empty($row[$key])
+							OR 	$row[$key] != $value
+						) {
+							$skip = true;
+							break;
+						}
+					}
+					if ($skip) {
+						continue;
+					}
 				}
 				$count++; // Save the number of line read
-				$lineNumber++; // Save the line number
 				$values[$idRow] = $row;
 				// If we have reached the limit we stop to read
 				if ($count >= $this->readLimit) {
@@ -430,9 +448,12 @@ class filecore extends solution {
 							'count'=>$count,
 							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
 							'values'=>$values,
-							'ruleParams' => array(array('name' => $file, 'value' => $lineNumber)),
 							'notRecall' => true // Stop the recall in the function Rule->readSource()
 			);
+			// Add the parameter only when it is a standard call (not an query call)
+			if (empty($param['query'])) {
+				$result['ruleParams'] = array(array('name' => $file, 'value' => $lineNumber));
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';

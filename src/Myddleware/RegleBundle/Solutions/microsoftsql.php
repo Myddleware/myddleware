@@ -27,7 +27,7 @@ namespace Myddleware\RegleBundle\Solutions;
 
 class microsoftsqlcore extends database {
 	
-	protected $driver = 'dblib';
+	protected $driver = 'sqlsrv';
 	
 	protected $fieldName = 'COLUMN_NAME';
 	protected $fieldLabel = 'COLUMN_NAME';
@@ -35,6 +35,10 @@ class microsoftsqlcore extends database {
 	
 	protected $stringSeparator = '';
 
+	protected function generatePdo() {		    
+		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].',Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+	}
+	
 	// Query to get all the tables of the database
 	protected function get_query_show_tables() {
 		return 'SELECT table_name FROM information_schema.tables';
@@ -53,18 +57,6 @@ class microsoftsqlcore extends database {
 	// Get the limit operator of the select query in the read last function
 	protected function get_query_select_limit_read_last() {
 		return "";
-	}
-	
-	// Get the alter column operator
-	protected function get_query_alter_column() {
-		return " ALTER COLUMN ";
-	}
-	
-	// Get the header of an insert query
-	protected function get_query_create_table_header($table) {
-		return  "CREATE TABLE ".$table." (
-			id int not null IDENTITY(1, 1) PRIMARY KEY,
-			date_modified smalldatetime default CURRENT_TIMESTAMP,";
 	}
 
 }// class microsoftsqlcore
