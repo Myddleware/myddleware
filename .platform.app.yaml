@@ -44,4 +44,5 @@ hooks:
         php app/console --env=prod assets:install web
         chmod -R 777 app/cache
         chmod -R 777 app/logs
+        php app/console d:s:u --force
         
