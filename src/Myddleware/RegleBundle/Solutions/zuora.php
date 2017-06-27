@@ -386,7 +386,7 @@ class zuoracore  extends solution {
 				$data = $this->checkDataBeforeCreate($param, $data);				
 				$obj = 'Zuora_'.$param['module'];
 				$zObject = new $obj();
-print_r($data);			
+		
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution
 					if ($key=='target_id') {
@@ -462,9 +462,9 @@ print_r($data);
 				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
 				$zSContact = new \Zuora_Contact();
 				$zPaymentMethod = new \Zuora_PaymentMethod();
-print_r($zSubscriptionData);				
+				
 				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
-print_r($resultCall);				
+				
 				unset($zAccount);
 				unset($zSubscriptionData);
 
@@ -550,7 +550,7 @@ print_r($resultCall);
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
 		}								
-// print_r($result);		
+		
 		return $result;
 	}
 	
