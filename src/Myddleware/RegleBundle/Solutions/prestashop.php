@@ -58,6 +58,7 @@ class prestashopcore extends solution {
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
 														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
+														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity'), 'relationships' => array('id_product','id_product_attribute','id_address_delivery'), 'searchModule' => 'cart', 'subModule' => 'cart_rows', 'subData' => 'cart_row'),
 														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
 														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
 														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
@@ -196,7 +197,10 @@ class prestashopcore extends solution {
 												'required_relationship' => 1
 											);
 				}
-				
+				// Ajout des champ relate au mapping des champs 
+				if (!empty($this->fieldsRelate)) {
+					$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+				}
 				return $this->moduleFields;
 			}
 
@@ -293,11 +297,12 @@ class prestashopcore extends solution {
 						unset($this->moduleFields['date_upd']);
 					}
 				}
-				
+
 				// Ajout des champ relate au mapping des champs 
 				if (!empty($this->fieldsRelate)) {
 					$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 				}
+
 				// Si l'extension est demandée alors on vide relate 
 				if ($extension) {
 					$this->fieldsRelate = array();
@@ -377,7 +382,7 @@ class prestashopcore extends solution {
 	
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
+	public function read_last($param) {	
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -392,6 +397,7 @@ class prestashopcore extends solution {
 				}
 				// Ajout des champs obligatoires
 				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 				
 				// Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
 				$getCurrentState = false;
@@ -542,6 +548,7 @@ class prestashopcore extends solution {
 				}
 				// Ajout des champs obligatoires
 				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 				
 				// Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
 				$getCurrentState = false;

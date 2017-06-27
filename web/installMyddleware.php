@@ -408,8 +408,8 @@ else {
 </div>
 </section>	
 <footer>
-<p>© Myddleware 2014-2016</p>
-<p>v2.1.1</p>
+<p>© Myddleware 2014-2017</p>
+<p>v2.2.3</p>
 </footer>
 </body>
 </html>

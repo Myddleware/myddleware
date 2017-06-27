@@ -450,6 +450,7 @@ class filecore extends solution {
 			// Add the parameter only when it is a standard call (not an query call)
 			if (empty($param['query'])) {
 				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
+
 			}
 		}
 		catch (\Exception $e) {

@@ -362,6 +362,45 @@ class Zuora_API
         }
         return $result;
     }
+	
+/**
+	 * Amend() call
+	 * @param $zAmendment Amendment to be created
+	 * @param $zAmendOptions Override of default amendment options
+	 * @param $zPreviewOptions Override of default preview options
+	 * @return AmendResults
+	 */
+	public function amend($zAmendment, $zAmendOptions, $zPreviewOptions) {
+		# Set up Default amend options and preview options
+		if($zAmendOptions==NULL){
+			$zAmendOptions = array(
+				"GenerateInvoice"=>false,
+				"ProcessPayments"=>false
+			);
+		}
+		if($zPreviewOptions==NULL){
+			$zPreviewOptions = array(
+				"EnablePreviewMode"=>false,
+				"NumberOfPeriods"=>1
+			);
+		}
+		# construct amend components
+		$amendRequest = array(
+			'Amendments'=>$zAmendment,
+			'AmendOptions'=>$zAmendOptions,
+			'PreviewOptions'=>$zPreviewOptions
+		);
+		$amendWrapper = array("requests"=>$amendRequest);
+		$amendWrapper = array("amend"=>$amendWrapper);
+		$amendResult;
+		try{
+			# Make amend request
+			$amendResult = $this->_client->__soapCall("amend", $amendWrapper, null, $this->_header);
+			return $amendResult;
+		} catch (SoapFault $e) {
+          throw new ZuoraFault('ERROR in ' . __METHOD__, $e, $this->_client->__getLastRequestHeaders(), $this->_client->__getLastRequest(), $this->_client->__getLastResponseHeaders(), $this->_client->__getLastResponse());
+        }
+	}
 
     /**
      * Execute generate() API call.
