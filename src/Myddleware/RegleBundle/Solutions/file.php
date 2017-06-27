@@ -38,6 +38,7 @@ class filecore extends solution {
 	Protected $escape = '';
 	Protected $removeChar = array(' ','/','\'','.','(',')');
 	protected $readLimit = 1000;
+	protected $lineNumber = 0;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -365,18 +366,18 @@ class filecore extends solution {
 			}		
 			//Control all lines of the file
 			$values = array();
-			$lineNumber = 2; // We count the header
+			$this->lineNumber = 2; // We count the header
 			while (($buffer = fgets($stream)) !== false) {				
 				$idRow = '';
 				// We don't read again line already read in a previous call
-				if ($lineNumber < $offset) {
-					$lineNumber++;
+				if ($this->lineNumber < $offset) {
+					$this->lineNumber++;
 					continue;
 				}			
 				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				};
 				
@@ -384,13 +385,13 @@ class filecore extends solution {
 			
 				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				}				
 				//If there are not the good number of columns, display an error
 				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
-					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
+					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$this->lineNumber.'. '.$nbCountHeader.' columns are expected.');
 				}			
 				foreach($allRuleField as $field){
 					$column = array_search($field, $header);
@@ -416,10 +417,10 @@ class filecore extends solution {
 				$row['date_modified'] = $new_date_ref;			
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				}				
-				$lineNumber++; // Save the line number				
+				$this->lineNumber++; // Save the line number				
 				// In case of query not empty, we filter the output data
 				if (!empty($param['query'])) {
 					$skip = false;
@@ -436,23 +437,20 @@ class filecore extends solution {
 						continue;
 					}
 				}
-				$count++; // Save the number of line read
-				$values[$idRow] = $row;
+				$count++; // Save the number of lines read
+				$values[$idRow] = $row;				
 				// If we have reached the limit we stop to read
-				if ($count >= $this->readLimit) {
+				if ($this->limitReached($param,$count)) {
 					break;
 				}
 			}
-			// la première ligne te donne les nom des champs, les lignes suivantes te donne leur valeur
-			$result = array(
-							'count'=>$count,
-							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
-							'values'=>$values,
-							'notRecall' => true // Stop the recall in the function Rule->readSource()
-			);
+			// Generate result
+			$result = $this->generateReadResult($param,$count,$values,$new_date_ref);
+			
 			// Add the parameter only when it is a standard call (not an query call)
 			if (empty($param['query'])) {
-				$result['ruleParams'] = array(array('name' => $file, 'value' => $lineNumber));
+				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
+
 			}
 		}
 		catch (\Exception $e) {
@@ -460,6 +458,24 @@ class filecore extends solution {
 		}	
 		return $result;
 	} // read($param)
+	
+	// Transform the result
+	protected function generateReadResult($param,$count,$values,$new_date_ref) {
+		return array(
+					'count'=>$count,
+					'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
+					'values'=>$values,
+					'notRecall' => true // Stop the recall in the function Rule->readSource()
+		);
+	}
+	
+	// Check if teh limit has been reached
+	protected function limitReached($param,$count) {
+		if ($count >= $this->readLimit) {
+			return true;
+		}
+		return false;
+	}
 	
 	// Convert the first line of the file to an array with all fields
 	protected function getFileHeader($stream,$param) {
