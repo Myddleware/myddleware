@@ -45,4 +45,5 @@ hooks:
         chmod -R 777 app/cache
         chmod -R 777 app/logs
         php app/console d:s:u --force
+        php app/console d:f:l -n
         
