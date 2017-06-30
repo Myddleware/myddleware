@@ -23,8 +23,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-
-namespace Tuto\HelloBundle\DependencyInjection;
+namespace Myddleware\LoginBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
@@ -36,7 +35,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class HelloExtension extends Extension
+class LoginExtension extends Extension
 {
     /**
      * {@inheritDoc}
