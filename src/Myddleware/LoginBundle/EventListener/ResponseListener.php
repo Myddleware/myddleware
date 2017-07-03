@@ -8,6 +8,7 @@ class ResponseListener
     {   
         $event->getResponse()->headers->set('x-frame-options', 'deny');
         $event->getResponse()->headers->set('X-XSS-Protection', '1');  
+        $event->getResponse()->headers->set('X-Content-Type-Option', 'nosniff');
     }   
 }
 
