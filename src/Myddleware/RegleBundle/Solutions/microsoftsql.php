@@ -35,8 +35,8 @@ class microsoftsqlcore extends database {
 	
 	protected $stringSeparator = '';
 
-	protected function generatePdo() {		    
-		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].',Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+	protected function generatePdo() {	
+		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
 	}
 	
 	// Query to get all the tables of the database
