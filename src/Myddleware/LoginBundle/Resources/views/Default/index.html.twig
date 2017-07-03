@@ -49,8 +49,8 @@
 				  {% if attempt < 6 %}			
 				  <div class="form-group">
 				    <p>
-				    	<input type="text" class="form-control" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
-				    	<input type="password" class="form-control" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
+				    	<input type="text" autocomplete='off' class="form-control" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
+				    	<input type="password" autocomplete='off' class="form-control" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
 				    	<input type="hidden" name="_csrf_token" value="{{ csrf_token }}" >
 				    </p>
 				    {% if error %}
