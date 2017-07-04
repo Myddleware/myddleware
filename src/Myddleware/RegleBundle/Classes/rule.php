@@ -297,6 +297,9 @@ class rulecore {
 					}
 					// Mise à jour de la date de référence si des documents ont été créés
 					$this->updateReferenceDate();
+					
+					// If params has been added in the output of the rule we saved it
+					$this->updateParams();
 				}
 				// Rollback if the job has been manually stopped
 				if ($this->getJobStatus() != 'Start') {
@@ -338,6 +341,32 @@ class rulecore {
 		$stmt->execute();			
 	}
 	
+	// Update/create rule parameter
+	protected function updateParams() {
+		if (!empty($this->dataSource['ruleParams'])) {
+			foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
+				// Search to check if the param already exists
+				 $paramEntity = $this->em->getRepository('RegleBundle:RuleParam')
+					   ->findOneBy( array(
+									'rule' => $this->ruleId, 
+									'name' => $ruleParam['name']
+								)
+						);	
+				// Update or create the new param		
+				if (!empty($paramEntity)) {
+					$paramEntity->setValue( $ruleParam['value'] );
+				} else {
+					$paramEntity = new RuleParam();		
+					$paramEntity->setRule($this->ruleId);
+					$paramEntity->setName($ruleParam['name']);
+					$paramEntity->setValue($ruleParam['value']); 						
+				}
+				$this->em->persist($paramEntity);
+				$this->em->flush();				
+			}
+		}
+	}
+	
 	protected function readSource() {		
 		$read['module'] = $this->rule['module_source'];
 		$read['rule'] = $this->rule;
@@ -360,30 +389,7 @@ class rulecore {
 			$connect = $this->connexionSolution('source');
 			if ($connect === true) {
 				$this->dataSource = $this->solutionSource->read($read);
-									
-				// If params has been added in the outup of the rule we saved it
-				if (!empty($this->dataSource['ruleParams'])) {
-					foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
-						// Search to check if the param already exists
-						 $paramEntity = $this->em->getRepository('RegleBundle:RuleParam')
-							   ->findOneBy( array(
-											'rule' => $this->ruleId, 
-											'name' => $ruleParam['name']
-										)
-								);	
-						// Update or create the new param		
-						if (!empty($paramEntity)) {
-							$paramEntity->setValue( $ruleParam['value'] );
-						} else {
-							$paramEntity = new RuleParam();		
-							$paramEntity->setRule($this->ruleId);
-							$paramEntity->setName($ruleParam['name']);
-							$paramEntity->setValue($ruleParam['value']); 						
-						}
-						$this->em->persist($paramEntity);
-						$this->em->flush();				
-					}
-				}				
+													
 				// Si on a $this->limit résultats et que la date de référence n'a pas changée alors on récupère les enregistrements suivants
 				// Récupération de la date de modification du premier enregistrement
 				$value['date_modified'] = '';
@@ -417,9 +423,7 @@ class rulecore {
 						// Sauvegarde des élément dans le tableau final
 						$this->dataSource['values'] = array_merge($this->dataSource['values'],$dataSource['values']);
 						$this->dataSource['count'] += $dataSource['count'];
-						$this->dataSource['date_ref'] = $dataSource['date_ref'];
-
-					
+						$this->dataSource['date_ref'] = $dataSource['date_ref'];		
 					}
 				}			
 				// Logout (source solution)

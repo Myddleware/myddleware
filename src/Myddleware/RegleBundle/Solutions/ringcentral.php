@@ -212,77 +212,111 @@ class ringcentralcore  extends solution {
 	
 	public function read($param) {
 		try {
-			$result['date_ref'] = $param['date_ref'];
-			$result['count'] = 0;
-			// Add required fields			
-			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
-			// Remove Myddleware 's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-		
-			// Get the reference date field name
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);	
-			
-			// Call RingCEntral
-			$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/~/".$param['module']."?dateFrom=".$dateRef);
-
-			// Error managment
-			if(!empty($records->errorCode)) {
-				throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
-			}
-			
-			// Transform result by adding a dimension for the presence module (only one record for each call)
-			if ($param['module'] == 'presence') {
-				$recordsObj = new \stdClass();
-				// No/date ref id in the presence module
-				$records->id = uniqid('', true).'_'.$records->extension->extensionNumber;
-				$records->$dateRefField = date('Y-m-d H:i:s');
-				$recordsObj->records = array($records);
-				$records = $recordsObj;
-			}
-			
-			if (!empty($records->records)) {
-				// For each records
-				foreach($records->records as $record) {
-					// For each fields expected
-					foreach($param['fields'] as $field) {
-						// The field could be a structure from_phoneNumber for example
-						$fieldStructure = explode('__',$field);
-						// If 2 dimensions						
-						if (!empty($fieldStructure[1])) {
-							// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
-							$record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
-						}
-						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-						if(isset($record->$field)) {
-							// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-							if ($field == $dateRefField) {
-								$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
-								$row['date_modified'] = $dateMyddlewareFormat;
-							}
-							$row[$field] = $record->$field;
-						} else {
-							$row[$field] = '';
-						}
+			// Init the result date ref even if the date_ref isn't updated here. Indeed, the date ref is requiered in output of this function.
+			$result['date_ref'] = $param['date_ref'];	
+			// If extensionID equal ALL, we get all extension ID and search for them
+			if (strtoupper($param['ruleParams']['extensionId']) == 'ALL') {
+				$extensions = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension");
+				if (!empty($extensions)) {
+					foreach($extensions->records as $extension) {
+						$extensionIds[] = $extension->id;
 					}
-					// date à gérer
-					if (
-							!empty($row['date_modified'])
-						&&	$result['date_ref'] <= $row['date_modified']
-					) {
-						$date = new \DateTime($row['date_modified']);					
-						$date = date_modify($date, '+1 seconde');						
-						$result['date_ref'] = $date->format('Y-m-d H:i:s');
-					}
-					$result['values'][$record->id] = $row;
-					$result['count']++;
-					$row = array();
 				}
-			}		
+				// /restapi/v1.0/account/{accountId}/extension
+			}elseif (!empty($param['ruleParams']['extensionId'])) {
+				$extensionIds = explode(';',$param['ruleParams']['extensionId']);
+			} else {
+				$extensionIds[] = '~';
+			}
+			if (empty($extensionIds)) {
+				throw new \Exception('Failed to get the extension ID. Failed to read data from RingCentral. Please make sur the rule parameter Extension ID is correct.');
+			}	
+			$result['count'] = 0;
+			$i = 0;
+			foreach($extensionIds as $extensionId) {
+				// Each extension could have its own reference date. If empty, we take the rule reference date			
+				if (!empty($param['ruleParams'][$extensionId])) {
+					$dateRefExt[$extensionId] = $param['ruleParams'][$extensionId];
+				} else {
+					$dateRefExt[$extensionId] = $param['date_ref'];					
+				}
+				// Add required fields			
+				$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+				// Remove Myddleware 's system fields
+				$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			
+				// Get the reference date field name
+				$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+				$dateRef = $this->dateTimeFromMyddleware($dateRefExt[$extensionId]);	
+				
+				// Call RingCEntral
+				$records = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension/".$extensionId."/".$param['module']."?dateFrom=".$dateRef);
+
+				// Error managment
+				if(!empty($records->errorCode)) {
+					throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
+				}
+				
+				// Transform result by adding a dimension for the presence module (only one record for each call)
+				if ($param['module'] == 'presence') {
+					$recordsObj = new \stdClass();
+					// No/date ref id in the presence module
+					$records->id = uniqid('', true).'_'.$records->extension->extensionNumber;
+					$records->$dateRefField = date('Y-m-d H:i:s');
+					$recordsObj->records = array($records);
+					$records = $recordsObj;
+				}
+				
+				if (!empty($records->records)) {
+					// For each records
+					foreach($records->records as $record) {
+						// For each fields expected
+						foreach($param['fields'] as $field) {
+							// The field could be a structure from_phoneNumber for example
+							$fieldStructure = explode('__',$field);
+							// If 2 dimensions						
+							if (!empty($fieldStructure[1])) {
+								// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
+								$record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
+							}
+							// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
+							if(isset($record->$field)) {
+								// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
+								if ($field == $dateRefField) {
+									$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
+									$row['date_modified'] = $dateMyddlewareFormat;
+								}
+								$row[$field] = $record->$field;
+							} else {
+								$row[$field] = '';
+							}
+						}
+						// date à gérer
+						if (
+								!empty($row['date_modified'])
+							&&	$dateRefExt[$extensionId] <= $row['date_modified']
+						) {
+							$date = new \DateTime($row['date_modified']);					
+							$date = date_modify($date, '+1 seconde');						
+							$dateRefExt[$extensionId] = $date->format('Y-m-d H:i:s');
+						}
+						$result['values'][$record->id] = $row;
+						$result['count']++;
+						$row = array();
+					}
+					// Create the date_ref parameter for the extension
+					$result['ruleParams'][] = array('name' => $extensionId, 'value' => $dateRefExt[$extensionId]);
+				}
+				$i++;
+				// Ring central allows only around 10 calls per minute
+				if ($i % 10 == 0) {
+					sleep(65);
+				}
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
+		}		
 		return $result;
 	}	
 	
