@@ -423,12 +423,12 @@ class filecore extends solution {
 				$this->lineNumber++; // Save the line number				
 				// In case of query not empty, we filter the output data
 				if (!empty($param['query'])) {
-					$skip = false;
+					$skip = false;				
 					foreach($param['query'] as $key => $value) {
 						if (
-								empty($row[$key])
+								!isset($row[$key])
 							OR 	$row[$key] != $value
-						) {
+						) {				
 							$skip = true;
 							break;
 						}
@@ -450,7 +450,6 @@ class filecore extends solution {
 			// Add the parameter only when it is a standard call (not an query call)
 			if (empty($param['query'])) {
 				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
-
 			}
 		}
 		catch (\Exception $e) {
