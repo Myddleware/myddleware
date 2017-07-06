@@ -6,9 +6,9 @@ class ResponseListener
 {
     public function onKernelResponse(FilterResponseEvent $event)
     {   
-        $event->getResponse()->headers->set('x-frame-options', 'deny');
-        $event->getResponse()->headers->set('X-XSS-Protection', '1');  
-        $event->getResponse()->headers->set('X-Content-Type-Option', 'nosniff');
+        $event->getResponse()->headers->set('X-Frame-Options', 'deny');
+        $event->getResponse()->headers->set('X-XSS-Protection', '1; mode=block');  
+        $event->getResponse()->headers->set('X-Content-Type-Options', 'nosniff');
     }   
 }
 
