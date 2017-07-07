@@ -398,6 +398,7 @@ class cirrusshieldcore  extends solution {
 				$selectparam = ["authToken" 		=> $this->token,
 								"action" 			=> ($this->update ? 'update' : 'insert'),
 								"matchingFieldName" => 'Id',
+								"useExternalId" 	=> 'false',
 							];
 				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
 

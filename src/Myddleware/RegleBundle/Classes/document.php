@@ -1007,13 +1007,17 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					if ($type == 'S') {
-						// We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
+						// We don't create entry in the array dataInsert when the field is my_value because there is no field in the source, just a formula to the target application
 						if ($ruleField['source_field_name']=='my_value') {
 							continue;
 						}
 						// It could be several fields in the source fields (in case of formula)
-						$sourceFields = explode(";",$ruleField['source_field_name']);
+						$sourceFields = explode(";",$ruleField['source_field_name']);					
 						foreach ($sourceFields as $sourceField) {
+							// if Myddleware_element_id is present, we transform it into id 
+							if ($sourceField=='Myddleware_element_id') {
+								$sourceField = 'id';
+							}
 							$dataInsert[$sourceField] = $data[$sourceField];
 						}
 					} else {
@@ -1149,7 +1153,7 @@ class documentcore {
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
-		try {
+		try {		
 			//--
 			if (!empty($ruleField['formula'])) {
 				// -- -- -- Gestion des formules
@@ -1224,6 +1228,13 @@ class documentcore {
 			// Si le champ est envoyé sans transformation
 			elseif (isset($source[$ruleField['source_field_name']])) {			
 				return $this->checkField($source[$ruleField['source_field_name']]);
+			}
+			// If Myddleware_element_id is requested, we return the id 
+			elseif (
+						$ruleField['source_field_name'] == 'Myddleware_element_id'
+					AND	isset($source['id'])
+			) {			
+				return $this->checkField($source['id']);
 			}
 			elseif (is_null($source[$ruleField['source_field_name']])) {			
 				return null;
