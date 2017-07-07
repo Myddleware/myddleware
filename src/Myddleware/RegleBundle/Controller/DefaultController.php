@@ -344,7 +344,7 @@ class DefaultControllerCore extends Controller
 			return new Response($r);		
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return new JsonResponse($e->getMessage());
 		}			 		
 	}
 
@@ -398,7 +398,7 @@ class DefaultControllerCore extends Controller
 			return new Response(1);
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return new JsonResponse($e->getMessage());
 		}			 		
 	}
 
@@ -949,20 +949,18 @@ class DefaultControllerCore extends Controller
 							
 							if(!empty($r)) {
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								echo "1"; // Connexion valide
-								exit;
+								return new JsonResponse("1"); // Connexion valide
 							}
 							else {
 								unset($myddlewareSession['param']['rule']);
-								echo "0"; // Erreur de connexion
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								exit;					
+								return new JsonResponse("0");// Erreur de connexion				
 							}
 						}
 						else {
-							echo "0"; // Erreur pas le même nombre de champs
+							
 							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-							exit;					
+							return new JsonResponse("0"); // Erreur pas le même nombre de champs				
 						}					
 					}					
 				} // Rule
@@ -1006,12 +1004,10 @@ class DefaultControllerCore extends Controller
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						$r = $solution->connexion_valide;
 						if(!empty($r)) {
-							echo "1"; // Connexion valide
-							exit;
+							return new JsonResponse("1"); // Connexion valide
 						}
 						else {
-							echo "0"; // Erreur de connexion
-							exit;					
+							return new JsonResponse("0"); // Erreur de connexion					
 						}
 
 						exit;
@@ -1021,8 +1017,7 @@ class DefaultControllerCore extends Controller
 					}
 					else {
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo "0";
-						exit;
+						return new JsonResponse("0");
 					}
 				}	
 			}			
@@ -1864,8 +1859,7 @@ class DefaultControllerCore extends Controller
 			$formule->init($this->getRequest()->request->get('formula')); // mise en place de la règle dans la classe
 			$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP	
 			
-			echo $formule->parse['error']; 	
-			exit;
+			return new JsonResponse($formule->parse['error']);
 		}
 		else {	
 			throw $this->createNotFoundException('Error');
@@ -1898,8 +1892,7 @@ class DefaultControllerCore extends Controller
 			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
 			if(strlen($myddlewareSession['param']['rule']['rulename']) < 3 || $myddlewareSession['param']['rule']['rulename_valide'] == false) {
-				echo 0;	
-				exit;
+				return new JsonResponse(0);
 			}
 			
 			//------------ Create rule
@@ -2249,15 +2242,15 @@ class DefaultControllerCore extends Controller
 				unset( $myddlewareSession['param']['rule'] );
 			}			
 			$this->em->getConnection()->commit();
-			echo 1;
+			$response = 1;
 		}catch(\Exception $e) {
 			$this->em->getConnection()->rollBack();
 			$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
-			echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
+			$response = '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
 		} 	
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 		$this->em->close();	
-		exit;
+		return new JsonResponse($response);
 	}
 
 	/* ******************************************************
