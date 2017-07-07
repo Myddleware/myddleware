@@ -3724,7 +3724,7 @@ function verifFields(field_id,show) {
 				}, // rev 1.08
 			    statusCode: {
 			        500: function() {
-			            alert('Internal Server Error (500)');
+			            alert('Service is temporarily unavailable');
 			            $( "#validation" ).attr('value',before); // rev 1.08
 			        }
 			    }				 
