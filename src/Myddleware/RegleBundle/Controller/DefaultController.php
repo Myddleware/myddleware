@@ -28,6 +28,7 @@ namespace Myddleware\RegleBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -1081,16 +1082,17 @@ class DefaultControllerCore extends Controller
 
 			// 0 existe pas 1 existe
 			if($rule == NULL) {
-				echo 0;
+				$existRule = 0;
 				$myddlewareSession['param']['rule']['rulename_valide'] = true;
 				$myddlewareSession['param']['rule']['rulename'] = $this->getRequest()->request->get('name');
 			}
 			else {
-				echo 1;
+				$existRule = 1;
 				$myddlewareSession['param']['rule']['rulename_valide'] = false;
 			}	
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			exit;
+			
+                        return new JsonResponse($existRule);
 		}	
 		else {
 			throw $this->createNotFoundException('Error');
@@ -2476,12 +2478,14 @@ class DefaultControllerCore extends Controller
 	}
 
 	// CREATION - STEP ONE - ANIMATION
-	public function ruleStepOneAnimationAction() {
+	public function ruleStepOneAnimationAction() {            
 		$request = $this->get('request');
 		$session = $request->getSession();
 		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                
+               
 		// s'il existe des vielles données on les supprime
 		if(isset( $myddlewareSession['param']['rule'] )) {
 			unset( $myddlewareSession['param']['rule'] );
@@ -2521,7 +2525,7 @@ class DefaultControllerCore extends Controller
 		// Liste target : solution avec au moins 1 connecteur
 		$solutionTarget = $this->em->getRepository('RegleBundle:Solution')
 				  	         ->solutionConnector( 'target',$permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId() );
-					   
+			
 		if( count($solutionTarget) > 0 ) {
 			foreach($solutionTarget as $t) {
 				$target[] = $t->getName();
