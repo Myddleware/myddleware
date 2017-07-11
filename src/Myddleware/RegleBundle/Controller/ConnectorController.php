@@ -38,6 +38,7 @@ use Myddleware\RegleBundle\Entity\ConnectorParam;
 //--
 use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\HttpFoundation\Request;
 
 class ConnectorController extends Controller
 {
@@ -661,19 +662,21 @@ class ConnectorController extends Controller
 	 * ANIMATION
 	 ****************************************************** */
 	// LISTE DES CONNECTEURS POUR ANIMATION
-	public function connectorListSolutionAction() {
+	public function connectorListSolutionAction(Request $request) {
 		
-		if(isset($_POST['id'])) {
+                $id = $request->get('id',null);
+                
+		if($id !=null) {
 							
 			// Detecte si la session est le support ---------
 			$permission =  $this->get('myddleware.permission');
 			
 			if( $permission->isAdmin($this->getUser()->getId()) ) {
-				$list_fields_sql = array('solution' => (int)$_POST['id']);
+				$list_fields_sql = array('solution' => (int)$id);
 			}
 			else {
 				$list_fields_sql = 
-					array('solution' => (int)$_POST['id'],
+					array('solution' => (int)$id,
 					      'createdBy' => $this->getUser()->getId()
 				);
 			}
