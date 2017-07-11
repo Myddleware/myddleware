@@ -525,6 +525,8 @@ class ConnectorController extends Controller
 		$em = $this->getDoctrine()->getManager();
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {
+                    $nom = $request->get("nom");
+                    $params = $request->get("params");
 			// SAVE
 			try {					   						   
 				// Detecte si la session est le support ---------
@@ -546,23 +548,22 @@ class ConnectorController extends Controller
 				// SAVE NOM CONNECTEUR
 				$connector = $em->getRepository('RegleBundle:Connector')
 		                        ->findBy( $list_fields_sql );						   
-				$connector[0]->setName( $_POST['nom'] );	
+				$connector[0]->setName( $nom );	
 			    $em->persist($connector[0]);
 			    $em->flush();					
 				
 				// SAVE PARAMS CONNECTEUR		   						   
-				if(count($_POST['params']) > 0) {
+				if(count($params) > 0) {
 					// Generate object to encrypt data
 					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
-					foreach($_POST['params']  as $p) {
-						$param = $em->getRepository('RegleBundle:ConnectorParam')
-			                        ->findOneBy( array(
-									    	'id' => (int)$p['id']
-									    )
-								);					
-						$param->setValue( $encrypter->encrypt($p['value']) );	
-					    $em->persist($param);
-					    $em->flush();											
+					foreach($params  as $p) {
+                                            if(isset($p['id']) && isset($p['value'])){
+                                            
+						$param = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy(array('id' => (int)$p['id']));					
+						$param->setValue( $encrypter->encrypt($p['value']));	
+                                                $em->persist($param);
+                                                $em->flush();
+                                            }
 					}	
 					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
 					$session = $request->getSession();
