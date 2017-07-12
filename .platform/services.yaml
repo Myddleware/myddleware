@@ -4,10 +4,8 @@ mysqldb:
     configuration:
         schemas:
             - main
-            - legacy
         endpoints:
-            admin:
-                default_schema: main
-                privileges:
-                    main: admin
-                    legacy: admin
+            mysql:
+              default_schema: main
+              privileges:
+                main: admin
