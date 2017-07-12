@@ -3,11 +3,11 @@ mysqldb:
     disk: 2048
     configuration:
         schemas:
-            - myddleware
+            - main
             - test
         endpoints:
             mysql:
-              default_schema: myddleware
+              default_schema: main
               privileges:
-                myddleware: admin
+                main: admin
                 test: admin
