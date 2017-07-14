@@ -2556,7 +2556,6 @@ class DefaultControllerCore extends Controller
                         if(!in_array($type,['source','cible']) || !is_numeric($id_connector)) {
                             throw $this->createAccessDeniedException();
                         }
-                        
                         $id_connector = (int)$id_connector;
 			
 			$this->getInstanceBdd();	
