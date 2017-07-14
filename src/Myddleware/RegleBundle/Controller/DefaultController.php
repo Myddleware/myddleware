@@ -1245,7 +1245,7 @@ class DefaultControllerCore extends Controller
 			$source = $solution_source->read_last( array( 
 										'module' => $myddlewareSession['param']['rule']['source']['module'],
 										'fields' => $sourcesfields));	
-					
+                        \Symfony\Component\VarDumper\VarDumper::dump($source);	
 			if( isset($source['done']) ) {
 				$before = array();
 				$after = array();
@@ -2324,14 +2324,17 @@ class DefaultControllerCore extends Controller
 		$permission =  $this->get('myddleware.permission');
 		$countTransferRule = array();
 		$i=1;
-		foreach ($home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) as $field => $value) {
-			if($i == 1) {
-				$countTransferRule[] = array('test','test2');	
-			} 
-			
-			$countTransferRule[] = array($value['name'],(int)$value['nb']);
-			$i++;
-		}
+                $values = $home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) ;
+		if(count($values) > 0){
+                    foreach ($values as $field => $value) {
+                            if($i == 1) {
+                                    $countTransferRule[] = array('test','test2');	
+                            } 
+
+                            $countTransferRule[] = array($value['name'],(int)$value['nb']);
+                            $i++;
+                    }
+                }
 
 		return new Response(json_encode($countTransferRule));			
 	} 
