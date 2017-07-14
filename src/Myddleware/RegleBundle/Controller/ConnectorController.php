@@ -547,11 +547,15 @@ class ConnectorController extends Controller
 			 
 				// SAVE NOM CONNECTEUR
 				$connector = $em->getRepository('RegleBundle:Connector')
-		                        ->findBy( $list_fields_sql );						   
+		                        ->findBy( $list_fields_sql );
+                                
+                                if(!isset($connector[0])){
+                                    throw $this->createAccessDeniedException();
+                                }
 				$connector[0]->setName( $nom );	
 			    $em->persist($connector[0]);
-			    $em->flush();					
-				
+			    $em->flush();	
+                          	
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($params) > 0) {
 					// Generate object to encrypt data
@@ -559,10 +563,17 @@ class ConnectorController extends Controller
 					foreach($params  as $p) {
                                             if(isset($p['id']) && isset($p['value'])){
                                             
-						$param = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy(array('id' => (int)$p['id']));					
-						$param->setValue( $encrypter->encrypt($p['value']));	
-                                                $em->persist($param);
-                                                $em->flush();
+						$param = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy(array('id' => (int)$p['id'], 'connector' => $connector[0]));
+                                                
+                                                # Check param object
+                                                if(!$param){
+                                                    throw $this->createAccessDeniedException();
+                                                }
+                                                
+                                                    $param->setValue( $encrypter->encrypt($p['value']));	
+                                                    $em->persist($param);
+                                                    $em->flush();
+                                                
                                             }
 					}	
 					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
