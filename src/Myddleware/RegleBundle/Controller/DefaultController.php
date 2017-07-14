@@ -1245,7 +1245,7 @@ class DefaultControllerCore extends Controller
 			$source = $solution_source->read_last( array( 
 										'module' => $myddlewareSession['param']['rule']['source']['module'],
 										'fields' => $sourcesfields));	
-                        \Symfony\Component\VarDumper\VarDumper::dump($source);	
+  
 			if( isset($source['done']) ) {
 				$before = array();
 				$after = array();
