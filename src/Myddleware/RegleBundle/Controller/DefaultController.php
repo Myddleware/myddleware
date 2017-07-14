@@ -2388,9 +2388,10 @@ class DefaultControllerCore extends Controller
 		// We always add data again in session because these data are removed after the call of the get
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 		try{
-			if(isset($_POST['choice_select'])) {
+                    $choiceSelect = $request->get('choice_select',null);
+			if($choiceSelect != null) {
 				
-				if($_POST['choice_select'] == 'module') {
+				if($choiceSelect == 'module') {
 					
 					// si le nom de la règle est inferieur à 3 caractères :
 					if(!isset($myddlewareSession['param']['rule']['source']['solution']) || strlen($myddlewareSession['param']['rule']['rulename']) < 3) {
@@ -2400,12 +2401,12 @@ class DefaultControllerCore extends Controller
 						$myddlewareSession['param']['rule']['rulename_valide'] = true;
 					}
 					
-					$myddlewareSession['param']['rule']['source']['module'] = $_POST['module_source'];
-					$myddlewareSession['param']['rule']['cible']['module'] = $_POST['module_target'];
+					$myddlewareSession['param']['rule']['source']['module'] = $request->get('module_source');
+					$myddlewareSession['param']['rule']['cible']['module'] = $request->get('module_target');
 					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					return new Response('module');
 				}
-				else if($_POST['choice_select'] == 'template') {
+				else if($choiceSelect == 'template') {
 					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					//--
 					$template = $this->get('myddleware.template');	
@@ -2414,7 +2415,7 @@ class DefaultControllerCore extends Controller
 					$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 					$template->setIdUser( $this->getUser()->getId() );	
 					// Rule creation with the template selected in parameter
-					$convertTemplate = $template->convertTemplate($_POST['template']);
+					$convertTemplate = $template->convertTemplate($request->get('template'));
 					// We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
 					return new Response('template');
 				}	
@@ -2547,9 +2548,16 @@ class DefaultControllerCore extends Controller
 			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 			// We always add data again in session because these data are removed after the call of the get
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-
-			$id_connector = (int)$_POST['id'];
-			$type = $_POST['type'];
+                        
+			$id_connector = $request->get('id');
+			$type = $request->get('type');
+                        
+                        # Control the request
+                        if(!in_array($type,['source','cible']) || !is_numeric($id_connector)) {
+                            throw $this->createAccessDeniedException();
+                        }
+                        
+                        $id_connector = (int)$id_connector;
 			
 			$this->getInstanceBdd();	
 			$connector = $this->em->getRepository('RegleBundle:Connector')
