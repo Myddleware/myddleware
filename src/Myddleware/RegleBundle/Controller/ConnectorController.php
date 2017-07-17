@@ -631,40 +631,14 @@ class ConnectorController extends Controller
 			}
 			// Detecte si la session est le support ---------			
 		
-			// Infos du connecteur
-			$connectorP = $em->getRepository('RegleBundle:ConnectorParam')
-	                        ->findByConnector( $id );
-			// Infos du connecteur
+                        // Infos du connecteur
 			$connector = $em->getRepository('RegleBundle:Connector')
-	                        ->findBy( $list_fields_sql );	
-						
-			if(count($connector) == 0) {
-				return $this->redirect($this->generateUrl('regle_connector_list'));
-			}
-									   
-			if( isset($connectorP) && count($connectorP > 0) ) {				
-				$connector_params = array();
-				$connector_params['label'] = $connector[0]->getName();
-				
-				$connector_params['solution']['name'] = $connector[0]->getSolution()->getName();
-				$connector_params['solution']['id'] = $connector[0]->getSolution()->getId();
-				foreach ($connectorP as $connectorObj) {	
-					$connector_params['id'] = $connectorObj->getConnector();
-					$connector_params['params'][$connectorObj->getName()]['value'] = $this->decrypt_params($connectorObj->getValue());	
-					$connector_params['params'][$connectorObj->getName()]['id'] = $connectorObj->getId();
-				}
-	
-			}	
-			
-			$solution = $this->get('myddleware_rule.'.$connector_params['solution']['name']);
-			
-			foreach ($solution->getFieldsLogin() as $k => $v) {
-			
-				$connector_params['params'][$v['name']]['type'] = $v['type'];
-			}
+	                        ->findOneBy( $list_fields_sql );	
+                        
+			$connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector);
 
 	        return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
-				'connector_params' => $connector_params)
+				'connector_params' => $connectorParams)
 			);			
 		}
 		
@@ -807,23 +781,6 @@ class ConnectorController extends Controller
 	}
 
 
-	// Décrypte les paramètres de connexion d'une solution
-	private function decrypt_params($tab_params) {		
-		// Instanciate object to decrypte data
-		$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
-		if( is_array($tab_params) ) {
-			$return_params = array();
-			foreach ($tab_params as $key => $value) {				
-				if(is_string($value)) {
-					$return_params[$key] = $encrypter->decrypt($value);
-				}
-			}
-			return $return_params;				
-		}
-		else {
-			return $encrypter->decrypt($tab_params);	
-		}	
-	}
 
 	
 }

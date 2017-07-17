@@ -93,4 +93,9 @@ services:
         arguments: [@doctrine.dbal.default_connection]
         tags:
             - { name: twig.extension }
+            
+            
+     myddleware.connector.service:
+        class: Myddleware\RegleBundle\Service\ConnectorService
+        arguments: [@service_container]
 

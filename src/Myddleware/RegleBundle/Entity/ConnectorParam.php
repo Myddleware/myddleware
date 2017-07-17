@@ -40,16 +40,14 @@ class ConnectorParam
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 	
     /**
-	* @var integer
     *
-    * @ORM\OneToOne(targetEntity="Myddleware\RegleBundle\Entity\Connector")
-	* @ORM\Column(name="conn_id", type="integer", nullable=false)
-	* @ORM\JoinColumn(name="conn_id", referencedColumnName="conn_id")
+    * @ORM\ManyToOne(targetEntity="Myddleware\RegleBundle\Entity\Connector", inversedBy="connectorParams")
+    * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
     */
     private $connector;	
 	
