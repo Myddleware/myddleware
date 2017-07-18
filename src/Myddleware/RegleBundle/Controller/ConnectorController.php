@@ -39,6 +39,7 @@ use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Request;
+use \Myddleware\RegleBundle\Form\ConnectorType;
 
 class ConnectorController extends Controller
 {
@@ -519,12 +520,44 @@ class ConnectorController extends Controller
 	}
 
 	// FICHE D UN CONNECTEUR
-	public function connectorOpenAction($id) {
-		$request = $this->get('request');
+	public function connectorOpenAction(Request $request, $id) {
+		
 		// On récupére l'EntityManager
 		$em = $this->getDoctrine()->getManager();
+                
+                // Detecte si la session est le support ---------
+                $permission = $this->get('myddleware.permission');
+
+                if ($permission->isAdmin($this->getUser()->getId())) {
+                    $list_fields_sql = array('id' => $id
+                    );
+                } else {
+                    $list_fields_sql = array(
+                                'id' => $id,
+                                'createdBy' => $this->getUser()->getId()
+                    );
+                }
+                // Detecte si la session est le support ---------			
+                // Infos du connecteur
+                $connector = $em->getRepository('RegleBundle:Connector')
+                        ->findOneBy($list_fields_sql);
+
+                if (!$connector) {
+                    throw $this->createNotFoundException("This connector doesn't exist");
+                }
+
+                // Create connector form
+                $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
+                $form = $this->createForm(new ConnectorType($connectorParams), $connector);
+
+                
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {
+                    
+                    $form->handleRequest($request);
+                    
+                    if($form->isValid()){
+                        
                     $nom = $request->get("nom");
                     $params = $request->get("params");
 			// SAVE
@@ -611,31 +644,19 @@ class ConnectorController extends Controller
 				return new Response($e->getMessage());
 			}
 			// SAVE
+                    }else{
+                       
+                        
+                    return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
+				'form' => $form->createView())
+			);			
+		
+                    }
 		}
 		// Display the connector
 		else {
-			// Detecte si la session est le support ---------
-			$permission =  $this->get('myddleware.permission');
 			
-			if( $permission->isAdmin($this->getUser()->getId()) ) {
-				$list_fields_sql = 
-					array('id' => $id
-				);			
-			}
-			else {
-				$list_fields_sql = 
-					array(
-					'id' => $id,
-					'createdBy' => $this->getUser()->getId()
-				);				
-			}
-			// Detecte si la session est le support ---------			
-		
-                        // Infos du connecteur
-			$connector = $em->getRepository('RegleBundle:Connector')
-	                        ->findOneBy( $list_fields_sql );	
-                        
-			$connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector);
+			    
 
 	        return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
 				'connector_params' => $connectorParams)

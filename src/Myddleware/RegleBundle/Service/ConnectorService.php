@@ -22,10 +22,6 @@ class ConnectorService {
 
         $connectorP = $connector->getConnectorParams();
 
-        if (!$connector) {
-            return $this->redirect($this->generateUrl('regle_connector_list'));
-        }
-
         if (isset($connectorP) && count($connectorP) > 0) {
             $connectorParams = array();
             $connectorParams['label'] = $connector->getName();
@@ -45,6 +41,8 @@ class ConnectorService {
 
             $connectorParams['params'][$v['name']]['type'] = $v['type'];
         }
+
+
 
         return $connectorParams;
     }
