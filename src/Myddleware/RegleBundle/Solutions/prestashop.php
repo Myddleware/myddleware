@@ -58,7 +58,7 @@ class prestashopcore extends solution {
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
 														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
-														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity'), 'relationships' => array('id_product','id_product_attribute','id_address_delivery'), 'searchModule' => 'cart', 'subModule' => 'cart_rows', 'subData' => 'cart_row'),
+														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity','id_product_attribute'=>'id_product_attribute','id_address_delivery'=>'id_address_delivery'), 'relationships' => array('cart_id','id_product'), 'searchModule' => 'carts', 'subModule' => 'cart_rows', 'subData' => 'cart_row', 'subDataId' => 'id_product'),
 														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
 														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
 														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
@@ -605,7 +605,8 @@ class prestashopcore extends solution {
 				// Call						
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);							
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);	
+					
 				$result['count'] = $simplexml->children()->children()->count();
 				
 				$record = array();
@@ -699,6 +700,7 @@ class prestashopcore extends solution {
 				$searchModule = $this->module_relationship_many_to_many[$param['module']]['searchModule'];
 				$subModule = $this->module_relationship_many_to_many[$param['module']]['subModule'];
 				$subData = $this->module_relationship_many_to_many[$param['module']]['subData'];
+				$subDataId = (!empty($this->module_relationship_many_to_many[$param['module']]['subDataId']) ? $this->module_relationship_many_to_many[$param['module']]['subDataId'] : 'id');
 				
 				// Ajout des champs obligatoires
 				$param['fields'] = $this->addRequiredField($param['fields'],$searchModule);				
@@ -738,11 +740,11 @@ class prestashopcore extends solution {
 				// Call
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);	
 
 				$cpt = 0;			
 				$record = array();
-				foreach ($simplexml->children()->children() as $resultRecord) {
+				foreach ($simplexml->children()->children() as $resultRecord) {	
 					foreach ($resultRecord as $key => $value) {
 						// Si la clé de référence est une date
 						if (
@@ -780,11 +782,20 @@ class prestashopcore extends solution {
 						}				
 				
 						if($key == 'associations'){
-							foreach ($resultRecord->associations->$subModule->$subData as $data) {
+							foreach ($resultRecord->associations->$subModule->$subData as $data) {													
 								$subRecord = array();
-								$idRelation = (string) $resultRecord->id . '_' . (string) $data->id;
+								$idRelation = (string) $resultRecord->id . '_' . (string) $data->$subDataId;								
 								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]] = (string) $resultRecord->id;
-								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->id;
+								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->$subDataId;
+								// Add fields in the relationship								
+								if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
+									foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $name => $label) {
+										// Add only requested fields									
+										if (array_search($name, $param['fields']) !== false) {
+											$subRecord[$name] = (string)$data->$name;
+										}
+									}
+								}
 								$subRecord['id'] = $idRelation;
 								$subRecord['date_modified'] = $record['date_modified'];
 								$result['values'][$idRelation] = $subRecord;

@@ -294,7 +294,7 @@ class zuoracore  extends solution {
 
 					// Get the response for each records
 					foreach($resultCall->result as $record) {
-						if ($record->Success) {
+						if (!empty($record->Success)) {
 							if (empty($record->Id)) {
 								$result[$idDocArray[$j]] = array(
 										'id' => '-1',
@@ -309,7 +309,7 @@ class zuoracore  extends solution {
 						} else {
 							$result[$idDocArray[$j]] = array(
 											'id' => '-1',
-											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+											'error' => (empty($record->Errors) ? (empty($record->Code) ? 'No error returned by Zuora.' : $record->Code.' : '.$record->Message) : print_r($record->Errors,true))
 											);	
 						}
 						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
