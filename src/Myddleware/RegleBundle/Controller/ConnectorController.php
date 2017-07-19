@@ -39,7 +39,7 @@ use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Request;
-use \Myddleware\RegleBundle\Form\ConnectorType;
+use Myddleware\RegleBundle\Form\ConnectorType;
 
 class ConnectorController extends Controller
 {
@@ -521,7 +521,8 @@ class ConnectorController extends Controller
 
 	// FICHE D UN CONNECTEUR
 	public function connectorOpenAction(Request $request, $id) {
-		
+
+                
 		// On récupére l'EntityManager
 		$em = $this->getDoctrine()->getManager();
                 
@@ -539,25 +540,27 @@ class ConnectorController extends Controller
                 }
                 // Detecte si la session est le support ---------			
                 // Infos du connecteur
-                $connector = $em->getRepository('RegleBundle:Connector')
+                $connector = $em->getRepository('RegleBundle:Connector')    
                         ->findOneBy($list_fields_sql);
 
                 if (!$connector) {
                     throw $this->createNotFoundException("This connector doesn't exist");
                 }
-
+              
+              
                 // Create connector form
-                $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
-                $form = $this->createForm(new ConnectorType($connectorParams), $connector);
-
+               // $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
+                $form = $this->createForm(new ConnectorType(), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
                 
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {
-                    
+                 
                     $form->handleRequest($request);
-                    
+              
                     if($form->isValid()){
-                        
+                      
+                    dump($form->getData()); die();
+                          
                     $nom = $request->get("nom");
                     $params = $request->get("params");
 			// SAVE
@@ -659,7 +662,8 @@ class ConnectorController extends Controller
 			    
 
 	        return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
-				'connector_params' => $connectorParams)
+                                'connector' => $connector,
+				'form' => $form->createView())
 			);			
 		}
 		

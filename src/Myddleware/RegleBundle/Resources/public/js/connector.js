@@ -25,7 +25,7 @@
 $( document ).ready(function() {
 
 	// Sauvegarde du connecteur
-	$('#connector_save','#connector').click(function(){	
+	/*$('#connector_save','#connector').click(function(){	
 		params = [];
 		$('.params','#tab_connector').each(function(){
 			id = $.trim( $(this).attr('data-id') );
@@ -52,7 +52,7 @@ $( document ).ready(function() {
 			 }
 		});
 					
-	});
+	});*/
 
 	// Test connexion
 	$('#connexion').click(function(){
@@ -81,14 +81,14 @@ $( document ).ready(function() {
 				status.removeAttr("src");
 				status.attr("src",path_img + "loader.gif");							
 			},				
-			success: function(data){
+			success: function(json){
 				
-				r = data.split(';');
+				//r = data.split(';');
 				// Si connexion echoue
-				if(r[1] == 0) {							
+				if(!json.success) {							
 					status.removeAttr("src");
 					status.attr("src",path_img + "status_offline.png");
-					$('#msg_status span.error').html(r[0]);
+					$('#msg_status span.error').html(json.message);
 					$('#msg_status').show();
 					return false;
 				}
@@ -152,7 +152,7 @@ $( document ).ready(function() {
 							});
 						}// sans popup
 						else {						
-							if(r[1] == 0) {								
+							if(!json.success) {								
 								status.removeAttr("src");
 								status.attr("src",path_img+"status_offline.png");
 								$('#msg_status span.error').html(r[0]);

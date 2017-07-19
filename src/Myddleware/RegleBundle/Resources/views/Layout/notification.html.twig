@@ -51,7 +51,14 @@
     {% endfor %}
 {% endif %}
 
+{{app.session.remove('error') }}
+{{app.session.remove('warning') }}
+{{app.session.remove('info') }}
+{{app.session.remove('success') }}
+{#
 {{ app.session.clear() }}
+WARNING, it's not a good practice, because it's clear all session *_*. We sould use flashbag for notification
+#}
 
 </ul>
 {% endif %}

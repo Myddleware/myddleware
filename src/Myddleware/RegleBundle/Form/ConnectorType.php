@@ -4,20 +4,22 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Myddleware\RegleBundle\Form\ConnectorParamType;
+use Myddleware\RegleBundle\Entity\Connector;
 
 class ConnectorType extends AbstractType{
     
-    private $connectorParams;
-    
-    public function __construct(array $connectorParams = null) {
-        $this->connectorParams = $connectorParams;
-    }
+ 
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
         
-       $builder->add('name', TextType::class,['attr' => ['id' => 'label','class' => 'params'] ]);
+        $builder->add('name', TextType::class,['attr' => ['id' => 'label','class' => 'params'] ]);
+        $builder->add('connectorParams', CollectionType::class, array(
+            'entry_type' => ConnectorParamType::class
+        ));
        
-       foreach ($this->connectorParams['params'] as $name =>  $value) { 
+       /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
                 $builder->add($name, $value['type'],[
                     'data' => $value['value'],
                     'mapped' => false,
@@ -29,7 +31,7 @@ class ConnectorType extends AbstractType{
                     ] 
                 ]) ;
             
-       }
+       }*/
               
    
     }
@@ -40,7 +42,7 @@ class ConnectorType extends AbstractType{
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'Myddleware\RegleBundle\Entity\Connector'
+            'data_class' => Connector::class
         ));
     }
     

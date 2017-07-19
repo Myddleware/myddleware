@@ -911,7 +911,7 @@ class DefaultControllerCore extends Controller
 				}
 			} // Vérifie si la connexion peut se faire ou non
 			elseif($this->getRequest()->request->get('mod') == 2 || $this->getRequest()->request->get('mod') == 3) {
-					
+                            		
 				// Connector	
 				if($this->getRequest()->request->get('mod') == 2) {
 					
@@ -949,18 +949,18 @@ class DefaultControllerCore extends Controller
 							
 							if(!empty($r)) {
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								return new JsonResponse("1"); // Connexion valide
+								return new JsonResponse(["success" => true]); // Connexion valide
 							}
 							else {
 								unset($myddlewareSession['param']['rule']);
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								return new JsonResponse("0");// Erreur de connexion				
+								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);// Erreur de connexion				
 							}
 						}
 						else {
 							
 							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-							return new JsonResponse("0"); // Erreur pas le même nombre de champs				
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur pas le même nombre de champs				
 						}					
 					}					
 				} // Rule
@@ -1004,10 +1004,10 @@ class DefaultControllerCore extends Controller
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						$r = $solution->connexion_valide;
 						if(!empty($r)) {
-							return new JsonResponse("1"); // Connexion valide
+							return new JsonResponse(["success" => true]); // Connexion valide
 						}
 						else {
-							return new JsonResponse("0"); // Erreur de connexion					
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur de connexion					
 						}
 
 						exit;
@@ -1017,7 +1017,7 @@ class DefaultControllerCore extends Controller
 					}
 					else {
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						return new JsonResponse("0");
+						return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);
 					}
 				}	
 			}			
