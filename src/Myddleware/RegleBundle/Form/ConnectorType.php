@@ -9,16 +9,20 @@ use Myddleware\RegleBundle\Form\ConnectorParamType;
 use Myddleware\RegleBundle\Entity\Connector;
 
 class ConnectorType extends AbstractType{
+      
+    private $_secret;
     
- 
+    public function __construct($secret) {
+        $this->_secret = $secret;
+    }
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
         
         $builder->add('name', TextType::class,['attr' => ['id' => 'label','class' => 'params'] ]);
         $builder->add('connectorParams', CollectionType::class, array(
-            'entry_type' => ConnectorParamType::class
+            'entry_type' => new ConnectorParamType($this->_secret)
         ));
-       
+          
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
                 $builder->add($name, $value['type'],[
                     'data' => $value['value'],
@@ -35,6 +39,7 @@ class ConnectorType extends AbstractType{
               
    
     }
+    
     
     /**
      * @param OptionsResolver $resolver
