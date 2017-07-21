@@ -462,15 +462,25 @@ class zuoracore  extends solution {
 				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
 				$zSContact = new \Zuora_Contact();
 				$zPaymentMethod = new \Zuora_PaymentMethod();
-				
-				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				try {	
+					$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				}
+				catch (\Exception $e) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => $e->getMessage().' '.$e->getFile().' '.$e->getLine()
+										);	
+				}	
 				
 				unset($zAccount);
 				unset($zSubscriptionData);
 
 				// General error
 				if (empty($resultCall)) {
-					throw new \Exception('No response from Zuora. ');
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => 'No response from Zuora. '
+										);	
 				}	
 				// Manage results		
 				if (!empty($resultCall->result->Errors)) {

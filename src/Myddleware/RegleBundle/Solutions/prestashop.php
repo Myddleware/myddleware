@@ -39,6 +39,7 @@ class prestashopcore extends solution {
 										'product_option_values' => array('id'),
 										'combinations' => array('id'),
 										'order_histories' => array('id', 'date_add'),
+										'order_payments' => array('id', 'date_add','order_reference'),
 								);
 	
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
@@ -273,10 +274,10 @@ class prestashopcore extends solution {
 					$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
 				}
 				// Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
-				if($module == "customer_messages") {
+				if($module == 'customer_messages') {
 					$this->fieldsRelate['id_customer_thread']['required_relationship'] = 1;
 				}
-				if($module == "customer_threads") {
+				if($module == 'customer_threads') {
 					$languages = $this->getList('language','languages');
 					$this->moduleFields['id_lang']['option'] = $languages;
 					$this->moduleFields['id_lang']['required'] = 1;
@@ -287,6 +288,19 @@ class prestashopcore extends solution {
 					$this->moduleFields['status']['option'] = $this->threadStatus;
 					// Le champ token est renseigné dans le create directement
 					unset($this->moduleFields['token']);
+				}
+				// If order_payments is requeted, we add the order_id because there is only the order_reference (no useable for relationship)
+				if(
+						$module == 'order_payments'
+					AND $type == 'source'
+				) {
+					$this->fieldsRelate['id_order'] = array(
+													'label' => 'id_order',
+													'type' => 'varchar(255)',
+													'type_bdd' => 'varchar(255)',
+													'required' => 0,
+													'required_relationship' => 0
+												);
 				}
 				// On enlève les champ date_add et date_upd si le module est en target 
 				if ($type == 'target') {
@@ -565,7 +579,10 @@ class prestashopcore extends solution {
 				$opt['display'] = '[';
 				foreach ($param['fields'] as $field) {
 					// On ne demande pas les champs spécifiques à Myddleware
-					if (!in_array($field, array('Myddleware_element_id','my_value'))) {
+					if (
+							!in_array($field, array('Myddleware_element_id','my_value'))
+						AND !($field == 'id_order' AND $param['module'] == 'order_payments')	
+					) {
 						$opt['display'] .= $field.',';
 					}
 				}
@@ -602,10 +619,11 @@ class prestashopcore extends solution {
 						$opt['sort'] = '[id_ASC]';
 					}
 				}				
-				// Call						
+				// Call	
+print_r($opt);				
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);	
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);				
 					
 				$result['count'] = $simplexml->children()->children()->count();
 				
@@ -622,9 +640,7 @@ class prestashopcore extends solution {
 								$date_ref = date_create($value);
 								date_modify($date_ref, '+1 seconde');							
 								$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
-
 								$record['date_modified'] = (string)$value;
-								continue;
 							}
 							// Si la clé de référence est un id et que celui-ci est supérieur alors on sauvegarde cette référence
 							elseif (
@@ -643,13 +659,33 @@ class prestashopcore extends solution {
 								// Une date de modification est mise artificiellement car il n'en existe pas dans le module
 								$record['date_modified'] = (string)date('Y-m-d H:i:s');
 							}
-							if(isset($value->language)){
-								$record[$key] = (string) $value->language;
-							} else {
-								$record[$key] = (string)$value;
+							// If field is requested (field corresponding to the reference date could be requested in the field mapping too)
+							if (array_search($key, $param['fields']) !== false) {
+								if(isset($value->language)){
+									$record[$key] = (string) $value->language;
+								} else {
+									$record[$key] = (string)$value;
+								}
 							}
-							
-						}	
+						}
+						// If id_order is requested for the module order_payments, we have to get the id order by using the order_reference
+						if (
+								array_search('id_order', $param['fields']) !== false
+							AND $param['module'] == 'order_payments'
+							AND !empty($data->order_reference)
+						) {
+							// Get the id_order from Prestashop
+							$optOrder['limit'] = 1;
+							$optOrder['resource'] = 'orders&date=1';
+							$optOrder['display'] = '[id]';
+							$optOrder['filter[reference]'] = '['.(string)$data->order_reference.']';					
+							$xml = $this->webService->get($optOrder);
+							$xml = $xml->asXML();
+							$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+							if (!empty($simplexml->orders->order->id)) {
+								$record['id_order'] = (string)$simplexml->orders->order->id;
+							}
+						}
 						// Récupération du statut courant de la commande si elle est demandée
 						if ($getCurrentState) {
 							$optState['limit'] = 1;
@@ -685,7 +721,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
+		}			
 		return $result;
 	} // read($param)
 	
@@ -1028,7 +1064,7 @@ class prestashopcore extends solution {
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
 		// Le module order_histories n'a que date_add
-		if (in_array($moduleSource, array('order_histories'))) {
+		if (in_array($moduleSource, array('order_histories','order_payments'))) {
 			return "date_add";
 		}
 		if($RuleMode == "0") {
