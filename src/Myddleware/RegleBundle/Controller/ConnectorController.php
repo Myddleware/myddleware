@@ -526,23 +526,23 @@ class ConnectorController extends Controller
 		// On récupére l'EntityManager
 		$em = $this->getDoctrine()->getManager();
                 
+                $qb = $em->getRepository('RegleBundle:Connector')->createQueryBuilder('c');
+                $qb->select('c','cp')
+                   ->leftjoin('c.connectorParams','cp');
+                
                 // Detecte si la session est le support ---------
                 $permission = $this->get('myddleware.permission');
 
                 if ($permission->isAdmin($this->getUser()->getId())) {
-                    $list_fields_sql = array('id' => $id
-                    );
+                    $qb->where('c.id =:id')->setParameter('id',$id); 
                 } else {
-                    $list_fields_sql = array(
-                                'id' => $id,
-                                'createdBy' => $this->getUser()->getId()
-                    );
+                    $qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
                 }
                 // Detecte si la session est le support ---------			
                 // Infos du connecteur
-                $connector = $em->getRepository('RegleBundle:Connector')    
-                        ->findOneBy($list_fields_sql);
+                $connector = $qb->getQuery()->getOneOrNullResult();
 
+               // dump($connector);die();
                 if (!$connector) {
                     throw $this->createNotFoundException("This connector doesn't exist");
                 }
@@ -560,59 +560,19 @@ class ConnectorController extends Controller
               
                     if($form->isValid()){
                       
-                    dump($form->getData()); die();
-                          
-                    $nom = $request->get("nom");
-                    $params = $request->get("params");
+                     
+                    //$nom = $request->get("nom");
+                    //$params = $request->get("params");
 			// SAVE
 			try {					   						   
-				// Detecte si la session est le support ---------
-				$permission =  $this->get('myddleware.permission');
-				if( $permission->isAdmin($this->getUser()->getId()) ) {
-					$list_fields_sql = 
-						array('id' => (int)$id
-					);			
-				}
-				else {
-					$list_fields_sql = 
-						array(
-						'id' => (int)$id,
-						'createdBy' => $this->getUser()->getId()
-					);				
-				}
-				// Detecte si la session est le support ---------						   
-			 
-				// SAVE NOM CONNECTEUR
-				$connector = $em->getRepository('RegleBundle:Connector')
-		                        ->findBy( $list_fields_sql );
+				
+				$params = $connector->getConnectorParams();
                                 
-                                if(!isset($connector[0])){
-                                    throw $this->createAccessDeniedException();
-                                }
-				$connector[0]->setName( $nom );	
-			    $em->persist($connector[0]);
-			    $em->flush();	
-                          	
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($params) > 0) {
 					// Generate object to encrypt data
-					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
-					foreach($params  as $p) {
-                                            if(isset($p['id']) && isset($p['value'])){
-                                            
-						$param = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy(array('id' => (int)$p['id'], 'connector' => $connector[0]));
-                                                
-                                                # Check param object
-                                                if(!$param){
-                                                    throw $this->createAccessDeniedException();
-                                                }
-                                                
-                                                    $param->setValue( $encrypter->encrypt($p['value']));	
-                                                    $em->persist($param);
-                                                    $em->flush();
-                                                
-                                            }
-					}	
+					$encrypter = new \Illuminate\Encryption\Encrypter(substr($secret,-16));
+						
 					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
 					$session = $request->getSession();
 					$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
@@ -624,27 +584,32 @@ class ConnectorController extends Controller
 					) {
 						// Get the param with the token_get_all
 						$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
-														'connector' => $connector[0],
+														'connector' => $connector,
 														'name' => 'token'
 													));				
 						// If not connector param for the token, we create one (should never happen)							
 						if (empty($connectorParam)) {
 							$connectorParam = new ConnectorParam();		
-							$connectorParam->setConnector($connector[0]->getId());
+							$connectorParam->setConnector($connector->getId());
 							$connectorParam->setName('token');
 						}
 						// Save the token in the connector param
+                                                $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
 						$connectorParam->setValue($encrypter->encrypt($myddlewareSession['param']['connector']['source']['token']));
 						$em->persist($connectorParam);
-						$em->flush(); 				
+                                                $connector->addConnectorParam($connectorParam);
+										
 					}
-					return new Response($this->generateUrl('regle_connector_list'));					
+                                        $em->persist($connector); 
+                                        $em->flush(); 
+					return $this->redirect($this->generateUrl('regle_connector_list'));					
 				}
 				else {
 					return new Response(0);
-				}		   
+				}	
+                                
 			}
-			catch(Exception $e) {
+			catch(\Exception $e) {
 				return new Response($e->getMessage());
 			}
 			// SAVE
