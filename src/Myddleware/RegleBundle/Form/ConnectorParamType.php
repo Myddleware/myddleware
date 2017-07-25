@@ -33,12 +33,12 @@ class ConnectorParamType extends AbstractType{
         $connectorParam = $event->getData();
         $form = $event->getForm();
         $type = TextType::class;
-        $option = [];
+        $option['attr']['class'] = 'params';
         
         foreach ($this->_solutionFieldsLogin as $f){
             if($f['name'] == $connectorParam->getName()){
                $type = $f['type'];
-               $option['label'] = $f['label'];
+               $option['label'] = $f['name'];
                if($type == 'password'){
                    $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
                }
