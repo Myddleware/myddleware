@@ -438,7 +438,8 @@ class filecore extends solution {
 					}
 				}
 				$count++; // Save the number of lines read
-				$values[$idRow] = $row;				
+			
+				$values[$idRow] = $this->addData($param,$idRow,$values,$row);
 				// If we have reached the limit we stop to read
 				if ($this->limitReached($param,$count)) {
 					break;
@@ -466,6 +467,11 @@ class filecore extends solution {
 					'values'=>$values,
 					'notRecall' => true // Stop the recall in the function Rule->readSource()
 		);
+	}
+	
+	// Add data to the result
+	protected function addData($param,$idRow,$values,$row) {
+		return $row;	
 	}
 	
 	// Check if teh limit has been reached
