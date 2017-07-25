@@ -7,7 +7,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Myddleware\RegleBundle\Form\DataTransformer\ConnectorParamsValueTransformer;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\FormInterface;
 
 
 class ConnectorParamType extends AbstractType{
@@ -15,19 +18,20 @@ class ConnectorParamType extends AbstractType{
     private $_secret;
     private $_solutionFieldsLogin;
     
-    public function __construct($secret, $solutionFieldsLogin) {
+    public function __construct($secret, $solutionFieldsLogin) 
+    {
         $this->_secret = $secret;
         $this->_solutionFieldsLogin = $solutionFieldsLogin;
     }
     
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options) 
+    {
         
         $builder->add('value')->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
        
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
         $connectorParam = $event->getData();
         $form = $event->getForm();
- 
         $type = TextType::class;
         $option = [];
         
@@ -35,9 +39,11 @@ class ConnectorParamType extends AbstractType{
             if($f['name'] == $connectorParam->getName()){
                $type = $f['type'];
                $option['label'] = $f['label'];
+               if($type == 'password'){
+                   $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
+               }
             }
         }
-         
         $form->add('value', $type, $option);
       
         
@@ -45,7 +51,6 @@ class ConnectorParamType extends AbstractType{
                
    
     }
-    
   
     
     /**

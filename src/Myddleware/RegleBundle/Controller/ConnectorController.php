@@ -566,10 +566,12 @@ class ConnectorController extends Controller
 				
 				$params = $connector->getConnectorParams();
                                 
+                                
+                                
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($params) > 0) {
 					// Generate object to encrypt data
-					$encrypter = new \Illuminate\Encryption\Encrypter(substr($secret,-16));
+					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
 						
 					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
 					$session = $request->getSession();
@@ -592,12 +594,14 @@ class ConnectorController extends Controller
 							$connectorParam->setName('token');
 						}
 						// Save the token in the connector param
-                                                $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
+                                               
 						$connectorParam->setValue($encrypter->encrypt($myddlewareSession['param']['connector']['source']['token']));
 						$em->persist($connectorParam);
                                                 $connector->addConnectorParam($connectorParam);
 										
 					}
+                                        
+                                       // dump($connector); die();
                                         $em->persist($connector); 
                                         $em->flush(); 
 					return $this->redirect($this->generateUrl('regle_connector_list'));					
