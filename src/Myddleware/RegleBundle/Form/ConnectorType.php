@@ -10,17 +10,17 @@ use Myddleware\RegleBundle\Entity\Connector;
 
 class ConnectorType extends AbstractType{
       
-    private $_secret;
+    private $_container;
     
-    public function __construct($secret) {
-        $this->_secret = $secret;
+    public function __construct($container) {
+        $this->_container = $container;
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        
+       
         $builder->add('name', TextType::class,['attr' => ['id' => 'label','class' => 'params'] ]);
         $builder->add('connectorParams', CollectionType::class, array(
-            'entry_type' => new ConnectorParamType($this->_secret)
+            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin())
         ));
           
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 

@@ -550,8 +550,8 @@ class ConnectorController extends Controller
               
                 // Create connector form
                // $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
-                $secret =  $this->getParameter('secret');
-                $form = $this->createForm(new ConnectorType($secret), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
+              
+                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
                 
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {

@@ -50,7 +50,7 @@
 		</tr>		
 		{% for key,field in form.connectorParams %}
                   <tr>
-                        <td class="title">{{ field.vars.value.name }}</td>
+                        <td class="title">{{ form_label(field.value) }}</td>
                         <td class="value">{{ form_widget(field.value) }}</td>
                   </tr>
 		{#<tr>
