@@ -19,8 +19,6 @@ class ConnectorParamType extends AbstractType{
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
         
-       
-       $builder->add('name');
        $builder->add('value')->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
                
    

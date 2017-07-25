@@ -561,8 +561,6 @@ class ConnectorController extends Controller
                     if($form->isValid()){
                       
                      
-                    //$nom = $request->get("nom");
-                    //$params = $request->get("params");
 			// SAVE
 			try {					   						   
 				
