@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Myddleware\RegleBundle\Form\DataTransformer\ConnectorParamsValueTransformer;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 
 class ConnectorParamType extends AbstractType{
@@ -37,6 +38,11 @@ class ConnectorParamType extends AbstractType{
         
         foreach ($this->_solutionFieldsLogin as $f){
             if($f['name'] == $connectorParam->getName()){
+               
+               if($f['type'] == 'file'){
+                   $option['data_class'] = null;      
+               }
+                        
                $type = $f['type'];
                $option['label'] = $f['name'];
                if($type == 'password'){

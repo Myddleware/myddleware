@@ -377,7 +377,7 @@ class ConnectorController extends Controller
 				foreach ( $myddlewareSession['param']['connector']['source'] as $connexion => $val ) {									
 					if( $connexion != "solution" ) {
 						$unConnectoParams = new ConnectorParam();		
-						$unConnectoParams->setConnector( $unConnector->getId() );
+						$unConnectoParams->setConnector( $unConnector );
 						$unConnectoParams->setName( $connexion );
 						$unConnectoParams->setValue( $encrypter->encrypt($val) );
 						$em->persist($unConnectoParams);
