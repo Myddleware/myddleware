@@ -453,12 +453,12 @@ $( document ).ready(function() {
 				},				
 				success: function(data){
 					
-					r = data.split(';');
+					//r = data.split(';');
 					
-					if(r[1] == 0) {							
+					if(!data.success) {							
 						$(status).removeAttr("src");
 						$(status).attr("src",path_img+"status_offline.png");
-						$('#msg_status span.error').html(r[0]);
+						$('#msg_status span.error').html(data.message);
 						$('#msg_status').show();
 						return false;
 					}
