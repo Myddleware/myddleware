@@ -51,7 +51,16 @@
 		{% for key,field in form.connectorParams %}
                   <tr>
                         <td class="title">{{ form_label(field.value) }}</td>
-                        <td class="value">{{ form_widget(field.value) }}</td>
+                        <td class="value">
+                            {% if field.vars.value.name !='wsdl' %}
+                                {{ form_widget(field.value) }}
+                            {% else %}
+                                <a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
+                                    {{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+                                </a>
+                            {% endif %}
+                            
+                        </td>
                   </tr>
 		{#<tr>
 			<td class="title">{{ field.vars.value.name }}</td>

@@ -36,12 +36,20 @@ class ConnectorParamType extends AbstractType{
         $type = TextType::class;
         $option['attr']['class'] = 'params';
         
-        foreach ($this->_solutionFieldsLogin as $f){
+        $id = $connectorParam->getId();
+        $name = $connectorParam->getName();
+        if ($name == 'wsdl') {
+           // $option['id'] = 'param_' . $name;
+            $option['attr']['readonly'] = 'readonly';
+            $option['attr']['data-id'] = $id;
+            $option['attr']['data-param'] = $name;
+            $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
+        }
+
+            foreach ($this->_solutionFieldsLogin as $f){
             if($f['name'] == $connectorParam->getName()){
                
-               if($f['type'] == 'file'){
-                   $option['data_class'] = null;      
-               }
+             
                         
                $type = $f['type'];
                $option['label'] = $f['name'];
