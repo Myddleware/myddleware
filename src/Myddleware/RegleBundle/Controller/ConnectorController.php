@@ -335,14 +335,25 @@ class ConnectorController extends Controller
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 		$type = '';	
 		
+                  $solution = $this->getDoctrine()
+                ->getManager()
+                ->getRepository('RegleBundle:Solution')
+                ->findOneByName($myddlewareSession['param']['connector']['source']['solution']);
+
+
+                $connector = new Connector();
+                $connector->setSolution($solution);
+                $form = $this->createForm(new ConnectorType($this->container), $connector);
+                
 		if($request->getMethod()=='POST' && isset($myddlewareSession['param']['connector'])) {		
 			try {
-				// Récupère l'id d'une solution
-				$solution = $this->getDoctrine()
-								 ->getManager()
-								 ->getRepository('RegleBundle:Solution')
-								 ->findOneByName($myddlewareSession['param']['connector']['source']['solution']);
-										 
+                          	
+                            $form->handleRequest($request);
+          
+                            if($form->isValid()){
+                                
+				
+                                $solution = $connector->getSolution();
 				$multi = $solution->getSource() + $solution->getTarget();			 		
 				
 				if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
@@ -357,34 +368,26 @@ class ConnectorController extends Controller
 				// On récupére l'EntityManager
 				$em = $this->getDoctrine()
 						   ->getManager();
+                                
+                                $connectorParams = $connector->getConnectorParams();
+                                $connector->setConnectorParams(null);
+				$connector->setNameSlug($connector->getName());
+				$connector->setDateCreated(new \DateTime);
+				$connector->setDateModified(new \DateTime);
+				$connector->setCreatedBy( $this->getUser()->getId() );
+				$connector->setModifiedBy( $this->getUser()->getId() );		
 	
-				// Création d'un connecteur
-				$unConnector = new Connector();	 
-				$unConnector->setSolution( $solution );
-				$unConnector->setName( $this->getRequest()->request->get('label') );
-				$unConnector->setNameSlug( $this->getRequest()->request->get('label') );
-				$unConnector->setDateCreated(new \DateTime);
-				$unConnector->setDateModified(new \DateTime);
-				$unConnector->setCreatedBy( $this->getUser()->getId() );
-				$unConnector->setModifiedBy( $this->getUser()->getId() );		
-	
-				$em->persist($unConnector);
-				$em->flush(); 		
-					
-				// Generate object to encrypt data
-				$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
-				// Insert les paramètres de connexion du connecteur
-				foreach ( $myddlewareSession['param']['connector']['source'] as $connexion => $val ) {									
-					if( $connexion != "solution" ) {
-						$unConnectoParams = new ConnectorParam();		
-						$unConnectoParams->setConnector( $unConnector );
-						$unConnectoParams->setName( $connexion );
-						$unConnectoParams->setValue( $encrypter->encrypt($val) );
-						$em->persist($unConnectoParams);
-						$em->flush(); 
-					}
-				}
-				
+				$em->persist($connector);
+				$em->flush(); 	
+                                
+                                foreach ($connectorParams as $key => $cp) {
+                                    $cp->setConnector($connector);
+                                    $em->persist($cp);
+                                    $em->flush(); 
+                                    
+                                }
+                                
+                              
 				unset($myddlewareSession['param']['connector']);
 				
 				if(
@@ -409,7 +412,9 @@ class ConnectorController extends Controller
 					);						
 				}
 						
-				//-----------
+                            }else{
+                                return $this->redirect($this->generateUrl('regle_connector_list'));
+                            }//-----------
 			}
 			catch(Exception $e) {
 				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);

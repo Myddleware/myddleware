@@ -363,5 +363,15 @@ class Connector
         return $this->connectorParams;
     }
     
+     /**
+     * Set connectorParams
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function setConnectorParams($connectorParams = null)
+    {
+        return $this->connectorParams = $connectorParams;
+    }
+    
    
 }

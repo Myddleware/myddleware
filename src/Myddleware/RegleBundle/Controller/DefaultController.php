@@ -52,6 +52,7 @@ use Myddleware\RegleBundle\Entity\FuncCatRelationShips;
 use Myddleware\RegleBundle\Classes\rule as RuleClass;
 use Myddleware\RegleBundle\Classes\document;
 use Myddleware\RegleBundle\Classes\tools;
+use Myddleware\RegleBundle\Form\ConnectorType;
 
 class DefaultControllerCore extends Controller
 {
@@ -864,18 +865,15 @@ class DefaultControllerCore extends Controller
 				if(is_string($this->getRequest()->request->get('solution')) && is_string($this->getRequest()->request->get('parent'))) {
 					if(preg_match("#[\w]#", $this->getRequest()->request->get('solution')) && preg_match("#[\w]#", $this->getRequest()->request->get('parent')))
 					{
-						$classe = strtolower($this->getRequest()->request->get('solution'));
-	
-						$solution = $this->get('myddleware_rule.'.$classe);
+                                                $classe = strtolower($this->getRequest()->request->get('solution'));
+                                              
+						//$solution = $this->get('myddleware_rule.'.$classe);
 						$parent = $this->getRequest()->request->get('parent');
-						$liste_input = $solution->getFieldsLogin();
-						
-						$this->getInstanceBdd();	
-						$solution = $this->em->getRepository('RegleBundle:Solution')
-									   ->findByName($classe);						
-						$solution = $solution[0];
-
-						$contenu = '<p><label><span class="glyphicon glyphicon-sort"></span></label>';
+						$em = $this->getDoctrine()->getManager();
+                                                $solution = $em->getRepository('RegleBundle:Solution')
+									   ->findOneByName($classe);
+                                                
+						/*$contenu = '<p><label><span class="glyphicon glyphicon-sort"></span></label>';
 						
 						if($solution->getSource()) {
 							$contenu .= '<span class="glyphicon glyphicon-download sync"></span> '.$this->get('translator')->trans('create_connector.source');	
@@ -901,10 +899,14 @@ class DefaultControllerCore extends Controller
 								}
 								// Rev 1.1.0 -----								
 							}					
-						}
+						}*/
+                                                $connector = new Connector();
+                                                $connector->setSolution($solution);
+                                                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('regle_connector_insert')]);
+                
 						
 				        return $this->render('RegleBundle:Ajax:result_liste_inputs.html.twig',array(
-							'contenu'=>$contenu,
+							'form'=>$form->createView(),
 							'parent'=>$parent)
 						);		
 					}

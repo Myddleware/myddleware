@@ -12,6 +12,7 @@ use Myddleware\RegleBundle\Form\DataTransformer\ConnectorParamsValueTransformer;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 
 class ConnectorParamType extends AbstractType{
@@ -27,7 +28,7 @@ class ConnectorParamType extends AbstractType{
     
     public function buildForm(FormBuilderInterface $builder, array $options) 
     {
-        
+      
         $builder->add('value')->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
        
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
@@ -38,11 +39,12 @@ class ConnectorParamType extends AbstractType{
         
         $id = $connectorParam->getId();
         $name = $connectorParam->getName();
+        $option['attr']['data-param'] = $name;
+         
         if ($name == 'wsdl') {
            // $option['id'] = 'param_' . $name;
             $option['attr']['readonly'] = 'readonly';
             $option['attr']['data-id'] = $id;
-            $option['attr']['data-param'] = $name;
             $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
         }
 
@@ -59,6 +61,9 @@ class ConnectorParamType extends AbstractType{
             }
         }
         $form->add('value', $type, $option);
+        if($connectorParam->getValue() == null){
+            $form->add('name', HiddenType::class, ['data' => $name]);
+        }
       
         
     });

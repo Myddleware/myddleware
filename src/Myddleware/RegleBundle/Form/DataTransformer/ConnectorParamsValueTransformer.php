@@ -41,7 +41,7 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface {
             }
             return $return_params;
         } else {
-            return $encrypter->decrypt($tab_params);
+            return $tab_params !=null ? $encrypter->decrypt($tab_params) : null;
         }
     }
 

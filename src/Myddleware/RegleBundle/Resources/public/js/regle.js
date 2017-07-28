@@ -428,15 +428,20 @@ $( document ).ready(function() {
 	function verif(div_clock) {
 		$('.testing', div_clock).on( "click", function() {	
 						
-			var parent = $(this).parent().parent().attr( "id" );
+			var parent = $('#connexion_connector > div').attr( "id" );
 			var datas="";
 			var status = $(div_clock).parent().find('.status img');
 			var solution = $(div_clock).parent().find('.liste_solution').val();
 			
-			$( $(this).parent() ).find( "input" ).each(function(){
-
-				datas += $(this).attr("name")+"::"+$(this).val()+";";	
-			});		
+			$('form[name="connector"] input').each(function(){
+                            
+				//datas += $(this).attr("name")+"::"+$(this).val()+";";	
+                                if($(this).attr('data-param') != undefined){
+                                    datas += $(this).attr('data-param') + "::" + $(this).val() + ";";
+                                }
+			});
+                        
+                        
 			
 			$.ajax({
 				type: "POST",
@@ -451,14 +456,14 @@ $( document ).ready(function() {
 					$(status).removeAttr("src");
 					$(status).attr("src",path_img+"loader.gif");								
 				},				
-				success: function(data){
+				success: function(json){
 					
 					//r = data.split(';');
 					
-					if(!data.success) {							
+					if(!json.success) {							
 						$(status).removeAttr("src");
 						$(status).attr("src",path_img+"status_offline.png");
-						$('#msg_status span.error').html(data.message);
+						$('#msg_status span.error').html(json.message);
 						$('#msg_status').show();
 						return false;
 					}
@@ -530,10 +535,10 @@ $( document ).ready(function() {
 								});
 							}// sans popup
 							else {						
-								if(r[1] == 0) {								
+								if(!json.success) {								
 									$(status).removeAttr("src");
 									$(status).attr("src",path_img+"status_offline.png");
-									$('#msg_status span.error').html(r[0]);
+									$('#msg_status span.error').html(json.message);
 									$('#msg_status').show();
 								}
 								else{

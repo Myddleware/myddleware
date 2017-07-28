@@ -7,6 +7,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Myddleware\RegleBundle\Form\ConnectorParamType;
 use Myddleware\RegleBundle\Entity\Connector;
+use Myddleware\RegleBundle\Entity\ConnectorParam;
 
 class ConnectorType extends AbstractType{
       
@@ -14,13 +15,27 @@ class ConnectorType extends AbstractType{
     
     public function __construct($container) {
         $this->_container = $container;
+        
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
-       
-        $builder->add('name', TextType::class,['attr' => ['id' => 'label','class' => 'params'] ]);
+        //dump($options); die();
+        $fieldsLogin = [];
+        if( $options['data']->getSolution() !=null ){
+            $fieldsLogin = $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin();
+            //Init ConnectorParams
+            if(count($options['data']->getConnectorParams()) == 0){
+                foreach ($fieldsLogin as $fieldLogin) {
+                   $connectorParam = new ConnectorParam;
+                   $connectorParam  ->setName($fieldLogin['name']);
+                   $options['data']->addConnectorParam($connectorParam);
+                }
+            }
+        }
+        
+        $builder->add('name', TextType::class,['label' => 'create_connector.connexion', 'attr' => ['id' => 'label','class' => 'params'] ]);
         $builder->add('connectorParams', CollectionType::class, array(
-            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin())
+            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin)
         ));
           
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
