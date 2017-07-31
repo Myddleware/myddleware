@@ -127,8 +127,8 @@ filter:
     different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
-    in: is included in the following table separated by semicolon
-    notin: is not included in the following table separated by semicolon
+    in: is included in the following table separated by;
+    notin: is not included in the following table separated by ;      
 
 view_rule:
     action:
@@ -465,8 +465,10 @@ solution:
         wsdl: File wsdl
         host: Host Server
         dbname: Database name
+        database_name: Database name
         dbdriver: Database driver
         dbport: Database port access
+        port: Database port access
         ftpport: Port (default 22)
         directory: Directory with files
         shop: Shop

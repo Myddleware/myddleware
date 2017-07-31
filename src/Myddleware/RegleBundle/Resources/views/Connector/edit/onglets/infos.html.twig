@@ -39,11 +39,11 @@
 			<th colspan="2">{{'view_connector.info.title'|trans}}</th>
 		</tr>	
 		<tr>
-			<td class="title solution">{{'view_connector.info.solution'|trans}}</td>
+                    <td class="title solution"><label>{{'view_connector.info.solution'|trans}}</label></td>
 			<td class="value"><p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{ connector.solution.name }}.png" alt="{{ connector.solution.name }}" /></p></td>
 		</tr>
 		<tr>
-			<td class="title">nom</td>
+                    <td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
 			<td class="value">{{form_widget(form.name)}}
                             {#<input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" />#}
                         </td>
