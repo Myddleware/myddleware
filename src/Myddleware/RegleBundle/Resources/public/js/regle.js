@@ -437,7 +437,7 @@ $( document ).ready(function() {
                             
 				//datas += $(this).attr("name")+"::"+$(this).val()+";";	
                                 if($(this).attr('data-param') != undefined){
-                                    datas += $(this).attr('data-param') + "::" + $(this).val() + ";";
+                                    datas += $(this).attr('data-param') + "::" + $(this).val().replace( /;/g, "" ) + ";";
                                 }
 			});
                         
