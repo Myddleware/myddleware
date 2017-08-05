@@ -56,6 +56,7 @@ class ConnectorParamType extends AbstractType{
                $type = $f['type'];
                $option['label'] = 'solution.fields.'.$f['name'];
                if($type == 'password'){
+                   $option['attr']['autocomplete'] = 'off'; 
                    $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
                }
             }
