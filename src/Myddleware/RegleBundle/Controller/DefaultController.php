@@ -1022,7 +1022,9 @@ class DefaultControllerCore extends Controller
 						return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);
 					}
 				}	
-			}			
+                        }else{
+                           throw $this->createNotFoundException('Error'); 
+                        }			
 		}
 		else {
 			throw $this->createNotFoundException('Error');
