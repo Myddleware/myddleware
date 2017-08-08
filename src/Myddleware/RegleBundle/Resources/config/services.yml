@@ -93,6 +93,10 @@ services:
         arguments: [@doctrine.dbal.default_connection]
         tags:
             - { name: twig.extension }
+     myddleware.twig.regle_extension:
+        class: Myddleware\RegleBundle\Twig\RegleExtension
+        tags:
+            - { name: twig.extension }
             
             
      myddleware.connector.service:

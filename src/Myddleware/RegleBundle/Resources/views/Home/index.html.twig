@@ -66,7 +66,7 @@
 	                    <a href="{{ path('task_view',{'id' : job.id }) }}">{{ job.begin }}</span></a>
 	                    <span> | {{ job.duration }} {{'panel.list_job.duration'|trans}}</span>
 	                    <span> | {{ job.status }}</span>
-	                    <span> | {{ job.message }}</span>
+	                    <span> | {{ job.message|sensor }}</span>
 	                  </li>
 	                {% endfor %}
 	            </ul>
