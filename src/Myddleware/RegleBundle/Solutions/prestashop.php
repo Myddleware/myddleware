@@ -48,7 +48,7 @@ class prestashopcore extends solution {
 	protected $moduleWithLanguage = array('products');
 	
 	// Module without reference date
-	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations');
+	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations','carriers');
 
 	protected $required_relationships = array(
 												'default' => array()
