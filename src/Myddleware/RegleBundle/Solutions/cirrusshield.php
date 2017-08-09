@@ -417,7 +417,7 @@ class cirrusshieldcore  extends solution {
 					$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
 
 					// Send data to the target solution
-					$resultCall = $this->call($url,'POST',urlencode(str_replace('&',' ',$xmlData)));
+					$resultCall = $this->call($url,'POST',$xmlData);
 					// XML initialisation (for the next call)
 					$xmlData = '<Data>';
 
