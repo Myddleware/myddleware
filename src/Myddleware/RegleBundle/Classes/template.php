@@ -125,7 +125,7 @@ class templatecore {
 	
 	// Permet de lister les templates pour les connecteurs selectionnés 
 	public function getTemplates() {
-		$templates = '';
+		$templates = array();
 		// Read in the directory template, we read files  corresponding to the selected solutions
 		foreach (glob($this->templateDir.$this->solutionSourceName.'_'.$this->solutionTarget.'*.yml') as $filename) {
 			$template = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($filename));
