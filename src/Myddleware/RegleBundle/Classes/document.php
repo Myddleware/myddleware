@@ -63,6 +63,7 @@ class documentcore {
 	protected $key;
 	protected $docIdRefError;
 	protected $tools;
+	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
 										'Predecessor_OK' => 'Open',
@@ -139,6 +140,9 @@ class documentcore {
 		}
 		if (!empty($param['parentId'])) {
 			$this->parentId = $param['parentId'];
+		}
+		if (!empty($param['ruleDocuments'])) {
+			$this->ruleDocuments = $param['ruleDocuments'];
 		}	
 
 		// Stop the processus if the job has been manually stopped
@@ -1391,18 +1395,17 @@ class documentcore {
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {	
 		try {	
+
 			// Query used in the method several times
 			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
-			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)									
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
@@ -1420,11 +1423,9 @@ class documentcore {
 								Document.id, 
 								Document.source_id target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)									
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
@@ -1498,16 +1499,38 @@ class documentcore {
 					}
 				}
 			}
-	
-			// If no relationship or no child rule
-			// Recherche d'un enregitsrement avec un target id sur la même source
-			$stmt = $this->connection->prepare($sqlParamsSoure);
-			$stmt->bindValue(":ruleId", $this->ruleId);
-			$stmt->bindValue(":id", $id);
-			$stmt->bindValue(":id_doc", $this->id);
-		    $stmt->execute();	   				
-			$result = $stmt->fetch();
-		
+			// A mass process exist for migration mode 
+			if (!empty($this->ruleDocuments)) {
+				// if ($direction == '-1') {	
+				foreach($this->ruleDocuments as $document) {
+					if (
+						(
+							$document['global_status'] != 'Cancel'
+						 OR (
+									$document['global_status'] == 'Cancel'	
+								AND $document['status'] == 'No_send'
+							)
+						)	
+						AND	$document['source_id'] == $id
+						AND $document['id'] !== $this->id
+					) {
+						$result = $document;
+						break;
+
+					}
+				}
+			} 
+			else {	
+				// If no relationship or no child rule
+				// Recherche d'un enregitsrement avec un target id sur la même source
+				$stmt = $this->connection->prepare($sqlParamsSoure);
+				$stmt->bindValue(":ruleId", $this->ruleId);
+				$stmt->bindValue(":id", $id);
+				$stmt->bindValue(":id_doc", $this->id);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();
+			}
+			
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
 			// Alors on recherche dans la règle opposée		
 			if (

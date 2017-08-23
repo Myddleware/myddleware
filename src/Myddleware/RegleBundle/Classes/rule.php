@@ -241,6 +241,7 @@ class rulecore {
 		}	
 	}
 	
+
 	// Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
 	// Cette fonction retourne le nombre d'enregistrements lus
 	public function createDocuments() {	
@@ -277,7 +278,11 @@ class rulecore {
 					$param['ruleRelationships'] = $this->ruleRelationships;
 					$i = 0;
 					if($this->dataSource['values']) {
-
+						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
+						$migrationParameters = $this->container->getParameter('migration');
+						if (!empty($migrationParameters['mode'])) {
+							$param['ruleDocuments'] = $this->getRuleDocuments();
+						}				
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
 							if ($i >= $this->limitReadCommit){
@@ -680,6 +685,16 @@ class rulecore {
 			}
 		}
 	}
+	
+	// Get all document of the rule
+	protected function getRuleDocuments() {
+		$sql = "SELECT * FROM Document WHERE rule_id = :ruleId";
+		$stmt = $this->connection->prepare($sql);
+		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->execute();	    
+		return $stmt->fetchAll();
+	}
+	
 	
 	// Permet de récupérer les règles potentiellement biderectionnelle.
 	// Cette fonction renvoie les règles qui utilisent les même connecteurs et modules que la règle en cours mais en sens inverse (source et target inversées)
