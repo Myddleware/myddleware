@@ -102,4 +102,9 @@ services:
      myddleware.connector.service:
         class: Myddleware\RegleBundle\Service\ConnectorService
         arguments: [@service_container]
+        
+     kernel.listener.request_listener:
+        class: Myddleware\RegleBundle\EventListener\RequestListener
+        tags:
+           - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
