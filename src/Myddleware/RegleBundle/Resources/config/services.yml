@@ -1,7 +1,48 @@
 parameters:
 #    regle.example.class: Myddleware\RegleBundle\Example
 
-services:       
+services:  
+             
+     kernel.listener.request_listener:
+        class: Myddleware\RegleBundle\EventListener\RequestListener
+        tags:
+           - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+           
+     myddleware.connector.service:
+        class: Myddleware\RegleBundle\Service\ConnectorService
+        arguments: [@service_container]
+        
+     formula.myddleware:  
+         class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
+     myddleware_job.job:  
+         class: Myddleware\RegleBundle\Classes\job
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.home:  
+         class: Myddleware\RegleBundle\Classes\home
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_tools.tools:  
+         class: Myddleware\RegleBundle\Classes\tools
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.document:  
+         class: Myddleware\RegleBundle\Classes\document
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection, %param%]
+     myddleware.template:  
+         class: Myddleware\RegleBundle\Classes\template
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.permission:  
+         class: Myddleware\RegleBundle\Classes\permission
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.twig.user_extension:
+        class: Myddleware\RegleBundle\Twig\UserExtension
+        arguments: [@doctrine.dbal.default_connection]
+        tags:
+            - { name: twig.extension }
+     myddleware.twig.regle_extension:
+        class: Myddleware\RegleBundle\Twig\RegleExtension
+        tags:
+            - { name: twig.extension }
+     
+     # Rule services
      myddleware_rule.salesforce:
          class: Myddleware\RegleBundle\Solutions\salesforce
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
@@ -68,43 +109,7 @@ services:
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']
-     formula.myddleware:  
-         class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
-     myddleware_job.job:  
-         class: Myddleware\RegleBundle\Classes\job
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware.home:  
-         class: Myddleware\RegleBundle\Classes\home
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware_tools.tools:  
-         class: Myddleware\RegleBundle\Classes\tools
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware.document:  
-         class: Myddleware\RegleBundle\Classes\document
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection, %param%]
-     myddleware.template:  
-         class: Myddleware\RegleBundle\Classes\template
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware.permission:  
-         class: Myddleware\RegleBundle\Classes\permission
-         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-     myddleware.twig.user_extension:
-        class: Myddleware\RegleBundle\Twig\UserExtension
-        arguments: [@doctrine.dbal.default_connection]
-        tags:
-            - { name: twig.extension }
-     myddleware.twig.regle_extension:
-        class: Myddleware\RegleBundle\Twig\RegleExtension
-        tags:
-            - { name: twig.extension }
-            
-            
-     myddleware.connector.service:
-        class: Myddleware\RegleBundle\Service\ConnectorService
-        arguments: [@service_container]
-        
-     kernel.listener.request_listener:
-        class: Myddleware\RegleBundle\EventListener\RequestListener
-        tags:
-           - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+         
+         
+  
 
