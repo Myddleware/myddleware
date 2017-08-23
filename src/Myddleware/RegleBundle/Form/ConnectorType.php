@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Myddleware\RegleBundle\Form\ConnectorParamType;
 use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
+use Symfony\Component\Validator\Constraints\Valid;
 
 class ConnectorType extends AbstractType{
       
@@ -35,6 +36,8 @@ class ConnectorType extends AbstractType{
         
         $builder->add('name', TextType::class,['label' => 'create_connector.connexion', 'attr' => ['id' => 'label','class' => 'params'] ]);
         $builder->add('connectorParams', CollectionType::class, array(
+            'constraints' => new Valid(),
+            'error_bubbling' => true,
             'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin)
         ));
           

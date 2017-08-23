@@ -29,7 +29,7 @@ class ConnectorParamType extends AbstractType{
     public function buildForm(FormBuilderInterface $builder, array $options) 
     {
       
-        $builder->add('value')->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
+        $builder->add('value',TextType::class,['error_bubbling' => true])->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
        
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
         $connectorParam = $event->getData();

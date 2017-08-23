@@ -563,6 +563,7 @@ class ConnectorController extends Controller
                  
                     $form->handleRequest($request);
               
+                     
                     if($form->isValid()){
                       
                      
@@ -622,9 +623,10 @@ class ConnectorController extends Controller
 			// SAVE
                     }else{
                        
-                        
-                    return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
-				'form' => $form->createView())
+                    return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array(
+                                'error' => true,
+				'connector' => $connector,
+                                'form' => $form->createView())
 			);			
 		
                     }

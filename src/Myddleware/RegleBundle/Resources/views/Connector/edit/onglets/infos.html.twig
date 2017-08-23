@@ -34,6 +34,9 @@
 
 <div align="center">
     {{form_start(form)}}
+        {% if error is defined %}
+            <div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
+        {% endif %}
 	<table id="tab_connector">
 		<tr>
 			<th colspan="2">{{'view_connector.info.title'|trans}}</th>
