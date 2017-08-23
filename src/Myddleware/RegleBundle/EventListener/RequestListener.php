@@ -39,7 +39,7 @@ class RequestListener {
                     }
                 }
             }
-            $request->request->replace([$key => $value]);
+            $request->request->set($key,$value);
             
         }
         

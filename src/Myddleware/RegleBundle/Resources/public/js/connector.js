@@ -64,7 +64,10 @@ $( document ).ready(function() {
 						
 			if( $(this).text() != 'solution' && $(this).text() != 'nom') {				
 				input = $('.params', $(this).parent());
-				datas += $(this).text() + "::" + input.val().replace( /;/g, "" )+ ";";	
+                                
+                                if(input.attr('data-param') != undefined){
+                                    datas += input.attr('data-param') + "::" + input.val().replace( /;/g, "" )+ ";";
+                                }
 			}			
 		});		
 		
