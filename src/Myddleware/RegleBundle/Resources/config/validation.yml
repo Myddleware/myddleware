@@ -1,7 +1,7 @@
-Myddleware\RegleBundle\Entity\ConnectorParam:
-    properties:
-        value:
-            - Length:
-                max: 200
-                maxMessage: The values of the connector params must be maximum 200 characters
+#Myddleware\RegleBundle\Entity\ConnectorParam:
+#    properties:
+#        value:
+#            - Length:
+#                max: 200
+#                maxMessage: The values of the connector params must be maximum 200 characters
         

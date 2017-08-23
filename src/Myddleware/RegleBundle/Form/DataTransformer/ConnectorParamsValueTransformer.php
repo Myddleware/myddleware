@@ -18,13 +18,20 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface {
         // Generate object to encrypt data
         $encrypter = new Encrypter(substr($this->_secret, -16));
         
-        $value->setValue($encrypter->encrypt(htmlentities($value->getValue())));  
+        $string = $value->getValue();
+        if(strlen($string) > 200){
+            $value->setValue($encrypter->encrypt('XXXX'));  
+        }else{
+            $value->setValue($encrypter->encrypt(htmlentities($value->getValue())));  
+        }
         
         return $value;
     }
 
     public function transform($value) {
+        
         $value->setValue($this->decrypt_params($value->getValue()));
+        
         return $value;
     }
 
