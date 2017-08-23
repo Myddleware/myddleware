@@ -1222,7 +1222,7 @@ class documentcore {
 					return $targetId['record_id'];
 				}
 				else {
-					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['source_field_name']].' of the rule '.$ruleField['related_rule'] );
+					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id'] );
 				}
 			}
 			// Si le champ est envoyé sans transformation
