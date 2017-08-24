@@ -20,11 +20,9 @@ parameters:
     extension_allowed:
         - xml
         - wsdl
-    myd_version: 2.2.3
+    myd_version: 2.2.5
     php:
         executable: php
     locale: en
     pager: 20
     block_install: 0
-    migration:
-        mode: 0
