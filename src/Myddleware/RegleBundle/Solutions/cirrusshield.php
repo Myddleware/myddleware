@@ -32,6 +32,7 @@ class cirrusshieldcore  extends solution {
 	protected $token;
 	protected $update;
 	protected $organizationTimezoneOffset;
+	protected $limitCall = 10;
 	
 	protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
 	
@@ -372,17 +373,22 @@ class cirrusshieldcore  extends solution {
 	}	
 	
 	// Create data in the target solution
-	public function create($param) {
-		foreach($param['data'] as $idDoc => $data) {
-			try {
+	public function create($param) {	
+		try {
+			$i = 0;
+			$nb_record = count($param['data']);	
+			// XML creation (for the first call)
+			$xmlData = '<Data>';
+			foreach($param['data'] as $idDoc => $data) {
+				$i++;
 				 // Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				
-				// XML creation
-				$xmlData = '<Data><'.$param['module'].'>';
+				$xmlData .= '<'.$param['module'].'>';
+				// Save the idoc to manage result
+				$xmlData .= '<OrderId>'.$idDoc.'</OrderId>';
 				foreach ($data as $key => $value) {
-					// Field only used for the update and contains the ID of the record in the target solution
-					if ($key=='target_id') {
+					// Field only used for the update and contains the ID of the record in the target solution			
+					if ($key=='target_id') {					
 						// If updade then we change the key in Id
 						if (!empty($value)) {
 							$key = 'Id';
@@ -391,50 +397,75 @@ class cirrusshieldcore  extends solution {
 						}
 					}
 					$xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
+					
 				}
-				$xmlData .= '</'.$param['module'].'></Data>';
-				
-				// Set parameters to send data to the target solution (creation or modification)
-				$selectparam = ["authToken" 		=> $this->token,
-								"action" 			=> ($this->update ? 'update' : 'insert'),
-								"matchingFieldName" => 'Id',
-							];
-				$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
+				$xmlData .= '</'.$param['module'].'>';
+			
+				// If we have finished to read all data or if the package is full we send the data to Sallesforce
+				if (
+						$i == $nb_record
+					 || $i % $this->limitCall  == 0
+				) {	
+					$xmlData .= '</Data>';
+					
+					// Set parameters to send data to the target solution (creation or modification)
+					$selectparam = ["authToken" 		=> $this->token,
+									"action" 			=> ($this->update ? 'update' : 'insert'),
+									"matchingFieldName" => 'Id',
+									"useExternalId" 	=> 'false',
+								];
+					$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
+					// Send data to the target solution					
+					$resultCall = $this->call($url,'POST',urlencode($xmlData));
+			
+					// XML initialisation (for the next call)
+					$xmlData = '<Data>';
 
-				// Send data to the target solution
-				$dataSent = $this->call($url,'POST',$xmlData);	
-				
-				// General error
-				if (!empty($dataSent['Message'])) {
-					throw new \Exception($dataSent['Message']);
-				}
-				if (!empty($dataSent['ErrorMessage'])) {
-					throw new \Exception($dataSent['ErrorMessage']);
-				}
-				// Error managment for the record creation
-				if (!empty($dataSent[$param['module']]['Success'])) {
-					if ($dataSent[$param['module']]['Success'] == 'False') {
-						throw new \Exception($dataSent[$param['module']]['ErrorMessage']);
-					} else {
-						$result[$idDoc] = array(
-											'id' => $dataSent[$param['module']]['GUID'],
-											'error' => false
-									);
+					// If only one result, we add a dimension
+					if (isset($resultCall[$param['module']]['Success'])) {
+						$resultCall[$param['module']] = array($resultCall[$param['module']]);
+						
 					}
-				} else {
-					throw new \Exception('No success flag returned by Cirrus Shield');
+					
+					// Manage results
+					if (!empty($resultCall[$param['module']])) {
+						foreach ($resultCall[$param['module']] as $record) {
+							// General error
+							if (!empty($record['Message'])) {
+								throw new \Exception($record['Message']);
+							}
+
+							// Error managment for the record creation
+							if (!empty($record['Success'])) {
+								if ($record['Success'] == 'False') {
+									$result[$record['orderid']] = array(
+																	'id' => '-1',
+																	'error' => $record['ErrorMessage']
+																);
+								} else {
+									$result[$record['orderid']] = array(
+															'id' => $record['GUID'],
+															'error' => false
+														);
+								}
+							} else {
+								$result[$record['orderid']] = array(
+																'id' => '-1',
+																'error' => 'No success flag returned by Cirrus Shield'
+															);
+
+							}
+							// Transfert status update
+							$this->updateDocumentStatus($record['orderid'],$result[$record['orderid']],$param);	
+						}
+					}
 				}
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
-				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Transfert status update
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}				
+			}				
+		}
+		catch (\Exception $e) {
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['error'] = $error;
+		}	
 		return $result;
 	}
 	

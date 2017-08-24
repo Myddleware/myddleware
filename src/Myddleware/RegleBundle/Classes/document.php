@@ -63,6 +63,7 @@ class documentcore {
 	protected $key;
 	protected $docIdRefError;
 	protected $tools;
+	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
 										'Predecessor_OK' => 'Open',
@@ -139,6 +140,9 @@ class documentcore {
 		}
 		if (!empty($param['parentId'])) {
 			$this->parentId = $param['parentId'];
+		}
+		if (!empty($param['ruleDocuments'])) {
+			$this->ruleDocuments = $param['ruleDocuments'];
 		}	
 
 		// Stop the processus if the job has been manually stopped
@@ -1007,13 +1011,17 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					if ($type == 'S') {
-						// We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
+						// We don't create entry in the array dataInsert when the field is my_value because there is no field in the source, just a formula to the target application
 						if ($ruleField['source_field_name']=='my_value') {
 							continue;
 						}
 						// It could be several fields in the source fields (in case of formula)
-						$sourceFields = explode(";",$ruleField['source_field_name']);
+						$sourceFields = explode(";",$ruleField['source_field_name']);					
 						foreach ($sourceFields as $sourceField) {
+							// if Myddleware_element_id is present, we transform it into id 
+							if ($sourceField=='Myddleware_element_id') {
+								$sourceField = 'id';
+							}
 							$dataInsert[$sourceField] = $data[$sourceField];
 						}
 					} else {
@@ -1149,7 +1157,7 @@ class documentcore {
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
-		try {
+		try {		
 			//--
 			if (!empty($ruleField['formula'])) {
 				// -- -- -- Gestion des formules
@@ -1218,12 +1226,19 @@ class documentcore {
 					return $targetId['record_id'];
 				}
 				else {
-					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['source_field_name']].' of the rule '.$ruleField['related_rule'] );
+					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id'] );
 				}
 			}
 			// Si le champ est envoyé sans transformation
 			elseif (isset($source[$ruleField['source_field_name']])) {			
 				return $this->checkField($source[$ruleField['source_field_name']]);
+			}
+			// If Myddleware_element_id is requested, we return the id 
+			elseif (
+						$ruleField['source_field_name'] == 'Myddleware_element_id'
+					AND	isset($source['id'])
+			) {			
+				return $this->checkField($source['id']);
 			}
 			elseif (is_null($source[$ruleField['source_field_name']])) {			
 				return null;
@@ -1380,18 +1395,17 @@ class documentcore {
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {	
 		try {	
+
 			// Query used in the method several times
 			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
-			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)									
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
@@ -1409,11 +1423,9 @@ class documentcore {
 								Document.id, 
 								Document.source_id target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)									
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
@@ -1487,16 +1499,38 @@ class documentcore {
 					}
 				}
 			}
-	
-			// If no relationship or no child rule
-			// Recherche d'un enregitsrement avec un target id sur la même source
-			$stmt = $this->connection->prepare($sqlParamsSoure);
-			$stmt->bindValue(":ruleId", $this->ruleId);
-			$stmt->bindValue(":id", $id);
-			$stmt->bindValue(":id_doc", $this->id);
-		    $stmt->execute();	   				
-			$result = $stmt->fetch();
-		
+			// A mass process exist for migration mode 
+			if (!empty($this->ruleDocuments)) {
+				// if ($direction == '-1') {	
+				foreach($this->ruleDocuments as $document) {
+					if (
+						(
+							$document['global_status'] != 'Cancel'
+						 OR (
+									$document['global_status'] == 'Cancel'	
+								AND $document['status'] == 'No_send'
+							)
+						)	
+						AND	$document['source_id'] == $id
+						AND $document['id'] !== $this->id
+					) {
+						$result = $document;
+						break;
+
+					}
+				}
+			} 
+			else {	
+				// If no relationship or no child rule
+				// Recherche d'un enregitsrement avec un target id sur la même source
+				$stmt = $this->connection->prepare($sqlParamsSoure);
+				$stmt->bindValue(":ruleId", $this->ruleId);
+				$stmt->bindValue(":id", $id);
+				$stmt->bindValue(":id_doc", $this->id);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();
+			}
+			
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
 			// Alors on recherche dans la règle opposée		
 			if (

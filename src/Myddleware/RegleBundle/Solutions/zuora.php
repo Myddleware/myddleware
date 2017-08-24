@@ -294,7 +294,7 @@ class zuoracore  extends solution {
 
 					// Get the response for each records
 					foreach($resultCall->result as $record) {
-						if ($record->Success) {
+						if (!empty($record->Success)) {
 							if (empty($record->Id)) {
 								$result[$idDocArray[$j]] = array(
 										'id' => '-1',
@@ -309,7 +309,7 @@ class zuoracore  extends solution {
 						} else {
 							$result[$idDocArray[$j]] = array(
 											'id' => '-1',
-											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+											'error' => (empty($record->Errors) ? (empty($record->Code) ? 'No error returned by Zuora.' : $record->Code.' : '.$record->Message) : print_r($record->Errors,true))
 											);	
 						}
 						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
@@ -462,15 +462,25 @@ class zuoracore  extends solution {
 				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
 				$zSContact = new \Zuora_Contact();
 				$zPaymentMethod = new \Zuora_PaymentMethod();
-				
-				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				try {	
+					$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				}
+				catch (\Exception $e) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => $e->getMessage().' '.$e->getFile().' '.$e->getLine()
+										);	
+				}	
 				
 				unset($zAccount);
 				unset($zSubscriptionData);
 
 				// General error
 				if (empty($resultCall)) {
-					throw new \Exception('No response from Zuora. ');
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => 'No response from Zuora. '
+										);	
 				}	
 				// Manage results		
 				if (!empty($resultCall->result->Errors)) {
