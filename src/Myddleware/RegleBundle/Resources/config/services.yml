@@ -7,10 +7,6 @@ services:
         class: Myddleware\RegleBundle\EventListener\RequestListener
         tags:
            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-           
-     myddleware.connector.service:
-        class: Myddleware\RegleBundle\Service\ConnectorService
-        arguments: [@service_container]
         
      formula.myddleware:  
          class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
