@@ -66,7 +66,7 @@
 	                    <a href="{{ path('task_view',{'id' : job.id }) }}">{{ job.begin }}</span></a>
 	                    <span> | {{ job.duration }} {{'panel.list_job.duration'|trans}}</span>
 	                    <span> | {{ job.status }}</span>
-	                    <span> | {{ job.message }}</span>
+	                    <span> | {{ job.message|sensor }}</span>
 	                  </li>
 	                {% endfor %}
 	            </ul>
@@ -105,7 +105,7 @@
 {% endblock css %}
 
 {% block js %}
-    <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    <script src="{{ asset('google/js/jsapi.js') }}" type="text/javascript"></script>
     <script src="{{ asset('bundles/regle/js/lib/d3.v2.js') }}" type="text/javascript"></script>
     <script src="{{ asset('bundles/regle/js/home.js') }}" type="text/javascript"></script>
 {% endblock js %}

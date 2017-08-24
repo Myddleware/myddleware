@@ -74,7 +74,7 @@
 		     	<td class="count">{{ task.close }}</td>
 		     	<td class="count">{{ task.cancel }}</td> 
 		     	<td class="count">{{ task.error }}</td>	
-		     	<td>{{ task.message }}</td>			     	
+		     	<td>{{ task.message|sensor }}</td>			     	
 			</tr>			
 			{% endfor %}			
 			<tr>

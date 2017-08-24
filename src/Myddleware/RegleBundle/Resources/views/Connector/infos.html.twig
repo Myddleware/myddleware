@@ -33,6 +33,7 @@
 {# BTN #} 
 
 <div align="center">
+    {{form_start(form)}}
 	<table id="tab_connector">
 		<tr>
 			<th colspan="2">{{'view_connector.info.title'|trans}}</th>
@@ -41,19 +42,21 @@
 			<td class="title solution">{{'view_connector.info.solution'|trans}}</td>
 			<td class="value"><p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{ connector_params.solution.name }}.png" alt="{{ connector_params.solution.name }}" /></p></td>
 		</tr>
+        </table>
+               
 		<tr>
 			<td class="title">nom</td>
-			<td class="value"><input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" /></td>
-		</tr>		
-		{% for title,field in connector_params.params %}
-		{% if field.type is defined %}
-		<tr>
-			<td class="title">{{ title }}</td>
-			<td class="value"><input type="{{ field.type }}" value="{{ field.value }}" data-param="{{ title }}" data-id="{{ field.id }}" class="params" /></td>
-		</tr>
-		{% endif %}	
+			<td class="value">{{form_widget(form.name)}}
+                            {#<input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" />#}</td>
+		</tr>	
+		{% for key,value in form.connectorParams %}
+                    <tr>
+                            <td class="title">{{ value.name }}</td>
+                            <td class="value"><input type="{{ getFieldType(value.name) }}" value="{{ getDecryptValue(value.value) }}" data-param="{{ value.name }}" data-id="{{ connector.id }}" class="params" /></td>
+                    </tr>
 		{% endfor %}
 	</table>
+    {{form_end(form)}}
 	<p><span id="connexion" class="btn-myd">Test</span>
 		<span id="source_status" class="status">
 				<img alt="status" src="{{ asset('bundles/regle/images/') }}status_offline.png">

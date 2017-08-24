@@ -30,18 +30,20 @@
         <!-- Latest compiled and minified CSS -->     
         {% block stylesheets %}
             {% stylesheets 
-                'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css'
                 '@RegleBundle/Resources/public/css/layout.css'
                 '@RegleBundle/Resources/public/css/menu.css'
-                '@RegleBundle/Resources/public/css/regle.css'              
-                'http://code.jquery.com/ui/1.10.3/themes/redmond/jquery-ui.css'    
-                'http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css'
+                '@RegleBundle/Resources/public/css/regle.css'                 
+                '@RegleBundle/Resources/public/css/lib/jquery/jquery-ui-timepicker-addon.css'
                 '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.css'
-                'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css' 
+                '@RegleBundle/Resources/public/css/lib/jquery/jquery.qtip.min.css' 
                 filter='lessphp,cssrewrite' 
                 output='css/compiled/base.css'                
              %}
 
+              <!-- Bootstrap doesn't in assetic mode because his css included font with relative path -->
+              <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css') }}" type="text/css" />
+              <link rel="stylesheet" href="{{ asset('jquery/css/redmond/jquery-ui-1.10.4.custom.min.css') }}" type="text/css" />
+             
               <link rel="stylesheet" href="{{ asset_url }}" type="text/css" />
             {% endstylesheets %}
         {% endblock %}
@@ -180,7 +182,7 @@
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.pack.js'
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_scrollbox/jquery.scrollbox.min.js'
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js'            
-            'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js'
+            '@RegleBundle/Resources/public/js/lib/jquery_qtip/jquery.qtip.min.js'
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_myddleware/function.js'
             '@RegleBundle/Resources/public/js/regle.js'
         %}
@@ -190,7 +192,7 @@
          <script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
          <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
           <!-- Latest compiled and minified JavaScript -->
-         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>  
+         <script src="{{asset('bootstrap/js/bootstrap.min.js')}}"></script>  
          
 	    <!--[if lt IE 9]>
 	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>

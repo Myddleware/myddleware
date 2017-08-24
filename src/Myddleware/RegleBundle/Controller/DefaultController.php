@@ -28,6 +28,7 @@ namespace Myddleware\RegleBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -51,6 +52,7 @@ use Myddleware\RegleBundle\Entity\FuncCatRelationShips;
 use Myddleware\RegleBundle\Classes\rule as RuleClass;
 use Myddleware\RegleBundle\Classes\document;
 use Myddleware\RegleBundle\Classes\tools;
+use Myddleware\RegleBundle\Form\ConnectorType;
 
 class DefaultControllerCore extends Controller
 {
@@ -343,7 +345,7 @@ class DefaultControllerCore extends Controller
 			return new Response($r);		
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return new JsonResponse($e->getMessage());
 		}			 		
 	}
 
@@ -397,7 +399,7 @@ class DefaultControllerCore extends Controller
 			return new Response(1);
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return new JsonResponse($e->getMessage());
 		}			 		
 	}
 
@@ -863,18 +865,15 @@ class DefaultControllerCore extends Controller
 				if(is_string($this->getRequest()->request->get('solution')) && is_string($this->getRequest()->request->get('parent'))) {
 					if(preg_match("#[\w]#", $this->getRequest()->request->get('solution')) && preg_match("#[\w]#", $this->getRequest()->request->get('parent')))
 					{
-						$classe = strtolower($this->getRequest()->request->get('solution'));
-	
-						$solution = $this->get('myddleware_rule.'.$classe);
+                                                $classe = strtolower($this->getRequest()->request->get('solution'));
+                                              
+						//$solution = $this->get('myddleware_rule.'.$classe);
 						$parent = $this->getRequest()->request->get('parent');
-						$liste_input = $solution->getFieldsLogin();
-						
-						$this->getInstanceBdd();	
-						$solution = $this->em->getRepository('RegleBundle:Solution')
-									   ->findByName($classe);						
-						$solution = $solution[0];
-
-						$contenu = '<p><label><span class="glyphicon glyphicon-sort"></span></label>';
+						$em = $this->getDoctrine()->getManager();
+                                                $solution = $em->getRepository('RegleBundle:Solution')
+									   ->findOneByName($classe);
+                                                
+						/*$contenu = '<p><label><span class="glyphicon glyphicon-sort"></span></label>';
 						
 						if($solution->getSource()) {
 							$contenu .= '<span class="glyphicon glyphicon-download sync"></span> '.$this->get('translator')->trans('create_connector.source');	
@@ -900,17 +899,21 @@ class DefaultControllerCore extends Controller
 								}
 								// Rev 1.1.0 -----								
 							}					
-						}
+						}*/
+                                                $connector = new Connector();
+                                                $connector->setSolution($solution);
+                                                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('regle_connector_insert')]);
+                
 						
 				        return $this->render('RegleBundle:Ajax:result_liste_inputs.html.twig',array(
-							'contenu'=>$contenu,
+							'form'=>$form->createView(),
 							'parent'=>$parent)
 						);		
 					}
 				}
 			} // Vérifie si la connexion peut se faire ou non
 			elseif($this->getRequest()->request->get('mod') == 2 || $this->getRequest()->request->get('mod') == 3) {
-					
+                            		
 				// Connector	
 				if($this->getRequest()->request->get('mod') == 2) {
 					
@@ -948,20 +951,18 @@ class DefaultControllerCore extends Controller
 							
 							if(!empty($r)) {
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								echo "1"; // Connexion valide
-								exit;
+								return new JsonResponse(["success" => true]); // Connexion valide
 							}
 							else {
 								unset($myddlewareSession['param']['rule']);
-								echo "0"; // Erreur de connexion
 								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-								exit;					
+								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);// Erreur de connexion				
 							}
 						}
 						else {
-							echo "0"; // Erreur pas le même nombre de champs
+							
 							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-							exit;					
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur pas le même nombre de champs				
 						}					
 					}					
 				} // Rule
@@ -1005,12 +1006,10 @@ class DefaultControllerCore extends Controller
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						$r = $solution->connexion_valide;
 						if(!empty($r)) {
-							echo "1"; // Connexion valide
-							exit;
+							return new JsonResponse(["success" => true]); // Connexion valide
 						}
 						else {
-							echo "0"; // Erreur de connexion
-							exit;					
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur de connexion					
 						}
 
 						exit;
@@ -1020,11 +1019,12 @@ class DefaultControllerCore extends Controller
 					}
 					else {
 						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-						echo "0";
-						exit;
+						return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);
 					}
 				}	
-			}			
+                        }else{
+                           throw $this->createNotFoundException('Error'); 
+                        }			
 		}
 		else {
 			throw $this->createNotFoundException('Error');
@@ -1081,16 +1081,17 @@ class DefaultControllerCore extends Controller
 
 			// 0 existe pas 1 existe
 			if($rule == NULL) {
-				echo 0;
+				$existRule = 0;
 				$myddlewareSession['param']['rule']['rulename_valide'] = true;
 				$myddlewareSession['param']['rule']['rulename'] = $this->getRequest()->request->get('name');
 			}
 			else {
-				echo 1;
+				$existRule = 1;
 				$myddlewareSession['param']['rule']['rulename_valide'] = false;
 			}	
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-			exit;
+			
+                        return new JsonResponse($existRule);
 		}	
 		else {
 			throw $this->createNotFoundException('Error');
@@ -1248,7 +1249,7 @@ class DefaultControllerCore extends Controller
 			$source = $solution_source->read_last( array( 
 										'module' => $myddlewareSession['param']['rule']['source']['module'],
 										'fields' => $sourcesfields));	
-					
+  
 			if( isset($source['done']) ) {
 				$before = array();
 				$after = array();
@@ -1862,8 +1863,7 @@ class DefaultControllerCore extends Controller
 			$formule->init($this->getRequest()->request->get('formula')); // mise en place de la règle dans la classe
 			$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP	
 			
-			echo $formule->parse['error']; 	
-			exit;
+			return new JsonResponse($formule->parse['error']);
 		}
 		else {	
 			throw $this->createNotFoundException('Error');
@@ -1896,8 +1896,7 @@ class DefaultControllerCore extends Controller
 			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
 			if(strlen($myddlewareSession['param']['rule']['rulename']) < 3 || $myddlewareSession['param']['rule']['rulename_valide'] == false) {
-				echo 0;	
-				exit;
+				return new JsonResponse(0);
 			}
 			
 			//------------ Create rule
@@ -2247,15 +2246,15 @@ class DefaultControllerCore extends Controller
 				unset( $myddlewareSession['param']['rule'] );
 			}			
 			$this->em->getConnection()->commit();
-			echo 1;
+			$response = 1;
 		}catch(\Exception $e) {
 			$this->em->getConnection()->rollBack();
 			$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
-			echo '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
+			$response = '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
 		} 	
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 		$this->em->close();	
-		exit;
+		return new JsonResponse($response);
 	}
 
 	/* ******************************************************
@@ -2329,14 +2328,17 @@ class DefaultControllerCore extends Controller
 		$permission =  $this->get('myddleware.permission');
 		$countTransferRule = array();
 		$i=1;
-		foreach ($home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) as $field => $value) {
-			if($i == 1) {
-				$countTransferRule[] = array('test','test2');	
-			} 
-			
-			$countTransferRule[] = array($value['name'],(int)$value['nb']);
-			$i++;
-		}
+                $values = $home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId()) ;
+		if(count($values) > 0){
+                    foreach ($values as $field => $value) {
+                            if($i == 1) {
+                                    $countTransferRule[] = array('test','test2');	
+                            } 
+
+                            $countTransferRule[] = array($value['name'],(int)$value['nb']);
+                            $i++;
+                    }
+                }
 
 		return new Response(json_encode($countTransferRule));			
 	} 
@@ -2390,9 +2392,10 @@ class DefaultControllerCore extends Controller
 		// We always add data again in session because these data are removed after the call of the get
 		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 		try{
-			if(isset($_POST['choice_select'])) {
+                    $choiceSelect = $request->get('choice_select',null);
+			if($choiceSelect != null) {
 				
-				if($_POST['choice_select'] == 'module') {
+				if($choiceSelect == 'module') {
 					
 					// si le nom de la règle est inferieur à 3 caractères :
 					if(!isset($myddlewareSession['param']['rule']['source']['solution']) || strlen($myddlewareSession['param']['rule']['rulename']) < 3) {
@@ -2402,12 +2405,12 @@ class DefaultControllerCore extends Controller
 						$myddlewareSession['param']['rule']['rulename_valide'] = true;
 					}
 					
-					$myddlewareSession['param']['rule']['source']['module'] = $_POST['module_source'];
-					$myddlewareSession['param']['rule']['cible']['module'] = $_POST['module_target'];
+					$myddlewareSession['param']['rule']['source']['module'] = $request->get('module_source');
+					$myddlewareSession['param']['rule']['cible']['module'] = $request->get('module_target');
 					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					return new Response('module');
 				}
-				else if($_POST['choice_select'] == 'template') {
+				else if($choiceSelect == 'template') {
 					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					//--
 					$template = $this->get('myddleware.template');	
@@ -2416,7 +2419,7 @@ class DefaultControllerCore extends Controller
 					$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 					$template->setIdUser( $this->getUser()->getId() );	
 					// Rule creation with the template selected in parameter
-					$convertTemplate = $template->convertTemplate($_POST['template']);
+					$convertTemplate = $template->convertTemplate($request->get('template'));
 					// We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
 					return new Response('template');
 				}	
@@ -2476,12 +2479,14 @@ class DefaultControllerCore extends Controller
 	}
 
 	// CREATION - STEP ONE - ANIMATION
-	public function ruleStepOneAnimationAction() {
+	public function ruleStepOneAnimationAction() {            
 		$request = $this->get('request');
 		$session = $request->getSession();
 		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                
+               
 		// s'il existe des vielles données on les supprime
 		if(isset( $myddlewareSession['param']['rule'] )) {
 			unset( $myddlewareSession['param']['rule'] );
@@ -2521,7 +2526,7 @@ class DefaultControllerCore extends Controller
 		// Liste target : solution avec au moins 1 connecteur
 		$solutionTarget = $this->em->getRepository('RegleBundle:Solution')
 				  	         ->solutionConnector( 'target',$permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId() );
-					   
+			
 		if( count($solutionTarget) > 0 ) {
 			foreach($solutionTarget as $t) {
 				$target[] = $t->getName();
@@ -2547,9 +2552,15 @@ class DefaultControllerCore extends Controller
 			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
 			// We always add data again in session because these data are removed after the call of the get
 			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-
-			$id_connector = (int)$_POST['id'];
-			$type = $_POST['type'];
+                        
+			$id_connector = $request->get('id');
+			$type = $request->get('type');
+                        
+                        # Control the request
+                        if(!in_array($type,['source','cible']) || !is_numeric($id_connector)) {
+                            throw $this->createAccessDeniedException();
+                        }
+                        $id_connector = (int)$id_connector;
 			
 			$this->getInstanceBdd();	
 			$connector = $this->em->getRepository('RegleBundle:Connector')
