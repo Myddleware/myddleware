@@ -281,7 +281,7 @@ class rulecore {
 						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
 						$migrationParameters = $this->container->getParameter('migration');
 						if (!empty($migrationParameters['mode'])) {
-							$param['ruleDocuments'] = $this->getRuleDocuments();
+							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
 						}				
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
@@ -508,11 +508,24 @@ class rulecore {
 			$documents = $this->selectDocuments('Predecessor_OK');
 		}
 		if(!empty($documents)) {
+			$param['jobId'] = $this->jobId;			
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
+			$migrationParameters = $this->container->getParameter('migration');
+			if (!empty($migrationParameters['mode'])) {
+				if (!empty($this->ruleRelationships)) {
+					// Get all documents of every rules linked
+					foreach($this->ruleRelationships as $ruleRelationship) {
+						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
+						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id']);		
+						}
+					}
+				}
+			}				
 			// Pour tous les docuements sélectionnés on vérifie les parents
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['ruleRelationships'] = $this->ruleRelationships;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->ckeckParentDocument();
 			}			
@@ -533,13 +546,26 @@ class rulecore {
 			$documents = $this->selectDocuments('Relate_OK');
 		}
 		if(!empty($documents)) {
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['key'] = $this->key;
+			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
+			$migrationParameters = $this->container->getParameter('migration');
+			if (!empty($migrationParameters['mode'])) {
+				if (!empty($this->ruleRelationships)) {
+					// Get all documents of every rules linked
+					foreach($this->ruleRelationships as $ruleRelationship) {
+						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
+						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id']);					
+						}
+					}
+				}
+			}		
 			// Transformation de tous les docuements sélectionnés
 			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
-				$param['ruleFields'] = $this->ruleFields;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$param['jobId'] = $this->jobId;
-				$param['key'] = $this->key;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->transformDocument();
 			}			
@@ -687,10 +713,10 @@ class rulecore {
 	}
 	
 	// Get all document of the rule
-	protected function getRuleDocuments() {
+	protected function getRuleDocuments($ruleId) {
 		$sql = "SELECT * FROM Document WHERE rule_id = :ruleId";
 		$stmt = $this->connection->prepare($sql);
-		$stmt->bindValue(":ruleId", $this->ruleId);
+		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->execute();	    
 		return $stmt->fetchAll();
 	}
