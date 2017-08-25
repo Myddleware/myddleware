@@ -1500,9 +1500,9 @@ class documentcore {
 				}
 			}
 			// A mass process exist for migration mode 
-			if (!empty($this->ruleDocuments)) {
+			if (!empty($this->ruleDocuments[$this->ruleId])) {
 				// if ($direction == '-1') {	
-				foreach($this->ruleDocuments as $document) {
+				foreach($this->ruleDocuments[$this->ruleId] as $document) {
 					if (
 						(
 							$document['global_status'] != 'Cancel'
@@ -1747,11 +1747,9 @@ class documentcore {
 				$sqlParams = "	SELECT 
 									source_id record_id,
 									Document.id document_id								
-								FROM Rule
-									INNER JOIN Document 
-										ON Document.rule_id = Rule.id
+								FROM JOIN Document
 								WHERE  
-										Rule.id = :ruleRelateId 
+										Document.rule_id = :ruleRelateId 
 									AND Document.source_id != '' 
 									AND Document.target_id = :record_id 
 									AND (
@@ -1764,11 +1762,9 @@ class documentcore {
 				$sqlParams = "	SELECT 
 									target_id record_id,
 									Document.id document_id
-								FROM Rule
-									INNER JOIN Document 
-										ON Document.rule_id = Rule.id
+								FROM Document 
 								WHERE  
-										Rule.id = :ruleRelateId 
+										Document.rule_id = :ruleRelateId 
 									AND Document.source_id = :record_id 
 									AND Document.target_id != '' 
 									AND (
@@ -1780,11 +1776,48 @@ class documentcore {
 			else {
 				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
 			}
-			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
-			$stmt->bindValue(":record_id", $record_id);
-			$stmt->execute();	   				
-			$result = $stmt->fetch();
+			
+			// A mass process exist for migration mode 
+			if (!empty($this->ruleDocuments[$ruleRelationship['field_id']])) {
+				// if ($direction == '-1') {	
+				foreach($this->ruleDocuments[$ruleRelationship['field_id']] as $document) {
+					if (
+						(
+								$document['global_status'] == 'Close'	
+							 OR $document['status'] == 'No_send'	
+						)	
+						AND	
+						(
+							(
+									$direction == '-1'
+								AND $document['source_id'] != '' 
+								AND $document['target_id'] == $record_id
+							)
+							OR
+							(
+									$direction == '1'
+								AND $document['target_id'] != '' 
+								AND $document['source_id'] == $record_id
+							)
+						)
+					) {
+						if($direction == '-1') {
+							$result['record_id'] = $document['source_id'];
+						} else {
+							$result['record_id'] = $document['target_id'];
+						}
+						$result['document_id'] = $document['id'];
+						break;
+					}
+				}
+			} 		
+			else {	
+				$stmt = $this->connection->prepare($sqlParams);
+				$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
+				$stmt->bindValue(":record_id", $record_id);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();		
+			}
 			if (!empty($result['record_id'])) {
 				return $result;
 			}
