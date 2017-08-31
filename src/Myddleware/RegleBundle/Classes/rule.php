@@ -155,7 +155,7 @@ class rulecore {
 			}
 			return null;
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			$errorObj = new \stdClass();
 			$errorObj->error = $error;		
@@ -219,7 +219,7 @@ class rulecore {
 
 			return $c; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}	
 	}
@@ -236,7 +236,7 @@ class rulecore {
 				return $this->solutionTarget->logout($params);				
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}	
 	}
@@ -313,8 +313,8 @@ class rulecore {
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			}	
 		}
 		// On affiche pas d'erreur si la lecture est désactivée
@@ -463,12 +463,18 @@ class rulecore {
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) {
 			$this->setRuleFilter();
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->filterDocument($this->ruleFilters);
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+			try {
+				foreach ($documents as $document) { 
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$response[$document['id']] = $doc->filterDocument($this->ruleFilters);
+				}
+				$this->connection->commit(); // -- COMMIT TRANSACTION	
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			}
 		}
 		return $response;
 	}
@@ -485,13 +491,19 @@ class rulecore {
 		}
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) { 
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->ckeckPredecessorDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+			try {
+				foreach ($documents as $document) { 
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$response[$document['id']] = $doc->ckeckPredecessorDocument();
+				}	
+				$this->connection->commit(); // -- COMMIT TRANSACTION	
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			}
 		}
 		return $response;
 	}
@@ -518,17 +530,23 @@ class rulecore {
 					foreach($this->ruleRelationships as $ruleRelationship) {
 						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
 						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id']);		
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'],true,true);		
 						}
 					}
 				}
 			}				
 			// Pour tous les docuements sélectionnés on vérifie les parents
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->ckeckParentDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+			try {
+				foreach ($documents as $document) { 
+					$param['id_doc_myddleware'] = $document['id'];
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$response[$document['id']] = $doc->ckeckParentDocument();
+				}
+				$this->connection->commit(); // -- COMMIT TRANSACTION	
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			}
 		}			
 		return $response;
 	}
@@ -558,17 +576,23 @@ class rulecore {
 					foreach($this->ruleRelationships as $ruleRelationship) {
 						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
 						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id']);					
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'],true,true);					
 						}
 					}
 				}
 			}		
-			// Transformation de tous les docuements sélectionnés
-			foreach ($documents as $document) { 			
-				$param['id_doc_myddleware'] = $document['id'];
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->transformDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+			try {
+				// Transformation de tous les docuements sélectionnés
+				foreach ($documents as $document) { 			
+					$param['id_doc_myddleware'] = $document['id'];
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$response[$document['id']] = $doc->transformDocument();
+				}	
+				$this->connection->commit(); // -- COMMIT TRANSACTION	
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			}
 		}	
 		return $response;		
 	}
@@ -594,17 +618,23 @@ class rulecore {
 			$this->connexionSolution('target');
 			
 			// Récupération de toutes les données dans la cible pour chaque document
-			foreach ($documents as $document) {
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['solutionTarget'] = $this->solutionTarget;
-				$param['ruleFields'] = $this->ruleFields;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$param['jobId'] = $this->jobId;
-				$param['key'] = $this->key;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$response[$document['id']] = $doc->getTargetDataDocument();
-				$response['doc_status'] = $doc->getStatus();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+			try {
+				foreach ($documents as $document) {
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['solutionTarget'] = $this->solutionTarget;
+					$param['ruleFields'] = $this->ruleFields;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					$param['jobId'] = $this->jobId;
+					$param['key'] = $this->key;
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$response[$document['id']] = $doc->getTargetDataDocument();
+					$response['doc_status'] = $doc->getStatus();
+				}		
+				$this->connection->commit(); // -- COMMIT TRANSACTION	
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			}
 		}	
 		return $response;			
 	}
@@ -713,12 +743,24 @@ class rulecore {
 	}
 	
 	// Get all document of the rule
-	protected function getRuleDocuments($ruleId) {
+	protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false) {
 		$sql = "SELECT * FROM Document WHERE rule_id = :ruleId";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->execute();	    
-		return $stmt->fetchAll();
+		$documents = $stmt->fetchAll();
+		if (!empty($documents)) {
+			foreach ($documents as $document) {
+				$documentResult['sourceId'][$document['source_id']][] = $document;
+				if (
+						$targetId
+					AND !empty($document['source_id'])
+				) {
+					$documentResult['targetId'][$document['target_id']][] = $document;
+				}
+			}
+			return $documentResult;
+		}
 	}
 	
 	
@@ -774,22 +816,28 @@ class rulecore {
 		
 	// Permet d'annuler un docuement 
 	protected function cancel($id_document) {	
-		$param['id_doc_myddleware'] = $id_document;
-		$param['jobId'] = $this->jobId;
-		$doc = new document($this->logger, $this->container, $this->connection, $param);
-		$doc->documentCancel(); 
-		$session = new Session();
-		$message = $doc->getMessage();
-		
-		// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
-		// On affiche alors le message directement dans Myddleware
-		if (empty($this->jobId)) {
-			if (empty($message)) {
-				$session->set( 'success', array('Annulation du transfert effectuée avec succès.'));
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+			$param['id_doc_myddleware'] = $id_document;
+			$param['jobId'] = $this->jobId;
+			$doc = new document($this->logger, $this->container, $this->connection, $param);
+			$doc->documentCancel(); 
+			$session = new Session();
+			$message = $doc->getMessage();
+			
+			// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
+			// On affiche alors le message directement dans Myddleware
+			if (empty($this->jobId)) {
+				if (empty($message)) {
+					$session->set( 'success', array('Annulation du transfert effectuée avec succès.'));
+				}
+				else {
+					$session->set( 'error', array($doc->getMessage()));
+				}
 			}
-			else {
-				$session->set( 'error', array($doc->getMessage()));
-			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION	
+		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 		}
 	}
 	
@@ -878,102 +926,108 @@ class rulecore {
 		}
 		
 		$response[$id_document] = false;
-		// On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
-		if (in_array($status,array('New','Filter_KO'))) {
-			$response = $this->filterDocuments(array(array('id' => $id_document)));
-			if ($response[$id_document] === true) {
-				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
-			}
-			elseif ($response[$id_document] == -1) {
-				$msg_info[] = 'Transfer id '.$id_document.' : Status change => Filter';
-			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
-			}
-		}
-		if ($response[$id_document] === true || in_array($status,array('Filter_OK','Predecessor_KO'))) {
-			$response = $this->ckeckPredecessorDocuments(array(array('id' => $id_document)));
-			if ($response[$id_document] === true) {
-				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
-			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
-			}
-		}
-		if ($response[$id_document] === true || in_array($status,array('Predecessor_OK','Relate_KO'))) {
-			$response = $this->ckeckParentDocuments(array(array('id' => $id_document)));
-			if ($response[$id_document] === true) {
-				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
-			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
-			}
-		}
-		if ($response[$id_document] === true || in_array($status,array('Relate_OK','Error_transformed'))) {
-			$response = $this->transformDocuments(array(array('id' => $id_document)));
-			if ($response[$id_document] === true) {
-				$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
-			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
-			}
-		}
-		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking'))) {
-			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
-			if ($response[$id_document] === true) {
-				if ($this->rule['mode'] == 'S') {
-					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+			// On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
+			if (in_array($status,array('New','Filter_KO'))) {
+				$response = $this->filterDocuments(array(array('id' => $id_document)));
+				if ($response[$id_document] === true) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
+				}
+				elseif ($response[$id_document] == -1) {
+					$msg_info[] = 'Transfer id '.$id_document.' : Status change => Filter';
 				}
 				else {
-					$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
 				}
 			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_checking';
+			if ($response[$id_document] === true || in_array($status,array('Filter_OK','Predecessor_KO'))) {
+				$response = $this->ckeckPredecessorDocuments(array(array('id' => $id_document)));
+				if ($response[$id_document] === true) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
+				}
+				else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
+				}
 			}
-		}
-		// Si la règle est en mode recherche alors on n'envoie pas de données
-		// Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
-		if (
-				$this->rule['mode'] != 'S'
-			&& (
-					in_array($status,array('Ready_to_send','Error_sending'))
-				|| (
-						$response[$id_document] === true 	
-					&& (
-							empty($response['doc_status'])
-						|| (
-								!empty($response['doc_status'])
-							&& $response['doc_status'] != 'No_send'
+			if ($response[$id_document] === true || in_array($status,array('Predecessor_OK','Relate_KO'))) {
+				$response = $this->ckeckParentDocuments(array(array('id' => $id_document)));
+				if ($response[$id_document] === true) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
+				}
+				else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
+				}
+			}
+			if ($response[$id_document] === true || in_array($status,array('Relate_OK','Error_transformed'))) {
+				$response = $this->transformDocuments(array(array('id' => $id_document)));
+				if ($response[$id_document] === true) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
+				}
+				else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
+				}
+			}
+			if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking'))) {
+				$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
+				if ($response[$id_document] === true) {
+					if ($this->rule['mode'] == 'S') {
+						$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
+					}
+					else {
+						$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
+					}
+				}
+				else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_checking';
+				}
+			}
+			// Si la règle est en mode recherche alors on n'envoie pas de données
+			// Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
+			if (
+					$this->rule['mode'] != 'S'
+				&& (
+						in_array($status,array('Ready_to_send','Error_sending'))
+					|| (
+							$response[$id_document] === true 	
+						&& (
+								empty($response['doc_status'])
+							|| (
+									!empty($response['doc_status'])
+								&& $response['doc_status'] != 'No_send'
+							)
 						)
 					)
 				)
-			)
-		){
-			$response = $this->sendTarget('',$id_document);		
-			if (
-					!empty($response[$id_document]['id']) 
-				&&	empty($response[$id_document]['error'])
-				&&	empty($response['error']) // Error can be on the document or can be a general error too
-			) {
-				$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';			
+			){
+				$response = $this->sendTarget('',$id_document);		
+				if (
+						!empty($response[$id_document]['id']) 
+					&&	empty($response[$id_document]['error'])
+					&&	empty($response['error']) // Error can be on the document or can be a general error too
+				) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';			
+				}
+				else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);				
+				}
+			}		
+				
+			// If the job is manual, we display error in the UI
+			if ($this->manual) {
+				if (!empty($msg_error)) {
+					$session->set( 'error', $msg_error);
+				}
+				if (!empty($msg_success)) {
+					$session->set( 'success', $msg_success);
+				}
+				if (!empty($msg_info)) {
+					$session->set( 'info', $msg_info);
+				}
 			}
-			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);				
-			}
-		}		
-			
-		// If the job is manual, we display error in the UI
-		if ($this->manual) {
-			if (!empty($msg_error)) {
-				$session->set( 'error', $msg_error);
-			}
-			if (!empty($msg_success)) {
-				$session->set( 'success', $msg_success);
-			}
-			if (!empty($msg_info)) {
-				$session->set( 'info', $msg_info);
-			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION	
+		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 		}
 		return $msg_error;
 	}
@@ -1009,7 +1063,7 @@ class rulecore {
 				return true;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 		return false;
 	}
@@ -1077,7 +1131,7 @@ class rulecore {
 				}
 			}
 		} catch (\Exception $e) {
-			$response['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			echo $response['error'];
 			$this->logger->error( $response['error'] );
 		}	
@@ -1158,7 +1212,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			return $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1177,7 +1231,7 @@ class rulecore {
 				return false;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1280,7 +1334,7 @@ class rulecore {
 				$this->sourceFields = array_unique($this->sourceFields); 				
 			}						
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 		
 	}
@@ -1302,7 +1356,7 @@ class rulecore {
 				}			
 			}			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}	
 
@@ -1321,7 +1375,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			$this->ruleRelationships = $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
     
@@ -1337,7 +1391,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			$this->ruleFilters= $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
     
@@ -1356,7 +1410,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			return $stmt->fetchAll();
 		} catch (\Exception $e) {
-			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1375,7 +1429,7 @@ class rulecore {
 				return json_decode($documentDataEntity->getData(),true);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}		

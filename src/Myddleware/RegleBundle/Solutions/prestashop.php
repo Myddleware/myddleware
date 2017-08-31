@@ -39,6 +39,8 @@ class prestashopcore extends solution {
 										'product_option_values' => array('id'),
 										'combinations' => array('id'),
 										'order_histories' => array('id', 'date_add'),
+										'customer_messages' => array('id', 'date_add'),
+										'order_carriers' => array('id', 'date_add'),
 										'order_payments' => array('id', 'date_add','order_reference'),
 								);
 	
@@ -605,6 +607,7 @@ class prestashopcore extends solution {
 							
 							$opt['sort'] = '[date_add_ASC]';
 						} else {
+							// $opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							$opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							
 							$opt['sort'] = '[date_upd_ASC]';
@@ -618,17 +621,16 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}				
+				}					
 				// Call				
-				$xml = $this->webService->get($opt);
+				$xml = $this->webService->get($opt);			
+
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);				
-					
-				$result['count'] = $simplexml->children()->children()->count();
-				
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);					
+				$result['count'] = $simplexml->children()->children()->count();				
 				$record = array();
 				foreach ($simplexml->children()->children() as $data) {
-					if (!empty($data)) {			
+					if (!empty($data)) {		
 						foreach ($data as $key => $value) {
 							// Si la clé de référence est une date
 							if (
@@ -636,8 +638,8 @@ class prestashopcore extends solution {
 								&& $key == $dateRefField
 							) {
 								// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
-								$date_ref = date_create($value);
-								date_modify($date_ref, '+1 seconde');							
+								$date_ref = date_create($value);							
+								date_modify($date_ref, '+1 seconde');
 								$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
 								$record['date_modified'] = (string)$value;
 							}
@@ -661,8 +663,12 @@ class prestashopcore extends solution {
 							// If field is requested (field corresponding to the reference date could be requested in the field mapping too)
 							if (array_search($key, $param['fields']) !== false) {
 								if(isset($value->language)){
-									$record[$key] = (string) $value->language;
-								} else {
+									if (!empty( $value->language[1])) {
+										$record[$key] = (string) $value->language[1];
+									} else {
+										$record[$key] = (string) $value->language;
+									}
+								} else {							
 									$record[$key] = (string)$value;
 								}
 							}
@@ -1063,8 +1069,8 @@ class prestashopcore extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		// Le module order_histories n'a que date_add
-		if (in_array($moduleSource, array('order_histories','order_payments'))) {
+		// We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
+		if (in_array($moduleSource, array('order_histories','order_payments','order_carriers','customer_messages'))) {
 			return "date_add";
 		}
 		if($RuleMode == "0") {
