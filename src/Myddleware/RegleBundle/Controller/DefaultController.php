@@ -53,6 +53,8 @@ use Myddleware\RegleBundle\Classes\rule as RuleClass;
 use Myddleware\RegleBundle\Classes\document;
 use Myddleware\RegleBundle\Classes\tools;
 use Myddleware\RegleBundle\Form\ConnectorType;
+use Myddleware\RegleBundle\Service\SessionService;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultControllerCore extends Controller
 {
@@ -850,56 +852,28 @@ class DefaultControllerCore extends Controller
 	}
 	 		
 	// CREATION - STEP ONE - CONNEXION : jQuery ajax 
-	public function ruleInputsAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();			
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-
+	public function ruleInputsAction(Request $request) {
+		
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+                        
 		if($request->getMethod()=='POST') {
 
 			// Retourne la liste des inputs pour la connexion
-			if($this->getRequest()->request->get('mod') == 1) {
+			if($request->request->get('mod') == 1) {
 				
-				if(is_string($this->getRequest()->request->get('solution')) && is_string($this->getRequest()->request->get('parent'))) {
-					if(preg_match("#[\w]#", $this->getRequest()->request->get('solution')) && preg_match("#[\w]#", $this->getRequest()->request->get('parent')))
+				if(is_string($request->request->get('solution')) && is_string($request->request->get('parent'))) {
+					if(preg_match("#[\w]#", $request->request->get('solution')) && preg_match("#[\w]#", $request->request->get('parent')))
 					{
-                                                $classe = strtolower($this->getRequest()->request->get('solution'));
+                                                $classe = strtolower($request->request->get('solution'));
                                               
 						//$solution = $this->get('myddleware_rule.'.$classe);
-						$parent = $this->getRequest()->request->get('parent');
+						$parent = $request->request->get('parent');
 						$em = $this->getDoctrine()->getManager();
                                                 $solution = $em->getRepository('RegleBundle:Solution')
 									   ->findOneByName($classe);
                                                 
-						/*$contenu = '<p><label><span class="glyphicon glyphicon-sort"></span></label>';
-						
-						if($solution->getSource()) {
-							$contenu .= '<span class="glyphicon glyphicon-download sync"></span> '.$this->get('translator')->trans('create_connector.source');	
-						}
-
-						if($solution->getTarget()) {
-							$contenu .= '<span class="glyphicon glyphicon-upload sync"></span> '.$this->get('translator')->trans('create_connector.target');	
-						}
-						
-						$contenu .= "</p>";
-						
-						if($liste_input) {
-							foreach ($liste_input as $input) {
-								// Rev 1.1.0 -----							
-								if($input['name'] == 'wsdl') {
-									$contenu .= '<p><a id="link_wsdl" class="fancybox_upload" href="'.$this->generateUrl('upload',array('solution'=>$classe)).'" data-fancybox-type="iframe">
-												<label for="'.$input['name'].'">'.ucfirst( $this->get('translator')->trans($input['label']) ).' <span class="glyphicon glyphicon-upload"></span></label>
-												<input id="param_'.$input['name'].'" type="'.$input['type'].'" name="'.$input['name'].'" readonly="readonly" placeholder="'.$this->get('translator')->trans('create_connector.upload_placeholder').'" /></a></p>';																
-								}
-								else {
-									$contenu .= '<p><label for="'.$input['name'].'">'.ucfirst( $this->get('translator')->trans($input['label']) ).'</label>
-												<input id="param_'.$input['name'].'" type="'.$input['type'].'" name="'.$input['name'].'" /></p>';
-								}
-								// Rev 1.1.0 -----								
-							}					
-						}*/
+					
                                                 $connector = new Connector();
                                                 $connector->setSolution($solution);
                                                 $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('regle_connector_insert')]);
@@ -912,56 +886,50 @@ class DefaultControllerCore extends Controller
 					}
 				}
 			} // Vérifie si la connexion peut se faire ou non
-			elseif($this->getRequest()->request->get('mod') == 2 || $this->getRequest()->request->get('mod') == 3) {
+			elseif($request->request->get('mod') == 2 || $request->request->get('mod') == 3) {
                             		
 				// Connector	
-				if($this->getRequest()->request->get('mod') == 2) {
+				if($request->request->get('mod') == 2) {
 					
-					if(preg_match("#[\w]#", $this->getRequest()->request->get('champs')) && preg_match("#[\w]#", $this->getRequest()->request->get('parent')) && preg_match("#[\w]#", $this->getRequest()->request->get('solution'))) {
+					if(preg_match("#[\w]#", $request->request->get('champs')) && preg_match("#[\w]#", $request->request->get('parent')) && preg_match("#[\w]#", $request->request->get('solution'))) {
 						
-						$classe = strtolower($this->getRequest()->request->get('solution'));
+						$classe = strtolower($request->request->get('solution'));
 						$solution = $this->get('myddleware_rule.'.$classe);
 						
 						// établi un tableau params
-						$champs = explode(';',$this->getRequest()->request->get('champs'));
+						$champs = explode(';',$request->request->get('champs'));
 						
 						if($champs) {
 							foreach ($champs as $key) {
 								$input = explode('::',$key);
 								if(!empty($input[0])) {
 									if(!empty($input[1]) || is_numeric($input[1])) {
-										$param[$input[0]] = trim($input[1]);	
-										$myddlewareSession['param']['connector'][$this->getRequest()->request->get('parent')][$input[0]] = trim($input[1]);	
+										$param[$input[0]] = trim($input[1]);
+                                                                                $sessionService->setParamConnectorParentType($request->request->get('parent'), $input[0], trim($input[1]));	
 									}								
 								}
 							}
 						}					
-						
-						$myddlewareSession['param']['connector'][$this->getRequest()->request->get('parent')]['solution'] = $classe;
+						$sessionService->setParamConnectorParentType($request->request->get('parent'),'solution',$classe);
 								
 						// Vérification du nombre de champs
 						if( isset($param) && (count($param) == count($solution->getFieldsLogin())) ) {
-							// Save the session befor calling login function because session could be used in this function
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+								
 							$solution->login($param);
 							$r = $solution->connexion_valide;
-							$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-							// We always add data again in session because these data are removed after the call of the get
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 							
 							if(!empty($r)) {
-								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+								
 								return new JsonResponse(["success" => true]); // Connexion valide
 							}
 							else {
-								unset($myddlewareSession['param']['rule']);
-								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                                                                $sessionService->removeParamRule();
+								
 								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);// Erreur de connexion				
 							}
 						}
 						else {
 							
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur pas le même nombre de champs				
 						}					
 					}					
@@ -970,11 +938,11 @@ class DefaultControllerCore extends Controller
 					
 					// 0 : solution
 					// 1 : id connector
-					$params = explode('_',$this->getRequest()->request->get('solution'));
+					$params = explode('_',$request->request->get('solution'));
 					
 					// Deux params obligatoires
 					if(count($params) == 2 && intval($params[1]) && is_string($params[0])) {
-						unset($myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]);
+                                                $sessionService->removeParamParentRule($request->request->get('parent'));
 						$classe = strtolower($params[0]);
 						$solution = $this->get('myddleware_rule.'.$classe);
 			    
@@ -990,20 +958,19 @@ class DefaultControllerCore extends Controller
 										  
 						if($connector_params) {
 							foreach ($connector_params as $key) {
-								$myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')][$key->getName()] = $key->getValue();	
+                                                                $sessionService->setParamConnectorParentType($request->request->get('parent'),$key->getName(), $key->getValue());	
 							}							
 						}
 
-						$myddlewareSession['param']['rule']['rulename'] = $this->getRequest()->request->get('name');
+                                                $sessionService->setParamRuleName($request->request->get('name'));
 						
 						// Affectation id connector
-						$myddlewareSession['param']['rule']['connector'][$this->getRequest()->request->get('parent')] = $params[1];
+                                                $sessionService->setParamRuleConnectorParent($request->request->get('parent'), $params[1]);
 						//$myddlewareSession['obj'][$this->getRequest()->request->get('parent')] = $connector_params;
 
-						$solution->login($this->decrypt_params($myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]));
-						$myddlewareSession['param']['rule'][$this->getRequest()->request->get('parent')]['solution'] = $classe;	
+						$solution->login($this->decrypt_params($sessionService->getParamParentRule($request->request->get('parent'))));
+                                                $sessionService->setParamRuleParentName($request->request->get('parent'), 'solution', $classe);
 						
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						$r = $solution->connexion_valide;
 						if(!empty($r)) {
 							return new JsonResponse(["success" => true]); // Connexion valide
@@ -1018,7 +985,6 @@ class DefaultControllerCore extends Controller
 						);							
 					}
 					else {
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);
 					}
 				}	

@@ -107,14 +107,18 @@ class SessionService{
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
       
-    public function setConnectorAddType()
+    public function setParamConnectorAddType($value)
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['connector']['add']['type'] = $value;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getConnectorAddType()
+    public function getParamConnectorAddType()
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['myddleware']['connector']['add']['type'];
     }
     
     public function setConnectorAddMessage($value)
@@ -253,6 +257,13 @@ class SessionService{
         return $myddlewareSession['param']['connector'][$parent][$type];
     }
     
+    
+    public function isParamConnectorExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['connector']);
+    }
+    
     public function removeConnector()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -273,6 +284,20 @@ class SessionService{
     {
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['myddleware']['connector']['values']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+     public function getParamConnectorValues()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return json_decode($myddlewareSession['param']['myddleware']['connector']['values']);
+    }
+    
+    public function setParamConnectorValues($value)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['connector']['values'] = $value;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }

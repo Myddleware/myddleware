@@ -40,6 +40,7 @@ use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Request;
 use Myddleware\RegleBundle\Form\ConnectorType;
+use Myddleware\RegleBundle\Service\SessionService;
 
 class ConnectorController extends Controller
 {
@@ -303,11 +304,10 @@ class ConnectorController extends Controller
     }
 						
 	// CREATION D UN CONNECTEUR
-	public function connectorInsertAction() {
-		
+	public function connectorInsertAction(Request $request) {
+            /* @var $sessionService SessionService */
             $sessionService = $this->get('myddleware_session.service');
-            dump($sessionService->getMyddlewareSession());
-            dump($sessionService->getParamConnectorSourceSolution()); die();
+          
 		$type = '';	
 		
                   $solution = $this->getDoctrine()
@@ -320,7 +320,7 @@ class ConnectorController extends Controller
                 $connector->setSolution($solution);
                 $form = $this->createForm(new ConnectorType($this->container), $connector);
                 
-		if($request->getMethod()=='POST' && isset($myddlewareSession['param']['connector'])) {		
+		if($request->getMethod()=='POST' && $sessionService->isParamConnectorExist()) {		
 			try {
                           	
                             $form->handleRequest($request);
@@ -331,12 +331,14 @@ class ConnectorController extends Controller
                                 $solution = $connector->getSolution();
 				$multi = $solution->getSource() + $solution->getTarget();			 		
 				
-				if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
+				//if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
+                                if($sessionService->getConnectorAnimation()){
 					// animation add connector
-					$type = $myddlewareSession['param']['myddleware']['connector']['add']['type'];
+					$type = $sessionService->getParamConnectorAddType();
 					// si la solution ajouté n'existe pas dans la page en cours on va la rajouter manuellement
-					if( !in_array($myddlewareSession['param']['connector']['source']['solution'], json_decode($myddlewareSession['param']['myddleware']['connector']['solution'][$type])) ) {
-						$myddlewareSession['param']['myddleware']['connector']['values'] = $type.';'.$myddlewareSession['param']['connector']['source']['solution'].';'.$multi.';'.$solution->getId();
+                                        $solution = $sessionService->getParamConnectorSourceSolution();
+					if( !in_array($solution, json_decode($sessionService->getSolutionType($type))) ) {
+						$sessionService->setParamConnectorValues($type.';'.$solution.';'.$multi.';'.$solution->getId());
 					}					
 				}
 						
@@ -362,24 +364,21 @@ class ConnectorController extends Controller
                                     
                                 }
                                 
-                              
-				unset($myddlewareSession['param']['connector']);
+                                $sessionService->removeConnector();
 				
 				if(
-						!empty($myddlewareSession['param']['myddleware']['connector']['add']['message'])
-					&&  $myddlewareSession['param']['myddleware']['connector']['add']['message'] == 'list'
+						!empty($sessionService->getConnectorAddMessage())
+					&&  $sessionService->getConnectorAddMessage() == 'list'
 				) {
-					unset($myddlewareSession['param']['myddleware']['connector']['add']);
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+					$sessionService->removeConnectorAdd();
 					return $this->redirect($this->generateUrl('regle_connector_list'));	
 				}
 				else { // animation
 					$message = '';
-					if (!empty($myddlewareSession['param']['myddleware']['connector']['add']['message'])) {
-						$message = $myddlewareSession['param']['myddleware']['connector']['add']['message'];
+					if (!empty($sessionService->getConnectorAddMessage())) {
+						$message = $sessionService->getConnectorAddMessage();
 					}
-					unset($myddlewareSession['param']['myddleware']['connector']['add']);		
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+					$sessionService->removeConnectorAdd();	
 					return $this->render('RegleBundle:Connector:createout_valid.html.twig',array(
 						   'message' => $message,
 						   'type' => $type
@@ -392,12 +391,12 @@ class ConnectorController extends Controller
                             }//-----------
 			}
 			catch(Exception $e) {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+				
 				throw $this->createNotFoundException('Error');
 			}		
 		}
 		else {
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 			throw $this->createNotFoundException('Error');
 		}		
 	}
