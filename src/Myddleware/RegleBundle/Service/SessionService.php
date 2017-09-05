@@ -42,6 +42,12 @@ class SessionService{
         return $myddlewareSession['param']['myddleware']['connector']['solution']['callback'];
     }
     
+    public function isSolutionNameExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['myddleware']['connector']['solution']['callback']);
+    }
+    
     public function setSolutionType()
     {
         return null;
@@ -55,40 +61,6 @@ class SessionService{
     
     ############# SOLUTION ###################
     
-    
-    ############# SOURCE ###################
-    
-    public function getSource()
-    {
-        return null;
-    }
-    
-    public function setSource()
-    {
-        return null;
-    }
-    
-    public function getRefreshTokenSource()
-    {
-        return null;
-    }
-    
-    public function setRefreshTokenSource()
-    {
-        return null;
-    }
-    
-    public function getTokenSource()
-    {
-        return null;
-    }
-    
-    public function setTokenSource()
-    {
-        return null;
-    }
-    
-    ############# SOURCE ###################
     
     ############# UPLOAD ###################
     
@@ -123,12 +95,16 @@ class SessionService{
     
     public function getConnectorAnimation()
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['myddleware']['connector']['animation'];
     }
     
-    public function setConnectorAnimation()
+    public function setConnectorAnimation($bool)
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['connector']['animation'] = $bool;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
       
     public function setConnectorAddType()
@@ -141,14 +117,19 @@ class SessionService{
         return null;
     }
     
-    public function setConnectorAddMessage()
+    public function setConnectorAddMessage($value)
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['connector']['add']['message'] = $value;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
     public function getConnectorAddMessage()
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['myddleware']['connector']['add']['message'];
+        
     }
     
     public function setConnectorValues()
@@ -159,6 +140,72 @@ class SessionService{
     public function getConnectorValues()
     {
         return null;
+    }
+    
+    public function setParamConnectorSource($source)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['connector']['source'] = $source;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+    
+    public function getParamConnectorSource()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['connector']['source'];
+    }
+    
+    public function getParamConnectorSourceSolution()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['connector']['source']['solution'];
+    }
+    
+    public function isParamConnectorSourceExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['connector']['source']);
+    }
+    
+    public function setParamConnectorSourceToken($token)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['connector']['source']['token'] = $token;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+    
+    public function getParamConnectorSourceToken()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return json_decode($myddlewareSession['param']['connector']['source']['token']);
+    }
+    
+    public function isParamConnectorSourceTokenExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['connector']['source']['token']);
+    }
+    
+    public function setParamConnectorSourceRefreshToken($refreshToken)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['connector']['source']['refreshToken'] = $refreshToken;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+    
+    public function getParamConnectorSourceRefreshToken()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return json_decode($myddlewareSession['param']['connector']['source']['refreshToken']);
+    }
+    
+    public function isParamConnectorSourceRefreshTokenExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['connector']['source']['refreshToken']);
     }
     
       
@@ -400,7 +447,7 @@ class SessionService{
     public function getParamRuleSourceSolution()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source']['solution'];
+        return isset($myddlewareSession['param']['rule']['source']['solution']) ? $myddlewareSession['param']['rule']['source']['solution'] : null ;
     }
     
     public function getParamRuleSource()
@@ -645,7 +692,7 @@ class SessionService{
      */
     public function isRuleNameLessThanXCharacters($number, $error = null)
     {
-	if (!isset($this->getParamRuleSourceSolution()) || strlen($this->getParamRuleName()) < $number || $this->getParamRuleNameValid() == false) {
+	if ($this->getParamRuleSourceSolution() !=null || strlen($this->getParamRuleName()) < $number || $this->getParamRuleNameValid() == false) {
             $this->setCreateRuleError($error);
             return false;
         }else{
