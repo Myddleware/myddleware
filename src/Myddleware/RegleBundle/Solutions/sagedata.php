@@ -45,19 +45,6 @@ class sagedatacore extends solution {
 
     // Tableau de correspondance Module / ID pour les modules qui n'ont pas d'id de type "nommodule"."id"
     protected $IdByModule = array(
-        "Orders" => "orderquoteid",
-        "Address_Link" => "addresslinkid",
-        "Comm_Link" => "commlinkid",
-        "Notes" => "noteid",
-        "NewProduct" => "productid",
-        "OrderItems" => "intid",
-        "Person_Link" => "personlinkid",
-        "PhoneLink" => "linkid",
-        "EmailLink" => "linkid",
-        "Products" => "productid",
-        "QuoteItems" => "lineitemid",
-        "UOMFamily" => "familyid",
-        "Users" => "userid"
     );
 
     private $access_token;
@@ -69,47 +56,26 @@ class sagedatacore extends solution {
     protected $exclude_field_list = array();
 
     // Connexion à SageCRM
+    // Connexion to Shop-application
     public function login($paramConnexion) {
+        // Call parent to set $paramConnexion in an attribut of the class
         parent::login($paramConnexion);
         try{
-            try{
-
-                // Define SOAP connection options.
-                $options = array(
-                    'trace' => 1, // All fault tracing this allows for recording messages sent and received
-                    'soap_version' => SOAP_1_1,
-                    'authentication' => SOAP_AUTHENTICATION_BASIC,
-                    'exceptions' => TRUE
-                );
-                $this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/wsdl/'.$this->paramConnexion['wsdl'];
-                $client = new \SoapClient($this->paramConnexion['wsdl'], $options);
-                $login_details  = array('username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']);
-                $response = $client->logon($login_details);
-
-                if(isset($response->result->sessionid)) {
-                    $sessionid = $response->result->sessionid;
-                } else {
-                    throw new \Exception("No SessionID. Logon failed.");
-                }
-
-                $response = $client->logoff(array("sessionId" => $sessionid));
-
-                // Instanciation des variables de classes
-                $this->wsdl = $this->paramConnexion['wsdl'];
-                $this->username = $this->paramConnexion['login'];
-                $this->password = $this->paramConnexion['password'];
-                $this->connexion_valide = true;
+            // Delete the "/" at the end of the url if the user have added one
+            $this->url = rtrim($this->paramConnexion['url'],'/').'/api/';;
+            // Try to access to the shop
+            $result = $this->call(trim($this->url.$this->apiKey), 'get', '');
+            // get the code, if 200 then success otherwise error
+            $code = $result->__get('code');
+            if ($code <> '200') {
+                // Get the error message
+                $body = $result->__get('body');
+                throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
             }
-            catch(\SoapFault $fault)
-            {
-                if(!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
-                }
-                throw new \Exception("SOAP FAULT. Logon failed.");
-            }
+            $this->connexion_valide = true;
         }
         catch (\Exception $e) {
-            $error = 'Failed to login to SageCRM : '.$e->getMessage();
+            $error = 'Failed to login to sagedata : '.$e->getMessage();
             echo $error . ';';
             $this->logger->error($error);
             return array('error' => $error);
@@ -130,11 +96,26 @@ class sagedatacore extends solution {
                 'name' => 'password',
                 'type' => 'password',
                 'label' => 'solution.fields.password'
+            ),
+            array(
+                'name' => 'host',
+                'type' => 'text',
+                'label' => 'solution.fields.host'
             )
         );
     } // getFieldsLogin()
 
-
+    protected function call($url, $method = 'get', $data=array()){
+        if (function_exists('curl_init') && function_exists('curl_setopt')) {
+            $response = \Unirest::$method(
+                $url, // URL de destination
+                array('Accept'=>'application/json'), // Type des données envoyées
+                json_encode($data) // On encode nos données en JSON
+            );
+            return $response;
+        }
+        throw new \Exception('curl extension is missing!');
+    } // call()
 }// class sagecrmcore
 
 /* * * * * * * *  * * * * * *  * * * * * *
