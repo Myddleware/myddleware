@@ -66,27 +66,50 @@ class SessionService{
     
     public function getUploadName()
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['myddleware']['upload']['name'];
     }
     
-    public function setUploadName()
+    public function setUploadName($value)
     {
-        return null;
-    }
-    
-    public function getUploadError()
-    {
-        return null;
-    }
-    
-    public function setUploadError()
-    {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['upload']['name'] = $value;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
     public function removeUpload()
     {
-        return null;
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['param']['myddleware']['upload']); 
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function getUploadError()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['myddleware']['upload']['error'];
+    }
+    
+    public function setUploadError($value)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['myddleware']['upload']['error'] = $value;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+
+    public function isUploadNameExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['myddleware']['upload']['name']);
+    }
+    
+    public function isUploadErrorExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['myddleware']['upload']['error']);
     }
     
     ############# UPLOAD ###################

@@ -184,11 +184,7 @@ class ConnectorController extends Controller
 	// Contrôle si le fichier upload est valide puis le déplace
     public function uploadAction($solution) // REV 1.1.0
     {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+			
 		if( isset($solution) ) {
 			if(in_array(trim($solution), array('sagecrm','sapcrm','sap'))){
 				$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/wsdl/";
@@ -209,8 +205,8 @@ class ConnectorController extends Controller
 				}
 			}		
 		}
-		
-
+		/* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
 		
 		// Supprime ancien fichier de config s'il existe
 		if(isset($_GET['file']) && $_GET['file'] != '') {
@@ -223,26 +219,25 @@ class ConnectorController extends Controller
 		}
 		
 	 	if($solution == 'all') {
-	     	if(isset($myddlewareSession['param']['myddleware']['upload']['name'])) {
-	    		echo '1;'.$myddlewareSession['param']['myddleware']['upload']['name'];
-				unset($myddlewareSession['param']['myddleware']['upload']);
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				exit;
-	    	}
+                    if($sessionService->isUploadNameExist()) {
+                            echo '1;'.$sessionService->getUploadName();
+                            $sessionService->removeUpload();
+                            exit;
+
+                    }
 	
-	    	if(isset($myddlewareSession['param']['myddleware']['upload']['error'])) {
-	    		echo '0;'.$myddlewareSession['param']['myddleware']['upload']['error'];
-				unset($myddlewareSession['param']['myddleware']['upload']);
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				exit;
-	    	}		
+                    if($sessionService->isUploadErrorExist()) {
+                            echo '0;'.$sessionService->getUploadError();
+                            $sessionService->removeUpload();
+                            exit;
+                    }		
 	 	}
 	    				
 		if(isset($_FILES['myfile']) && isset($output_dir) && is_dir($output_dir)) {		
 			if ($_FILES['myfile']["error"] > 0) {
 		    	$error = $_FILES["file"]["error"];	
 		    	echo '0;'.$error;
-				$myddlewareSession['param']['myddleware']['upload']['error'] = $error;
+				$sessionService->setUploadError($error);
 		    } else {
 				// A list of permitted file extensions
 				$allowed = $this->container->getParameter('extension_allowed');	
@@ -250,7 +245,6 @@ class ConnectorController extends Controller
 						
 				if(!in_array(strtolower($extension), $allowed)){
 					echo '0;'.$this->get('translator')->trans('create_connector.upload_error_ext');
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					exit;
 				}
 					
@@ -259,20 +253,17 @@ class ConnectorController extends Controller
 				
 				if(move_uploaded_file($_FILES['myfile']['tmp_name'],$output_dir. $new_name)) {
 					echo "1;".$this->get('translator')->trans('create_connector.upload_success').' : '.$new_name;
-					$myddlewareSession['param']['myddleware']['upload']['name'] = $new_name;	
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);					
+                                        $sessionService->setUploadName($new_name);					
 					exit;
 				}
 				else {
-					echo '0;'.$this->get('translator')->trans('create_connector.upload_error');		
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+					echo '0;'.$this->get('translator')->trans('create_connector.upload_error');
 					exit;
-				}
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+				}	
 			exit;
 			}
 		} else {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 		    	return $this->render('RegleBundle:Connector:upload.html.twig',array( 'solution' => $solution )
 			);	
 		}
