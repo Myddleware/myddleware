@@ -521,15 +521,13 @@ class ConnectorController extends Controller
                 // Infos du connecteur
                 $connector = $qb->getQuery()->getOneOrNullResult();
 
-               // dump($connector);die();
+               
                 if (!$connector) {
                     throw $this->createNotFoundException("This connector doesn't exist");
                 }
               
               
                 // Create connector form
-               // $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
-              
                 $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
                 
 		// If the connector has been changed
@@ -540,48 +538,36 @@ class ConnectorController extends Controller
                      
                     if($form->isValid()){
                       
-                     
 			// SAVE
 			try {					   						   
 				
 				$params = $connector->getConnectorParams();
                                 
-                                
-                                
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($params) > 0) {
 					// Generate object to encrypt data
-					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
-						
-					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
-					$session = $request->getSession();
-					$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-					// We always add data again in session because these data are removed after the call of the get
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-					if (
-							!empty($myddlewareSession['param']['myddleware']['connector']['solution']['callback']) // Confirm Oath 2
-						 &&	!empty($myddlewareSession['param']['connector']['source']['token'])
-					) {
+					//$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
+					
+                                        
 						// Get the param with the token_get_all
-						$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
+						/*$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
 														'connector' => $connector,
 														'name' => 'token'
-													));				
+													));*/				
 						// If not connector param for the token, we create one (should never happen)							
-						if (empty($connectorParam)) {
+						/*if (empty($connectorParam)) {
 							$connectorParam = new ConnectorParam();		
 							$connectorParam->setConnector($connector->getId());
 							$connectorParam->setName('token');
-						}
+						}*/
 						// Save the token in the connector param
-                                               
-						$connectorParam->setValue($encrypter->encrypt($myddlewareSession['param']['connector']['source']['token']));
-						$em->persist($connectorParam);
-                                                $connector->addConnectorParam($connectorParam);
+						//$connectorParam->setValue($encrypter->encrypt($sessionService->getParamConnectorSourceToken()));
+						//$em->persist($connectorParam);
+                                                //$connector->addConnectorParam($connectorParam);
 										
-					}
+					
                                         
-                                       // dump($connector); die();
+                                       
                                         $em->persist($connector); 
                                         $em->flush(); 
 					return $this->redirect($this->generateUrl('regle_connector_list'));					
