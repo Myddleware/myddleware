@@ -637,12 +637,10 @@ class ConnectorController extends Controller
 
 	// CREATION D UN CONNECTEUR LISTE animation
     public function createOutAction($type)
-    {	
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+    {           
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+
 		$em = $this->getDoctrine()->getManager();
 		
 		$solution = $em->getRepository('RegleBundle:Solution')
@@ -656,10 +654,12 @@ class ConnectorController extends Controller
 		}					   
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));
-		$myddlewareSession['param']['myddleware']['connector']['add']['message'] = $this->get('translator')->trans('create_rule.step1.connector');
-		$myddlewareSession['param']['myddleware']['connector']['add']['type'] = strip_tags($type);
-		$myddlewareSession['param']['myddleware']['connector']['animation'] = true;
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);			  
+
+                $sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
+                $sessionService->setParamConnectorAddType(strip_tags($type));
+                $sessionService->setConnectorAnimation(true);
+                
+              			  
         return $this->render('RegleBundle:Connector:createout.html.twig',array(
 			'solutions'=> $lst_solution
 			)
@@ -668,15 +668,13 @@ class ConnectorController extends Controller
 
 	// RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY	
 	public function connectorInsertSolutionAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		if(isset($myddlewareSession['param']['myddleware']['connector']['values'])) {
-			$values = $myddlewareSession['param']['myddleware']['connector']['values'];	
-			unset($myddlewareSession['param']['myddleware']['connector']['values']);		
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+            
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+
+		if($sessionService->isConnectorValuesExist()) {
+			$values = $sessionService->getConnectorValues();	
+			$sessionService->removeConnectorValues();
 			return new Response($values);
 		}
 		else {

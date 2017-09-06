@@ -325,6 +325,12 @@ class SessionService{
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
+    public function isConnectorValuesExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['myddleware']['connector']['values']);
+    }
+    
     ############# CONNECTOR ###################
     
     ############# MAILCHIMP ###################
