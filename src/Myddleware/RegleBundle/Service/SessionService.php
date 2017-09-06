@@ -740,6 +740,12 @@ class SessionService{
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
+    public function isRuleIdExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['rule']['newid']);
+    }
+    
     /**
      * If the rulename is less than X characters
      * @return boolean

@@ -80,16 +80,12 @@ class DefaultControllerCore extends Controller
  	// LISTE DES REGLES
 	public function ruleListAction($page) {
 		try {
-			$request = $this->get('request');
-			$session = $request->getSession();
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-
-			if(isset($myddlewareSession['rule']['newid'])) {
-				$id = $myddlewareSession['rule']['newid'];
-				unset($myddlewareSession['rule']['newid']);
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                        /* @var $sessionService SessionService */
+                        $sessionService = $this->get('myddleware_session.service');
+                        
+			if($sessionService->isRuleIdExist()) {
+				$id = $sessionService->getRuleId();
+				$sessionService->removeRuleId();
 				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
 			}
 		
@@ -114,7 +110,6 @@ class DefaultControllerCore extends Controller
 					$compact['entities'] = "";
 					$compact['pager'] = "";				
 				}
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 				return $this->render('RegleBundle:Rule:list.html.twig',array(
 					   'nb_rule' => $compact['nb'],
 					   'entities' => $compact['entities'],
@@ -127,8 +122,7 @@ class DefaultControllerCore extends Controller
 			}
 
 		// ---------------
-		}catch(Exception $e) {		
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		}catch(Exception $e) {
 			throw $this->createNotFoundException('Error : '.$e);
 		}
 	
