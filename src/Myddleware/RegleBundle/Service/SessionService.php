@@ -583,6 +583,20 @@ class SessionService{
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
+    public function getParamRuleReloadRelate()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return json_decode($myddlewareSession['param']['rule']['reload']['relate']);
+    }
+    
+    public function setParamRuleReloadRelate($value)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['rule']['reload']['relate'] = json_encode($value);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
     public function getParamRuleReloadFields()
     {
         $myddlewareSession = $this->getMyddlewareSession();
