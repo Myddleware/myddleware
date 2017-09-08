@@ -195,6 +195,24 @@ class SessionService{
         return isset($myddlewareSession['param']['connector']['source']);
     }
     
+    public function isParamRuleSourceModuleExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['source']['module']);
+    }
+    
+    public function isParamRuleCibleModuleExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['cible']['module']);
+    }
+    
+    public function isParamRuleCibleModeExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['cible']['mode']);
+    }
+    
     public function setParamConnectorSourceToken($token)
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -446,6 +464,12 @@ class SessionService{
         return $myddlewareSession['param']['rule']['rulename'];
     }
     
+     public function getParamRule()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['rule'];
+    }
+    
     public function setParamRuleConnectorSourceId($connectorSouceId)
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -489,6 +513,11 @@ class SessionService{
         return $myddlewareSession['param']['rule']['last_version_id'];
     }
     
+    public function isParamRuleLastVersionIdExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['last_version_id']);
+    }
     
     public function setParamRuleSourceSolution($solutionName)
     {
@@ -674,6 +703,25 @@ class SessionService{
         $myddlewareSession = $this->getMyddlewareSession();
         return $myddlewareSession['param']['rule']['source']['fields']['error'];
     }
+    
+    public function isParamRuleSourceFieldsErrorExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['source']['fields']['error']);
+    }
+    
+    public function isParamRuleSourceFieldsExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['source']['fields']);
+    }
+    
+     public function isParamRuleTargetFieldsExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['target']['fields']);
+    }
+    
 
     public function setParamRuleCibleModule($moduleTarget)
     {
@@ -764,10 +812,9 @@ class SessionService{
      * If the rulename is less than X characters
      * @return boolean
      */
-    public function isRuleNameLessThanXCharacters($number, $error = null)
+    public function isRuleNameLessThanXCharacters($number)
     {
 	if ($this->getParamRuleSourceSolution() !=null || strlen($this->getParamRuleName()) < $number || $this->getParamRuleNameValid() == false) {
-            $this->setCreateRuleError($error);
             return false;
         }else{
             return true;

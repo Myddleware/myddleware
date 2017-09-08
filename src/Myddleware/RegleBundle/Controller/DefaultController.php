@@ -1289,49 +1289,45 @@ class DefaultControllerCore extends Controller
 	
 	// CREATION - STEP THREE - CHOIX DES CHAMPS - MAPPING DES CHAMPS
 	public function ruleStepThreeAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);		
+			
 		$this->getInstanceBdd();
+                
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
 			
 		// Test que l'ordre des étapes
-		if(!isset($myddlewareSession['param']['rule'])) {
-			$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.order');
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		if(!$sessionService->isParamRuleExist()) {
+                        $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.order'));
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));					
 			exit;
 		}
 		
-		// Contrôle si la nouvelle règle peut-être valide
-		if( strlen($myddlewareSession['param']['rule']['rulename']) < 3 || $myddlewareSession['param']['rule']['rulename_valide'] == false) {
-			$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.valid');	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);			
+                // Contrôle si la nouvelle règle peut-être valide
+		if($sessionService->isRuleNameLessThanXCharacters(3) ) {
+			$sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.valid'));			
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));	
 			exit;
 		}
 		
 		try {
 			// ---- Mode update ----
-			if(!isset($myddlewareSession['param']['rule']['source']['module']) && !isset($myddlewareSession['param']['rule']['cible']['module'])) {
+			if(!$sessionService->isParamRuleSourceModuleExist() && !$sessionService->isParamRuleCibleModuleExist()) {
 				// RELOAD : Chargement des données d'une règle en édition
-				$myddlewareSession['param']['rule']['source']['module'] = $this->getRequest()->request->get('source_module');
-				$myddlewareSession['param']['rule']['cible']['module'] = $this->getRequest()->request->get('cible_module');					
+				$sessionService->setParamRuleSourceModule($this->getRequest()->request->get('source_module'));
+				$sessionService->setParamRuleCibleModule($this->getRequest()->request->get('cible_module'));					
 			} 
 			// ---- Mode update ----
 			
 			// Get all data from the target solution first		
-			$solution_cible = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['cible']['solution']);
+			$solution_cible = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution());
 			
 			// TARGET ------------------------------------------------------------------	
 			// We retriev first all data from the target application and the from the source application
 			// We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
-			$solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
+			$solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible()));
 			
 			if($solution_cible->connexion_valide == false) {
-				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                                $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.source_module_connect'));
 				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 				exit;
 			}
@@ -1340,7 +1336,7 @@ class DefaultControllerCore extends Controller
 				$module['cible'] = $this->getRequest()->request->get('cible_module'); // mode create <<----
 			}
 			else {
-				$module['cible'] = $myddlewareSession['param']['rule']['cible']['module']; // mode update <<----
+				$module['cible'] = $sessionService->getParamRuleCibleModule(); // mode update <<----
 			}
 			
 			// Récupère la liste des paramètres cible
@@ -1357,20 +1353,19 @@ class DefaultControllerCore extends Controller
 			// Liste des relations TARGET
 			$relation = $solution_cible->get_module_fields_relate($module['cible']);
 			
-			$allowParentRelationship = $solution_cible->allowParentRelationship($myddlewareSession['param']['rule']['cible']['module']);
+			$allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule());
 			
 			// Champs pour éviter les doublons
-			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($myddlewareSession['param']['rule']['cible']['module']);
+			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($sessionService->getParamRuleCibleModule());
 			
 			// SOURCE ------------------------------------------------------------------
 			// Connexion au service de la solution source			
-			$solution_source = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['source']['solution']);			
-			$solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
+			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution());			
+			$solution_source->login($this->decrypt_params($sessionService->getParamRuleSource()));
 			
 			// Contrôle que la connexion est valide
 			if($solution_source->connexion_valide == false) {
-				$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                                $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.source_module_connect'));
 				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 				exit;
 			}
@@ -1379,11 +1374,11 @@ class DefaultControllerCore extends Controller
 				$module['source'] = $this->getRequest()->request->get('source_module'); // mode create <<----
 			}
 			else {
-				$module['source'] = $myddlewareSession['param']['rule']['source']['module']; // mode update <<----
+				$module['source'] = $sessionService->getParamRuleSourceModule(); // mode update <<----
 			}
 			
 			// Met en mémoire la façon de traiter la date de référence
-			$myddlewareSession['param']['rule']['source']['datereference'] = $solution_source->referenceIsDate($module['source']);
+                        $sessionService->setParamRuleSourceDateReference($solution_source->referenceIsDate($module['source']));
 			
 			// Ajoute des champs source pour la validation
 			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source'],$myddlewareSession);
@@ -1392,12 +1387,12 @@ class DefaultControllerCore extends Controller
 			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source');
 
 			if($rule_fields_source) {
-				$myddlewareSession['param']['rule']['source']['fields'] = $rule_fields_source;
+                                $sessionService->setParamRuleSourceFields($rule_fields_source);
 				
 				// Erreur champs, pas de données sources (Exemple: GotoWebinar)
-				if(isset($myddlewareSession['param']['rule']['source']['fields']['error']) && !empty($myddlewareSession['param']['rule']['source']['fields']['error'])) {
-					$myddlewareSession['error']['create_rule'] = $myddlewareSession['param']['rule']['source']['fields']['error'];
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                                
+				if($sessionService->isParamRuleSourceFieldsErrorExist() && $sessionService->getParamRuleSourceFieldsError() !=null ) {
+					$sessionService->setCreateRuleError($sessionService->getParamRuleSourceFieldsError());
 					return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 					exit;
 				}
@@ -1423,7 +1418,7 @@ class DefaultControllerCore extends Controller
 			if (empty($intersectMode)) {
 				$intersectMode['C'] = 'create_only';
 			}
-			$myddlewareSession['param']['rule']['cible']['mode'] = $intersectMode;
+                        $sessionService->setParamRuleCibleMode($intersectMode);
 			
 			
 			// Préparation des champs cible				
@@ -1431,7 +1426,7 @@ class DefaultControllerCore extends Controller
 			
 			if($rule_fields_target) {
 				
-				$myddlewareSession['param']['rule']['target']['fields'] = $rule_fields_target;				
+                                $sessionService->setParamRuleTargetFields($rule_fields_target);			
 					
 				$tmp = $rule_fields_target;
 				
@@ -1463,12 +1458,12 @@ class DefaultControllerCore extends Controller
 			}
 			
 			// On ajoute des champs personnalisés à notre mapping
-			if($fieldMappingAdd && isset($myddlewareSession['param']['rule']['last_version_id'])) {
+			if($fieldMappingAdd && $sessionService->isParamRuleLastVersionIdExist()) {
 			
 				$ruleFields = $this->getDoctrine()
 						  ->getManager()
 						  ->getRepository('RegleBundle:RuleField')
-						  ->findByRule( $myddlewareSession['param']['rule']['last_version_id'] );
+						  ->findByRule($sessionService->getParamRuleLastId());
 				
 				$tmp = array();
 				foreach ($ruleFields as $fields) {
@@ -1504,7 +1499,7 @@ class DefaultControllerCore extends Controller
 			
 // -------------------	SOURCE					
 			// Liste des relations SOURCE
-			$relation_source = $solution_source->get_module_fields_relate($myddlewareSession['param']['rule']['source']['module']);			
+			$relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule());			
 			$lst_relation_source = array();
 			$lst_relation_source_alpha = array();
 			$choice_source = array();
@@ -1528,7 +1523,7 @@ class DefaultControllerCore extends Controller
 
 
 			if(!isset($source['table'])) {
-				$source['table'][ $myddlewareSession['param']['rule']['source']['module'] ] = array();		
+				$source['table'][$sessionService->getParamRuleSourceModule()] = array();		
 			}
 
 			// -- Relation
@@ -1551,15 +1546,15 @@ class DefaultControllerCore extends Controller
 							AND r.deleted = 0
 					)
 					'); 	  
-			$stmt->bindValue('id_source', (int)$myddlewareSession['param']['rule']['connector']['source'] ); 
-			$stmt->bindValue('id_target', (int)$myddlewareSession['param']['rule']['connector']['cible'] ); 
-			$stmt->bindValue('name', $myddlewareSession['param']['rule']['rulename'] ); 						
+			$stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId() ); 
+			$stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId() ); 
+			$stmt->bindValue('name', $sessionService->getParamRuleName() ); 						
 			$stmt->execute();
 		
 			$ruleListRelation = $stmt->fetchAll();
 			
 			//Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
-			$ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($myddlewareSession['param']['rule']['source']['module'],'source');	
+			$ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule(),'source');	
 			if (!empty($ruleListRelationSourceCustom)) {
 				$ruleListRelation = array_merge($ruleListRelation,$ruleListRelationSourceCustom);
 			}		
@@ -1635,8 +1630,8 @@ class DefaultControllerCore extends Controller
 			// récupération des champs de type liste --------------------------------------------------
 
 			// -----[ SOURCE ]-----
-			if(isset($myddlewareSession['param']['rule']['source']['fields'])) {
-				foreach($myddlewareSession['param']['rule']['source']['fields'] as $field => $fields_tab) {					
+			if($sessionService->isParamRuleSourceFieldsExist()) {
+				foreach($sessionService->getParamRuleSourceFields() as $field => $fields_tab) {					
 					if (array_key_exists('option', $fields_tab)) {
 						$formule_list['source'][$field] = $fields_tab;	
 					}	
@@ -1664,8 +1659,8 @@ class DefaultControllerCore extends Controller
 			}				
 							
 			// -----[ TARGET ]-----
-			if(isset($myddlewareSession['param']['rule']['target']['fields'])) {
-				foreach($myddlewareSession['param']['rule']['target']['fields'] as $field => $fields_tab) {					
+			if($sessionService->isParamRuleTargetFieldsExist()) {
+				foreach($sessionService->getParamRuleTargetFields() as $field => $fields_tab) {					
 					if (array_key_exists('option', $fields_tab)) {
 						$formule_list['target'][$field] = $fields_tab;	
 					}	
@@ -1695,10 +1690,10 @@ class DefaultControllerCore extends Controller
 
 			
 			// Type de synchronisation de données rev 1.06 --------------------------
-			if(isset($myddlewareSession['param']['rule']['cible']['mode'])) {
+			if($sessionService->isParamRuleCibleModuleExist()) {
 				
 				$mode_translate = array();
-				foreach ($myddlewareSession['param']['rule']['cible']['mode'] as $key => $value) {
+				foreach ($sessionService->getParamRuleCibleMode() as $key => $value) {
 					$mode_translate[ $key ] = $this->get('translator')->trans('create_rule.step3.syncdata.'.$value);
 				}
 				
@@ -1720,8 +1715,8 @@ class DefaultControllerCore extends Controller
 			
 			
 			//  rev 1.07 --------------------------
-			$bidirectional_params['connector']['source'] = $myddlewareSession['param']['rule']['connector']['source'];
-			$bidirectional_params['connector']['cible'] = $myddlewareSession['param']['rule']['connector']['cible'];
+			$bidirectional_params['connector']['source'] = $sessionService->getParamRuleConnectorSourceId();
+			$bidirectional_params['connector']['cible'] = $sessionService->getParamRuleConnectorCibleId();
 			$bidirectional_params['module']['source'] = $module['source'];
 			$bidirectional_params['module']['cible'] = $module['cible'];
 			
@@ -1740,7 +1735,7 @@ class DefaultControllerCore extends Controller
 					'lst_category' => $lstCategory,
 					'lst_functions' => $lstFunctions,
 					'lst_filter' =>$lst_filter,
-					'params' => $myddlewareSession['param']['rule'],
+					'params' => $sessionService->getParamRule(),
 					'duplicate_target' => $fieldsDuplicateTarget,
 					'opt_target' => $html_list_target,
 					'opt_source' => $html_list_source,
@@ -1755,15 +1750,14 @@ class DefaultControllerCore extends Controller
 			$result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-				
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			dump($myddlewareSession); 
+			
 			return $this->render('RegleBundle:Rule:create/step3.html.twig',$result);					
 										
 			// ----------------
 		}
 		catch(Exception $e) {
-			$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.mapping');
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                        $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.mapping'));
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));				
 			exit;
 		}	
