@@ -50,12 +50,14 @@ class sagesdatacore extends solution
         parent::login($paramConnexion);
         try {
             // Call to get the token
-            $this->apiKey = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
+            $this->token = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
             $this->response = $this->makeRequest($this->paramConnexion['host'], $this->apiKey, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/bankAccounts?select=name&count=1');
 
             if ($this->response['curlErrorNumber'] === 0) { // url all fine . precced as usual
                 if (!empty($this->response['curlInfo']) && $this->response['curlInfo']['http_code'] === 200) { // token is valid
                     $this->connexion_valide = true;
+                    $this->setAccessToken( $this->token);
+
                 } else if (!empty($this->response['curlInfo']) && $this->response['curlInfo']['http_code'] === 401) { //if 401 non unauthorized
                     throw new \Exception('Bad auth key');
                 } else {
@@ -72,6 +74,14 @@ class sagesdatacore extends solution
             return array('error' => $error);
         }
     } // login($paramConnexion)
+
+    public function getAccessToken() {
+        return 	$this->access_token;
+    }
+
+    public function setAccessToken($token) {
+        $this->access_token = $token;
+    }
 
     /**
      * Function HTTP Request
