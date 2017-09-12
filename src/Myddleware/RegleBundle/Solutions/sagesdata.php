@@ -27,16 +27,8 @@ class sagesdatacore extends solution
 
     const APPLICATION = "accounts50";
     const CONTRACT = "GCRM";
-    protected $fieldsRelate = array();
-    protected $fieldsNotRelate = array('Opportunity' => array('assigneduserid' => true), 'PhoneLink' => array('entityid' => true), 'EmailLink' => array('entityid' => true));
-    protected $required_fields = array('default' => array('updateddate', 'createddate'));
-    protected $FieldsDuplicate = array();
-    protected $required_relationships = array(
-        'default' => array()
-    );
-
     private $access_token;
-    private $instance_url;
+    protected $moduleFields;
 
 
     /**
@@ -83,6 +75,11 @@ class sagesdatacore extends solution
     public function setAccessToken($token)
     {
         $this->access_token = $token;
+    }
+
+    public function getFieldModules($index)
+    {
+        return $this->moduleFields = $this->moduleFields[$index];
     }
 
     /**
@@ -188,8 +185,9 @@ class sagesdatacore extends solution
             if (strlen($this->response['curlData']) > 0) { // url all fine . precced as usual
                 $xml = simplexml_load_string($this->response['curlData']);
                 if ($xml) {
-                    $elementNames = array_map('strval', $xml->xpath('//xs:element[@sme:canGet="true" and  @sme:role="resourceKind"]/@name')); // get attribute who role is resourceKind and can get is true
-                    return $elementNames;
+                    $modules = $xml->xpath('//xs:element[@sme:canGet="true" and  @sme:role="resourceKind"]/@name');
+                    $this->moduleFields = array_map('strval', $modules); // get attribute who role is resourceKind and can get is true
+                    return $this->moduleFields;
                 } else {
                     throw new \Exception("Error: Cannot create object");
                 }
@@ -206,6 +204,39 @@ class sagesdatacore extends solution
 
     }
 
+
+    // Get the fields available for the module in input
+    public function get_module_fields($module, $type = 'source')
+    {
+        parent::get_module_fields($module, $type);
+        try {
+            // Call to get the token
+            $this->token = $this->getAccessToken();
+            $this->response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema');
+            // Ajout du champs date
+
+            if (strlen($this->response['curlData']) > 0) { // url all fine . precced as usual
+                $xml = simplexml_load_string($this->response['curlData']);
+                if ($xml) {
+                    $this->moduleFields = array();
+                    $modules = $xml->xpath('//xs:complexType[@name="bankAccount--type"]/xs:all/*/@name');
+                    foreach ($modules as $module) {
+                        $this->moduleFields[(string)$module["name"]] = array('label' => (string)$module["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+                    }
+                    return $this->moduleFields;
+                } else {
+                    throw new \Exception("Error: Cannot create object");
+                }
+
+            } else {
+                throw new \Exception('No modules from sagesData.');
+            }
+
+
+        } catch (\Exception $e) {
+            return false;
+        }
+    } // get_module_fields($module)
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
