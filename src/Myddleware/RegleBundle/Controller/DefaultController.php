@@ -1156,12 +1156,11 @@ class DefaultControllerCore extends Controller
 	// CREATION - STEP THREE - SIMULATION DES DONNEES
 	public function ruleSimulationAction() {
 		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 		
-		if( $request->getMethod()=='POST' && isset(  $myddlewareSession['param']['rule'] )) {
+                /* @var $serviceSession SessionService */
+                $serviceSession = $this->get('myddleware_session.service');
+		
+		if($request->getMethod()=='POST' && $serviceSession->isParamRuleExist()) {
 						
 			// retourne un tableau prêt à l'emploi
 			$target = $this->createListeParamsRule(
@@ -1171,9 +1170,9 @@ class DefaultControllerCore extends Controller
 			); 
 			
 	
-			$solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];			
+			$solution_source_nom = $serviceSession->getParamRuleSourceSolution();			
 			$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);			
-			$solution_source->login($myddlewareSession['param']['rule']['source']);
+			$solution_source->login($serviceSession->getParamRuleSource());
 			$doc = $this->get('myddleware.document');
 			$tab_simulation = array();				
 			$sourcesfields = array();
@@ -1208,7 +1207,7 @@ class DefaultControllerCore extends Controller
 			
 			// Récupère données source													
 			$source = $solution_source->read_last( array( 
-										'module' => $myddlewareSession['param']['rule']['source']['module'],
+										'module' => $serviceSession->getParamRuleSourceModule(),
 										'fields' => $sourcesfields));	
   
 			if( isset($source['done']) ) {
@@ -1275,7 +1274,7 @@ class DefaultControllerCore extends Controller
 			       'before' => $before, // source
 			       'after' => $after, // target
 			       'data_source' => $source['done'],
-			       'params' => $myddlewareSession['param']['rule']
+			       'params' => $serviceSession->getParamRule()
 				)
 			);
 
