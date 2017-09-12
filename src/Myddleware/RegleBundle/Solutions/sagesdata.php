@@ -51,12 +51,12 @@ class sagesdatacore extends solution
         try {
             // Call to get the token
             $this->token = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
-            $this->response = $this->makeRequest($this->paramConnexion['host'], $this->apiKey, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/bankAccounts?select=name&count=1');
+            $this->response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/bankAccounts?select=name&count=1');
 
             if ($this->response['curlErrorNumber'] === 0) { // url all fine . precced as usual
                 if (!empty($this->response['curlInfo']) && $this->response['curlInfo']['http_code'] === 200) { // token is valid
                     $this->connexion_valide = true;
-                    $this->setAccessToken( $this->token);
+                    $this->setAccessToken($this->token);
 
                 } else if (!empty($this->response['curlInfo']) && $this->response['curlInfo']['http_code'] === 401) { //if 401 non unauthorized
                     throw new \Exception('Bad auth key');
@@ -75,11 +75,13 @@ class sagesdatacore extends solution
         }
     } // login($paramConnexion)
 
-    public function getAccessToken() {
-        return 	$this->access_token;
+    public function getAccessToken()
+    {
+        return $this->access_token;
     }
 
-    public function setAccessToken($token) {
+    public function setAccessToken($token)
+    {
         $this->access_token = $token;
     }
 
@@ -127,10 +129,11 @@ class sagesdatacore extends solution
             );
 
             // Execute request
-            curl_exec($ch);
+            $result = curl_exec($ch);
 
             //Object for response curl
             $response = array(
+                'curlData' => $result,
                 'curlInfo' => curl_getinfo($ch),
                 'curlErrorNumber' => curl_errno($ch),
                 'curlErrorMessage' => curl_error($ch)
@@ -138,6 +141,7 @@ class sagesdatacore extends solution
 
             // Close Connection
             curl_close($ch);
+
             return $response;
         }
         throw new \Exception('curl extension is missing!');
@@ -168,6 +172,40 @@ class sagesdatacore extends solution
             )
         );
     } // getFieldsLogin()
+
+
+    /**
+     * Function for get module of sage
+     * @param string $type
+     * @return array|void
+     */
+    public function get_modules($type = 'source')
+    {
+        try {
+            // Call to get the token
+            $this->token = $this->getAccessToken();
+            $this->response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema');
+            if (strlen($this->response['curlData']) > 0) { // url all fine . precced as usual
+                $xml = simplexml_load_string($this->response['curlData']);
+                if ($xml) {
+                    $elementNames = array_map('strval', $xml->xpath('//xs:element[@sme:canGet="true" and  @sme:role="resourceKind"]/@name')); // get attribute who role is resourceKind and can get is true
+                    return $elementNames;
+                } else {
+                    throw new \Exception("Error: Cannot create object");
+                }
+
+            } else {
+                throw new \Exception('No modules from sagesData.');
+            }
+        } catch (\Exception $e) {
+            $error = 'Error get modules for sagesData : ' . $e->getMessage();
+            echo $error . ';';
+            $this->logger->error($error);
+            return array('error' => $error);
+        }
+
+    }
+
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
