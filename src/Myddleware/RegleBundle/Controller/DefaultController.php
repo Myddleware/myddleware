@@ -681,9 +681,8 @@ class DefaultControllerCore extends Controller
 			//--	
 			}		
 		}
-		catch(Exception $e) {
-			$myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.update');	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);			
+		catch(Exception $e) {	
+			$sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.update'));			
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));	
 			exit;				
 		}	
@@ -1295,6 +1294,7 @@ class DefaultControllerCore extends Controller
                 /* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');
 			
+                //dump($sessionService->getMyddlewareSession()); die();
 		// Test que l'ordre des étapes
 		if(!$sessionService->isParamRuleExist()) {
                         $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.order'));
@@ -1340,7 +1340,7 @@ class DefaultControllerCore extends Controller
 			}
 			
 			// Récupère la liste des paramètres cible
-			$rule_params_target = $solution_cible->getFieldsParamUpd('target',$module['cible'],$myddlewareSession);
+			$rule_params_target = $solution_cible->getFieldsParamUpd('target',$module['cible']);
 			
 			// Récupère la liste des champs cible
 			$rule_fields_target = $solution_cible->get_module_fields($module['cible'],'target');
@@ -1381,7 +1381,7 @@ class DefaultControllerCore extends Controller
                         $sessionService->setParamRuleSourceDateReference($solution_source->referenceIsDate($module['source']));
 			
 			// Ajoute des champs source pour la validation
-			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source'],$myddlewareSession);
+			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source']);
 			
 			// Récupère la liste des champs source
 			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source');
@@ -1750,7 +1750,7 @@ class DefaultControllerCore extends Controller
 			$result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-			dump($myddlewareSession); 
+			//dump($myddlewareSession); 
 			
 			return $this->render('RegleBundle:Rule:create/step3.html.twig',$result);					
 										

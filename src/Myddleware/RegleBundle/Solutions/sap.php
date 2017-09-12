@@ -134,7 +134,7 @@ class sapcore extends saproot {
 		return null;
 	}
 	
-	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type,$module) {	
 		try {
 			$params = array();
 			if ($type == 'source'){

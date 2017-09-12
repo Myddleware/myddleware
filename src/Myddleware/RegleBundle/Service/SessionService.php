@@ -433,7 +433,7 @@ class SessionService{
     public function isParamRuleExist()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['params']['rule']); 
+        return isset($myddlewareSession['param']['rule']); 
     }
     
     public function setParamRuleNameValid($isValid)

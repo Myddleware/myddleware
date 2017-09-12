@@ -344,7 +344,7 @@ class ringcentralcore  extends solution {
 	
 	
 	// Add the filed extensionId on the rule
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$params[] = array(
 								'id' => 'extensionId',

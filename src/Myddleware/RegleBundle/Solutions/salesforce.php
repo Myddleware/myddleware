@@ -285,7 +285,7 @@ class salesforcecore extends solution {
 	} // get_module_fields($module)
 
 	// Permet d'ajouter des paramètres 
-	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type,$module) {	
 		try {
 			// Si le module est PricebookEntry (produit dans le catalogue) alors il faut indiquer le catalogue de produit utilisé
 			if (
