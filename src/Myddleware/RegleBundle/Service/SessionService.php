@@ -1009,11 +1009,145 @@ class SessionService{
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
+    public function removeFluxFilterDateCreateStart()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['date_create_start']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterDateCreateEnd()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['date_create_end']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    public function removeFluxFilterDateModifStart()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['date_modif_start']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterDateModifEnd()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['date_modif_end']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+     public function removeFluxFilterRuleName()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['rule']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterStatus()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['status']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterGblStatus()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['gblstatus']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterTargetId()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['target_id']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function removeFluxFilterSourceId()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['source_id']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    
+    
+
+    public function isFluxFilterCSourceIdExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['source_id']);
+    }
+    
+    public function isFluxFilterCTargetIdExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['target_id']);
+    }
+    
+    public function isFluxFilterCWhereExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['where']);
+    }
+    
+    
+    public function isFluxFilterCGblStatusExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['gblstatus']);
+    }
+    
+    public function isFluxFilterCStatusExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['status']);
+    }
+    
+    public function isFluxFilterCRuleExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['rule']);
+    }
     
     public function isFluxFilterCExist()
     {
         $myddlewareSession = $this->getMyddlewareSession();
         return isset($myddlewareSession['flux_filter']['c']);
+    }
+    
+    public function isFluxFilterCDateCreateStartExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['date_create_start']);
+    }
+    
+    public function isFluxFilterCDateModifEndExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['date_modif_end']);
+    }
+    
+     public function isFluxFilterCDateModifStartExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['date_modif_start']);
+    }
+    
+    public function isFluxFilterCDateCreateEndExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['date_create_end']);
     }
     
     public function isFluxFilterExist()
