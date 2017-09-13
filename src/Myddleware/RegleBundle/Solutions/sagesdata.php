@@ -186,7 +186,9 @@ class sagesdatacore extends solution
                 $xml = simplexml_load_string($this->response['curlData']);
                 if ($xml) {
                     $modules = $xml->xpath('//xs:element[@sme:canGet="true" and  @sme:role="resourceKind"]/@name');
-                    $this->moduleFields = array_map('strval', $modules); // get attribute who role is resourceKind and can get is true
+                    foreach ($modules as $module) {
+                        $this->moduleFields[(string)$module["name"]] = (string)$module["name"]; // get attribute who role is resourceKind and can get is true
+                    }
                     return $this->moduleFields;
                 } else {
                     throw new \Exception("Error: Cannot create object");
@@ -205,7 +207,12 @@ class sagesdatacore extends solution
     }
 
 
-    // Get the fields available for the module in input
+    /**
+     * Get the fields available for the module in input
+     * @param $module
+     * @param string $type
+     * @return array|bool
+     */
     public function get_module_fields($module, $type = 'source')
     {
         parent::get_module_fields($module, $type);
@@ -213,15 +220,19 @@ class sagesdatacore extends solution
             // Call to get the token
             $this->token = $this->getAccessToken();
             $this->response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema');
-            // Ajout du champs date
-
             if (strlen($this->response['curlData']) > 0) { // url all fine . precced as usual
                 $xml = simplexml_load_string($this->response['curlData']);
                 if ($xml) {
                     $this->moduleFields = array();
-                    $modules = $xml->xpath('//xs:complexType[@name="bankAccount--type"]/xs:all/*/@name');
+                    $modules = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
                     foreach ($modules as $module) {
-                        $this->moduleFields[(string)$module["name"]] = array('label' => (string)$module["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+                        if ((string)$module["nillable"]) {
+                            $existRequired = 1;
+                        } else {
+                            $existRequired = 0;
+                        }
+                        str_replace('xs:', '', (string)$module['type']);
+                        $this->moduleFields[(string)$module["name"]] = array('label' => (string)$module["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => $existRequired);
                     }
                     return $this->moduleFields;
                 } else {
@@ -237,6 +248,93 @@ class sagesdatacore extends solution
             return false;
         }
     } // get_module_fields($module)
+
+    /**
+     * Read one specific record
+     * @param $params
+     */
+    public function read_last($param)
+    {
+        try {
+            // Call to get the token
+            $this->token = $this->getAccessToken();
+            $this->response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $param["module"] . '?count=1');
+            if (strlen($this->response['curlData']) > 0) { // url all fine . precced as usual
+                //return array value
+
+                //“1” if a data has been found
+                //“0”if no data has been found and no error occured
+                //“-1” if an error occured
+            } else {
+                throw new \Exception('No modules from sagesData.');
+            }
+        } catch (\Exception $e) {
+            $error = 'Failed to read data to sagesData : ' . $e->getMessage();
+            echo $error . ';';
+            $this->logger->error($error);
+            return array('error' => $error);
+        }
+    }
+
+
+    /*    // Create data in the target solution
+       public function create($param) {
+           foreach($param['data'] as $idDoc => $data) {
+               try {
+                   // Check control before create
+                   $data = $this->checkDataBeforeCreate($param, $data);
+
+                    // XML creation
+                   foreach ($data as $key => $value) {
+                       // Field only used for the update and contains the ID of the record in the target solution
+                       if ($key=='target_id') {
+                           // If updade then we change the key in Id
+                           if (!empty($value)) {
+                               $key = 'Id';
+                           } else { // If creation, we skip this field
+                               continue;
+                           }
+                       }
+                      $parameter[$key] = $value;
+                   }
+
+                   // Call to get the token
+                   $this->token = $this->getAccessToken();
+                   $dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/'.$param['module'], $parameter, 'POST');
+
+                    // General error
+                   if (!empty($dataSent['Message'])) {
+                       throw new \Exception($dataSent['Message']);
+                   }
+                   if (!empty($dataSent['ErrorMessage'])) {
+                       throw new \Exception($dataSent['ErrorMessage']);
+                   }
+                   // Error managment for the record creation
+                   if (!empty($dataSent[$param['module']]['Success'])) {
+                       if ($dataSent[$param['module']]['Success'] == 'False') {
+                           throw new \Exception($dataSent[$param['module']]['ErrorMessage']);
+                       } else {
+                           $result[$idDoc] = array(
+                               'id' => $dataSent[$param['module']]['GUID'],
+                               'error' => false
+                           );
+                       }
+                   } else {
+                       throw new \Exception('No success flag returned by Cirrus Shield');
+                   }
+               }
+               catch (\Exception $e) {
+                   $error = $e->getMessage();
+                   $result[$idDoc] = array(
+                       'id' => '-1',
+                       'error' => $error
+                   );
+               }
+               // Transfert status update
+               $this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+           }
+           return $result;
+       } */
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
