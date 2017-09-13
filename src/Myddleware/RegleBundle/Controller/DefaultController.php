@@ -293,11 +293,7 @@ class DefaultControllerCore extends Controller
 
 	// AFFICHE LES FLUX D'UNE REGLE
 	public function displayFluxAction($id){
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		
 		$rule = $this->getDoctrine()
                      ->getManager()
                      ->getRepository('RegleBundle:Rule')
@@ -305,10 +301,12 @@ class DefaultControllerCore extends Controller
 						    	'id' => $id
 						    )
 					);
-					
-		$myddlewareSession['flux_filter']['where'] = "WHERE Document.rule_id = '" . $rule->getId() . "'";
-		$myddlewareSession['flux_filter']['c']['rule'] = $rule->getName();
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                /* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
+                
+                $sessionService->setFluxFilterWhere("WHERE Document.rule_id = '" . $rule->getId() . "'");
+                $sessionService->setFluxFilterRuleName($rule->getName());
+		
 		return $this->redirect($this->generateUrl('flux_list'));
 	}
 	
@@ -1024,10 +1022,8 @@ class DefaultControllerCore extends Controller
 	// CREATION - STEP ONE - VERIF ALIAS RULE
 	public function ruleNameUniqAction() {
 		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		/* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');	
 		
 		if($request->getMethod()=='POST') {
 			
@@ -1043,14 +1039,13 @@ class DefaultControllerCore extends Controller
 			// 0 existe pas 1 existe
 			if($rule == NULL) {
 				$existRule = 0;
-				$myddlewareSession['param']['rule']['rulename_valide'] = true;
-				$myddlewareSession['param']['rule']['rulename'] = $this->getRequest()->request->get('name');
+                                $sessionService->setParamRuleNameValid(true);
+                                $sessionService->setParamRuleName($this->getRequest()->request->get('name'));
 			}
 			else {
 				$existRule = 1;
-				$myddlewareSession['param']['rule']['rulename_valide'] = false;
+                                $sessionService->setParamRuleNameValid(false);
 			}	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 			
                         return new JsonResponse($existRule);
 		}	
@@ -1827,13 +1822,10 @@ class DefaultControllerCore extends Controller
 
 	// CREATION - STEP THREE - Validation du formulaire 
 	public function ruleValidationAction() {
-		$request = $this->get('request');	
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-	
-	    // On récupére l'EntityManager
+		
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+                // On récupére l'EntityManager
 		$this->getInstanceBdd();				   
 		$this->em->getConnection()->beginTransaction();
 		try {	
@@ -1847,10 +1839,10 @@ class DefaultControllerCore extends Controller
 				
 			// fields relate
 			if(!empty( $this->getRequest()->request->get('duplicate') )) {
-				$tab_new_rule['params']['rule']['duplicate_fields']	= implode($this->getRequest()->request->get('duplicate'),';');
+                                $sessionService->setParamParentRule('duplicate_fields', implode($this->getRequest()->request->get('duplicate'),';'));
 			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
-			if(strlen($myddlewareSession['param']['rule']['rulename']) < 3 || $myddlewareSession['param']['rule']['rulename_valide'] == false) {
+			if(strlen($sessionService->getParamRuleName()) < 3 || $sessionService->getParamRuleNameValid() == false) {
 				return new JsonResponse(0);
 			}
 			
@@ -1858,19 +1850,19 @@ class DefaultControllerCore extends Controller
   			$connector_source = $this->getDoctrine()
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Connector')
-	                          ->findOneById( $myddlewareSession['param']['rule']['connector']['source'] );
+	                          ->findOneById($sessionService->getParamRuleConnectorSourceId());
 			
   			$connector_target = $this->getDoctrine()
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Connector')
-	                          ->findOneById( $myddlewareSession['param']['rule']['connector']['cible'] );
+	                          ->findOneById($sessionService->getParamRuleConnectorCibleId());
 			
 			$param = RuleClass::getFieldsParamDefault();
 			
 			// Get the id of the rule if we edit a rule
 			// Generate Rule object (create a new one or instanciate the existing one
-			if (!empty($myddlewareSession['param']['rule']['last_version_id'])) {
-				$oneRule = $this->em->getRepository('RegleBundle:Rule')->find($myddlewareSession['param']['rule']['last_version_id']);
+			if (!$sessionService->isParamRuleLastVersionIdEmpty()) {
+				$oneRule = $this->em->getRepository('RegleBundle:Rule')->find($sessionService->getParamRuleLastId());
 				$oneRule->setDateModified(new \DateTime);
 				$oneRule->setModifiedBy( $this->getUser()->getId() );	
 			} else {
@@ -1881,17 +1873,16 @@ class DefaultControllerCore extends Controller
 				$oneRule->setDateModified(new \DateTime);
 				$oneRule->setCreatedBy( $this->getUser()->getId() );
 				$oneRule->setModifiedBy( $this->getUser()->getId() );	
-				$oneRule->setModuleSource( $myddlewareSession['param']['rule']['source']['module'] );	
-				$oneRule->setModuleTarget( $myddlewareSession['param']['rule']['cible']['module'] );	
+				$oneRule->setModuleSource($sessionService->getParamRuleSourceModule());	
+				$oneRule->setModuleTarget($sessionService->getParamRuleCibleModule());	
 				$oneRule->setDeleted( 0 );
 				$oneRule->setActive( (int)$param['active'] );
-				$oneRule->setName( $myddlewareSession['param']['rule']['rulename'] );
+				$oneRule->setName($sessionService->getParamRuleName());
 			}
 		    $this->em->persist($oneRule);
 			// On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
 		    $this->em->flush(); 
-			
-			$myddlewareSession['rule']['newid'] = $oneRule->getId();			
+			$sessionService->setRuleId($oneRule->getId());			
 			$nameRule = $oneRule->getNameSlug();		
 
 			// BEFORE SAVE rev 1.08 ----------------------
@@ -1899,19 +1890,19 @@ class DefaultControllerCore extends Controller
 			$before_save = RuleClass::beforeSave($this->container,
 				array('ruleName' => $nameRule,
 					  'RuleId' => $oneRule->getId(),
-					  'connector' => $myddlewareSession['param']['rule']['connector'],
+					  'connector' => $sessionService->getParamParentRule('connector'),
 					  'content' => $tab_new_rule,
 					  'relationships' => $relationshipsBeforeSave,
 					  'module' => array(
 					  	'source' => 
 					  	array(
-							'solution' => $myddlewareSession['param']['rule']['source']['solution'],
-							'name' => $myddlewareSession['param']['rule']['source']['module']
+							'solution' => $sessionService->getParamRuleSourceSolution(),
+							'name' => $sessionService->getParamRuleSourceModule()
 						),
 					  	'target' => 
 					  	array(
-							'solution' => $myddlewareSession['param']['rule']['cible']['solution'],
-							'name' => $myddlewareSession['param']['rule']['cible']['module']
+							'solution' => $sessionService->getParamRuleCibleSolution(),
+							'name' => $sessionService->getParamRuleCibleModule()
 						),				  	
 					  )
 				)	
@@ -1930,7 +1921,7 @@ class DefaultControllerCore extends Controller
 			}
 					
 			// Edit mode
-			if(!empty($myddlewareSession['param']['rule']['last_version_id'])) {
+			if(!$sessionService->isParamRuleLastVersionIdEmpty()) {
 				// We delete every data of the rule before we create them again
 				// Rule fields
 				$ruleFields = $this->em->getRepository('RegleBundle:RuleField')->findByRule($oneRule->getId());
@@ -1974,7 +1965,7 @@ class DefaultControllerCore extends Controller
 			}
 			// Create mode
 			else {
-				if(isset($myddlewareSession['param']['rule']['source']['datereference']) && $myddlewareSession['param']['rule']['source']['datereference']) {				
+				if($sessionService->isParamRuleSourceDateReference() && $sessionService->getParamRuleSourceDateReference()) {				
 					$date_reference = date('Y-m-d 00:00:00');
 				}
 				else {
@@ -2163,11 +2154,11 @@ class DefaultControllerCore extends Controller
 
 			
 			// notification 
-			$solution_source = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['source']['solution']);
-			$solution_source->setMessageCreateRule($myddlewareSession['param']['rule']['source']['module']);
+			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution());
+			$solution_source->setMessageCreateRule($sessionService->getParamRuleSourceModule());
 
-			$solution_target = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule']['cible']['solution']);
-			$solution_target->setMessageCreateRule($myddlewareSession['param']['rule']['cible']['module']); 
+			$solution_target = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution());
+			$solution_target->setMessageCreateRule($sessionService->getParamRuleCibleModule()); 
 			// notification
 			
 			// --------------------------------------------------------------------------------------------------	
@@ -2178,27 +2169,27 @@ class DefaultControllerCore extends Controller
 			RuleClass::afterSave($this->container,	array(
 						'ruleId' => $oneRule->getId(),
 						'ruleName' => $nameRule,
-						'oldRule' => (empty($myddlewareSession['param']['rule']['last_version_id']) ? '' : $myddlewareSession['param']['rule']['last_version_id']),
+						'oldRule' => ($sessionService->isParamRuleLastVersionIdEmpty()) ? '' : $sessionService->getParamRuleLastId(),
 						'datereference' => $date_reference,
-						'connector' => $myddlewareSession['param']['rule']['connector'],
+						'connector' => $sessionService->getParamParentRule('connector'),
 						'content' => $tab_new_rule,
 						'relationships' => $relationshipsBeforeSave,
 						'module' => array(
 							'source' => 
 							array(
-								'solution' => $myddlewareSession['param']['rule']['source']['solution'],
-								'name' => $myddlewareSession['param']['rule']['source']['module']
+								'solution' => $sessionService->getParamRuleSourceSolution(),
+								'name' => $sessionService->getParamRuleSourceModule()
 							),
 							'target' => 
 							array(
-								'solution' => $myddlewareSession['param']['rule']['cible']['solution'],
-								'name' => $myddlewareSession['param']['rule']['cible']['module']
+								'solution' => $sessionService->getParamRuleCibleSolution(),
+								'name' => $sessionService->getParamRuleCibleModule()
 							),				  	
 						)
 					)	
 			 );		
-			if(isset($myddlewareSession['param']['rule'])) {
-				unset( $myddlewareSession['param']['rule'] );
+			if($sessionService->isParamRuleExist()) {
+                            $sessionService->removeParamRule();
 			}			
 			$this->em->getConnection()->commit();
 			$response = 1;
@@ -2207,7 +2198,7 @@ class DefaultControllerCore extends Controller
 			$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
 			$response = '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
 		} 	
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		
 		$this->em->close();	
 		return new JsonResponse($response);
 	}
@@ -2342,10 +2333,9 @@ class DefaultControllerCore extends Controller
 	// VALIDATION DE L ANIMATION
 	public function validationAnimationAction() {
 		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		/* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+                
 		try{
                     $choiceSelect = $request->get('choice_select',null);
 			if($choiceSelect != null) {
@@ -2353,24 +2343,21 @@ class DefaultControllerCore extends Controller
 				if($choiceSelect == 'module') {
 					
 					// si le nom de la règle est inferieur à 3 caractères :
-					if(!isset($myddlewareSession['param']['rule']['source']['solution']) || strlen($myddlewareSession['param']['rule']['rulename']) < 3) {
-						$myddlewareSession['param']['rule']['rulename_valide'] = false;
+					if(empty($sessionService->getParamRuleSourceSolution()) || strlen($sessionService->getParamRuleName()) < 3) {
+                                                $sessionService->setParamRuleNameValid(false);
 					}
 					else {
-						$myddlewareSession['param']['rule']['rulename_valide'] = true;
+                                                $sessionService->setParamRuleNameValid(true);
 					}
-					
-					$myddlewareSession['param']['rule']['source']['module'] = $request->get('module_source');
-					$myddlewareSession['param']['rule']['cible']['module'] = $request->get('module_target');
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+					$sessionService->setParamRuleSourceModule($request->get('module_source'));
+                                        $sessionService->setParamRuleCibleModule( $request->get('module_target'));
 					return new Response('module');
 				}
 				else if($choiceSelect == 'template') {
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-					//--
+					
 					$template = $this->get('myddleware.template');	
-					$template->setIdConnectorSource( (int)$myddlewareSession['param']['rule']['connector']['source'] );
-					$template->setIdConnectorTarget( (int)$myddlewareSession['param']['rule']['connector']['cible'] );
+					$template->setIdConnectorSource( (int)$sessionService->getParamRuleConnectorSourceId());
+					$template->setIdConnectorTarget( (int)$sessionService->getParamRuleConnectorCibleId());
 					$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 					$template->setIdUser( $this->getUser()->getId() );	
 					// Rule creation with the template selected in parameter
@@ -2393,15 +2380,13 @@ class DefaultControllerCore extends Controller
 
 	// LISTE DES TEMPLATES
 	public function listTemplateAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);		
+		/* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+                
 		$template = $this->get('myddleware.template');	
 	
-		$template->setsolutionSourceName($myddlewareSession['param']['rule']['source']['solution']);
-		$template->setSolutionTarget($myddlewareSession['param']['rule']['cible']['solution']);
+		$template->setsolutionSourceName($sessionService->getParamRuleSourceSolution());
+		$template->setSolutionTarget($sessionService->getParamRuleCibleSolution());
 		$template->setLang( mb_strtoupper($this->getRequest()->getLocale()) );
 		$template->setIdUser( $this->getUser()->getId() );
 		$templates = $template->getTemplates();
@@ -2435,26 +2420,23 @@ class DefaultControllerCore extends Controller
 
 	// CREATION - STEP ONE - ANIMATION
 	public function ruleStepOneAnimationAction() {            
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
                 
-               
 		// s'il existe des vielles données on les supprime
-		if(isset( $myddlewareSession['param']['rule'] )) {
-			unset( $myddlewareSession['param']['rule'] );
+		if($sessionService->isParamRuleExist()) {
+			$sessionService->removeParamRule();
 		}	
 	
-		if(isset( $myddlewareSession['param']['myddleware']['connector'] )) {
-			unset( $myddlewareSession['param']['myddleware']['connector'] );
+		if($sessionService->isConnectorExist()) {
+			$sessionService->removeMyddlewareConnector();
 		}	
 				
 		// Détecte s'il existe des erreurs
-		if(isset($myddlewareSession['error']['create_rule']) && !empty($myddlewareSession['error']['create_rule']) ) {
-			$error = $myddlewareSession['error']['create_rule'];
-			unset($myddlewareSession['error']['create_rule']);
+		if($sessionService->isErrorNotEmpty(SessionService::ERROR_CREATE_RULE_INDEX)) {
+			$error = $sessionService->getCreateRuleError();
+			$sessionService->removeError(SessionService::ERROR_CREATE_RULE_INDEX);
 		}
 		else {
 			$error = false;
@@ -2474,8 +2456,7 @@ class DefaultControllerCore extends Controller
 			foreach($solutionSource as $s) {
 				$source[] = $s->getName();
 			}
-			
-			$myddlewareSession['param']['myddleware']['connector']['solution']['source'] = json_encode($source); 		
+			$sessionService->setParamConnectorSolutionSource($source);		
 		} 			   
 			   			   			   			
 		// Liste target : solution avec au moins 1 connecteur
@@ -2486,10 +2467,9 @@ class DefaultControllerCore extends Controller
 			foreach($solutionTarget as $t) {
 				$target[] = $t->getName();
 			}	
-			
-			$myddlewareSession['param']['myddleware']['connector']['solution']['target']	= json_encode($target); 			
+			$sessionService->setParamConnectorSolutionTarget($target); 			
 		} 					   	
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+	
         return $this->render('RegleBundle:Rule:create/step1simply.html.twig',array(
 		       'source' => $solutionSource,
 		       'target' => $solutionTarget,
@@ -2502,11 +2482,11 @@ class DefaultControllerCore extends Controller
 	public function ruleListModuleAction() {
 		
 		try {
+                        /* @var $sessionService SessionService */
+                        $sessionService = $this->get('myddleware_session.service');
+                        
 			$request = $this->get('request');
-			$session = $request->getSession();
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+			
                         
 			$id_connector = $request->get('id');
 			$type = $request->get('type');
@@ -2525,15 +2505,15 @@ class DefaultControllerCore extends Controller
 								->findByConnector( $id_connector );	// infos params connector
 			
 			foreach ($connectorParams as $p) {
-				$myddlewareSession['param']['rule'][$type][$p->getName()] = $p->getValue();	// params connector
+                                $sessionService->setParamRuleParentName($type, $p->getName(), $p->getValue()); // params connector
 			}
-																				
-			$myddlewareSession['param']['rule']['connector'][$type] = $id_connector; // id connector
-			$myddlewareSession['param']['rule'][$type]['solution'] = $connector[0]->getSolution()->getName(); // nom de la solution		
-				
-			$solution = $this->get('myddleware_rule.'.$myddlewareSession['param']['rule'][$type]['solution']);
+			$sessionService->setParamRuleConnectorParent($type, $id_connector); // id connector
+                        $sessionService->setParamRuleParentName($type, 'solution', $connector[0]->getSolution()->getName()); // nom de la solution
 			
-			$params_connexion = $this->decrypt_params($myddlewareSession['param']['rule'][$type]);
+				
+			$solution = $this->get('myddleware_rule.'.$sessionService->getParamRuleParentName($type, 'solution'));
+			
+			$params_connexion = $this->decrypt_params($sessionService->getParamParentRule($type));
 			$params_connexion['idConnector'] = $id_connector;
 			
 			$solution->login( $params_connexion );	
@@ -2541,11 +2521,10 @@ class DefaultControllerCore extends Controller
 			$t = (($type == 'source') ? 'source' : 'target' );
 			
 			$liste_modules = tools::composeListHtml($solution->get_modules($t), $this->get('translator')->trans('create_rule.step1.choose_module'));	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 			return new Response($liste_modules);			
 		}
 		catch(\Exception $e) {
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 			return new Response('<option value="">Aucun module pour ce connecteur</option>');	
 		}		
 	}

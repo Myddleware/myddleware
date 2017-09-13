@@ -116,6 +116,12 @@ class SessionService{
     
     ############# CONNECTOR ###################
     
+    public function isConnectorExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['myddleware']['connector']);
+    }
+    
     public function getConnectorAnimation()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -312,6 +318,13 @@ class SessionService{
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
+     public function removeMyddlewareConnector()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['param']['myddleware']['connector']); 
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
     
     public function removeConnectorAdd()
     {
@@ -464,6 +477,14 @@ class SessionService{
         return $myddlewareSession['param']['rule']['rulename'];
     }
     
+    public function isParamRuleNameExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['rulename']);
+    }
+    
+    
+    
      public function getParamRule()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -518,6 +539,14 @@ class SessionService{
         $myddlewareSession = $this->getMyddlewareSession();
         return isset($myddlewareSession['param']['rule']['last_version_id']);
     }
+    
+    public function isParamRuleLastVersionIdEmpty()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return empty($myddlewareSession['param']['rule']['last_version_id']);
+    }
+    
+    
     
     public function setParamRuleSourceSolution($solutionName)
     {
@@ -673,6 +702,12 @@ class SessionService{
     {
         $myddlewareSession = $this->getMyddlewareSession();
         return $myddlewareSession['param']['rule']['source']['datereference'];
+    }
+    
+    public function isParamRuleSourceDateReference()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule']['source']['datereference']);
     }
     
     
@@ -981,6 +1016,12 @@ class SessionService{
         return isset($myddlewareSession['flux_filter']['c']);
     }
     
+    public function isFluxFilterExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']);
+    }
+    
     ############# FLUX FILTER ###################
     
     
@@ -1000,10 +1041,10 @@ class SessionService{
         return $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX];
     }
     
-    public function isErrorExist($type)
+    public function isErrorNotEmpty($type)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['error'][$type]);
+        return !empty($myddlewareSession['error']['create_rule']);
     }
     
      public function removeError($type)

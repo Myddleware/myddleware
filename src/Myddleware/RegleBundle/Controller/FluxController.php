@@ -37,6 +37,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 use Myddleware\RegleBundle\Entity\Solution;
 use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\DocumentAudit;
+use Myddleware\RegleBundle\Service\SessionService;
 
 use Myddleware\RegleBundle\Classes\document as doc;
 
@@ -402,14 +403,12 @@ class FluxControllerCore extends Controller
 
 	// Supprime le filtre des flux
 	public function fluxListDeleteFilterAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		if(isset($myddlewareSession['flux_filter'])) {
-			unset($myddlewareSession['flux_filter']);	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		
+                /* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
+                
+		if($sessionService->isFluxFilterExist()) {
+			$sessionService->removeFluxFilter();
 		}
 
 		return $this->redirect($this->generateUrl('flux_list'));	
