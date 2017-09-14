@@ -990,35 +990,6 @@ class DefaultControllerCore extends Controller
 		}
 	}
 	
-	// CREATION - STEP ONE - CONNEXION
-	public function ruleStepOneAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		// s'il existe des vielles données on les supprime
-		if(isset( $myddlewareSession['param']['rule'] )) {
-			unset( $myddlewareSession['param']['rule'] );
-		}
-		
-		// Détecte s'il existe des erreurs
-		if(isset($myddlewareSession['error']['create_rule']) && !empty($myddlewareSession['error']['create_rule']) ) {
-			$error = $myddlewareSession['error']['create_rule'];
-			unset($myddlewareSession['error']['create_rule']);
-		}
-		else {
-			$error = false;
-		}
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);					
-        return $this->render('RegleBundle:Rule:create/step1.html.twig',array(
-			'solutions_source'=>$this->liste_connectorAction('source'),
-			'solutions_target'=>$this->liste_connectorAction('target'),
-			'error' => $error
-			)
-		);		
-	}
-
 	// CREATION - STEP ONE - VERIF ALIAS RULE
 	public function ruleNameUniqAction() {
 		$request = $this->get('request');
