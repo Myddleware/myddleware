@@ -201,22 +201,22 @@ class SessionService{
         return isset($myddlewareSession['param']['connector']['source']);
     }
     
-    public function isParamRuleSourceModuleExist()
+    public function isParamRuleSourceModuleExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['source']['module']);
+        return isset($myddlewareSession['param']['rule'][$key]['source']['module']);
     }
     
-    public function isParamRuleCibleModuleExist()
+    public function isParamRuleCibleModuleExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['cible']['module']);
+        return isset($myddlewareSession['param']['rule'][$key]['cible']['module']);
     }
     
-    public function isParamRuleCibleModeExist()
+    public function isParamRuleCibleModeExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['cible']['mode']);
+        return isset($myddlewareSession['param']['rule'][$key]['cible']['mode']);
     }
     
     public function setParamConnectorSourceToken($token)
@@ -260,33 +260,33 @@ class SessionService{
     }
     
       
-    public function setParamConnectorSolutionSource($source)
+    public function setParamConnectorSolutionSource($key, $source)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['myddleware']['connector']['solution']['source'] = json_encode($source);
+        $myddlewareSession['param']['myddleware']['connector'][$key]['solution']['source'] = json_encode($source);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamConnectorSolutionSource()
+    public function getParamConnectorSolutionSource($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['myddleware']['connector']['solution']['source']);
+        return json_decode($myddlewareSession['param']['myddleware']['connector'][$key]['solution']['source']);
     }
     
     
-     public function setParamConnectorSolutionTarget($target)
+     public function setParamConnectorSolutionTarget($key, $target)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['myddleware']['connector']['solution']['target'] = json_encode($target);
+        $myddlewareSession['param']['myddleware']['connector'][$key]['solution']['target'] = json_encode($target);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamConnectorSolutionTarget()
+    public function getParamConnectorSolutionTarget($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['myddleware']['connector']['solution']['target']);
+        return json_decode($myddlewareSession['param']['myddleware']['connector'][$key]['solution']['target']);
     }
     
     
@@ -384,420 +384,434 @@ class SessionService{
     
     ############# RULE ###################
     
-    public function removeParamRule()
+    public function removeParamRule($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        unset($myddlewareSession['param']['rule']);
+        unset($myddlewareSession['param']['rule'][$key]);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function removeParamParentRule($parent)
+    public function removeParamParentRule($key, $parent)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        unset($myddlewareSession['param']['rule'][$parent]);
+        unset($myddlewareSession['param']['rule'][$key][$parent]);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function setParamParentRule($parent, $value)
+    public function setParamParentRule($key, $parent, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule'][$parent] = $value;
+        $myddlewareSession['param']['rule'][$key][$parent] = $value;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamParentRule($parent)
+    public function getParamParentRule($key, $parent)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule'][$parent];
+        return $myddlewareSession['param']['rule'][$key][$parent];
     }
     
      
-    public function setParamRuleConnectorParent($parent, $value)
+    public function setParamRuleConnectorParent($key, $parent, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['connector'][$parent] = $value;
+        $myddlewareSession['param']['rule'][$key]['connector'][$parent] = $value;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleConnectorParent($parent)
+    public function getParamRuleConnectorParent($key, $parent)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['connector'][$parent];
+        return $myddlewareSession['param']['rule'][$key]['connector'][$parent];
     }
     
-    public function setParamRuleParentName($parent, $name, $value)
+    public function setParamRuleParentName($key, $parent, $name, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule'][$parent][$name] = $value;
+        $myddlewareSession['param']['rule'][$key][$parent][$name] = $value;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleParentName($parent, $name)
+    public function getParamRuleParentName($key, $parent, $name)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule'][$parent][$name];
+        return $myddlewareSession['param']['rule'][$key][$parent][$name];
     }
     
-    public function isParamRuleExist()
+    public function isParamRuleExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']); 
+        return isset($myddlewareSession['param']['rule'][$key]); 
     }
     
-    public function setParamRuleNameValid($isValid)
+    public function setParamRuleNameValid($key, $isValid)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['rulename_valide'] = $isValid;
+        $myddlewareSession['param']['rule'][$key]['rulename_valide'] = $isValid;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleNameValid()
+    public function getParamRuleNameValid($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return (bool)$myddlewareSession['param']['rule']['rulename_valide'];
+        return (bool)$myddlewareSession['param']['rule'][$key]['rulename_valide'];
     }
     
-    public function setParamRuleName($ruleName)
+    public function setParamRuleName($key, $ruleName)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['rulename'] = $ruleName;
+        $myddlewareSession['param']['rule'][$key]['rulename'] = $ruleName;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleName()
+    public function getParamRuleName($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['rulename'];
+        return $myddlewareSession['param']['rule'][$key]['rulename'];
     }
     
-    public function isParamRuleNameExist()
+    public function isParamRuleNameExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['rulename']);
+        return isset($myddlewareSession['param']['rule'][$key]['rulename']);
     }
     
     
     
-     public function getParamRule()
+     public function getParamRule($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule'];
+        return $myddlewareSession['param']['rule'][$key];
     }
     
-    public function setParamRuleConnectorSourceId($connectorSouceId)
+    public function setParamRuleConnectorSourceId($key, $connectorSouceId)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['connector']['source'] = $connectorSouceId;
+        $myddlewareSession['param']['rule'][$key]['connector']['source'] = $connectorSouceId;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleConnectorSourceId()
+    public function getParamRuleConnectorSourceId($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['connector']['source'];
+        return $myddlewareSession['param']['rule'][$key]['connector']['source'];
     }
     
-    public function setParamRuleConnectorCibleId($connectorCibleId)
+    public function setParamRuleConnectorCibleId($key, $connectorCibleId)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['connector']['cible'] = $connectorCibleId;
+        $myddlewareSession['param']['rule'][$key]['connector']['cible'] = $connectorCibleId;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleConnectorCibleId()
+    public function getParamRuleConnectorCibleId($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['connector']['cible'];
+        return $myddlewareSession['param']['rule'][$key]['connector']['cible'];
     }
     
     
-    public function setParamRuleLastId($id)
+    public function getParamRuleLastKey()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['last_version_id'] = $id;
+        return $myddlewareSession['param']['rule']['key'];
+    }
+    
+     public function setParamRuleLastKey($key)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['rule']['key'] = $key;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleLastId()
+    public function setParamRuleLastId($key, $id)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['last_version_id'];
-    }
-    
-    public function isParamRuleLastVersionIdExist()
-    {
-        $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['last_version_id']);
-    }
-    
-    public function isParamRuleLastVersionIdEmpty()
-    {
-        $myddlewareSession = $this->getMyddlewareSession();
-        return empty($myddlewareSession['param']['rule']['last_version_id']);
-    }
-    
-    
-    
-    public function setParamRuleSourceSolution($solutionName)
-    {
-        $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source']['solution'] = $solutionName;
+        $myddlewareSession['param']['rule'][$key]['last_version_id'] = $id;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceSolution()
+    public function getParamRuleLastId($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['source']['solution']) ? $myddlewareSession['param']['rule']['source']['solution'] : null ;
+        return $myddlewareSession['param']['rule'][$key]['last_version_id'];
+    }
+        
+    public function isParamRuleLastVersionIdExist($key)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['param']['rule'][$key]['last_version_id']);
     }
     
-    public function getParamRuleSource()
+    public function isParamRuleLastVersionIdEmpty($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source'];
+        return empty($myddlewareSession['param']['rule'][$key]['last_version_id']);
     }
     
     
-    public function setParamRuleSourceConnector($connectorName, $connectorValue)
+    
+    public function setParamRuleSourceSolution($key, $solutionName)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source'][$connectorName] = $connectorValue;
+        $myddlewareSession['param']['rule'][$key]['source']['solution'] = $solutionName;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceConnector($connectorName)
+    public function getParamRuleSourceSolution($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source'][$connectorName];
+        return isset($myddlewareSession['param']['rule'][$key]['source']['solution']) ? $myddlewareSession['param']['rule'][$key]['source']['solution'] : null ;
+    }
+    
+    public function getParamRuleSource($key)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['rule'][$key]['source'];
     }
     
     
-    public function setParamRuleCibleSolution($solutionName)
+    public function setParamRuleSourceConnector($key, $connectorName, $connectorValue)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['cible']['solution'] = $solutionName;
+        $myddlewareSession['param']['rule'][$key]['source'][$connectorName] = $connectorValue;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleCibleSolution()
+    public function getParamRuleSourceConnector($key, $connectorName)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['cible']['solution'];
+        return $myddlewareSession['param']['rule'][$key]['source'][$connectorName];
     }
     
-    public function setParamRuleCibleConnector($connectorName, $connectorValue)
+    
+    public function setParamRuleCibleSolution($key, $solutionName)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['cible'][$connectorName] = $connectorValue;
+        $myddlewareSession['param']['rule'][$key]['cible']['solution'] = $solutionName;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleCibleConnector($connectorName)
+    public function getParamRuleCibleSolution($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['cible'][$connectorName];
+        return $myddlewareSession['param']['rule'][$key]['cible']['solution'];
+    }
+    
+    public function setParamRuleCibleConnector($key, $connectorName, $connectorValue)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['rule'][$key]['cible'][$connectorName] = $connectorValue;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function getParamRuleCibleConnector($key,$connectorName)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['param']['rule'][$key]['cible'][$connectorName];
     }
    
     
-    public function getParamRuleCible()
+    public function getParamRuleCible($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['cible'];
+        return $myddlewareSession['param']['rule'][$key]['cible'];
     }
 
-    public function setParamRuleReloadParams($params)
+    public function setParamRuleReloadParams($key, $params)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['reload']['params'] = json_encode($params);
+        $myddlewareSession['param']['rule'][$key]['reload']['params'] = json_encode($params);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleReloadParams()
+    public function getParamRuleReloadParams($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['rule']['reload']['params']);
+        return json_decode($myddlewareSession['param']['rule'][$key]['reload']['params']);
     } 
     
-    public function setParamRuleReloadFields($fields)
+    public function setParamRuleReloadFields($key, $fields)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['reload']['fields'] = json_encode($fields);
+        $myddlewareSession['param']['rule'][$key]['reload']['fields'] = json_encode($fields);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleReloadRelate()
+    public function getParamRuleReloadRelate($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['rule']['reload']['relate']);
+        return json_decode($myddlewareSession['param']['rule'][$key]['reload']['relate']);
     }
     
-    public function setParamRuleReloadRelate($value)
+    public function setParamRuleReloadRelate($key, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['reload']['relate'] = json_encode($value);
+        $myddlewareSession['param']['rule'][$key]['reload']['relate'] = json_encode($value);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleReloadFields()
+    public function getParamRuleReloadFields($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['rule']['reload']['fields']);
+        return json_decode($myddlewareSession['param']['rule'][$key]['reload']['fields']);
     }
 
-    public function setParamRuleReloadFilter($filter)
+    public function setParamRuleReloadFilter($key, $filter)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['reload']['filter'] = json_encode($filter);
+        $myddlewareSession['param']['rule'][$key]['reload']['filter'] = json_encode($filter);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleReloadFilter()
+    public function getParamRuleReloadFilter($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return json_decode($myddlewareSession['param']['rule']['reload']['filter']);
+        return json_decode($myddlewareSession['param']['rule'][$key]['reload']['filter']);
     }        
     
-    public function setParamRuleSourceModule($moduleSource)
+    public function setParamRuleSourceModule($key, $moduleSource)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source']['module'] = $moduleSource;
+        $myddlewareSession['param']['rule'][$key]['source']['module'] = $moduleSource;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceModule()
+    public function getParamRuleSourceModule($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source']['module'];
+        return $myddlewareSession['param']['rule'][$key]['source']['module'];
     }
     
     
-    public function setParamRuleSourceDateReference($dateReferenceSource)
+    public function setParamRuleSourceDateReference($key, $dateReferenceSource)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source']['datereference'] = $dateReferenceSource;
+        $myddlewareSession['param']['rule'][$key]['source']['datereference'] = $dateReferenceSource;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceDateReference()
+    public function getParamRuleSourceDateReference($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source']['datereference'];
+        return $myddlewareSession['param']['rule'][$key]['source']['datereference'];
     }
     
-    public function isParamRuleSourceDateReference()
+    public function isParamRuleSourceDateReference($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['source']['datereference']);
+        return isset($myddlewareSession['param']['rule'][$key]['source']['datereference']);
     }
     
     
-    public function setParamRuleSourceFields($fieldsSource)
+    public function setParamRuleSourceFields($key,$fieldsSource)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source']['fields'] = $fieldsSource;
+        $myddlewareSession['param']['rule'][$key]['source']['fields'] = $fieldsSource;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceFields()
+    public function getParamRuleSourceFields($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source']['fields'];
+        return $myddlewareSession['param']['rule'][$key]['source']['fields'];
     }
     
-     public function setParamRuleSourceFieldsError($fieldsSourceError)
+     public function setParamRuleSourceFieldsError($key,$fieldsSourceError)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['source']['fields']['error'] = $fieldsSourceError;
+        $myddlewareSession['param']['rule'][$key]['source']['fields']['error'] = $fieldsSourceError;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleSourceFieldsError()
+    public function getParamRuleSourceFieldsError($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['source']['fields']['error'];
+        return $myddlewareSession['param']['rule'][$key]['source']['fields']['error'];
     }
     
-    public function isParamRuleSourceFieldsErrorExist()
+    public function isParamRuleSourceFieldsErrorExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['source']['fields']['error']);
+        return isset($myddlewareSession['param']['rule'][$key]['source']['fields']['error']);
     }
     
-    public function isParamRuleSourceFieldsExist()
+    public function isParamRuleSourceFieldsExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['source']['fields']);
+        return isset($myddlewareSession['param']['rule'][$key]['source']['fields']);
     }
     
-     public function isParamRuleTargetFieldsExist()
+     public function isParamRuleTargetFieldsExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['param']['rule']['target']['fields']);
+        return isset($myddlewareSession['param']['rule'][$key]['target']['fields']);
     }
     
 
-    public function setParamRuleCibleModule($moduleTarget)
+    public function setParamRuleCibleModule($key,$moduleTarget)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['cible']['module'] = $moduleTarget;
+        $myddlewareSession['param']['rule'][$key]['cible']['module'] = $moduleTarget;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleCibleModule()
+    public function getParamRuleCibleModule($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['cible']['module'];
+        return $myddlewareSession['param']['rule'][$key]['cible']['module'];
     } 
 
-    public function setParamRuleCibleMode($cibleMode)
+    public function setParamRuleCibleMode($key,$cibleMode)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['cible']['mode'] = $cibleMode;
+        $myddlewareSession['param']['rule'][$key]['cible']['mode'] = $cibleMode;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleCibleMode()
+    public function getParamRuleCibleMode($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['cible']['mode'];
+        return $myddlewareSession['param']['rule'][$key]['cible']['mode'];
     } 
     
-    public function setParamRuleTargetFields($targetFields)
+    public function setParamRuleTargetFields($key,$targetFields)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['target']['fields'] = $targetFields;
+        $myddlewareSession['param']['rule'][$key]['target']['fields'] = $targetFields;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getParamRuleFieldsByType($type, $field = null)
+    public function getParamRuleFieldsByType($key,$type, $field = null)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $fields = $myddlewareSession['param']['rule'][$type]['fields'];
+        $fields = $myddlewareSession['param']['rule'][$key][$type]['fields'];
         
         if($field != null){
             return $fields[$field];
@@ -808,25 +822,25 @@ class SessionService{
     } 
     
     
-    public function getParamRuleTargetFields()
+    public function getParamRuleTargetFields($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['param']['rule']['target']['fields'];
+        return $myddlewareSession['param']['rule'][$key]['target']['fields'];
     } 
     
   
-    public function setRuleId($id)
+    public function setRuleId($key, $id)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['rule']['newid'] = $id;
+        $myddlewareSession['rule']['newid'][$key] = $id;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getRuleId()
+    public function getRuleId($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['rule']['newid'];
+        return $myddlewareSession['rule']['newid'][$key];
     }
     
     public function removeRuleId()
@@ -1161,30 +1175,30 @@ class SessionService{
     
     ############# ERROR ###################
     
-    public function setCreateRuleError($message)
+    public function setCreateRuleError($key, $message)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX] = $message;
+        $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX][$key] = $message;
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function getCreateRuleError()
+    public function getCreateRuleError($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX];
+        return $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX][$key];
     }
     
-    public function isErrorNotEmpty($type)
+    public function isErrorNotEmpty($key,$type)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return !empty($myddlewareSession['error']['create_rule']);
+        return !empty($myddlewareSession['error'][$type][$key]);
     }
     
-     public function removeError($type)
+     public function removeError($key,$type)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        unset($myddlewareSession['error'][$type]);
+        unset($myddlewareSession['error'][$type][$key]);
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
