@@ -843,27 +843,27 @@ class SessionService{
         return $myddlewareSession['rule']['newid'][$key];
     }
     
-    public function removeRuleId()
+    public function removeRuleId($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        unset($myddlewareSession['rule']['newid']);
+        unset($myddlewareSession['rule']['newid'][$key] );
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
-    public function isRuleIdExist()
+    public function isRuleIdExist($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return isset($myddlewareSession['rule']['newid']);
+        return isset($myddlewareSession['rule']['newid'][$key]);
     }
     
     /**
      * If the rulename is less than X characters
      * @return boolean
      */
-    public function isRuleNameLessThanXCharacters($number)
+    public function isRuleNameLessThanXCharacters($key, $number)
     {
-	if ($this->getParamRuleSourceSolution() !=null || strlen($this->getParamRuleName()) < $number || $this->getParamRuleNameValid() == false) {
+	if ($this->getParamRuleSourceSolution($key) !=null || strlen($this->getParamRuleName($key)) < $number || $this->getParamRuleNameValid($key) == false) {
             return false;
         }else{
             return true;

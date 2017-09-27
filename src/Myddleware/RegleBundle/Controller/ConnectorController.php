@@ -51,7 +51,8 @@ class ConnectorController extends Controller
 
 	// CALLBACK POUR LES APIS
 	public function callBackAction() { // REV 1.1.1
-		try {		
+		try {	
+                        /* @var $sessionService SessionService */
                         $sessionService = $this->get('myddleware_session.service');
                         
                         // Nom de la solution

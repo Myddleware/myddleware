@@ -83,9 +83,10 @@ class DefaultControllerCore extends Controller
                         /* @var $sessionService SessionService */
                         $sessionService = $this->get('myddleware_session.service');
                         
-			if($sessionService->isRuleIdExist()) {
-				$id = $sessionService->getRuleId();
-				$sessionService->removeRuleId();
+                        $key = $sessionService->getParamRuleLastKey();    
+			if($sessionService->isRuleIdExist($key)) {
+				$id = $sessionService->getRuleId($key);
+				$sessionService->removeRuleId($key);
 				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
 			}
 		
@@ -998,6 +999,8 @@ class DefaultControllerCore extends Controller
 		/* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');	
 		
+                $key = $sessionService->getParamRuleLastKey();
+                        
 		if($request->getMethod()=='POST') {
 			
 			$this->getInstanceBdd();	
@@ -1127,8 +1130,10 @@ class DefaultControllerCore extends Controller
 		
                 /* @var $serviceSession SessionService */
                 $serviceSession = $this->get('myddleware_session.service');
+                
+                $ruleKey = $serviceSession->getParamRuleLastKey();
 		
-		if($request->getMethod()=='POST' && $serviceSession->isParamRuleExist()) {
+		if($request->getMethod()=='POST' && $serviceSession->isParamRuleExist($ruleKey)) {
 						
 			// retourne un tableau prêt à l'emploi
 			$target = $this->createListeParamsRule(
@@ -1138,9 +1143,9 @@ class DefaultControllerCore extends Controller
 			); 
 			
 	
-			$solution_source_nom = $serviceSession->getParamRuleSourceSolution();			
+			$solution_source_nom = $serviceSession->getParamRuleSourceSolution($ruleKey);			
 			$solution_source = $this->get('myddleware_rule.'.$solution_source_nom);			
-			$solution_source->login($serviceSession->getParamRuleSource());
+			$solution_source->login($serviceSession->getParamRuleSource($ruleKey));
 			$doc = $this->get('myddleware.document');
 			$tab_simulation = array();				
 			$sourcesfields = array();
@@ -1175,7 +1180,7 @@ class DefaultControllerCore extends Controller
 			
 			// Récupère données source													
 			$source = $solution_source->read_last( array( 
-										'module' => $serviceSession->getParamRuleSourceModule(),
+										'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
 										'fields' => $sourcesfields));	
   
 			if( isset($source['done']) ) {
@@ -1242,7 +1247,7 @@ class DefaultControllerCore extends Controller
 			       'before' => $before, // source
 			       'after' => $after, // target
 			       'data_source' => $source['done'],
-			       'params' => $serviceSession->getParamRule()
+			       'params' => $serviceSession->getParamRule($ruleKey)
 				)
 			);
 
@@ -1260,41 +1265,41 @@ class DefaultControllerCore extends Controller
                 
                 /* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');
-			
+		$ruleKey = $sessionService->getParamRuleLastKey();
                 //dump($sessionService->getMyddlewareSession()); die();
 		// Test que l'ordre des étapes
-		if(!$sessionService->isParamRuleExist($key)) {
-                        $sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.order'));
+		if(!$sessionService->isParamRuleExist($ruleKey)) {
+                        $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.order'));
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));					
 			exit;
 		}
 		
                 // Contrôle si la nouvelle règle peut-être valide
-		if($sessionService->isRuleNameLessThanXCharacters(3) ) {
-			$sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.valid'));			
+		if($sessionService->isRuleNameLessThanXCharacters($ruleKey, 3) ) {
+			$sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.valid'));			
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));	
 			exit;
 		}
 		
 		try {
 			// ---- Mode update ----
-			if(!$sessionService->isParamRuleSourceModuleExist($key) && !$sessionService->isParamRuleCibleModuleExist($key)) {
+			if(!$sessionService->isParamRuleSourceModuleExist($ruleKey) && !$sessionService->isParamRuleCibleModuleExist($ruleKey)) {
 				// RELOAD : Chargement des données d'une règle en édition
-				$sessionService->setParamRuleSourceModule($key, $this->getRequest()->request->get('source_module'));
-				$sessionService->setParamRuleCibleModule($key, $this->getRequest()->request->get('cible_module'));					
+				$sessionService->setParamRuleSourceModule($ruleKey, $this->getRequest()->request->get('source_module'));
+				$sessionService->setParamRuleCibleModule($ruleKey, $this->getRequest()->request->get('cible_module'));					
 			} 
 			// ---- Mode update ----
 			
 			// Get all data from the target solution first		
-			$solution_cible = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution($key));
+			$solution_cible = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution($ruleKey));
 			
 			// TARGET ------------------------------------------------------------------	
 			// We retriev first all data from the target application and the from the source application
 			// We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
-			$solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($key)));
+			$solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($ruleKey)));
 			
 			if($solution_cible->connexion_valide == false) {
-                                $sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.source_module_connect'));
+                                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect'));
 				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 				exit;
 			}
@@ -1303,7 +1308,7 @@ class DefaultControllerCore extends Controller
 				$module['cible'] = $this->getRequest()->request->get('cible_module'); // mode create <<----
 			}
 			else {
-				$module['cible'] = $sessionService->getParamRuleCibleModule($key); // mode update <<----
+				$module['cible'] = $sessionService->getParamRuleCibleModule($ruleKey); // mode update <<----
 			}
 			
 			// Récupère la liste des paramètres cible
@@ -1320,19 +1325,19 @@ class DefaultControllerCore extends Controller
 			// Liste des relations TARGET
 			$relation = $solution_cible->get_module_fields_relate($module['cible']);
 			
-			$allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule($key));
+			$allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule($ruleKey));
 			
 			// Champs pour éviter les doublons
-			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($sessionService->getParamRuleCibleModule($key));
+			$fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($sessionService->getParamRuleCibleModule($ruleKey));
 			
 			// SOURCE ------------------------------------------------------------------
 			// Connexion au service de la solution source			
-			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution($key));			
-			$solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($key)));
+			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution($ruleKey));			
+			$solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($ruleKey)));
 			
 			// Contrôle que la connexion est valide
 			if($solution_source->connexion_valide == false) {
-                                $sessionService->setCreateRuleError($this->get('translator')->trans('error.rule.source_module_connect'));
+                                $sessionService->setCreateRuleError($ruleKey,$this->get('translator')->trans('error.rule.source_module_connect'));
 				return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 				exit;
 			}
@@ -1341,11 +1346,11 @@ class DefaultControllerCore extends Controller
 				$module['source'] = $this->getRequest()->request->get('source_module'); // mode create <<----
 			}
 			else {
-				$module['source'] = $sessionService->getParamRuleSourceModule($key); // mode update <<----
+				$module['source'] = $sessionService->getParamRuleSourceModule($ruleKey); // mode update <<----
 			}
 			
 			// Met en mémoire la façon de traiter la date de référence
-                        $sessionService->setParamRuleSourceDateReference($key, $solution_source->referenceIsDate($module['source']));
+                        $sessionService->setParamRuleSourceDateReference($ruleKey, $solution_source->referenceIsDate($module['source']));
 			
 			// Ajoute des champs source pour la validation
 			$rule_params_source = $solution_source->getFieldsParamUpd('source',$module['source']);
@@ -1354,12 +1359,12 @@ class DefaultControllerCore extends Controller
 			$rule_fields_source = $solution_source->get_module_fields($module['source'],'source');
 
 			if($rule_fields_source) {
-                                $sessionService->setParamRuleSourceFields($key, $rule_fields_source);
+                                $sessionService->setParamRuleSourceFields($ruleKey, $rule_fields_source);
 				
 				// Erreur champs, pas de données sources (Exemple: GotoWebinar)
                                 
-				if($sessionService->isParamRuleSourceFieldsErrorExist($key) && $sessionService->getParamRuleSourceFieldsError($key) !=null ) {
-					$sessionService->setCreateRuleError($key, $sessionService->getParamRuleSourceFieldsError($key));
+				if($sessionService->isParamRuleSourceFieldsErrorExist($ruleKey) && $sessionService->getParamRuleSourceFieldsError($ruleKey) !=null ) {
+					$sessionService->setCreateRuleError($ruleKey, $sessionService->getParamRuleSourceFieldsError($ruleKey));
 					return $this->redirect($this->generateUrl('regle_stepone_animation'));						
 					exit;
 				}
@@ -1385,7 +1390,7 @@ class DefaultControllerCore extends Controller
 			if (empty($intersectMode)) {
 				$intersectMode['C'] = 'create_only';
 			}
-                        $sessionService->setParamRuleCibleMode($key, $intersectMode);
+                        $sessionService->setParamRuleCibleMode($ruleKey, $intersectMode);
 			
 			
 			// Préparation des champs cible				
@@ -1393,7 +1398,7 @@ class DefaultControllerCore extends Controller
 			
 			if($rule_fields_target) {
 				
-                                $sessionService->setParamRuleTargetFields($key, $rule_fields_target);			
+                                $sessionService->setParamRuleTargetFields($ruleKey, $rule_fields_target);			
 					
 				$tmp = $rule_fields_target;
 				
@@ -1425,12 +1430,12 @@ class DefaultControllerCore extends Controller
 			}
 			
 			// On ajoute des champs personnalisés à notre mapping
-			if($fieldMappingAdd && $sessionService->isParamRuleLastVersionIdExist($key)) {
+			if($fieldMappingAdd && $sessionService->isParamRuleLastVersionIdExist($ruleKey)) {
 			
 				$ruleFields = $this->getDoctrine()
 						  ->getManager()
 						  ->getRepository('RegleBundle:RuleField')
-						  ->findByRule($sessionService->getParamRuleLastId($key));
+						  ->findByRule($sessionService->getParamRuleLastId($ruleKey));
 				
 				$tmp = array();
 				foreach ($ruleFields as $fields) {
@@ -1466,7 +1471,7 @@ class DefaultControllerCore extends Controller
 			
 // -------------------	SOURCE					
 			// Liste des relations SOURCE
-			$relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($key));			
+			$relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey));			
 			$lst_relation_source = array();
 			$lst_relation_source_alpha = array();
 			$choice_source = array();
@@ -1490,7 +1495,7 @@ class DefaultControllerCore extends Controller
 
 
 			if(!isset($source['table'])) {
-				$source['table'][$sessionService->getParamRuleSourceModule($key)] = array();		
+				$source['table'][$sessionService->getParamRuleSourceModule($ruleKey)] = array();		
 			}
 
 			// -- Relation
@@ -1513,15 +1518,15 @@ class DefaultControllerCore extends Controller
 							AND r.deleted = 0
 					)
 					'); 	  
-			$stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId($key) ); 
-			$stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId($key) ); 
-			$stmt->bindValue('name', $sessionService->getParamRuleName($key) ); 						
+			$stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId($ruleKey) ); 
+			$stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId($ruleKey) ); 
+			$stmt->bindValue('name', $sessionService->getParamRuleName($ruleKey) ); 						
 			$stmt->execute();
 		
 			$ruleListRelation = $stmt->fetchAll();
 			
 			//Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
-			$ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule($key),'source');	
+			$ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule($ruleKey),'source');	
 			if (!empty($ruleListRelationSourceCustom)) {
 				$ruleListRelation = array_merge($ruleListRelation,$ruleListRelationSourceCustom);
 			}		
@@ -1597,8 +1602,8 @@ class DefaultControllerCore extends Controller
 			// récupération des champs de type liste --------------------------------------------------
 
 			// -----[ SOURCE ]-----
-			if($sessionService->isParamRuleSourceFieldsExist($key)) {
-				foreach($sessionService->getParamRuleSourceFields($key) as $field => $fields_tab) {					
+			if($sessionService->isParamRuleSourceFieldsExist($ruleKey)) {
+				foreach($sessionService->getParamRuleSourceFields($ruleKey) as $field => $fields_tab) {					
 					if (array_key_exists('option', $fields_tab)) {
 						$formule_list['source'][$field] = $fields_tab;	
 					}	
@@ -1626,8 +1631,8 @@ class DefaultControllerCore extends Controller
 			}				
 							
 			// -----[ TARGET ]-----
-			if($sessionService->isParamRuleTargetFieldsExist($key)) {
-				foreach($sessionService->getParamRuleTargetFields($key) as $field => $fields_tab) {					
+			if($sessionService->isParamRuleTargetFieldsExist($ruleKey)) {
+				foreach($sessionService->getParamRuleTargetFields($ruleKey) as $field => $fields_tab) {					
 					if (array_key_exists('option', $fields_tab)) {
 						$formule_list['target'][$field] = $fields_tab;	
 					}	
@@ -1657,10 +1662,10 @@ class DefaultControllerCore extends Controller
 
 			
 			// Type de synchronisation de données rev 1.06 --------------------------
-			if($sessionService->isParamRuleCibleModuleExist($key)) {
+			if($sessionService->isParamRuleCibleModuleExist($ruleKey)) {
 				
 				$mode_translate = array();
-				foreach ($sessionService->getParamRuleCibleMode($key) as $key => $value) {
+				foreach ($sessionService->getParamRuleCibleMode($ruleKey) as $key => $value) {
 					$mode_translate[ $key ] = $this->get('translator')->trans('create_rule.step3.syncdata.'.$value);
 				}
 				
@@ -1682,8 +1687,8 @@ class DefaultControllerCore extends Controller
 			
 			
 			//  rev 1.07 --------------------------
-			$bidirectional_params['connector']['source'] = $sessionService->getParamRuleConnectorSourceId($key);
-			$bidirectional_params['connector']['cible'] = $sessionService->getParamRuleConnectorCibleId($key);
+			$bidirectional_params['connector']['source'] = $sessionService->getParamRuleConnectorSourceId($ruleKey);
+			$bidirectional_params['connector']['cible'] = $sessionService->getParamRuleConnectorCibleId($ruleKey);
 			$bidirectional_params['module']['source'] = $module['source'];
 			$bidirectional_params['module']['cible'] = $module['cible'];
 			
@@ -1702,7 +1707,7 @@ class DefaultControllerCore extends Controller
 					'lst_category' => $lstCategory,
 					'lst_functions' => $lstFunctions,
 					'lst_filter' =>$lst_filter,
-					'params' => $sessionService->getParamRule($key),
+					'params' => $sessionService->getParamRule($ruleKey),
 					'duplicate_target' => $fieldsDuplicateTarget,
 					'opt_target' => $html_list_target,
 					'opt_source' => $html_list_source,
@@ -1724,7 +1729,7 @@ class DefaultControllerCore extends Controller
 			// ----------------
 		}
 		catch(Exception $e) {
-                        $sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.mapping'));
+                        $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping'));
 			return $this->redirect($this->generateUrl('regle_stepone_animation'));				
 			exit;
 		}	
@@ -1798,7 +1803,7 @@ class DefaultControllerCore extends Controller
 		
                 /* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');
-                $key = $sessionService->getParamRuleLastKey();
+                $ruleKey = $sessionService->getParamRuleLastKey();
                 
                 // On récupére l'EntityManager
 		$this->getInstanceBdd();				   
@@ -1814,10 +1819,10 @@ class DefaultControllerCore extends Controller
 				
 			// fields relate
 			if(!empty( $this->getRequest()->request->get('duplicate') )) {
-                                $sessionService->setParamParentRule($key,'duplicate_fields', implode($this->getRequest()->request->get('duplicate'),';'));
+                                $sessionService->setParamParentRule($ruleKey,'duplicate_fields', implode($this->getRequest()->request->get('duplicate'),';'));
 			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
-			if(strlen($sessionService->getParamRuleName($key)) < 3 || $sessionService->getParamRuleNameValid($key) == false) {
+			if(strlen($sessionService->getParamRuleName($ruleKey)) < 3 || $sessionService->getParamRuleNameValid($ruleKey) == false) {
 				return new JsonResponse(0);
 			}
 			
@@ -1825,19 +1830,19 @@ class DefaultControllerCore extends Controller
   			$connector_source = $this->getDoctrine()
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Connector')
-	                          ->findOneById($sessionService->getParamRuleConnectorSourceId($key));
+	                          ->findOneById($sessionService->getParamRuleConnectorSourceId($ruleKey));
 			
   			$connector_target = $this->getDoctrine()
 	                          ->getManager()
 	                          ->getRepository('RegleBundle:Connector')
-	                          ->findOneById($sessionService->getParamRuleConnectorCibleId($key));
+	                          ->findOneById($sessionService->getParamRuleConnectorCibleId($ruleKey));
 			
 			$param = RuleClass::getFieldsParamDefault();
 			
 			// Get the id of the rule if we edit a rule
 			// Generate Rule object (create a new one or instanciate the existing one
-			if (!$sessionService->isParamRuleLastVersionIdEmpty($key)) {
-				$oneRule = $this->em->getRepository('RegleBundle:Rule')->find($sessionService->getParamRuleLastId($key));
+			if (!$sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
+				$oneRule = $this->em->getRepository('RegleBundle:Rule')->find($sessionService->getParamRuleLastId($ruleKey));
 				$oneRule->setDateModified(new \DateTime);
 				$oneRule->setModifiedBy( $this->getUser()->getId() );	
 			} else {
@@ -1848,16 +1853,16 @@ class DefaultControllerCore extends Controller
 				$oneRule->setDateModified(new \DateTime);
 				$oneRule->setCreatedBy( $this->getUser()->getId() );
 				$oneRule->setModifiedBy( $this->getUser()->getId() );	
-				$oneRule->setModuleSource($sessionService->getParamRuleSourceModule($key));	
-				$oneRule->setModuleTarget($sessionService->getParamRuleCibleModule($key));	
+				$oneRule->setModuleSource($sessionService->getParamRuleSourceModule($ruleKey));	
+				$oneRule->setModuleTarget($sessionService->getParamRuleCibleModule($ruleKey));	
 				$oneRule->setDeleted( 0 );
 				$oneRule->setActive( (int)$param['active'] );
-				$oneRule->setName($sessionService->getParamRuleName($key));
+				$oneRule->setName($sessionService->getParamRuleName($ruleKey));
 			}
 		    $this->em->persist($oneRule);
 			// On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
 		    $this->em->flush(); 
-			$sessionService->setRuleId($key, $oneRule->getId());			
+			$sessionService->setRuleId($ruleKey, $oneRule->getId());			
 			$nameRule = $oneRule->getNameSlug();		
 
 			// BEFORE SAVE rev 1.08 ----------------------
@@ -1865,19 +1870,19 @@ class DefaultControllerCore extends Controller
 			$before_save = RuleClass::beforeSave($this->container,
 				array('ruleName' => $nameRule,
 					  'RuleId' => $oneRule->getId(),
-					  'connector' => $sessionService->getParamParentRule($key, 'connector'),
+					  'connector' => $sessionService->getParamParentRule($ruleKey, 'connector'),
 					  'content' => $tab_new_rule,
 					  'relationships' => $relationshipsBeforeSave,
 					  'module' => array(
 					  	'source' => 
 					  	array(
-							'solution' => $sessionService->getParamRuleSourceSolution($key),
-							'name' => $sessionService->getParamRuleSourceModule($key)
+							'solution' => $sessionService->getParamRuleSourceSolution($ruleKey),
+							'name' => $sessionService->getParamRuleSourceModule($ruleKey)
 						),
 					  	'target' => 
 					  	array(
-							'solution' => $sessionService->getParamRuleCibleSolution($key),
-							'name' => $sessionService->getParamRuleCibleModule($key)
+							'solution' => $sessionService->getParamRuleCibleSolution($ruleKey),
+							'name' => $sessionService->getParamRuleCibleModule($ruleKey)
 						),				  	
 					  )
 				)	
@@ -1896,7 +1901,7 @@ class DefaultControllerCore extends Controller
 			}
 					
 			// Edit mode
-			if(!$sessionService->isParamRuleLastVersionIdEmpty($key)) {
+			if(!$sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
 				// We delete every data of the rule before we create them again
 				// Rule fields
 				$ruleFields = $this->em->getRepository('RegleBundle:RuleField')->findByRule($oneRule->getId());
@@ -1940,7 +1945,7 @@ class DefaultControllerCore extends Controller
 			}
 			// Create mode
 			else {
-				if($sessionService->isParamRuleSourceDateReference($key) && $sessionService->getParamRuleSourceDateReference($key)) {				
+				if($sessionService->isParamRuleSourceDateReference($ruleKey) && $sessionService->getParamRuleSourceDateReference($ruleKey)) {				
 					$date_reference = date('Y-m-d 00:00:00');
 				}
 				else {
@@ -2129,11 +2134,11 @@ class DefaultControllerCore extends Controller
 
 			
 			// notification 
-			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution($key));
-			$solution_source->setMessageCreateRule($sessionService->getParamRuleSourceModule($key));
+			$solution_source = $this->get('myddleware_rule.'.$sessionService->getParamRuleSourceSolution($ruleKey));
+			$solution_source->setMessageCreateRule($sessionService->getParamRuleSourceModule($ruleKey));
 
-			$solution_target = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution($key));
-			$solution_target->setMessageCreateRule($sessionService->getParamRuleCibleModule($key)); 
+			$solution_target = $this->get('myddleware_rule.'.$sessionService->getParamRuleCibleSolution($ruleKey));
+			$solution_target->setMessageCreateRule($sessionService->getParamRuleCibleModule($ruleKey)); 
 			// notification
 			
 			// --------------------------------------------------------------------------------------------------	
@@ -2144,27 +2149,27 @@ class DefaultControllerCore extends Controller
 			RuleClass::afterSave($this->container,	array(
 						'ruleId' => $oneRule->getId(),
 						'ruleName' => $nameRule,
-						'oldRule' => ($sessionService->isParamRuleLastVersionIdEmpty($key)) ? '' : $sessionService->getParamRuleLastId($key),
+						'oldRule' => ($sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $sessionService->getParamRuleLastId($key),
 						'datereference' => $date_reference,
-						'connector' => $sessionService->getParamParentRule('connector'),
+						'connector' => $sessionService->getParamParentRule($ruleKey, 'connector'),
 						'content' => $tab_new_rule,
 						'relationships' => $relationshipsBeforeSave,
 						'module' => array(
 							'source' => 
 							array(
-								'solution' => $sessionService->getParamRuleSourceSolution($key),
-								'name' => $sessionService->getParamRuleSourceModule($key)
+								'solution' => $sessionService->getParamRuleSourceSolution($ruleKey),
+								'name' => $sessionService->getParamRuleSourceModule($ruleKey)
 							),
 							'target' => 
 							array(
-								'solution' => $sessionService->getParamRuleCibleSolution($key),
-								'name' => $sessionService->getParamRuleCibleModule($key)
+								'solution' => $sessionService->getParamRuleCibleSolution($ruleKey),
+								'name' => $sessionService->getParamRuleCibleModule($ruleKey)
 							),				  	
 						)
 					)	
 			 );		
-			if($sessionService->isParamRuleExist($key)) {
-                            $sessionService->removeParamRule($key);
+			if($sessionService->isParamRuleExist($ruleKey)) {
+                            $sessionService->removeParamRule($ruleKey);
 			}			
 			$this->em->getConnection()->commit();
 			$response = 1;
