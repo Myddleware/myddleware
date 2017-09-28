@@ -21,6 +21,10 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+require_once('lib/sagesdata/Conn.php');
+require_once('lib/sagesdata/Query.php');
+require_once('lib/sagesdata/Schema.php');
+require_once('lib/sagesdata/Query/Type/Create.php');
 
 class sage50core extends solution
 {
@@ -29,10 +33,12 @@ class sage50core extends solution
     const CONTRACT = "GCRM";
     private $access_token;
     protected $plurial_name = array();
+    protected $sdata;
     protected $moduleFields;
     protected $xml;
     protected $dataToHTML = array();
 	protected $required_fields = array('default' => array('id','updated','published'));
+	protected $update;
 
 	
     /**
@@ -70,9 +76,21 @@ class sage50core extends solution
     {
         parent::login($paramConnexion);
         try {
+			 $this->sdata = new \Ia\Sdata\Conn(array(
+				'hostname'=>$this->paramConnexion['host'],
+				'username'=>$this->paramConnexion['login'],
+				'password'=> $this->paramConnexion['password'],
+				'application'=> self::APPLICATION,
+				'contract'=> self::CONTRACT,
+				'company'=>'companyname'
+			));
+			// $this->Schema = new \Ia\Sdata\Schema($this->sdata);
+                    // throw new \Exception(print_r($this->Schema,true));
+			
+			
             // Call to get the token
             $this->token = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
-            $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema', 'login');	
+            $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema', 'login');
             if ($response['curlErrorNumber'] === 0) { // url all fine . precced as usual
                 if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
                     $this->connexion_valide = true;
@@ -107,7 +125,11 @@ class sage50core extends solution
             // Call to get the token
             $this->token = $this->getAccessToken();
             $xml = $this->getXML();
-            $modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');			
+			if ($type == 'source') {
+				$modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
+			} else {
+				$modules_names = $xml->xpath('//xs:element[@sme:canPost="true" and @sme:role="resourceKind"]/@name');
+			}
             if (count($modules_names) > 0) { // url all fine . precced as usual
                 foreach ($modules_names as $key => $moduleName) {
                     $this->moduleFields[(string)$moduleName] = (string)$moduleName; // get attribute who role is resourceKind and can get is true
@@ -139,41 +161,45 @@ class sage50core extends solution
             // Call to get the token
             $this->token = $this->getAccessToken();
             $xml = $this->getXML();
-             $modules = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
-	
-            if (count($modules) > 0) { // url all fine . precced as usual
-                if ($xml) {
-                    $this->moduleFields = array();
 	// echo '<pre>';
 	// print_r($modules);
+	// print_r($modules);
 	// die(); 					
-                    foreach ($modules as $key => $module) {						
-                        if ((string)$module["nillable"]) { // required or not
+	
+			if ($xml) {
+				$fields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
+				if (count($fields) > 0) { // url all fine . precced as usual
+                    $this->moduleFields = array();
+                    foreach ($fields as $key => $field) {						
+                        if ((string)$field["nillable"]) { // required or not
                             $existRequired = 1;
                         } else {
                             $existRequired = 0;
                         }
-                        str_replace('xs:', '', (string)$module['type']);
-                        $this->moduleFields[(string)$module["name"]] = array('label' => (string)$module["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => $existRequired);
+                        $this->moduleFields[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => $existRequired);
                     }
-/* // GET http://www.example.com/sdata/myApp/-/-/products?**includeMetadata**=true 			
- $this->token = $this->getAccessToken();
-$modules_pluralName = $this->getPluralName($module);
-// Get one data from Sage
-// $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/-/-/' . $modules_pluralName . '?**includeMetadata**=true&format=json', 'read_last');
-// $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/-/-/$prototypes/addresses', 'read_last');
-$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/-/-/contacts?**includeMetadata**=true', 'read_last');
-echo '<pre>test';
-print_r($response);
-die(); */
-                    return $this->moduleFields;
                 }
+				// $relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
+				$relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/xs:element[@sme:relationship="reference"]/@name'); // on recrée la requete avec l'element sélectionné
+				if (count($relateFields) > 0) { // url all fine . precced as usual
+                    $this->fieldsRelate = array();
+                    foreach ($relateFields as $key => $field) {						
+                        $this->fieldsRelate[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+                    }
+                }
+	
+				// $modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
+				 // $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
+				 // $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
+	// echo '<pre>';
+	// print_r($this->fieldsRelate);
+	// print_r($this->moduleFields);
+	// die(); 			
 
             } else {
                 throw new \Exception('No modules from sage50.');
             }
-
-
+			return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
@@ -247,6 +273,7 @@ die(); */
 
     public function read_last($param)
     {
+// print_r($param);		
 		// return null;
         $result = array();
         try {
@@ -254,14 +281,22 @@ die(); */
             $this->token = $this->getAccessToken();
             $modules_pluralName = $this->getPluralName($param ["module"]);
 			// Get one data from Sage
-            $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1&format=json', 'read_last');
-			
+			if (!empty($param['query']['id'])) {
+				// The ID is the url. We just change the format to json
+				$response = $this->makeRequest('', $this->token, str_replace('format=atomentry','format=json',$param['query']['id']), 'read_last');
+			} else {				
+				$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1&format=json', 'read_last');
+			}
+	
             if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
                 if (!empty($response['curlData']['$resources'][0])) { 	
-					// Get the data for every field
+					// Get the data for every field					
                     foreach ($param['fields'] as $field) {						
                         $result['values'][$field] = $response['curlData']['$resources'][0][$field];
                     }
+					if (!empty($response['curlData']['$resources'][0]['$url'])) {	
+						$result['values']['id'] = $response['curlData']['$resources'][0]['$url'];
+					}
                     $result['done'] = true;
                     //“1” if a data has been found
                     //“0”if no data has been found and no error occured
@@ -279,7 +314,7 @@ die(); */
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
-        }
+        }		
         return $result;
     }
 	
@@ -293,7 +328,7 @@ die(); */
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
 			}
-$param['limit'] = 1;
+$param['limit'] = 10;
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -424,161 +459,105 @@ $param['limit'] = 1;
 	
 	// Create data in the target solution
 	public function create($param) {
-		print_r($param);
+// print_r($param);
+// return null;	
+		// if ($this->update) {
+			// $function = 'update';
+		// } else {
+			// $function = 'create';
+		// }
+		$this->get_module_fields($param ['module'],'source');		
 		foreach($param['data'] as $idDoc => $data) {
 			try {
-				
-				/*  $this->token = $this->getAccessToken();
-            $modules_pluralName = $this->getPluralName($param ["module"]);
-echo ' $modules_pluralName : '. $modules_pluralName.chr(10);			
-			// Get one data from Sage
-            $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/salesOrders/$template&format=json', 'read');
-print_r($response);	
-return null;  */
-				// GET /sdata/myApp/myContract/-/salesOrders/$template
-				
+				// If update we add the target id in the xml
+				if ($this->update) {
+					$xmlId = '<id>'.$data['target_id'].'</id>';
+				} else {
+					$xmlId = '<id/>';
+				}
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-	$uuid = $this->generate_uuid();
-echo '$uuid  : '.$uuid .chr(10);	
+				
+	// $uuid = $this->generate_uuid();
+// echo '$uuid  : '.$uuid .chr(10);	
 				// Call to get the token
 				$this->token = $this->getAccessToken();
 				$modules_pluralName = $this->getPluralName($param ["module"]);
+				// Generate XML for creation
 				$xmlData = 
 '<?xml version="1.0" encoding="utf-8"?>
 <entry xmlns:sdata="http://schemas.sage.com/sdata/2008/1" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://www.w3.org/2005/Atom">
-  <id/>
+  xmlns="http://www.w3.org/2005/Atom">'.
+  $xmlId.'
   <title/>
   <content/>
   <sdata:payload>
     <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008">'.chr(10);
       // sdata:uuid="'.$uuid.'">'.chr(10);
-				/* foreach ($data as $key => $value) {
-					// Field only used for the update and contains the ID of the record in the target solution			
-					 if ($key=='target_id') {					
-						// If updade then we change the key in Id
-						if (!empty($value)) {
-							$key = 'Id';
-						} else { // If creation, we skip this field
-							continue;
-						}
+				foreach ($data as $key => $value) {
+					Target id is managed above, so we skip this field			
+					if ($key=='target_id') {					
+						continue;
 					} 
-					$xmlData .= '      <'.$key.'>'.$value.'</'.$key.'>'.chr(10);				
-				} */
-				
-				
-				// $xmlData .= '      <active xsi:nil="true" />'.chr(10);
-				// $xmlData .= '      <companyPersonFlag>Company</companyPersonFlag>'.chr(10);
-				// $xmlData .= '      <status>Open</status>'.chr(10);
-				// $xmlData .= '      <type>Unknown</type>'.chr(10);
-$xmlData .= 
-'  <familyName>Doe</familyName>
-   <firstName>John</firstName>
-   <tradingAccount sdata:uuid="c10e13ab-1403-4a2d-b8bc-c4ddf2f46daf" />
-   <type>Customer Delivery Contact</type>'.chr(10);		
-/* $xmlData .= 
-'  <familyName>Doe</familyName>
-   <firstName>John</firstName>
-   <reference>999</reference>
-   <tradingAccount sdata:uuid="c10e13ab-1403-4a2d-b8bc-c4ddf2f46daf" />
-   <type>Customer Delivery Contact</type>'.chr(10);	 */	
-								
-				// $xmlData .= '      <tradingAccount sdata:uuid="c10e13ab-1403-4a2d-b8bc-c4ddf2f46daf" />'.chr(10);
-				// $xmlData .= '      <type>Customer Delivery Contact</type>'.chr(10);
-						
+					// Relate field			
+					if (!empty($this->fieldsRelate[$key])) {
+						$xmlData .= '      <'.$key.' sdata:uuid="'.$value.'" />'.chr(10);	
+					} else {
+						$xmlData .= '      <'.$key.'>'.$value.'</'.$key.'>'.chr(10);
+					}
+				} 		
 $xmlData .= '    </'.$param ["module"].'>
   </sdata:payload>
 </entry>';
 							
-			/* 				
-				$xmlData  = 	'<?xml version="1.0" encoding="utf-8"?>
-								<entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:cf="http://www.microsoft.com/schemas/rss/core/2005" xmlns="http://www.w3.org/2005/Atom" xmlns:sdatasync="http://schemas.sage.com/sdata/sync/2008/1" xmlns:sdata="http://schemas.sage.com/sdata/2008/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:sme="http://schemas.sage.com/sdata/sme/2007" xmlns:http="http://schemas.sage.com/sdata/http/2008/1" xmlns:sc="http://schemas.sage.com/sc/2009" xmlns:crm="http://schemas.sage.com/crmErp/2008">
-								  <id/>
-								  <title/>
-								  <content/>
-								  <sdata:payload>
-									<'.$param ["module"].' xmlns="http://schemas.sage.com/'.self::CONTRACT.'">
-									  <familyName>fauretest</familyName>
-									</contact>
-								  </sdata:payload>
-								</entry>';	
-								 */
-								// <contact sdata:uri="'.$this->paramConnexion['host'].'/sdata/accounts50/GCRM/contact" xmlns="http://schemas.sage.com/crmErp/2008">
-								// <salesOrder sdata:uri="$this->paramConnexion['host']/sdata/accounts50/GCRM/contact" xmlns="http://schemas.sage.com/crmErp/2008">
-								// <salesOrder sdata:uri="http://40.127.137.52:5493/sdata/accounts50/GCRM/{3BEF6B40-1059-4FED-B801-E19279096657}/salesOrder" xmlns="http://schemas.sage.com/crmErp/2008">
-								
-/* 								
-<?xml version="1.0" encoding="utf-8"?>
-<entry xmlns:sme="http://schemas.sage.com/sdata/sme/2007"
-       xmlns:sdata="http://schemas.sage.com/sdata/2008/1"
-       xmlns:cf="http://www.microsoft.com/schemas/rss/core/2005"
-       xmlns="http://www.w3.org/2005/Atom">
-  <id>http://localhost:8001/sdata/aw/dynamic/-/employees(1)</id>
-  <link href="http://localhost:8001/sdata/aw/dynamic/-/employees(1)?format=html" rel="alternate" type="text/html" title="" />
-  <link href="http://localhost:8001/sdata/aw/dynamic/-/employees(1)" rel="self" type="application/atom+xml" title="" />
-  <link href="http://localhost:8001/sdata/aw/dynamic/-/employees(1)" rel="edit" type="application/atom+xml" title="" />
-  <link href="http://localhost:8001/sdata/aw/dynamic/-/employees(1)?format=atomentry" rel="via" type="application/atom+xml" title="" />
-  <published>0001-01-01T00:00:00+00:00</published>
-  <sdata:payload>
-    <Employee xmlns="http://schemas.sage.com/dynamic/2007">
-      <Title>Production Technician - WC60</Title>
-      <NationalIdNumber>14417807</NationalIdNumber>
-<ContactId>1209</ContactId> */
+// echo $xmlData.chr(10);
+				// Send data to Sage
+				if ($this->update) {
+					// target id contains the right url
+					$dataSent = $this->makeRequest('', $this->token, $data['target_id'], 'create', null, $xmlData);
+				} else {
+					$dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName, 'create', null, $xmlData);
+				}
+// print_r($dataSent);
+// return null;				
+				// General error
+				if (!empty($dataSent['curlData']->message)) {
+					throw new \Exception($dataSent['curlData']->message);
+				}
+				if (empty($dataSent['curlData']->id)) {
+					throw new \Exception('No ID retruned by Sage. ');
+				}
 
-/* // <?xml version="1.0" encoding="utf-8"?><xs:schema targetNamespace="http://schemas.sage.com/crmErp/2008" xmlns="http://schemas.sage.com/crmErp/2008" xmlns:crm="http://schemas.sage.com/crmErp/2008" xmlns:sc="http://schemas.sage.com/s
-// c/2009" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sdata="http://schemas.sage.com/sdata/2008/1" xmlns:sme="http://schemas.sage.com/sdata/sme/2007" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"><xs:
-// import namespace="http://schemas.sage.com/sc/2009" schemaLocation="http://bps-test01:5493/sdata/accounts50/GCRM/-/$schema/$schema?namespace=http://schemas.sage.com/sc/2009" /><xs:element name="bankAccount" type="crm:bankAccount--t
-// ype" sme:canGet="true" sme:canPost="false" sme:canPut="false" sme:canDelete="false" sme:canSearch="false" sme:pluralName="bankAccounts" sme:canPagePrevious="false" sme:canPageNext="false" sme:canPageIndex="false" sme:supportsETag=
-// "false" sme:hasUuid="true" sme:batchingMode="none" sme:role="resourceKind" sme:iArray
-// ( */
-								
-			// $xmlData  = 	'<entry xmlns:sdata="http://schemas.sage.com/sdata/2008/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.w3.org/2005/Atom"><id/><title/><content/><sdata:payload><contact xmlns="http://schemas.sage.com/'.self::CONTRACT.'" sdata:uuid="BE7D7445-7FA4-4c67-AC22-5F6446314771"><familyName>fauretest</familyName></contact></sdata:payload></entry>';						
-print_r($xmlData);
-// print_r($parameter);
-			
-			// Get one data from Sage
-			// POST /sdata/myApp/myContract/-/salesOrders
-            $dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName, 'create', null, $xmlData);
-		return null;
-				// Call to get the token
- 				// $this->token = $this->getAccessToken();
-				// $dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/'.$param['module'], $parameter, 'POST');
-/*
-// General error
-if (!empty($dataSent['Message'])) {
-throw new \Exception($dataSent['Message']);
-}
-if (!empty($dataSent['ErrorMessage'])) {
-throw new \Exception($dataSent['ErrorMessage']);
-}
-// Error managment for the record creation
-if (!empty($dataSent[$param['module']]['Success'])) {
-if ($dataSent[$param['module']]['Success'] == 'False') {
-throw new \Exception($dataSent[$param['module']]['ErrorMessage']);
-} else {
-$result[$idDoc] = array(
-'id' => $dataSent[$param['module']]['GUID'],
-'error' => false
-);
-}
-} else {
-throw new \Exception('No success flag returned by Cirrus Shield');
-} */
+				// Retrieve the id in parentheses
+				// $id = substr($dataSent['curlData']->id, strpos($dataSent['curlData']->id,'(')+1, strpos($dataSent['curlData']->id,')')-(strpos($dataSent['curlData']->id,'(')+1));			
+				if (empty($dataSent['curlData']->id)) {
+					throw new \Exception('Failed to get the id in parentheses from this URL : '.$dataSent['curlData']->id.'. ');
+				}
+				$result[$idDoc] = array(
+										'id' => $dataSent['curlData']->id,
+										'error' => false
+										);		
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => $error
+									);
+			}
+			// Transfert status update
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 		}
-		catch (\Exception $e) {
-			$error = $e->getMessage();
-			$result[$idDoc] = array(
-									'id' => '-1',
-									'error' => $error
-								);
-		}
-		// Transfert status update
-		$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+// print_r($result);		
+		return $result;
+	} 
+	
+	// We use the same function for record's creation and modification
+	public function update($param) {
+		$this->update = true;
+		return $this->create($param);
 	}
-	return $result;
-} 
 
    // retrun the reference date field name
 	public function getDateRefName($moduleSource, $RuleMode) {
@@ -606,7 +585,7 @@ throw new \Exception('No success flag returned by Cirrus Shield');
      * @return array
      * @throws \Exception
      */
-    function makeRequest($server, $token, $path, $method, $args = null, $data = null, $read_last = false)
+    function makeRequest($server, $token, $path, $method, $args = null, $xml = null, $read_last = false)
     {
 // echo 'A'.chr(10);		
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
@@ -624,42 +603,90 @@ throw new \Exception('No success flag returned by Cirrus Shield');
                 // $contentType = 'Content-Type: application/atom+xml; type=entry';
                 // $contentType = 'Content-Type: application/x-www-form-urlencoded';
 				// curl_setopt($ch, CURLOPT_HTTPHEADER, array($contentType));
-                if ("create" == $method/*  && "array" !== gettype($data) */) {
-// echo 'AAZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ '.$data.chr(10);		
-					$headers[] = "Content-Type: application/atom+xml; type=entry";
-					curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                if (
+						$method == 'create' 
+					 OR $method == 'update'
+				) {	
+					 $headers[] = "Content-Type: application/atom+xml;type=entry";
+					/*curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 					curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 					curl_setopt($ch, CURLOPT_POST, true);
 					curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-					curl_setopt($ch, CURLOPT_SSLVERSION, 6);
-					// curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+					curl_setopt($ch, CURLOPT_SSLVERSION, 6); */
 					
-                    // curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-                    // $data_string = json_encode($data);
-                    // curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+// echo 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbb'.chr(10);		
+					// curl_setopt($ch, CURLOPT_URL, $url);
+					// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0);
+					curl_setopt($ch, CURLOPT_HEADER, 0);
+					if ($method == 'create') {
+						curl_setopt($ch, CURLOPT_POST, true );        
+					} else {
+						curl_setopt($ch, CURLOPT_PUT, true ); 
+					}
+					curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);        
+					$headers[] = 'Content-Length: '.strlen($xml);    
+					
                 }
             } else {
                 // $authHeader = 'Authorization: Basic ' . $token;
                 curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
             }
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             // Execute request
-// echo 'B'.chr(10);		
             $result = curl_exec($ch);
-			// if ("create" == $method) 
-// print_r($result);		
+// $xml = simplexml_load_string($result);
+// $json = json_encode($xml);
+// $result2 = json_decode($json,TRUE);	
+// print_r($result2);	
+		// $xml = new \SimpleXMLElement($result); // Transforme la réponse en élément XML
+		
+		// $result = (json_decode(json_encode((array)$xml), true)); // Encode en json (avec une convertion en array) puis le décode afin d'obtenir un array correctement traitable
+			
+			// if ("create" == $method) { 
+			// $result = str_replace('sdata:','',$result);
+// echo 'pos : '.strpos($result,'<').chr(10);			
+// $result = trim(substr($result,strpos($result,'<')));
+// print_r($result);
+/* $result = trim(str_replace('<?xml version="1.0" encoding="utf-8"?>','',$result)); */
+// $xml = simplexml_load_string($result);
+// print_r($xml);
+// echo chr(10).chr(10).chr(10).' result : '.$xml->severity.chr(10);
+// print_r($result->diagnosis->severity);
+// $error = $xml->xpath('/diagnosis/sdata:message');		
+// echo chr(10).chr(10).chr(10).' error : '.chr(10);	
+// $result = $this->repairJson($result);
+				// $result2 = (!empty(json_decode($result,TRUE)) ? json_decode($result,TRUE) : $result);		
+// $xml = simplexml_load_string($result);
+
+// echo chr(10).chr(10).chr(10).' xml : '.chr(10);
+// print_r($xml);		
+// $json = json_encode($xml);
+// $result2 = json_decode($xml,TRUE);	
+// print_r($result2);	
+			// }
+// echo substr($result,0,5000);	
 // else echo substr($result,0,5000);	
 // else echo $result;	
-// echo 'C'.chr(10);		
-
-			if ($method == 'read') {
+// echo 'C'.chr(10);	
+// echo $xml.chr(10).chr(10).chr(10).chr(10).chr(10).chr(10).chr(10);	
+// $json = $this->repairJson($result);
+// $result = (!empty(json_decode($result,TRUE)) ? json_decode($result,TRUE) : $result);
+// echo $json.chr(10);	
+// $result = json_decode($result,TRUE);			
+// print_r($result);		
+// return null;
+			if ($method == 'read' /* OR $method == 'create' */) {
 				$xml = simplexml_load_string($result);
 				$json = json_encode($xml);
 				$result = json_decode($json,TRUE);						
-			} else {
+			} elseif ($method == 'create') {
+				$result = str_replace('sdata:','',$result);
+				$result = simplexml_load_string($result);
+			}else {
 				$result = $this->repairJson($result);
 				$result = (!empty(json_decode($result,TRUE)) ? json_decode($result,TRUE) : $result);
 			}
