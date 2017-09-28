@@ -496,7 +496,7 @@ $param['limit'] = 10;
     <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008">'.chr(10);
       // sdata:uuid="'.$uuid.'">'.chr(10);
 				foreach ($data as $key => $value) {
-					Target id is managed above, so we skip this field			
+					// Target id is managed above, so we skip this field			
 					if ($key=='target_id') {					
 						continue;
 					} 
