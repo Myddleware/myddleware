@@ -93,7 +93,7 @@ services:
      myddleware_rule.sagelive:
         class: Myddleware\RegleBundle\Solutions\sagelive
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
-      myddleware_rule.sage50:
+     myddleware_rule.sage50:
         class: Myddleware\RegleBundle\Solutions\sage50
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware_rule.ringcentral:
