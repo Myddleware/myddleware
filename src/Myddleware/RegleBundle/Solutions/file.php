@@ -444,7 +444,7 @@ class filecore extends solution {
 				if ($this->limitReached($param,$count)) {
 					break;
 				}
-			}
+			}		
 			// Generate result
 			$result = $this->generateReadResult($param,$count,$values,$new_date_ref);
 			
@@ -463,7 +463,7 @@ class filecore extends solution {
 	protected function generateReadResult($param,$count,$values,$new_date_ref) {
 		return array(
 					'count'=>$count,
-					'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
+					'date_ref'=>($count >= $this->readLimit ? (!empty($param['date_ref']) ? $param['date_ref'] : '') : $new_date_ref), // Update date_ref only if the file is read completely. Date_ref could be empty when we read for child document for example.
 					'values'=>$values,
 					'notRecall' => true // Stop the recall in the function Rule->readSource()
 		);

@@ -114,9 +114,8 @@ class databasecore extends solution {
 	
 	// Get all fields from the table selected
 	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
-			$this->moduleFields = array();
-			$this->fieldsRelate = array();
 			// parent::get_module_fields($module, $type);
 			// Get all fields of the table in input	
 			$q = $this->pdo->prepare($this->get_query_describe_table($module));
@@ -124,7 +123,9 @@ class databasecore extends solution {
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
-			}	
+			}
+			// Get field ID
+			$idFields = $this->getIdFields($module,$type);			
 			// Format the fields
 			$fetchAll = $q->fetchAll();		
 		
@@ -135,8 +136,19 @@ class databasecore extends solution {
 						'type_bdd' => 'varchar(255)',
 						'required' => false
 				);
+				if (
+						strtoupper(substr($field[$this->fieldName],0,2)) == 'ID'
+					OR	strtoupper(substr($field[$this->fieldName],-2)) == 'ID'
+				) {
+					$this->fieldsRelate[$field[$this->fieldName]] = array(
+							'label' => $field[$this->fieldLabel],
+							'type' => $field[$this->fieldType],
+							'type_bdd' => 'varchar(255)',
+							'required' => false,
+							'required_relationship' => 0
+					);
+				}
 				// If the field contains the id indicator, we add it to the fieldsRelate list
-				$idFields = $this->getIdFields($module,$type);			
 				if (!empty($idFields)) {
 					foreach ($idFields as $idField) {		
 						if (strpos($field[$this->fieldName],$idField) !== false) {
@@ -164,7 +176,7 @@ class databasecore extends solution {
 										'required' => false,
 										'required_relationship' => 0
 									);
-			}
+			}			
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -295,7 +307,7 @@ class databasecore extends solution {
 	} // read_last($param)
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {		
 		$result = array();
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
@@ -332,12 +344,25 @@ class databasecore extends solution {
 			$requestSQL = rtrim($requestSQL,',').' '; 
 			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
 
-			$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
+			// if a specific query is requeted we don't use date_ref
+			if (!empty($param['query'])) {
+				$nbFilter = count($param['query']);
+				$requestSQL .= " WHERE ";
+				foreach ($param['query'] as $queryKey => $queryValue) {
+					$requestSQL .= $queryKey.' = '.$queryValue.' ';
+					$nbFilter--;
+					if ($nbFilter > 0){
+						$requestSQL .= " AND ";	
+					}
+				}
+			} else {				
+				$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
+			}
 			
 			$requestSQL .= " ORDER BY ".$param['ruleParams']['fieldDateRef']. " ASC"; // Tri par date utilisateur
 			
 			// Appel de la requête
-			$q = $this->pdo->prepare($requestSQL);
+			$q = $this->pdo->prepare($requestSQL);		
 			$exec = $q->execute();
 			
 			if(!$exec) {
@@ -361,14 +386,14 @@ class databasecore extends solution {
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
-				    }
+				    }					
 					$result['values'][$row['id']] = $row;
 				}
 			} 
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}
+		}		
 		return $result;	
 	} // read($param)
 	
@@ -444,7 +469,7 @@ class databasecore extends solution {
 					'id' => '-1',
 					'error' => $error
 			);
-		}
+		}		
 		return $result;
 	}
 

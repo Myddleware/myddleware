@@ -42,6 +42,7 @@ class ringcentralcore  extends solution {
 	protected $token;
 	protected $server;
 	protected $callLimit = 100;
+	protected $readLimit = 1000;
 	
 	protected $required_fields = array(
 										'default' => array('id'),
@@ -115,14 +116,14 @@ class ringcentralcore  extends solution {
 	
 	// Get the modules available
 	public function get_modules($type = 'source') {
-		try{		
-			$modules = array(	
+		try{
+			$modules = array(
 								'call-log'		=> 'Call log',
 								'message-store'	=> 'Messages',
 								'presence'		=> 'Presence',
 							);
-			return $modules;			
-		} catch (\Exception $e) {
+			return $modules;
+        } catch (\Exception $e) {
 			$error = $e->getMessage();
 			return $error;			
 		}
@@ -318,8 +319,8 @@ class ringcentralcore  extends solution {
 						sleep(65);
 					}
 				} while ($nbRecord == $this->callLimit);
-				// Limit the call to aroung 1000 documents
-				if ($result['count'] > 1000) {
+				// Limit the call around readLimit
+				if ($result['count'] > $this->readLimit) {
 					break;
 				}
 			}

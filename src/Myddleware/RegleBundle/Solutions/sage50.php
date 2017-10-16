@@ -39,6 +39,7 @@ class sage50core extends solution
     protected $dataToHTML = array();
 	protected $required_fields = array('default' => array('id','updated','published'));
 	protected $update;
+	protected $subModules = array('salesOrderLine', 'salesInvoiceLine','purchaseOrderLine','purchaseOrderDeliveryLine');
 
 	
     /**
@@ -84,10 +85,7 @@ class sage50core extends solution
 				'contract'=> self::CONTRACT,
 				'company'=>'companyname'
 			));
-			// $this->Schema = new \Ia\Sdata\Schema($this->sdata);
-                    // throw new \Exception(print_r($this->Schema,true));
-			
-			
+
             // Call to get the token
             $this->token = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
             $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema', 'login');
@@ -129,6 +127,9 @@ class sage50core extends solution
 				$modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
 			} else {
 				$modules_names = $xml->xpath('//xs:element[@sme:canPost="true" and @sme:role="resourceKind"]/@name');
+				$this->moduleFields['salesInvoiceLine'] = 'salesInvoiceLine';
+				$this->moduleFields['purchaseOrderLine'] = 'purchaseOrderLine';
+				$this->moduleFields['purchaseOrderDeliveryLine'] = 'purchaseOrderDeliveryLine';
 			}
             if (count($modules_names) > 0) { // url all fine . precced as usual
                 foreach ($modules_names as $key => $moduleName) {
@@ -154,48 +155,30 @@ class sage50core extends solution
      * @param string $type
      * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source')
-    {
+    public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);		
         try {
             // Call to get the token
             $this->token = $this->getAccessToken();
             $xml = $this->getXML();
-	// echo '<pre>';
-	// print_r($modules);
-	// print_r($modules);
-	// die(); 					
-	
 			if ($xml) {
 				$fields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
 				if (count($fields) > 0) { // url all fine . precced as usual
-                    $this->moduleFields = array();
                     foreach ($fields as $key => $field) {						
-                        if ((string)$field["nillable"]) { // required or not
-                            $existRequired = 1;
-                        } else {
-                            $existRequired = 0;
-                        }
-                        $this->moduleFields[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => $existRequired);
+                        $this->moduleFields[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
                     }
                 }
 				// $relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
-				$relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/xs:element[@sme:relationship="reference"]/@name'); // on recrée la requete avec l'element sélectionné
+				$relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/xs:element[@sme:relationship="reference" or @sme:relationship="parent"]/@name'); // on recrée la requete avec l'element sélectionné
 				if (count($relateFields) > 0) { // url all fine . precced as usual
-                    $this->fieldsRelate = array();
                     foreach ($relateFields as $key => $field) {						
-                        $this->fieldsRelate[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+                        $this->fieldsRelate[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required_relationship' => 0);
                     }
                 }
-	
-				// $modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
-				 // $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
-				 // $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
-	// echo '<pre>';
-	// print_r($this->fieldsRelate);
-	// print_r($this->moduleFields);
-	// die(); 			
-
+				// Add relate field in the field mapping 
+				if (!empty($this->fieldsRelate)) {
+					$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+				}	
             } else {
                 throw new \Exception('No modules from sage50.');
             }
@@ -273,8 +256,6 @@ class sage50core extends solution
 
     public function read_last($param)
     {
-// print_r($param);		
-		// return null;
         $result = array();
         try {
             // Call to get the token
@@ -284,14 +265,17 @@ class sage50core extends solution
 			if (!empty($param['query']['id'])) {
 				// The ID is the url. We just change the format to json
 				$response = $this->makeRequest('', $this->token, str_replace('format=atomentry','format=json',$param['query']['id']), 'read_last');
+				// $response = $this->makeRequest('', $this->token, $param['query']['id'], 'read_last');
 			} else {				
 				$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1&format=json', 'read_last');
 			}
-	
             if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
                 if (!empty($response['curlData']['$resources'][0])) { 	
 					// Get the data for every field					
-                    foreach ($param['fields'] as $field) {						
+                    foreach ($param['fields'] as $field) {		
+						if (strtoupper($field) == 'ID') {
+							$field = '$uuid';
+						}
                         $result['values'][$field] = $response['curlData']['$resources'][0][$field];
                     }
 					if (!empty($response['curlData']['$resources'][0]['$url'])) {	
@@ -328,7 +312,7 @@ class sage50core extends solution
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
 			}
-$param['limit'] = 10;
+$param['limit'] = 3;
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -365,27 +349,33 @@ $param['limit'] = 10;
 			} else {
 				$param['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);		
 				$query .= '&where='.$dateRefField.' gt @'.$param['date_ref'].'@';
+				$query .= '&orderBy='.$dateRefField.' asc';
 
-				$query .= '&orderBy='.$dateRefField.' desc';
+				// $query .= '&orderBy='.$dateRefField;
 				// $query .= '&orderBy=firstName desc';
 			}			
-// $param['limit'] = 10;
 			// convert space
-			$query = str_replace(' ','%20',$query);			
+			$query = str_replace(' ','%20',$query);		
+// echo $param['date_ref'].chr(10);				
 			// Call to get the token
             $this->token = $this->getAccessToken();
             $modules_pluralName = $this->getPluralName($param ["module"]);
+			$startIndex = (!empty($param['ruleParams']['Offset']) ? $param['ruleParams']['Offset'] : 0);
+
 			// Get one data from Sage
-            $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&count='.$param['limit'], 'read');
-	
+			$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&count='.$param['limit'], 'read');
+echo $query.chr(10);
+// echo $query.'&startIndex='.$startIndex.'&count='.$param['limit'].chr(10);
+			// $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&startIndex='.$startIndex.'&count='.$param['limit'], 'read');
+// print_r($response['curlData']['entry']);
 			if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
 				// If no result
-                if (!empty($response['curlData']['entry'])) { 
+				if (!empty($response['curlData']['entry'])) { 
 					// If only one record, we add a dimension to be able to use the foreach below
 					if (empty($response['curlData']['entry'][0])) {
 						$tmp['curlData']['entry'][0] = $response['curlData']['entry'];
 						$response = $tmp;
-					}
+					}					
 					// For each records
 					foreach($response['curlData']['entry'] as $record) {			
 						// Add date_modified					
@@ -395,7 +385,7 @@ $param['limit'] = 10;
 	
 						// Get the detail of the current record (only in json format)
 						$detailRecord = $this->makeRequest('', $this->token, str_replace('atomentry', 'json',$record['id']), 'read_last');
-		
+	
 						if (empty($detailRecord['curlData']['$resources'][0])) {
 							throw new \Exception('Failed to get the detail of the record '.$record['id'].'.');
 						}
@@ -417,21 +407,29 @@ $param['limit'] = 10;
 						) {								
 							$result['date_ref'] = $row['date_modified'];
 						}
+// print_r($row);								
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
 						$row = array();
-					}
+					}							
 				}
 			// If the query return an error 
 			}elseif (!empty($resultQuery['Message'])) {
 				throw new \Exception($resultQuery['Message']);	
 			}	
+			// Set the offset for the next call if needed
+			if ($result['count'] == $param['limit']) {
+				$result['ruleParams'][] = array('name' => 'Offset', 'value' => $startIndex + $result['count']);
+			} else {
+				$result['ruleParams'][] = array('name' => 'Offset', 'value' => 0);
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 		}	
-// print_r($result);		
-// return null;		
+
+print_r($result);
+return null;		
 		return $result;
 	}	
 	
@@ -459,27 +457,20 @@ $param['limit'] = 10;
 	
 	// Create data in the target solution
 	public function create($param) {
-// print_r($param);
-// return null;	
-		// if ($this->update) {
-			// $function = 'update';
-		// } else {
-			// $function = 'create';
-		// }
+		$subDocIdArray = array();
 		$this->get_module_fields($param ['module'],'source');		
 		foreach($param['data'] as $idDoc => $data) {
 			try {
 				// If update we add the target id in the xml
 				if ($this->update) {
-					$xmlId = '<id>'.$data['target_id'].'</id>';
+					$uuid = substr($data['target_id'], strpos($data['target_id'],'(')+1, strpos($data['target_id'],')')-(strpos($data['target_id'],'(')+1));
+					$xmlId = '<id>'.$data['target_id'].'</id>'.chr(10);
 				} else {
-					$xmlId = '<id/>';
-				}
+					$xmlId = '<id/>'.chr(10);
+					$uuid = $this->generate_uuid();
+				}			
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
-				
-	// $uuid = $this->generate_uuid();
-// echo '$uuid  : '.$uuid .chr(10);	
 				// Call to get the token
 				$this->token = $this->getAccessToken();
 				$modules_pluralName = $this->getPluralName($param ["module"]);
@@ -488,21 +479,70 @@ $param['limit'] = 10;
 '<?xml version="1.0" encoding="utf-8"?>
 <entry xmlns:sdata="http://schemas.sage.com/sdata/2008/1" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://www.w3.org/2005/Atom">'.
-  $xmlId.'
-  <title/>
+  xmlns="http://www.w3.org/2005/Atom">'.chr(10).
+  $xmlId.
+  '<title/>
   <content/>
   <sdata:payload>
-    <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008">'.chr(10);
-      // sdata:uuid="'.$uuid.'">'.chr(10);
-				foreach ($data as $key => $value) {
+    <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008"
+      sdata:uuid="'.$uuid.'">'.chr(10);
+				foreach (array_reverse($data) as $key => $value) {				
 					// Target id is managed above, so we skip this field			
-					if ($key=='target_id') {					
+					if ($key=='target_id' OR $key=='ID') {					
 						continue;
-					} 
+					// If the field is a submodule	
+					} elseif (is_array($value)) {
+						if(in_array($key, $this->subModules)) {
+							$subModulesPluralName = $this->getPluralName($key);
+							$xmlData .= '<'.$subModulesPluralName.'>'.chr(10);
+							// Could be done with recursive function
+							foreach($value as $subIdDoc => $subData) {
+								// We can have a target ID if we update a record
+								if (!empty($subData['target_id'])) {
+									if (strlen($subData['target_id'])>36) {
+										$uuid = substr($subData['target_id'], strpos($subData['target_id'],'(')+1, strpos($subData['target_id'],')')-(strpos($subData['target_id'],'(')+1));
+									} else  {
+										$uuid = $subData['target_id'];
+									}
+								} else {
+									$uuid = $this->generate_uuid();
+								}
+								$subDocIdArray[$subIdDoc] = array('id' => $uuid);
+
+								$xmlData .= '<'.$key.' sdata:uuid="'.$uuid.'">'.chr(10);
+								foreach ($subData as $subKey => $subValue) {
+									if(in_array($subKey, array($param["module"], 'id_doc_myddleware', 'target_id', 'source_date_modified'))) {
+										continue;
+									}
+									if (!empty($this->fieldsRelate[$subKey]) OR $subKey == 'commodity') {
+										// Retrieve the id in parentheses if the id is included in an URL
+										if (strlen($subValue) > 36) {
+											$subId = substr($subValue, strpos($subValue,'(')+1, strpos($subValue,')')-(strpos($subValue,'(')+1));
+										} else {
+											$subId = $subValue;
+										}
+										$xmlData .= '      <'.$subKey.' sdata:uuid="'.$subId.'" />'.chr(10);	
+										$subId = '';
+									} else {
+										$xmlData .= '      <'.$subKey.'>'.$subValue.'</'.$subKey.'>'.chr(10);
+									}
+								}
+								$xmlData .= '    </'.$key.'>'.chr(10);
+							}
+							$xmlData .= '</'.$subModulesPluralName.'>'.chr(10);
+						} else {
+							throw new \Exception('The submodule '.$key.' is not registered. ');
+						}
 					// Relate field			
-					if (!empty($this->fieldsRelate[$key])) {
-						$xmlData .= '      <'.$key.' sdata:uuid="'.$value.'" />'.chr(10);	
+					} elseif (!empty($this->fieldsRelate[$key])) {
+						// Retrieve the id in parentheses if the id is included in an URL					
+						if (strlen($value) > 36) {
+							$id = substr($value, strpos($value,'(')+1, strpos($value,')')-(strpos($value,'(')+1));
+						} else {
+							$id = $value;
+						}
+						$xmlData .= '      <'.$key.' sdata:uuid="'.$id.'" />'.chr(10);	
+						$id = '';
 					} else {
 						$xmlData .= '      <'.$key.'>'.$value.'</'.$key.'>'.chr(10);
 					}
@@ -510,17 +550,15 @@ $param['limit'] = 10;
 $xmlData .= '    </'.$param ["module"].'>
   </sdata:payload>
 </entry>';
-							
-// echo $xmlData.chr(10);
+			
 				// Send data to Sage
-				if ($this->update) {
+				if ($this->update) {					
 					// target id contains the right url
-					$dataSent = $this->makeRequest('', $this->token, $data['target_id'], 'create', null, $xmlData);
-				} else {
+					$dataSent = $this->makeRequest('', $this->token, $data['target_id'], 'update', null, $xmlData);
+				} else {				
 					$dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName, 'create', null, $xmlData);
 				}
-// print_r($dataSent);
-// return null;				
+		
 				// General error
 				if (!empty($dataSent['curlData']->message)) {
 					throw new \Exception($dataSent['curlData']->message);
@@ -529,29 +567,43 @@ $xmlData .= '    </'.$param ["module"].'>
 					throw new \Exception('No ID retruned by Sage. ');
 				}
 
-				// Retrieve the id in parentheses
-				// $id = substr($dataSent['curlData']->id, strpos($dataSent['curlData']->id,'(')+1, strpos($dataSent['curlData']->id,')')-(strpos($dataSent['curlData']->id,'(')+1));			
+				// Retrieve the id in parentheses		
 				if (empty($dataSent['curlData']->id)) {
 					throw new \Exception('Failed to get the id in parentheses from this URL : '.$dataSent['curlData']->id.'. ');
 				}
 				$result[$idDoc] = array(
 										'id' => $dataSent['curlData']->id,
 										'error' => false
-										);		
+										);	
+								
+				// Transfert status update
+				if (!empty($subDocIdArray)) {				
+					foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+						$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+					}
+				}
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
 			catch (\Exception $e) {
-				$error = $e->getMessage();
+				// $error = $e->getMessage();
+				$error ='Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 										'id' => '-1',
 										'error' => $error
 									);
 			}
-			// Transfert status update
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
-		}
-// print_r($result);		
+		}	
 		return $result;
 	} 
+	
+	// The function return true if we can display the column parent in the rule view, relationship tab
+	// We display the parent column when module is subscription
+	public function allowParentRelationship($module) {
+		if (in_array($module, array('salesOrder','salesInvoice'))) {
+			return true;
+		}
+		return false;
+	}
 	
 	// We use the same function for record's creation and modification
 	public function update($param) {
@@ -573,6 +625,18 @@ $xmlData .= '    </'.$param ["module"].'>
 		return null;
 	}
 	
+	public function getRuleMode($module,$type) {
+		if(
+				$type == 'target'
+			&&	in_array($module, array('salesOrder','salesInvoice'))
+		) { // Si le module est dans le tableau alors c'est uniquement de la création
+			return array(
+				'C' => 'create_only'
+			);
+		}
+		return parent::getRuleMode($module,$type);
+	}
+	
 	   /**
      * Function HTTP Request
      *
@@ -586,8 +650,7 @@ $xmlData .= '    </'.$param ["module"].'>
      * @throws \Exception
      */
     function makeRequest($server, $token, $path, $method, $args = null, $xml = null, $read_last = false)
-    {
-// echo 'A'.chr(10);		
+    {	
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             // The URL to use
             $ch = curl_init($server . $path);
@@ -600,33 +663,22 @@ $xmlData .= '    </'.$param ["module"].'>
             $authPath = '/oauth\/token/';
             if (1 !== preg_match($authPath, $path)) {
                 $headers[] = 'Authorization: Basic ' . $token;
-                // $contentType = 'Content-Type: application/atom+xml; type=entry';
-                // $contentType = 'Content-Type: application/x-www-form-urlencoded';
-				// curl_setopt($ch, CURLOPT_HTTPHEADER, array($contentType));
                 if (
 						$method == 'create' 
 					 OR $method == 'update'
 				) {	
-					 $headers[] = "Content-Type: application/atom+xml;type=entry";
-					/*curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-					curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-					curl_setopt($ch, CURLOPT_POST, true);
-					curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-					curl_setopt($ch, CURLOPT_SSLVERSION, 6); */
-					
-// echo 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbb'.chr(10);		
-					// curl_setopt($ch, CURLOPT_URL, $url);
-					// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					$headers[] = "Content-Type: application/atom+xml;type=entry";
 					curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0);
 					curl_setopt($ch, CURLOPT_HEADER, 0);
 					if ($method == 'create') {
-						curl_setopt($ch, CURLOPT_POST, true );        
+						// curl_setopt($ch, CURLOPT_POST, true );     
+						curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 						
 					} else {
-						curl_setopt($ch, CURLOPT_PUT, true ); 
+						// curl_setopt($ch, CURLOPT_PUT, true ); 
+						curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT"); 
 					}
 					curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);        
-					$headers[] = 'Content-Length: '.strlen($xml);    
-					
+					$headers[] = 'Content-Length: '.strlen($xml);    				
                 }
             } else {
                 // $authHeader = 'Authorization: Basic ' . $token;
@@ -638,52 +690,12 @@ $xmlData .= '    </'.$param ["module"].'>
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             // Execute request
             $result = curl_exec($ch);
-// $xml = simplexml_load_string($result);
-// $json = json_encode($xml);
-// $result2 = json_decode($json,TRUE);	
-// print_r($result2);	
-		// $xml = new \SimpleXMLElement($result); // Transforme la réponse en élément XML
-		
-		// $result = (json_decode(json_encode((array)$xml), true)); // Encode en json (avec une convertion en array) puis le décode afin d'obtenir un array correctement traitable
-			
-			// if ("create" == $method) { 
-			// $result = str_replace('sdata:','',$result);
-// echo 'pos : '.strpos($result,'<').chr(10);			
-// $result = trim(substr($result,strpos($result,'<')));
-// print_r($result);
-/* $result = trim(str_replace('<?xml version="1.0" encoding="utf-8"?>','',$result)); */
-// $xml = simplexml_load_string($result);
-// print_r($xml);
-// echo chr(10).chr(10).chr(10).' result : '.$xml->severity.chr(10);
-// print_r($result->diagnosis->severity);
-// $error = $xml->xpath('/diagnosis/sdata:message');		
-// echo chr(10).chr(10).chr(10).' error : '.chr(10);	
-// $result = $this->repairJson($result);
-				// $result2 = (!empty(json_decode($result,TRUE)) ? json_decode($result,TRUE) : $result);		
-// $xml = simplexml_load_string($result);
 
-// echo chr(10).chr(10).chr(10).' xml : '.chr(10);
-// print_r($xml);		
-// $json = json_encode($xml);
-// $result2 = json_decode($xml,TRUE);	
-// print_r($result2);	
-			// }
-// echo substr($result,0,5000);	
-// else echo substr($result,0,5000);	
-// else echo $result;	
-// echo 'C'.chr(10);	
-// echo $xml.chr(10).chr(10).chr(10).chr(10).chr(10).chr(10).chr(10);	
-// $json = $this->repairJson($result);
-// $result = (!empty(json_decode($result,TRUE)) ? json_decode($result,TRUE) : $result);
-// echo $json.chr(10);	
-// $result = json_decode($result,TRUE);			
-// print_r($result);		
-// return null;
-			if ($method == 'read' /* OR $method == 'create' */) {
+			if ($method == 'read') {
 				$xml = simplexml_load_string($result);
 				$json = json_encode($xml);
 				$result = json_decode($json,TRUE);						
-			} elseif ($method == 'create') {
+			} elseif ($method == 'create' OR $method == 'update') {		
 				$result = str_replace('sdata:','',$result);
 				$result = simplexml_load_string($result);
 			}else {
@@ -700,7 +712,6 @@ $xmlData .= '    </'.$param ["module"].'>
 
             // Close Connection
             curl_close($ch);
-// echo '<pre>';
             return $response;
         }
         throw new \Exception('curl extension is missing!');

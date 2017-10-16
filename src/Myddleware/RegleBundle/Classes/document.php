@@ -332,6 +332,7 @@ class documentcore {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$filterOK = true;
 			// Si des filtres sont présents 
@@ -350,8 +351,10 @@ class documentcore {
 			if ($filterOK === true) {
 				$this->updateStatus('Filter_OK');
 			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return $filterOK;
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Failed to filter document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Filter_KO');
@@ -509,6 +512,7 @@ class documentcore {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Vérification que pour les documents en modification, les création n'ont pas de prédécesseur
 			if ($this->document_data['type'] == 'U') {
@@ -603,8 +607,10 @@ class documentcore {
 				}
 			}
 			$this->updateStatus('Predecessor_OK');
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
@@ -620,6 +626,7 @@ class documentcore {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {		
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
@@ -676,9 +683,12 @@ class documentcore {
 					$this->updateType('U');
 				}
 			}
-			$this->updateStatus('Relate_OK');	
+			$this->updateStatus('Relate_OK');
+					
+			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Relate_KO');
@@ -694,6 +704,7 @@ class documentcore {
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Transformation des données et insertion dans la table target
 			$transformed = $this->updateTargetTable();
@@ -720,8 +731,10 @@ class documentcore {
 				throw new \Exception( 'Failed to transformed data. This document is queued. ' );
 			}			
 			$this->updateStatus('Transformed');
+			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Error_transformed');
@@ -738,6 +751,7 @@ class documentcore {
 			return false;
 		}	
 		$history = false;
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Check if the rule is a parent and run the child data.
 			$this->runChildRule();
@@ -841,8 +855,10 @@ class documentcore {
 				&&	!$this->isParent()
 			) {
 				$this->checkNoChange();
-			}			
+			}		
+			$this->connection->commit(); // -- COMMIT TRANSACTION	
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Error_checking');
@@ -994,7 +1010,7 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					if ($type == 'S') {
-						// We don't create entry in the array dataInsert when the field is my_value because there is no field in the source, just a formula to the target application
+						// We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
 						if ($ruleField['source_field_name']=='my_value') {
 							continue;
 						}
@@ -1338,12 +1354,22 @@ class documentcore {
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
 				$ruleRelationShips = $stmt->fetchAll();
-				if(!empty($ruleRelationShips)){
+				if(!empty($ruleRelationShips)){						
 					foreach ($ruleRelationShips AS $ruleRelationShip) {
-						$fields[] = $ruleRelationShip['field_name_target'];
+						// If it is a normal relationship we take the target field 
+						// but if it is a parent relationship we have to take the source field in the relation (wich corresponding to the target field)
+						if (empty($ruleRelationShip['parent'])) {
+							$fields[] = $ruleRelationShip['field_name_target'];
+						} else {
+							$fields[] = $ruleRelationShip['field_name_source'];
+						}
 					}
-				}
-				
+				}				
+				// We don't need the field Myddleware_element_id as it is the id of the current record
+				$key = array_search('Myddleware_element_id', $fields);
+				if ($key !== false) {
+					unset($fields[$key]);
+				}					
 				return $fields;
 			}
 		} catch (\Exception $e) {
@@ -1484,7 +1510,7 @@ class documentcore {
 			}
 			// A mass process exist for migration mode 
 			if (!empty($this->ruleDocuments[$this->ruleId])) {
-				// If a leat on record is alredy existing, we test if it was successfully sent
+				// If a least one record is already existing, we test if it was successfully sent
 				if (!empty($this->ruleDocuments[$this->ruleId]['sourceId'][$id])) {
 					foreach($this->ruleDocuments[$this->ruleId]['sourceId'][$id] as $document) {
 						if (
@@ -1497,8 +1523,20 @@ class documentcore {
 							)	
 							AND $document['id'] !== $this->id
 						) {
-							$result = $document;
-							break;
+							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
+							if (!empty($document['target_id'])) {							
+								$this->targetId = $document['target_id'];
+								return 'U';
+							}
+							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+							if (
+									empty($result['id']) 
+								 || $result['global_status'] == 'Cancel'
+							) {
+								return 'C';
+							} else {
+								return 'U';
+							}
 						}
 					}
 				} 
@@ -1577,6 +1615,7 @@ class documentcore {
 	}
 	
 	public function updateStatus($new_status) {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// On ajoute un contôle dans le cas on voudrait changer le statut
 			$new_status = $this->beforeStatusChange($new_status);
@@ -1607,10 +1646,12 @@ class documentcore {
 			$stmt->bindValue(":id", $this->id);
 			$stmt->execute();
 			$this->message .= 'Status : '.$new_status;
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			$this->status = $new_status;
 			$this->afterStatusChange($new_status);
 			$this->createDocLog();
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .=  'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
@@ -1629,6 +1670,7 @@ class documentcore {
 	
 	// Permet de modifier le type du document
 	public function updateType($new_type) {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
 			$query = "	UPDATE Document 
@@ -1645,8 +1687,10 @@ class documentcore {
 			$stmt->bindValue(":id", $this->id);
 			$stmt->execute();
 			$this->message .= 'Type  : '.$new_type;
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			$this->createDocLog();
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
@@ -1656,6 +1700,7 @@ class documentcore {
 	
 	// Permet de modifier le type du document
 	public function updateTargetId($target_id) {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
 			$query = "	UPDATE Document 
@@ -1672,9 +1717,11 @@ class documentcore {
 			$stmt->bindValue(":id", $this->id); 
 			$stmt->execute();
 			$this->message .= 'Target id : '.$target_id;
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			$this->createDocLog();
 			return true;
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
@@ -1721,7 +1768,7 @@ class documentcore {
 				$sqlParams = "	SELECT 
 									source_id record_id,
 									Document.id document_id								
-								FROM JOIN Document
+								FROM Document
 								WHERE  
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id != '' 
@@ -1817,6 +1864,7 @@ class documentcore {
 		// $message contient le message de l'erreur avec potentiellement des variable &1, &2...
 		// $data contient les varables du message de type array('id_contact', 'nom_contact')
 	protected function createDocLog() {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
 			$this->message = substr(str_replace("'","",$this->message),0,1000);
@@ -1824,7 +1872,9 @@ class documentcore {
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->message = '';
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->logger->error( 'Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}

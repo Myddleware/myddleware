@@ -592,7 +592,7 @@ class prestashopcore extends solution {
 				$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
 				$opt['display'] .= ']';
 				
-				// Query creation
+ 				// Query creation
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
@@ -823,7 +823,7 @@ class prestashopcore extends solution {
 							$record[$key] = (string)$value;
 						}				
 				
-						if($key == 'associations'){
+						if($key == 'associations'){					
 							foreach ($resultRecord->associations->$subModule->$subData as $data) {													
 								$subRecord = array();
 								$idRelation = (string) $resultRecord->id . '_' . (string) $data->$subDataId;								
@@ -864,7 +864,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}		
+		}			
 		return $result;
 	}// readManyToMany($param)
 	

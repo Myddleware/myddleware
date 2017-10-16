@@ -32,7 +32,7 @@ class cirrusshieldcore  extends solution {
 	protected $token;
 	protected $update;
 	protected $organizationTimezoneOffset;
-	protected $limitCall = 10;
+	protected $limitCall = 100;
 	
 	protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
 	
@@ -417,7 +417,12 @@ class cirrusshieldcore  extends solution {
 					$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
 					// Send data to the target solution					
 					$resultCall = $this->call($url,'POST',urlencode($xmlData));
-			
+					if (empty($resultCall)) {
+						throw new \Exception('Result from Cirrus Shield empty');
+					}
+					if (!empty($resultCall['Message'])) {
+						throw new \Exception($resultCall['Message']);
+					}		
 					// XML initialisation (for the next call)
 					$xmlData = '<Data>';
 
@@ -472,7 +477,9 @@ class cirrusshieldcore  extends solution {
 	// Cirrus Shield use the same function for record's creation and modification
 	public function update($param) {
 		$this->update = true;
-		return $this->create($param);
+		$result = $this->create($param);
+		$this->update = false;
+		return $result;
 	}
 	
 	// retrun the reference date field name
@@ -524,7 +531,7 @@ class cirrusshieldcore  extends solution {
 	}
 
 	
-	protected function call($url, $method = 'GET', $xmlData='', $timeout = 10){   
+	protected function call($url, $method = 'GET', $xmlData='', $timeout = 300){   
 		if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
