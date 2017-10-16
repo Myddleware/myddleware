@@ -176,14 +176,13 @@ class jobcore  {
 		try {
 			// Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
 			$sqlParams = "	SELECT * 
-							FROM Document	
+							FROM Document
+								INNER JOIN ruleorder
+									ON Document.rule_id = ruleorder.rule_id
 							WHERE 
-									(
-											global_status = 'Error'
-										OR status = 'New'
-									)
+									global_status = 'Error'
 								AND attempt <= :attempt 
-							ORDER BY attempt ASC, source_date_modified ASC	
+							ORDER BY ruleorder.order ASC, source_date_modified ASC	
 							LIMIT $limit";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("attempt", $attempt);
