@@ -84,7 +84,7 @@ class DefaultControllerCore extends Controller
                         $sessionService = $this->get('myddleware_session.service');
                         
                         $key = $sessionService->getParamRuleLastKey();    
-			if($sessionService->isRuleIdExist($key)) {
+			if($key =!null && $sessionService->isRuleIdExist($key)) {
 				$id = $sessionService->getRuleId($key);
 				$sessionService->removeRuleId($key);
 				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
