@@ -40,6 +40,7 @@ use Myddleware\RegleBundle\Classes\tools;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Request;
 use Myddleware\RegleBundle\Form\ConnectorType;
+use Myddleware\RegleBundle\Service\SessionService;
 
 class ConnectorController extends Controller
 {
@@ -50,77 +51,64 @@ class ConnectorController extends Controller
 
 	// CALLBACK POUR LES APIS
 	public function callBackAction() { // REV 1.1.1
-		try {				
-			$request = $this->get('request');
-			$session = $request->getSession();
-			$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-			// We always add data again in session because these data are removed after the call of the get
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		
-			// Nom de la solution
-			if(!isset($myddlewareSession['param']['myddleware']['connector']['solution']['callback'])) {
+		try {	
+                        /* @var $sessionService SessionService */
+                        $sessionService = $this->get('myddleware_session.service');
+                        
+                        // Nom de la solution
+			if(!$sessionService->isSolutionNameExist()) {
 				return new Response('');
 			}
 			else {
-				$solution_name = $myddlewareSession['param']['myddleware']['connector']['solution']['callback'];			
+				$solution_name = $sessionService->getSolutionName();			
 			}
 					
 			$solution = $this->get('myddleware_rule.'.$solution_name);
 						
 			// ETAPE 2 : Récupération du retour de la Popup en GET et génération du token final
-			if(isset($_GET[$solution->nameFieldGet])) {					
-				$solution->init($myddlewareSession['param']['connector']['source']); // Affecte les variables
+			if(isset($_GET[$solution->nameFieldGet])) {	
+                            
+                                $connectorSource = $sessionService->getParamConnectorSource();
+                                
+				$solution->init($connectorSource); // Affecte les variables
 	
 				$solution->setAuthenticate($_GET[$solution->nameFieldGet]);	
 
 				if($solution->refresh_token) { // Si RefreshToken
-					$myddlewareSession['param']['connector']['source']['refreshToken'] = $solution->getRefreshToken();
+					$sessionService->setParamConnectorSourceRefreshToken($solution->getRefreshToken());
 				}	
 				
-				// Save the session befor calling login function because session could be used in this function
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-				$solution->login( $myddlewareSession['param']['connector']['source'] ); 
-				$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-				// We always add data again in session because these data are removed after the call of the get
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-			
+				$solution->login($connectorSource); 
+				
 				// Sauvegarde des 2 jetons en session afin de les enregistrer dans les paramètres du connecteur
-				$myddlewareSession['param']['connector']['source']['token'] = $solution->getAccessToken();	
+				$sessionService->setParamConnectorSourceToken($solution->getAccessToken());
+                                
 				if($solution->refresh_token) { // Si RefreshToken	
-					$myddlewareSession['param']['connector']['source']['refreshToken'] = $solution->getRefreshToken();;
+					$sessionService->setParamConnectorSourceRefreshToken($solution->getRefreshToken());
 				}
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+					
 				return $this->redirect($this->generateUrl('connector_callback'));
 			}	
 					
 			// SOLUTION AVEC POPUP ---------------------------------------------------------------------
 			// ATAPE 1 si la solution utilise un callback et le js
-			if( 
-					$solution->callback 
-				&& $solution->js 
-			) {		
-				if(!empty($myddlewareSession['param']['connector']['source']))  {
-					$params_connexion_solution = $myddlewareSession['param']['connector']['source'];
+			if($solution->callback && $solution->js) {		
+				if(!$sessionService->isParamConnectorSourceExist())  {
+					$params_connexion_solution = $sessionService->getParamConnectorSource();
 				}
-				if(!empty($myddlewareSession['param']['connector']['source']['token']))  {
-					$params_connexion_solution['token'] = $myddlewareSession['param']['connector']['source']['token'];
+				if(!$sessionService->isParamConnectorSourceTokenExist())  {
+					$params_connexion_solution['token'] =  $sessionService->getParamConnectorSourceToken();
 				}
-				if(!empty($myddlewareSession['param']['connector']['source']['refreshToken']))  {
-					$params_connexion_solution['refreshToken'] = $myddlewareSession['param']['connector']['source']['refreshToken'];
+				if(!$sessionService->isParamConnectorSourceRefreshTokenExist())  {
+					$params_connexion_solution['refreshToken'] = $sessionService->getParamConnectorSourceRefreshToken();
 				}
 	
 				$solution->init($params_connexion_solution); // Affecte les variables
 				
-				// Save the session befor calling login function because session could be used in this function
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 				$error = $solution->login( $params_connexion_solution );
-				$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-				// We always add data again in session because these data are removed after the call of the get
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
 				
 				// Gestion des erreurs retour méthode login
 				if(!empty($error)) {
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					return new Response('');
 				}
 									
@@ -129,12 +117,12 @@ class ConnectorController extends Controller
 					// Déclenche la pop up															
 					if(!empty($_POST['detectjs'])) {							
 						$callbackUrl = $solution->getCreateAuthUrl((isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$this->generateUrl('connector_callback'));								
-						if(!empty($myddlewareSession['param']['connector']['source']['token'])) {			
-							$solution->setAccessToken($myddlewareSession['param']['connector']['source']['token'] );
+						if(!$sessionService->isParamConnectorSourceTokenExist()) {			
+							$solution->setAccessToken($sessionService->getParamConnectorSourceToken());
 						}					
 						// Redirection vers une autorisation manuel			
 						else {	
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+							
 							return new Response($solution->js.';'.urldecode($callbackUrl)); // Url de l'authentification prêt à être ouvert en popup
 						}
 					
@@ -143,47 +131,42 @@ class ConnectorController extends Controller
 
 						if(!empty($testToken['error']['code'])) {	
 							if($testToken['error']['code'] == 401 || $testToken['error']['code'] == 404) {
-								$myddlewareSession['param']['connector']['source']['token'] = NULL;
+								$sessionService->setParamConnectorSourceToken(NULL);
 								$url = $solution->getCreateAuthUrl($callbackUrl);	
-								$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 								return new Response($solution->js.';'.urldecode($url)); // Url de l'authentification prêt à être ouvert en popup						
 							}
 						}	
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+						
 						return new Response($solution->js.';'.$callbackUrl);	// tentative de connexion												
 
 					} // detect js
 					
-					if(isset($myddlewareSession['param']['connector']['source']['token'])) {
-						$solution->setAccessToken($myddlewareSession['param']['connector']['source']['token'] );				
+					if($sessionService->isParamConnectorSourceTokenExist()) {
+						$solution->setAccessToken($sessionService->getParamConnectorSourceToken());				
 					} 
 					// 2nd Test la validité du token
 					$testToken = $solution->testToken();
 					
 					// Erreur sans ouvrir la popup
 					if($testToken['error']['code'] == 404 || $testToken['error']['code'] === 0) {
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						return new Response("2;".$testToken['error']['message']); // Error Not Found
 					}
 					
 					if(isset($testToken['error']['code']) && !empty($testToken['error']['code']) && !empty($testToken['error']['message'])) {	
-						$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 						return new Response($testToken['error']['code'].';'.$testToken['error']['message']);
 					}	
 									
-					if(isset($myddlewareSession['param']['connector']['source']['token'])) {				
+					if($sessionService->isParamConnectorSourceTokenExist()) {				
 						if(isset($testToken['error']['message']) && !empty($testToken['error']['message'])) {
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 							return new Response($testToken['error']['message'] . ';'); // Erreur de connexion
 						}
 						else {
 							$solution->connexion_valide = true;
-							$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 							return new Response(1); // Connexion réussi
 						}
 					}		
 				}
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                                
 				return new Response('<script type="text/javascript" language="javascript">window.close();</script>'); // Ferme la popup automatiquement			
 			} // fin 
 			// SOLUTION AVEC POPUP ---------------------------------------------------------------------
@@ -192,21 +175,17 @@ class ConnectorController extends Controller
 			}
 		}
 		catch (\Exception $e) {
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 			return new Response($e->getMessage());
 		}
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		
 		return new Response('');
 	} 
 
 	// Contrôle si le fichier upload est valide puis le déplace
     public function uploadAction($solution) // REV 1.1.0
     {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+			
 		if( isset($solution) ) {
 			if(in_array(trim($solution), array('sagecrm','sapcrm','sap'))){
 				$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/wsdl/";
@@ -227,8 +206,8 @@ class ConnectorController extends Controller
 				}
 			}		
 		}
-		
-
+		/* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
 		
 		// Supprime ancien fichier de config s'il existe
 		if(isset($_GET['file']) && $_GET['file'] != '') {
@@ -241,26 +220,25 @@ class ConnectorController extends Controller
 		}
 		
 	 	if($solution == 'all') {
-	     	if(isset($myddlewareSession['param']['myddleware']['upload']['name'])) {
-	    		echo '1;'.$myddlewareSession['param']['myddleware']['upload']['name'];
-				unset($myddlewareSession['param']['myddleware']['upload']);
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				exit;
-	    	}
+                    if($sessionService->isUploadNameExist()) {
+                            echo '1;'.$sessionService->getUploadName();
+                            $sessionService->removeUpload();
+                            exit;
+
+                    }
 	
-	    	if(isset($myddlewareSession['param']['myddleware']['upload']['error'])) {
-	    		echo '0;'.$myddlewareSession['param']['myddleware']['upload']['error'];
-				unset($myddlewareSession['param']['myddleware']['upload']);
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-				exit;
-	    	}		
+                    if($sessionService->isUploadErrorExist()) {
+                            echo '0;'.$sessionService->getUploadError();
+                            $sessionService->removeUpload();
+                            exit;
+                    }		
 	 	}
 	    				
 		if(isset($_FILES['myfile']) && isset($output_dir) && is_dir($output_dir)) {		
 			if ($_FILES['myfile']["error"] > 0) {
 		    	$error = $_FILES["file"]["error"];	
 		    	echo '0;'.$error;
-				$myddlewareSession['param']['myddleware']['upload']['error'] = $error;
+				$sessionService->setUploadError($error);
 		    } else {
 				// A list of permitted file extensions
 				$allowed = $this->container->getParameter('extension_allowed');	
@@ -268,7 +246,6 @@ class ConnectorController extends Controller
 						
 				if(!in_array(strtolower($extension), $allowed)){
 					echo '0;'.$this->get('translator')->trans('create_connector.upload_error_ext');
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
 					exit;
 				}
 					
@@ -277,20 +254,17 @@ class ConnectorController extends Controller
 				
 				if(move_uploaded_file($_FILES['myfile']['tmp_name'],$output_dir. $new_name)) {
 					echo "1;".$this->get('translator')->trans('create_connector.upload_success').' : '.$new_name;
-					$myddlewareSession['param']['myddleware']['upload']['name'] = $new_name;	
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);					
+                                        $sessionService->setUploadName($new_name);					
 					exit;
 				}
 				else {
-					echo '0;'.$this->get('translator')->trans('create_connector.upload_error');		
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+					echo '0;'.$this->get('translator')->trans('create_connector.upload_error');
 					exit;
-				}
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+				}	
 			exit;
 			}
 		} else {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 		    	return $this->render('RegleBundle:Connector:upload.html.twig',array( 'solution' => $solution )
 			);	
 		}
@@ -300,12 +274,8 @@ class ConnectorController extends Controller
 	// CREATION D UN CONNECTEUR LISTE
     public function createAction()
     {	
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-
+                $sessionService = $this->get('myddleware_session.service');
+		
 		$em = $this->getDoctrine()->getManager();
 		$solution = $em->getRepository('RegleBundle:Solution')
 					   ->solutionActive();
@@ -317,35 +287,32 @@ class ConnectorController extends Controller
 		}					   
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));	
-		$myddlewareSession['param']['myddleware']['connector']['animation'] = false;		
-		$myddlewareSession['param']['myddleware']['connector']['add']['message'] = 'list'; 
-		// $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+		$sessionService->setConnectorAnimation(false);
+                $sessionService->setConnectorAddMessage('list');       
+               
         return $this->render('RegleBundle:Connector:index.html.twig',array(
 			'solutions'=> $lst_solution )
 		);
     }
 						
 	// CREATION D UN CONNECTEUR
-	public function connectorInsertAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+	public function connectorInsertAction(Request $request) {
+            /* @var $sessionService SessionService */
+            $sessionService = $this->get('myddleware_session.service');
+          
 		$type = '';	
 		
                   $solution = $this->getDoctrine()
                 ->getManager()
                 ->getRepository('RegleBundle:Solution')
-                ->findOneByName($myddlewareSession['param']['connector']['source']['solution']);
+                ->findOneByName($sessionService->getParamConnectorSourceSolution());
 
 
                 $connector = new Connector();
                 $connector->setSolution($solution);
                 $form = $this->createForm(new ConnectorType($this->container), $connector);
                 
-		if($request->getMethod()=='POST' && isset($myddlewareSession['param']['connector'])) {		
+		if($request->getMethod()=='POST' && $sessionService->isParamConnectorExist()) {		
 			try {
                           	
                             $form->handleRequest($request);
@@ -356,12 +323,14 @@ class ConnectorController extends Controller
                                 $solution = $connector->getSolution();
 				$multi = $solution->getSource() + $solution->getTarget();			 		
 				
-				if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
+				//if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
+                                if($sessionService->getConnectorAnimation()){
 					// animation add connector
-					$type = $myddlewareSession['param']['myddleware']['connector']['add']['type'];
+					$type = $sessionService->getParamConnectorAddType();
 					// si la solution ajouté n'existe pas dans la page en cours on va la rajouter manuellement
-					if( !in_array($myddlewareSession['param']['connector']['source']['solution'], json_decode($myddlewareSession['param']['myddleware']['connector']['solution'][$type])) ) {
-						$myddlewareSession['param']['myddleware']['connector']['values'] = $type.';'.$myddlewareSession['param']['connector']['source']['solution'].';'.$multi.';'.$solution->getId();
+                                        $solution = $sessionService->getParamConnectorSourceSolution();
+					if( !in_array($solution, json_decode($sessionService->getSolutionType($type))) ) {
+						$sessionService->setParamConnectorValues($type.';'.$solution.';'.$multi.';'.$solution->getId());
 					}					
 				}
 						
@@ -387,24 +356,21 @@ class ConnectorController extends Controller
                                     
                                 }
                                 
-                              
-				unset($myddlewareSession['param']['connector']);
+                                $sessionService->removeConnector();
 				
 				if(
-						!empty($myddlewareSession['param']['myddleware']['connector']['add']['message'])
-					&&  $myddlewareSession['param']['myddleware']['connector']['add']['message'] == 'list'
+						!empty($sessionService->getConnectorAddMessage())
+					&&  $sessionService->getConnectorAddMessage() == 'list'
 				) {
-					unset($myddlewareSession['param']['myddleware']['connector']['add']);
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+					$sessionService->removeConnectorAdd();
 					return $this->redirect($this->generateUrl('regle_connector_list'));	
 				}
 				else { // animation
 					$message = '';
-					if (!empty($myddlewareSession['param']['myddleware']['connector']['add']['message'])) {
-						$message = $myddlewareSession['param']['myddleware']['connector']['add']['message'];
+					if (!empty($sessionService->getConnectorAddMessage())) {
+						$message = $sessionService->getConnectorAddMessage();
 					}
-					unset($myddlewareSession['param']['myddleware']['connector']['add']);		
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+					$sessionService->removeConnectorAdd();	
 					return $this->render('RegleBundle:Connector:createout_valid.html.twig',array(
 						   'message' => $message,
 						   'type' => $type
@@ -417,12 +383,12 @@ class ConnectorController extends Controller
                             }//-----------
 			}
 			catch(Exception $e) {
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+				
 				throw $this->createNotFoundException('Error');
 			}		
 		}
 		else {
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 			throw $this->createNotFoundException('Error');
 		}		
 	}
@@ -547,15 +513,13 @@ class ConnectorController extends Controller
                 // Infos du connecteur
                 $connector = $qb->getQuery()->getOneOrNullResult();
 
-               // dump($connector);die();
+               
                 if (!$connector) {
                     throw $this->createNotFoundException("This connector doesn't exist");
                 }
               
               
                 // Create connector form
-               // $connectorParams = $this->get('myddleware.connector.service')->getConnectorParamFormatted($connector); 
-              
                 $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
                 
 		// If the connector has been changed
@@ -566,48 +530,36 @@ class ConnectorController extends Controller
                      
                     if($form->isValid()){
                       
-                     
 			// SAVE
 			try {					   						   
 				
 				$params = $connector->getConnectorParams();
                                 
-                                
-                                
 				// SAVE PARAMS CONNECTEUR		   						   
 				if(count($params) > 0) {
 					// Generate object to encrypt data
-					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
-						
-					// In case of Oath 2, the token can exist and is not in the form so not is the POST too. So we check if the token is existing
-					$session = $request->getSession();
-					$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-					// We always add data again in session because these data are removed after the call of the get
-					$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-					if (
-							!empty($myddlewareSession['param']['myddleware']['connector']['solution']['callback']) // Confirm Oath 2
-						 &&	!empty($myddlewareSession['param']['connector']['source']['token'])
-					) {
+					//$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
+					
+                                        
 						// Get the param with the token_get_all
-						$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
+						/*$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
 														'connector' => $connector,
 														'name' => 'token'
-													));				
+													));*/				
 						// If not connector param for the token, we create one (should never happen)							
-						if (empty($connectorParam)) {
+						/*if (empty($connectorParam)) {
 							$connectorParam = new ConnectorParam();		
 							$connectorParam->setConnector($connector->getId());
 							$connectorParam->setName('token');
-						}
+						}*/
 						// Save the token in the connector param
-                                               
-						$connectorParam->setValue($encrypter->encrypt($myddlewareSession['param']['connector']['source']['token']));
-						$em->persist($connectorParam);
-                                                $connector->addConnectorParam($connectorParam);
+						//$connectorParam->setValue($encrypter->encrypt($sessionService->getParamConnectorSourceToken()));
+						//$em->persist($connectorParam);
+                                                //$connector->addConnectorParam($connectorParam);
 										
-					}
+					
                                         
-                                       // dump($connector); die();
+                                       
                                         $em->persist($connector); 
                                         $em->flush(); 
 					return $this->redirect($this->generateUrl('regle_connector_list'));					
@@ -686,12 +638,10 @@ class ConnectorController extends Controller
 
 	// CREATION D UN CONNECTEUR LISTE animation
     public function createOutAction($type)
-    {	
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+    {           
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+
 		$em = $this->getDoctrine()->getManager();
 		
 		$solution = $em->getRepository('RegleBundle:Solution')
@@ -705,10 +655,12 @@ class ConnectorController extends Controller
 		}					   
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));
-		$myddlewareSession['param']['myddleware']['connector']['add']['message'] = $this->get('translator')->trans('create_rule.step1.connector');
-		$myddlewareSession['param']['myddleware']['connector']['add']['type'] = strip_tags($type);
-		$myddlewareSession['param']['myddleware']['connector']['animation'] = true;
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);			  
+
+                $sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
+                $sessionService->setParamConnectorAddType(strip_tags($type));
+                $sessionService->setConnectorAnimation(true);
+                
+              			  
         return $this->render('RegleBundle:Connector:createout.html.twig',array(
 			'solutions'=> $lst_solution
 			)
@@ -717,15 +669,13 @@ class ConnectorController extends Controller
 
 	// RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY	
 	public function connectorInsertSolutionAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		if(isset($myddlewareSession['param']['myddleware']['connector']['values'])) {
-			$values = $myddlewareSession['param']['myddleware']['connector']['values'];	
-			unset($myddlewareSession['param']['myddleware']['connector']['values']);		
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+            
+                /* @var $sessionService SessionService */
+                $sessionService = $this->get('myddleware_session.service');
+
+		if($sessionService->isConnectorValuesExist()) {
+			$values = $sessionService->getConnectorValues();	
+			$sessionService->removeConnectorValues();
 			return new Response($values);
 		}
 		else {

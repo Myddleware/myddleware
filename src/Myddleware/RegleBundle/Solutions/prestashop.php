@@ -1093,7 +1093,7 @@ class prestashopcore extends solution {
 	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			if (
 					$type == 'target'

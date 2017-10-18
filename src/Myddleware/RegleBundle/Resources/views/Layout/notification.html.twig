@@ -51,10 +51,22 @@
     {% endfor %}
 {% endif %}
 
-{{app.session.remove('error') }}
-{{app.session.remove('warning') }}
-{{app.session.remove('info') }}
-{{app.session.remove('success') }}
+{% if app.session.has('error') %}
+    {#{{app.session.remove('error') }}#}
+    {{app.session.set('error',null) }}
+{% endif %}
+{% if app.session.has('warning') %}
+    {# {{app.session.remove('warning') }}#}
+    {{app.session.set('warning',null) }}
+{% endif %}
+{% if app.session.has('info') %}
+     {#{{app.session.remove('info') }}#}
+    {{app.session.set('info',null) }}
+{% endif %}
+{% if app.session.has('success') %}
+     {#{{app.session.remove('success') }}#}
+    {{app.session.set('success',null) }}
+{% endif %}
 {#
 {{ app.session.clear() }}
 WARNING, it's not a good practice, because it's clear all session *_*. We sould use flashbag for notification

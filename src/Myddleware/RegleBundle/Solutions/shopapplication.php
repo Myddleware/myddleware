@@ -698,7 +698,7 @@ class shopapplicationcore extends solution {
 	}
 	
 	// Force some module in child
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		$params = array();
 		try {	
 			if ($type == 'target') {			
