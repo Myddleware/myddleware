@@ -83,8 +83,8 @@ class DefaultControllerCore extends Controller
                         /* @var $sessionService SessionService */
                         $sessionService = $this->get('myddleware_session.service');
                         
-                        $key = $sessionService->getParamRuleLastKey();    
-			if($key =!null && $sessionService->isRuleIdExist($key)) {
+                        $key = $sessionService->getParamRuleLastKey(); 
+			if($key !=null && $sessionService->isRuleIdExist($key)) {
 				$id = $sessionService->getRuleId($key);
 				$sessionService->removeRuleId($key);
 				return $this->redirect($this->generateUrl('regle_open', array('id'=>$id)));	
@@ -495,7 +495,8 @@ class DefaultControllerCore extends Controller
 	}
 
 	// MODE EDITION D UNE REGLE
-	public function ruleEditAction($id) {
+	public function ruleEditAction(Request $request, $id) {
+                $session = $request->getSession();
 		try {
 			
 			// First, checking that the rule has no document open or in error
@@ -515,8 +516,9 @@ class DefaultControllerCore extends Controller
 
                         /* @var $sessionService SessionService */
 			$sessionService = $this->get('myddleware_session.service');
-                        $key = $sessionService->getParamRuleLastKey();
                         
+                        $sessionService->setParamRuleLastKey($id);
+                        $key = $sessionService->getParamRuleLastKey();
 			if(isset($id)) {
 			//--
 				// si une session existe alors on la supprime
@@ -851,7 +853,7 @@ class DefaultControllerCore extends Controller
 		
                 /* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');
-                $key = $sessionService->getParamRuleLastKey();
+                $ruleKey = $sessionService->getParamRuleLastKey();
                         
 		if($request->getMethod()=='POST') {
 
@@ -919,7 +921,7 @@ class DefaultControllerCore extends Controller
 								return new JsonResponse(["success" => true]); // Connexion valide
 							}
 							else {
-                                                                $sessionService->removeParamRule($key);
+                                                                $sessionService->removeParamRule($ruleKey);
 								
 								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);// Erreur de connexion				
 							}
@@ -938,7 +940,7 @@ class DefaultControllerCore extends Controller
 					
 					// Deux params obligatoires
 					if(count($params) == 2 && intval($params[1]) && is_string($params[0])) {
-                                                $sessionService->removeParamParentRule($key, $request->request->get('parent'));
+                                                $sessionService->removeParamParentRule($ruleKey, $request->request->get('parent'));
 						$classe = strtolower($params[0]);
 						$solution = $this->get('myddleware_rule.'.$classe);
 			    
@@ -958,14 +960,14 @@ class DefaultControllerCore extends Controller
 							}							
 						}
 
-                                                $sessionService->setParamRuleName($key, $request->request->get('name'));
+                                                $sessionService->setParamRuleName($ruleKey, $request->request->get('name'));
 						
 						// Affectation id connector
-                                                $sessionService->setParamRuleConnectorParent($key, $request->request->get('parent'), $params[1]);
+                                                $sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
 						//$myddlewareSession['obj'][$this->getRequest()->request->get('parent')] = $connector_params;
 
 						$solution->login($this->decrypt_params($sessionService->getParamParentRule($request->request->get('parent'))));
-                                                $sessionService->setParamRuleParentName($key, $request->request->get('parent'), 'solution', $classe);
+                                                $sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
 						
 						$r = $solution->connexion_valide;
 						if(!empty($r)) {
@@ -1266,7 +1268,6 @@ class DefaultControllerCore extends Controller
                 /* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');
 		$ruleKey = $sessionService->getParamRuleLastKey();
-                //dump($sessionService->getMyddlewareSession()); die();
 		// Test que l'ordre des étapes
 		if(!$sessionService->isParamRuleExist($ruleKey)) {
                         $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.order'));
@@ -1722,7 +1723,7 @@ class DefaultControllerCore extends Controller
 			$result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
 			$result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 			$result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-			//dump($myddlewareSession); 
+			
 			
 			return $this->render('RegleBundle:Rule:create/step3.html.twig',$result);					
 										
@@ -2149,7 +2150,7 @@ class DefaultControllerCore extends Controller
 			RuleClass::afterSave($this->container,	array(
 						'ruleId' => $oneRule->getId(),
 						'ruleName' => $nameRule,
-						'oldRule' => ($sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $sessionService->getParamRuleLastId($key),
+						'oldRule' => ($sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $sessionService->getParamRuleLastId($ruleKey),
 						'datereference' => $date_reference,
 						'connector' => $sessionService->getParamParentRule($ruleKey, 'connector'),
 						'content' => $tab_new_rule,
@@ -2177,7 +2178,7 @@ class DefaultControllerCore extends Controller
 			$this->em->getConnection()->rollBack();
 			$this->get('logger')->error('2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'));
 			$response = '2;'.htmlentities($e->getMessage().' (line '.$e->getLine().')'); 
-		} 	
+		}	
 		
 		$this->em->close();	
 		return new JsonResponse($response);

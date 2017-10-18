@@ -529,7 +529,10 @@ class SessionService{
      public function setParamRuleLastKey($key)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['rule']['key'] = $key;
+        if($key == 0 || !isset($myddlewareSession['param']['rule']['key'][$key])){
+           $myddlewareSession['param']['rule']['key'] = $key;
+        }
+        
         
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
