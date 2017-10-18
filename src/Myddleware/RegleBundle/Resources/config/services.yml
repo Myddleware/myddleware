@@ -7,7 +7,10 @@ services:
         class: Myddleware\RegleBundle\EventListener\RequestListener
         tags:
            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-        
+     myddleware_session.service:  
+         class: Myddleware\RegleBundle\Service\SessionService
+         arguments: [@session]
+         
      formula.myddleware:  
          class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
      myddleware_job.job:  

@@ -83,7 +83,7 @@ class sapecccore extends sap {
 	} // get_modules()
 
 	
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$params = array();
 			if ($type == 'source'){

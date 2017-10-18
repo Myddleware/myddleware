@@ -500,7 +500,7 @@ class filecore extends solution {
 	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);
