@@ -33,9 +33,10 @@ class microsoftsqlcore extends database {
 	protected $fieldLabel = 'COLUMN_NAME';
 	protected $fieldType = 'DATA_TYPE';
 	
-	protected $stringSeparator = '';
+	protected $stringSeparatorOpen = '[';
+	protected $stringSeparatorClose = ']';
 
-	protected function generatePdo() {	
+	protected function generatePdo() {		    
 		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
 	}
 	

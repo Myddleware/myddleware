@@ -34,7 +34,8 @@ class databasecore extends solution {
 	protected $pdo;
 	protected $charset = 'utf8';
 	
-	protected $stringSeparator = '`';
+	protected $stringSeparatorOpen = '`';
+	protected $stringSeparatorClose = '`';
 
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
@@ -215,7 +216,7 @@ class databasecore extends solution {
 							throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
 						}
 					}
-					$where .= $key." = '".$value."'";
+					$where .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose." = '".$value."'";
 				}
 			} // else the function is called for a simulation (rule creation), the limit is manage in the query creation
 			
@@ -240,12 +241,12 @@ class databasecore extends solution {
 						throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
 					}
 				}
-				$requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
+				$requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
 			}
 			// Remove the last coma/space
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
+			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
 		
@@ -337,30 +338,30 @@ class databasecore extends solution {
 			// TODO Ajout des champs id et date de l'utilisateur
 			
 			foreach ($param['fields'] as $field){
-			    $requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
+			    $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
 			}
 			// Suppression de la dernière virgule en laissant le +
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
+			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
 			// if a specific query is requeted we don't use date_ref
 			if (!empty($param['query'])) {
 				$nbFilter = count($param['query']);
 				$requestSQL .= " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
-					$requestSQL .= $queryKey.' = '.$queryValue.' ';
+					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose.' = '.$queryValue.' ';
 					$nbFilter--;
 					if ($nbFilter > 0){
 						$requestSQL .= " AND ";	
 					}
 				}
 			} else {				
-				$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
+				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
 			
-			$requestSQL .= " ORDER BY ".$param['ruleParams']['fieldDateRef']. " ASC"; // Tri par date utilisateur
-			
+			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+	
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);		
 			$exec = $q->execute();
@@ -412,7 +413,7 @@ class databasecore extends solution {
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
 					// Query init
-					$sql = "INSERT INTO ".$this->stringSeparator.$param['module'].$this->stringSeparator." (";
+					$sql = "INSERT INTO ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." (";
 					$values = "(";
 					// We build the query with every fields
 					foreach ($data as $key => $value) {				
@@ -422,7 +423,7 @@ class databasecore extends solution {
 						} elseif($key == $param['ruleParams']['targetFieldId']) {
 							$idTarget = $value;
 						}
-						$sql .= $this->stringSeparator.$key.$this->stringSeparator.",";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose.",";
 						$values .= "'".$value."',";
 					}
 					
@@ -482,7 +483,7 @@ class databasecore extends solution {
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Query init
-					$sql = "UPDATE ".$this->stringSeparator.$param['module'].$this->stringSeparator." SET "; 
+					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET "; 
 					// We build the query with every fields
 					// Boucle sur chaque champ du document
 					foreach ($data as $key => $value) {				
@@ -493,11 +494,11 @@ class databasecore extends solution {
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
 						}								
-						$sql .= $key."='".$value."',";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorOpen."='".$value."',";
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE ".$param['ruleParams']['targetFieldId']."='".$idTarget."'";						
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";						
 					// Execute the query
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
@@ -538,7 +539,7 @@ class databasecore extends solution {
 		return array('id');
 	}
 
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
 			if(!empty($fieldsSource)) {
