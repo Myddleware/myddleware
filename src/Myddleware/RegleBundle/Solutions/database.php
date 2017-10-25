@@ -539,7 +539,7 @@ class databasecore extends solution {
 		return array('id');
 	}
 
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
 			if(!empty($fieldsSource)) {
