@@ -302,10 +302,10 @@ class rulecore {
 					}
 					// Mise à jour de la date de référence si des documents ont été créés
 					$this->updateReferenceDate();
-					
-					// If params has been added in the output of the rule we saved it
-					$this->updateParams();
-				}
+				}				
+				// If params has been added in the output of the rule we saved it
+				$this->updateParams();
+				
 				// Rollback if the job has been manually stopped
 				if ($this->getJobStatus() != 'Start') {
 					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
