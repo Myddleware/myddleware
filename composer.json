@@ -31,8 +31,7 @@
 	"pagerfanta/pagerfanta": "dev-master",
 	"raulfraile/ladybug-bundle": "~1.0",        
 	"illuminate/encryption": "5.3.*@dev",
-        "friendsofsymfony/jsrouting-bundle": "^1.6",
-        "phpunit/phpunit": "^6.3"     
+        "friendsofsymfony/jsrouting-bundle": "^1.6"   
     },
     "repositories": [   
         {
