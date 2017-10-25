@@ -249,7 +249,7 @@ class databasecore extends solution {
 			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
-		
+			
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
@@ -494,12 +494,12 @@ class databasecore extends solution {
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
 						}								
-						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorOpen."='".$value."',";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$value."',";
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
 					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";						
-					// Execute the query
+					// Execute the query					
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					if(!$exec) {

@@ -822,6 +822,19 @@ class documentcore {
 						// Add filed in duplicate search only if not empty
 						if (!empty($searchFieldValue)) {
 							$searchFields[$duplicate_field] = $searchFieldValue;
+						// If no value, wecheck if the field is a relationship
+						} else {	
+							foreach ($this->ruleRelationships as $ruleRelationship) {	
+								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
+									$sourceDuplicateFieldRelationship = $ruleRelationship;
+								}
+							}					
+							if (!empty($sourceDuplicateFieldRelationship)) {
+								$searchFieldValue = $this->getTransformValue($this->sourceData,$ruleRelationship);
+							}
+							if (!empty($searchFieldValue)) {
+								$searchFields[$duplicate_field] = $searchFieldValue;
+							}							
 						}
 					}
 				}					

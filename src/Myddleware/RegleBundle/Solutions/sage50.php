@@ -40,6 +40,7 @@ class sage50core extends solution
 	protected $required_fields = array('default' => array('id','updated','published'));
 	protected $update;
 	protected $subModules = array('salesOrderLine', 'salesInvoiceLine','purchaseOrderLine','purchaseOrderDeliveryLine');
+    protected $readLimit = 2;
 
 	
     /**
@@ -255,7 +256,7 @@ class sage50core extends solution
      */
 
     public function read_last($param)
-    {
+    {		
         $result = array();
         try {
             // Call to get the token
@@ -269,6 +270,7 @@ class sage50core extends solution
 			} else {				
 				$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1&format=json', 'read_last');
 			}
+		
             if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
                 if (!empty($response['curlData']['$resources'][0])) { 	
 					// Get the data for every field					
@@ -308,11 +310,13 @@ class sage50core extends solution
 	public function read($param) {
 		try {
 			$result['date_ref'] = $param['date_ref'];
-			$result['count'] = 0;
-			if (empty($param['limit'])) {
-				$param['limit'] = 100;
+			// If we use an offset, we have to restart from the same beginning
+			if (!empty($param['ruleParams']['OffsetDateREf'])) {
+				$param['date_ref'] = $param['ruleParams']['OffsetDateREf'];
 			}
-$param['limit'] = 3;
+			$result['count'] = 0;
+			$param['limit'] = $this->readLimit;
+
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -347,27 +351,21 @@ $param['limit'] = 3;
 				}
 			// Function called as a standard read, we use the reference date
 			} else {
-				$param['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);		
+				// $param['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);		
+				$param['date_ref'] = $param['date_ref'];		
 				$query .= '&where='.$dateRefField.' gt @'.$param['date_ref'].'@';
 				$query .= '&orderBy='.$dateRefField.' asc';
-
-				// $query .= '&orderBy='.$dateRefField;
-				// $query .= '&orderBy=firstName desc';
 			}			
 			// convert space
 			$query = str_replace(' ','%20',$query);		
-// echo $param['date_ref'].chr(10);				
+			
 			// Call to get the token
             $this->token = $this->getAccessToken();
             $modules_pluralName = $this->getPluralName($param ["module"]);
 			$startIndex = (!empty($param['ruleParams']['Offset']) ? $param['ruleParams']['Offset'] : 0);
 
 			// Get one data from Sage
-			$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&count='.$param['limit'], 'read');
-echo $query.chr(10);
-// echo $query.'&startIndex='.$startIndex.'&count='.$param['limit'].chr(10);
-			// $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&startIndex='.$startIndex.'&count='.$param['limit'], 'read');
-// print_r($response['curlData']['entry']);
+			$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?'.$query.'&startIndex='.$startIndex.'&count='.$param['limit'], 'read');
 			if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
 				// If no result
 				if (!empty($response['curlData']['entry'])) { 
@@ -378,8 +376,8 @@ echo $query.chr(10);
 					}					
 					// For each records
 					foreach($response['curlData']['entry'] as $record) {			
-						// Add date_modified					
-						$row['date_modified'] = $this->dateTimeToMyddleware($record[$dateRefField]);				
+						// Add date_modified								
+						$row['date_modified'] = $record[$dateRefField];				
 						$row['updated'] = $record['updated'];
 						$row['published'] = $record['published'];
 	
@@ -407,7 +405,7 @@ echo $query.chr(10);
 						) {								
 							$result['date_ref'] = $row['date_modified'];
 						}
-// print_r($row);								
+
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
 						$row = array();
@@ -417,19 +415,18 @@ echo $query.chr(10);
 			}elseif (!empty($resultQuery['Message'])) {
 				throw new \Exception($resultQuery['Message']);	
 			}	
-			// Set the offset for the next call if needed
-			if ($result['count'] == $param['limit']) {
+			// Set the offset for the next call if needed. We keep teh reference date too, we ned it to restart from the same beginning
+			if ($result['count'] == $param['limit']) {				
 				$result['ruleParams'][] = array('name' => 'Offset', 'value' => $startIndex + $result['count']);
-			} else {
+				$result['ruleParams'][] = array('name' => 'OffsetDateREf', 'value' => $param['date_ref']);
+			} else {			
 				$result['ruleParams'][] = array('name' => 'Offset', 'value' => 0);
+				$result['ruleParams'][] = array('name' => 'OffsetDateREf', 'value' => '');
 			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
-
-print_r($result);
-return null;		
+		}		
 		return $result;
 	}	
 	
@@ -486,6 +483,7 @@ return null;
   <sdata:payload>
     <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008"
       sdata:uuid="'.$uuid.'">'.chr(10);
+// print_r($data);	  
 				foreach (array_reverse($data) as $key => $value) {				
 					// Target id is managed above, so we skip this field			
 					if ($key=='target_id' OR $key=='ID') {					
@@ -513,8 +511,13 @@ return null;
 								foreach ($subData as $subKey => $subValue) {
 									if(in_array($subKey, array($param["module"], 'id_doc_myddleware', 'target_id', 'source_date_modified'))) {
 										continue;
-									}
-									if (!empty($this->fieldsRelate[$subKey]) OR $subKey == 'commodity') {
+									}	
+									// If relate field or commodity (submodule)
+									if (!empty($this->fieldsRelate[$subKey]) OR $subKey == 'commodity') { 
+										// If relationship empty we continue
+										if (empty($subValue)) {
+											continue;
+										}
 										// Retrieve the id in parentheses if the id is included in an URL
 										if (strlen($subValue) > 36) {
 											$subId = substr($subValue, strpos($subValue,'(')+1, strpos($subValue,')')-(strpos($subValue,'(')+1));
@@ -550,6 +553,7 @@ return null;
 $xmlData .= '    </'.$param ["module"].'>
   </sdata:payload>
 </entry>';
+// echo chr(10).$xmlData.chr(10);
 			
 				// Send data to Sage
 				if ($this->update) {					
