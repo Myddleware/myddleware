@@ -141,7 +141,7 @@ class hubspotcore extends solution
 //            echo '<pre>';
 //            $param['query'] = array("email" => "coolrobot@hubspot.com");// for test
             //$param['query'] = array("id" => 1);// for test
-
+            // Get the reference date field name
 
             if (!empty($param['fields'])) { //add properties for request
                 $property = "";
@@ -150,7 +150,6 @@ class hubspotcore extends solution
                 }
             }
             if (!empty($param['query'])) {
-
                 if (!empty($param['query']['email'])) {
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
@@ -197,32 +196,37 @@ class hubspotcore extends solution
     public function read($param)
     {
         try {
-//            print_r($param);
+            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             if (!empty($param['fields'])) { //add properties for request
                 $property = "";
                 foreach ($param['fields'] as $fields) {
                     $property .= "&property=" . $fields;
                 }
             }
-//          print_r($this->url . $param['module'] . "/contacts/v1/lists/recently_updated/contacts/recent" . "&hapikey=" . $this->paramConnexion['apikey'] . $property);
-            //@todo get contact with date ?
-            $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/recently_updated/contacts/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
-            $identifyProfiles = $resultQuery[$param['module']][0];
+            //@todo get contact with timeOffset?
+            if ($dateRefField === "ModificationDate") {
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/recently_updated/contacts/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+            } else if ($dateRefField === "CreationDate") {
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/contacts/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+            }
+            $identifyProfiles = $resultQuery[$param['module']];
             // If no result
             if (empty($resultQuery)) {
             } else {
                 $result['date_ref'] = $param['date_ref'];
-                foreach ($param['fields'] as $field) {
-                    $resultTemp = '';
-                    if (isset($identifyProfchmodiles['properties'][$field])) {
 
-                        if ($field == 'Id') {
-                            $resultTemp['values']['id'] = $resultQuery[$param['module']][0]['vid'];
-                        } else {
-                            $resultTemp[$field] = $identifyProfiles['properties'][$field]['value'];
+                foreach ($identifyProfiles as $identifyProfile) {
+                    $records = null;
+                    foreach ($param['fields'] as $field) {
+                        if (isset($identifyProfile["properties"] [$field])) {
+                            if ($field == 'Id') {
+                                $records['values']['id'] = $identifyProfile["properties"] ['vid'];
+                            } else {
+                                $records[$field] = $identifyProfile["properties"] [$field]['value'];
+                            }
                         }
+                        $result['values'][$identifyProfile['vid']] = $records;
                     }
-                    $result['values'][$identifyProfiles['vid']] = $resultTemp;
                 }
                 $result['count'] = count($result['values']);
             }
@@ -234,12 +238,43 @@ class hubspotcore extends solution
     }
 
 
-    public function create($param)
+    public
+    function create($param)
     {
+        try {
+            //  die();
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+        }
+        return $result;
     }
 
-    public function update($param)
+    public
+    function update($param)
     {
+        try {
+            print_r($param);
+            die();
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+        }
+    }
+
+
+    // retrun the reference date field name
+    public
+    function getDateRefName($moduleSource, $RuleMode)
+    {
+        // Creation and modification mode
+        if ($RuleMode == "0") {
+            return "ModificationDate";
+            // Creation mode only
+        } else if ($RuleMode == "C") {
+            return "CreationDate";
+        } else {
+            throw new \Exception ("$RuleMode is not a correct Rule mode.");
+        }
+        return null;
     }
 
     /**
@@ -276,8 +311,8 @@ class hubspotcore extends solution
 
 }
 
-/* * * * * * * *  * * * * * *  * * * * * * 
-	si custom file exist alors on fait un include de la custom class
+/* * * * * * * *  * * * * * *  * * * * * *
+    si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__ . '/../Custom/Solutions/hubspot.php';
 if (file_exists($file)) {
