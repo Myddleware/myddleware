@@ -148,24 +148,25 @@ class hubspotcore extends solution
                 foreach ($param['fields'] as $fields) {
                     $property .= "&property=" . $fields;
                 }
+                $property .= "&property=lastmodifieddate";
             }
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } else {
                     //@todo  get word for request
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/search/query?q=hubspot" . "&count=1&hapikey=" . $this->paramConnexion['apikey'] . $property);
                 }
                 $identifyProfiles = $resultQuery['properties'];
+
             } else {
                 // limit to 1 result
                 $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/all?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property);
-
                 //on ajoute l'email car elle se trouve dans la proprietes
                 $identifyProfiles = $resultQuery['contacts'][0]['properties'];
-
+                $identifyProfilesId = $resultQuery['contacts'][0]['vid'];
             }
             // If no result
             if (empty($resultQuery)) {
@@ -173,14 +174,11 @@ class hubspotcore extends solution
             } else {
                 foreach ($param['fields'] as $field) {
                     if (isset($identifyProfiles[$field])) {
-
-                        if ($field == 'Id') {
-                            $result['values']['id'] = $resultQuery[$param['module']][0]['vid'];
-                        } else {
-                            $result['values'][$field] = $identifyProfiles[$field]['value'];
-                        }
+                        $result['values'][$field] = $identifyProfiles[$field]['value'];
                     }
                 }
+                $result['values']['id'] = $identifyProfilesId; // Add id
+                $result['values']['date_modified'] = $identifyProfiles["lastmodifieddate"]['value']; // add date modified
                 if (!empty($result['values'])) {
                     $result['done'] = true;
                 }
@@ -190,6 +188,7 @@ class hubspotcore extends solution
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
         }
+//        print_r($result);
         return $result;
     }
 
@@ -202,6 +201,7 @@ class hubspotcore extends solution
                 foreach ($param['fields'] as $fields) {
                     $property .= "&property=" . $fields;
                 }
+                $property .= "&property=lastmodifieddate";
             }
             //@todo get contact with timeOffset?
             if ($dateRefField === "ModificationDate") {
@@ -213,19 +213,20 @@ class hubspotcore extends solution
             // If no result
             if (empty($resultQuery)) {
             } else {
-                $result['date_ref'] = $param['date_ref'];
 
+                $result['date_ref'] = $param['date_ref'];
                 foreach ($identifyProfiles as $identifyProfile) {
                     $records = null;
                     foreach ($param['fields'] as $field) {
                         if (isset($identifyProfile["properties"] [$field])) {
-                            if ($field == 'Id') {
-                                $records['values']['id'] = $identifyProfile["properties"] ['vid'];
-                            } else {
-                                $records[$field] = $identifyProfile["properties"] [$field]['value'];
-                            }
+                            $records[$field] = $identifyProfile["properties"] [$field]['value'];
                         }
+
+                        $records['date_modified'] = $identifyProfile["properties"]["lastmodifieddate"]['value']; // add date modified
+                        $records['id'] = $identifyProfile['vid'];
                         $result['values'][$identifyProfile['vid']] = $records;
+
+
                     }
                 }
                 $result['count'] = count($result['values']);
@@ -242,10 +243,35 @@ class hubspotcore extends solution
     function create($param)
     {
         try {
-            //  die();
+            // Tranform Myddleware data to Mailchimp data
+            $result = array();
+            foreach ($param['data'] as $key => $data) {
+                $dataHubspot["properties"] = null;
+                $records = array();
+                foreach ($param['data'][$key] as $key => $value) {
+                    if ($key === "target_id") continue;
+                    array_push($records, array("property" => $key, "value" => $value));
+                }
+                $dataHubspot["properties"] = $records;
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+                if (isset($resultQuery['status']) && $resultQuery['status'] === 'error') {
+                    //   throw new \Exception($resultQuery['message']);
+                } else {
+                    array_push($result[$key], array(
+                        'id' => $resultQuery['vid'],
+                        'error' => false
+                    ));
+                }
+                $this->updateDocumentStatus($key, $result[$key], $param);
+            }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+            $error = $e->getMessage();
+            $result[$key] = array(
+                'id' => '-1',
+                'error' => $error
+            );
         }
+
         return $result;
     }
 
@@ -254,14 +280,41 @@ class hubspotcore extends solution
     {
         try {
             print_r($param);
-            die();
+            // Tranform Myddleware data to Mailchimp data
+            $result = array();
+            foreach ($param['data'] as $key => $data) {
+                $dataHubspot["properties"] = null;
+                $records = array();
+                foreach ($param['data'][$key] as $key => $value) {
+                    if ($key === "target_id") $idProfile = $value;
+                    array_push($records, array("property" => $key, "value" => $value));
+                }
+                $dataHubspot["properties"] = $records;
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+
+                if (isset($resultQuery['status']) && $resultQuery['status'] === 'error') {
+                    throw new \Exception($resultQuery['message']);
+                } else {
+                    $result[$key] = array(
+                        'id' => $resultQuery['vid'],
+                        'error' => false
+                    );
+                }
+            }
+           //                 $this->updateDocumentStatus($key, $result[$key], $param);
         } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+            $error = $e->getMessage();
+            $result[$key] = array(
+                'id' => '-1',
+                'error' => $error
+            );
+        //    $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
+        return $result;
     }
 
 
-    // retrun the reference date field name
+// return the reference date field name
     public
     function getDateRefName($moduleSource, $RuleMode)
     {
@@ -298,6 +351,7 @@ class hubspotcore extends solution
             }
             if (!empty($args)) {
                 $jsonArgs = json_encode($args);
+
                 $headers[] = "Content-Lenght: " . $jsonArgs;
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
             }
@@ -305,6 +359,7 @@ class hubspotcore extends solution
             $result = curl_exec($ch);
             curl_close($ch);
             return $result ? json_decode($result, true) : false;
+
         }
         throw new \Exception('curl extension is missing!');
     }
