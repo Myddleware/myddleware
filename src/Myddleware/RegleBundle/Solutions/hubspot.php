@@ -188,7 +188,6 @@ class hubspotcore extends solution
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
         }
-//        print_r($result);
         return $result;
     }
 
@@ -205,13 +204,16 @@ class hubspotcore extends solution
             }
             //@todo get contact with timeOffset?
             if ($dateRefField === "ModificationDate") {
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/recently_updated/contacts/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
             } else if ($dateRefField === "CreationDate") {
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/contacts/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
             }
+            $resultQuery = $resultQuery['exec'];
             $identifyProfiles = $resultQuery[$param['module']];
+
             // If no result
             if (empty($resultQuery)) {
+                $result['error'] = "Request error";
             } else {
 
                 $result['date_ref'] = $param['date_ref'];
@@ -225,13 +227,11 @@ class hubspotcore extends solution
                         $records['date_modified'] = $identifyProfile["properties"]["lastmodifieddate"]['value']; // add date modified
                         $records['id'] = $identifyProfile['vid'];
                         $result['values'][$identifyProfile['vid']] = $records;
-
-
                     }
                 }
+
                 $result['count'] = count($result['values']);
             }
-            // die();
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
         }
@@ -244,23 +244,31 @@ class hubspotcore extends solution
     {
         try {
             // Tranform Myddleware data to Mailchimp data
-            $result = array();
             foreach ($param['data'] as $key => $data) {
+
                 $dataHubspot["properties"] = null;
                 $records = array();
-                foreach ($param['data'][$key] as $key => $value) {
-                    if ($key === "target_id") continue;
-                    array_push($records, array("property" => $key, "value" => $value));
+                foreach ($param['data'][$key] as $idDoc => $value) {
+                    if ($idDoc === "target_id") continue;
+                    array_push($records, array("property" => $idDoc, "value" => $value));
                 }
+
+                //getsingular contact
+                $contact = $this->getsingular($param['module']);
                 $dataHubspot["properties"] = $records;
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
-                if (isset($resultQuery['status']) && $resultQuery['status'] === 'error') {
-                    //   throw new \Exception($resultQuery['message']);
+
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+                if (isset($resultQuery['exec']['status']) && $resultQuery['exec']['status'] === 'error') {
+                    $result[$key] = array(
+                        'id' => '-1',
+                        'error' => 'Failed to create data in hubspot. '
+                    );
+
                 } else {
-                    array_push($result[$key], array(
+                    $result[$key] = array(
                         'id' => $resultQuery['vid'],
                         'error' => false
-                    ));
+                    );
                 }
                 $this->updateDocumentStatus($key, $result[$key], $param);
             }
@@ -271,7 +279,6 @@ class hubspotcore extends solution
                 'error' => $error
             );
         }
-
         return $result;
     }
 
@@ -279,36 +286,41 @@ class hubspotcore extends solution
     function update($param)
     {
         try {
-            print_r($param);
-            // Tranform Myddleware data to Mailchimp data
-            $result = array();
+            // Tranform Myddleware data to hubspot data
             foreach ($param['data'] as $key => $data) {
                 $dataHubspot["properties"] = null;
                 $records = array();
-                foreach ($param['data'][$key] as $key => $value) {
-                    if ($key === "target_id") $idProfile = $value;
-                    array_push($records, array("property" => $key, "value" => $value));
+                foreach ($param['data'][$key] as $idDoc => $value) {
+                    if ($idDoc === "target_id") {
+                        $idProfile = $value;
+                        continue;
+                    }
+                    array_push($records, array("property" => $idDoc, "value" => $value));
                 }
-                $dataHubspot["properties"] = $records;
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/contact/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
 
-                if (isset($resultQuery['status']) && $resultQuery['status'] === 'error') {
-                    throw new \Exception($resultQuery['message']);
+                //getsingular contact
+                $contact = $this->getsingular($param['module']);
+                $dataHubspot["properties"] = $records;
+                $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+                if ($resultQuery['info']['http_code'] ==! 204) { //204 is good
+                     $result[$key] = array(
+                        'id' => '-1',
+                        'error' => 'Failed to create data in hubspot. '
+                    );
                 } else {
                     $result[$key] = array(
-                        'id' => $resultQuery['vid'],
+                        'id' => $idProfile,
                         'error' => false
                     );
                 }
+                $this->updateDocumentStatus($key, $result[$key], $param);
             }
-           //                 $this->updateDocumentStatus($key, $result[$key], $param);
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $result[$key] = array(
                 'id' => '-1',
                 'error' => $error
             );
-        //    $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
         return $result;
     }
@@ -330,6 +342,13 @@ class hubspotcore extends solution
         return null;
     }
 
+    public function getsingular($name)
+    {
+        if ($name === "contacts") {
+            return "contact";
+        }
+    }
+
     /**
      * Performs the underlying HTTP request. Not very exciting
      * @param  string $method The API method to be called
@@ -337,7 +356,7 @@ class hubspotcore extends solution
      * @return array          Assoc array of decoded result
      */
     protected
-    function call($url, $method = 'GET', $args = array(), $timeout = 120)
+    function call($url, $method = 'GET', $args = array(), $timeout = 120 )
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init($url);
@@ -357,8 +376,10 @@ class hubspotcore extends solution
             }
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $result = curl_exec($ch);
+            $resultCurl['exec'] = json_decode($result, true);;
+            $resultCurl['info'] = curl_getinfo($ch);
             curl_close($ch);
-            return $result ? json_decode($result, true) : false;
+            return $result ? $resultCurl : false;
 
         }
         throw new \Exception('curl extension is missing!');
