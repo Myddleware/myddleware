@@ -138,6 +138,7 @@ class hubspotcore extends solution
     public function read_last($param)
     {
         try {
+            print_r($param);
 //            echo '<pre>';
 //            $param['query'] = array("email" => "coolrobot@hubspot.com");// for test
             //$param['query'] = array("id" => 1);// for test
@@ -150,23 +151,26 @@ class hubspotcore extends solution
                 }
                 $property .= "&property=lastmodifieddate";
             }
+            //getsingular contact
+            $contact = $this->getsingular($param['module']);
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } else {
                     //@todo  get word for request
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/search/query?q=hubspot" . "&count=1&hapikey=" . $this->paramConnexion['apikey'] . $property);
                 }
-                $identifyProfiles = $resultQuery['properties'];
+                $identifyProfiles = $resultQuery['exec']['properties'];
+                $identifyProfilesId = $resultQuery['exec']['vid'];
 
             } else {
                 // limit to 1 result
                 $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/all?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property);
                 //on ajoute l'email car elle se trouve dans la proprietes
-                $identifyProfiles = $resultQuery['contacts'][0]['properties'];
-                $identifyProfilesId = $resultQuery['contacts'][0]['vid'];
+                $identifyProfiles = $resultQuery['exec'][$param['module']][0]['properties'];
+                $identifyProfilesId = $resultQuery['exec'][$param['module']][0]['vid'];
             }
             // If no result
             if (empty($resultQuery)) {
@@ -302,8 +306,8 @@ class hubspotcore extends solution
                 $contact = $this->getsingular($param['module']);
                 $dataHubspot["properties"] = $records;
                 $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
-                if ($resultQuery['info']['http_code'] ==! 204) { //204 is good
-                     $result[$key] = array(
+                if ($resultQuery['info']['http_code'] == !204) { //204 is good
+                    $result[$key] = array(
                         'id' => '-1',
                         'error' => 'Failed to create data in hubspot. '
                     );
@@ -356,7 +360,7 @@ class hubspotcore extends solution
      * @return array          Assoc array of decoded result
      */
     protected
-    function call($url, $method = 'GET', $args = array(), $timeout = 120 )
+    function call($url, $method = 'GET', $args = array(), $timeout = 120)
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init($url);
