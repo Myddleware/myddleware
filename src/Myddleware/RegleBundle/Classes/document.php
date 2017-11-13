@@ -822,7 +822,7 @@ class documentcore {
 						// Add filed in duplicate search only if not empty
 						if (!empty($searchFieldValue)) {
 							$searchFields[$duplicate_field] = $searchFieldValue;
-						// If no value, wecheck if the field is a relationship
+						// If no value, we check if the field is a relationship
 						} else {	
 							foreach ($this->ruleRelationships as $ruleRelationship) {	
 								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
@@ -968,12 +968,17 @@ class documentcore {
 		// Permet de renseigner le tableau rule avec les données d'entête
 		$rule = $this->getRule();
 		$read['module'] = $rule['module_target'];
-		$read['fields'] = $this->getTargetFields();
+		$read['fields'] = $this->getTargetFields();	
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
-		$dataTarget = $this->solutionTarget->read_last($read);
+		$dataTarget = $this->solutionTarget->read_last($read);		
 		if (empty($dataTarget['done'])) {
+			// If we have search an ID we should always find a result
+			if (!empty($searchFields['id'])) {
+				$this->message .= 'No result from the target solution. Failed to buid the data history.';
+				return -1;
+			}
 			return false;
 		}
 		elseif ($dataTarget['done'] === -1) {
