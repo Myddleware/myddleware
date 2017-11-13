@@ -31,16 +31,9 @@ require_once('lib/zuora/API.php');
 
 class zuoracore  extends solution { 
 	
-	protected $client;
 	protected $instance;
-	protected $sessionId;
 	protected $debug = 0;
-	protected $header;
-	protected $defaultApiNamespaceURL = 'http://api.zuora.com/';	
-	protected $maxZObjectCount = 50;
-	protected $defaultApiNamespace = "ns1";
-	protected $defaultObjectNamespace = "ns2";
-	protected $defaultObjectNamespaceURL = "http://object.api.zuora.com/";
+	protected $version = '85.0'; // Maw limit : 50
 	protected $update = false;
 	protected $limitCall = 10; // Maw limit : 50
 	
@@ -59,11 +52,16 @@ class zuoracore  extends solution {
                             'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
-                    // array(
-                            // 'name' => 'wsdl',
-                            // 'type' => 'text',
-                            // 'label' => 'solution.fields.wsdl'
-                        // )
+                    array(
+                            'name' => 'wsdl',
+                            'type' => 'text',
+                            'label' => 'solution.fields.wsdl'
+                        ),
+					array(
+						'name' => 'sandbox',
+						'type' => 'text',
+						'label' => 'solution.fields.sandbox'
+					)
         );
 	} // getFieldsLogin()
 
@@ -72,13 +70,20 @@ class zuoracore  extends solution {
 		parent::login($paramConnexion);
 		try{
 			// Get the wsdl (temporary solution)
-			$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/zuora/wsdl/zuora.a.85.0.wsdl';		
-			
 			$config = new \stdClass();
-			$config->wsdl = $this->paramConnexion['wsdl'];
+			$config->wsdl = __DIR__.'/../Custom/Solutions/zuora/wsdl/'.$this->paramConnexion['wsdl'];		 		
 			$this->instance = \Zuora_API::getInstance($config);
-			
-			$this->instance->setLocation('https://apisandbox.zuora.com/apps/services/a/85.0');
+			if (
+					!empty($this->paramConnexion['sandbox'])
+				&&	$this->paramConnexion['sandbox'] == 1
+			) {
+				$domain = 'https://apisandbox.zuora.com/';
+			}
+			else {
+				$domain = 'https://api.zuora.com/';
+			}
+				
+			$this->instance->setLocation($domain.'apps/services/a/'.$this->version);
 			$this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
 
 			$this->connexion_valide = true; 
