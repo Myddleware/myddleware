@@ -187,7 +187,7 @@ class ConnectorController extends Controller
     {
 			
 		if( isset($solution) ) {
-			if(in_array(trim($solution), array('sagecrm','sapcrm','sap'))){
+			if(in_array(trim($solution), array('sagecrm','sapcrm','sap','zuora'))){
 				$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/wsdl/";
 				// Get canonicalized absolute pathname
 				$path = realpath($output_dir);

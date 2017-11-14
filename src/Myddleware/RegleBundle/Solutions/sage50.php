@@ -21,10 +21,10 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-require_once('lib/sagesdata/Conn.php');
-require_once('lib/sagesdata/Query.php');
-require_once('lib/sagesdata/Schema.php');
-require_once('lib/sagesdata/Query/Type/Create.php');
+// require_once('lib/sagesdata/Conn.php');
+// require_once('lib/sagesdata/Query.php');
+// require_once('lib/sagesdata/Schema.php');
+// require_once('lib/sagesdata/Query/Type/Create.php');
 
 class sage50core extends solution
 {
@@ -39,9 +39,58 @@ class sage50core extends solution
     protected $dataToHTML = array();
 	protected $required_fields = array('default' => array('id','updated','published'));
 	protected $update;
-	protected $subModules = array('salesOrderLine', 'salesInvoiceLine','purchaseOrderLine','purchaseOrderDeliveryLine');
-    protected $readLimit = 2;
+	protected $subModules = array('salesOrderLine', 'salesInvoiceLine','purchaseOrderLine','purchaseOrderDeliveryLine'/* ,'bankAccount' */);
+	protected $parentModules = array('salesOrder','salesInvoice'/* ,'tradingAccount' */);
+	protected $createOnlyModules = array('salesOrder','salesInvoice');
+    protected $readLimit = 100;
 
+	protected $moduleSubFields = array(	
+										'tradingAccount' => array( // Name of the main module into Sage
+																	'phoneNumber' => array( // Name of the module into Sage
+																							'title' => 'phones',	// Name of the structure in the title in the link structure
+																							'structureNames' => array('Business Phone', 'Other Phone','Business Fax'), // Every type of data linked to the searchField
+																							'searchField' => 'type', // Search field where the structureNames are strored
+																							'structureFields' => array('uuid','text') // Fields belonging to the structure available in Myddleware
+																						),
+																	'postalAddress' => array( // Name of the module into Sage
+																							'title' => 'postalAddresses',	// Name of the structure in the title in the link structure
+																							'structureNames' => array('Billing', 'Shipping', 'Registered'), // Every type of data linked to the searchField
+																							'searchField' => 'type', // Search field where the structureNames are strored
+																							'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','county','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), // Fields belonging to the structure available in Myddleware
+																							// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																						),	
+																	'email' => array( // Name of the module into Sage
+																							'title' => 'emails',	// Name of the structure in the title in the link structure
+																							'structureNames' => array('Supplier Registered Email', 'Supplier Registered Email2', 'Supplier Registered Email3','Supplier Delivery Email'), // Every type of data linked to the searchField
+																							'searchField' => 'label', // Search field where the structureNames are strored
+																							'structureFields' => array('uuid','address') // Fields belonging to the structure available in Myddleware
+																						),
+																	'contact' => array( // Name of the module into Sage
+																							'title' => 'contacts',	// Name of the structure in the title in the link structure
+																							'structureNames' => array('1','2'), // Every type of data linked to the searchField
+																							'searchField' => 'addressType', // Search field where the structureNames are strored
+																							'structureFields' => array('uuid','fullName','salutation','firstName','familyName') // Fields belonging to the structure available in Myddleware
+																						),
+																	'bankAccount' => array( // Name of the module into Sage
+																							'title' => 'bankAccounts',	// Name of the structure in the title in the link structure
+																							'structureFields' => array('uuid','active','name','description','branchIdentifier','accountNumber','iBANNumber','bICSwiftCode','rollNumber','currency','operatingCompanyCurrency','paymentAllowedFlag','receiptAllowedFlag') // Fields belonging to the structure available in Myddleware
+																						),	
+																),
+										'bankAccount' => array( // Name of the main module into Sage
+																	'tradingAccount' => array( // Name of the module into Sage
+																								'title' => 'tradingAccount',	// Name of the structure in the title in the link structure
+																								'structureFields' => array('uuid','active','customerSupplierFlag','companyPersonFlag','reference','name'), // Fields belonging to the structure available in Myddleware
+																								// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																							),
+																	'postalAddress' => array( // Name of the module into Sage
+																								'title' => 'postalAddress',	// Name of the structure in the title in the link structure
+																								'structureNames' => array('Other'), // Every type of data linked to the searchField
+																								'searchField' => 'type', // Search field where the structureNames are strored
+																								'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','county','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), // Fields belonging to the structure available in Myddleware
+																								// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																							),					
+																)
+								);		
 	
     /**
      * Function list fields for login
@@ -78,18 +127,11 @@ class sage50core extends solution
     {
         parent::login($paramConnexion);
         try {
-			 $this->sdata = new \Ia\Sdata\Conn(array(
-				'hostname'=>$this->paramConnexion['host'],
-				'username'=>$this->paramConnexion['login'],
-				'password'=> $this->paramConnexion['password'],
-				'application'=> self::APPLICATION,
-				'contract'=> self::CONTRACT,
-				'company'=>'companyname'
-			));
-
             // Call to get the token
             $this->token = base64_encode($this->paramConnexion['login'] . ':' . $this->paramConnexion['password']);
             $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/$schema', 'login');
+            // $response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/$system/registry/-/contracts', 'login');
+		
             if ($response['curlErrorNumber'] === 0) { // url all fine . precced as usual
                 if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
                     $this->connexion_valide = true;
@@ -124,22 +166,26 @@ class sage50core extends solution
             // Call to get the token
             $this->token = $this->getAccessToken();
             $xml = $this->getXML();
+
 			if ($type == 'source') {
-				$modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');
+				$modules_names = $xml->xpath('//xs:element[@sme:canGet="true" and @sme:role="resourceKind"]/@name');		
 			} else {
 				$modules_names = $xml->xpath('//xs:element[@sme:canPost="true" and @sme:role="resourceKind"]/@name');
-				$this->moduleFields['salesInvoiceLine'] = 'salesInvoiceLine';
-				$this->moduleFields['purchaseOrderLine'] = 'purchaseOrderLine';
-				$this->moduleFields['purchaseOrderDeliveryLine'] = 'purchaseOrderDeliveryLine';
+				// Add submodules if exist
+				if (!empty($this->subModules)) {
+					foreach($this->subModules as $subModule) {
+						$modules_names[$subModule] = $subModule;	
+					}
+				}
 			}
             if (count($modules_names) > 0) { // url all fine . precced as usual
                 foreach ($modules_names as $key => $moduleName) {
-                    $this->moduleFields[(string)$moduleName] = (string)$moduleName; // get attribute who role is resourceKind and can get is true
-                }			
-                return $this->moduleFields;
+                    $modules[(string)$moduleName] = (string)$moduleName; // get attribute who role is resourceKind and can get is true
+                }	
             } else {
                 throw new \Exception('No modules from sage50.');
             }
+			return $modules;
         } catch (\Exception $e) {
             $error = 'Error get modules for sage50 : ' . $e->getMessage();
             echo $error . ';';
@@ -158,31 +204,84 @@ class sage50core extends solution
      */
     public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);		
-        try {
+        try {			
             // Call to get the token
             $this->token = $this->getAccessToken();
-            $xml = $this->getXML();
+            $xml = $this->getXML();				
+			
 			if ($xml) {
-				$fields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
-				if (count($fields) > 0) { // url all fine . precced as usual
-                    foreach ($fields as $key => $field) {						
-                        $this->moduleFields[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+				$fields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné			
+				if (count($fields) > 0) { // url all fine . precced as usual	
+                    foreach ($fields as $key => $field) {
+						
+						// If the type is a list or a structure, we check if we have registered it in the moduleSubFields array
+						if (
+								(
+									substr($field['type'],-6) == '--type' 
+								 OR	substr($field['type'],-6) == '--list' 
+								)
+						){
+			
+							// Get structure name from the full name (e.g. "sc:phoneNumber--list")
+							$structureKey = substr($field['type'], strpos($field['type'],':')+1, strlen($field['type'])-6-(strpos($field['type'],':')+1));							
+							if (!empty($this->moduleSubFields[$module][$structureKey])) {
+								$fieldList = $this->moduleSubFields[$module][$structureKey];
+								// If it is registered in the moduleSubFields array, we add the field in structure
+								if (!empty($fieldList['structureNames'])) {
+									foreach ($fieldList['structureNames'] as $structureName) {
+										foreach ($fieldList['structureFields'] as $structureField) {
+											if ($structureField == 'uuid') {
+												$this->fieldsRelate[$structureKey.'__'.str_replace(' ','',$structureName).'__'.str_replace(' ','',$structureField)] = array('label' => $structureKey.' : '.$structureName.' - '.$structureField, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required_relationship' => 0);
+											} else {
+												$this->moduleFields[$structureKey.'__'.str_replace(' ','',$structureName).'__'.str_replace(' ','',$structureField)] = array('label' => $structureKey.' : '.$structureName.' - '.$structureField, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+											}
+										}
+									}
+								} else {
+									foreach ($fieldList['structureFields'] as $structureField) {
+										if ($structureField == 'uuid') {
+											$this->fieldsRelate[$structureKey.'__'.str_replace(' ','',$structureField)] = array('label' => $structureKey.' - '.$structureField, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required_relationship' => 0);
+										} else {
+											$this->moduleFields[$structureKey.'__'.str_replace(' ','',$structureField)] = array('label' => $structureKey.' - '.$structureField, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+										}
+									}
+								}
+							}
+						} else {
+							switch ($field['type']) {
+								case 'xs:boolean':
+									$type = 'bool';
+									break;
+								case 'xs:date':
+									$type = 'date';
+									break;
+								case 'xs:time':
+									$type = 'time';
+									break;
+								default:
+									$type = 'varchar(255)';
+							}
+							$this->moduleFields[(string)$field["name"]] = array('label' => (string)$field['name'], 'type' => $type, 'type_bdd' => 'varchar(255)', 'required' => 0);
+						}
                     }
                 }
-				// $relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/*'); // on recrée la requete avec l'element sélectionné
-				$relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/xs:element[@sme:relationship="reference" or @sme:relationship="parent"]/@name'); // on recrée la requete avec l'element sélectionné
-				if (count($relateFields) > 0) { // url all fine . precced as usual
-                    foreach ($relateFields as $key => $field) {						
-                        $this->fieldsRelate[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required_relationship' => 0);
-                    }
-                }
+				
+				if ($type == 'target') {
+					$relateFields = $xml->xpath('//xs:complexType[@name="' . $module . '--type"]/xs:all/xs:element[@sme:relationship="reference" or @sme:relationship="parent"]/@name'); // on recrée la requete avec l'element sélectionné
+					if (count($relateFields) > 0) { // url all fine . precced as usual
+						foreach ($relateFields as $key => $field) {						
+							$this->fieldsRelate[(string)$field["name"]] = array('label' => (string)$field["name"], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required_relationship' => 0);
+						}
+					}
+				}
+				
 				// Add relate field in the field mapping 
 				if (!empty($this->fieldsRelate)) {
 					$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 				}	
             } else {
                 throw new \Exception('No modules from sage50.');
-            }
+            }				
 			return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
@@ -254,7 +353,6 @@ class sage50core extends solution
      * @param $result
      * @return array|mixed
      */
-
     public function read_last($param)
     {		
         $result = array();
@@ -262,53 +360,119 @@ class sage50core extends solution
             // Call to get the token
             $this->token = $this->getAccessToken();
             $modules_pluralName = $this->getPluralName($param ["module"]);
-			// Get one data from Sage
+			// Get one data from Sage	
 			if (!empty($param['query']['id'])) {
 				// The ID is the url. We just change the format to json
-				$response = $this->makeRequest('', $this->token, str_replace('format=atomentry','format=json',$param['query']['id']), 'read_last');
-				// $response = $this->makeRequest('', $this->token, $param['query']['id'], 'read_last');
+				$response = $this->makeRequest('', $this->token, $param['query']['id'], 'read');
+				// $response['curlData']['entry'] = $response['curlData'];
 			} else {				
-				$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1&format=json', 'read_last');
+				$response = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName . '?count=1', 'read');
+				$response['curlData']['entry'] = $response['curlData']['entry'];
 			}
-		
             if (!empty($response['curlInfo']) && $response['curlInfo']['http_code'] === 200) { // token is valid
-                if (!empty($response['curlData']['$resources'][0])) { 	
+				// The format returned by Sage is different when we list or when we search by ID
+				if (empty($param['query']['id'])) {
+					$response['curlData'] = $response['curlData']['entry'];
+				}
+		
+			
+                // if (!empty($response['curlData']['$resources'][0])) { 
+				if (!empty($response['curlData']['id'])) {				
+					$linkFound = array();
+					$linkData = array();
 					// Get the data for every field					
                     foreach ($param['fields'] as $field) {		
-						if (strtoupper($field) == 'ID') {
-							$field = '$uuid';
+						// If the field is an array, it means that there is a structure, and we have to call Sage to get the detail of this structure (e.g. phoneNumber__BusinessPhone__text)
+						$fieldArray = explode('__',$field);						
+						if (count($fieldArray) > 1) {
+							// Make sure our field is in $moduleSubFields
+							if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]])) {
+								// Search the link for the structure expexted (phones for exemple)								
+								foreach($response['curlData']['link'] as $link) {
+									if (
+											!empty($link['@attributes']['title'])
+										AND $link['@attributes']['title'] == $this->moduleSubFields[$param['module']][$fieldArray[0]]['title']
+									) {
+										$linkFound = $link['@attributes'];
+										break;
+									}
+								}							
+								if (!empty($linkFound)) {	
+									// Call sage if it isn't done already for the current record and structure (e.g.the phones for a specific tradingAccount). 
+									if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']])) {
+										// $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')).'&count='.count($this->moduleSubFields[$param['module']][$fieldArray[0]]['structureNames']), 'read');
+										$linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')), 'read');
+										// If only one record, we add a dimension to be able to use the foreach below
+										if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0])) {
+											$tmp[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0] = $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'];
+											$linkData = $tmp;
+										}
+									}	
+									// if we have a result from Sage
+									if (!empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'])) {
+										// Search the right record whith the search field (e.g. field type for the phone)
+										foreach($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'] as $linkRecord) {
+											// We always add the uuid in the structure
+											if (!empty($linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'])) {
+												$linkRecord['payload'][$fieldArray[0]]['uuid'] = $linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'];										
+											}
+											// If there is a search field then we filter on this search field
+											if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField'])) {
+												// If we have found the right record, we save the field of this structure
+												// We delete space in the names of the fields because we did it in the method get_module_fields (Myddleware doesn't allow space in fieldname)
+												if (str_replace(' ', '',$linkRecord['payload'][$fieldArray[0]][$this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField']]) == $fieldArray[1]) {
+													$result['values'][$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]); // empty = array for Sage
+												}
+											// Otherwise, we take the first data (only one structure), the array has only 2 value (main struture + field)
+											} else {
+												$result['values'][$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]);   // empty = array for Sage
+											}
+										}
+									}
+								} else {
+									throw new \Exception('Failed to find the link with the title '.$this->moduleSubFields[$param['module']][$fieldArray[0]]['title'].'.' );	
+								}
+								// If we couldn't get the field, we set the finid to empty
+								if (!isset($result['values'][$field])) {
+									$result['values'][$field] = '';
+								}								
+							}
+						} else {
+							if ($field == 'id') {
+								$result['values'][$field] = $response['curlData']['payload'][$param ['module']]['@attributes']['uuid'];
+							} elseif (!empty($response['curlData']['payload'][$param ['module']][$field])) {
+								$result['values'][$field] = $response['curlData']['payload'][$param ['module']][$field];
+							} else {
+								$result['values'][$field] = '';
+							}
 						}
-                        $result['values'][$field] = $response['curlData']['$resources'][0][$field];
                     }
-					if (!empty($response['curlData']['$resources'][0]['$url'])) {	
-						$result['values']['id'] = $response['curlData']['$resources'][0]['$url'];
+					if (!empty($response['curlData']['id'])) {	
+						$result['values']['id'] = $response['curlData']['id'];
 					}
                     $result['done'] = true;
-                    //“1” if a data has been found
-                    //“0”if no data has been found and no error occured
-                    //“-1” if an error occured
                 } else {
-                    if (strlen($response['curlData']) === 0) {
-                        $result['done'] = false;
-                    } else {
-                        throw new \Exception('No data from sage50.');
-                    }
+					$result['done'] = false;
                 }
-            } else {
-                throw new \Exception('Error read data from sagesSata.');
-            }
+            // If the query return an error 
+			} elseif (!empty($response['Message'])) {
+				throw new \Exception($response['Message']);	
+			} else {
+				throw new \Exception('Failed to call Sage with no error returned.');	
+			}	
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
-        }		
+        }	
         return $result;
     }
-	
+
     /**
      * Function read
      */
 	public function read($param) {
-		try {
+		try {		
+			$this->get_module_fields($param['module'],'source');		
 			$result['date_ref'] = $param['date_ref'];
 			// If we use an offset, we have to restart from the same beginning
 			if (!empty($param['ruleParams']['OffsetDateREf'])) {
@@ -325,6 +489,7 @@ class sage50core extends solution
 			// Get the reference date field name
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);		
 			$query = 'select=';
+			
 			// Build the SELECT 
 			if (!empty($param['fields'])) {
 				foreach ($param['fields'] as $field) {
@@ -361,7 +526,7 @@ class sage50core extends solution
 			
 			// Call to get the token
             $this->token = $this->getAccessToken();
-            $modules_pluralName = $this->getPluralName($param ["module"]);
+            $modules_pluralName = $this->getPluralName($param ['module']);
 			$startIndex = (!empty($param['ruleParams']['Offset']) ? $param['ruleParams']['Offset'] : 0);
 
 			// Get one data from Sage
@@ -380,24 +545,80 @@ class sage50core extends solution
 						$row['date_modified'] = $record[$dateRefField];				
 						$row['updated'] = $record['updated'];
 						$row['published'] = $record['published'];
-	
-						// Get the detail of the current record (only in json format)
-						$detailRecord = $this->makeRequest('', $this->token, str_replace('atomentry', 'json',$record['id']), 'read_last');
-	
-						if (empty($detailRecord['curlData']['$resources'][0])) {
-							throw new \Exception('Failed to get the detail of the record '.$record['id'].'.');
-						}
+						$linkFound = array();
+						$linkData = array();
+
 						// For each fields expected
 						foreach($param['fields'] as $field) {					
 							if (in_array($field, array('updated', 'published'))) {
 								continue;
 							}
-							if ($field == 'id') {
-								$row[$field] = $detailRecord['curlData']['$resources'][0]['$uuid'];
+							// If the field is an array, it means that there is a structure, and we have to call Sage to get the detail of this structure (e.g. phoneNumber__BusinessPhone__text)
+							$fieldArray = explode('__',$field);
+							if (count($fieldArray) > 1) {
+								// $phones = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/accounts50/GCRM/%7BA8C43BE7-A572-4E7C-A141-14C848413F84%7D/PhoneNumbers?where=reference%20eq%20"SFE-UK"&count=4', 'read');
+								// Make sure our field is in $moduleSubFields
+								if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]])) {
+									// Search the link for the structure expexted (phones for exemple)
+									foreach($record['link'] as $link) {
+										if (
+												!empty($link['@attributes']['title'])
+											AND $link['@attributes']['title'] == $this->moduleSubFields[$param['module']][$fieldArray[0]]['title']
+										) {
+											$linkFound = $link['@attributes'];
+											break;
+										}
+									}
+									if (!empty($linkFound)) {	
+										// Call sage if it isn't done already for the current record and structure (e.g.the phones for a specific tradingAccount). 
+										if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']])) {
+											$linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')), 'read');
+											// If only one record, we add a dimension to be able to use the foreach below
+											if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0])) {
+												$tmp[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0] = $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'];
+												$linkData = $tmp;
+											}	
+										}
+										// if we have a result from Sage
+										if (!empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'])) {
+											// Search the right record whith the search field (e.g. field type for the phone)
+											foreach($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'] as $linkRecord) {
+												// We always add the uuid in the structure
+												if (!empty($linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'])) {
+													$linkRecord['payload'][$fieldArray[0]]['uuid'] = $linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'];										
+												}
+												// If there is a search field then we filter on this search field
+												if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField'])) {
+													// If we have found the right record, we save the field of this structure
+													// We delete space in the names of teh fields because we did it in the method get_module_fields (Myddleware doesn't allow space in fieldname)
+													if (str_replace(' ', '',$linkRecord['payload'][$fieldArray[0]][$this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField']]) == $fieldArray[1]) {
+														$row[$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]); // empty = array for Sage
+													}
+												// Otherwise, we take the first data (only one structure), the array has only 2 value (main struture + field)
+												} else {
+													$row[$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]);   // empty = array for Sage
+												}
+											}
+										}
+									} else {
+										throw new \Exception('Failed to find the link with the title '.$this->moduleSubFields[$param['module']][$fieldArray[0]]['title'].'.' );	
+									}
+									// If we couldn't get the field, we set the finid to empty
+									if (!isset($row[$field])) {
+										$row[$field] = '';
+									}								
+								}								
 							} else {
-								$row[$field] = $detailRecord['curlData']['$resources'][0][$field];
+								// echo count($fieldArray).chr(10);
+								if ($field == 'id') {
+									$row[$field] = $record['payload'][$param ['module']]['@attributes']['uuid'];
+								} elseif (!empty($record['payload'][$param ['module']][$field])) {
+									$row[$field] = $record['payload'][$param ['module']][$field];
+								} else {
+									$row[$field] = '';
+								}
 							}
-						}
+						}												
 						// Calculae the reference date
 						if (
 								!empty($row['date_modified'])
@@ -412,9 +633,11 @@ class sage50core extends solution
 					}							
 				}
 			// If the query return an error 
-			}elseif (!empty($resultQuery['Message'])) {
-				throw new \Exception($resultQuery['Message']);	
-			}	
+			} elseif (!empty($response['Message'])) {
+				throw new \Exception($response['Message']);	
+			} else {
+				throw new \Exception('Failed to call Sage with no error returned.');	
+			}		
 			// Set the offset for the next call if needed. We keep teh reference date too, we ned it to restart from the same beginning
 			if ($result['count'] == $param['limit']) {				
 				$result['ruleParams'][] = array('name' => 'Offset', 'value' => $startIndex + $result['count']);
@@ -481,7 +704,7 @@ class sage50core extends solution
   '<title/>
   <content/>
   <sdata:payload>
-    <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008"
+    <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008" xmlns:sc="http://schemas.sage.com/sc/2009"
       sdata:uuid="'.$uuid.'">'.chr(10);
 // print_r($data);	  
 				foreach (array_reverse($data) as $key => $value) {				
@@ -547,13 +770,12 @@ class sage50core extends solution
 						$xmlData .= '      <'.$key.' sdata:uuid="'.$id.'" />'.chr(10);	
 						$id = '';
 					} else {
-						$xmlData .= '      <'.$key.'>'.$value.'</'.$key.'>'.chr(10);
+						$xmlData .= '      <'.$key.'>'.$value.'</'.$key.'>'.chr(10);					
 					}
-				} 		
+				}	
 $xmlData .= '    </'.$param ["module"].'>
   </sdata:payload>
 </entry>';
-// echo chr(10).$xmlData.chr(10);
 			
 				// Send data to Sage
 				if ($this->update) {					
@@ -561,8 +783,7 @@ $xmlData .= '    </'.$param ["module"].'>
 					$dataSent = $this->makeRequest('', $this->token, $data['target_id'], 'update', null, $xmlData);
 				} else {				
 					$dataSent = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/' . self::APPLICATION . '/' . self::CONTRACT . '/-/' . $modules_pluralName, 'create', null, $xmlData);
-				}
-		
+				}	
 				// General error
 				if (!empty($dataSent['curlData']->message)) {
 					throw new \Exception($dataSent['curlData']->message);
@@ -578,8 +799,7 @@ $xmlData .= '    </'.$param ["module"].'>
 				$result[$idDoc] = array(
 										'id' => $dataSent['curlData']->id,
 										'error' => false
-										);	
-								
+										);		
 				// Transfert status update
 				if (!empty($subDocIdArray)) {				
 					foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
@@ -603,7 +823,7 @@ $xmlData .= '    </'.$param ["module"].'>
 	// The function return true if we can display the column parent in the rule view, relationship tab
 	// We display the parent column when module is subscription
 	public function allowParentRelationship($module) {
-		if (in_array($module, array('salesOrder','salesInvoice'))) {
+		if (in_array($module, $this->parentModules)) {
 			return true;
 		}
 		return false;
@@ -628,11 +848,11 @@ $xmlData .= '    </'.$param ["module"].'>
 		}
 		return null;
 	}
-	
+
 	public function getRuleMode($module,$type) {
 		if(
 				$type == 'target'
-			&&	in_array($module, array('salesOrder','salesInvoice'))
+			&&	in_array($module, $this->createOnlyModules)
 		) { // Si le module est dans le tableau alors c'est uniquement de la création
 			return array(
 				'C' => 'create_only'
@@ -695,12 +915,17 @@ $xmlData .= '    </'.$param ["module"].'>
             // Execute request
             $result = curl_exec($ch);
 
-			if ($method == 'read') {
+			if ($method == 'read') {			
+				$result = str_replace('sdata:','',$result);
+				$result = str_replace('crm:','',$result);
+				$result = str_replace('sc:','',$result);
 				$xml = simplexml_load_string($result);
 				$json = json_encode($xml);
-				$result = json_decode($json,TRUE);						
+				$result = json_decode($json,TRUE);									
 			} elseif ($method == 'create' OR $method == 'update') {		
 				$result = str_replace('sdata:','',$result);
+				$result = str_replace('crm:','',$result);
+				$result = str_replace('sc:','',$result);
 				$result = simplexml_load_string($result);
 			}else {
 				$result = $this->repairJson($result);
