@@ -219,15 +219,14 @@ class hubspotcore extends solution
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {
-
-                $result['date_ref'] = $param['date_ref'];
+                $timestampLastmodified = $identifyProfiles[0]["properties"]["lastmodifieddate"]["value"];
+                $result['date_ref'] = date('Y-d-m H:i:s', $timestampLastmodified / 1000);
                 foreach ($identifyProfiles as $identifyProfile) {
                     $records = null;
                     foreach ($param['fields'] as $field) {
                         if (isset($identifyProfile["properties"] [$field])) {
                             $records[$field] = $identifyProfile["properties"] [$field]['value'];
                         }
-
                         $records['date_modified'] = $identifyProfile["properties"]["lastmodifieddate"]['value']; // add date modified
                         $records['id'] = $identifyProfile['vid'];
                         $result['values'][$identifyProfile['vid']] = $records;
@@ -270,7 +269,7 @@ class hubspotcore extends solution
 
                 } else {
                     $result[$key] = array(
-                        'id' => $resultQuery['vid'],
+                        'id' => $resultQuery['exec']['vid'],
                         'error' => false
                     );
                 }
@@ -346,6 +345,11 @@ class hubspotcore extends solution
         return null;
     }
 
+    /**
+     * get singular of module
+     * @param $name
+     * @return string
+     */
     public function getsingular($name)
     {
         if ($name === "contacts") {
