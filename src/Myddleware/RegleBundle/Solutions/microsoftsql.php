@@ -59,6 +59,12 @@ class microsoftsqlcore extends database {
 	protected function get_query_select_limit_read_last() {
 		return "";
 	}
+	
+	// Function to escape characters 
+	protected function escape($value) {
+		return str_replace("'", "''", $value);
+	}
+	
 
 }// class microsoftsqlcore
 
