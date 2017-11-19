@@ -250,18 +250,18 @@ class sage50core extends solution
 						} else {
 							switch ($field['type']) {
 								case 'xs:boolean':
-									$type = 'bool';
+									$typeData = 'bool';
 									break;
 								case 'xs:date':
-									$type = 'date';
+									$typeData = 'date';
 									break;
 								case 'xs:time':
-									$type = 'time';
+									$typeData = 'time';
 									break;
 								default:
-									$type = 'varchar(255)';
+									$typeData = 'varchar(255)';
 							}
-							$this->moduleFields[(string)$field["name"]] = array('label' => (string)$field['name'], 'type' => $type, 'type_bdd' => 'varchar(255)', 'required' => 0);
+							$this->moduleFields[(string)$field["name"]] = array('label' => (string)$field['name'], 'type' => $typeData, 'type_bdd' => 'varchar(255)', 'required' => 0);
 						}
                     }
                 }

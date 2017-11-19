@@ -424,7 +424,7 @@ class databasecore extends solution {
 							$idTarget = $value;
 						}
 						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose.",";
-						$values .= "'".$value."',";
+						$values .= "'".$this->escape($value)."',";
 					}
 					
 					// Remove the last coma
@@ -494,7 +494,7 @@ class databasecore extends solution {
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
 						}								
-						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$value."',";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$this->escape($value)."',";
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
@@ -531,6 +531,11 @@ class databasecore extends solution {
 			);
 		}
 		return $result;
+	}
+	
+	// Function to escape characters 
+	protected function escape($value) {
+		return $value;
 	}
 	
 	// Get the strings which can identify what field is an id in the table
