@@ -90,6 +90,7 @@ class hubspotcore extends solution
         parent::get_module_fields($module, $type);
         try {
             $result = $this->call($this->url . 'properties/' . $this->version . '/' . $module . '/properties?hapikey=' . $this->paramConnexion['apikey']);
+            $result = $result['exec'];
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
             } elseif (empty($result)) {
@@ -134,43 +135,68 @@ class hubspotcore extends solution
         }
     } // get_module_fields($module)
 
-    // Get the last data in the application
+    /**
+     * Get the last data in the application
+     * @param $param
+     * @return mixed
+     */
     public function read_last($param)
     {
         try {
-            print_r($param);
-//            echo '<pre>';
-//            $param['query'] = array("email" => "coolrobot@hubspot.com");// for test
-            //$param['query'] = array("id" => 1);// for test
-            // Get the reference date field name
+
+            $module = $this->getsingular($param['module']);
 
             if (!empty($param['fields'])) { //add properties for request
                 $property = "";
-                foreach ($param['fields'] as $fields) {
-                    $property .= "&property=" . $fields;
+                // Get the reference date field name
+                if ($module === "companies" || $module === "deal") {
+                    $properties = "properties";
+                    $property .= "&properties=hs_lastmodifieddate";
+                    $id = $module === "companies" ? "companyId" : "dealId";
+                    $version = $module === "companies" ? "v2" : "v1";
+                    $modified = "hs_lastmodifieddate";
+
+                } else if ($module === "contact") {
+                    $properties = "property";
+                    $property .= "&property=lastmodifieddate";
+                    $id = "vid";
+                    $modified = "lastmodifieddate";
                 }
-                $property .= "&property=lastmodifieddate";
+                foreach ($param['fields'] as $fields) {
+                    $property .= "&" . $properties . "=" . $fields;
+                }
             }
-            //getsingular contact
-            $contact = $this->getsingular($param['module']);
+
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    if ($module === "companies" || $module === "deal") {
+                        $url_id = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
+                    } else if ($module === "contact") {
+                        $url_id = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                    }
+                    $resultQuery = $this->call($url_id);
                 } else {
                     //@todo  get word for request
                     $resultQuery = $this->call($this->url . $param['module'] . "/v1/search/query?q=hubspot" . "&count=1&hapikey=" . $this->paramConnexion['apikey'] . $property);
                 }
                 $identifyProfiles = $resultQuery['exec']['properties'];
-                $identifyProfilesId = $resultQuery['exec']['vid'];
+                $identifyProfilesId = $resultQuery['exec'][$id];
 
             } else {
-                // limit to 1 result
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/all?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property);
+                if ($module === "companies" || $module === "deal") {
+                    $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/paged?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
+                    $resultQuery = $this->call($url);
+                } else if ($module === "contact") {
+                    $url = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/all?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
+                    $resultQuery = $this->call($url);
+                }
+
+                $identifyProfilesId = $resultQuery['exec'][$param['module']][0][$id];
+
                 //on ajoute l'email car elle se trouve dans la proprietes
                 $identifyProfiles = $resultQuery['exec'][$param['module']][0]['properties'];
-                $identifyProfilesId = $resultQuery['exec'][$param['module']][0]['vid'];
             }
             // If no result
             if (empty($resultQuery)) {
@@ -182,54 +208,93 @@ class hubspotcore extends solution
                     }
                 }
                 $result['values']['id'] = $identifyProfilesId; // Add id
-                $result['values']['date_modified'] = $identifyProfiles["lastmodifieddate"]['value']; // add date modified
+                $result['values']['date_modified'] = $identifyProfiles[$modified]['value']; // add date modified
                 if (!empty($result['values'])) {
                     $result['done'] = true;
                 }
             }
-//            die();
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
         }
         return $result;
-    }
+    }// end function read_last
 
+    /**
+     * Function read data
+     * @param $param
+     * @return mixed
+     */
     public function read($param)
     {
         try {
             $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-            if (!empty($param['fields'])) { //add properties for request
-                $property = "";
-                foreach ($param['fields'] as $fields) {
-                    $property .= "&property=" . $fields;
+            $module = $this->getsingular($param['module']);
+
+            // Get the reference date field name
+            if ($module === "companies" || $module === "deal") {
+                $version = $module === "companies" ? "v2" : "v1";
+                if (!empty($param['fields'])) { //add properties for request
+                    $property = "";
+                    foreach ($param['fields'] as $fields) {
+                        $property .= "&properties=" . $fields;
+                    }
+                    $property .= "&properties=hs_lastmodifieddate";
                 }
-                $property .= "&property=lastmodifieddate";
+                $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                $ur_created = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+
+            } else if ($module === "contact") {
+                if (!empty($param['fields'])) { //add properties for request
+                    $property = "";
+                    foreach ($param['fields'] as $fields) {
+                        $property .= "&property=" . $fields;
+                    }
+                    $property .= "&property=lastmodifieddate";
+                }
+                $url_modified = $this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             }
-            //@todo get contact with timeOffset?
+
+
             if ($dateRefField === "ModificationDate") {
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                $resultQuery = $this->call($url_modified);
+
             } else if ($dateRefField === "CreationDate") {
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                $resultQuery = $this->call($ur_created);
+
             }
             $resultQuery = $resultQuery['exec'];
-            $identifyProfiles = $resultQuery[$param['module']];
+
+            if ($module === "companies" || $module === "deal") {
+                $identifyProfiles = $resultQuery['results'];
+                $modified = "hs_lastmodifieddate";
+                $id = $module === "companies" ? "companyId" : "dealId";
+
+            } else if ($module === "contact") {
+                $identifyProfiles = $resultQuery[$param['module']];
+                $modified = "lastmodifieddate";
+                $id = 'vid';
+
+            }
 
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {
-                $timestampLastmodified = $identifyProfiles[0]["properties"]["lastmodifieddate"]["value"];
+                $timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
                 $result['date_ref'] = date('Y-d-m H:i:s', $timestampLastmodified / 1000);
                 foreach ($identifyProfiles as $identifyProfile) {
                     $records = null;
                     foreach ($param['fields'] as $field) {
                         if (isset($identifyProfile["properties"] [$field])) {
                             $records[$field] = $identifyProfile["properties"] [$field]['value'];
+
                         }
-                        $records['date_modified'] = $identifyProfile["properties"]["lastmodifieddate"]['value']; // add date modified
-                        $records['id'] = $identifyProfile['vid'];
-                        $result['values'][$identifyProfile['vid']] = $records;
+                        $records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
+
+                        $records['id'] = $identifyProfile[$id];
+                        $result['values'][$identifyProfile[$id]] = $records;
                     }
                 }
 
@@ -239,11 +304,14 @@ class hubspotcore extends solution
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
         }
         return $result;
-    }
+    }// end function read
 
-
-    public
-    function create($param)
+    /**
+     * Function create data
+     * @param $param
+     * @return mixed
+     */
+    public function create($param)
     {
         try {
             // Tranform Myddleware data to Mailchimp data
@@ -251,16 +319,27 @@ class hubspotcore extends solution
 
                 $dataHubspot["properties"] = null;
                 $records = array();
-                foreach ($param['data'][$key] as $idDoc => $value) {
-                    if ($idDoc === "target_id") continue;
-                    array_push($records, array("property" => $idDoc, "value" => $value));
-                }
 
                 //getsingular contact
-                $contact = $this->getsingular($param['module']);
-                $dataHubspot["properties"] = $records;
+                $module = $this->getsingular($param['module']);
 
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+                if ($module === "companies" || $module === "deal") {
+                    $version = $module === "companies" ? "v2" : "v1";
+                    $id = $module === "companies" ? "companyId" : "dealId";
+                    $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "?hapikey=" . $this->paramConnexion['apikey'];
+
+                    $property = "name";
+                } else if ($module === "contact") {
+                    $url = $this->url . $param['module'] . "/v1/" . $module . "?hapikey=" . $this->paramConnexion['apikey'];
+                    $id = 'vid';
+                    $property = "property";
+                }
+                foreach ($param['data'][$key] as $idDoc => $value) {
+                    if ($idDoc === "target_id") continue;
+                    array_push($records, array($property => $idDoc, "value" => $value));
+                }
+                $dataHubspot["properties"] = $records;
+                $resultQuery = $this->call($url, "POST", $dataHubspot);
                 if (isset($resultQuery['exec']['status']) && $resultQuery['exec']['status'] === 'error') {
                     $result[$key] = array(
                         'id' => '-1',
@@ -269,7 +348,7 @@ class hubspotcore extends solution
 
                 } else {
                     $result[$key] = array(
-                        'id' => $resultQuery['exec']['vid'],
+                        'id' => $resultQuery['exec'][$id],
                         'error' => false
                     );
                 }
@@ -283,28 +362,51 @@ class hubspotcore extends solution
             );
         }
         return $result;
-    }
+    }// end function create
 
-    public
-    function update($param)
+    /**
+     * Function update data
+     * @param $param
+     * @return mixed
+     */
+    public function update($param)
     {
         try {
+
+            $module = $this->getsingular($param['module']);
+            if ($module === "companies" || $module === "deal") {
+                $property = "name";
+                $method = 'PUT';
+                $version = $module === "companies" ? "v2" : "v1";
+            } else if ($module === "contact") {
+                $property = "property";
+                $method = 'POST';
+            }
+
             // Tranform Myddleware data to hubspot data
             foreach ($param['data'] as $key => $data) {
                 $dataHubspot["properties"] = null;
                 $records = array();
+
                 foreach ($param['data'][$key] as $idDoc => $value) {
                     if ($idDoc === "target_id") {
                         $idProfile = $value;
                         continue;
                     }
-                    array_push($records, array("property" => $idDoc, "value" => $value));
+                    array_push($records, array($property => $idDoc, "value" => $value));
                 }
 
+                if ($module === "companies" || $module === "deal") {
+                    $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $idProfile . "?hapikey=" . $this->paramConnexion['apikey'];
+
+                } else if ($module === "contact") {
+                    $url = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'];
+
+                }
                 //getsingular contact
-                $contact = $this->getsingular($param['module']);
                 $dataHubspot["properties"] = $records;
-                $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $contact . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'], "POST", $dataHubspot);
+                $resultQuery = $this->call($url, $method, $dataHubspot);
+
                 if ($resultQuery['info']['http_code'] == !204) { //204 is good
                     $result[$key] = array(
                         'id' => '-1',
@@ -326,12 +428,17 @@ class hubspotcore extends solution
             );
         }
         return $result;
-    }
+    }// end function update
 
 
-// return the reference date field name
-    public
-    function getDateRefName($moduleSource, $RuleMode)
+    /**
+     * return the reference date field name
+     * @param $moduleSource
+     * @param $RuleMode
+     * @return null|string
+     * @throws \Exception
+     */
+    public function getDateRefName($moduleSource, $RuleMode)
     {
         // Creation and modification mode
         if ($RuleMode == "0") {
@@ -354,6 +461,10 @@ class hubspotcore extends solution
     {
         if ($name === "contacts") {
             return "contact";
+        } else if ($name === "companies") {
+            return "companies";
+        } else if ($name === "deals") {
+            return "deal";
         }
     }
 
@@ -366,31 +477,35 @@ class hubspotcore extends solution
     protected
     function call($url, $method = 'GET', $args = array(), $timeout = 120)
     {
-        if (function_exists('curl_init') && function_exists('curl_setopt')) {
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-            $headers = array();
-            $headers[] = "Content-Type: application/json";
-            if (!empty($this->token)) {
-                $headers[] = "Authorization: Bearer " . $this->token;
-            }
-            if (!empty($args)) {
-                $jsonArgs = json_encode($args);
+        try {
+            if (function_exists('curl_init') && function_exists('curl_setopt')) {
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+                $headers = array();
+                $headers[] = "Content-Type: application/json";
+                if (!empty($this->token)) {
+                    $headers[] = "Authorization: Bearer " . $this->token;
+                }
+                if (!empty($args)) {
+                    $jsonArgs = json_encode($args);
 
-                $headers[] = "Content-Lenght: " . $jsonArgs;
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
-            }
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $result = curl_exec($ch);
-            $resultCurl['exec'] = json_decode($result, true);;
-            $resultCurl['info'] = curl_getinfo($ch);
-            curl_close($ch);
-            return $result ? $resultCurl : false;
+                    $headers[] = "Content-Lenght: " . $jsonArgs;
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
+                }
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                $result = curl_exec($ch);
+                $resultCurl['exec'] = json_decode($result, true);
+                $resultCurl['info'] = curl_getinfo($ch);
+                curl_close($ch);
 
+                return $resultCurl;
+
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('curl extension is missing!');
         }
-        throw new \Exception('curl extension is missing!');
     }
 
 }
