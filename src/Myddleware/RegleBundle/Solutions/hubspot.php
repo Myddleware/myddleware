@@ -25,6 +25,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Component\HttpFoundation\Session\Session;
+use \Datetime;
 
 class hubspotcore extends solution
 {
@@ -77,11 +78,16 @@ class hubspotcore extends solution
 
     public function get_modules($type = 'source')
     {
-        return array(
+        $modules = array(
             'companies' => 'Companies',
             'contacts' => 'Contacts',
             'deals' => 'Deals',
         );
+        // Module to create relationship between deals and contacts/companies
+        if ($type == 'target') {
+            $modules['associate_deal'] = 'Associate deals with companies/contacts';
+        }
+        return $modules;
     } // get_modules()
 
     // Renvoie les champs du module passé en paramètre
@@ -89,8 +95,18 @@ class hubspotcore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $result = $this->call($this->url . 'properties/' . $this->version . '/' . $module . '/properties?hapikey=' . $this->paramConnexion['apikey']);
-            $result = $result['exec'];
+            // Manage custom module to deal with associate_deal
+            if ($module == 'associate_deal') {
+                $result = array(
+                    array('name' => 'deal_id', 'label' => 'Deal Id', 'type' => 'varchar(36)'),
+                    array('name' => 'record_id', 'label' => 'Contact or company ID', 'type' => 'varchar(36)'),
+                    array('name' => 'object_type', 'label' => 'Object Type', 'type' => 'varchar(36)', 'options' => array(array('value' => 'CONTACT', 'label' => 'Contact'), array('value' => 'COMPANY', 'label' => 'Company')))
+                );
+            } else {
+                $result = $this->call($this->url . 'properties/' . $this->version . '/' . $module . '/properties?hapikey=' . $this->paramConnexion['apikey']);
+                $result = $result['exec'];
+            }
+
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
             } elseif (empty($result)) {
@@ -256,13 +272,14 @@ class hubspotcore extends solution
                 $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             }
 
-
             if ($dateRefField === "ModificationDate") {
-                $resultQuery = $this->call($url_modified);
+                $result = $this->call($url_modified);
+                $resultQuery = $this->getresultQuery($result, $url_modified, $param);
 
             } else if ($dateRefField === "CreationDate") {
-                $resultQuery = $this->call($ur_created);
 
+                $result = $this->call($ur_created);
+                $resultQuery = $this->getresultQuery($result, $ur_created, $param);
             }
             $resultQuery = $resultQuery['exec'];
 
@@ -283,7 +300,7 @@ class hubspotcore extends solution
                 $result['error'] = "Request error";
             } else {
                 $timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
-                $result['date_ref'] = date('Y-d-m H:i:s', $timestampLastmodified / 1000);
+                $result['date_ref'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000);
                 foreach ($identifyProfiles as $identifyProfile) {
                     $records = null;
                     foreach ($param['fields'] as $field) {
@@ -292,12 +309,10 @@ class hubspotcore extends solution
 
                         }
                         $records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
-
                         $records['id'] = $identifyProfile[$id];
                         $result['values'][$identifyProfile[$id]] = $records;
                     }
                 }
-
                 $result['count'] = count($result['values']);
             }
         } catch (\Exception $e) {
@@ -314,8 +329,12 @@ class hubspotcore extends solution
     public function create($param)
     {
         try {
+            // Associate deal is always an update to Hubspot
+            if ($param['module'] == 'associate_deal') {
+                return $this->update($param);
+            }
             // Tranform Myddleware data to Mailchimp data
-            foreach ($param['data'] as $key => $data) {
+            foreach ($param['data'] as $idDoc => $data) {
 
                 $dataHubspot["properties"] = null;
                 $records = array();
@@ -334,29 +353,32 @@ class hubspotcore extends solution
                     $id = 'vid';
                     $property = "property";
                 }
-                foreach ($param['data'][$key] as $idDoc => $value) {
-                    if ($idDoc === "target_id") continue;
-                    array_push($records, array($property => $idDoc, "value" => $value));
+                foreach ($param['data'][$idDoc] as $key => $value) {
+                    if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
+                        continue;
+                    }
+                    array_push($records, array($property => $key, "value" => $value));
                 }
                 $dataHubspot["properties"] = $records;
                 $resultQuery = $this->call($url, "POST", $dataHubspot);
+
                 if (isset($resultQuery['exec']['status']) && $resultQuery['exec']['status'] === 'error') {
-                    $result[$key] = array(
+                    $result[$idDoc] = array(
                         'id' => '-1',
-                        'error' => 'Failed to create data in hubspot. '
+                        'error' => 'Failed to create data in hubspot. ' . (!empty($resultQuery['exec']['validationResults'][0]['message']) ? $resultQuery['exec']['validationResults'][0]['message'] : (!empty($resultQuery['exec']['message']) ? $resultQuery['exec']['message'] : ''))
                     );
 
                 } else {
-                    $result[$key] = array(
+                    $result[$idDoc] = array(
                         'id' => $resultQuery['exec'][$id],
                         'error' => false
                     );
                 }
-                $this->updateDocumentStatus($key, $result[$key], $param);
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();
-            $result[$key] = array(
+            $result[$idDoc] = array(
                 'id' => '-1',
                 'error' => $error
             );
@@ -384,45 +406,58 @@ class hubspotcore extends solution
             }
 
             // Tranform Myddleware data to hubspot data
-            foreach ($param['data'] as $key => $data) {
-                $dataHubspot["properties"] = null;
+            foreach ($param['data'] as $idDoc => $data) {
                 $records = array();
 
-                foreach ($param['data'][$key] as $idDoc => $value) {
-                    if ($idDoc === "target_id") {
-                        $idProfile = $value;
-                        continue;
+                // No properties for module associate_deal
+                if ($param['module'] != "associate_deal") {
+                    $dataHubspot["properties"] = null;
+                    foreach ($param['data'][$idDoc] as $key => $value) {
+                        if ($key == 'target_id') {
+                            $idProfile = $value;
+                            continue;
+                        } elseif ($key == 'Myddleware_element_id') {
+                            continue;
+                        }
+                        array_push($records, array($property => $key, "value" => $value));
                     }
-                    array_push($records, array($property => $idDoc, "value" => $value));
+                    $dataHubspot["properties"] = $records;
                 }
 
-                if ($module === "companies" || $module === "deal") {
+                if ($param['module'] === "associate_deal") {
+                    // Id profile is the deal_id. It is possible that we haven't target_id because the update function can be called by the create function
+                    $idProfile = $data['deal_id'];
+                    $url = $this->url . "deals/" . $version . "/" . $module . "/" . $idProfile . "/associations/" . $data['object_type'] . "?id=" . $data['record_id'] . "&hapikey=" . $this->paramConnexion['apikey'];
+                    $dataHubspot = array();
+
+                } elseif ($module === "companies" || $module === "deal") {
                     $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $idProfile . "?hapikey=" . $this->paramConnexion['apikey'];
-
-                } else if ($module === "contact") {
+                } elseif ($module === "contact") {
                     $url = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'];
-
-                }
-                //getsingular contact
-                $dataHubspot["properties"] = $records;
-                $resultQuery = $this->call($url, $method, $dataHubspot);
-
-                if ($resultQuery['info']['http_code'] == !204) { //204 is good
-                    $result[$key] = array(
-                        'id' => '-1',
-                        'error' => 'Failed to create data in hubspot. '
-                    );
                 } else {
-                    $result[$key] = array(
+                    throw new \Exception('Module ' . $module . ' unknown.');
+                }
+                // Call Hubspot			
+                $resultQuery = $this->call($url, $method, $dataHubspot);
+                if (
+                    $resultQuery['info']['http_code'] >= 200 // 200 is used to update deals for example
+                    AND $resultQuery['info']['http_code'] <= 204 //204 is good
+                ) {
+                    $result[$idDoc] = array(
                         'id' => $idProfile,
                         'error' => false
                     );
+                } else {
+                    $result[$idDoc] = array(
+                        'id' => '-1',
+                        'error' => 'Failed to create data in hubspot. ' . (!empty($resultQuery['exec']['validationResults'][0]['message']) ? $resultQuery['exec']['validationResults'][0]['message'] : (!empty($resultQuery['exec']['message']) ? $resultQuery['exec']['message'] : ''))
+                    );
                 }
-                $this->updateDocumentStatus($key, $result[$key], $param);
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();
-            $result[$key] = array(
+            $result[$idDoc] = array(
                 'id' => '-1',
                 'error' => $error
             );
@@ -430,6 +465,97 @@ class hubspotcore extends solution
         return $result;
     }// end function update
 
+
+    /**
+     * Function for get data
+     * @param $request
+     * @param $url
+     * @param $param
+     * @return array
+     *
+     */
+    protected function getresultQuery($request, $url, $param)
+    {
+        if ($param['module'] === "contacts") {
+            if ($request['exec']['time-offset'] === 0) {
+                $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
+            } else {
+                $timeOffset = $request['exec']['time-offset'];
+                $vidOffset = $request['exec']['vid-offset'];
+                $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
+
+                do {
+                    $resultOffset = $this->call($url . "&timeOffset=" . $timeOffset . "&vidOffset=" . $vidOffset);
+                    $timeOffset = $resultOffset['exec']['time-offset'];
+                    $vidOffset = $resultOffset['exec']['vid-offset'];
+                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);
+                    $merge = array_merge($result['exec'][$param['module']], $resultOffsetTemps);
+                    $result['exec'][$param['module']] = $merge;
+                } while ($timeOffset >= $this->dateTimeToTimestamp($param["date_ref"]));
+            }
+        } elseif ($param['module'] === "deals" || $param['module'] === "companies") {
+            if ($request['exec']['offset'] === $request['exec']['total']) {
+                $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
+
+            } else {
+                $offset = $request['exec']['offset'];
+                $total = $request['exec']['total'];
+                $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
+
+                do {
+                    $resultOffset = $this->call($url . "&offset=" . $offset);
+                    $offset = $resultOffset['exec']['offset'];
+                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
+                    $merge = array_merge($result['exec']['results'], $resultOffsetTemps);
+                    $result['exec']['results'] = $merge;
+                } while ($offset !== $total);
+            }
+        }
+        return $result;
+    }
+
+
+    /**
+     * Function for get data with date_ref
+     * @param $request
+     * @param $url
+     * @param $param
+     * @return array
+     *
+     */
+    protected function getresultQueryBydate($request, $param, $offset)
+    {
+        $param['module'] === "deals" || $param['module'] === "companies" ? $modified = "hs_lastmodifieddate" : $modified = "lastmodifieddate";
+        if (!$offset) {
+            if ($param['module'] === "deals" || $param['module'] === "companies") {
+                $module = 'results';
+                $result['exec'][$module] = [];
+            } else {
+                $module = $param['module'];
+                $result['exec'][$module] = [];
+            }
+        } else {
+            $result = [];
+        }
+        $dateTimestamp = $this->dateTimeToTimestamp($param["date_ref"]);
+        foreach ($request as $key => $item) {
+            if ($item['properties'][$modified]['value'] > $dateTimestamp) {
+                if (!$offset) {
+                    array_push($result['exec'][$module], $item);
+                } else {
+                    array_push($result, $item);
+                }
+            }
+        }
+        return $result;
+    }
+
+    // Function de conversion de datetime format solution à un datetime format Myddleware
+    protected function dateTimeToTimestamp($dateTime)
+    {
+        $date = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
+        return $date->getTimestamp() * 1000;
+    }// dateTimeToMyddleware($dateTime)
 
     /**
      * return the reference date field name
@@ -463,7 +589,7 @@ class hubspotcore extends solution
             return "contact";
         } else if ($name === "companies") {
             return "companies";
-        } else if ($name === "deals") {
+        } else if ($name === "deals" OR $name === "associate_deal") {
             return "deal";
         }
     }
