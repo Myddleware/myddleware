@@ -83,6 +83,7 @@ class hubspotcore extends solution
             'contacts' => 'Contacts',
             'deals' => 'Deals',
         );
+
         // Module to create relationship between deals and contacts/companies
         if ($type == 'target') {
             $modules['associate_deal'] = 'Associate deals with companies/contacts';
@@ -95,6 +96,7 @@ class hubspotcore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
+
             // Manage custom module to deal with associate_deal
             if ($module == 'associate_deal') {
                 $result = array(
@@ -326,6 +328,7 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
+
     public function create($param)
     {
         try {
@@ -354,6 +357,7 @@ class hubspotcore extends solution
                     $property = "property";
                 }
                 foreach ($param['data'][$idDoc] as $key => $value) {
+
                     if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
                         continue;
                     }
@@ -430,14 +434,16 @@ class hubspotcore extends solution
                     $url = $this->url . "deals/" . $version . "/" . $module . "/" . $idProfile . "/associations/" . $data['object_type'] . "?id=" . $data['record_id'] . "&hapikey=" . $this->paramConnexion['apikey'];
                     $dataHubspot = array();
 
+
                 } elseif ($module === "companies" || $module === "deal") {
                     $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $idProfile . "?hapikey=" . $this->paramConnexion['apikey'];
                 } elseif ($module === "contact") {
                     $url = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'];
                 } else {
+
                     throw new \Exception('Module ' . $module . ' unknown.');
                 }
-                // Call Hubspot			
+                // Call Hubspot
                 $resultQuery = $this->call($url, $method, $dataHubspot);
                 if (
                     $resultQuery['info']['http_code'] >= 200 // 200 is used to update deals for example
@@ -450,6 +456,7 @@ class hubspotcore extends solution
                 } else {
                     $result[$idDoc] = array(
                         'id' => '-1',
+
                         'error' => 'Failed to create data in hubspot. ' . (!empty($resultQuery['exec']['validationResults'][0]['message']) ? $resultQuery['exec']['validationResults'][0]['message'] : (!empty($resultQuery['exec']['message']) ? $resultQuery['exec']['message'] : ''))
                     );
                 }
