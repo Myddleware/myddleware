@@ -33,15 +33,9 @@ class hubspotcore extends solution
     protected $url = 'https://api.hubapi.com/';
     protected $version = 'v1';
 
-    /* protected $token;
-    protected $update;
-    protected $organizationTimezoneOffset;
-
-    protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
-
-    protected $FieldsDuplicate = array(	'Contact' => array('Email','Name'),
-                                        'default' => array('Name')
-                                      ); */
+    protected $FieldsDuplicate = array(	
+										'contacts' => array('email'),
+                                      ); 
 
     public function getFieldsLogin()
     {
@@ -158,10 +152,8 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read_last($param)
-    {
+    public function read_last($param) {
         try {
-
             $module = $this->getsingular($param['module']);
 
             if (!empty($param['fields'])) { //add properties for request
@@ -187,7 +179,7 @@ class hubspotcore extends solution
 
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $param['module'] . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $module . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);				
                 } elseif (!empty($param['query']['id'])) {
                     if ($module === "companies" || $module === "deal") {
                         $url_id = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
@@ -283,8 +275,7 @@ class hubspotcore extends solution
                 $result = $this->call($ur_created);
                 $resultQuery = $this->getresultQuery($result, $ur_created, $param);
             }
-            $resultQuery = $resultQuery['exec'];
-
+            $resultQuery = $resultQuery['exec'];		
             if ($module === "companies" || $module === "deal") {
                 $identifyProfiles = $resultQuery['results'];
                 $modified = "hs_lastmodifieddate";
@@ -294,28 +285,30 @@ class hubspotcore extends solution
                 $identifyProfiles = $resultQuery[$param['module']];
                 $modified = "lastmodifieddate";
                 $id = 'vid';
-
-            }
+            }		
 
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {
-                $timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
-                $result['date_ref'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000);
-                foreach ($identifyProfiles as $identifyProfile) {
-                    $records = null;
-                    foreach ($param['fields'] as $field) {
-                        if (isset($identifyProfile["properties"] [$field])) {
-                            $records[$field] = $identifyProfile["properties"] [$field]['value'];
+				if (!empty($identifyProfiles)) {
+					$timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
+					// Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
+					$result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000)+1);
+					foreach ($identifyProfiles as $identifyProfile) {
+						$records = null;
+						foreach ($param['fields'] as $field) {
+							if (isset($identifyProfile["properties"] [$field])) {
+								$records[$field] = $identifyProfile["properties"] [$field]['value'];
 
-                        }
-                        $records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
-                        $records['id'] = $identifyProfile[$id];
-                        $result['values'][$identifyProfile[$id]] = $records;
-                    }
-                }
-                $result['count'] = count($result['values']);
+							}
+							$records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
+							$records['id'] = $identifyProfile[$id];
+							$result['values'][$identifyProfile[$id]] = $records;
+						}
+					}
+					$result['count'] = count($result['values']);
+				}
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
