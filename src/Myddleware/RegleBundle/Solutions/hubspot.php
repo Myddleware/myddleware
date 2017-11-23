@@ -53,10 +53,9 @@ class hubspotcore extends solution
     {
         parent::login($paramConnexion);
         try {
-            // $this->paramConnexion['apikey'] = 'f91a946d-701e-4a0d-acdf-c5204c556901';
-            $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);
-            if (!empty($result['message'])) {
-                throw new \Exception($result['message']);
+            $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);	
+            if (!empty($result['exec']['message'])) {
+                throw new \Exception($result['exec']['message']);
             } elseif (empty($result)) {
                 throw new \Exception('Failed to connect but no error returned by Hubspot. ');
             }
