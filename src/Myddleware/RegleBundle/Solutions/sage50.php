@@ -288,41 +288,6 @@ class sage50core extends solution
         }
     } // get_module_fields($module)
 
-	
-    public function getAccessToken()
-    {
-        return $this->access_token;
-    }//getAccessToken
-
-    public function setAccessToken($token)
-    {
-        $this->access_token = $token;
-    }//setAccessToken
-
-    public function getFieldModules($index)
-    {
-        return $this->moduleFields = $this->moduleFields[$index];
-    }//getFieldModules
-
-    /**
-     * setter for xml schema
-     * @param $xml
-     */
-    public function setXML($xml)
-    {
-        $this->xml = $xml;
-    }//setXML
-
-    /**
-     * getter for xml schema
-     * @return mixed
-     */
-    public function getXML()
-    {
-        return $this->xml;
-    }//getXML
-
-
     /**
      * Function for get plural name of attribute selected, required for routes get modules field
      * @param $name
@@ -335,7 +300,6 @@ class sage50core extends solution
         return $modules_names ? (string)$modules_names[0] : false;
     }//getPluralName
 
- 
     public function repairJson($result) {
 		for ($i = 0; $i <= 31; ++$i) {
 			$result = str_replace(chr($i), "", $result);
@@ -800,13 +764,6 @@ $xmlData .= '    </'.$param ["module"].'>
 										'id' => $dataSent['curlData']->id,
 										'error' => false
 										);		
-				// Transfert status update
-				if (!empty($subDocIdArray)) {				
-					foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
-						$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
-					}
-				}
-				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
 			catch (\Exception $e) {
 				// $error = $e->getMessage();
@@ -816,6 +773,13 @@ $xmlData .= '    </'.$param ["module"].'>
 										'error' => $error
 									);
 			}
+			// Transfert status update
+			if (!empty($subDocIdArray)) {				
+				foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+					$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+				}
+			}
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 		}	
 		return $result;
 	} 
@@ -861,6 +825,35 @@ $xmlData .= '    </'.$param ["module"].'>
 		return parent::getRuleMode($module,$type);
 	}
 	
+	public function getAccessToken() {
+        return $this->access_token;
+    }//getAccessToken
+
+    public function setAccessToken($token) {
+        $this->access_token = $token;
+    }//setAccessToken
+
+    public function getFieldModules($index) {
+        return $this->moduleFields = $this->moduleFields[$index];
+    }//getFieldModules
+
+    /**
+     * setter for xml schema
+     * @param $xml
+     */
+    public function setXML($xml) {
+        $this->xml = $xml;
+    }//setXML
+
+    /**
+     * getter for xml schema
+     * @return mixed
+     */
+    public function getXML() {
+        return $this->xml;
+    }//getXML
+
+
 	   /**
      * Function HTTP Request
      *
