@@ -1820,7 +1820,10 @@ class DefaultControllerCore extends Controller
 				
 			// fields relate
 			if(!empty( $this->getRequest()->request->get('duplicate') )) {
-                                $sessionService->setParamParentRule($ruleKey,'duplicate_fields', implode($this->getRequest()->request->get('duplicate'),';'));
+                                # fix : Put the duplicate fields values in the old $tab_new_rule array
+                                $duplicateArray = implode($this->getRequest()->request->get('duplicate'),';');
+                                $tab_new_rule['params']['rule']['duplicate_fields'] = $duplicateArray;
+                                $sessionService->setParamParentRule($ruleKey,'duplicate_fields', $duplicateArray);
 			} 			
 			// si le nom de la règle est inferieur à 3 caractères :
 			if(strlen($sessionService->getParamRuleName($ruleKey)) < 3 || $sessionService->getParamRuleNameValid($ruleKey) == false) {
