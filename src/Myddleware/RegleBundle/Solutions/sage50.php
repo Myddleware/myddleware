@@ -149,7 +149,6 @@ class sage50core extends solution
             }
         } catch (\Exception $e) {
             $error = 'Failed to login to sage50 : ' . $e->getMessage();
-            echo $error . ';';
             $this->logger->error($error);
             return array('error' => $error);
         }

@@ -76,7 +76,6 @@ class cirrusshieldcore  extends solution {
 		}
 		catch (\Exception $e) {
 			$error = 'Failed to login to Cirrus Shield : '.$e->getMessage();
-			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

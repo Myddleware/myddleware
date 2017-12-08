@@ -146,7 +146,6 @@ class shopapplicationcore extends solution {
 		}
 		catch (\Exception $e) {
 			$error = 'Failed to login to Shop-application : '.$e->getMessage();
-			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

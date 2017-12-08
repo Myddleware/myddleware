@@ -62,7 +62,6 @@ class hubspotcore extends solution
             $this->connexion_valide = true;
         } catch (\Exception $e) {
             $error = 'Failed to login to Hubspot : ' . $e->getMessage();
-//            echo $error . ';';
             $this->logger->error($error);
             return array('error' => $error);
         }

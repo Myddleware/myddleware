@@ -110,7 +110,6 @@ class sagecrmcore extends solution {
 		}
 		catch (\Exception $e) {
 			$error = 'Failed to login to SageCRM : '.$e->getMessage();
-			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

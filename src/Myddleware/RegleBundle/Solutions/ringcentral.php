@@ -108,7 +108,6 @@ class ringcentralcore  extends solution {
 		}
 		catch (\Exception $e) {
 			$error = 'Failed to login to Ring Central : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine();
-			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

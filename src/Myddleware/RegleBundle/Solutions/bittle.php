@@ -51,7 +51,6 @@ class bittlecore extends solution {
 		}
 		catch (\Exception $e) {
 			$error = 'Failed to login to bittle : '.$e->getMessage();
-			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
