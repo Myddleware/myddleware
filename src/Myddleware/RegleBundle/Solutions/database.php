@@ -44,12 +44,12 @@ class databasecore extends solution {
 				$this->pdo = $this->generatePdo();
 			    $this->connexion_valide = true;	
 			} catch (\PDOException $e) {
-				$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 				$this->logger->error($error);
 				return array('error' => $error);
 			}
 		} catch (\Exception $e) {
-			$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

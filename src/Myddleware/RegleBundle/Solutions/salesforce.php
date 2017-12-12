@@ -105,7 +105,7 @@ class salesforcecore extends solution {
 		    }
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login : '.$e->getMessage();
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

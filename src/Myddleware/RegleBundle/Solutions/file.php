@@ -72,7 +72,7 @@ class filecore extends solution {
 			$this->connexion_valide = true;
 
 		} catch (\Exception $e) {	
-			$error = 'Failed to access to the server: '.$e->getMessage();
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
