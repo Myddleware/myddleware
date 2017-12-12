@@ -21,11 +21,6 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-// require_once('lib/sagesdata/Conn.php');
-// require_once('lib/sagesdata/Query.php');
-// require_once('lib/sagesdata/Schema.php');
-// require_once('lib/sagesdata/Query/Type/Create.php');
-
 class sage50core extends solution
 {
 
