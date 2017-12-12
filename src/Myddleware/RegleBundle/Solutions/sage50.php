@@ -43,51 +43,75 @@ class sage50core extends solution
 	protected $parentModules = array('salesOrder','salesInvoice'/* ,'tradingAccount' */);
 	protected $createOnlyModules = array('salesOrder','salesInvoice');
     protected $readLimit = 100;
+	protected $linkFound; // temp variable
+	protected $linkData; // temp variable
 
 	protected $moduleSubFields = array(	
-										'tradingAccount' => array( // Name of the main module into Sage
-																	'phoneNumber' => array( // Name of the module into Sage
+										'tradingAccount' => array( // Name of the main module into Sage (first entry in the payload)
+																	'phoneNumber' => array( // Name of the module into Sage (first entry in the payload)
 																							'title' => 'phones',	// Name of the structure in the title in the link structure
 																							'structureNames' => array('Business Phone', 'Other Phone','Business Fax'), // Every type of data linked to the searchField
 																							'searchField' => 'type', // Search field where the structureNames are strored
-																							'structureFields' => array('uuid','text') // Fields belonging to the structure available in Myddleware
+																							'structureFields' => array('uuid','text'), // Fields belonging to the structure available in Myddleware
+																							'additional_filter' => array('reference2' => '1')
 																						),
-																	'postalAddress' => array( // Name of the module into Sage
-																							'title' => 'postalAddresses',	// Name of the structure in the title in the link structure
-																							'structureNames' => array('Billing', 'Shipping', 'Registered'), // Every type of data linked to the searchField
-																							'searchField' => 'type', // Search field where the structureNames are strored
-																							'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','county','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), // Fields belonging to the structure available in Myddleware
-																							// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																	'postalAddress' => array( 
+																							'title' => 'postalAddresses',	
+																							'structureNames' => array('Billing', 'Shipping', 'Registered'), 
+																							'searchField' => 'type', 
+																							'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','stateRegion','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), 
 																						),	
-																	'email' => array( // Name of the module into Sage
-																							'title' => 'emails',	// Name of the structure in the title in the link structure
-																							'structureNames' => array('Supplier Registered Email', 'Supplier Registered Email2', 'Supplier Registered Email3','Supplier Delivery Email'), // Every type of data linked to the searchField
-																							'searchField' => 'label', // Search field where the structureNames are strored
-																							'structureFields' => array('uuid','address') // Fields belonging to the structure available in Myddleware
+																	'email' => array( 
+																							'title' => 'emails',	
+																							'structureNames' => array('Supplier Registered Email', 'Supplier Registered Email2', 'Supplier Registered Email3','Supplier Delivery Email', 'Customer Registered Email', 'Customer Delivery Email', 'Customer Registered Email2', 'Customer Registered Email3'), 
+																							'searchField' => 'label', 
+																							'structureFields' => array('uuid','address') 
 																						),
-																	'contact' => array( // Name of the module into Sage
-																							'title' => 'contacts',	// Name of the structure in the title in the link structure
-																							'structureNames' => array('1','2'), // Every type of data linked to the searchField
-																							'searchField' => 'addressType', // Search field where the structureNames are strored
-																							'structureFields' => array('uuid','fullName','salutation','firstName','familyName') // Fields belonging to the structure available in Myddleware
+																	'contact' => array( 
+																							'title' => 'contacts',	
+																							'structureNames' => array('Customer Delivery Contact','Supplier Delivery Contact'), 
+																							'searchField' => 'type', 
+																							'structureFields' => array('uuid','fullName','salutation','firstName','familyName') 
 																						),
-																	'bankAccount' => array( // Name of the module into Sage
-																							'title' => 'bankAccounts',	// Name of the structure in the title in the link structure
-																							'structureFields' => array('uuid','active','name','description','branchIdentifier','accountNumber','iBANNumber','bICSwiftCode','rollNumber','currency','operatingCompanyCurrency','paymentAllowedFlag','receiptAllowedFlag') // Fields belonging to the structure available in Myddleware
+																	'bankAccount' => array( 
+																							'title' => 'bankAccounts',	
+																							'structureFields' => array('uuid','active','name','description','branchIdentifier','accountNumber','iBANNumber','bICSwiftCode','rollNumber','currency','operatingCompanyCurrency','paymentAllowedFlag','receiptAllowedFlag') 
+																						),
+																	'financialAccount' => array( 
+																							'title' => 'financialAccounts',	
+																							'structureFields' => array('uuid','active','reference','reference2','name','account','description','currency','balance') 
+																						),
+																	'taxCode' => array( 
+																							'title' => 'taxCode',	
+																							'structureFields' => array('uuid','reference','type','value','valueText') 
 																						),	
 																),
 										'bankAccount' => array( // Name of the main module into Sage
-																	'tradingAccount' => array( // Name of the module into Sage
-																								'title' => 'tradingAccount',	// Name of the structure in the title in the link structure
-																								'structureFields' => array('uuid','active','customerSupplierFlag','companyPersonFlag','reference','name'), // Fields belonging to the structure available in Myddleware
-																								// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																	'tradingAccount' => array( 
+																								'title' => 'tradingAccount',	
+																								'structureFields' => array('uuid','active','customerSupplierFlag','companyPersonFlag','reference','name'), 
 																							),
-																	'postalAddress' => array( // Name of the module into Sage
-																								'title' => 'postalAddress',	// Name of the structure in the title in the link structure
-																								'structureNames' => array('Other'), // Every type of data linked to the searchField
-																								'searchField' => 'type', // Search field where the structureNames are strored
-																								'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','county','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), // Fields belonging to the structure available in Myddleware
-																								// 'additionalFilters' => array(array('key' => 'primacyIndicator', 'value' => 'true'))
+																	'postalAddress' => array( 
+																								'title' => 'postalAddress',	
+																								'structureNames' => array('Other'), 
+																								'searchField' => 'type', 
+																								'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','stateRegion','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), 
+																							),					
+																),
+										'salesOrder' => array( // Name of the main module into Sage
+																	'tradingAccount' => array( 
+																								'title' => 'tradingAccount',	
+																								'structureFields' => array('uuid','active','customerSupplierFlag','companyPersonFlag','reference','name'), 
+																							),
+																	'postalAddress' => array( 
+																								'title' => 'postalAddresses',	
+																								'structureNames' => array('Billing','Shipping'), 
+																								'searchField' => 'type', 
+																								'structureFields' => array('uuid','active','name','address1','address2','address3','address4','townCity','stateRegion','stateRegion','zipPostCode','country','primacyIndicator','primacyIndicator','description'), 
+																							),	
+																	'contact' => array( 
+																								'title' => 'buyerContact',	
+																								'structureFields' => array('uuid','reference','fullName','firstName','familyName'), 
 																							),					
 																)
 								);		
@@ -341,65 +365,14 @@ class sage50core extends solution
 			
                 // if (!empty($response['curlData']['$resources'][0])) { 
 				if (!empty($response['curlData']['id'])) {				
-					$linkFound = array();
-					$linkData = array();
+					$this->linkFound = array();
+					$this->linkData = array();
 					// Get the data for every field					
                     foreach ($param['fields'] as $field) {		
 						// If the field is an array, it means that there is a structure, and we have to call Sage to get the detail of this structure (e.g. phoneNumber__BusinessPhone__text)
-						$fieldArray = explode('__',$field);						
+						$fieldArray = explode('__',$field);					
 						if (count($fieldArray) > 1) {
-							// Make sure our field is in $moduleSubFields
-							if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]])) {
-								// Search the link for the structure expexted (phones for exemple)								
-								foreach($response['curlData']['link'] as $link) {
-									if (
-											!empty($link['@attributes']['title'])
-										AND $link['@attributes']['title'] == $this->moduleSubFields[$param['module']][$fieldArray[0]]['title']
-									) {
-										$linkFound = $link['@attributes'];
-										break;
-									}
-								}							
-								if (!empty($linkFound)) {	
-									// Call sage if it isn't done already for the current record and structure (e.g.the phones for a specific tradingAccount). 
-									if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']])) {
-										// $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')).'&count='.count($this->moduleSubFields[$param['module']][$fieldArray[0]]['structureNames']), 'read');
-										$linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')), 'read');
-										// If only one record, we add a dimension to be able to use the foreach below
-										if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0])) {
-											$tmp[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0] = $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'];
-											$linkData = $tmp;
-										}
-									}	
-									// if we have a result from Sage
-									if (!empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'])) {
-										// Search the right record whith the search field (e.g. field type for the phone)
-										foreach($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'] as $linkRecord) {
-											// We always add the uuid in the structure
-											if (!empty($linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'])) {
-												$linkRecord['payload'][$fieldArray[0]]['uuid'] = $linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'];										
-											}
-											// If there is a search field then we filter on this search field
-											if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField'])) {
-												// If we have found the right record, we save the field of this structure
-												// We delete space in the names of the fields because we did it in the method get_module_fields (Myddleware doesn't allow space in fieldname)
-												if (str_replace(' ', '',$linkRecord['payload'][$fieldArray[0]][$this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField']]) == $fieldArray[1]) {
-													$result['values'][$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]); // empty = array for Sage
-												}
-											// Otherwise, we take the first data (only one structure), the array has only 2 value (main struture + field)
-											} else {
-												$result['values'][$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]);   // empty = array for Sage
-											}
-										}
-									}
-								} else {
-									throw new \Exception('Failed to find the link with the title '.$this->moduleSubFields[$param['module']][$fieldArray[0]]['title'].'.' );	
-								}
-								// If we couldn't get the field, we set the finid to empty
-								if (!isset($result['values'][$field])) {
-									$result['values'][$field] = '';
-								}								
-							}
+							$result['values'][$field] = $this->getValueFromLink($param, $response, $fieldArray);
 						} else {
 							if ($field == 'id') {
 								$result['values'][$field] = $response['curlData']['payload'][$param ['module']]['@attributes']['uuid'];
@@ -508,8 +481,8 @@ class sage50core extends solution
 						$row['date_modified'] = $record[$dateRefField];				
 						$row['updated'] = $record['updated'];
 						$row['published'] = $record['published'];
-						$linkFound = array();
-						$linkData = array();
+						$this->linkFound = array();
+						$this->linkData = array();
 
 						// For each fields expected
 						foreach($param['fields'] as $field) {					
@@ -519,58 +492,7 @@ class sage50core extends solution
 							// If the field is an array, it means that there is a structure, and we have to call Sage to get the detail of this structure (e.g. phoneNumber__BusinessPhone__text)
 							$fieldArray = explode('__',$field);
 							if (count($fieldArray) > 1) {
-								// $phones = $this->makeRequest($this->paramConnexion['host'], $this->token, '/sdata/accounts50/GCRM/%7BA8C43BE7-A572-4E7C-A141-14C848413F84%7D/PhoneNumbers?where=reference%20eq%20"SFE-UK"&count=4', 'read');
-								// Make sure our field is in $moduleSubFields
-								if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]])) {
-									// Search the link for the structure expexted (phones for exemple)
-									foreach($record['link'] as $link) {
-										if (
-												!empty($link['@attributes']['title'])
-											AND $link['@attributes']['title'] == $this->moduleSubFields[$param['module']][$fieldArray[0]]['title']
-										) {
-											$linkFound = $link['@attributes'];
-											break;
-										}
-									}
-									if (!empty($linkFound)) {	
-										// Call sage if it isn't done already for the current record and structure (e.g.the phones for a specific tradingAccount). 
-										if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']])) {
-											$linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($linkFound['href'],strpos($linkFound['href'],'/sdata/')), 'read');
-											// If only one record, we add a dimension to be able to use the foreach below
-											if (empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0])) {
-												$tmp[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0] = $linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'];
-												$linkData = $tmp;
-											}	
-										}
-										// if we have a result from Sage
-										if (!empty($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'])) {
-											// Search the right record whith the search field (e.g. field type for the phone)
-											foreach($linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'] as $linkRecord) {
-												// We always add the uuid in the structure
-												if (!empty($linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'])) {
-													$linkRecord['payload'][$fieldArray[0]]['uuid'] = $linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'];										
-												}
-												// If there is a search field then we filter on this search field
-												if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField'])) {
-													// If we have found the right record, we save the field of this structure
-													// We delete space in the names of teh fields because we did it in the method get_module_fields (Myddleware doesn't allow space in fieldname)
-													if (str_replace(' ', '',$linkRecord['payload'][$fieldArray[0]][$this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField']]) == $fieldArray[1]) {
-														$row[$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]); // empty = array for Sage
-													}
-												// Otherwise, we take the first data (only one structure), the array has only 2 value (main struture + field)
-												} else {
-													$row[$field] = (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]) ? '' : $linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]);   // empty = array for Sage
-												}
-											}
-										}
-									} else {
-										throw new \Exception('Failed to find the link with the title '.$this->moduleSubFields[$param['module']][$fieldArray[0]]['title'].'.' );	
-									}
-									// If we couldn't get the field, we set the finid to empty
-									if (!isset($row[$field])) {
-										$row[$field] = '';
-									}								
-								}								
+								$row[$field] = $this->getValueFromLink($param, $record, $fieldArray);				
 							} else {
 								// echo count($fieldArray).chr(10);
 								if ($field == 'id') {
@@ -615,6 +537,71 @@ class sage50core extends solution
 		}		
 		return $result;
 	}	
+	
+	protected function getValueFromLink($param, $response, $fieldArray) {
+		if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]])) {	
+			// We add curldata to manage the different $response format if the function is called by read or read_last functions
+			if (!isset($response['curlData'])) {
+				$responseTmp['curlData'] = $response;
+				$response = $responseTmp;
+			}
+			// Search the link for the structure expexted (phones for exemple)									
+			foreach($response['curlData']['link'] as $link) {
+				if (
+						!empty($link['@attributes']['title'])
+					AND $link['@attributes']['title'] == $this->moduleSubFields[$param['module']][$fieldArray[0]]['title']
+				) {
+					$this->linkFound = $link['@attributes'];
+					break;
+				}
+			}							
+			if (!empty($this->linkFound)) {	
+				// Call sage if it isn't done already for the current record and structure (e.g.the phones for a specific tradingAccount). 
+				if (empty($this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']])) {
+					// $this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($this->linkFound['href'],strpos($this->linkFound['href'],'/sdata/')).'&count='.count($this->moduleSubFields[$param['module']][$fieldArray[0]]['structureNames']), 'read');
+					$this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']] = $this->makeRequest($this->paramConnexion['host'], $this->token, substr($this->linkFound['href'],strpos($this->linkFound['href'],'/sdata/')), 'read');
+					// If only one record, we add a dimension to be able to use the foreach below
+					if (empty($this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0])) {
+						$tmp[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'][0] = $this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'];
+						$this->linkData = $tmp;
+					}
+				}	
+				// if we have a result from Sage
+				if (!empty($this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'])) {
+					// Search the right record whith the search field (e.g. field type for the phone)
+					foreach($this->linkData[$this->moduleSubFields[$param['module']][$fieldArray[0]]['title']]['curlData']['entry'] as $linkRecord) {
+						// We always add the uuid in the structure
+						if (!empty($linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'])) {
+							$linkRecord['payload'][$fieldArray[0]]['uuid'] = $linkRecord['payload'][$fieldArray[0]]['@attributes']['uuid'];										
+						}
+						// If there is a search field then we filter on all of them
+						if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['additional_filter'])) {
+							foreach ($this->moduleSubFields[$param['module']][$fieldArray[0]]['additional_filter'] as $additionalFilterKey => $additionalFilterValue) {								
+								if ($linkRecord['payload'][$fieldArray[0]][$additionalFilterKey] != $additionalFilterValue) {
+									continue 2;
+								}
+							}
+						}
+						// If there is a search field then we filter on this search field
+						if (!empty($this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField'])) {
+							// If we have found the right record, we save the field of this structure
+							// We delete space in the names of the fields because we did it in the method get_module_fields (Myddleware doesn't allow space in fieldname)
+							if (str_replace(' ', '',$linkRecord['payload'][$fieldArray[0]][$this->moduleSubFields[$param['module']][$fieldArray[0]]['searchField']]) == $fieldArray[1]) {
+								return (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]) ? null : $linkRecord['payload'][$fieldArray[0]][$fieldArray[2]]); // empty = array for Sage
+							}
+						// Otherwise, we take the first data (only one structure), the array has only 2 value (main struture + field)
+						} else {
+							return (empty($linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]) ? null : $linkRecord['payload'][$fieldArray[0]][$fieldArray[1]]);   // empty = array for Sage
+						}
+					}
+				}
+			} else {
+				throw new \Exception('Failed to find the link with the title '.$this->moduleSubFields[$param['module']][$fieldArray[0]]['title'].'.' );	
+			}
+			// If we couldn't get the field, we set the finid to empty
+			return null;					
+		}
+	}
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
 	protected function dateTimeToMyddleware($dateTime) {
@@ -668,8 +655,7 @@ class sage50core extends solution
   <content/>
   <sdata:payload>
     <'.$param ["module"].' xmlns="http://schemas.sage.com/crmErp/2008" xmlns:sc="http://schemas.sage.com/sc/2009"
-      sdata:uuid="'.$uuid.'">'.chr(10);
-// print_r($data);	  
+      sdata:uuid="'.$uuid.'">'.chr(10); 
 				foreach (array_reverse($data) as $key => $value) {				
 					// Target id is managed above, so we skip this field			
 					if ($key=='target_id' OR $key=='ID') {					
