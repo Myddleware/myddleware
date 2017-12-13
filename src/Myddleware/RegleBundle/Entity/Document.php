@@ -33,7 +33,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(indexes={
  *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
- *      @ORM\Index(name="index_parent_id", columns={"parent_id"})
+ *      @ORM\Index(name="index_parent_id", columns={"parent_id"}),
+ *      @ORM\Index(name="global_status", columns={"global_status"})
  * })
  */ 
 class Document
