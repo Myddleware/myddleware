@@ -133,7 +133,7 @@ class suitecrmcore  extends solution {
 			}
 		} 
 		catch (\Exception $e) {
-			$error = 'Failed to login to SuiteCRM : '.$e->getMessage();
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		} 

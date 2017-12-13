@@ -71,7 +71,7 @@ class dolistcore extends solution {
 			}
 		} // Gestion d'erreur Symfony
 		catch(\Exception $e){
-			$error = 'Failed to login to Dolist : '.$e->getMessage();
+			$error = $e->getMessage();
 			echo $error . ';';
 			$this->logger->error($error);
 			return array('error' => $error);

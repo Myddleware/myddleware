@@ -912,8 +912,8 @@ class DefaultControllerCore extends Controller
 								
 						// Vérification du nombre de champs
 						if( isset($param) && (count($param) == count($solution->getFieldsLogin())) ) {
-								
-							$solution->login($param);
+
+							$result = $solution->login($param);
 							$r = $solution->connexion_valide;
 							
 							if(!empty($r)) {
@@ -923,12 +923,12 @@ class DefaultControllerCore extends Controller
 							else {
                                                                 $sessionService->removeParamRule($ruleKey);
 								
-								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]);// Erreur de connexion				
+								return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans($result['error'])]);// Erreur de connexion
 							}
 						}
 						else {
 							
-							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur pas le même nombre de champs				
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur pas le même nombre de champs
 						}					
 					}					
 				} // Rule
@@ -966,7 +966,7 @@ class DefaultControllerCore extends Controller
                                                 $sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
 						//$myddlewareSession['obj'][$this->getRequest()->request->get('parent')] = $connector_params;
 
-						$solution->login($this->decrypt_params($sessionService->getParamParentRule($request->request->get('parent'))));
+						$result = $solution->login($this->decrypt_params($sessionService->getParamParentRule($request->request->get('parent'))));
                                                 $sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
 						
 						$r = $solution->connexion_valide;
@@ -974,7 +974,7 @@ class DefaultControllerCore extends Controller
 							return new JsonResponse(["success" => true]); // Connexion valide
 						}
 						else {
-							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans("Connection error")]); // Erreur de connexion					
+							return new JsonResponse(["success" => false,'message'=> $this->get('translator')->trans($result['error'])]); // Erreur de connexion
 						}
 
 						exit;
