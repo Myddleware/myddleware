@@ -61,8 +61,20 @@
 				     		{% endif %}
 						</td>
 						<td class="ctr">{{ task.getParam }}</td>
-						<td class="ctr">{{ task.getBegin|date("d/m/Y H:i:s") }}</td>
-						<td class="ctr">{{ task.getEnd|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">
+				     		{% if task.getBegin is null %}
+								-
+				     		{% else %}
+								{{ task.getBegin|date("d/m/Y H:i:s") }}
+				     		{% endif %}
+						</td>
+						<td class="ctr">
+				     		{% if task.getEnd is null %}
+								-
+				     		{% else %}
+								{{ task.getEnd|date("d/m/Y H:i:s") }}
+				     		{% endif %}
+						</td>
 						<td class="ctr">{{ task.getOpen }}</td>
 						<td class="ctr">{{ task.getClose }}</td>
 						<td class="ctr">{{ task.getCancel }}</td>
