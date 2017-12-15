@@ -32,7 +32,7 @@ disk: 2048
 mounts:
     "/app/cache": "shared:files/cache"
     "/app/logs": "shared:files/logs"
-    #"/var/sessions": "shared:files/sessions"
+	"/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
 
 # The hooks that will be performed when the package is deployed.
 hooks:
@@ -46,4 +46,9 @@ hooks:
         chmod -R 777 app/logs
         php app/console d:s:u --force
         php app/console d:f:l --append
-        
+
+crons:
+    synchro:
+        spec: ‘*/5 * * * *'
+        cmd: 'php app/console myddleware:synchro ALL --env=background'
+		
