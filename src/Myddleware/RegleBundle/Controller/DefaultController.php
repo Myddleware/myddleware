@@ -2160,8 +2160,8 @@ class DefaultControllerCore extends Controller
             $response = 1;
         } catch (\Exception $e) {
             $this->em->getConnection()->rollBack();
-            $this->get('logger')->error('2;' . htmlentities($e->getMessage() . ' (line ' . $e->getLine() . ')'));
-            $response = '2;' . htmlentities($e->getMessage() . ' (line ' . $e->getLine() . ')');
+            $this->get('logger')->error('2;' . htmlentities($e->getMessage() . ' ('.$e->getFile().' line ' . $e->getLine() . ')'));
+            $response = '2;' . htmlentities($e->getMessage() . ' ('.$e->getFile().' line ' . $e->getLine() . ')');
         }
 
         $this->em->close();
