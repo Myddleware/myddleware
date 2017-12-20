@@ -515,6 +515,8 @@ class sage50core extends solution
 			// If the query return an error 
 			} elseif (!empty($response['Message'])) {
 				throw new \Exception($response['Message']);	
+			} elseif (!empty($response['curlData']['message'])) {
+				throw new \Exception($response['curlData']['message']);	
 			} else {
 				throw new \Exception('Failed to call Sage with no error returned.');	
 			}		
