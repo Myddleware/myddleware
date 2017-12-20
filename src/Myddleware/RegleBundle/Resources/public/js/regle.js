@@ -1014,7 +1014,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			
 			$.ajax({
 			    type: "POST",
-				url: "simulation/",
+				url: path_simulation,
 				data:{
 					champs : recup_champs(),
   					formules : recup_formule(),
@@ -1394,7 +1394,7 @@ function verifFields(field_id,show) {
 			
 			$.ajax({
 			    type: "POST",
-				url: "validation/",
+				url:  path_validation ,
 				data:{
 					champs : recup_champs(),
   					formules : recup_formule(),
@@ -1410,7 +1410,6 @@ function verifFields(field_id,show) {
 					
 					if(data == 1) {
 						alert(confirm_success);
-						
 						$(location).attr('href',return_success);
 					}				
 					else {

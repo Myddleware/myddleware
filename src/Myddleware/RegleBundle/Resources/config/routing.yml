@@ -85,8 +85,8 @@ regle_steptwo:
         _method:  POST
         
 regle_stepthree:
-    pattern:  /create/step3/
-    defaults: { _controller: RegleBundle:Default:ruleStepThree } 
+    pattern:  /create/step3/{id}
+    defaults: { _controller: RegleBundle:Default:ruleStepThree, id: 0 }
 
 regle_validation:
     pattern:  /create/step3/validation/
