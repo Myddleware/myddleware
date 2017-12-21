@@ -48,7 +48,7 @@ hooks:
         php app/console d:f:l --append
 
 crons:
-    synchro:
-        spec: ‘*/5 * * * *'
-        cmd: 'php app/console myddleware:synchro ALL --env=background'
+    jobScheduler:
+        spec: '*/5 * * * *'
+        cmd: 'php app/console myddleware:jobScheduler --env=background'
 
