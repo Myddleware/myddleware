@@ -112,8 +112,11 @@ class jobSchedulercore  {
 				// Update the lastrun date for the job (GMT timezone)
 				$jobScheduler = $this->em
 									 ->getRepository('RegleBundle:JobScheduler')
-									 ->findOneById($jobToRun['id']);									 
-				$jobScheduler->setLastRun(new \DateTime('now',new \DateTimeZone('GMT')));		
+									 ->findOneById($jobToRun['id']);
+				// We round the current date to the minute because the period is on minute
+				$now = new \DateTime('now',new \DateTimeZone('GMT'));
+				$now->setTime ( $now->format('H'), $now->format('i'),0);
+				$jobScheduler->setLastRun($now);				
 				$this->em->persist($jobScheduler); 	
 				$this->em->flush();				
 			}
