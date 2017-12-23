@@ -43,75 +43,14 @@ class jobSchedulerCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output)
     {
 		try {		
-			$logger = $this->getContainer()->get('logger');		
-	echo 'test'.chr(10);	
-
-// récupération de toutes les tâches à lancer : now - last run >= fréquence
-	// Ordonner les tâche à lancer : si plusieurs synchro => ordonner avec ruleOrder
-	
-// Lancer chaque tâche
-	
-			/* // Source -------------------------------------------------
-			// alias de la règle en params
-			$rule = $input->getArgument('rule');
-			// Récupération du Job			
-			$job = $this->getContainer()->get('myddleware_job.job');		
+			$jobScheduler = $this->getContainer()->get('myddleware.jobScheduler');		
+			$jobScheduler->setJobsToRun();
+			$jobScheduler->runJobs();
 			
-			if ($job->initJob($rule)) {
-				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
-				
-				if (!empty($rule)) {			
-					if ($rule == 'ERROR') {
-						// Premier paramètre : limite d'enregistrement traités
-						// Deuxième paramètre, limite d'erreur : si un flux a plus de tentative que le paramètre il n'est pas relancé
-						$job->runError( 50 , 100);	
-					}
-					else {
-						// Envoi du job sur toutes les règles demandées. Si ALL est sélectionné alors on récupère toutes les règle dans leur ordre de lancement sinon on lance seulement la règle demandée.
-						if ($rule == 'ALL') {
-							$rules = $job->getRules();
-						}
-						else {
-							$rules[] = $rule;
-						}								
-						if (!empty($rules)) {
-							foreach ($rules as $key => $value) {
-								echo $value.chr(10);
-								$output->writeln($step.'-'.$value.' : Synchronisation de la règle : <question>'.$value.'</question>'); $step++;
-								// Chargement des données de la règle
-								if ($job->setRule($value)) {		
-									// Sauvegarde des données sources dans les tables de myddleware
-									$output->writeln($step.'-'.$value.' : Create documents.');			
-									$nb = $job->createDocuments();
-									$output->writeln($step.'-'.$value.' : Number of documents created : '.$nb); 
-
-									// Permet de filtrer les documents
-									$job->filterDocuments();
-									
-									// Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-									$job->ckeckPredecessorDocuments();
-
-									// Permet de valider qu'au moins un document parent(relation père) est existant
-									$job->ckeckParentDocuments();
-									
-									// Permet de transformer les docuement avant d'être envoyés à la cible
-									$job->transformDocuments();	
-
-									// Historisation des données avant modification dans la cible
-									$job->getTargetDataDocuments();
-
-									// Envoi des documents à la cible
-									$job->sendDocuments();	
-								}
-							}
-						}
-					}
-				}	
-			} */
 		}
 		catch(\Exception $e) {
-		// $this->getContainer()->get('logger')
-			// $job->message .= $e->getMessage();
+			echo $e->getMessage().chr(10);
+			$this->getContainer()->get('logger')->error($e->getMessage());
 		}
 		
 	}

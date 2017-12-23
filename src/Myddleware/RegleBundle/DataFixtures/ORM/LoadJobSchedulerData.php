@@ -33,9 +33,9 @@ class LoadJobSchedulerData implements FixtureInterface
 {
     private $manager; 
 	protected $jobSchedulerData = array(
-									array('command' => 'synchro', 	'param1' => 'ALL','param2' => '', 	'period' => 5), 
-									array('command' => 'rerunError','param1' => '100','param2' => '5',	'period' => 60), 
-									array('command' => 'rerunError','param1' => '100','param2' => '10',	'period' => 1440), 
+									array('command' => 'synchro', 	'paramName1' => 'rule', 'paramValue1' => 'ALL', 'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10), 
+									array('command' => 'rerunerror','paramName1' => 'limit','paramValue1' => '100', 'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100), 
+									array('command' => 'rerunerror','paramName1' => 'limit','paramValue1' => '100', 'paramName2' => 'attempt',	'paramValue2' => '10',	'period' => 1440,	'jobOrder' => 110), 
 								);
  
     public function load(ObjectManager $manager){
@@ -65,14 +65,16 @@ class LoadJobSchedulerData implements FixtureInterface
 		) {	
 			$jobSchedulerObject = new JobScheduler();
 			$jobSchedulerObject->setDateCreated(new \DateTime('now'));
-			$jobSchedulerObject->setDateModified(new \DateTime('now'));
+			// $jobSchedulerObject->setDateModified(new \DateTime('now'));
 			$jobSchedulerObject->setCreatedBy('1');
 			$jobSchedulerObject->setModifiedBy('1');
 			$jobSchedulerObject->setCommand($jobScheduler['command']);
-			$jobSchedulerObject->setParam1($jobScheduler['param1']);
-			$jobSchedulerObject->setParam2($jobScheduler['param2']);
+			$jobSchedulerObject->setParamName1($jobScheduler['paramName1']);
+			$jobSchedulerObject->setParamValue1($jobScheduler['paramValue1']);
+			$jobSchedulerObject->setParamName2($jobScheduler['paramName2']);
+			$jobSchedulerObject->setParamValue2($jobScheduler['paramValue2']);
 			$jobSchedulerObject->setPeriod($jobScheduler['period']);
-			$jobSchedulerObject->setLastRun(new \DateTime('now'));
+			$jobSchedulerObject->setJobOrder($jobScheduler['jobOrder']);
 			$this->manager->persist($jobSchedulerObject);
 		}	
     }

@@ -57,7 +57,7 @@ class JobScheduler
     /**
      * @var datetime
      *
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
+     * @ORM\Column(name="date_modified", columnDefinition="DATETIME on update CURRENT_TIMESTAMP"))
 	 * 
      */
     private $dateModified;
@@ -65,7 +65,7 @@ class JobScheduler
     /**
      * @var integer
      *
-	 * @ORM\Column(name="created_by", type="integer", nullable=false)
+	 * @ORM\Column(name="created_by", type="integer", nullable=false, options={"default":1})
 	 * 
      */
     private $createdBy;	
@@ -73,7 +73,7 @@ class JobScheduler
     /**
      * @var integer
      *
-     * @ORM\Column(name="modified_by", type="integer", nullable=false)
+     * @ORM\Column(name="modified_by", type="integer", nullable=false, options={"default":1})
 	 * 
      */
     private $modifiedBy;
@@ -89,18 +89,34 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="param1", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramName1", type="string", length=50, nullable=false)
 	 * 
      */
-    private $param1;
+    private $paramName1;
+
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="paramValue1", type="string", length=50, nullable=false)
+	 * 
+     */
+    private $paramValue1;
 
 	 /**
      * @var string
      *
-     * @ORM\Column(name="param2", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramName2", type="string", length=50, nullable=false)
 	 * 
      */
-    private $param2;
+    private $paramName2;
+	
+	 /**
+     * @var string
+     *
+     * @ORM\Column(name="paramValue2", type="string", length=50, nullable=false)
+	 * 
+     */
+    private $paramValue2;
 	
 	/**
      * @var integer
@@ -114,12 +130,19 @@ class JobScheduler
      * @var datetime
      *
 	 * 
-     * @ORM\Column(name="lastRun", type="datetime")
+     * @ORM\Column(name="lastRun", type="datetime", nullable=true)
 	 * 
      */
     private $lastRun;
 
-    
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="jobOrder", type="integer", length=3, nullable=true)
+	 * 
+     */
+    private $jobOrder;
+	
     /**
      * Get id
      *
@@ -246,52 +269,97 @@ class JobScheduler
     }
 	
 	/**
-     * Set param1
+     * Set paramName1
      *
-     * @param string $param1
+     * @param string $paramName1
      * @return JobScheduler
      */
-    public function setParam1($param1)
+    public function setParamName1($paramName1)
     {
-        $this->param1 = $param1;
+        $this->paramName1 = $paramName1;
     
         return $this;
     }
 
     /**
-     * Get param1
+     * Get paramName1
      *
      * @return string 
      */
-    public function getParam1()
+    public function getParamName1()
     {
-        return $this->param1;
+        return $this->paramName1;
     }
 	
 	/**
-     * Set param2
+     * Set paramValue1
      *
-     * @param string $param2
+     * @param string $paramValue1
      * @return JobScheduler
      */
-    public function setParam2($param2)
+    public function setParamValue1($paramValue1)
     {
-        $this->param2 = $param2;
+        $this->paramValue1 = $paramValue1;
     
         return $this;
     }
 
     /**
-     * Get param2
+     * Get paramValue1
      *
      * @return string 
      */
-    public function getParam2()
+    public function getParamValue1()
     {
-        return $this->param2;
+        return $this->paramValue1;
     }
 	
+	/**
+     * Set paramName2
+     *
+     * @param string $paramName2
+     * @return JobScheduler
+     */
+    public function setParamName2($paramName2)
+    {
+        $this->paramName2 = $paramName2;
+    
+        return $this;
+    }
+
+    /**
+     * Get paramName2
+     *
+     * @return string 
+     */
+    public function getParamName2()
+    {
+        return $this->paramName2;
+    }
 	
+	/**
+     * Set paramValue2
+     *
+     * @param string $paramValue2
+     * @return JobScheduler
+     */
+    public function setParamValue2($paramValue2)
+    {
+        $this->paramValue2 = $paramValue2;
+    
+        return $this;
+    }
+
+    /**
+     * Get paramValue2
+     *
+     * @return string 
+     */
+    public function getParamValue2()
+    {
+        return $this->paramValue2;
+    }
+		
 	/**
      * Set period
      *
@@ -336,6 +404,29 @@ class JobScheduler
     public function getLastRun()
     {
         return $this->lastRun;
+    }
+	
+	/**
+     * Set jobOrder
+     *
+     * @param string $jobOrder
+     * @return JobScheduler
+     */
+    public function setJobOrder($jobOrder)
+    {
+        $this->jobOrder = $jobOrder;
+    
+        return $this;
+    }
+
+    /**
+     * Get jobOrder
+     *
+     * @return string 
+     */
+    public function getJobOrder()
+    {
+        return $this->jobOrder;
     }
 
 }

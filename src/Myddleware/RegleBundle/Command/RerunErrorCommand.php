@@ -51,7 +51,7 @@ class RerunErrorCommand extends ContainerAwareCommand
 			// Récupération du Job
 			$job = $this->getContainer()->get('myddleware_job.job');
 			
-			if ($job->initJob('ERROR')) {	
+			if ($job->initJob('Rerun error : limit '.$limit.', attempt '.$attempt)) {	
 				// Premier paramètre : limite d'enregistrement traités
 				// Deuxième paramètre, limite d'erreur : si un flux a plus de tentative que le paramètre il n'est pas relancé
 				$job->runError( $limit , $attempt);	
