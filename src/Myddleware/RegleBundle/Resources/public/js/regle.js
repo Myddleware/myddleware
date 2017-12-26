@@ -1391,7 +1391,6 @@ function verifFields(field_id,show) {
 		before = $( "#validation" ).attr('value'); // rev 1.08
 
 		if(require() && require_params() && require_relate() && duplicate_fields_error() ){	
-			
 			$.ajax({
 			    type: "POST",
 				url:  path_validation ,

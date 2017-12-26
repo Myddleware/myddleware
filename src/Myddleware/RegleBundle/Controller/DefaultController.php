@@ -1699,7 +1699,8 @@ class DefaultControllerCore extends Controller
                 'fieldMappingAddListType' => $fieldMappingAdd,
                 'parentRelationships' => $allowParentRelationship,
                 'lst_parent_fields' => $lstParentFields,
-                'id_regle' => $request->get('id')
+                'regleId' => $ruleKey
+
             );
 
             $result = $this->beforeRender($result);
@@ -1791,7 +1792,7 @@ class DefaultControllerCore extends Controller
         /* @var $sessionService SessionService */
         $sessionService = $this->get('myddleware_session.service');
         //     $ruleKey = $sessionService->getParamRuleLastKey();
-        $ruleKey =  $this->getRequest()->request->get('params')[1]['value'];
+        $ruleKey = $this->getRequest()->request->get('params')[1]['value']; // get param
 
         // On récupére l'EntityManager
         $this->getInstanceBdd();
@@ -1804,6 +1805,7 @@ class DefaultControllerCore extends Controller
                 $this->getRequest()->request->get('formules'), // Formula
                 $this->getRequest()->request->get('params') // Params
             );
+            unset($tab_new_rule['params']['regleId']); // delete  id regle for gestion session
 
             // fields relate
             if (!empty($this->getRequest()->request->get('duplicate'))) {
