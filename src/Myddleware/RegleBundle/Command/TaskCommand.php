@@ -53,7 +53,7 @@ class TaskCommand extends ContainerAwareCommand {
 			// Récupération du Job			
 			$job = $this->getContainer()->get('myddleware_job.job');		
 			
-			if ($job->initJob($rule)) {
+			if ($job->initJob('Synchro : '.$rule)) {
 				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
 				
 				if (!empty($rule)) {			

@@ -28,6 +28,9 @@ services:
      myddleware.template:  
          class: Myddleware\RegleBundle\Classes\template
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.jobScheduler:  
+         class: Myddleware\RegleBundle\Classes\jobScheduler
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware.permission:  
          class: Myddleware\RegleBundle\Classes\permission
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]

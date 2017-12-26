@@ -30,46 +30,28 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RerunErrorCommand extends ContainerAwareCommand
-{
+class jobSchedulerCommand extends ContainerAwareCommand {
+
     protected function configure()
     {
         $this
-            ->setName('myddleware:rerunerror')
-            ->setDescription('Synchronisation des données')
-            ->addArgument('limit', InputArgument::REQUIRED, "Nombre maximum de flux en erreur traité")
-            ->addArgument('attempt', InputArgument::REQUIRED, "Nombre maximum de tentative")
+            ->setName('myddleware:jobScheduler')
+            ->setDescription('Run every job in the scheduler')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
-    {		
+    {
 		try {		
-			$logger = $this->getContainer()->get('logger');
-			$limit = $input->getArgument('limit');
-			$attempt = $input->getArgument('attempt');
-			// Récupération du Job
-			$job = $this->getContainer()->get('myddleware_job.job');
+			$jobScheduler = $this->getContainer()->get('myddleware.jobScheduler');		
+			$jobScheduler->setJobsToRun();
+			$jobScheduler->runJobs();
 			
-			if ($job->initJob('Rerun error : limit '.$limit.', attempt '.$attempt)) {	
-				// Premier paramètre : limite d'enregistrement traités
-				// Deuxième paramètre, limite d'erreur : si un flux a plus de tentative que le paramètre il n'est pas relancé
-				$job->runError( $limit , $attempt);	
-			}
 		}
 		catch(\Exception $e) {
-			$job->message .= $e->getMessage();
+			echo $e->getMessage().chr(10);
+			$this->getContainer()->get('logger')->error($e->getMessage());
 		}
 		
-		// Close job if it has been created
-		if($job->createdJob === true) {
-			$job->closeJob();
-		}
-		
-		// Display message on the console
-		if (!empty($job->message)) {
-			$output->writeln('<error>'.$job->message.'</error>');
-			$logger->error($job->message);
-		} 	
 	}
 }

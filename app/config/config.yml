@@ -83,6 +83,9 @@ fos_user:
     from_email:
         address:        contact@myddleware.com
         sender_name:    Myddleware contact
+    registration:
+        confirmation:
+            enabled: true
     
 # Stof\DoctrineExtensionBundle configuration
 stof_doctrine_extensions:
