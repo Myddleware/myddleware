@@ -329,7 +329,7 @@ class FluxControllerCore extends Controller
 			$user = '';
 		}
 		else {
-			$user = $cond.' created_by = '.$this->getUser()->getId();
+			$user = $cond.' Document.created_by = '.$this->getUser()->getId();
 		}
 		// Detecte si la session est le support ---------
 
