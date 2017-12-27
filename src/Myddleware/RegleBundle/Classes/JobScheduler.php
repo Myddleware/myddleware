@@ -4,7 +4,7 @@
 
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.

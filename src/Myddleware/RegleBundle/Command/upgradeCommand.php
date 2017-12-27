@@ -31,34 +31,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class upgradeCommand extends ContainerAwareCommand
 {
-    protected function configure()
-    {
+    protected function configure() {
         $this
             ->setName('myddleware:upgrade')
             ->setDescription('Upgrade of Myddleware')
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-		$logger = $this->getContainer()->get('logger');
-		
-		$job = $this->getContainer()->get('myddleware_job.job');
-				
-		if ($job->initJob('upgrade Myddleware')) {
-			$job->myddlewareUpgrade();
+	// Process to the upgrade
+    protected function execute(InputInterface $input, OutputInterface $output) {
+		try {
+			$logger = $this->getContainer()->get('logger');
+			$upgrade = $this->getContainer()->get('myddleware.upgrade');	
+			$upgrade->processUpgrade();	
 		}
-		
-		// Close job if it has been created
-		if($job->createdJob === true) {
-			$job->closeJob();
-		}
-		
-		// Display message on the console
-		if (!empty($job->message)) {
-			$output->writeln('<error>'.$job->message.'</error>');
-			$logger->error($job->message);
-		} 	
+		catch(\Exception $e) {
+			$output->writeln( '<error>'.$e->getMessage().'</error>');
+		}	
 	}
 
 

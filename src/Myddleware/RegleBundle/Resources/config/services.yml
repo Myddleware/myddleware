@@ -31,6 +31,9 @@ services:
      myddleware.jobScheduler:  
          class: Myddleware\RegleBundle\Classes\jobScheduler
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.upgrade:  
+         class: Myddleware\RegleBundle\Classes\upgrade
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware.permission:  
          class: Myddleware\RegleBundle\Classes\permission
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]

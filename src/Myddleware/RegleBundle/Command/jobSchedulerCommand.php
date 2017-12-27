@@ -32,21 +32,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class jobSchedulerCommand extends ContainerAwareCommand {
 
-    protected function configure()
-    {
+    protected function configure() {
         $this
             ->setName('myddleware:jobScheduler')
             ->setDescription('Run every job in the scheduler')
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+	// Run the job scheduler
+    protected function execute(InputInterface $input, OutputInterface $output) {
 		try {		
 			$jobScheduler = $this->getContainer()->get('myddleware.jobScheduler');		
 			$jobScheduler->setJobsToRun();
-			$jobScheduler->runJobs();
-			
+			$jobScheduler->runJobs();	
 		}
 		catch(\Exception $e) {
 			echo $e->getMessage().chr(10);
