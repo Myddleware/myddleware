@@ -1249,7 +1249,7 @@ class dolistcore extends solution {
 			}
 		}
 		catch (\Exception $e){
-			$result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $result;
 		}
 	} // read($param)	
@@ -2094,7 +2094,7 @@ class dolistcore extends solution {
 					break;
 			}
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -2184,7 +2184,7 @@ class dolistcore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -2251,7 +2251,7 @@ class dolistcore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -2367,7 +2367,7 @@ class dolistcore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -2474,7 +2474,7 @@ class dolistcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			return array('error' => 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');
+			return array('error' => 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
 		// Parcours de chaque relation contact - campagne
 		foreach($param['data'] as $idDoc => $data) {
@@ -2569,7 +2569,7 @@ class dolistcore extends solution {
 									);
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -2600,7 +2600,7 @@ class dolistcore extends solution {
 					break;
 			}
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error

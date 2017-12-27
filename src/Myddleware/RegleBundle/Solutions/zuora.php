@@ -89,7 +89,7 @@ class zuoracore  extends solution {
 			$this->connexion_valide = true; 
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}

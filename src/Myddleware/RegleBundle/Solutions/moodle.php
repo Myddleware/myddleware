@@ -419,7 +419,7 @@ class moodlecore  extends solution {
 			return $result;		 
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;
 			return $result;
 		}	
@@ -492,7 +492,7 @@ class moodlecore  extends solution {
 			$result['date_ref'] = $this->dateTimeToMyddleware($result['date_ref']);			
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';;
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
 		}	
 		return $result;
 	}

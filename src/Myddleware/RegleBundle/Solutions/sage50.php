@@ -530,7 +530,7 @@ class sage50core extends solution
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}		
 		return $result;
 	}	
@@ -749,7 +749,7 @@ $xmlData .= '    </'.$param ["module"].'>
 			}
 			catch (\Exception $e) {
 				// $error = $e->getMessage();
-				$error ='Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error ='Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 										'id' => '-1',
 										'error' => $error

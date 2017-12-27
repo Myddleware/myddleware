@@ -602,7 +602,7 @@ class sapcrmcore extends saproot {
 			return $params;
 		}
 		catch (\Exception $e){
-			$this->logger->error('Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');	
+			$this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');	
 			return array();
 		}
 	}

@@ -424,7 +424,7 @@ class templatecore {
 			$this->em->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
 			$session = new Session();
 			$session->set( 'error', array($this->container->get('translator')->trans('error.template.creation'),$e->getMessage()));
-			$error = 'Failed to generate rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'; 
+			$error = 'Failed to generate rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'; 
 			$this->logger->error($error);
 			return $error;
 		}		

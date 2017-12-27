@@ -106,7 +106,7 @@ class jobcore  {
 			}
 			return true;
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$this->message .= $e->getMessage();
 			return false;
 		}	
@@ -201,8 +201,8 @@ class jobcore  {
 				}			
 			}			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}
 	}
 	
@@ -369,7 +369,7 @@ class jobcore  {
 				return false;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -392,7 +392,7 @@ class jobcore  {
 				}			
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}
 		if (empty($ruleOrder)) {
@@ -476,7 +476,7 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
 			return false;
 		}	 
@@ -503,7 +503,7 @@ class jobcore  {
 				file_put_contents($this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
 			return false;
 		}	
@@ -693,7 +693,7 @@ class jobcore  {
 			}
 			return true;
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$this->message .= $e->getMessage();
 			return false;							
 		}
@@ -791,7 +791,7 @@ class jobcore  {
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->logger->error($this->message);	
 			}	
 		}
@@ -877,8 +877,8 @@ class jobcore  {
 			// Récupération des erreurs
 			$this->logData['jobError'] = $this->message;
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->logData['jobError'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->logData['jobError'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}
 		return $this->logData;
 	}
@@ -918,8 +918,8 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION			
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to update Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .= 'Failed to update Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+			$this->logger->error( 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
 			return false;
 		}
 		return true;
@@ -935,8 +935,8 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to create Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .=  'Failed to create Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+			$this->logger->error( 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .=  'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
 			return false;
 		}
 		return true;

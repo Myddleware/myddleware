@@ -44,12 +44,12 @@ class databasecore extends solution {
 				$this->pdo = $this->generatePdo();
 			    $this->connexion_valide = true;	
 			} catch (\PDOException $e) {
-				$error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->logger->error($error);
 				return array('error' => $error);
 			}
 		} catch (\Exception $e) {
-			$error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -106,7 +106,7 @@ class databasecore extends solution {
 			}		
 			return $modules;
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $error;			
 		}
 	} 	
@@ -179,7 +179,7 @@ class databasecore extends solution {
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';			
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';			
 			return false;
 		}
 	} // get_module_fields($module) 
@@ -300,7 +300,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';					
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';					
 		}					
 		return $result;
 	} // read_last($param)
@@ -391,7 +391,7 @@ class databasecore extends solution {
 			} 
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}		
 		return $result;	
 	} // read($param)
@@ -452,7 +452,7 @@ class databasecore extends solution {
 									);
 				}
 				catch (\Exception $e) {
-					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -463,7 +463,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error
@@ -511,7 +511,7 @@ class databasecore extends solution {
 									);									
 				}
 				catch (\Exception $e) {
-					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -522,7 +522,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error

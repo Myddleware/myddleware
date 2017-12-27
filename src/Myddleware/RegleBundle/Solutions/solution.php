@@ -165,10 +165,10 @@ class solutioncore {
 		}
 		catch (\Exception $e) {
 			$this->conn->rollBack(); // -- ROLLBACK TRANSACTION
-			$document->setMessage('Failed to send document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');
+			$document->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$document->setTypeError('E');
 			$document->updateStatus('Error_sending : '.$e->getMessage());
-			$this->logger->error( 'Failed to send document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$response[$idDoc] = false;
 		}				
 		return $response;
