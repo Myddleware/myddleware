@@ -957,7 +957,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			
 			$.ajax({
 			    type: "POST",
-				url: "formula/",
+				url: path_formula ,
 				data:{
   					formula : myFormula
 				},
