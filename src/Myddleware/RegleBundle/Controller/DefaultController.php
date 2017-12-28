@@ -71,7 +71,6 @@ class DefaultControllerCore extends Controller
             $this->connection = $this->get('database_connection');
         }
     }
-    // debug ladybug_dump($compact);
 
     /* ******************************************************
      * RULE

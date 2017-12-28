@@ -37,7 +37,6 @@ class AppKernel extends Kernel
 			// Console
 			// $bundles[] = new CoreSphere\ConsoleBundle\CoreSphereConsoleBundle();
 			// Debug
-			$bundles[] = new RaulFraile\Bundle\LadybugBundle\RaulFraileLadybugBundle();
         }
 
         return $bundles;
