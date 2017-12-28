@@ -562,15 +562,6 @@ class jobcore  {
 
 	// Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
 	public function clearData() {
-		//Get the table list 
-		// $sqlTables = "SHOW TABLES";
-		// $stmt = $this->connection->prepare($sqlTables);
-		// $stmt->execute();	   				
-		// $tablesQuery = $stmt->fetchAll();
-		// foreach ($tablesQuery as $key => $table) {
-			// $tables[] = current($table);
-		// }
-	
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
 							Rule.id,
@@ -604,7 +595,9 @@ class jobcore  {
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("days", $rule['days']);
 					$stmt->execute();
-
+					if ($stmt->rowCount() > 0) {
+						$this->message .= $stmt->rowCount().' rows deleted in the table DocumentData. ';
+					}
 					// Delete log for these rule	
 					$deleteLog = "
 						DELETE Log
@@ -621,34 +614,30 @@ class jobcore  {
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("days", $rule['days']);
 					$stmt->execute(); 
-					
+					if ($stmt->rowCount() > 0) {
+						$this->message .= $stmt->rowCount().' rows deleted in the table Log. ';
+					}
 				}
-				// Suppression des jobs de transfert vide et des autres jobs qui datent de plus de nbDayClearJob jours
+				// Suppression des jobs de transfert vide
 				$deleteJob = " 	
 					DELETE 
 					FROM Job
 					WHERE 
 							status = 'End'
-						AND (
-								(
-										param NOT IN ('cleardata', 'backup', 'notification')
-									AND message IN ('', 'Another job is running. Failed to start job. ')
-									AND open = 0
-									AND close = 0
-									AND cancel = 0
-									AND error = 0
-								)
-							OR 	(
-									param IN ('cleardata', 'backup', 'notification')
-									AND message = ''
-									AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
-								)
-							)
+						AND param NOT IN ('cleardata', 'notification')
+						AND message  = ''
+						AND open = 0
+						AND close = 0
+						AND cancel = 0
+						AND error = 0
+						AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
 				";	
 				$stmt = $this->connection->prepare($deleteJob);
 				$stmt->bindValue("nbDayClearJob", $this->nbDayClearJob);
 				$stmt->execute();
-				
+				if ($stmt->rowCount() > 0) {
+					$this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
+				}
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
