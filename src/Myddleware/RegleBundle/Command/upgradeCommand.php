@@ -41,7 +41,6 @@ class upgradeCommand extends ContainerAwareCommand
 	// Process to the upgrade
     protected function execute(InputInterface $input, OutputInterface $output) {
 		try {
-			$logger = $this->getContainer()->get('logger');
 			$upgrade = $this->getContainer()->get('myddleware.upgrade');	
 			$upgrade->processUpgrade();	
 		}

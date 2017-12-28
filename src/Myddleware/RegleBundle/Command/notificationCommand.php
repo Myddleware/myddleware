@@ -34,33 +34,43 @@ use Psr\Log\LoggerInterface;
 
 class notificationCommand extends ContainerAwareCommand
 {
-    protected function configure()
-    {
+    protected function configure() {
         $this
             ->setName('myddleware:notification')
-            ->setDescription('DESCRIPTION')
+            ->setDescription('Send notification')
+			->addArgument('type',InputArgument::OPTIONAL, "Notification type")
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-    	$logger = $this->getContainer()->get('logger');
-		$job = $this->getContainer()->get('myddleware_job.job');
-		
-		if ($job->initJob('notification')) {
-			$job->sendNotification();
-		}
-		
-		// Close job if it has been created
-		if($job->createdJob == true) {
-			$job->closeJob();
-		}
-		
-		// Display message on the console
-		if (!empty($job->message)) {
-			$output->writeln('<error>'.$job->message.'</error>');
-			$logger->error($job->message);
-		} 	
+    protected function execute(InputInterface $input, OutputInterface $output) {
+			// We don't create job for alert
+			$notification = $this->getContainer()->get('myddleware.notification');	
+			if ($input->getArgument('type') == 'alert') {
+				try {
+					$notification->sendAlert();	
+				}
+				catch(\Exception $e) {
+					$output->writeln( '<error>'.$e->getMessage().'</error>');
+				}	
+			}
+			// Standard notification
+			elseif (empty($input->getArgument('type'))) {
+				try {
+					$logger = $this->getContainer()->get('logger');
+					$job = $this->getContainer()->get('myddleware_job.job');
+					if ($job->initJob('notification')) {
+						$notification->sendNotification();	
+					}
+				}
+				catch(\Exception $e) {
+					$job->message = $e->getMessage();
+					$output->writeln( '<error>'.$e->getMessage().'</error>');
+				}		
+				// Close job if it has been created
+				if($job->createdJob == true) {
+					$job->closeJob();
+				}
+			}
 	}
 
 

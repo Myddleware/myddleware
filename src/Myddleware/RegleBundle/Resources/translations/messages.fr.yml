@@ -652,3 +652,10 @@ email_notification:
     100_first_erros: Voici les 100 premières erreurs: 
     best_regards: Bien cordialement, 
     signature: L'équipe Myddleware
+email_alert:
+    subject: Alerte Myddleware
+    introduction: Une tâche en cours a dépassé la limite que vous avez autorisée : 
+    minute: minutes. 
+    job_start: La tâche a commencé à  
+    job_id: . ID ode la tâche : 
+    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".		

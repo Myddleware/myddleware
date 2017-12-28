@@ -34,6 +34,9 @@ services:
      myddleware.upgrade:  
          class: Myddleware\RegleBundle\Classes\upgrade
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware.notification:  
+         class: Myddleware\RegleBundle\Classes\notification
+         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware.permission:  
          class: Myddleware\RegleBundle\Classes\permission
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
