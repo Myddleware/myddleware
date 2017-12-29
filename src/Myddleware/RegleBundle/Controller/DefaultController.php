@@ -1790,8 +1790,15 @@ class DefaultControllerCore extends Controller
     {
         /* @var $sessionService SessionService */
         $sessionService = $this->get('myddleware_session.service');
-        //     $ruleKey = $sessionService->getParamRuleLastKey();
-        $ruleKey = $this->getRequest()->request->get('params')[1]['value']; // get param
+        // $ruleKey = $sessionService->getParamRuleLastKey();
+        /**
+         * get rule id in the params in regle.js
+         */
+        if ($this->getRequest()->request->get('params')[1]['name'] === "regleId") {
+            $ruleKey = $this->getRequest()->request->get('params')[1]['value']; // get param
+        } else {
+            $ruleKey = $this->getRequest()->request->get('params')[2]['value']; // get param
+        }
 
         // On récupére l'EntityManager
         $this->getInstanceBdd();
@@ -2161,8 +2168,8 @@ class DefaultControllerCore extends Controller
             $response = 1;
         } catch (\Exception $e) {
             $this->em->getConnection()->rollBack();
-            $this->get('logger')->error('2;' . htmlentities($e->getMessage() . ' ('.$e->getFile().' line ' . $e->getLine() . ')'));
-            $response = '2;' . htmlentities($e->getMessage() . ' ('.$e->getFile().' line ' . $e->getLine() . ')');
+            $this->get('logger')->error('2;' . htmlentities($e->getMessage() . ' (' . $e->getFile() . ' line ' . $e->getLine() . ')'));
+            $response = '2;' . htmlentities($e->getMessage() . ' (' . $e->getFile() . ' line ' . $e->getLine() . ')');
         }
 
         $this->em->close();
