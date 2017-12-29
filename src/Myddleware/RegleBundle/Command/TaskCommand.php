@@ -80,12 +80,7 @@ class TaskCommand extends ContainerAwareCommand {
 									$output->writeln($value.' : Create documents.');			
 									$nb = $job->createDocuments();
 									$output->writeln($value.' : Number of documents created : '.$nb); 
-								}
-							}
-							foreach ($rules as $key => $value) {								
-								$output->writeln('Tranform and send data for rule : <question>'.$value.'</question>');
-								// Chargement des données de la règle
-								if ($job->setRule($value)) {		
+
 									// Permet de filtrer les documents
 									$job->filterDocuments();
 									
