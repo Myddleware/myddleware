@@ -1422,7 +1422,6 @@ class documentcore {
 	// En sortie : le type de docuement (C ou U)
 	protected function checkRecordExist($id) {	
 		try {	
-
 			// Query used in the method several times
 			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
@@ -1433,9 +1432,8 @@ class documentcore {
 							FROM Document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
-								AND Document.global_status != 'Error'
 								AND (
-										Document.global_status != 'Cancel'
+										Document.global_status = 'Close'
 									 OR (
 											Document.global_status = 'Cancel'	
 										AND Document.status = 'No_send'
@@ -1454,14 +1452,13 @@ class documentcore {
 							FROM Document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
-								AND Document.global_status != 'Error'
 								AND (
-										Document.global_status != 'Cancel'
+										Document.global_status = 'Close'
 									 OR (
 											Document.global_status = 'Cancel'	
 										AND Document.status = 'No_send'
 									)
-								)	
+								)
 								AND	Document.target_id = :id
 								AND Document.id != :id_doc
 							ORDER BY target_id DESC, global_status DESC
