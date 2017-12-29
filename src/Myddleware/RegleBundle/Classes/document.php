@@ -1432,7 +1432,8 @@ class documentcore {
 								Document.global_status 
 							FROM Document 
 							WHERE 
-									Document.rule_id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)	
+								AND Document.global_status != 'Error'
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
@@ -1452,7 +1453,8 @@ class documentcore {
 								Document.global_status 
 							FROM Document 
 							WHERE 
-									Document.rule_id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)	
+								AND Document.global_status != 'Error'
 								AND (
 										Document.global_status != 'Cancel'
 									 OR (
