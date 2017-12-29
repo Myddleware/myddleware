@@ -110,6 +110,7 @@
 				<th>{{'list_flux.tab.date_created'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
+				<th>{{'list_flux.tab.type'|trans}}</th>
 			</tr> 
 		     {% for flux in entities %}
 		     <tr class="fd_{{ flux.global_status|lower }}" data-id="{{ flux.id }}">
@@ -138,7 +139,8 @@
 						<span class="glyphicon glyphicon-exclamation-sign"></span>
 		     		{% endif %}
 		     		</div>
-		     	</td>	     			     	
+		     	</td>	  
+				<td>{{ flux.type }}</td>
 			</tr>			
 			{% endfor %}			
 			<tr>
@@ -150,6 +152,7 @@
 				<th>{{'list_flux.tab.date_created'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
+				<th>{{'list_flux.tab.type'|trans}}</th>
 			</tr>			
 		{% endif %}
 		</table>

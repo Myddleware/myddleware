@@ -312,6 +312,7 @@ list_flux:
         date_modified: Date of modification
         statut: Status
         source_date_modified: Date of reference
+        type: Type
 
 flux:
     gbl_status:
