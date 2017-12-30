@@ -565,7 +565,7 @@ class jobcore  {
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
 							Rule.id,
-							Rule.name_slug,
+							Rule.name,
 							RuleParam.value days
 						FROM Rule
 							INNER JOIN RuleParam
@@ -576,10 +576,13 @@ class jobcore  {
 		$stmt->execute();	   				
 		$rules = $stmt->fetchAll();	
 		if (!empty($rules)) {
-			$this->connection->beginTransaction();						
-			try {
-				// Boucle sur toutes les règles
-				foreach ($rules as $rule) {	
+			// Boucle sur toutes les règles
+			foreach ($rules as $rule) {	
+				// Calculate the date corresponding depending the rule parameters
+				$limitDate = new \DateTime('now',new \DateTimeZone('GMT'));
+				$limitDate->modify('-'.$rule['days'].' days');	
+				$this->connection->beginTransaction();						
+				try {
 					// Delete document data
 					$deleteSource = "
 						DELETE DocumentData
@@ -589,14 +592,13 @@ class jobcore  {
 						WHERE 
 								Document.rule_id = :ruleId
 							AND Document.global_status IN ('Close','Cancel')
-							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= :days
-					";							
+							AND Document.date_modified < :limitDate	";							
 					$stmt = $this->connection->prepare($deleteSource);
 					$stmt->bindValue("ruleId", $rule['id']);
-					$stmt->bindValue("days", $rule['days']);
+					$stmt->bindValue("limitDate", $limitDate->format('Y-m-d H:i:s'));
 					$stmt->execute();
-					if ($stmt->rowCount() > 0) {
-						$this->message .= $stmt->rowCount().' rows deleted in the table DocumentData. ';
+					if ($stmt->rowCount() > 0) {				
+						$this->message .= $stmt->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
 					}
 					// Delete log for these rule	
 					$deleteLog = "
@@ -608,43 +610,51 @@ class jobcore  {
 								Log.rule_id = :ruleId
 							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
 							AND Document.global_status IN ('Close','Cancel')
-							AND DATEDIFF(CURRENT_DATE( ),Document.date_modified) >= :days
-					";						
+							AND Document.date_modified < :limitDate	";						
 					$stmt = $this->connection->prepare($deleteLog);
 					$stmt->bindValue("ruleId", $rule['id']);
-					$stmt->bindValue("days", $rule['days']);
+					$stmt->bindValue("limitDate", $limitDate->format('Y-m-d H:i:s'));
 					$stmt->execute(); 
 					if ($stmt->rowCount() > 0) {
-						$this->message .= $stmt->rowCount().' rows deleted in the table Log. ';
+						$this->message .= $stmt->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';			
 					}
-				}
-				// Suppression des jobs de transfert vide
-				$deleteJob = " 	
-					DELETE 
-					FROM Job
-					WHERE 
-							status = 'End'
-						AND param NOT IN ('cleardata', 'notification')
-						AND message  = ''
-						AND open = 0
-						AND close = 0
-						AND cancel = 0
-						AND error = 0
-						AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
-				";	
-				$stmt = $this->connection->prepare($deleteJob);
-				$stmt->bindValue("nbDayClearJob", $this->nbDayClearJob);
-				$stmt->execute();
-				if ($stmt->rowCount() > 0) {
-					$this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
-				}
-				$this->connection->commit(); // -- COMMIT TRANSACTION
-			} catch (\Exception $e) {
-				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-				$this->logger->error($this->message);	
-			}	
+				} catch (\Exception $e) {
+					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+					$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$this->logger->error($this->message);	
+				}		
+			}
 		}
+		$this->connection->beginTransaction();						
+		try {
+			$limitDate = new \DateTime('now',new \DateTimeZone('GMT'));
+			$limitDate->modify('-'.$this->nbDayClearJob.' days');	
+			// Suppression des jobs de transfert vide
+			$deleteJob = " 	
+				DELETE 
+				FROM Job
+				WHERE 
+						status = 'End'
+					AND param NOT IN ('cleardata', 'notification')
+					AND message  = ''
+					AND open = 0
+					AND close = 0
+					AND cancel = 0
+					AND error = 0
+					AND end < :limitDate
+			";	
+			$stmt = $this->connection->prepare($deleteJob);
+			$stmt->bindValue("limitDate", $limitDate->format('Y-m-d H:i:s'));
+			$stmt->execute();
+			if ($stmt->rowCount() > 0) {
+				$this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
+			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION
+		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($this->message);	
+		}				
 	}
 	
 	
