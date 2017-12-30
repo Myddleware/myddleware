@@ -86,9 +86,6 @@ function drawChart() {
 //--------------
 
 $( document ).ready(function() {
-	// Refresh home page every 5 minutes
-	setTimeout(function() { window.location=window.location;},300000);
-	
 	if($('#listing-solutions','#panel').length != 0) {
 		$('#listing-solutions','#panel').scrollbox({
 			direction: 'h',
