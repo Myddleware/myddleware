@@ -24,7 +24,7 @@
 
 {% extends '::base.html.twig' %}
 {% block title %}{{parent()}} | {{'title.flux.view'|trans}} {{ doc.getId }}{% endblock %}
-{% block titlesm %}<a href="{{ path('flux_list',  array('search' => 1)) }}">{{'breadcrumb.transfert_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.flux.view'|trans}} {{ doc.getId }}{% endblock titlesm %} 
+{% block titlesm %}<a href="{{ path('flux_list', {'search': 1}) }}">{{'breadcrumb.transfert_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.flux.view'|trans}} {{ doc.getId }}{% endblock titlesm %} 
 {% block body %}
     <div id="flux">
 		
