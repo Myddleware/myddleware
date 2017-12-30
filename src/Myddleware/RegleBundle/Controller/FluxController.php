@@ -43,15 +43,13 @@ use Myddleware\RegleBundle\Classes\document as doc;
 
 class FluxControllerCore extends Controller
 {
-	protected $llimitListFlux = 1000;
-
 	/* ******************************************************
 	 * FLUX
 	 ****************************************************** */
 
 	public function fluxErrorByRuleAction($id) {
             
-                /* @var $sessionService SessionService */
+		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
                 
 			
@@ -77,19 +75,19 @@ class FluxControllerCore extends Controller
 		$rule = $em->getRepository('RegleBundle:Rule')
                    ->findBy( $list_fields_sql );		
 		if($rule) {
-                        $sessionService->setFluxFilterRuleName($rule[0]->getName());
-                        $sessionService->setFluxFilterGlobalStatus('Error');
-                        $sessionService->setFluxFilterWhere("WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ");				
+			$sessionService->setFluxFilterRuleName($rule[0]->getName());
+			$sessionService->setFluxFilterGlobalStatus('Error');
+			$sessionService->setFluxFilterWhere("WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ");				
 		}
 		else {
-                        $sessionService->removeFluxFilter();
+			$sessionService->removeFluxFilter();
 		}
                 
-		return $this->redirect($this->generateUrl('flux_list'));	
+		return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));	
 	}
 	 	 
  	// LISTE DES FLUX
- 	public function fluxListAction($page) {
+ 	public function fluxListAction($page,$search) {
  		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
 		//--- Liste status traduction
@@ -204,7 +202,12 @@ class FluxControllerCore extends Controller
 
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
-		$where = ($sessionService->isFluxFilterCWhereExist() ? $sessionService->getFluxFilterWhere() : '');
+		// $where = ($sessionService->isFluxFilterCWhereExist() ? $sessionService->getFluxFilterWhere() : '');
+		if (!empty($sessionService->getFluxFilterWhere())) {
+			$where = $sessionService->getFluxFilterWhere();
+			$sessionService->removeFluxFilter();
+		}
+		
 		$conditions = 0;
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
@@ -214,90 +217,90 @@ class FluxControllerCore extends Controller
 			if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
 				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterDateCreateStart($data['date_create_start']);
+				$sessionService->setFluxFilterDateCreateStart($data['date_create_start']);
 			}
 			else {
-                                $sessionService->removeFluxFilterDateCreateStart();
+				$sessionService->removeFluxFilterDateCreateStart();
 			}				
 			
 			if(!empty( $data['date_create_end'] ) && is_string($data['date_create_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_created <= '".$data['date_create_end']."' ";
 				$conditions++;	
-                                $sessionService->setFluxFilterDateCreateEnd($data['date_create_end']);
+				$sessionService->setFluxFilterDateCreateEnd($data['date_create_end']);
 			}	
 			else {
-                                $sessionService->removeFluxFilterDateCreateEnd();
+				$sessionService->removeFluxFilterDateCreateEnd();
 			}							
 
 			if(!empty( $data['date_modif_start'] ) && is_string($data['date_modif_start'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_modified >= '".$data['date_modif_start']."' ";
 				$conditions++;		
-                                $sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+				$sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
 			}
 			else {
-                                $sessionService->removeFluxFilterDateModifStart();
+				$sessionService->removeFluxFilterDateModifStart();
 			}
 							
 			if(!empty( $data['date_modif_end'] ) && is_string($data['date_modif_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_modified <= '".$data['date_modif_end']."' ";
 				$conditions++;	
-                                $sessionService->setFluxFilterDateModifEnd( $data['date_modif_end']);
+				$sessionService->setFluxFilterDateModifEnd( $data['date_modif_end']);
 			}
 			else {
-                                $sessionService->removeFluxFilterDateModifEnd();
+				$sessionService->removeFluxFilterDateModifEnd();
 			}
 			
 			if(!empty( $data['rule'] ) && is_string($data['rule'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Rule.name='".trim($data['rule'])."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterRuleName($data['rule']);
+				$sessionService->setFluxFilterRuleName($data['rule']);
 			}				
 			else {
-                                $sessionService->removeFluxFilterRuleName();
+				$sessionService->removeFluxFilterRuleName();
 			}
 										
 			if(!empty( $data['status'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.status='".$data['status']."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterStatus($data['status']);
+				$sessionService->setFluxFilterStatus($data['status']);
 			}
 			else {
-                                $sessionService->removeFluxFilterStatus();
+				$sessionService->removeFluxFilterStatus();
 			}	
 
 			if(!empty( $data['gblstatus'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.global_status='".$data['gblstatus']."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+				$sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
 			}
 			else {
-                                $sessionService->removeFluxFilterGblStatus();
+				$sessionService->removeFluxFilterGblStatus();
 			}
 			
 			if(!empty( $data['target_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.target_id LIKE '".$data['target_id']."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterTargetId($data['target_id']);
+				$sessionService->setFluxFilterTargetId($data['target_id']);
 			}
 			else {
-                                $sessionService->removeFluxFilterTargetId();
+				$sessionService->removeFluxFilterTargetId();
 			}
 			
 			if(!empty( $data['source_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.source_id LIKE '".$data['source_id']."' ";
 				$conditions++;
-                                $sessionService->setFluxFilterSourceId($data['source_id']);
+				$sessionService->setFluxFilterSourceId($data['source_id']);
 			}
 			else {
-                                $sessionService->removeFluxFilterSourceId();
+				$sessionService->removeFluxFilterSourceId();
 			}
 			
 			// si aucun condition alors on vide le where
@@ -335,16 +338,21 @@ class FluxControllerCore extends Controller
 
 		
 		$conn = $this->get( 'database_connection' );
+		// Stop search if search parameter = 0
+		if (
+				empty($search)
+			AND $page == 1
+		) {
+			$where = " WHERE 0";
+		}
 		
-		// Le nombre de flux affichés est limité
 		$sql = "SELECT Document.*, users.username, Rule.name rule_name
 				FROM Document  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 
 				$user
-				ORDER BY date_modified DESC 
-				LIMIT $this->llimitListFlux";					
+				ORDER BY date_modified DESC ";					
 		$stmt = $conn->prepare($sql);
 		$stmt->execute();
 		$r = $stmt->fetchall();
@@ -362,20 +370,6 @@ class FluxControllerCore extends Controller
 			if( $compact['nb'] < 1 && !intval($compact['nb'])) {
 				$compact['entities'] = '';
 				$compact['pager'] = '';				
-			}
-			
-			// Si on atteind la limit alors on récupère le nombre total de flux
-			if ($compact['nb'] >= $this->llimitListFlux) {
-				$sql = "SELECT count(*) nb
-						FROM Document 
-						JOIN users ON(users.id = Document.created_by)
-						JOIN Rule ON(Rule.id = Document.rule_id)
-						$where 
-						$user";
-				$stmt = $conn->prepare($sql);
-				$stmt->execute();		
-				$count = $stmt->fetch();
-				$compact['nb'] = $count['nb'];
 			}
 			
 			// affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
@@ -408,7 +402,7 @@ class FluxControllerCore extends Controller
 			$sessionService->removeFluxFilter();
 		}
 
-		return $this->redirect($this->generateUrl('flux_list'));	
+		return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));	
 	}
 
 	// Info d'un flux
@@ -429,7 +423,7 @@ class FluxControllerCore extends Controller
 						empty($doc[0])
 					 || $doc[0]->getCreatedBy() != $this->getUser()->getId()
 				) {
-					return $this->redirect($this->generateUrl('flux_list'));	
+					return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));	
 				}
 			}											
 			// Detecte si la session est le support ---------
@@ -540,7 +534,7 @@ class FluxControllerCore extends Controller
 			);			
 		}
 		catch(Exception $e) {
-			return $this->redirect($this->generateUrl('flux_list'));	
+			return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));	
 			exit;
 		}
 
@@ -600,7 +594,7 @@ class FluxControllerCore extends Controller
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
 		catch(Exception $e) {
-			return $this->redirect($this->generateUrl('flux_list'));
+			return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
 		}		
 	}
 
@@ -614,7 +608,7 @@ class FluxControllerCore extends Controller
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
 		catch(Exception $e) {
-			return $this->redirect($this->generateUrl('flux_list'));
+			return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
 		}													
 	}
 	

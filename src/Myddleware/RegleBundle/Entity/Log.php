@@ -33,7 +33,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_job_id", columns={"job_id"})
+ *  @ORM\Index(name="index_job_id", columns={"job_id"}),
+ *  @ORM\Index(name="index_rule_id",columns={"rule_id"})
  *})
  */ 
 class Log

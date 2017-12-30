@@ -33,12 +33,12 @@ class LoadJobSchedulerData implements FixtureInterface
 {
     private $manager; 
 	protected $jobSchedulerData = array(
-									array('command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10), 
-									array('command' => 'rerunerror',	'paramName1' => 'limit','paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100), 
-									array('command' => 'rerunerror',	'paramName1' => 'limit','paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '10',	'period' => 1440,	'jobOrder' => 110), 
-									array('command' => 'notification',	'paramName1' => 'type',	'paramValue1' => 'alert',	'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 200), 
-									array('command' => 'notification',	'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 210), 
-									array('command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 300), 
+									array('command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => 1), 
+									array('command' => 'rerunerror',	'paramName1' => 'limit','paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100,	'active' => 1), 
+									array('command' => 'rerunerror',	'paramName1' => 'limit','paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '10',	'period' => 1440,	'jobOrder' => 110,	'active' => 1), 
+									array('command' => 'notification',	'paramName1' => 'type',	'paramValue1' => 'alert',	'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 200,	'active' => 1),  
+									array('command' => 'notification',	'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 210,	'active' => 1),  
+									array('command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 300,	'active' => 1), 
 								);
  
     public function load(ObjectManager $manager){
@@ -77,6 +77,7 @@ class LoadJobSchedulerData implements FixtureInterface
 			$jobSchedulerObject->setParamName2($jobScheduler['paramName2']);
 			$jobSchedulerObject->setParamValue2($jobScheduler['paramValue2']);
 			$jobSchedulerObject->setPeriod($jobScheduler['period']);
+			$jobSchedulerObject->setActive($jobScheduler['active']);
 			$jobSchedulerObject->setJobOrder($jobScheduler['jobOrder']);
 			$this->manager->persist($jobSchedulerObject);
 		}	

@@ -34,7 +34,10 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(indexes={
  *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
  *      @ORM\Index(name="index_parent_id", columns={"parent_id"}),
- *      @ORM\Index(name="global_status", columns={"global_status"})
+ *      @ORM\Index(name="global_status", columns={"global_status"}),
+ *      @ORM\Index(name="source_id", columns={"source_id"}),
+ *      @ORM\Index(name="target_id", columns={"target_id"}),
+ *      @ORM\Index(name="date_modified", columns={"date_modified"})
  * })
  */ 
 class Document

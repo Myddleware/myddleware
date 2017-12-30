@@ -70,6 +70,7 @@ class jobSchedulercore  {
 										JobScheduler.lastRun IS NOT NULL
 									AND TIMESTAMPDIFF(MINUTE,JobScheduler.lastRun,UTC_TIMESTAMP()) >= JobScheduler.period	
 								)	
+								AND JobScheduler.active = 1
 							ORDER BY jobOrder ASC";
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				

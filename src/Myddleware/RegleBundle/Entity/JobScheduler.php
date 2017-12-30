@@ -134,7 +134,15 @@ class JobScheduler
 	 * 
      */
     private $lastRun;
-
+	
+    /**
+     * @var boolean
+     *
+	 * @ORM\Column(name="active", type="boolean", options={"default":1})
+	 * 
+     */
+    private $active;  
+	
     /**
      * @var integer
      *
@@ -404,6 +412,29 @@ class JobScheduler
     public function getLastRun()
     {
         return $this->lastRun;
+    }
+	
+	/**
+     * Set active
+     *
+     * @param string $active
+     * @return JobScheduler
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+    
+        return $this;
+    }
+
+    /**
+     * Get active
+     *
+     * @return string 
+     */
+    public function getActive()
+    {
+        return $this->active;
     }
 	
 	/**

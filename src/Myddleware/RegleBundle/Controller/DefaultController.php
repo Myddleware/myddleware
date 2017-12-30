@@ -307,7 +307,7 @@ class DefaultControllerCore extends Controller
         $sessionService->setFluxFilterWhere("WHERE Document.rule_id = '" . $rule->getId() . "'");
         $sessionService->setFluxFilterRuleName($rule->getName());
 
-        return $this->redirect($this->generateUrl('flux_list'));
+        return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
     }
 
     // ACTIVE UNE REGLE

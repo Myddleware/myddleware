@@ -28,7 +28,7 @@
 {% block body %}
     
 	<div id="flux" >
-	<form action="{{ path('flux_list') }}" method="post" {{ form_enctype(form) }}>
+	<form action="{{ path('flux_list', {'search': 1}) }}" method="post" {{ form_enctype(form) }}>
 	{% if nb > 0 %}
 	
 	<div id="fd-title-small" class="left">
