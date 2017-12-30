@@ -888,7 +888,7 @@ class SessionService{
     public function getFluxFilterWhere()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        return $myddlewareSession['flux_filter']['where'];
+        return (!empty($myddlewareSession['flux_filter']['where']) ? $myddlewareSession['flux_filter']['where'] : null);
     }
     
     

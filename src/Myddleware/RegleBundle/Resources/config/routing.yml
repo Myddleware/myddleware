@@ -187,7 +187,7 @@ flux_btn_dyn:
     defaults: { _controller: RegleBundle:Flux:fluxBtnDyn }
 
 flux_list:
-    pattern:  /flux/list/
+    pattern:  /flux/list/search-{search}
     defaults: { _controller: RegleBundle:Flux:fluxList, page: 1 }
 
 flux_list_page:
