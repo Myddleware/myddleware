@@ -145,8 +145,7 @@ class shopapplicationcore extends solution {
 			$this->connexion_valide = true;
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Shop-application : '.$e->getMessage();
-			echo $error . ';';
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -369,7 +368,7 @@ class shopapplicationcore extends solution {
 			}			
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;			
 		}		
 		return $result;
@@ -441,7 +440,7 @@ class shopapplicationcore extends solution {
 			}		
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
 		}		
 		return $result;
 	}
@@ -501,7 +500,7 @@ class shopapplicationcore extends solution {
 				}			
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -574,7 +573,7 @@ class shopapplicationcore extends solution {
 				}			
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -698,7 +697,7 @@ class shopapplicationcore extends solution {
 	}
 	
 	// Force some module in child
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		$params = array();
 		try {	
 			if ($type == 'target') {			

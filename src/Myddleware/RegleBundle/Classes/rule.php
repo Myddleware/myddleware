@@ -155,7 +155,7 @@ class rulecore {
 			}
 			return null;
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			$errorObj = new \stdClass();
 			$errorObj->error = $error;		
@@ -219,7 +219,7 @@ class rulecore {
 
 			return $c; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}	
 	}
@@ -236,11 +236,12 @@ class rulecore {
 				return $this->solutionTarget->logout($params);				
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}	
 	}
 	
+
 	// Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
 	// Cette fonction retourne le nombre d'enregistrements lus
 	public function createDocuments() {	
@@ -277,7 +278,11 @@ class rulecore {
 					$param['ruleRelationships'] = $this->ruleRelationships;
 					$i = 0;
 					if($this->dataSource['values']) {
-
+						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
+						$migrationParameters = $this->container->getParameter('migration');
+						if (!empty($migrationParameters['mode'])) {
+							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
+						}				
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
 							if ($i >= $this->limitReadCommit){
@@ -297,7 +302,10 @@ class rulecore {
 					}
 					// Mise à jour de la date de référence si des documents ont été créés
 					$this->updateReferenceDate();
-				}
+				}				
+				// If params has been added in the output of the rule we saved it
+				$this->updateParams();
+				
 				// Rollback if the job has been manually stopped
 				if ($this->getJobStatus() != 'Start') {
 					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
@@ -305,8 +313,8 @@ class rulecore {
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			}	
 		}
 		// On affiche pas d'erreur si la lecture est désactivée
@@ -338,6 +346,32 @@ class rulecore {
 		$stmt->execute();			
 	}
 	
+	// Update/create rule parameter
+	protected function updateParams() {
+		if (!empty($this->dataSource['ruleParams'])) {
+			foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
+				// Search to check if the param already exists
+				 $paramEntity = $this->em->getRepository('RegleBundle:RuleParam')
+					   ->findOneBy( array(
+									'rule' => $this->ruleId, 
+									'name' => $ruleParam['name']
+								)
+						);	
+				// Update or create the new param		
+				if (!empty($paramEntity)) {
+					$paramEntity->setValue( $ruleParam['value'] );
+				} else {
+					$paramEntity = new RuleParam();		
+					$paramEntity->setRule($this->ruleId);
+					$paramEntity->setName($ruleParam['name']);
+					$paramEntity->setValue($ruleParam['value']); 						
+				}
+				$this->em->persist($paramEntity);
+				$this->em->flush();				
+			}
+		}
+	}
+	
 	protected function readSource() {		
 		$read['module'] = $this->rule['module_source'];
 		$read['rule'] = $this->rule;
@@ -360,30 +394,7 @@ class rulecore {
 			$connect = $this->connexionSolution('source');
 			if ($connect === true) {
 				$this->dataSource = $this->solutionSource->read($read);
-									
-				// If params has been added in the outup of the rule we saved it
-				if (!empty($this->dataSource['ruleParams'])) {
-					foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
-						// Search to check if the param already exists
-						 $paramEntity = $this->em->getRepository('RegleBundle:RuleParam')
-							   ->findOneBy( array(
-											'rule' => $this->ruleId, 
-											'name' => $ruleParam['name']
-										)
-								);	
-						// Update or create the new param		
-						if (!empty($paramEntity)) {
-							$paramEntity->setValue( $ruleParam['value'] );
-						} else {
-							$paramEntity = new RuleParam();		
-							$paramEntity->setRule($this->ruleId);
-							$paramEntity->setName($ruleParam['name']);
-							$paramEntity->setValue($ruleParam['value']); 						
-						}
-						$this->em->persist($paramEntity);
-						$this->em->flush();				
-					}
-				}				
+													
 				// Si on a $this->limit résultats et que la date de référence n'a pas changée alors on récupère les enregistrements suivants
 				// Récupération de la date de modification du premier enregistrement
 				$value['date_modified'] = '';
@@ -417,9 +428,7 @@ class rulecore {
 						// Sauvegarde des élément dans le tableau final
 						$this->dataSource['values'] = array_merge($this->dataSource['values'],$dataSource['values']);
 						$this->dataSource['count'] += $dataSource['count'];
-						$this->dataSource['date_ref'] = $dataSource['date_ref'];
-
-					
+						$this->dataSource['date_ref'] = $dataSource['date_ref'];		
 					}
 				}			
 				// Logout (source solution)
@@ -499,6 +508,21 @@ class rulecore {
 			$documents = $this->selectDocuments('Predecessor_OK');
 		}
 		if(!empty($documents)) {
+			$param['jobId'] = $this->jobId;			
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
+			$migrationParameters = $this->container->getParameter('migration');
+			if (!empty($migrationParameters['mode'])) {
+				if (!empty($this->ruleRelationships)) {
+					// Get all documents of every rules linked
+					foreach($this->ruleRelationships as $ruleRelationship) {
+						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
+						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'],true,true);		
+						}
+					}
+				}
+			}				
 			// Pour tous les docuements sélectionnés on vérifie les parents
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
@@ -524,16 +548,29 @@ class rulecore {
 			$documents = $this->selectDocuments('Relate_OK');
 		}
 		if(!empty($documents)) {
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['key'] = $this->key;
+			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
+			$migrationParameters = $this->container->getParameter('migration');
+			if (!empty($migrationParameters['mode'])) {
+				if (!empty($this->ruleRelationships)) {
+					// Get all documents of every rules linked
+					foreach($this->ruleRelationships as $ruleRelationship) {
+						// Get documents only if we don't have them yet (we could have several relationship to the same rule)
+						if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
+							$param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'],true,true);					
+						}
+					}
+				}
+			}		
 			// Transformation de tous les docuements sélectionnés
 			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
-				$param['ruleFields'] = $this->ruleFields;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$param['jobId'] = $this->jobId;
-				$param['key'] = $this->key;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->transformDocument();
-			}			
+			}	
 		}	
 		return $response;		
 	}
@@ -676,6 +713,28 @@ class rulecore {
 			}
 		}
 	}
+	
+	// Get all document of the rule
+	protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false) {
+		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId";
+		$stmt = $this->connection->prepare($sql);
+		$stmt->bindValue(":ruleId", $ruleId);
+		$stmt->execute();	    
+		$documents = $stmt->fetchAll();
+		if (!empty($documents)) {
+			foreach ($documents as $document) {
+				$documentResult['sourceId'][$document['source_id']][] = $document;
+				if (
+						$targetId
+					AND !empty($document['source_id'])
+				) {
+					$documentResult['targetId'][$document['target_id']][] = $document;
+				}
+			}
+			return $documentResult;
+		}
+	}
+	
 	
 	// Permet de récupérer les règles potentiellement biderectionnelle.
 	// Cette fonction renvoie les règles qui utilisent les même connecteurs et modules que la règle en cours mais en sens inverse (source et target inversées)
@@ -964,7 +1023,7 @@ class rulecore {
 				return true;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 		return false;
 	}
@@ -1032,7 +1091,7 @@ class rulecore {
 				}
 			}
 		} catch (\Exception $e) {
-			$response['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			echo $response['error'];
 			$this->logger->error( $response['error'] );
 		}	
@@ -1113,7 +1172,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			return $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1132,7 +1191,7 @@ class rulecore {
 				return false;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1235,7 +1294,7 @@ class rulecore {
 				$this->sourceFields = array_unique($this->sourceFields); 				
 			}						
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 		
 	}
@@ -1257,7 +1316,7 @@ class rulecore {
 				}			
 			}			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}	
 
@@ -1276,7 +1335,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			$this->ruleRelationships = $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
     
@@ -1292,7 +1351,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			$this->ruleFilters= $stmt->fetchAll();
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
     
@@ -1311,7 +1370,7 @@ class rulecore {
 		    $stmt->execute();	   				
 			return $stmt->fetchAll();
 		} catch (\Exception $e) {
-			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			throw new \Exception ('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -1330,7 +1389,7 @@ class rulecore {
 				return json_decode($documentDataEntity->getData(),true);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}		

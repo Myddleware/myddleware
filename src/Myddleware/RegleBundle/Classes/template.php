@@ -125,7 +125,7 @@ class templatecore {
 	
 	// Permet de lister les templates pour les connecteurs selectionnés 
 	public function getTemplates() {
-		$templates = '';
+		$templates = array();
 		// Read in the directory template, we read files  corresponding to the selected solutions
 		foreach (glob($this->templateDir.$this->solutionSourceName.'_'.$this->solutionTarget.'*.yml') as $filename) {
 			$template = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($filename));
@@ -424,7 +424,7 @@ class templatecore {
 			$this->em->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
 			$session = new Session();
 			$session->set( 'error', array($this->container->get('translator')->trans('error.template.creation'),$e->getMessage()));
-			$error = 'Failed to generate rules : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )'; 
+			$error = 'Failed to generate rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'; 
 			$this->logger->error($error);
 			return $error;
 		}		

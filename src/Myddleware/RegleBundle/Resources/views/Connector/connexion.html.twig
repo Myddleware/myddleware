@@ -34,15 +34,12 @@
 
 <div class="clr"></div>
 <div id="step_modules">
-	<form method="post" action="{{ path('regle_connector_insert') }}">
+	
 
 		<div id="msg_status" class="alert alert-danger" role="alert">
 			<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
 		</div>
 
-		<p><label>{{'create_connector.connexion'|trans}} : </label><input type="text" name="label" value="" /></p>		
-		<p><input class="btn-large-myd" id="step_modules_confirme" type="submit" value="{{'create_connector.save'|trans}}" disabled="disabled"/></p>
-	</form>
 </div>
 
 {# ------------- PARAMETRES JQUERY ------------- #}

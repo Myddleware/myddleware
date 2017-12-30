@@ -105,8 +105,7 @@ class salesforcecore extends solution {
 		    }
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login : '.$e->getMessage();
-			echo $error . ';';
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -285,7 +284,7 @@ class salesforcecore extends solution {
 	} // get_module_fields($module)
 
 	// Permet d'ajouter des paramètres 
-	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type,$module) {	
 		try {
 			// Si le module est PricebookEntry (produit dans le catalogue) alors il faut indiquer le catalogue de produit utilisé
 			if (
@@ -411,7 +410,7 @@ class salesforcecore extends solution {
 		}
 		catch (\Exception $e) {
 			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $result;
 		}
 	} // read_last($param)	
@@ -544,7 +543,7 @@ class salesforcecore extends solution {
 			return $result;
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $result;
 		}
 	} // read($param)
@@ -649,7 +648,7 @@ class salesforcecore extends solution {
 				}
 			}			
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['error'] = $error;
 		}					
 		return $result;
@@ -730,7 +729,7 @@ class salesforcecore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error

@@ -83,8 +83,7 @@ class magentocore extends solution {
 			$this->connexion_valide = true;	
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Magento : '.$e->getMessage();
-			echo $error . ';';
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -389,7 +388,7 @@ class magentocore extends solution {
 			}				
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;			
 		}		
 		return $result;
@@ -505,7 +504,7 @@ class magentocore extends solution {
 			}		
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';				
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';				
 		}
 		return $result;	
 	} // read($param)

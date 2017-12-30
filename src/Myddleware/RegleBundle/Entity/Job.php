@@ -265,7 +265,11 @@ class Job
      */
     public function getMessage()
     {
-        return $this->message;
+        # Don't show ip address
+        $patterns = "/[0-9]{0,3}\.[0-9]{0,3}\.[0-9]{0,3}\.[0-9]{0,3}/";
+        $replacements = "XXX.XXX.XXX.XXX";
+
+        return preg_replace($patterns, $replacements, $this->message);
     }
 
     /**

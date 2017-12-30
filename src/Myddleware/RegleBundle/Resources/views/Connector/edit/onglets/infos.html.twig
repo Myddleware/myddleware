@@ -24,7 +24,7 @@
 
 {# BTN #}
 <div class="block-btn-infos">
-	<a href="{{ path('connector_delete',{'id' : connector_params.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
+	<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
 		<button type="button" class="btn-mydinv">
 		  <span class="glyphicon glyphicon-remove"></span> {{'view_connector.btn.delete'|trans}}
 		</button> 
@@ -33,42 +33,65 @@
 {# BTN #} 
 
 <div align="center">
+    {{form_start(form)}}
+        {% if error is defined %}
+            <div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
+        {% endif %}
 	<table id="tab_connector">
 		<tr>
 			<th colspan="2">{{'view_connector.info.title'|trans}}</th>
 		</tr>	
 		<tr>
-			<td class="title solution">{{'view_connector.info.solution'|trans}}</td>
-			<td class="value"><p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{ connector_params.solution.name }}.png" alt="{{ connector_params.solution.name }}" /></p></td>
+                    <td class="title solution"><label>{{'view_connector.info.solution'|trans}}</label></td>
+			<td class="value"><p><img class="vignette" src="{{ asset('bundles/regle/images/solution/') }}{{ connector.solution.name }}.png" alt="{{ connector.solution.name }}" /></p></td>
 		</tr>
 		<tr>
-			<td class="title">nom</td>
-			<td class="value"><input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" /></td>
+                    <td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
+			<td class="value">{{form_widget(form.name)}}
+                            {#<input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" />#}
+                        </td>
 		</tr>		
-		{% for title,field in connector_params.params %}
-		{% if field.type is defined %}
-		<tr>
-			<td class="title">{{ title }}</td>
-			{% if title != 'wsdl' %}
-				<td class="value"><input id="param_{{ title }}" type="{{ field.type }}" value="{{ field.value }}" data-param="{{ title }}" data-id="{{ field.id }}" class="params" /></td>
+		{% for key,field in form.connectorParams %}
+                  <tr>
+                        <td class="title">{{ form_label(field.value) }}</td>
+                        <td class="value">
+                            {% if field.vars.value.name !='wsdl' %}
+                                {{ form_widget(field.value) }}
+                            {% else %}
+                                <a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
+                                    {{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+                                </a>
+                            {% endif %}
+                            
+                        </td>
+                  </tr>
+		{#<tr>
+			<td class="title">{{ field.vars.value.name }}</td>
+			{% if  field.vars.value.name != 'wsdl' %}
+				<td class="value"><input id="param_{{  field.vars.value.name }}" type="{{ getFieldType(field.vars.value.connector.solution, field.vars.value.name) }}" value="{{ getDecryptValue( field.vars.value.value) }}" data-param="{{  field.vars.value.name }}" data-id="{{  field.vars.value.id }}" class="params" /></td>
 			{% else %}
 				<td class="value">
 					<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': connector_params.solution.name }) }}?file={{ field.value }}" data-fancybox-type="iframe">
 					<input id="param_{{ title }}" type="{{ field.type }}" value="{{ field.value }}" data-param="{{ title }}" data-id="{{ field.id }}" class="params" readonly="readonly" placeholder="{{ 'create_connector.upload_placeholder' }}" /></a></td>
 
 			{% endif %}
-		</tr>	
-		{% endif %}
+		</tr>#}	
 		{% endfor %}
 	</table>
+        
 	<p><span id="connexion" class="btn-myd">Test</span>
 		<span id="source_status" class="status">
 				<img alt="status" src="{{ asset('bundles/regle/images/') }}status_offline.png">
 		</span>
 	</p>	
-	<p><span id="connector_save" class="btn-myd">{{'view_connector.btn.save'|trans}}</span> <div id="validation"></div></p>
+	<p>
+            <button id="connector_save" type="submit" class="btn-myd">{{'view_connector.btn.save'|trans}}</button>
+        <div id="validation"></div></p>
 	<div id="msg_status" class="alert alert-danger" role="alert">
 		<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
 	</div>
+{#{{form_row(form._token)}}#}
 
-</div>
+{{form_end(form)}}
+
+</div>  

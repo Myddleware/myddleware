@@ -127,8 +127,8 @@ filter:
     different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
-    in: is included in the following table separated by semicolon
-    notin: is not included in the following table separated by semicolon
+    in: is included in the following table separated by;
+    notin: is not included in the following table separated by ;      
 
 view_rule:
     action:
@@ -247,7 +247,8 @@ create_connector:
     upload_error_ext: Extension not allowed
     upload_success: The file has been successfully upload
     upload_delete: Deleting file
-
+    params_error: An error occurred while saving the settings
+    
 list_connector:
     empty: You have no connector yet !
     delete: Do you want to delete this connector?
@@ -311,6 +312,7 @@ list_flux:
         date_modified: Date of modification
         statut: Status
         source_date_modified: Date of reference
+        type: Type
 
 flux:
     gbl_status:
@@ -465,8 +467,10 @@ solution:
         wsdl: File wsdl
         host: Host Server
         dbname: Database name
+        database_name: Database name
         dbdriver: Database driver
         dbport: Database port access
+        port: Database port access
         ftpport: Port (default 22)
         directory: Directory with files
         shop: Shop
@@ -637,7 +641,7 @@ messages:
   
 email_notification:
     subject: Myddleware notification
-    hello: Hello, 
+    hello: Hi, 
     introduction: Here the statistics about your data transfer with Myddleware: 
     transfer_success: - Tranferts successfully sent: 
     transfer_error: - Tranferts in error: 
@@ -648,3 +652,10 @@ email_notification:
     error_list: Here the errors:
     best_regards: Best regards, 
     signature: Myddleware team
+email_alert:
+    subject: Myddleware alert
+    introduction: A job is running beyond the limit you have set up : 
+    minute: minutes. 
+    job_start: The job has begun at 
+    job_id: . ID of this job : 
+    recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".

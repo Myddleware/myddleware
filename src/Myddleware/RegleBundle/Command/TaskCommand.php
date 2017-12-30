@@ -53,7 +53,7 @@ class TaskCommand extends ContainerAwareCommand {
 			// Récupération du Job			
 			$job = $this->getContainer()->get('myddleware_job.job');		
 			
-			if ($job->initJob($rule)) {
+			if ($job->initJob('Synchro : '.$rule)) {
 				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
 				
 				if (!empty($rule)) {			
@@ -71,15 +71,15 @@ class TaskCommand extends ContainerAwareCommand {
 							$rules[] = $rule;
 						}								
 						if (!empty($rules)) {
-							foreach ($rules as $key => $value) {
+							foreach ($rules as $key => $value) {								
 								echo $value.chr(10);
-								$output->writeln($step.'-'.$value.' : Synchronisation de la règle : <question>'.$value.'</question>'); $step++;
+								$output->writeln('Read data for rule : <question>'.$value.'</question>');
 								// Chargement des données de la règle
 								if ($job->setRule($value)) {		
 									// Sauvegarde des données sources dans les tables de myddleware
-									$output->writeln($step.'-'.$value.' : Create documents.');			
+									$output->writeln($value.' : Create documents.');			
 									$nb = $job->createDocuments();
-									$output->writeln($step.'-'.$value.' : Number of documents created : '.$nb); 
+									$output->writeln($value.' : Number of documents created : '.$nb); 
 
 									// Permet de filtrer les documents
 									$job->filterDocuments();

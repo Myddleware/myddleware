@@ -33,10 +33,11 @@ class microsoftsqlcore extends database {
 	protected $fieldLabel = 'COLUMN_NAME';
 	protected $fieldType = 'DATA_TYPE';
 	
-	protected $stringSeparator = '';
+	protected $stringSeparatorOpen = '[';
+	protected $stringSeparatorClose = ']';
 
 	protected function generatePdo() {		    
-		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].',Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
 	}
 	
 	// Query to get all the tables of the database
@@ -58,6 +59,12 @@ class microsoftsqlcore extends database {
 	protected function get_query_select_limit_read_last() {
 		return "";
 	}
+	
+	// Function to escape characters 
+	protected function escape($value) {
+		return str_replace("'", "''", $value);
+	}
+	
 
 }// class microsoftsqlcore
 

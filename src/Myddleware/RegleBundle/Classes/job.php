@@ -106,7 +106,7 @@ class jobcore  {
 			}
 			return true;
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$this->message .= $e->getMessage();
 			return false;
 		}	
@@ -176,14 +176,13 @@ class jobcore  {
 		try {
 			// Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
 			$sqlParams = "	SELECT * 
-							FROM Document	
+							FROM Document
+								INNER JOIN RuleOrder
+									ON Document.rule_id = RuleOrder.rule_id
 							WHERE 
-									(
-											global_status = 'Error'
-										OR status = 'New'
-									)
+									global_status = 'Error'
 								AND attempt <= :attempt 
-							ORDER BY attempt ASC, source_date_modified ASC	
+							ORDER BY RuleOrder.order ASC, source_date_modified ASC	
 							LIMIT $limit";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("attempt", $attempt);
@@ -202,8 +201,8 @@ class jobcore  {
 				}			
 			}			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}
 	}
 	
@@ -256,26 +255,6 @@ class jobcore  {
 		else {
 			return 'Action '.$event.' unknown. Failed to run this action. ';
 		}
-	}
-	
-	// Myddleware upgrade
-	public function myddlewareUpgrade() {
-		try{
-			// Read the file parameters.yml.dist with the new version of Myddleware
-			$myddlewareNewParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
-			if (!empty($myddlewareNewParameters['parameters']['myd_version'])) {
-				// Read the file parameters.yml and change the version of Myddleware
-				$myddlewareParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));
-				$myddlewareParameters['parameters']['myd_version'] = $myddlewareNewParameters['parameters']['myd_version'];
-				$new_yaml = \Symfony\Component\Yaml\Yaml::dump($myddlewareParameters, 4);
-				file_put_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml', $new_yaml);
-			} else {
-				throw new \Exception ('No version in the file parameters.yml.dist. Failed to update the version of Myddleware.');
-			}
-		} catch (\Exception $e) {
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			$this->logger->error( $this->message );
-		}	
 	}
 	
 	// Lancement d'un job manuellement en arrière plan 
@@ -390,7 +369,7 @@ class jobcore  {
 				return false;
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -413,7 +392,7 @@ class jobcore  {
 				}			
 			}
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}
 		if (empty($ruleOrder)) {
@@ -497,7 +476,7 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
 			return false;
 		}	 
@@ -524,7 +503,7 @@ class jobcore  {
 				file_put_contents($this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
 			return false;
 		}	
@@ -581,156 +560,8 @@ class jobcore  {
 		return $config['conf_value'];
 	}
 
-
-	// Send notification to receive statistique about myddleware data transfer
-	public function sendNotification() {
-		try {
-			// Get the email address for notification
-			$contactMail = $this->container->getParameter('notification_emailaddress');
-			if (empty($contactMail)) {
-				throw new \Exception ('No email address for notification. Please add the parameter notification_emailaddress in the file app/config/config_background.yml.');
-			}
-			
-			// Write the introduction
-			$textMail = $this->tools->getTranslation(array('email_notification', 'hello')).chr(10).chr(10).$this->tools->getTranslation(array('email_notification', 'introduction')).chr(10);
-
-			// Récupération du nombre de données transférées depuis la dernière notification. On en compte qu'une fois les erreurs
-			$sqlParams = "	SELECT
-								count(distinct Log.doc_id) cpt,
-								Document.global_status
-							FROM Job
-								INNER JOIN Log
-									ON Log.job_id = Job.id
-								INNER JOIN Rule
-									ON Log.rule_id = Rule.id
-								INNER JOIN Document
-									ON Document.id = Log.doc_id
-							WHERE
-									Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
-								AND (
-										Document.global_status != 'Error'
-									OR (
-											Document.global_status = 'Error'
-										AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
-									)
-								)
-							GROUP BY Document.global_status";
-			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->execute();	   				
-			$cptLogs = $stmt->fetchAll();
-			$job_open = 0;
-			$job_close = 0;
-			$job_cancel = 0;
-			$job_error = 0;
-			if (!empty($cptLogs)) {
-				foreach ($cptLogs as $cptLog) {
-					switch ($cptLog['global_status']) {
-						case 'Open':
-							$job_open = $cptLog['cpt'];
-							break;
-						case 'Error':
-							$job_error = $cptLog['cpt'];
-							break;
-						case 'Close':
-							$job_close = $cptLog['cpt'];
-							break;
-						case 'Cancel':
-							$job_cancel = $cptLog['cpt'];
-							break;
-					}
-				}
-			}			
-			$textMail .= $this->tools->getTranslation(array('email_notification', 'transfer_success')).' '.$job_close.chr(10);
-			$textMail .= $this->tools->getTranslation(array('email_notification', 'transfer_error')).' '.$job_error.chr(10);
-			$textMail .= $this->tools->getTranslation(array('email_notification', 'transfer_open')).' '.$job_open.chr(10);	
-			
-			// Récupération des règles actives
-			$sqlParams = "	SELECT * 
-							FROM Rule
-							WHERE
-									Rule.active = 1
-								AND	Rule.deleted = 0
-			";
-			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->execute();	   				
-			$activeRules = $stmt->fetchAll();
-			if (!empty($activeRules)) {
-				$textMail .= chr(10).$this->tools->getTranslation(array('email_notification', 'active_rule')).chr(10);
-				foreach ($activeRules as $activeRule) {
-					$textMail .= " - ".$activeRule['name']." v".$activeRule['version'].chr(10);
-				}
-			}
-			else {
-				$textMail .= chr(10).$this->tools->getTranslation(array('email_notification', 'no_active_rule')).chr(10);
-			}
-			
-			
-			// Get errors since the last notification
-			if ($job_error > 0) {
-				$sqlParams = "	SELECT
-									Log.created,
-									Log.msg,
-									Log.doc_id,
-									Rule.name
-								FROM Job
-									INNER JOIN Log
-										ON Log.job_id = Job.id
-									INNER JOIN Rule
-										ON Log.rule_id = Rule.id
-									INNER JOIN Document
-										ON Document.id = Log.doc_id
-								WHERE
-										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
-									AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
-									AND Document.global_status = 'Error'
-								ORDER BY Log.created ASC
-								LIMIT 100	";
-				$stmt = $this->connection->prepare($sqlParams);
-				$stmt->execute();	   				
-				$logs = $stmt->fetchAll();
-
-				if (count($logs) == 100) {
-					$textMail .= chr(10).chr(10).$this->tools->getTranslation(array('email_notification', '100_first_erros')).chr(10);
-				}
-				else  {
-					$textMail .= chr(10).chr(10).$this->tools->getTranslation(array('email_notification', 'error_list')).chr(10);
-				}
-				foreach ($logs as $log) {
-					$textMail .= " - Règle $log[name], id transfert $log[doc_id], le $log[created] : $log[msg]".chr(10);
-				}
-			}
-			
-			$textMail .= chr(10).$this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
-			$message = \Swift_Message::newInstance()
-				->setSubject($this->tools->getTranslation(array('email_notification', 'subject')))
- 				->setFrom('no-reply@myddleware.com')
-				->setTo($contactMail)
-				->setBody($textMail)
-			;
-			$send = $this->container->get('mailer')->send($message);
-			if (!$send) {
-				$this->logger->error('Failed to send email : '.$textMail.' to '.$contactMail);	
-				throw new \Exception ('Failed to send email : '.$textMail.' to '.$contactMail);
-			}
-			return true;
-		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .= $e->getMessage();
-			return false;							
-		}
-	}
-	
 	// Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
 	public function clearData() {
-		//Get the table list 
-		// $sqlTables = "SHOW TABLES";
-		// $stmt = $this->connection->prepare($sqlTables);
-		// $stmt->execute();	   				
-		// $tablesQuery = $stmt->fetchAll();
-		// foreach ($tablesQuery as $key => $table) {
-			// $tables[] = current($table);
-		// }
-	
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
 							Rule.id,
@@ -764,7 +595,9 @@ class jobcore  {
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("days", $rule['days']);
 					$stmt->execute();
-
+					if ($stmt->rowCount() > 0) {
+						$this->message .= $stmt->rowCount().' rows deleted in the table DocumentData. ';
+					}
 					// Delete log for these rule	
 					$deleteLog = "
 						DELETE Log
@@ -781,38 +614,34 @@ class jobcore  {
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("days", $rule['days']);
 					$stmt->execute(); 
-					
+					if ($stmt->rowCount() > 0) {
+						$this->message .= $stmt->rowCount().' rows deleted in the table Log. ';
+					}
 				}
-				// Suppression des jobs de transfert vide et des autres jobs qui datent de plus de nbDayClearJob jours
+				// Suppression des jobs de transfert vide
 				$deleteJob = " 	
 					DELETE 
 					FROM Job
 					WHERE 
 							status = 'End'
-						AND (
-								(
-										param NOT IN ('cleardata', 'backup', 'notification')
-									AND message IN ('', 'Another job is running. Failed to start job. ')
-									AND open = 0
-									AND close = 0
-									AND cancel = 0
-									AND error = 0
-								)
-							OR 	(
-									param IN ('cleardata', 'backup', 'notification')
-									AND message = ''
-									AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
-								)
-							)
+						AND param NOT IN ('cleardata', 'notification')
+						AND message  = ''
+						AND open = 0
+						AND close = 0
+						AND cancel = 0
+						AND error = 0
+						AND DATEDIFF(CURRENT_DATE( ),end) > :nbDayClearJob
 				";	
 				$stmt = $this->connection->prepare($deleteJob);
 				$stmt->bindValue("nbDayClearJob", $this->nbDayClearJob);
 				$stmt->execute();
-				
+				if ($stmt->rowCount() > 0) {
+					$this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
+				}
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->logger->error($this->message);	
 			}	
 		}
@@ -898,8 +727,8 @@ class jobcore  {
 			// Récupération des erreurs
 			$this->logData['jobError'] = $this->message;
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->logData['jobError'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->logData['jobError'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}
 		return $this->logData;
 	}
@@ -939,8 +768,8 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION			
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to update Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .= 'Failed to update Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+			$this->logger->error( 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
 			return false;
 		}
 		return true;
@@ -956,8 +785,8 @@ class jobcore  {
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to create Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
-			$this->message .=  'Failed to create Job : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';		
+			$this->logger->error( 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			$this->message .=  'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
 			return false;
 		}
 		return true;

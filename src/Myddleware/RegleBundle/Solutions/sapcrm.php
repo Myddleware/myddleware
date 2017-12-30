@@ -557,7 +557,7 @@ class sapcrmcore extends saproot {
 			
 	
 	// Ajout des filiale et du groupe en paramètre
-	public function getFieldsParamUpd($type,$module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type,$module) {	
 		try {
 			$params = array();
 			if ($type == 'source'){
@@ -602,7 +602,7 @@ class sapcrmcore extends saproot {
 			return $params;
 		}
 		catch (\Exception $e){
-			$this->logger->error('Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');	
+			$this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');	
 			return array();
 		}
 	}

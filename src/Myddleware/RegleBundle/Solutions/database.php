@@ -34,7 +34,8 @@ class databasecore extends solution {
 	protected $pdo;
 	protected $charset = 'utf8';
 	
-	protected $stringSeparator = '`';
+	protected $stringSeparatorOpen = '`';
+	protected $stringSeparatorClose = '`';
 
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
@@ -43,14 +44,12 @@ class databasecore extends solution {
 				$this->pdo = $this->generatePdo();
 			    $this->connexion_valide = true;	
 			} catch (\PDOException $e) {
-				$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-				echo $error . ';';
+				$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->logger->error($error);
 				return array('error' => $error);
 			}
 		} catch (\Exception $e) {
-			$error = 'Failed to login to Database : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			echo $error . ';';
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -107,16 +106,15 @@ class databasecore extends solution {
 			}		
 			return $modules;
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $error;			
 		}
 	} 	
 	
 	// Get all fields from the table selected
 	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
 		try{
-			$this->moduleFields = array();
-			$this->fieldsRelate = array();
 			// parent::get_module_fields($module, $type);
 			// Get all fields of the table in input	
 			$q = $this->pdo->prepare($this->get_query_describe_table($module));
@@ -124,7 +122,9 @@ class databasecore extends solution {
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
-			}	
+			}
+			// Get field ID
+			$idFields = $this->getIdFields($module,$type);			
 			// Format the fields
 			$fetchAll = $q->fetchAll();		
 		
@@ -135,8 +135,19 @@ class databasecore extends solution {
 						'type_bdd' => 'varchar(255)',
 						'required' => false
 				);
+				if (
+						strtoupper(substr($field[$this->fieldName],0,2)) == 'ID'
+					OR	strtoupper(substr($field[$this->fieldName],-2)) == 'ID'
+				) {
+					$this->fieldsRelate[$field[$this->fieldName]] = array(
+							'label' => $field[$this->fieldLabel],
+							'type' => $field[$this->fieldType],
+							'type_bdd' => 'varchar(255)',
+							'required' => false,
+							'required_relationship' => 0
+					);
+				}
 				// If the field contains the id indicator, we add it to the fieldsRelate list
-				$idFields = $this->getIdFields($module,$type);			
 				if (!empty($idFields)) {
 					foreach ($idFields as $idField) {		
 						if (strpos($field[$this->fieldName],$idField) !== false) {
@@ -164,11 +175,11 @@ class databasecore extends solution {
 										'required' => false,
 										'required_relationship' => 0
 									);
-			}
+			}			
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';			
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';			
 			return false;
 		}
 	} // get_module_fields($module) 
@@ -203,7 +214,7 @@ class databasecore extends solution {
 							throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
 						}
 					}
-					$where .= $key." = '".$value."'";
+					$where .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose." = '".$value."'";
 				}
 			} // else the function is called for a simulation (rule creation), the limit is manage in the query creation
 			
@@ -228,15 +239,15 @@ class databasecore extends solution {
 						throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
 					}
 				}
-				$requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
+				$requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
 			}
 			// Remove the last coma/space
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
+			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
-		
+			
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
@@ -289,13 +300,13 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';					
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';					
 		}					
 		return $result;
 	} // read_last($param)
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {		
 		$result = array();
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
@@ -325,19 +336,32 @@ class databasecore extends solution {
 			// TODO Ajout des champs id et date de l'utilisateur
 			
 			foreach ($param['fields'] as $field){
-			    $requestSQL .= $field . ", "; // Ajout de chaque champ souhaité
+			    $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
 			}
 			// Suppression de la dernière virgule en laissant le +
 			$requestSQL = rtrim($requestSQL,' '); 
 			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparator.$param['module'].$this->stringSeparator;
+			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
-			$requestSQL .= " WHERE ".$param['ruleParams']['fieldDateRef']. " > '".$param['date_ref']."'";
+			// if a specific query is requeted we don't use date_ref
+			if (!empty($param['query'])) {
+				$nbFilter = count($param['query']);
+				$requestSQL .= " WHERE ";
+				foreach ($param['query'] as $queryKey => $queryValue) {
+					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose.' = '.$queryValue.' ';
+					$nbFilter--;
+					if ($nbFilter > 0){
+						$requestSQL .= " AND ";	
+					}
+				}
+			} else {				
+				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
+			}
 			
-			$requestSQL .= " ORDER BY ".$param['ruleParams']['fieldDateRef']. " ASC"; // Tri par date utilisateur
-			
+			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+	
 			// Appel de la requête
-			$q = $this->pdo->prepare($requestSQL);
+			$q = $this->pdo->prepare($requestSQL);		
 			$exec = $q->execute();
 			
 			if(!$exec) {
@@ -361,14 +385,14 @@ class databasecore extends solution {
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
-				    }
+				    }					
 					$result['values'][$row['id']] = $row;
 				}
 			} 
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+		}		
 		return $result;	
 	} // read($param)
 	
@@ -387,7 +411,7 @@ class databasecore extends solution {
 					// Check control before create
 					$data = $this->checkDataBeforeCreate($param, $data);
 					// Query init
-					$sql = "INSERT INTO ".$this->stringSeparator.$param['module'].$this->stringSeparator." (";
+					$sql = "INSERT INTO ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." (";
 					$values = "(";
 					// We build the query with every fields
 					foreach ($data as $key => $value) {				
@@ -397,8 +421,8 @@ class databasecore extends solution {
 						} elseif($key == $param['ruleParams']['targetFieldId']) {
 							$idTarget = $value;
 						}
-						$sql .= $this->stringSeparator.$key.$this->stringSeparator.",";
-						$values .= "'".$value."',";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose.",";
+						$values .= "'".$this->escape($value)."',";
 					}
 					
 					// Remove the last coma
@@ -428,7 +452,7 @@ class databasecore extends solution {
 									);
 				}
 				catch (\Exception $e) {
-					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -439,12 +463,12 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error
 			);
-		}
+		}		
 		return $result;
 	}
 
@@ -457,7 +481,7 @@ class databasecore extends solution {
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Query init
-					$sql = "UPDATE ".$this->stringSeparator.$param['module'].$this->stringSeparator." SET "; 
+					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET "; 
 					// We build the query with every fields
 					// Boucle sur chaque champ du document
 					foreach ($data as $key => $value) {				
@@ -468,12 +492,12 @@ class databasecore extends solution {
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
 						}								
-						$sql .= $key."='".$value."',";
+						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$this->escape($value)."',";
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE ".$param['ruleParams']['targetFieldId']."='".$idTarget."'";						
-					// Execute the query
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";						
+					// Execute the query					
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					if(!$exec) {
@@ -487,7 +511,7 @@ class databasecore extends solution {
 									);									
 				}
 				catch (\Exception $e) {
-					$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 					$result[$idDoc] = array(
 							'id' => '-1',
 							'error' => $error
@@ -498,7 +522,7 @@ class databasecore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result[$idDoc] = array(
 					'id' => '-1',
 					'error' => $error
@@ -507,13 +531,18 @@ class databasecore extends solution {
 		return $result;
 	}
 	
+	// Function to escape characters 
+	protected function escape($value) {
+		return $value;
+	}
+	
 	// Get the strings which can identify what field is an id in the table
 	protected function getIdFields($module,$type) {
 		// default is id
 		return array('id');
 	}
 
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
 			if(!empty($fieldsSource)) {

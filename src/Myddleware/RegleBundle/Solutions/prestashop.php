@@ -39,6 +39,9 @@ class prestashopcore extends solution {
 										'product_option_values' => array('id'),
 										'combinations' => array('id'),
 										'order_histories' => array('id', 'date_add'),
+										'customer_messages' => array('id', 'date_add'),
+										'order_carriers' => array('id', 'date_add'),
+										'order_payments' => array('id', 'date_add','order_reference'),
 								);
 	
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
@@ -47,7 +50,7 @@ class prestashopcore extends solution {
 	protected $moduleWithLanguage = array('products');
 	
 	// Module without reference date
-	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations');
+	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations','carriers');
 
 	protected $required_relationships = array(
 												'default' => array()
@@ -58,7 +61,7 @@ class prestashopcore extends solution {
 	// List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
 	protected $module_relationship_many_to_many = array(
 														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
-														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity'), 'relationships' => array('id_product','id_product_attribute','id_address_delivery'), 'searchModule' => 'cart', 'subModule' => 'cart_rows', 'subData' => 'cart_row'),
+														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity','id_product_attribute'=>'id_product_attribute','id_address_delivery'=>'id_address_delivery'), 'relationships' => array('cart_id','id_product'), 'searchModule' => 'carts', 'subModule' => 'cart_rows', 'subData' => 'cart_row', 'subDataId' => 'id_product'),
 														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
 														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
 														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
@@ -104,8 +107,7 @@ class prestashopcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Prestashop : '.$e->getMessage();
-			echo $error . ';';
+			$error =$e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -273,10 +275,10 @@ class prestashopcore extends solution {
 					$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
 				}
 				// Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
-				if($module == "customer_messages") {
+				if($module == 'customer_messages') {
 					$this->fieldsRelate['id_customer_thread']['required_relationship'] = 1;
 				}
-				if($module == "customer_threads") {
+				if($module == 'customer_threads') {
 					$languages = $this->getList('language','languages');
 					$this->moduleFields['id_lang']['option'] = $languages;
 					$this->moduleFields['id_lang']['required'] = 1;
@@ -287,6 +289,19 @@ class prestashopcore extends solution {
 					$this->moduleFields['status']['option'] = $this->threadStatus;
 					// Le champ token est renseigné dans le create directement
 					unset($this->moduleFields['token']);
+				}
+				// If order_payments is requeted, we add the order_id because there is only the order_reference (no useable for relationship)
+				if(
+						$module == 'order_payments'
+					AND $type == 'source'
+				) {
+					$this->fieldsRelate['id_order'] = array(
+													'label' => 'id_order',
+													'type' => 'varchar(255)',
+													'type_bdd' => 'varchar(255)',
+													'required' => 0,
+													'required_relationship' => 0
+												);
 				}
 				// On enlève les champ date_add et date_upd si le module est en target 
 				if ($type == 'target') {
@@ -523,7 +538,7 @@ class prestashopcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;	
 			return $result;
 		}
@@ -565,7 +580,10 @@ class prestashopcore extends solution {
 				$opt['display'] = '[';
 				foreach ($param['fields'] as $field) {
 					// On ne demande pas les champs spécifiques à Myddleware
-					if (!in_array($field, array('Myddleware_element_id','my_value'))) {
+					if (
+							!in_array($field, array('Myddleware_element_id','my_value'))
+						AND !($field == 'id_order' AND $param['module'] == 'order_payments')	
+					) {
 						$opt['display'] .= $field.',';
 					}
 				}
@@ -573,7 +591,7 @@ class prestashopcore extends solution {
 				$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
 				$opt['display'] .= ']';
 				
-				// Query creation
+ 				// Query creation
 				// if a specific query is requeted we don't use date_ref
 				if (!empty($param['query'])) {
 					foreach ($param['query'] as $key => $value) {
@@ -588,6 +606,7 @@ class prestashopcore extends solution {
 							
 							$opt['sort'] = '[date_add_ASC]';
 						} else {
+							// $opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							$opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
 							
 							$opt['sort'] = '[date_upd_ASC]';
@@ -601,16 +620,16 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}				
-				// Call						
-				$xml = $this->webService->get($opt);
+				}					
+				// Call				
+				$xml = $this->webService->get($opt);			
+
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);							
-				$result['count'] = $simplexml->children()->children()->count();
-				
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);					
+				$result['count'] = $simplexml->children()->children()->count();				
 				$record = array();
 				foreach ($simplexml->children()->children() as $data) {
-					if (!empty($data)) {			
+					if (!empty($data)) {		
 						foreach ($data as $key => $value) {
 							// Si la clé de référence est une date
 							if (
@@ -618,12 +637,10 @@ class prestashopcore extends solution {
 								&& $key == $dateRefField
 							) {
 								// Ajout d'un seconde à la date de référence pour ne pas prendre 2 fois la dernière commande
-								$date_ref = date_create($value);
-								date_modify($date_ref, '+1 seconde');							
+								$date_ref = date_create($value);							
+								date_modify($date_ref, '+1 seconde');
 								$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
-
 								$record['date_modified'] = (string)$value;
-								continue;
 							}
 							// Si la clé de référence est un id et que celui-ci est supérieur alors on sauvegarde cette référence
 							elseif (
@@ -642,13 +659,37 @@ class prestashopcore extends solution {
 								// Une date de modification est mise artificiellement car il n'en existe pas dans le module
 								$record['date_modified'] = (string)date('Y-m-d H:i:s');
 							}
-							if(isset($value->language)){
-								$record[$key] = (string) $value->language;
-							} else {
-								$record[$key] = (string)$value;
+							// If field is requested (field corresponding to the reference date could be requested in the field mapping too)
+							if (array_search($key, $param['fields']) !== false) {
+								if(isset($value->language)){
+									if (!empty( $value->language[1])) {
+										$record[$key] = (string) $value->language[1];
+									} else {
+										$record[$key] = (string) $value->language;
+									}
+								} else {							
+									$record[$key] = (string)$value;
+								}
 							}
-							
-						}	
+						}
+						// If id_order is requested for the module order_payments, we have to get the id order by using the order_reference
+						if (
+								array_search('id_order', $param['fields']) !== false
+							AND $param['module'] == 'order_payments'
+							AND !empty($data->order_reference)
+						) {
+							// Get the id_order from Prestashop
+							$optOrder['limit'] = 1;
+							$optOrder['resource'] = 'orders&date=1';
+							$optOrder['display'] = '[id]';
+							$optOrder['filter[reference]'] = '['.(string)$data->order_reference.']';					
+							$xml = $this->webService->get($optOrder);
+							$xml = $xml->asXML();
+							$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+							if (!empty($simplexml->orders->order->id)) {
+								$record['id_order'] = (string)$simplexml->orders->order->id;
+							}
+						}
 						// Récupération du statut courant de la commande si elle est demandée
 						if ($getCurrentState) {
 							$optState['limit'] = 1;
@@ -683,8 +724,8 @@ class prestashopcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}	
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+		}			
 		return $result;
 	} // read($param)
 	
@@ -699,9 +740,11 @@ class prestashopcore extends solution {
 				$searchModule = $this->module_relationship_many_to_many[$param['module']]['searchModule'];
 				$subModule = $this->module_relationship_many_to_many[$param['module']]['subModule'];
 				$subData = $this->module_relationship_many_to_many[$param['module']]['subData'];
+				$subDataId = (!empty($this->module_relationship_many_to_many[$param['module']]['subDataId']) ? $this->module_relationship_many_to_many[$param['module']]['subDataId'] : 'id');
 				
 				// Ajout des champs obligatoires
-				$param['fields'] = $this->addRequiredField($param['fields'],$searchModule);				
+				$param['fields'] = $this->addRequiredField($param['fields'],$searchModule);	
+				$opt['limit'] = $param['limit'];				
 				$opt['resource'] = $searchModule.'&date=1';			
 				$opt['display'] = 'full';		
 				
@@ -738,11 +781,11 @@ class prestashopcore extends solution {
 				// Call
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
-				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);	
 
 				$cpt = 0;			
 				$record = array();
-				foreach ($simplexml->children()->children() as $resultRecord) {
+				foreach ($simplexml->children()->children() as $resultRecord) {	
 					foreach ($resultRecord as $key => $value) {
 						// Si la clé de référence est une date
 						if (
@@ -779,12 +822,21 @@ class prestashopcore extends solution {
 							$record[$key] = (string)$value;
 						}				
 				
-						if($key == 'associations'){
-							foreach ($resultRecord->associations->$subModule->$subData as $data) {
+						if($key == 'associations'){					
+							foreach ($resultRecord->associations->$subModule->$subData as $data) {													
 								$subRecord = array();
-								$idRelation = (string) $resultRecord->id . '_' . (string) $data->id;
+								$idRelation = (string) $resultRecord->id . '_' . (string) $data->$subDataId;								
 								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]] = (string) $resultRecord->id;
-								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->id;
+								$subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->$subDataId;
+								// Add fields in the relationship								
+								if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
+									foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $name => $label) {
+										// Add only requested fields									
+										if (array_search($name, $param['fields']) !== false) {
+											$subRecord[$name] = (string)$data->$name;
+										}
+									}
+								}
 								$subRecord['id'] = $idRelation;
 								$subRecord['date_modified'] = $record['date_modified'];
 								$result['values'][$idRelation] = $subRecord;
@@ -810,8 +862,8 @@ class prestashopcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-		}		
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+		}			
 		return $result;
 	}// readManyToMany($param)
 	
@@ -889,7 +941,7 @@ class prestashopcore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -987,7 +1039,7 @@ class prestashopcore extends solution {
 				}
 			}
 			catch (\Exception $e) {
-				$error = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$result[$idDoc] = array(
 						'id' => '-1',
 						'error' => $error
@@ -1016,8 +1068,8 @@ class prestashopcore extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		// Le module order_histories n'a que date_add
-		if (in_array($moduleSource, array('order_histories'))) {
+		// We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
+		if (in_array($moduleSource, array('order_histories','order_payments','order_carriers','customer_messages'))) {
 			return "date_add";
 		}
 		if($RuleMode == "0") {
@@ -1040,7 +1092,7 @@ class prestashopcore extends solution {
 	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			if (
 					$type == 'target'

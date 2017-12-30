@@ -83,7 +83,7 @@ class sapecccore extends sap {
 	} // get_modules()
 
 	
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$params = array();
 			if ($type == 'source'){
@@ -119,7 +119,7 @@ class sapecccore extends sap {
 			return $params;
 		}
 		catch (\Exception $e){
-			$this->logger->error('Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )');	
+			$this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');	
 			return array();
 		}
 	}

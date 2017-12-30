@@ -35,7 +35,7 @@ class LoadFunctionData implements FixtureInterface
     private $manager; 
 	protected $functionData = array(
 									'mathematical' 	=> array('round','ceil','abs'), 
-									'text'			=> array('trim','lower','upper','substr','striptags','changeValue','htmlEntityDecode','replace','utf8encode','utf8decode','htmlentities','htmlspecialchars','strlen'),
+									'text'			=> array('trim','ltrim','rtrim','lower','upper','substr','striptags','changeValue','htmlEntityDecode','replace','utf8encode','utf8decode','htmlentities','htmlspecialchars','strlen','urlencode'),
 									'date'			=> array('date','microtime','changeTimeZone','changeFormatDate')
 								);
  

@@ -29,20 +29,22 @@
         <title>{% block title %}Myddleware{% endblock %}</title>
         {% block stylesheets %}
             {% stylesheets 
-                '@RegleBundle/Resources/public/css/regle.css'              
-                'http://code.jquery.com/ui/1.10.3/themes/redmond/jquery-ui.css'    
-                'http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css'
+                '@RegleBundle/Resources/public/css/regle.css'                
+                '@RegleBundle/Resources/public/css/lib/jquery/jquery-ui-timepicker-addon.css'
                 '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.css'
-                'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css'                    
+                '@RegleBundle/Resources/public/css/lib/jquery/jquery.qtip.min.css'                    
                 filter='lessphp,cssrewrite' 
                 output='css/compiled/baseone.css'                
              %}
-
+             
+               <!-- Bootstrap doesn't in assetic mode because his css included font with relative path -->
+              <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css') }}" type="text/css" />
+              <link rel="stylesheet" href="{{ asset('jquery/css/redmond/jquery-ui-1.10.4.custom.min.css') }}" type="text/css" />
+             
               <link rel="stylesheet" href="{{ asset_url }}" type="text/css" />
             {% endstylesheets %}
         {% endblock %}
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">   
+     
          {% block css %}{% endblock css %}
      
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -65,7 +67,7 @@
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_onoff/jquery.onoff.min.js'        
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_fancybox/jquery.fancybox.pack.js'
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js'            
-            'http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js'    
+            '@RegleBundle/Resources/public/js/lib/jquery_qtip/jquery.qtip.min.js'    
             '%kernel.root_dir%/../src/Myddleware/RegleBundle/Resources/public/js/lib/jquery_myddleware/function.js'   
             '@LoginBundle/Resources/public/js/login.js'
             '@RegleBundle/Resources/public/js/regle.js'
@@ -74,7 +76,7 @@
          {% endjavascripts %}  
          
           <!-- Latest compiled and minified JavaScript -->
-         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>  
+         <script src="{{asset('bootstrap/js/bootstrap.min.js')}}"></script>  
                 
         {% block js %}{% endblock js %}
     </body>

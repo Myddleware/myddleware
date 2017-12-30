@@ -1,3 +1,13 @@
 mysqldb:
     type: mysql:10.0
     disk: 2048
+    configuration:
+        schemas:
+            - main
+            - test
+        endpoints:
+            mysql:
+              default_schema: main
+              privileges:
+                main: admin
+                test: admin

@@ -37,6 +37,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 use Myddleware\RegleBundle\Entity\Solution;
 use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\DocumentAudit;
+use Myddleware\RegleBundle\Service\SessionService;
 
 use Myddleware\RegleBundle\Classes\document as doc;
 
@@ -49,11 +50,11 @@ class FluxControllerCore extends Controller
 	 ****************************************************** */
 
 	public function fluxErrorByRuleAction($id) {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+            
+                /* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
+                
+			
 		$em = $this->getDoctrine()->getManager();
 
 		// Detecte si la session est le support ---------
@@ -76,24 +77,21 @@ class FluxControllerCore extends Controller
 		$rule = $em->getRepository('RegleBundle:Rule')
                    ->findBy( $list_fields_sql );		
 		if($rule) {
-			$myddlewareSession['flux_filter']['c']['rule'] = $rule[0]->getName();
-			$myddlewareSession['flux_filter']['c']['gblstatus'] = 'Error';			
-			$myddlewareSession['flux_filter']['where'] = "WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ";					
+                        $sessionService->setFluxFilterRuleName($rule[0]->getName());
+                        $sessionService->setFluxFilterGlobalStatus('Error');
+                        $sessionService->setFluxFilterWhere("WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ");				
 		}
 		else {
-			unset($myddlewareSession['flux_filter']);
+                        $sessionService->removeFluxFilter();
 		}
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+                
 		return $this->redirect($this->generateUrl('flux_list'));	
 	}
 	 	 
  	// LISTE DES FLUX
  	public function fluxListAction($page) {
- 		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
+ 		/* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
 		//--- Liste status traduction
 		$lstStatusTwig = doc::lstStatus();		
 		foreach ($lstStatusTwig as $key => $value) {
@@ -146,44 +144,44 @@ class FluxControllerCore extends Controller
 		$form = $this->createFormBuilder()
 		
 					 ->add('date_create_start','text', array(
-						'data'=> ((isset($myddlewareSession['flux_filter']['c']['date_create_start'])) ? $myddlewareSession['flux_filter']['c']['date_create_start'] : false),
+						'data'=> ($sessionService->isFluxFilterCDateCreateStartExist() ? $sessionService->getFluxFilterDateCreateStart() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 
 					 ->add('date_create_end','text', array(
-					 	'data'=> ((isset($myddlewareSession['flux_filter']['c']['date_create_end'])) ? $myddlewareSession['flux_filter']['c']['date_create_end'] : false),
+					 	'data'=> ($sessionService->isFluxFilterCDateCreateEndExist() ? $sessionService->getFluxFilterDateCreateEnd() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 				 
 					 ->add('date_modif_start','text', array(
-					 	'data'=> ((isset($myddlewareSession['flux_filter']['c']['date_modif_start'])) ? $myddlewareSession['flux_filter']['c']['date_modif_start'] : false),
+					 	'data'=> ($sessionService->isFluxFilterCDateModifStartExist() ? $sessionService->getFluxFilterDateModifStart() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 				 
 					 ->add('date_modif_end','text', array(
-					 	'data'=> ((isset($myddlewareSession['flux_filter']['c']['date_modif_end'])) ? $myddlewareSession['flux_filter']['c']['date_modif_end'] : false),
+					 	'data'=> ($sessionService->isFluxFilterCDateModifEndExist() ? $sessionService->getFluxFilterDateModifEnd() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 
 					 ->add('rule','text', array( 
-					 	'data'=> ((isset($myddlewareSession['flux_filter']['c']['rule'])) ? $myddlewareSession['flux_filter']['c']['rule'] : false),
+					 	'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 					 	'required'=> false	))	
 						
 					 ->add('rule', 'choice', array(
 							       'choices'   => $lstRuleName,
-								   'data'=> ((isset($myddlewareSession['flux_filter']['c']['rule'])) ? $myddlewareSession['flux_filter']['c']['rule'] : false),
+								   'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 							       'required'  => false
 						 ))						
 						
 					 ->add('status', 'choice', array(
 							       'choices'   => $lstStatus,
-								   'data'=> ((isset($myddlewareSession['flux_filter']['c']['status'])) ? $myddlewareSession['flux_filter']['c']['status'] : false),
+								   'data'=> ($sessionService->isFluxFilterCStatusExist() ? $sessionService->getFluxFilterStatus() : false),
 							       'required'  => false
 						 ))
 						 
 					 ->add('gblstatus', 'choice', array(
 							       'choices'   => $lstGblStatus,
-								   'data'=> ((isset($myddlewareSession['flux_filter']['c']['gblstatus'])) ? $myddlewareSession['flux_filter']['c']['gblstatus'] : false),
+								   'data'=> ($sessionService->isFluxFilterCGblStatusExist() ? $sessionService->getFluxFilterGlobalStatus() : false),
 							       'required'  => false
 						 ))						 
 						 
@@ -195,18 +193,18 @@ class FluxControllerCore extends Controller
 					))		
 
 					->add('source_id','text', array( 
-						'data'=> ((isset($myddlewareSession['flux_filter']['c']['source_id'])) ? $myddlewareSession['flux_filter']['c']['source_id'] : false),
+						'data'=> ($sessionService->isFluxFilterCSourceIdExist() ? $sessionService->getFluxFilterSourceId() : false),
 						'required'=> false	))	
 
 					->add('target_id','text', array( 
-						'data'=> ((isset($myddlewareSession['flux_filter']['c']['target_id'])) ? $myddlewareSession['flux_filter']['c']['target_id'] : false),
+						'data'=> ($sessionService->isFluxFilterCTargetIdExist() ? $sessionService->getFluxFilterTargetId() : false),
 						'required'=> false	))							
 					 					  
 					->getForm();
 
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
-		$where = ((isset($myddlewareSession['flux_filter']['where']) ? $myddlewareSession['flux_filter']['where'] : ''));
+		$where = ($sessionService->isFluxFilterCWhereExist() ? $sessionService->getFluxFilterWhere() : '');
 		$conditions = 0;
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
@@ -216,90 +214,90 @@ class FluxControllerCore extends Controller
 			if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
 				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['date_create_start'] = $data['date_create_start'];							
+                                $sessionService->setFluxFilterDateCreateStart($data['date_create_start']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['date_create_start']);
+                                $sessionService->removeFluxFilterDateCreateStart();
 			}				
 			
 			if(!empty( $data['date_create_end'] ) && is_string($data['date_create_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_created <= '".$data['date_create_end']."' ";
 				$conditions++;	
-				$myddlewareSession['flux_filter']['c']['date_create_end'] = $data['date_create_end'];							
+                                $sessionService->setFluxFilterDateCreateEnd($data['date_create_end']);
 			}	
 			else {
-				unset($myddlewareSession['flux_filter']['c']['date_create_end']);
+                                $sessionService->removeFluxFilterDateCreateEnd();
 			}							
 
 			if(!empty( $data['date_modif_start'] ) && is_string($data['date_modif_start'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_modified >= '".$data['date_modif_start']."' ";
-				$conditions++;	
-				$myddlewareSession['flux_filter']['c']['date_modif_start'] = $data['date_modif_start'];							
+				$conditions++;		
+                                $sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['date_modif_start']);
+                                $sessionService->removeFluxFilterDateModifStart();
 			}
 							
 			if(!empty( $data['date_modif_end'] ) && is_string($data['date_modif_end'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_modified <= '".$data['date_modif_end']."' ";
 				$conditions++;	
-				$myddlewareSession['flux_filter']['c']['date_modif_end'] = $data['date_modif_end'];					
+                                $sessionService->setFluxFilterDateModifEnd( $data['date_modif_end']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['date_modif_end']);
+                                $sessionService->removeFluxFilterDateModifEnd();
 			}
 			
 			if(!empty( $data['rule'] ) && is_string($data['rule'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Rule.name='".trim($data['rule'])."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['rule'] = $data['rule'];
+                                $sessionService->setFluxFilterRuleName($data['rule']);
 			}				
 			else {
-				unset($myddlewareSession['flux_filter']['c']['rule']);
+                                $sessionService->removeFluxFilterRuleName();
 			}
 										
 			if(!empty( $data['status'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.status='".$data['status']."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['status'] = $data['status'];
+                                $sessionService->setFluxFilterStatus($data['status']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['status']);
+                                $sessionService->removeFluxFilterStatus();
 			}	
 
 			if(!empty( $data['gblstatus'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.global_status='".$data['gblstatus']."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['gblstatus'] = $data['gblstatus'];
+                                $sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['gblstatus']);
+                                $sessionService->removeFluxFilterGblStatus();
 			}
 			
 			if(!empty( $data['target_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.target_id LIKE '".$data['target_id']."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['target_id'] = $data['target_id'];
+                                $sessionService->setFluxFilterTargetId($data['target_id']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['target_id']);
+                                $sessionService->removeFluxFilterTargetId();
 			}
 			
 			if(!empty( $data['source_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.source_id LIKE '".$data['source_id']."' ";
 				$conditions++;
-				$myddlewareSession['flux_filter']['c']['source_id'] = $data['source_id'];
+                                $sessionService->setFluxFilterSourceId($data['source_id']);
 			}
 			else {
-				unset($myddlewareSession['flux_filter']['c']['source_id']);
+                                $sessionService->removeFluxFilterSourceId();
 			}
 			
 			// si aucun condition alors on vide le where
@@ -311,14 +309,14 @@ class FluxControllerCore extends Controller
 
 		// si première page on stock les conditions
 		if($page == 1) {
-			if(!empty($where) || isset($myddlewareSession['flux_filter']['where'])) {
-				$myddlewareSession['flux_filter']['where'] = $where;
+			if(!empty($where) || $sessionService->isFluxFilterCWhereExist()) {
+                                $sessionService->setFluxFilterWhere($where);
 			}
 		}
 		
 		// si pagination on récupère les conditions
-		if((int)$page > 1 && isset($myddlewareSession['flux_filter']['where'])) {
-			$where = $myddlewareSession['flux_filter']['where'];
+		if((int)$page > 1 && $sessionService->isFluxFilterCWhereExist()) {
+			$where = $sessionService->getFluxFilterWhere($where);
 		}
 		
 		$cond = ((!empty($where)) ? 'AND' : 'WHERE' );
@@ -331,7 +329,7 @@ class FluxControllerCore extends Controller
 			$user = '';
 		}
 		else {
-			$user = $cond.' created_by = '.$this->getUser()->getId();
+			$user = $cond.' Document.created_by = '.$this->getUser()->getId();
 		}
 		// Detecte si la session est le support ---------
 
@@ -381,10 +379,10 @@ class FluxControllerCore extends Controller
 			}
 			
 			// affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
-			if(isset($myddlewareSession['flux_filter']['c'])) {
+			if($sessionService->isFluxFilterCExist()) {
 				$conditions = 1;
 			}
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 		 	return $this->render('RegleBundle:Flux:list.html.twig',array(
 			       'nb' => $compact['nb'],
 			       'entities' => $compact['entities'],
@@ -395,21 +393,19 @@ class FluxControllerCore extends Controller
 			);					
 		}
 		else {
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+			
 			throw $this->createNotFoundException('Error');
 		}
  	}	 
 
 	// Supprime le filtre des flux
 	public function fluxListDeleteFilterAction() {
-		$request = $this->get('request');
-		$session = $request->getSession();
-		$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-		// We always add data again in session because these data are removed after the call of the get
-		$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-		if(isset($myddlewareSession['flux_filter'])) {
-			unset($myddlewareSession['flux_filter']);	
-			$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+		
+                /* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
+                
+		if($sessionService->isFluxFilterExist()) {
+			$sessionService->removeFluxFilter();
 		}
 
 		return $this->redirect($this->generateUrl('flux_list'));	

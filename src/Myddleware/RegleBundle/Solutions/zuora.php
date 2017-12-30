@@ -31,16 +31,9 @@ require_once('lib/zuora/API.php');
 
 class zuoracore  extends solution { 
 	
-	protected $client;
 	protected $instance;
-	protected $sessionId;
 	protected $debug = 0;
-	protected $header;
-	protected $defaultApiNamespaceURL = 'http://api.zuora.com/';	
-	protected $maxZObjectCount = 50;
-	protected $defaultApiNamespace = "ns1";
-	protected $defaultObjectNamespace = "ns2";
-	protected $defaultObjectNamespaceURL = "http://object.api.zuora.com/";
+	protected $version = '85.0'; // Maw limit : 50
 	protected $update = false;
 	protected $limitCall = 10; // Maw limit : 50
 	
@@ -59,11 +52,16 @@ class zuoracore  extends solution {
                             'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
-                    // array(
-                            // 'name' => 'wsdl',
-                            // 'type' => 'text',
-                            // 'label' => 'solution.fields.wsdl'
-                        // )
+                    array(
+                            'name' => 'wsdl',
+                            'type' => 'text',
+                            'label' => 'solution.fields.wsdl'
+                        ),
+					array(
+						'name' => 'sandbox',
+						'type' => 'text',
+						'label' => 'solution.fields.sandbox'
+					)
         );
 	} // getFieldsLogin()
 
@@ -72,20 +70,26 @@ class zuoracore  extends solution {
 		parent::login($paramConnexion);
 		try{
 			// Get the wsdl (temporary solution)
-			$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/zuora/wsdl/zuora.a.85.0.wsdl';		
-			
 			$config = new \stdClass();
-			$config->wsdl = $this->paramConnexion['wsdl'];
+			$config->wsdl = __DIR__.'/../Custom/Solutions/zuora/wsdl/'.$this->paramConnexion['wsdl'];		 		
 			$this->instance = \Zuora_API::getInstance($config);
-			
-			$this->instance->setLocation('https://apisandbox.zuora.com/apps/services/a/85.0');
+			if (
+					!empty($this->paramConnexion['sandbox'])
+				&&	$this->paramConnexion['sandbox'] == 1
+			) {
+				$domain = 'https://apisandbox.zuora.com/';
+			}
+			else {
+				$domain = 'https://api.zuora.com/';
+			}
+				
+			$this->instance->setLocation($domain.'apps/services/a/'.$this->version);
 			$this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
 
 			$this->connexion_valide = true; 
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to Zuora : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-			echo $error . ';';
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -294,7 +298,7 @@ class zuoracore  extends solution {
 
 					// Get the response for each records
 					foreach($resultCall->result as $record) {
-						if ($record->Success) {
+						if (!empty($record->Success)) {
 							if (empty($record->Id)) {
 								$result[$idDocArray[$j]] = array(
 										'id' => '-1',
@@ -309,7 +313,7 @@ class zuoracore  extends solution {
 						} else {
 							$result[$idDocArray[$j]] = array(
 											'id' => '-1',
-											'error' => (empty($record->Errors) ? 'No error returned by Zuora.' : print_r($record->Errors,true))
+											'error' => (empty($record->Errors) ? (empty($record->Code) ? 'No error returned by Zuora.' : $record->Code.' : '.$record->Message) : print_r($record->Errors,true))
 											);	
 						}
 						$this->updateDocumentStatus($idDocArray[$j],$result[$idDocArray[$j]],$param);	
@@ -462,15 +466,25 @@ class zuoracore  extends solution {
 				$zSubscribeOptions = new \Zuora_SubscribeOptions(false,false);
 				$zSContact = new \Zuora_Contact();
 				$zPaymentMethod = new \Zuora_PaymentMethod();
-				
-				$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				try {	
+					$resultCall = $this->instance->subscribe($zAccount,$zSubscriptionData,$zSContact,$zPaymentMethod,$zSubscribeOptions);	
+				}
+				catch (\Exception $e) {
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => $e->getMessage().' '.$e->getFile().' '.$e->getLine()
+										);	
+				}	
 				
 				unset($zAccount);
 				unset($zSubscriptionData);
 
 				// General error
 				if (empty($resultCall)) {
-					throw new \Exception('No response from Zuora. ');
+					$result[$idDoc] = array(
+										'id' => '-1',
+										'error' => 'No response from Zuora. '
+										);	
 				}	
 				// Manage results		
 				if (!empty($resultCall->result->Errors)) {

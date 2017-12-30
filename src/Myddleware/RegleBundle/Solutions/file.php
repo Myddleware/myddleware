@@ -38,6 +38,7 @@ class filecore extends solution {
 	Protected $escape = '';
 	Protected $removeChar = array(' ','/','\'','.','(',')');
 	protected $readLimit = 1000;
+	protected $lineNumber = 0;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
 
@@ -71,8 +72,7 @@ class filecore extends solution {
 			$this->connexion_valide = true;
 
 		} catch (\Exception $e) {	
-			$error = 'Failed to access to the server: '.$e->getMessage();
-			echo $error . ';';
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
@@ -273,7 +273,7 @@ class filecore extends solution {
 							'done' => true
 			);	
 		} catch (\Exception $e) {
-		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
 		}					
 		return $result;
@@ -365,18 +365,18 @@ class filecore extends solution {
 			}		
 			//Control all lines of the file
 			$values = array();
-			$lineNumber = 2; // We count the header
+			$this->lineNumber = 2; // We count the header
 			while (($buffer = fgets($stream)) !== false) {				
 				$idRow = '';
 				// We don't read again line already read in a previous call
-				if ($lineNumber < $offset) {
-					$lineNumber++;
+				if ($this->lineNumber < $offset) {
+					$this->lineNumber++;
 					continue;
 				}			
 				
 				//If there are a line empty, we continue to read the file
 				if(empty(trim($buffer))){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				};
 				
@@ -384,13 +384,13 @@ class filecore extends solution {
 			
 				$checkRow = $this->checkRow($rowFile,$param);
 				if($checkRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				}				
 				//If there are not the good number of columns, display an error
 				$nbRowLine = count($rowFile); 			
 				if($nbRowLine != $nbCountHeader){
-					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$lineNumber.'. '.$nbCountHeader.' columns are expected.');
+					throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$this->lineNumber.'. '.$nbCountHeader.' columns are expected.');
 				}			
 				foreach($allRuleField as $field){
 					$column = array_search($field, $header);
@@ -416,18 +416,18 @@ class filecore extends solution {
 				$row['date_modified'] = $new_date_ref;			
 				$validateRow = $this->validateRow($row, $idRow,$count);
 				if($validateRow == false){
-					$lineNumber++;
+					$this->lineNumber++;
 					continue;
 				}				
-				$lineNumber++; // Save the line number				
+				$this->lineNumber++; // Save the line number				
 				// In case of query not empty, we filter the output data
 				if (!empty($param['query'])) {
-					$skip = false;
+					$skip = false;				
 					foreach($param['query'] as $key => $value) {
 						if (
-								empty($row[$key])
+								!isset($row[$key])
 							OR 	$row[$key] != $value
-						) {
+						) {				
 							$skip = true;
 							break;
 						}
@@ -436,30 +436,50 @@ class filecore extends solution {
 						continue;
 					}
 				}
-				$count++; // Save the number of line read
-				$values[$idRow] = $row;
+				$count++; // Save the number of lines read
+			
+				$values[$idRow] = $this->addData($param,$idRow,$values,$row);
 				// If we have reached the limit we stop to read
-				if ($count >= $this->readLimit) {
+				if ($this->limitReached($param,$count)) {
 					break;
 				}
-			}
-			// la première ligne te donne les nom des champs, les lignes suivantes te donne leur valeur
-			$result = array(
-							'count'=>$count,
-							'date_ref'=>($count >= $this->readLimit ? $param['date_ref'] : $new_date_ref), // Update date_ref only if the file is read completely
-							'values'=>$values,
-							'notRecall' => true // Stop the recall in the function Rule->readSource()
-			);
+			}		
+			// Generate result
+			$result = $this->generateReadResult($param,$count,$values,$new_date_ref);
+			
 			// Add the parameter only when it is a standard call (not an query call)
 			if (empty($param['query'])) {
-				$result['ruleParams'] = array(array('name' => $file, 'value' => $lineNumber));
+				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
 			}
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}	
 		return $result;
 	} // read($param)
+	
+	// Transform the result
+	protected function generateReadResult($param,$count,$values,$new_date_ref) {
+		return array(
+					'count'=>$count,
+					'date_ref'=>($count >= $this->readLimit ? (!empty($param['date_ref']) ? $param['date_ref'] : '') : $new_date_ref), // Update date_ref only if the file is read completely. Date_ref could be empty when we read for child document for example.
+					'values'=>$values,
+					'notRecall' => true // Stop the recall in the function Rule->readSource()
+		);
+	}
+	
+	// Add data to the result
+	protected function addData($param,$idRow,$values,$row) {
+		return $row;	
+	}
+	
+	// Check if teh limit has been reached
+	protected function limitReached($param,$count) {
+		if ($count >= $this->readLimit) {
+			return true;
+		}
+		return false;
+	}
 	
 	// Convert the first line of the file to an array with all fields
 	protected function getFileHeader($stream,$param) {
@@ -479,7 +499,7 @@ class filecore extends solution {
 	}
 	
 	// Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-	public function getFieldsParamUpd($type, $module, $myddlewareSession) {	
+	public function getFieldsParamUpd($type, $module) {	
 		try {
 			if ($type == 'source'){
 				$fieldsSource = $this->get_module_fields($module, $type, false);

@@ -72,8 +72,7 @@ class saprootcore extends solution {
 			}
 		}
 		catch (\Exception $e) {
-			$error = 'Failed to login to sapcrm : '.$e->getMessage();
-			echo $error . ';';
+			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		} 

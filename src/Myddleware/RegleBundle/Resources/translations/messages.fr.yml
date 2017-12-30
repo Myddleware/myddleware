@@ -127,8 +127,8 @@ filter:
     different: est différent de
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
-    in: est compris dans le tableau suivant séparé par des points virgules
-    notin: n’est pas compris dans le tableau suivant séparé par points virgules
+    in: est compris dans le tableau suivant séparé par des ;
+    notin: n’est pas compris dans le tableau suivant séparé par des ;      
             
 view_rule:
     action:
@@ -248,6 +248,7 @@ create_connector:
     upload_error_ext: L'extension n'est pas autorisée
     upload_success: Le fichier a bien été transféré
     upload_delete: Suppression du fichier
+    params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
@@ -312,6 +313,7 @@ list_flux:
         date_modified: Date de modification
         statut: Status
         source_date_modified: Date de référence
+        type: Type
         
 flux:
     gbl_status:
@@ -466,8 +468,10 @@ solution:
         wsdl: Fichier wsdl
         host: Serveur Host
         dbname: Nom de la base de données
+        database_name: Nom de la base de données
         dbdriver: Driver (pilote) de la base de données
         dbport: Port d'accès à la base de données
+        port: Port d'accès à la base de données
         ftpport: Port (défaut 22)
         directory: Répertoire avec les fichiers
         shop: Magasin
@@ -649,3 +653,10 @@ email_notification:
     100_first_erros: Voici les 100 premières erreurs: 
     best_regards: Bien cordialement, 
     signature: L'équipe Myddleware
+email_alert:
+    subject: Alerte Myddleware
+    introduction: Une tâche en cours a dépassé la limite que vous avez autorisée : 
+    minute: minutes. 
+    job_start: La tâche a commencé à  
+    job_id: . ID ode la tâche : 
+    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".		

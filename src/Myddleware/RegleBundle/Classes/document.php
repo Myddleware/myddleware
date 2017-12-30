@@ -63,6 +63,7 @@ class documentcore {
 	protected $key;
 	protected $docIdRefError;
 	protected $tools;
+	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
 										'Predecessor_OK' => 'Open',
@@ -139,6 +140,9 @@ class documentcore {
 		}
 		if (!empty($param['parentId'])) {
 			$this->parentId = $param['parentId'];
+		}
+		if (!empty($param['ruleDocuments'])) {
+			$this->ruleDocuments = $param['ruleDocuments'];
 		}	
 
 		// Stop the processus if the job has been manually stopped
@@ -233,7 +237,7 @@ class documentcore {
 			}
 		}
 		catch (\Exception $e) {
-			$this->message .= 'Failed to retrieve document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to retrieve document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error($this->message);
 			$this->createDocLog();
@@ -251,69 +255,17 @@ class documentcore {
 			}
 			
 			// Création du header de la requête 
-			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, target_id,source_date_modified, mode, type, parent_id) VALUES";
-
-			// Récupération du type de document : vérification de l'existance d'un enregistrement avec le même ID dans Myddleware (passage du type docuement en U ou C)
-			$this->type_document = $this->checkRecordExist($this->sourceId);	
-	
-			// SI la règle est en mode search alors on met le document en mode search aussi
-			if ($this->ruleMode == 'S') {
-				$old_type_document = $this->type_document;
-				$this->type_document = 'S';
-			}	
-			
+			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, parent_id) VALUES";		
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
-			// Encodage en UTF8, nécessaire pour SAP car les id peuvent avoir des accents
-			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$this->targetId','$date_modified','$this->ruleMode','$this->type_document','$this->parentId')";
+			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$date_modified','$this->ruleMode','$this->parentId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
-		
-			// Si la règle est seulement en création et que le document est en update alors on passe au document suivant
-			// Cependant si le document vient d'une règle child alors on autorise l'Update
-			if (
-					$this->ruleMode == 'C' 
-				&& $this->type_document == 'U'
-				&& !$this->isChild()
-			) {
-				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-				$this->updateStatus('Filter');
-				$createDocument = $this->insertDataTable($this->data,'S');
-			}
-			// Si la règle est seulement en recherche et que le document est en update alors on passe au document suivant
-			elseif (
-					$this->ruleMode == 'S' 
-				&& !empty($old_type_document)
-				&& $old_type_document == 'U'
-			) {
-				$this->message .= 'Rule mode only allows to search data. Filter because this document updates data.';
-				$this->updateStatus('Filter');
-				$createDocument = $this->insertDataTable($this->data,'S');
-			}
-			elseif (
-					$this->ruleMode == 'S' 
-				&& $this->type_document == 'U'
-			) {
-				$this->message .= 'Rule mode only allows to search data. Filter because this document updates data.';
-				$this->updateStatus('Filter');
-				$createDocument = $this->insertDataTable($this->data,'S');
-			}
-			elseif (!empty($this->type_document)) {
-				// Mise à jour de la table des données source
-				$createDocument = $this->insertDataTable($this->data,'S');
-				if ($createDocument) {
-					$this->updateStatus('New');
-				}
-				else {
-					throw new \Exception( 'Failed to create source data for this document.' );
-				}
-			}
-			else {
-				throw new \Exception( 'Failed to get the mode of the document. Failed to create the document.' );
-			}
-			return $createDocument;
+			$this->updateStatus('New');
+			// Insert source data
+			return $this->insertDataTable($this->data,'S');		
 		} catch (\Exception $e) {
-			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Create_KO');
 			$this->logger->error($this->message);
@@ -351,7 +303,7 @@ class documentcore {
 			return $filterOK;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to filter document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to filter document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Filter_KO');
 			$this->logger->error($this->message); 
@@ -510,105 +462,137 @@ class documentcore {
 		}
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
-			// Vérification que pour les documents en modification, les création n'ont pas de prédécesseur
-			if ($this->document_data['type'] == 'U') {
-				// Avant de vérifier les prédécesseur, on re vérifie que le document en cours est toujours du type UPDATE. 
-				// En effet si un docuement précédent a été annulé il se peut que se docuement doivent être transformé en CREATE
-				// On ne fait cette vérification que si le target_id n'est pas renseigné, il peut l'etre quand on se sert de myddleware_element_id (plusieurs modules source pour un seul cible)
-				if (empty($this->targetId)) {
-					$this->type_document = $this->checkRecordExist($this->sourceId);	
-				}
-				// Si le document doit réellement changé en CREATE, on modifie le type du document et on passe le document en Predecessor_OK
-				if($this->type_document == 'C') {
-					$this->updateType($this->type_document);
-				}
-				// Sinon on fait la recherche du prédécesseur classique
-				else {
-					$rules[] = $this->document_data['rule_id'];
-					// We check the bidirectionnal rule too if it exists
-					if (!empty($this->ruleParams['bidirectional'])) {
-						$rules[] = $this->ruleParams['bidirectional'];
-					}
-					foreach ($rules as $ruleId) {
-						// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed et Cancel
-						// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
-						$sqlParams = "	SELECT 
-											Document.id,							
-											Document.rule_id,
-											Rule.id rule_parent,
-											if(Rule.deleted=1,1,0) rule_parent_deleted,
-											Document.status,
-											Document.global_status											
-										FROM Document
-											LEFT OUTER JOIN RuleRelationShip
-												ON RuleRelationShip.field_id = Document.rule_id
-												AND RuleRelationShip.parent = 1
-											LEFT OUTER JOIN Rule
-												ON Rule.id = RuleRelationShip.rule_id 									
-										WHERE 
-												Document.rule_id = :rule_id 
-											AND Document.source_id = :source_id 
-											AND Document.date_created < :date_created  
-										HAVING 
-												rule_parent_deleted != 1
-											AND (
-													global_status = 'Error'
-												OR (
-														global_status = 'OPEN'
-													AND (
-															status != 'Ready_to_send'
-														OR (
-																status = 'Ready_to_send'
-															AND rule_parent IS NULL
-														)
-													)
-												)	
-											)
-										LIMIT 1	
-										";								
-						$stmt = $this->connection->prepare($sqlParams);
-						$stmt->bindValue(":rule_id", $ruleId);
-						$stmt->bindValue(":source_id", $this->document_data['source_id']);
-						$stmt->bindValue(":date_created", $this->document_data['date_created']);
-						$stmt->execute();	   				
-						$result = $stmt->fetch();						
-						// if id found, we stop to send an error
-						if (!empty($result['id'])) {
-							break;
-						}
-					}
-
-					// Si un prédécesseur non clos est trouvé on passe le document au statut Predecessor_KO
-					if (!empty($result['id'])) {		
-						$this->docIdRefError = $result['id'];
-						throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
-					}
-					else {
-						// Mise à jour du target id si celui-ci n'était pas renseigné (document précédent sans target id au moment de la creation de ce docuement)
-						if (empty($this->targetId)) {
-							// Récupération de $this->targetId dans les documents clos
-							$this->checkRecordExist($this->document_data['source_id']);
-							if (!empty($this->targetId)) {
-								if(!$this->updateTargetId($this->targetId)) {
-									throw new \Exception('Failed to update the target id. Failed to unblock this update document. ');
-								}
-							}
-							// Si on est sur une règle groupée avec un child alors il est possible qu'il n'y ait pas de prédécesseur 
-							// mais que l'on vienne quand même mettre à jour la règle root.
-							elseif (!$this->isChild()) {
-								throw new \Exception('Failed to retrieve the target in a parent document. Failed to unlock this update document. ');
-							}
-						}
-					}
-				}
+			// Check predecessor in the current rule
+			$sqlParams = "	SELECT 
+								Document.id,							
+								Document.rule_id,
+								Document.status,
+								Document.global_status											
+							FROM Document								
+							WHERE 
+									Document.rule_id = :rule_id 
+								AND Document.source_id = :source_id 
+								AND Document.date_created < :date_created  
+								AND global_status IN ('Error','Open')
+							LIMIT 1	
+							";								
+			$stmt = $this->connection->prepare($sqlParams);
+			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
+			$stmt->bindValue(":source_id", $this->document_data['source_id']);
+			$stmt->bindValue(":date_created", $this->document_data['date_created']);
+			$stmt->execute();	   				
+			$result = $stmt->fetch();						
+			// if id found, we stop to send an error
+			if (!empty($result['id'])) {
+				throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
 			}
+			
+			// Check predecessor in the opposite bidirectional rule
+			if (!empty($this->ruleParams['bidirectional'])) {
+				$stmt = $this->connection->prepare($sqlParams);
+				$stmt->bindValue(":rule_id", $this->ruleParams['bidirectional']);
+				$stmt->bindValue(":source_id", $this->document_data['source_id']);
+				$stmt->bindValue(":date_created", $this->document_data['date_created']);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();
+				if (!empty($result['id'])) {
+					throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$this->ruleParams['bidirectional'].'. This document is not closed. This document is queued. ');
+				}				
+			}
+			
+			// Check predecessor in the child rule
+			// Get all child rules 
+			$sqlGetChildRules = "	SELECT 
+										RuleRelationShip.rule_id 											
+									FROM Document
+										INNER JOIN RuleRelationShip
+											ON RuleRelationShip.field_id = Document.rule_id
+											AND RuleRelationShip.parent = 1
+										INNER JOIN Rule
+											ON Rule.id = RuleRelationShip.rule_id 									
+									WHERE 
+											Document.rule_id = :rule_id 
+										AND	Rule.deleted = 0";					
+			$stmt = $this->connection->prepare($sqlGetChildRules);
+			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
+			$stmt->execute();	    
+			$childRules = $stmt->fetchAll();	
+			if($childRules) {
+				// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
+				$sqlParamsChild = "	SELECT 
+										Document.id,							
+										Document.rule_id,
+										Document.status,
+										Document.global_status											
+									FROM Document								
+									WHERE 
+											Document.rule_id = :rule_id 
+										AND Document.source_id = :source_id 
+										AND Document.date_created < :date_created  
+										AND (
+												global_status = 'Error'
+											 OR (
+													global_status = 'Open'
+												AND status != 'Ready_to_send'
+											)
+										)
+									LIMIT 1	
+							";			
+				foreach ($childRules as $childRule) {
+					$stmt = $this->connection->prepare($sqlParamsChild);
+					$stmt->bindValue(":rule_id", $childRule['rule_id']);
+					$stmt->bindValue(":source_id", $this->document_data['source_id']);
+					$stmt->bindValue(":date_created", $this->document_data['date_created']);
+					$stmt->execute();	   				
+					$result = $stmt->fetch();
+					if (!empty($result['id'])) {
+						throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
+					}	
+				}			
+			}	
 
+			// Get the target id and the type of the document
+			$this->type_document = $this->checkRecordExist($this->sourceId);	
+			// Override the document type in case of search type rule
+			if ($this->ruleMode == 'S') {
+				$this->type_document = 'S';
+			}				
+			// Update the type of the document
+			if (empty($this->type_document)) {
+				throw new \Exception('Failed to find a type for this document. ');
+			}
+			$this->updateType($this->type_document);
+			
+			// Update the target ID if we founnd it
+			if ($this->type_document == 'U') {
+				if (empty($this->targetId)) {
+					throw new \Exception('No target id found for a document with the type Update. ');
+				}
+				if(!$this->updateTargetId($this->targetId)) {
+					throw new \Exception('Failed to update the target id. Failed to unblock this update document. ');
+				}
+			}		
+			
+			// Check compatibility between rule mode et document tupe
+			// A rule in create mode can't update data excpt for a child rule
+			if (
+					$this->ruleMode == 'C' 
+				&& $this->type_document == 'U'
+				&& !$this->isChild()
+			) {
+				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+				$this->updateStatus('Filter');
+			}
+			
+			// Set the status Predecessor_OK
 			$this->updateStatus('Predecessor_OK');
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			// Reference document id is used to show which document is blocking the current document in Myddleware
+			$this->docIdRefError = $result['id'];
+			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
 			$this->logger->error($this->message);
@@ -686,7 +670,7 @@ class documentcore {
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Relate_KO');
 			$this->logger->error($this->message);
@@ -732,7 +716,7 @@ class documentcore {
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Failed to transform document : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Error_transformed');
 			$this->logger->error($this->message);
@@ -819,6 +803,19 @@ class documentcore {
 						// Add filed in duplicate search only if not empty
 						if (!empty($searchFieldValue)) {
 							$searchFields[$duplicate_field] = $searchFieldValue;
+						// If no value, we check if the field is a relationship
+						} else {	
+							foreach ($this->ruleRelationships as $ruleRelationship) {	
+								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
+									$sourceDuplicateFieldRelationship = $ruleRelationship;
+								}
+							}					
+							if (!empty($sourceDuplicateFieldRelationship)) {
+								$searchFieldValue = $this->getTransformValue($this->sourceData,$ruleRelationship);
+							}
+							if (!empty($searchFieldValue)) {
+								$searchFields[$duplicate_field] = $searchFieldValue;
+							}							
 						}
 					}
 				}					
@@ -856,7 +853,7 @@ class documentcore {
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Error_checking');
 			$this->logger->error($this->message);
@@ -952,12 +949,17 @@ class documentcore {
 		// Permet de renseigner le tableau rule avec les données d'entête
 		$rule = $this->getRule();
 		$read['module'] = $rule['module_target'];
-		$read['fields'] = $this->getTargetFields();
+		$read['fields'] = $this->getTargetFields();	
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
-		$dataTarget = $this->solutionTarget->read_last($read);
+		$dataTarget = $this->solutionTarget->read_last($read);		
 		if (empty($dataTarget['done'])) {
+			// If we have search an ID we should always find a result
+			if (!empty($searchFields['id'])) {
+				$this->message .= 'No result from the target solution. Failed to buid the data history.';
+				return -1;
+			}
 			return false;
 		}
 		elseif ($dataTarget['done'] === -1) {
@@ -992,7 +994,7 @@ class documentcore {
 				return json_decode($documentDataEntity->getData(),true);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}		
@@ -1012,8 +1014,12 @@ class documentcore {
 							continue;
 						}
 						// It could be several fields in the source fields (in case of formula)
-						$sourceFields = explode(";",$ruleField['source_field_name']);
+						$sourceFields = explode(";",$ruleField['source_field_name']);					
 						foreach ($sourceFields as $sourceField) {
+							// if Myddleware_element_id is present, we transform it into id 
+							if ($sourceField=='Myddleware_element_id') {
+								$sourceField = 'id';
+							}
 							$dataInsert[$sourceField] = $data[$sourceField];
 						}
 					} else {
@@ -1053,7 +1059,7 @@ class documentcore {
 			}
 		} 
 		catch (\Exception $e) {
-			$this->message .= 'Failed : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );			
 			return false;
@@ -1072,7 +1078,7 @@ class documentcore {
 				return true;
 			}
 			catch(Exception $e) {
-				$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->typeError = 'E';
 				$this->logger->error( $this->message );
 			}		
@@ -1116,7 +1122,7 @@ class documentcore {
 				return true;
 			}
 			catch(Exception $e) {
-				$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+				$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->typeError = 'E';
 				$this->logger->error( $this->message );
 			}		
@@ -1149,7 +1155,7 @@ class documentcore {
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
-		try {
+		try {		
 			//--
 			if (!empty($ruleField['formula'])) {
 				// -- -- -- Gestion des formules
@@ -1218,12 +1224,19 @@ class documentcore {
 					return $targetId['record_id'];
 				}
 				else {
-					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['source_field_name']].' of the rule '.$ruleField['related_rule'] );
+					throw new \Exception( 'Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id'] );
 				}
 			}
 			// Si le champ est envoyé sans transformation
 			elseif (isset($source[$ruleField['source_field_name']])) {			
 				return $this->checkField($source[$ruleField['source_field_name']]);
+			}
+			// If Myddleware_element_id is requested, we return the id 
+			elseif (
+						$ruleField['source_field_name'] == 'Myddleware_element_id'
+					AND	isset($source['id'])
+			) {			
+				return $this->checkField($source['id']);
 			}
 			elseif (is_null($source[$ruleField['source_field_name']])) {			
 				return null;
@@ -1234,7 +1247,7 @@ class documentcore {
 		}
 		catch(\Exception $e) {		
 			$this->typeError = 'E';
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
 			return false;
 		}
@@ -1261,7 +1274,7 @@ class documentcore {
 			}
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
-			$this->message .= 'Error getRule  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getRule  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
 		}	
 	}
@@ -1298,7 +1311,7 @@ class documentcore {
 			return $stmt->fetchAll();	
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
-			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
 		}	
 	}
@@ -1340,17 +1353,27 @@ class documentcore {
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
 				$ruleRelationShips = $stmt->fetchAll();
-				if(!empty($ruleRelationShips)){
+				if(!empty($ruleRelationShips)){						
 					foreach ($ruleRelationShips AS $ruleRelationShip) {
-						$fields[] = $ruleRelationShip['field_name_target'];
+						// If it is a normal relationship we take the target field 
+						// but if it is a parent relationship we have to take the source field in the relation (wich corresponding to the target field)
+						if (empty($ruleRelationShip['parent'])) {
+							$fields[] = $ruleRelationShip['field_name_target'];
+						} else {
+							$fields[] = $ruleRelationShip['field_name_source'];
+						}
 					}
-				}
-				
+				}				
+				// We don't need the field Myddleware_element_id as it is the id of the current record
+				$key = array_search('Myddleware_element_id', $fields);
+				if ($key !== false) {
+					unset($fields[$key]);
+				}					
 				return $fields;
 			}
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
-			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
 		}		
 	}
@@ -1371,7 +1394,7 @@ class documentcore {
 				}			
 			}			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}	
 
@@ -1382,18 +1405,16 @@ class documentcore {
 		try {	
 			// Query used in the method several times
 			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
-			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status != 'Cancel'
+										Document.global_status = 'Close'
 									 OR (
 											Document.global_status = 'Cancel'	
 										AND Document.status = 'No_send'
@@ -1409,18 +1430,16 @@ class documentcore {
 								Document.id, 
 								Document.source_id target_id, 
 								Document.global_status 
-							FROM Rule
-								INNER JOIN Document 
-									ON Document.rule_id = Rule.id
+							FROM Document 
 							WHERE 
-									Rule.id IN (:ruleId)									
+									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status != 'Cancel'
+										Document.global_status = 'Close'
 									 OR (
 											Document.global_status = 'Cancel'	
 										AND Document.status = 'No_send'
 									)
-								)	
+								)
 								AND	Document.target_id = :id
 								AND Document.id != :id_doc
 							ORDER BY target_id DESC, global_status DESC
@@ -1459,7 +1478,7 @@ class documentcore {
 							$stmt->bindValue(":id", $this->sourceId);
 							$stmt->bindValue(":id_doc", $this->id);
 							$stmt->execute();	   				
-							$result = $stmt->fetch();				
+							$result = $stmt->fetch();
 				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 							if (!empty($result['target_id'])) {							
@@ -1487,16 +1506,50 @@ class documentcore {
 					}
 				}
 			}
-	
-			// If no relationship or no child rule
-			// Recherche d'un enregitsrement avec un target id sur la même source
-			$stmt = $this->connection->prepare($sqlParamsSoure);
-			$stmt->bindValue(":ruleId", $this->ruleId);
-			$stmt->bindValue(":id", $id);
-			$stmt->bindValue(":id_doc", $this->id);
-		    $stmt->execute();	   				
-			$result = $stmt->fetch();
-		
+			// A mass process exist for migration mode 
+			if (!empty($this->ruleDocuments[$this->ruleId])) {
+				// If a least one record is already existing, we test if it was successfully sent
+				if (!empty($this->ruleDocuments[$this->ruleId]['sourceId'][$id])) {
+					foreach($this->ruleDocuments[$this->ruleId]['sourceId'][$id] as $document) {
+						if (
+							(
+								$document['global_status'] != 'Cancel'
+							 OR (
+										$document['global_status'] == 'Cancel'	
+									AND $document['status'] == 'No_send'
+								)
+							)	
+							AND $document['id'] !== $this->id
+						) {
+							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
+							if (!empty($document['target_id'])) {							
+								$this->targetId = $document['target_id'];
+								return 'U';
+							}
+							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
+							if (
+									empty($result['id']) 
+								 || $result['global_status'] == 'Cancel'
+							) {
+								return 'C';
+							} else {
+								return 'U';
+							}
+						}
+					}
+				} 
+			} 
+			else {	
+				// If no relationship or no child rule
+				// Recherche d'un enregitsrement avec un target id sur la même source
+				$stmt = $this->connection->prepare($sqlParamsSoure);
+				$stmt->bindValue(":ruleId", $this->ruleId);
+				$stmt->bindValue(":id", $id);
+				$stmt->bindValue(":id_doc", $this->id);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();
+			}
+			
 			// Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
 			// Alors on recherche dans la règle opposée		
 			if (
@@ -1535,7 +1588,7 @@ class documentcore {
 			return 'C';
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
-			$this->message .= 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );	
 			return null;
 		}
@@ -1597,7 +1650,7 @@ class documentcore {
 			$this->createDocLog();
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .=  'Error status update : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .=  'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 			$this->createDocLog();
@@ -1636,7 +1689,7 @@ class documentcore {
 			$this->createDocLog();
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Error type   : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 			$this->createDocLog();
@@ -1667,7 +1720,7 @@ class documentcore {
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->message .= 'Error target id  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 			$this->createDocLog();
@@ -1713,11 +1766,9 @@ class documentcore {
 				$sqlParams = "	SELECT 
 									source_id record_id,
 									Document.id document_id								
-								FROM Rule
-									INNER JOIN Document 
-										ON Document.rule_id = Rule.id
+								FROM Document
 								WHERE  
-										Rule.id = :ruleRelateId 
+										Document.rule_id = :ruleRelateId 
 									AND Document.source_id != '' 
 									AND Document.target_id = :record_id 
 									AND (
@@ -1730,11 +1781,9 @@ class documentcore {
 				$sqlParams = "	SELECT 
 									target_id record_id,
 									Document.id document_id
-								FROM Rule
-									INNER JOIN Document 
-										ON Document.rule_id = Rule.id
+								FROM Document 
 								WHERE  
-										Rule.id = :ruleRelateId 
+										Document.rule_id = :ruleRelateId 
 									AND Document.source_id = :record_id 
 									AND Document.target_id != '' 
 									AND (
@@ -1746,17 +1795,56 @@ class documentcore {
 			else {
 				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
 			}
-			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
-			$stmt->bindValue(":record_id", $record_id);
-			$stmt->execute();	   				
-			$result = $stmt->fetch();
+			
+			// A mass process exist for migration mode 
+			if (!empty($this->ruleDocuments[$ruleRelationship['field_id']])) {
+				// We search the target/source id in the array in memory
+				if ($direction == '1') {	
+					if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id])) {
+						foreach($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id] as $document) {
+							if (
+								(
+										$document['global_status'] == 'Close'	
+									 OR $document['status'] == 'No_send'	
+								)	
+								AND $document['target_id'] != '' 
+							) {
+								$result['record_id'] = $document['target_id'];
+								$result['document_id'] = $document['id'];
+								break;
+							}
+						}
+					}
+				} else {
+					if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id])) {
+						foreach($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id] as $document) {
+							if (
+								(
+										$document['global_status'] == 'Close'	
+									 OR $document['status'] == 'No_send'	
+								)	
+								AND $document['source_id'] != '' 
+							) {
+								$result['record_id'] = $document['source_id'];
+								$result['document_id'] = $document['id'];
+								break;
+							}
+						}
+					}
+				}
+			} else {	
+				$stmt = $this->connection->prepare($sqlParams);
+				$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
+				$stmt->bindValue(":record_id", $record_id);
+				$stmt->execute();	   				
+				$result = $stmt->fetch();		
+			}
 			if (!empty($result['record_id'])) {
 				return $result;
 			}
 			return null;
 		} catch (\Exception $e) {
-			$this->message .= 'Error getTargetId  : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}	
@@ -1785,7 +1873,7 @@ class documentcore {
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to create log : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	

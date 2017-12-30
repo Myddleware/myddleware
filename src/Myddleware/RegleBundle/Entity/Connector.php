@@ -45,7 +45,12 @@ class Connector
      */
     private $id;
 	
-
+    /**
+     *
+     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector")
+     */
+    private $connectorParams;
+    
     /**
      * @var Solution $solution
      *
@@ -321,4 +326,52 @@ class Connector
     {
         return $this->rule;
     }
+
+ 
+
+    /**
+     * Add connectorParam
+     *
+     * @param \Myddleware\RegleBundle\Entity\ConnectorParam $connectorParam
+     *
+     * @return Connector
+     */
+    public function addConnectorParam(\Myddleware\RegleBundle\Entity\ConnectorParam $connectorParam)
+    {
+        $this->connectorParams[] = $connectorParam;
+
+        return $this;
+    }
+
+    /**
+     * Remove connectorParam
+     *
+     * @param \Myddleware\RegleBundle\Entity\ConnectorParam $connectorParam
+     */
+    public function removeConnectorParam(\Myddleware\RegleBundle\Entity\ConnectorParam $connectorParam)
+    {
+        $this->connectorParams->removeElement($connectorParam);
+    }
+
+    /**
+     * Get connectorParams
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getConnectorParams()
+    {
+        return $this->connectorParams;
+    }
+    
+     /**
+     * Set connectorParams
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function setConnectorParams($connectorParams = null)
+    {
+        return $this->connectorParams = $connectorParams;
+    }
+    
+   
 }

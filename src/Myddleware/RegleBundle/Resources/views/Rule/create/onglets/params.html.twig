@@ -40,6 +40,7 @@
 			</p>
 		{% endif %}
 	{% endfor %}
+	<input class="params" type="hidden" name="regleId" id="regleId" value="{{ regleId }}" />
 {% endif %}
 
 {% if duplicate_target %}
@@ -58,3 +59,11 @@
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
 	<p>{{'help.rule.validate'|trans}}</p>
 </div>
+
+{# ------------- PARAMETRES JQUERY ------------- #}
+<script type="text/javascript">
+
+    var path_validation = "{{ path('regle_validation') }}";
+    var path_formula = "{{ path('regle_formula') }}";
+
+</script>

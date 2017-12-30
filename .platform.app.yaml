@@ -30,9 +30,10 @@ disk: 2048
 
 # The mounts that will be performed when the package is deployed.
 mounts:
-    "/app/cache": "shared:files/cache"
-    "/app/logs": "shared:files/logs"
-    #"/var/sessions": "shared:files/sessions"
+    "/var/cache": "shared:files/cache"
+    "/var/logs": "shared:files/logs"
+    "/var/sessions": "shared:files/sessions"
+    "/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
 
 # The hooks that will be performed when the package is deployed.
 hooks:
@@ -45,5 +46,9 @@ hooks:
         chmod -R 777 app/cache
         chmod -R 777 app/logs
         php app/console d:s:u --force
-        php app/console d:f:l -n
-        
+        php app/console d:f:l --append
+
+crons:
+    jobScheduler:
+        spec: '*/5 * * * *'
+        cmd: 'php app/console myddleware:jobScheduler --env=background'

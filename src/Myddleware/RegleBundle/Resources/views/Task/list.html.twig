@@ -39,7 +39,7 @@
     	<table class="listepager">
 		{% if entities is not empty %}	
 			<tr>
-				<th>{{'list_task.th.id'|trans}}</th>
+				<th>{{'list_task.th.param'|trans}}</th>
 				<th>{{'list_task.th.status'|trans}}</th>
 				<th>{{'list_task.th.begin'|trans}}</th>
 				<th>{{'list_task.th.end'|trans}}</th>				
@@ -56,7 +56,7 @@
 		     {% else %}
 		     	<tr>
 			 {% endif %}
-		     	<td><a href="{{ path('task_view',{'id' :task.id }) }}">{{ task.id }}</a></td>
+		     	<td><a href="{{ path('task_view',{'id' :task.id }) }}">{{ task.param }}</a></td>
 		     	<td class="ctr">	     		
 		     		{% if task.status|lower == 'end' %}
 		     		<span class="label label-default">{{ task.status }}</span>
@@ -64,17 +64,13 @@
 					<span class="label label-warning">{{ task.status }}</span>
 		     		{% endif %}
 		     	</td>	
-		     	<td>
-					{{ task.begin|date("d/m/Y H:i:s") }}
-		     	</td>	
-		     	<td>
-					{{ task.end|date("d/m/Y H:i:s") }}
-		     	</td>		     	
+		     	<td>{{ task.begin }}</td>	
+		     	<td>{{ task.end }}</td>		     	
 		     	<td class="count">{{ task.open }}</td>	
 		     	<td class="count">{{ task.close }}</td>
 		     	<td class="count">{{ task.cancel }}</td> 
 		     	<td class="count">{{ task.error }}</td>	
-		     	<td>{{ task.message }}</td>			     	
+		     	<td>{{ task.message|sensor }}</td>			     	
 			</tr>			
 			{% endfor %}			
 			<tr>

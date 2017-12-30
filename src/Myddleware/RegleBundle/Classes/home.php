@@ -75,7 +75,7 @@ class homecore {
 			$result = $stmt->fetchAll();
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}	
 	}
 		
@@ -87,7 +87,7 @@ class homecore {
 			$result = $stmt->fetchAll();
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}	
 	}
 	
@@ -120,7 +120,7 @@ class homecore {
 			$result = $stmt->fetchAll();
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}	
 	}
 
@@ -142,7 +142,7 @@ class homecore {
 			$result = $stmt->fetchAll();
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}	
 	}
 
@@ -166,7 +166,7 @@ class homecore {
 		
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -193,7 +193,7 @@ class homecore {
 			$result = $stmt->fetchAll();			
 			return $result; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -228,7 +228,7 @@ class homecore {
 			}
 			return $historic; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 	
@@ -247,7 +247,7 @@ class homecore {
 			}
 			return $historic; 			
 		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )' );
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
 
