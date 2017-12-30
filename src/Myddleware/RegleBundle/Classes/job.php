@@ -581,9 +581,9 @@ class jobcore  {
 				// Calculate the date corresponding depending the rule parameters
 				$limitDate = new \DateTime('now',new \DateTimeZone('GMT'));
 				$limitDate->modify('-'.$rule['days'].' days');	
+				// Delete document data
 				$this->connection->beginTransaction();						
 				try {
-					// Delete document data
 					$deleteSource = "
 						DELETE DocumentData
 						FROM Document
@@ -600,7 +600,16 @@ class jobcore  {
 					if ($stmt->rowCount() > 0) {				
 						$this->message .= $stmt->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
 					}
-					// Delete log for these rule	
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				} catch (\Exception $e) {
+					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+					$this->message .= 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$this->logger->error($this->message);	
+				}	
+				
+				// Delete log for these rule
+				$this->connection->beginTransaction();						
+				try {	
 					$deleteLog = "
 						DELETE Log
 						FROM Log
@@ -618,9 +627,10 @@ class jobcore  {
 					if ($stmt->rowCount() > 0) {
 						$this->message .= $stmt->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';			
 					}
+					$this->connection->commit(); // -- COMMIT TRANSACTION					
 				} catch (\Exception $e) {
 					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$this->message .= 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 					$this->logger->error($this->message);	
 				}		
 			}
