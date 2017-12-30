@@ -43,8 +43,6 @@ use Myddleware\RegleBundle\Classes\document as doc;
 
 class FluxControllerCore extends Controller
 {
-	protected $llimitListFlux = 1000;
-
 	/* ******************************************************
 	 * FLUX
 	 ****************************************************** */
@@ -343,8 +341,7 @@ class FluxControllerCore extends Controller
 				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 
 				$user
-				ORDER BY date_modified DESC 
-				LIMIT $this->llimitListFlux";					
+				ORDER BY date_modified DESC ";					
 		$stmt = $conn->prepare($sql);
 		$stmt->execute();
 		$r = $stmt->fetchall();
@@ -362,20 +359,6 @@ class FluxControllerCore extends Controller
 			if( $compact['nb'] < 1 && !intval($compact['nb'])) {
 				$compact['entities'] = '';
 				$compact['pager'] = '';				
-			}
-			
-			// Si on atteind la limit alors on récupère le nombre total de flux
-			if ($compact['nb'] >= $this->llimitListFlux) {
-				$sql = "SELECT count(*) nb
-						FROM Document 
-						JOIN users ON(users.id = Document.created_by)
-						JOIN Rule ON(Rule.id = Document.rule_id)
-						$where 
-						$user";
-				$stmt = $conn->prepare($sql);
-				$stmt->execute();		
-				$count = $stmt->fetch();
-				$compact['nb'] = $count['nb'];
 			}
 			
 			// affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
