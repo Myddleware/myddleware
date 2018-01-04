@@ -57,7 +57,43 @@ class sugarcrmcore  extends suitecrm {
 													'documents_opportunities' => array('label' => 'Relationship Document Opportunity', 'module_name' => 'Documents', 'link_field_name' => 'opportunities', 'fields' => array(), 'relationships' => array('document_id','opportunity_id')),
 													'documents_cases' => array('label' => 'Relationship Document Case', 'module_name' => 'Documents', 'link_field_name' => 'cases', 'fields' => array(), 'relationships' => array('document_id','case_id')),
 													'documents_bugs' => array('label' => 'Relationship Document Bug', 'module_name' => 'Documents', 'link_field_name' => 'bugs', 'fields' => array(), 'relationships' => array('document_id','bug_id')),
+													'bundles_products' => array('label' => 'Relationship Bundle Product', 'module_name' => 'ProductBundles', 'link_field_name' => 'products', 'fields' => array(), 'relationships' => array('bundle_id','product_id')),
+													'quotes_bundles' => array('label' => 'Relationship Quote Bundle', 'module_name' => 'Quotes', 'link_field_name' => 'product_bundles', 'fields' => array(), 'relationships' => array('quote_id','bundle_id')),
 												);
+	
+	protected $adminModules = array(
+									'ProductTemplates' => 'Product templates',
+									'ProductCategories' => 'Product categories',
+									'ProductBundles' => 'Product bundles'
+								);
+	
+	public function get_modules($type = 'source') {		
+		$modules = parent::get_modules($type);
+		// Add admin module if SugarCRM is in target
+		if ($type == 'target') {
+			foreach ($this->adminModules as $key => $value) {
+				$modules[$key] = $value;
+			}
+		}		
+		return $modules;										
+	}
+	
+	public function read_last($param) {
+		// No history for admin module
+		if (
+				!empty($this->adminModules[$param['module']])
+			 OR !empty($this->module_relationship_many_to_many[$param['module']])
+		) {
+			foreach ($param['fields'] as $field) {
+				$result['values'][$field] = '';
+			}
+			$result['values']['id'] = $param['query']['id'];
+			$result['done'] = true;
+		} else {
+			$result = parent::read_last($param);
+		}
+		return $result;
+	}
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
