@@ -409,6 +409,9 @@ class templatecore {
 				$nbRule++;
 			}
 			
+			// Commit the rules in the database
+			$this->em->flush();
+			$this->em->getConnection()->commit(); // -- COMMIT TRANSACTION
 			// Refresh table order
 			include_once 'job.php';
 			$job = new job($this->logger, $this->container, $this->connection);
@@ -416,9 +419,6 @@ class templatecore {
 			// Set the message in Myddleware UI
 			$session = new Session();
 			$session->set( 'info', array($this->container->get('translator')->trans('messages.template.nb_rule').$nbRule, $this->container->get('translator')->trans('messages.template.help')));
-			// Commit the rules in the database
-			$this->em->flush();
-			$this->em->getConnection()->commit(); // -- COMMIT TRANSACTION
 		} catch (\Exception $e) {
 			// Rollback in case of error
 			$this->em->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
