@@ -4,15 +4,15 @@ parameters:
     database_port: 
     database_name: 
     database_user: 
-    database_password: 
-    mailer_transport: sendmail
-    mailer_host: 
-    mailer_port: 
-    mailer_auth_mode: 
-    mailer_user: 
-    mailer_password: 
+    database_password:
+    mailer_transport: smtp
+    mailer_host:
+    mailer_user:
+    mailer_password:
+    mailer_port:
+    mailer_auth_mode:
     mailer_email:
-    mailer_name: 
+    mailer_name:
     secret: ThisTokenIsNotSoSecretChangeIt
     myddleware_support: 0
     param:
