@@ -1,0 +1,221 @@
+name: prestashop_sugarcrm_customers_orders_products
+description: 'Customer, orders and products from Prestashop to SugarCRM'
+rules:
+    -
+        name: 'Product bundles'
+        nameSlug: product_bundles
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: orders
+        targetModule: ProductBundles
+        fields:
+            - { target: name, source: reference, formula: '"Prestashop order ".{reference}' }
+            - { target: shipping, source: total_shipping_tax_incl, formula: null }
+            - { target: shipping_usdollar, source: total_shipping_tax_incl, formula: null }
+            - { target: subtotal, source: total_paid_tax_excl;total_shipping_tax_excl, formula: '{total_paid_tax_excl}-{total_shipping_tax_excl}' }
+            - { target: subtotal_usdollar, source: total_shipping_tax_excl;total_paid_tax_excl, formula: '{total_paid_tax_excl}-{total_shipping_tax_excl}' }
+            - { target: tax, source: total_paid_tax_excl;total_paid_tax_incl, formula: '{total_paid_tax_incl}-{total_paid_tax_excl}' }
+            - { target: tax_usdollar, source: total_paid_tax_excl;total_paid_tax_incl, formula: '{total_paid_tax_incl}-{total_paid_tax_excl}' }
+            - { target: total, source: total_paid_tax_incl, formula: null }
+            - { target: total_usdollar, source: total_paid_tax_incl, formula: null }
+            - { target: bundle_stage, source: my_value, formula: '"Draft"' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Accounts
+        nameSlug: accounts
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: customers
+        targetModule: Accounts
+        fields:
+            - { target: name, source: company;lastname;firstname, formula: '({company} != "" ? {company} : {firstname}." ".{lastname})' }
+            - { target: description, source: note, formula: null }
+            - { target: email1, source: email, formula: null }
+            - { target: sic_code, source: siret, formula: null }
+            - { target: website, source: website, formula: null }
+            - { target: account_type, source: my_value, formula: '"Customer"' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: email1 }
+    -
+        name: 'Product categories'
+        nameSlug: product_categories
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: categories
+        targetModule: ProductCategories
+        fields:
+            - { target: name, source: name, formula: null }
+            - { target: description, source: description, formula: null }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Contacts
+        nameSlug: contacts
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: customers
+        targetModule: Contacts
+        fields:
+            - { target: last_name, source: lastname, formula: null }
+            - { target: birthdate, source: birthday, formula: null }
+            - { target: description, source: note, formula: null }
+            - { target: email1, source: email, formula: null }
+            - { target: first_name, source: firstname, formula: null }
+        relationships:
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: account_id, fieldId: accounts, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: email1 }
+    -
+        name: 'Categories relationship'
+        nameSlug: categories_relationship
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: categories
+        targetModule: ProductCategories
+        fields:
+            - { target: deleted, source: id_parent, formula: '"0"' }
+        relationships:
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: Myddleware_element_id, fieldId: product_categories, parent: false }
+            - { fieldNameSource: id_parent, fieldNameTarget: parent_id, fieldId: product_categories, parent: false }
+        filters:
+            - { target: id_parent, type: gt, value: '0' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Product templates'
+        nameSlug: product_templates
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: products
+        targetModule: ProductTemplates
+        fields:
+            - { target: discount_price, source: price, formula: null }
+            - { target: list_price, source: price, formula: null }
+            - { target: name, source: name, formula: null }
+            - { target: description, source: description, formula: null }
+        relationships:
+            - { fieldNameSource: id_category_default, fieldNameTarget: category_id, fieldId: product_categories, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Quotes
+        nameSlug: quotes
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: orders
+        targetModule: Quotes
+        fields:
+            - { target: date_quote_expected_closed, source: date_add, formula: null }
+            - { target: name, source: reference, formula: null }
+            - { target: quote_stage, source: current_state, formula: '({current_state}=="5"?"Delivered": ({current_state}=="2"?"Closed Accepted": ({current_state}=="4"?"Confirmed": ({current_state}=="12"?"Closed Accepted": ({current_state}=="6"?"Closed Dead": ({current_state}=="7"?"Closed Dead": ({current_state}=="9"?"Closed Accepted": "On Hold" ) ) ) ) ) ) )' }
+            - { target: description, source: gift_message, formula: null }
+            - { target: shipping, source: total_shipping_tax_incl, formula: null }
+            - { target: shipping_usdollar, source: total_shipping_tax_incl, formula: null }
+            - { target: subtotal, source: total_shipping_tax_excl;total_paid_tax_excl, formula: '{total_paid_tax_excl}-{total_shipping_tax_excl}' }
+            - { target: subtotal_usdollar, source: total_shipping_tax_excl;total_paid_tax_excl, formula: '{total_paid_tax_excl}-{total_shipping_tax_excl}' }
+            - { target: tax, source: total_paid_tax_incl;total_paid_tax_excl, formula: '{total_paid_tax_incl}-{total_paid_tax_excl}' }
+            - { target: tax_usdollar, source: total_paid_tax_incl;total_paid_tax_excl, formula: '{total_paid_tax_incl}-{total_paid_tax_excl}' }
+            - { target: total, source: total_paid_tax_incl, formula: null }
+            - { target: total_usdollar, source: total_paid_tax_incl, formula: null }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: account_id, fieldId: accounts, parent: false }
+            - { fieldNameSource: id_customer, fieldNameTarget: billing_account_id, fieldId: accounts, parent: false }
+            - { fieldNameSource: id_customer, fieldNameTarget: billing_contact_id, fieldId: contacts, parent: false }
+            - { fieldNameSource: id_customer, fieldNameTarget: shipping_account_id, fieldId: accounts, parent: false }
+            - { fieldNameSource: id_customer, fieldNameTarget: shipping_contact_id, fieldId: contacts, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Addresses - Contacts'
+        nameSlug: addresses_contacts
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: addresses
+        targetModule: Contacts
+        fields:
+            - { target: phone_home, source: phone, formula: null }
+            - { target: phone_mobile, source: phone_mobile, formula: null }
+            - { target: primary_address_city, source: city, formula: null }
+            - { target: primary_address_postalcode, source: postcode, formula: null }
+            - { target: primary_address_street, source: address1, formula: null }
+            - { target: primary_address_street_2, source: address2, formula: null }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: contacts, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Quote lines'
+        nameSlug: quote_lines
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: order_details
+        targetModule: Products
+        fields:
+            - { target: name, source: product_name, formula: null }
+            - { target: discount_amount, source: reduction_amount, formula: null }
+            - { target: discount_amount_usdollar, source: reduction_amount_tax_excl, formula: null }
+            - { target: discount_price, source: unit_price_tax_incl, formula: null }
+            - { target: discount_rate_percent, source: reduction_percent, formula: null }
+            - { target: discount_usdollar, source: unit_price_tax_incl, formula: null }
+            - { target: list_price, source: unit_price_tax_incl, formula: null }
+            - { target: list_usdollar, source: unit_price_tax_incl, formula: null }
+            - { target: quantity, source: product_quantity, formula: null }
+            - { target: subtotal, source: total_price_tax_incl, formula: null }
+            - { target: total_amount, source: total_price_tax_incl, formula: null }
+            - { target: account_id, source: my_value, formula: '"68d84b04-f0d1-11e7-a16a-fa163eb37c15"' }
+            - { target: assigned_user_id, source: my_value, formula: '"1"' }
+            - { target: status, source: my_value, formula: '"Quotes"' }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: product_template_id, fieldId: product_templates, parent: false }
+            - { fieldNameSource: id_order, fieldNameTarget: quote_id, fieldId: quotes, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: 0 }
+            - { name: mode, value: '0' }
+    -
+        name: 'Relationship Quote - Bundles'
+        nameSlug: relationship_quote_bundles
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: orders
+        targetModule: quotes_bundles
+        relationships:
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: bundle_id, fieldId: product_bundles, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: quote_id, fieldId: quotes, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: C }
+    -
+        name: 'Relationship Bundles - Quote lines'
+        nameSlug: relationship_bundles_quote_lines
+        sourceSolution: prestashop
+        targetSolution: sugarcrm
+        sourceModule: order_details
+        targetModule: bundles_products
+        relationships:
+            - { fieldNameSource: id_order, fieldNameTarget: bundle_id, fieldId: product_bundles, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: product_id, fieldId: quote_lines, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: 0 }
+            - { name: mode, value: C }
