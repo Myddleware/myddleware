@@ -955,11 +955,6 @@ class documentcore {
 		$read['rule'] = $rule;
 		$dataTarget = $this->solutionTarget->read_last($read);		
 		if (empty($dataTarget['done'])) {
-			// If we have search an ID we should always find a result
-			if (!empty($searchFields['id'])) {
-				$this->message .= 'No result from the target solution. Failed to buid the data history.';
-				return -1;
-			}
 			return false;
 		}
 		elseif ($dataTarget['done'] === -1) {
