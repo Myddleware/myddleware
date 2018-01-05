@@ -79,20 +79,14 @@ class sugarcrmcore  extends suitecrm {
 	}
 	
 	public function read_last($param) {
-		// No history for admin module
+		// No history for admin and many-to-many modules
 		if (
 				!empty($this->adminModules[$param['module']])
 			 OR !empty($this->module_relationship_many_to_many[$param['module']])
 		) {
-			foreach ($param['fields'] as $field) {
-				$result['values'][$field] = '';
-			}
-			$result['values']['id'] = $param['query']['id'];
-			$result['done'] = true;
-		} else {
-			$result = parent::read_last($param);
-		}
-		return $result;
+			return false;
+		} 
+		return parent::read_last($param);
 	}
 }
 

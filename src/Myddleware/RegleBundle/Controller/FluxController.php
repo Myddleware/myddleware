@@ -346,13 +346,21 @@ class FluxControllerCore extends Controller
 			$where = " WHERE 0";
 		}
 		
+		// Add limit to the query
+		$transferParameters = $this->container->getParameter('transfer');
+		$limit = '';
+		if (!empty($transferParameters['search_limit'])) {
+			$limit = ' LIMIT '.$transferParameters['search_limit'];
+		}
+		
 		$sql = "SELECT Document.*, users.username, Rule.name rule_name
 				FROM Document  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 
 				$user
-				ORDER BY date_modified DESC ";					
+				ORDER BY date_modified DESC 
+				$limit ";					
 		$stmt = $conn->prepare($sql);
 		$stmt->execute();
 		$r = $stmt->fetchall();
