@@ -45,7 +45,7 @@
 	min-width: 320px;    		
 	background: #404042;
 	color: white;
-	padding-top: 20%;
+	padding-top: 5%;
 }
 
 #myd_connexion .white {
@@ -60,7 +60,19 @@
 
 #myd_connexion .logo {
 	width:160px;
-	height:113px;
+	height:90px;
+	display:inline-block;
+}
+
+#myd_connexion .logo_platform {
+	width:160px;
+	height:80px;
+	display:inline-block;
+}
+
+#myd_connexion .logo_empty{
+	width:160px;
+	height:80px;
 	display:inline-block;
 }
 
@@ -73,6 +85,10 @@
     padding: 4px;
     width: 196px;
     word-spacing: -0.6em;
+}
+
+#myd_connexion .login_warnig {
+    color: red;
 }
 
 .btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {

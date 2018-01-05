@@ -34,7 +34,7 @@ class DefaultController extends Controller
         }
         // last username entered by the user
         $lastUsername = (null === $session) ? '' : $session->get(SecurityContext::LAST_USERNAME);
-		
+	
 		$securityContext = $this->get('security.context');
 		if( $securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED') ){
 			return $this->redirect( $this->generateUrl('regle_panel') );				 
@@ -45,13 +45,32 @@ class DefaultController extends Controller
 				
 			$attempt = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['attempt']  : 0 );
 			$remaining = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['remaining'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['remaining']  : 0 );
+			
+			// If we are on platform.sh, we check that the password has been changed because the first user is always admin/admin
+			$passwordMessage = false;
+			$platformSh = false;
+			if (isset($_ENV['PLATFORM_RELATIONSHIPS'])) {	
+				$platformSh = true;
+				// Get the admin user
+				$manager = $this->getDoctrine()->getManager();
+				$userAdmin = $manager->getRepository('LoginBundle:User')->findOneByUsername('admin');
+				if (!empty($userAdmin )) {
+					$encoder = $this->container->get('security.encoder_factory')->getEncoder($userAdmin);
+					// Compare password with admin encoded
+					if ($encoder->encodePassword('admin', $userAdmin->getSalt()) == $userAdmin->getPassword()) {;
+						$passwordMessage = true;
+					}
+				}
+			}
 
 			return $this->render('LoginBundle:Default:index.html.twig',array(
 				'last_username' => $lastUsername,
 				'error'         => $error,
 				'csrf_token' => $csrfToken,
 				'attempt' => $attempt,
-				'remaining' => $remaining
+				'remaining' => $remaining,
+				'password_message' => $passwordMessage,
+				'platform_sh' => $platformSh
 			));				
 				
 		}

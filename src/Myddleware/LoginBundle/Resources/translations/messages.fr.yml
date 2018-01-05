@@ -7,6 +7,10 @@ login:
     error_session: Erreur de session 
     text_up_right: Pour en savoir plus sur myddleware
     text_bottom_right: Vous serez redirigé vers notre site explicatif
+    platform:
+        line1: Merci d'utiliser le cloud Platform.sh
+        line2: Pour votre première connexion, utilisez les identifiants admin/admin
+        line3: Veuillez modifier votre mot de passe dans la rubrique "Mon compte"
     btn:
         here: Cliquez ici
         create: Créer un compte
