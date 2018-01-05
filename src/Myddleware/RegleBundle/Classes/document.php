@@ -573,19 +573,19 @@ class documentcore {
 				}
 			}		
 			
+			// Set the status Predecessor_OK
+			$this->updateStatus('Predecessor_OK');
+			
 			// Check compatibility between rule mode et document tupe
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
 				&& $this->type_document == 'U'
 				&& !$this->isChild()
-			) {
+			) {	
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
 			}
-			
-			// Set the status Predecessor_OK
-			$this->updateStatus('Predecessor_OK');
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
 		} catch (\Exception $e) {
