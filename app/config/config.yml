@@ -86,6 +86,9 @@ fos_user:
     registration:
         confirmation:
             enabled: true
+    profile:
+        form:
+            type: regle_user_profile
     
 # Stof\DoctrineExtensionBundle configuration
 stof_doctrine_extensions:
