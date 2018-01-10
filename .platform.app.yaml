@@ -30,9 +30,9 @@ disk: 2048
 
 # The mounts that will be performed when the package is deployed.
 mounts:
-    "/var/cache": "shared:files/cache"
-    "/var/logs": "shared:files/logs"
-    "/var/sessions": "shared:files/sessions"
+    "/app/cache": "shared:files/cache"
+    "/app/logs": "shared:files/logs"
+    "/app/sessions": "shared:files/sessions"
     "/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
 
 # The hooks that will be performed when the package is deployed.
@@ -43,10 +43,9 @@ hooks:
         php app/console --env=prod cache:clear
         php app/console --env=prod assetic:dump
         php app/console --env=prod assets:install web
-        chmod -R 777 app/cache
-        chmod -R 777 app/logs
         php app/console d:s:u --force
         php app/console d:f:l --append
+        php app/console fos:user:create admin admin@example.com admin --super-admin
 
 crons:
     jobScheduler:

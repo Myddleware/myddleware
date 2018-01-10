@@ -236,34 +236,36 @@ regle_exec:
 
 my_account:
     pattern:  /account/
-    defaults: { _controller: RegleBundle:Account:displayAccount }
-              
+    defaults: { _controller: RegleBundle:Account:myAccount }
+
+
 account_locale:
     pattern:  /account/locale/
     defaults: { _controller: RegleBundle:Account:changeLocale }
     options:
         expose: true
-      
+
 task_list:
     pattern:  /task/list/
     defaults: { _controller: RegleBundle:Task:taskList, page: 1 }
-    
+
 task_list_page:
     pattern:  /task/list/page-{page}
     defaults: { _controller: RegleBundle:Task:taskList }
     requirements:
-        page: \d+       
+        page: \d+
 
 task_view:
     pattern:  /task/view/{id}/log/
     defaults: { _controller: RegleBundle:Task:viewTask, page: 1 }
-    
+
 task_view_page:
     pattern:  /task/view/{id}/log/page-{page}
     defaults: { _controller: RegleBundle:Task:viewTask }
     requirements:
-        page: \d+ 
+        page: \d+
 
 task_stop:
     pattern:  /task/stop/{id}
-    defaults: { _controller: RegleBundle:Task:stopTask, page: 1 } 
+    defaults: { _controller: RegleBundle:Task:stopTask, page: 1 }
+

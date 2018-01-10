@@ -73,9 +73,19 @@
 				</form>			
     		</div>
     		<div class="grey">
+				{% if platform_sh == true %}	
+					<p class="ctr"><span class="logo_platform"></span></p>	
+				{% else %}
+					<p class="ctr"><span class="logo_empty"></span></p>
+				{% endif %}
     			<p class="ctr">
-    				{{ 'login.text_up_right'|trans }}   			
-    				<a href="http://www.myddleware.com" class="btn-mydinv">{{ 'login.btn.here'|trans }}</a>
+					{% if password_message == true %}	
+						<p>{{ 'login.platform.line1'|trans }}</p>
+						<p>{{ 'login.platform.line2'|trans }}</p>
+						<p class="login_warnig">{{ 'login.platform.line3'|trans }}</p>
+					{% endif %}
+					<p>{{ 'login.text_up_right'|trans }}</p>   			
+    				<a href="http://www.myddleware.com" class="btn-mydinv" target="_blank">{{ 'login.btn.here'|trans }}</a>
     			</p>
     			{#<p class="ctr">
     				<small>{{ 'login.text_bottom_right'|trans }}</small>
@@ -106,6 +116,16 @@
 
 	#myd_connexion .logo {
 		background: url({{ asset('bundles/login/images/') }}logo.png) no-repeat;
+		background-size: 158px;
+	}
+	
+	#myd_connexion .logo_platform {
+		background: url({{ asset('bundles/login/images/') }}logo_platform.png) no-repeat;
+		background-size: 158px;
+	}
+
+	#myd_connexion .logo_empty {
+		background: url({{ asset('bundles/login/images/') }}logo_empty.png) no-repeat;
 		background-size: 158px;
 	}
 

@@ -23,6 +23,11 @@ if (isset($_ENV['PLATFORM_RELATIONSHIPS'])) {
     }
 }
 
+// Configure SwiftMailer
+if (isset($_ENV['PLATFORM_SMTP_HOST'])) {
+    $container->setParameter('mailer_host', $_ENV['PLATFORM_SMTP_HOST']);
+}
+
 // Set a default unique secret, based on a project-specific entropy value.
 if (isset($_ENV['PLATFORM_PROJECT_ENTROPY'])) {
     $container->setParameter('kernel.secret', $_ENV['PLATFORM_PROJECT_ENTROPY']);

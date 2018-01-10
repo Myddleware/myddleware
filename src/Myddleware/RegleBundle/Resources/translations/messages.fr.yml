@@ -407,6 +407,8 @@ view_task:
 view_account:
     title: Mon compte
     user_info: Mes informations
+    change_password : Changer mot de passe
+    profile_edit: Edition profile
     support:
         enabled: Support activé
         disabled: Support désactivé
