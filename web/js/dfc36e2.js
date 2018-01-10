@@ -3182,7 +3182,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			
 			$.ajax({
 			    type: "POST",
-				url: "formula/",
+				url: path_formula ,
 				data:{
   					formula : myFormula
 				},
@@ -3239,7 +3239,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			
 			$.ajax({
 			    type: "POST",
-				url: "simulation/",
+				url: path_simulation,
 				data:{
 					champs : recup_champs(),
   					formules : recup_formule(),
@@ -3616,10 +3616,9 @@ function verifFields(field_id,show) {
 		before = $( "#validation" ).attr('value'); // rev 1.08
 
 		if(require() && require_params() && require_relate() && duplicate_fields_error() ){	
-			
 			$.ajax({
 			    type: "POST",
-				url: "validation/",
+				url:  path_validation ,
 				data:{
 					champs : recup_champs(),
   					formules : recup_formule(),
@@ -3635,7 +3634,6 @@ function verifFields(field_id,show) {
 					
 					if(data == 1) {
 						alert(confirm_success);
-						
 						$(location).attr('href',return_success);
 					}				
 					else {
