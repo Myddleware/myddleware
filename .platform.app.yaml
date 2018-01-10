@@ -45,7 +45,8 @@ hooks:
         php app/console --env=prod assets:install web
         php app/console d:s:u --force
         php app/console d:f:l --append
-        php app/console fos:user:create admin admin@example.com admin --super-admin
+        php app/console fos:user:create admin admin@example.com admin
+        php app/console fos:user:promote admin ROLE_ADMIN
 
 crons:
     jobScheduler:
