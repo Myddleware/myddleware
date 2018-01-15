@@ -8,7 +8,7 @@ login:
     text_up_right: Pour en savoir plus sur myddleware
     text_bottom_right: Vous serez redirigé vers notre site explicatif
     platform:
-        line1: Merci d'utiliser le cloud Platform.sh
+        line1: Merci d'utiliser le cloud d'hébergement et de déploiement continu Platform.sh
         line2: Pour votre première connexion, utilisez les identifiants admin/admin
         line3: Veuillez modifier votre mot de passe dans la rubrique "Mon compte"
     btn:
