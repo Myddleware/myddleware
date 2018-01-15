@@ -85,8 +85,7 @@ class SolutionRepository extends EntityRepository
 		}		 
 		 
 
-		$qb ->groupBy('s.name')
-		    ->orderBy('s.name', 'ASC');
+		$qb->orderBy('s.name', 'ASC');
 		 
 	    return $qb->getQuery()
 	              ->getResult();	
