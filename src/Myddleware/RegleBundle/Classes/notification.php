@@ -199,6 +199,7 @@ class notificationcore  {
 										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 									AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 									AND Document.global_status = 'Error'
+									AND Log.type = 'E'
 								ORDER BY Log.created ASC
 								LIMIT 100	";
 				$stmt = $this->connection->prepare($sqlParams);

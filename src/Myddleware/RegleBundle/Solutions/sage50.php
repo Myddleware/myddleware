@@ -506,7 +506,8 @@ class sage50core extends solution
 						) {								
 							$result['date_ref'] = $row['date_modified'];
 						}
-
+						// Change the date format
+						$row['date_modified'] = $this->dateTimeToMyddleware($row['date_modified']);
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
 						$row = array();
