@@ -506,8 +506,7 @@ class sage50core extends solution
 						) {								
 							$result['date_ref'] = $row['date_modified'];
 						}
-						// Change the date format
-						$row['date_modified'] = $this->dateTimeToMyddleware($row['date_modified']);
+
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
 						$row = array();
@@ -626,7 +625,7 @@ class sage50core extends solution
 	// Create data in the target solution
 	public function create($param) {
 		$subDocIdArray = array();
-		$this->get_module_fields($param ['module'],'source');		
+		$this->get_module_fields($param ['module'],'target');		
 		foreach($param['data'] as $idDoc => $data) {
 			try {
 				// If update we add the target id in the xml
