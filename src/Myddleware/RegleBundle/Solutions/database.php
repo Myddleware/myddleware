@@ -254,7 +254,7 @@ class databasecore extends solution {
 			
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
-				throw new \Exception('ReadLast: '.$errorInfo[2]);
+				throw new \Exception('ReadLast: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);			
 			$row = array();
@@ -366,7 +366,7 @@ class databasecore extends solution {
 			
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
-				throw new \Exception('Read: '.$errorInfo[2]);
+				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
 			
@@ -434,7 +434,7 @@ class databasecore extends solution {
 					$exec = $q->execute();	
 					if(!$exec) {
 						$errorInfo = $this->pdo->errorInfo();
-						throw new \Exception('Create: '.$errorInfo[2]);
+						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
 					}
 					
 					// If the target reference field isn't in data sent
@@ -502,7 +502,7 @@ class databasecore extends solution {
 					$exec = $q->execute();
 					if(!$exec) {
 						$errorInfo = $this->pdo->errorInfo();						
-						throw new \Exception('Update: '.$errorInfo[2]);
+						throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
 					}
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(

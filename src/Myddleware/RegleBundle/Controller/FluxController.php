@@ -87,7 +87,7 @@ class FluxControllerCore extends Controller
 	}
 	 	 
  	// LISTE DES FLUX
- 	public function fluxListAction($page,$search) {
+ 	public function fluxListAction($page,$search = 1) {
  		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
 		//--- Liste status traduction
@@ -202,6 +202,7 @@ class FluxControllerCore extends Controller
 
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
+		$where = '';
 		// $where = ($sessionService->isFluxFilterCWhereExist() ? $sessionService->getFluxFilterWhere() : '');
 		if (!empty($sessionService->getFluxFilterWhere())) {
 			$where = $sessionService->getFluxFilterWhere();
