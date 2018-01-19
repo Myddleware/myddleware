@@ -576,6 +576,9 @@ class databasecore extends solution {
 								'required'	=> true
 							);
 					foreach ($fieldsSource as $key => $value) {
+						if ($key== 'Myddleware_element_id') {
+							continue;
+						}
 						$idParam['option'][$key] = $value['label'];
 					}
 					$params[] = $idParam;
