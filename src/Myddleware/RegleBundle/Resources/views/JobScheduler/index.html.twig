@@ -1,0 +1,65 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>JobScheduler list</h1>
+
+    <table class="records_list">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Datecreated</th>
+                <th>Datemodified</th>
+                <th>Createdby</th>
+                <th>Modifiedby</th>
+                <th>Command</th>
+                <th>Paramname1</th>
+                <th>Paramvalue1</th>
+                <th>Paramname2</th>
+                <th>Paramvalue2</th>
+                <th>Period</th>
+                <th>Lastrun</th>
+                <th>Active</th>
+                <th>Joborder</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('jobscheduler_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ entity.dateModified }}</td>
+                <td>{{ entity.createdBy }}</td>
+                <td>{{ entity.modifiedBy }}</td>
+                <td>{{ entity.command }}</td>
+                <td>{{ entity.paramName1 }}</td>
+                <td>{{ entity.paramValue1 }}</td>
+                <td>{{ entity.paramName2 }}</td>
+                <td>{{ entity.paramValue2 }}</td>
+                <td>{{ entity.period }}</td>
+                <td>{% if entity.lastRun %}{{ entity.lastRun|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ entity.active }}</td>
+                <td>{{ entity.jobOrder }}</td>
+                <td>
+                <ul>
+                    <li>
+                        <a href="{{ path('jobscheduler_show', { 'id': entity.id }) }}">show</a>
+                    </li>
+                    <li>
+                        <a href="{{ path('jobscheduler_edit', { 'id': entity.id }) }}">edit</a>
+                    </li>
+                </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <ul>
+        <li>
+            <a href="{{ path('jobscheduler_new') }}">
+                Create a new entry
+            </a>
+        </li>
+    </ul>
+    {% endblock %}

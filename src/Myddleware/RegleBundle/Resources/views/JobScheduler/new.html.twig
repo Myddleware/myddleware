@@ -1,0 +1,165 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>JobScheduler creation</h1>
+    {{ form_start(form, { 'action': path('jobscheduler_create'), 'attr': { 'class': 'myddleware_reglebundle_jobscheduler' ,'novalidate' : ''} }) }}
+    <div class="container">
+        <div class="form-group row">
+            <label for="command" class="col-sm-2 col-form-label"> {{ form_label( form.command) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.command, { 'attr': {'class': 'form-control' , 'id' : 'command'} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramName1">
+            <label for="paramName1" class="col-sm-2 col-form-label"> {{ form_label( form.paramName1) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.paramName1, { 'attr': {'class': 'form-control' , 'id' : 'paramName1' ,  'readonly' :''} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramvalue1">
+            <label for="paramValue1" class="col-sm-2 col-form-label"> {{ form_label( form.paramValue1) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.paramValue1, { 'attr': {'class': 'form-control' , 'id' : 'paramValue1'} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramName2">
+            <label for="paramName2" class="col-sm-2 col-form-label"> {{ form_label( form.paramName2) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.paramName2, { 'attr': {'class': 'form-control' , 'id' : 'paramName2' ,  'readonly' :''} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramvalue2">
+            <label for="paramValue2" class="col-sm-2 col-form-label"> {{ form_label( form.paramValue2) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.paramValue2, { 'attr': {'class': 'form-control' , 'id' : 'paramValue2'} }) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="period" class="col-sm-2 col-form-label"> {{ form_label( form.period) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.period, { 'attr': {'class': 'form-control' , 'id' : 'period'} }) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="jobOrder" class="col-sm-2 col-form-label"> {{ form_label( form.jobOrder) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( form.jobOrder, { 'attr': {'class': 'form-control' , 'id' : 'jobOrder'} }) }}
+            </div>
+        </div>
+        {#<div class="form-group row">#}
+        {#<label for="period" class="col-sm-2 col-form-label"> {{ form_label( form.active) }}</label>#}
+        {#<div class="col-sm-10">#}
+        {#{{ form_widget( form.active, { 'attr': {'class': 'form-control' , 'id' : 'active'} }) }}#}
+        {#</div>#}
+        {#</div>#}
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                {{ form_widget( form.active, { 'attr': {'class': 'form-check-input' , 'id' : 'inlineCheckbox1'} }) }}
+                {{ form_label( form.active) }}
+            </label>
+        </div>
+        {#<ul class="record_actions">#}
+        {#<li>#}
+        {#<a href="{{ path('jobscheduler') }}">#}
+        {#Back to the list#}
+        {#</a>#}
+        {#</li>#}
+        {#</ul>#}
+
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+
+        function hideInput() {
+            $("#bloc_paramName1").hide();
+            $("#bloc_paramvalue1").hide();
+            $("#bloc_paramName2").hide();
+            $("#bloc_paramvalue2").hide();
+        }
+
+        function resetInput() {
+            $("#bloc_paramName1").html('');
+            $("#bloc_paramvalue1").html('');
+            $("#bloc_paramName2").html('');
+            $("#bloc_paramvalue2").html('');
+        }
+
+        $(document).ready(function () {
+            hideInput();
+        });
+
+        $('select#myddleware_reglebundle_jobscheduler_command').on('change', function () {
+            var type = $(this).val();
+            var paramName1 = $("#myddleware_reglebundle_jobscheduler_paramName1");
+            var paramValue1 = $("#myddleware_reglebundle_jobscheduler_paramValue1");
+            var paramValue2 = $("#myddleware_reglebundle_jobscheduler_paramValue2");
+            var paramName2 = $("#myddleware_reglebundle_jobscheduler_paramName2");
+            var field_name = "";
+            $.ajax({
+                type: "GET",
+                url: "{{ path('jobscheduler_input') }}",
+                data: {
+                    type: type
+                },
+                success: function (option) {
+
+                    if(!option.hasOwnProperty('name')){
+                        console.log("option : ", option);
+                        console.log("option : ", option.hasOwnProperty('name'));
+                        paramName1.val('');
+                        paramValue1.val('');
+                    }
+                    delete option.name;
+                    hideInput();
+                    // initialization input
+                    $.each(option, function (key, option) {
+                        console.log("key : ", key);
+                        console.log("option : ", option);
+                        var fieldName = '';
+                        var fieldValue = '';
+                        if (key === 'param1') {
+                            fieldName = paramName1;
+                            fieldValue = paramValue1;
+                            field_name = "paramValue1";
+                            $("#bloc_paramName1").show();
+                            $("#bloc_paramvalue1").show();
+                        } else {
+                            fieldName = paramName2;
+                            fieldValue = paramValue2;
+                            field_name = "paramValue2";
+                            $("#bloc_paramName2").show();
+                            $("#bloc_paramvalue2").show();
+                        }
+                        fieldName.val(Object.keys(option)[0]);
+                        var fieldType = option[Object.keys(option)[0]]['fieldType'];
+                        if (fieldType === 'list') { // if input is select option
+                            fieldValue.replaceWith(function ($this) {
+                                console.log('field_name'  , field_name)
+                                console.log('field_name'  , field_name)
+                                var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-control" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');
+                                fieldValue.append('<option value  selected="selected">> Select ' + $(this).find("option:selected").text() + ' ...</option>');
+                                for (var item in option[Object.keys(option)[0]].option) {
+
+                                    select.append('<option value="' + item + '" >' + option[Object.keys(option)[0]].option[item] + '</option>');
+                                }
+                                return select;
+                            });
+                        } else if (fieldType === 'int') {
+                            fieldValue.replaceWith(function () {
+                                var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" />');
+                                return input;
+                            });
+                        }
+                    });
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        });
+    </script>
+
+{% endblock js %}

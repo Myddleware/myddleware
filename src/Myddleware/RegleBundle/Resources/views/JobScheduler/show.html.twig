@@ -1,0 +1,80 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>JobScheduler</h1>
+
+    <table class="record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Datecreated</th>
+                <td>{{ entity.dateCreated|date('Y-m-d H:i:s') }}</td>
+            </tr>
+            <tr>
+                <th>Datemodified</th>
+                <td>{{ entity.dateModified }}</td>
+            </tr>
+            <tr>
+                <th>Createdby</th>
+                <td>{{ entity.createdBy }}</td>
+            </tr>
+            <tr>
+                <th>Modifiedby</th>
+                <td>{{ entity.modifiedBy }}</td>
+            </tr>
+            <tr>
+                <th>Command</th>
+                <td>{{ entity.command }}</td>
+            </tr>
+            <tr>
+                <th>Paramname1</th>
+                <td>{{ entity.paramName1 }}</td>
+            </tr>
+            <tr>
+                <th>Paramvalue1</th>
+                <td>{{ entity.paramValue1 }}</td>
+            </tr>
+            <tr>
+                <th>Paramname2</th>
+                <td>{{ entity.paramName2 }}</td>
+            </tr>
+            <tr>
+                <th>Paramvalue2</th>
+                <td>{{ entity.paramValue2 }}</td>
+            </tr>
+            <tr>
+                <th>Period</th>
+                <td>{{ entity.period }}</td>
+            </tr>
+            <tr>
+                <th>Lastrun</th>
+                <td>{{ entity.lastRun|date('Y-m-d H:i:s') }}</td>
+            </tr>
+            <tr>
+                <th>Active</th>
+                <td>{{ entity.active }}</td>
+            </tr>
+            <tr>
+                <th>Joborder</th>
+                <td>{{ entity.jobOrder }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('jobscheduler') }}">
+            Back to the list
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('jobscheduler_edit', { 'id': entity.id }) }}">
+            Edit
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}
