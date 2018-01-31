@@ -577,6 +577,7 @@ breadcrumb:
                                 
 menu_user:
     account: Mon compte
+    jobscheduler: Job scheduler
     logout: Déconnexion     
     
 help:
@@ -661,4 +662,17 @@ email_alert:
     minute: minutes. 
     job_start: La tâche a commencé à  
     job_id: . ID ode la tâche : 
-    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".		
+    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".
+
+jobscheduler:
+    command: Comamande
+    last_run: Dernière exécution
+    active: Active
+    list: Liste
+    title: Jobscheduler
+    period: Période
+    job_order: Ordre job
+    date_modified: Date modifié
+    total : Total
+    action :
+        new_jobscheduler : Nouvelle commande

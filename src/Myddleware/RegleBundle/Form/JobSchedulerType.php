@@ -39,8 +39,8 @@ class JobSchedulerType extends AbstractType
             ))
             ->add('paramName1')
             ->add('paramValue1')
-            ->add('paramValue2', TextType::class, array('data' => ' '))
-            ->add('paramName2', TextType::class, array('data' => ' '))
+            ->add('paramValue2')
+            ->add('paramName2')
             ->add('period')
 //            ->add('lastRun')
             ->add('active', CheckboxType::class, array(

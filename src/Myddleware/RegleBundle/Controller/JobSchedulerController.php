@@ -26,13 +26,8 @@ class JobSchedulerController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entities = $em->getRepository('RegleBundle:JobScheduler');
-        if (!$entities) {
-            //   var_dump("not exist");
-        } else {
-            // var_dump("exist");
-
-        }
+        $entities = $em->getRepository('RegleBundle:JobScheduler')->findAll();
+dump($entities);
         return $this->render('RegleBundle:JobScheduler:index.html.twig', array(
             'entities' => $entities,
         ));
@@ -161,7 +156,7 @@ class JobSchedulerController extends Controller
 
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
-
+        dump($editForm);
         return $this->render('RegleBundle:JobScheduler:edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),

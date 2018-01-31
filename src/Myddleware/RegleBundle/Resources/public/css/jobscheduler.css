@@ -1,0 +1,10 @@
+.myddleware_reglebundle_jobscheduler {
+
+    padding-top: 20px;
+}
+
+#bloc_paramName,
+#bloc_paramvalue1,#bloc_paramName2,
+#bloc_paramvalue2{
+    display : none;
+}

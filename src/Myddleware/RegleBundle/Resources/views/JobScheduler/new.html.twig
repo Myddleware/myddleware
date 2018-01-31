@@ -1,7 +1,7 @@
 {% extends '::base.html.twig' %}
-
+{% block title %}{{ parent() }} | {{ 'jobscheduler.title'|trans }}{% endblock %}
+{% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
 {% block body -%}
-    <h1>JobScheduler creation</h1>
     {{ form_start(form, { 'action': path('jobscheduler_create'), 'attr': { 'class': 'myddleware_reglebundle_jobscheduler' ,'novalidate' : ''} }) }}
     <div class="container">
         <div class="form-group row">
@@ -88,7 +88,7 @@
         }
 
         $(document).ready(function () {
-            hideInput();
+//            hideInput();
         });
 
         $('select#myddleware_reglebundle_jobscheduler_command').on('change', function () {
@@ -163,3 +163,6 @@
     </script>
 
 {% endblock js %}
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/jobscheduler.css') }}" type="text/css"/>
+{% endblock css %}
