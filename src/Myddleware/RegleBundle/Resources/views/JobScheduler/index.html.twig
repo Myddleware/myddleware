@@ -24,6 +24,7 @@
                     <th>{{ 'jobscheduler.period'|trans }}</th>
                     <th>{{ 'jobscheduler.job_order'|trans }}</th>
                     <th>{{ 'jobscheduler.active'|trans }}</th>
+                    <th>{{ 'jobscheduler.action'|trans }}</th>
                 </tr>
                 {% for entity in entities %}
                     <tr>
@@ -46,7 +47,8 @@
                             {{ entity.period }}
                         </td>
                         <td>
-                            {{ entity.active }}
+                            {{ entity.jobOrder }}
+
 
                             {#         <div class="onoffswitch">
                                          <input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
@@ -59,7 +61,19 @@
                                      </div>#}
                         </td>
                         <td>
-                            {{ entity.jobOrder }}
+                            {% if entity.active %} true {% else %} false {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}"
+                               title="{{ 'list_rule.btn.edit'|trans }}">
+                                <span class="glyphicon glyphicon-edit btn-opt"></span></a>
+                            <a class="delete" href="{{ path('jobscheduler_delete',{'id' : entity.id }) }}"
+                               title="{{ 'list_rule.btn.delete'|trans }}"
+                               onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
+                                <span class="glyphicon glyphicon-trash btn-opt"></span></a>
+                            <a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}"
+                               title="{{ 'list_rule.btn.view'|trans }}">
+                                <span class="glyphicon glyphicon-file btn-opt"></span></a>
                         </td>
 
                     </tr>
@@ -71,6 +85,7 @@
                     <th>{{ 'jobscheduler.period'|trans }}</th>
                     <th>{{ 'jobscheduler.job_order'|trans }}</th>
                     <th>{{ 'jobscheduler.active'|trans }}</th>
+                    <th>{{ 'jobscheduler.action'|trans }}</th>
                 </tr>
             {% endif %}
         </table>

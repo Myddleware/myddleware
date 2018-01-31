@@ -1,7 +1,7 @@
 {% extends '::base.html.twig' %}
 {% block title %}{{ parent() }} | {{ 'jobscheduler.title'|trans }}{% endblock %}
 {% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
-{% block body -%}
+{% block body %}
     {{ form_start(edit_form, { 'action': path('jobscheduler_update',{id : entity.id}), 'attr': { 'class': 'myddleware_reglebundle_jobscheduler' ,'novalidate' : ''} }) }}
     <div class="container">
         <div class="form-group row">
@@ -178,3 +178,6 @@
     </script>
 
 {% endblock js %}
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/jobscheduler.css') }}" type="text/css"/>
+{% endblock css %}

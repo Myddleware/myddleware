@@ -27,7 +27,7 @@ jobscheduler_update:
 jobscheduler_delete:
     path:     /{id}/delete
     defaults: { _controller: "RegleBundle:JobScheduler:delete" }
-    methods:  [POST, DELETE]
+    methods:  [GET, DELETE]
 
 jobscheduler_input:
     path:     /getFieldsSelect

@@ -27,7 +27,7 @@ class JobSchedulerController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $entities = $em->getRepository('RegleBundle:JobScheduler')->findAll();
-dump($entities);
+        dump($entities);
         return $this->render('RegleBundle:JobScheduler:index.html.twig', array(
             'entities' => $entities,
         ));
@@ -156,7 +156,6 @@ dump($entities);
 
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
-        dump($editForm);
         return $this->render('RegleBundle:JobScheduler:edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
@@ -220,20 +219,16 @@ dump($entities);
      */
     public function deleteAction(Request $request, $id)
     {
-        $form = $this->createDeleteForm($id);
-        $form->handleRequest($request);
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('RegleBundle:JobScheduler')->find($id);
 
-        if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $entity = $em->getRepository('RegleBundle:JobScheduler')->find($id);
-
-            if (!$entity) {
-                throw $this->createNotFoundException('Unable to find JobScheduler entity.');
-            }
-
-            $em->remove($entity);
-            $em->flush();
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find JobScheduler entity.');
         }
+
+        $em->remove($entity);
+        $em->flush();
 
         return $this->redirect($this->generateUrl('jobscheduler'));
     }
