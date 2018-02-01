@@ -666,7 +666,7 @@ email_alert:
 
 jobscheduler:
     command: Comamande
-    last_run: Dernière exécution
+    date_created: Date création
     active: Active
     list: Liste
     title: Jobscheduler
