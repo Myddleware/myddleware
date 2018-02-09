@@ -269,13 +269,6 @@ class DefaultControllerCore extends Controller
                         $this->em->flush();
                     }
                 }
-
-                $stmt = $this->connection->prepare('DELETE FROM RuleRelationShip WHERE id =:id');
-                $stmt->bindValue('id', $rule->getId());
-                $stmt->execute();
-
-                // - - -
-
                 $this->em->remove($rule);
                 $this->em->flush();
             } else { // flag

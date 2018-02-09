@@ -517,7 +517,10 @@ class sage50core extends solution
 			} elseif (!empty($response['Message'])) {
 				throw new \Exception($response['Message']);	
 			} elseif (!empty($response['curlData']['message'])) {
-				throw new \Exception($response['curlData']['message']);	
+				// When there is no result, Sage returns this message : Unable to locate the specified object '' 
+				if (strpos($response['curlData']['message'], "Unable to locate the specified object ''") === false) {
+					throw new \Exception($response['curlData']['message']);	
+				}
 			} else {
 				throw new \Exception('Failed to call Sage with no error returned.');	
 			}		
