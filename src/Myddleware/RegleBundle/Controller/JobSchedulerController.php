@@ -2,9 +2,10 @@
 
 namespace Myddleware\RegleBundle\Controller;
 
+use Myddleware\RegleBundle\Classes\jobSchedulercore;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Myddleware\RegleBundle\Entity\JobScheduler;
 use Myddleware\RegleBundle\Form\JobSchedulerType;
 // Include JSON Response
@@ -249,80 +250,26 @@ class JobSchedulerController extends Controller
             ->getForm();
     }
 
+    /**
+     * get fields select
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function getFieldsSelectAction(Request $request)
     {
         if ($request->isXmlHttpRequest() && $request->getMethod() == 'GET') {
-            $em = $this->getDoctrine()->getEntityManager();
-
             $select = $this->getData($request->query->get("type"));
-            // create array for json response
-//            $empoloyees = array();
             return new JsonResponse($select);
-
-//            $response = new Response(json_encode(2));
-//            $response->headers->set('Content-Type', 'application/json');
-//            return $response;
         }
     }
 
-    public $jobList = array('cleardata', 'notification', 'rerunerror', 'synchro');
-
-    public function getJobsParams()
-    {
-        try {
-            $list = array();
-            if (!empty($this->jobList)) {
-                foreach ($this->jobList as $job) {
-                    $list[$job]['name'] = $job;
-                    switch ($job) {
-                        case 'synchro':
-                            $list[$job]['param1'] = array(
-                                'rule' => array(
-                                    'fieldType' => 'list',
-                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
-                                )
-                            );
-                            $list[$job]['param2'] = array(
-                                'rule' => array(
-                                    'fieldType' => 'list',
-                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
-                                )
-                            );
-                            break;
-                        case 'notification':
-                            $list[$job]['param1'] = array(
-                                'type' => array(
-                                    'fieldType' => 'list',
-                                    'option' => array('alert' => 'alert', 'statistics' => 'statistics')
-                                )
-                            );
-                            break;
-                        case 'rerunerror':
-                            $list[$job]['param1'] = array(
-                                'limit' => array(
-                                    'fieldType' => 'int'
-                                )
-                            );
-                            $list[$job]['param1'] = array(
-                                'attempt' => array(
-                                    'fieldType' => 'int'
-                                )
-                            );
-                            break;
-                    }
-                }
-            }
-            return $list;
-        } catch (\Exception $e) {
-            throw new \Exception ('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
-    }
 
     private function getData($selectName)
     {
+        $jobScheduler = $this->container->get('myddleware.jobScheduler');
         $paramsCommand = null;
-        if (isset($this->getJobsParams()[$selectName])) {
-            $paramsCommand = $this->getJobsParams()[$selectName];
+        if (isset($jobScheduler->getJobsParams()[$selectName])) {
+            $paramsCommand = $jobScheduler->getJobsParams()[$selectName];
         } else {
             $paramsCommand = null;
         }

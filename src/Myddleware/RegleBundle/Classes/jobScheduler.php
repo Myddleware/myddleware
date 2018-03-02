@@ -41,6 +41,7 @@ class jobSchedulercore
     protected $em;
     protected $jobsToRun;
 
+
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection)
     {
         $this->logger = $logger; // gestion des logs symfony monolog
@@ -48,6 +49,58 @@ class jobSchedulercore
         $this->connection = $dbalConnection;
         $this->env = $this->container->getParameter("kernel.environment");
         $this->em = $this->container->get('doctrine')->getEntityManager();
+    }
+
+    protected $jobList = array('cleardata', 'notification', 'rerunerror', 'synchro');
+    public function getJobsParams()
+    {
+        try {
+            $list = array();
+            if (!empty($this->jobList)) {
+                foreach ($this->jobList as $job) {
+                    $list[$job]['name'] = $job;
+                    switch ($job) {
+                        case 'synchro':
+                            $list[$job]['param1'] = array(
+                                'rule' => array(
+                                    'fieldType' => 'list',
+                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
+                                )
+                            );
+                            $list[$job]['param2'] = array(
+                                'rule' => array(
+                                    'fieldType' => 'list',
+                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
+                                )
+                            );
+                            break;
+                        case 'notification':
+                            $list[$job]['param1'] = array(
+                                'type' => array(
+                                    'fieldType' => 'list',
+                                    'option' => array('alert' => 'alert', 'statistics' => 'statistics')
+                                )
+                            );
+                            break;
+                        case 'rerunerror':
+                            $list[$job]['param1'] = array(
+                                'limit' => array(
+                                    'fieldType' => 'int'
+                                )
+                            );
+                            $list[$job]['param1'] = array(
+                                'attempt' => array(
+                                    'fieldType' => 'int'
+                                )
+                            );
+                            break;
+                    }
+                }
+            }
+            return $list;
+        } catch (\Exception $e) {
+            throw new \Exception ('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+        }
     }
 
 

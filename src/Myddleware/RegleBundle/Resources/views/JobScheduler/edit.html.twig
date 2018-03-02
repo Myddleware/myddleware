@@ -71,113 +71,110 @@
     </div>
 {% endblock %}
 {% block js %}
-    <script type="text/javascript">
+    {#<script type="text/javascript">#}
 
-        var paramName1 = $("#myddleware_reglebundle_jobscheduler_paramName1");
-        var paramValue1 = $("#myddleware_reglebundle_jobscheduler_paramValue1");
-        var paramValue2 = $("#myddleware_reglebundle_jobscheduler_paramValue2");
-        var paramName2 = $("#myddleware_reglebundle_jobscheduler_paramName2");
-
-
-        function hideInput() {
-            $("#bloc_paramName1").hide();
-            $("#bloc_paramvalue1").hide();
-            $("#bloc_paramName2").hide();
-            $("#bloc_paramvalue2").hide();
-        }
-
-        function resetInput() {
-            $("#bloc_paramName1").html('');
-            $("#bloc_paramvalue1").html('');
-            $("#bloc_paramName2").html('');
-            $("#bloc_paramvalue2").html('');
-        }
-
-        $(document).ready(function () {
-
-            //hideInput();
-            fieldTreatment();
-        });
-        $('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);
+        {#var paramName1 = $("#myddleware_reglebundle_jobscheduler_paramName1");#}
+        {#var paramValue1 = $("#myddleware_reglebundle_jobscheduler_paramValue1");#}
+        {#var paramValue2 = $("#myddleware_reglebundle_jobscheduler_paramValue2");#}
+        {#var paramName2 = $("#myddleware_reglebundle_jobscheduler_paramName2");#}
 
 
-        function fieldTreatment() {
-            var type = $('select#myddleware_reglebundle_jobscheduler_command').val();
-            var fieldName = '';
-            var fieldValue = '';
-            var field_name = "";
-            $.ajax({
-                type: "GET",
-                url: "{{ path('jobscheduler_input') }}",
-                data: {
-                    type: type
-                },
-                success: function (option) {
-
-                    if (!option.hasOwnProperty('name')) {
-                        console.log("option : ", option);
-                        console.log("option : ", option.hasOwnProperty('name'));
-                        paramName1.val('');
-                        paramValue1.val('');
-                    }
-                    delete option.name;
-                    hideInput();
-                    // initialization input
-                    $.each(option, function (key, option) {
-                        //console.log("key : ", key);
-                        //console.log("option : ", option);
-                        var fieldName = '';
-                        var fieldValue = '';
-                        if (key === 'param1') {
-                            fieldName = paramName1;
-                            fieldValue = paramValue1;
-                            field_name = "paramValue1";
-                            $("#bloc_paramName1").show();
-                            $("#bloc_paramvalue1").show();
-                        } else {
-                            fieldName = paramName2;
-                            fieldValue = paramValue2;
-                            field_name = "paramValue2";
-                            $("#bloc_paramName2").show();
-                            $("#bloc_paramvalue2").show();
-                        }
-                        fieldName.val(Object.keys(option)[0]);
-                        var fieldType = option[Object.keys(option)[0]]['fieldType'];
-                        if (fieldType === 'list') { // if input is select option
-                            fieldValue.replaceWith(function () {
-                                var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-control" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');
+        {#function hideInput() {#}
+            {#$("#bloc_paramName1").hide();#}
+            {#$("#bloc_paramvalue1").hide();#}
+            {#$("#bloc_paramName2").hide();#}
+            {#$("#bloc_paramvalue2").hide();#}
+        {#}#}
 
 
-                                for (var item in option[Object.keys(option)[0]].option) {
-                                    //  console.log("field_name : ", fieldValue.val());
-                                    // console.log("item selected: ", item);
-                                    //console.log("egality: ", item == fieldValue.val());
-                                    //console.log("*********************************************************");
-                                    if (item == fieldValue.val()) {
-                                        select.append('<option value="' + item + '"selected="selected">' + option[Object.keys(option)[0]].option[item] + '</option>');
-                                    } else {
-                                        select.append('<option value="' + item + '" >' + option[Object.keys(option)[0]].option[item] + '</option>');
-                                    }
-                                }
-                                return select;
-                            });
-                        } else if (fieldType === 'int') {
-                            fieldValue.replaceWith(function () {
-                                var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" />');
-                                return input;
-                            });
-                        }
-                    });
-                },
-                error: function (err) {
-                    alert("An error ocurred while loading data ...");
-                }
-            });
-        }
+        {#$(document).ready(function () {#}
 
-    </script>
+
+            {#fieldTreatment();#}
+        {#});#}
+        {#$('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);#}
+
+
+        {#function fieldTreatment() {#}
+            {##}
+            {#var fieldName = '';#}
+            {#var fieldValue = '';#}
+            {#var field_name = "";#}
+            {#$.ajax({#}
+                {#type: "GET",#}
+                {#url: "{{ path('jobscheduler_input') }}",#}
+                {#data: {#}
+                    {#type: type#}
+                {#},#}
+                {#success: function (option) {#}
+
+                    {#if (!option.hasOwnProperty('name')) {#}
+                        {#console.log("option : ", option);#}
+                        {#console.log("option : ", option.hasOwnProperty('name'));#}
+                        {#paramName1.val('');#}
+                        {#paramValue1.val('');#}
+                    {#}#}
+                    {#delete option.name;#}
+                    {#hideInput();#}
+                    {#// initialization input#}
+                    {#$.each(option, function (key, option) {#}
+                        {#//console.log("key : ", key);#}
+                        {#//console.log("option : ", option);#}
+                        {#var fieldName = '';#}
+                        {#var fieldValue = '';#}
+                        {#if (key === 'param1') {#}
+                            {#fieldName = paramName1;#}
+                            {#fieldValue = paramValue1;#}
+                            {#field_name = "paramValue1";#}
+                            {#$("#bloc_paramName1").show();#}
+                            {#$("#bloc_paramvalue1").show();#}
+                        {#} else {#}
+                            {#fieldName = paramName2;#}
+                            {#fieldValue = paramValue2;#}
+                            {#field_name = "paramValue2";#}
+                            {#$("#bloc_paramName2").show();#}
+                            {#$("#bloc_paramvalue2").show();#}
+                        {#}#}
+                        {#fieldName.val(Object.keys(option)[0]);#}
+                        {#var fieldType = option[Object.keys(option)[0]]['fieldType'];#}
+                        {#if (fieldType === 'list') { // if input is select option#}
+                            {#fieldValue.replaceWith(function () {#}
+                                {#var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-control" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');#}
+
+
+                                {#for (var item in option[Object.keys(option)[0]].option) {#}
+                                    {#//  console.log("field_name : ", fieldValue.val());#}
+                                    {#// console.log("item selected: ", item);#}
+                                    {#//console.log("egality: ", item == fieldValue.val());#}
+                                    {#//console.log("*********************************************************");#}
+                                    {#if (item == fieldValue.val()) {#}
+                                    {#select.append('<option value="' + item + '"selected="selected">' + option[Object.keys(option)[0]].option[item] + '</option>');#}
+                                {#} else {#}
+                                    {#select.append('<option value="' + item + '" >' + option[Object.keys(option)[0]].option[item] + '</option>');#}
+                                {#}#}
+                            {#}#}
+                                {#return select;#}
+                            {#});#}
+                        {#} else if (fieldType === 'int') {#}
+                            {#fieldValue.replaceWith(function () {#}
+                                {#var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" />');#}
+                                {#return input;#}
+                            {#});#}
+                        {#}#}
+                    {#});#}
+                {#},#}
+                {#error: function (err) {#}
+                    {#alert("An error ocurred while loading data ...");#}
+                {#}#}
+            {#});#}
+        {#}#}
+
+    {#</script>#}
+    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}" type="text/javascript"></script>
 
 {% endblock js %}
+
+
 {% block css %}
     <link rel="stylesheet" href="{{ asset('bundles/regle/css/jobscheduler.css') }}" type="text/css"/>
 {% endblock css %}
