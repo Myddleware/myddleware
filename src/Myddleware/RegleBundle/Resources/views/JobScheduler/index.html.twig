@@ -35,30 +35,12 @@
                       {% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}
                         </td>
                         <td>
-                            {{ entity.dateModified }}
-                            {#         <a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}">
-                                         <span class="glyphicon glyphicon-edit btn-opt"></span></a>
-                                     <a class="delete" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
-                                         <span class="glyphicon glyphicon-trash btn-opt"></span></a>
-                                     <a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">
-                                         <span class="glyphicon glyphicon-file btn-opt"></span></a>#}
                         </td>
                         <td>
                             {{ entity.period }}
                         </td>
                         <td>
                             {{ entity.jobOrder }}
-
-
-                            {#         <div class="onoffswitch">
-                                         <input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
-                                         <label class="onoffswitch-label" for="{{ rule.nameSlug }}">
-                                     <span class="onoffswitch-inner">
-                                     <span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
-                                     <span class="onoffswitch-inactive"><span class="onoffswitch-switch">OFF</span></span>
-                                     </span>
-                                         </label>
-                                     </div>#}
                         </td>
                         <td>
                             {% if entity.active %} true {% else %} false {% endif %}
@@ -90,59 +72,6 @@
             {% endif %}
         </table>
     </div>
-    {#
-        <table class="records_list">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Datecreated</th>
-                    <th>Datemodified</th>
-                    <th>Createdby</th>
-                    <th>Modifiedby</th>
-                    <th>Command</th>
-                    <th>Paramname1</th>
-                    <th>Paramvalue1</th>
-                    <th>Paramname2</th>
-                    <th>Paramvalue2</th>
-                    <th>Period</th>
-                    <th>Lastrun</th>
-                    <th>Active</th>
-                    <th>Joborder</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for entity in entities %}
-                <tr>
-                    <td><a href="{{ path('jobscheduler_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
-                    <td>{% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}</td>
-                    <td>{{ entity.dateModified }}</td>
-                    <td>{{ entity.createdBy }}</td>
-                    <td>{{ entity.modifiedBy }}</td>
-                    <td>{{ entity.command }}</td>
-                    <td>{{ entity.paramName1 }}</td>
-                    <td>{{ entity.paramValue1 }}</td>
-                    <td>{{ entity.paramName2 }}</td>
-                    <td>{{ entity.paramValue2 }}</td>
-                    <td>{{ entity.period }}</td>
-                    <td>{% if entity.lastRun %}{{ entity.lastRun|date('Y-m-d H:i:s') }}{% endif %}</td>
-                    <td>{{ entity.active }}</td>
-                    <td>{{ entity.jobOrder }}</td>
-                    <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('jobscheduler_show', { 'id': entity.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('jobscheduler_edit', { 'id': entity.id }) }}">edit</a>
-                        </li>
-                    </ul>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    #}
 {% endblock %}
 
 {% block css %}

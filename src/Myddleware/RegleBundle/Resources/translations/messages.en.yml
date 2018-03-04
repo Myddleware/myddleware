@@ -673,5 +673,13 @@ jobscheduler:
     job_order: Order job
     date_modified: Date update
     total : Total
+    create_by : create by
+    modified_by : modified by
+    paramName1 : Parameter 1
+    paramValue1 : Parameter value 1
+    paramName2 : Parameter 2
+    paramValue2 : Parameter value 2
     action :
         new_jobscheduler : New command
+    view  :
+        show : View details

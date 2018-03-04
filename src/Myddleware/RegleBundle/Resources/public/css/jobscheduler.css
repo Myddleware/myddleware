@@ -8,3 +8,13 @@
 #bloc_paramvalue2{
     display : none;
 }
+
+#jobsceduler_table{
+    padding-top: 15px;
+}
+#jobsceduler_table tr > td >label {
+    color:#0F66A9;
+}
+#jobsceduler_table tr > td:nth-child(1) {
+     padding-right: 20px;
+}

@@ -1,10 +1,7 @@
 $(document).ready(function () {
-
-
     fieldTreatment();
 });
 $('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);
-
 
 function fieldTreatment() {
 
@@ -16,9 +13,7 @@ function fieldTreatment() {
     var type = $('select#myddleware_reglebundle_jobscheduler_command').val();
     if ($('select#myddleware_reglebundle_jobscheduler_command').val() !== '') {
         type = $('select#myddleware_reglebundle_jobscheduler_command').val();
-    } else {
     }
-
 
     var field_name = "";
     $.ajax({
@@ -28,10 +23,9 @@ function fieldTreatment() {
             type: type
         },
         success: function (option) {
-            console.log(option);
-            if (!option.hasOwnProperty('name')) {
+            $(this).click(function(event) {
                 refreshFields();
-            }
+            });
             delete option.name;
             // initialization input
             $.each(option, function (key, option) {
@@ -45,16 +39,12 @@ function fieldTreatment() {
                     field_name = "paramValue1";
                     $("#bloc_paramName1").show();
                     $("#bloc_paramvalue1").show();
-                    console.log('field_name', field_name)
-                    console.log('fieldValue', fieldValue.val())
                 } else {
                     fieldName = paramName2;
                     fieldValue = paramValue2;
                     field_name = "paramValue2";
                     $("#bloc_paramName2").show();
                     $("#bloc_paramvalue2").show();
-                    console.log('field_name', field_name)
-                    console.log('fieldValue', fieldValue.val())
                 }
                 fieldName.val(Object.keys(option)[0]);
                 var fieldType = option[Object.keys(option)[0]]['fieldType'];
@@ -89,7 +79,6 @@ function fieldTreatment() {
      * function for refresh fields
      */
     function refreshFields() {
-
         paramName1.val('');
         paramValue1.val('');
         paramName2.val('');

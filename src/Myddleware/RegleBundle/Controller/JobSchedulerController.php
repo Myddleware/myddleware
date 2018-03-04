@@ -133,11 +133,14 @@ class JobSchedulerController extends Controller
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
         }
 
-        $deleteForm = $this->createDeleteForm($id);
 
+        $user_created = $this->get('fos_user.user_manager')->findUsers(array('id' => $entity->getcreatedBy()));
+        $user_modified = $this->get('fos_user.user_manager')->findUsers(array('id' => $entity->getmodifiedBy()));
+        dump($entity);
         return $this->render('RegleBundle:JobScheduler:show.html.twig', array(
             'entity' => $entity,
-            'delete_form' => $deleteForm->createView(),
+            'user_created' => $user_created[0],
+            'user_modified' => $user_modified[0]
         ));
     }
 

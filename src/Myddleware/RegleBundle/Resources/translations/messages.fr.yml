@@ -673,6 +673,14 @@ jobscheduler:
     period: Période
     job_order: Ordre job
     date_modified: Date modifié
+    create_by : crée par
+    modified_by : modifié par
+    paramName1 : Paramètre 1
+    paramValue1 : Paramètre valeur 1
+    paramName2 : Paramètre 2
+    paramValue2 : Paramètre valeur 2
     total : Total
     action :
         new_jobscheduler : Nouvelle commande
+    view  :
+        show : Vue detaillé
