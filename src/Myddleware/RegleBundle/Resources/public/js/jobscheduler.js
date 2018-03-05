@@ -4,6 +4,7 @@ $(document).ready(function () {
 });
 
 $('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);
+
 function fieldTreatment($event) {
     var paramName1 = $("#myddleware_reglebundle_jobscheduler_paramName1");
     var paramValue1 = $("#myddleware_reglebundle_jobscheduler_paramValue1");
@@ -14,7 +15,6 @@ function fieldTreatment($event) {
     if ($('select#myddleware_reglebundle_jobscheduler_command').val() !== '') {
         type = $('select#myddleware_reglebundle_jobscheduler_command').val();
     }
-
     var field_name = "";
     $.ajax({
         type: "GET",
@@ -23,9 +23,10 @@ function fieldTreatment($event) {
             type: type
         },
         success: function (option) {
-           if($event){
-               refreshFields();
-            };
+            if ($event) {
+                refreshFields();
+            }
+            ;
             delete option.name;
             // initialization input
             $.each(option, function (key, option) {
@@ -61,10 +62,8 @@ function fieldTreatment($event) {
                         return select;
                     });
                 } else if (fieldType === 'int') {
-                    console.log(option[Object.keys(option)[0]])
                     fieldValue.replaceWith(function () {
-                        var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" />');
-                        console.log(input)
+                        var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" value="' + fieldValue.val() + '" />');
                         return input;
                     });
                 }
