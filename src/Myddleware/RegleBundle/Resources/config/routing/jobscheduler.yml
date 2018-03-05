@@ -32,4 +32,6 @@ jobscheduler_delete:
 jobscheduler_input:
     path:     /getFieldsSelect
     defaults: { _controller: "RegleBundle:JobScheduler:getFieldsSelect" }
+    options:
+        expose: true
     methods:  [GET]

@@ -56,11 +56,14 @@
         {{ form_rest(edit_form) }}
         {{ form_end(edit_form) }}
     </div>
+
+    <script type="text/javascript">
+        var path = {{ path('jobscheduler_input') }}
+    </script>
 {% endblock %}
+
 {% block js %}
-
-    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}" type="text/javascript"></script>
-
+    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}" ></script>
 {% endblock js %}
 
 
