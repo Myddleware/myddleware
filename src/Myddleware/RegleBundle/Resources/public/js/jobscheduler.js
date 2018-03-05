@@ -5,7 +5,6 @@ $(document).ready(function () {
 
 $('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);
 function fieldTreatment($event) {
-console.log("event click",$event)
     var paramName1 = $("#myddleware_reglebundle_jobscheduler_paramName1");
     var paramValue1 = $("#myddleware_reglebundle_jobscheduler_paramValue1");
     var paramValue2 = $("#myddleware_reglebundle_jobscheduler_paramValue2");
@@ -25,7 +24,7 @@ console.log("event click",$event)
         },
         success: function (option) {
            if($event){
-              //  refreshFields();
+               refreshFields();
             };
             delete option.name;
             // initialization input
