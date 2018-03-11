@@ -8,7 +8,16 @@
             <p>{{ 'jobscheduler.total'|trans }}<p><span class="nb">{{ entities | length }}</span>
         </div>
         <div class="clr"></div>
-        {# BTN #}
+        <div>
+            <h3>Titre jobscheduler</h3>
+            <p class="jobscheduler_text">Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant
+                impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un
+                peintre anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de
+                texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique,
+                sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de
+                feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des
+                applications de mise en page de texte, comme Aldus PageMaker.</p>
+        </div>
         <div class="block-btn-infos">
             <a id="new_jobscheduler" href="{{ path('jobscheduler_new') }}" title=""><span
                         class="glyphicon glyphicon-plus"></span> {{ 'jobscheduler.action.new_jobscheduler'|trans }}</a>
@@ -32,7 +41,7 @@
                             {{ entity.command }}
                         </td>
                         <td class="solution_block">
-                      {% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}
+                            {% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}
                         </td>
                         <td>
                         </td>
@@ -72,10 +81,18 @@
             {% endif %}
         </table>
     </div>
+    <p class="jobscheduler_text">Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant
+        impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un
+        peintre anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de
+        texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique,
+        sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de
+        feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des
+        applications de mise en page de texte, comme Aldus PageMaker.</p>
 {% endblock %}
 
 {% block css %}
     <link rel="stylesheet" href="{{ asset('bundles/regle/css/rule.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/jobscheduler.css') }}" type="text/css"/>
 {% endblock css %}
 
 {% block cssin %}

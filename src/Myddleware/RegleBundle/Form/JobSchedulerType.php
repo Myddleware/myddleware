@@ -24,16 +24,9 @@ class JobSchedulerType extends AbstractType
         $builder
             ->add('command', ChoiceType::class, array(
                 'choices' => array(
-
-                    'clearData' => 'clear Data',
                     'synchro' => 'Synchro',
-                    'generateTemplate' => 'Generate template',
-                    'jobScheduler' => 'jobScheduler',
-                    'mass' => 'Mass',
                     'notification' => 'Notification',
                     'rerunerror' => 'reRunError',
-                    'task' => 'Task',
-                    'upgrade' => 'Upgrade',
                 ),
                 'empty_value' => '- Choice command -',
             ))

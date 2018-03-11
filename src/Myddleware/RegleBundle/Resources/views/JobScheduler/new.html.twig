@@ -53,6 +53,11 @@
                 {{ form_label( form.active) }}
             </label>
         </div>
+        <div>
+            <button type="submit" id="myddleware_reglebundle_jobscheduler_submit"
+                    name="myddleware_reglebundle_jobscheduler[submit]">{{ 'jobscheduler.update' | trans }}</button>
+            <button><a id="link_button" href="{{ path('jobscheduler') }}">{{ 'jobscheduler.cancel' | trans }}</a></button>
+        </div>
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </div>

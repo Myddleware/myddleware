@@ -680,7 +680,9 @@ jobscheduler:
     paramName2 : Paramètre 2
     paramValue2 : Paramètre valeur 2
     total : Total
-    actions: action
+    actions: Action
+    update: Mise à jour
+    cancel: Annuler
     action :
         new_jobscheduler : Nouvelle commande
     view  :

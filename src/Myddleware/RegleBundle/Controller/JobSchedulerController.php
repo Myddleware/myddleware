@@ -2,10 +2,8 @@
 
 namespace Myddleware\RegleBundle\Controller;
 
-use Myddleware\RegleBundle\Classes\jobSchedulercore;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Myddleware\RegleBundle\Entity\JobScheduler;
 use Myddleware\RegleBundle\Form\JobSchedulerType;
 // Include JSON Response
@@ -28,7 +26,6 @@ class JobSchedulerController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $entities = $em->getRepository('RegleBundle:JobScheduler')->findAll();
-        dump($entities);
         return $this->render('RegleBundle:JobScheduler:index.html.twig', array(
             'entities' => $entities,
         ));
@@ -98,8 +95,6 @@ class JobSchedulerController extends Controller
             'action' => $this->generateUrl('jobscheduler_create'),
             'method' => 'POST',
         ));
-
-        $form->add('submit', 'submit', array('label' => 'Create'));
 
         return $form;
     }
@@ -180,8 +175,6 @@ class JobSchedulerController extends Controller
             'action' => $this->generateUrl('jobscheduler_update', array('id' => $entity->getId())),
             'method' => 'PUT',
         ));
-
-        $form->add('submit', 'submit', array('label' => 'Update'));
 
         return $form;
     }
@@ -277,6 +270,5 @@ class JobSchedulerController extends Controller
             $paramsCommand = null;
         }
         return $paramsCommand;
-
     }
 }

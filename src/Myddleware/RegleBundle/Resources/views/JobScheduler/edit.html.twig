@@ -52,18 +52,18 @@
                 {{ form_label( edit_form.active) }}
             </label>
         </div>
-
+        <div>
+            <button type="submit" id="myddleware_reglebundle_jobscheduler_submit"
+                    name="myddleware_reglebundle_jobscheduler[submit]">{{ 'jobscheduler.update' | trans }}</button>
+            <button><a id="link_button" href="{{ path('jobscheduler') }}">{{ 'jobscheduler.cancel' | trans }}</a></button>
+        </div>
         {{ form_rest(edit_form) }}
         {{ form_end(edit_form) }}
     </div>
-
-    <script type="text/javascript">
-        var path = {{ path('jobscheduler_input') }}
-    </script>
 {% endblock %}
 
 {% block js %}
-    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}" ></script>
+    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}"></script>
 {% endblock js %}
 
 
