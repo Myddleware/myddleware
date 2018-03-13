@@ -29,7 +29,17 @@
     text-decoration: none;
 }
 
-.jobscheduler_text{
-    padding:30px 50px 30px 50px;
+.jobscheduler_text {
+    padding: 30px 50px 30px 50px;
     text-align: justify;
+}
+
+.errors ul {
+    padding-left: 0;
+}
+
+.errors ul li {
+    list-style: none;
+    padding: 5px;
+    color: red;
 }

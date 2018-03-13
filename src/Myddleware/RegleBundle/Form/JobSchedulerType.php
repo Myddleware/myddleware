@@ -4,6 +4,7 @@ namespace Myddleware\RegleBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,23 +20,23 @@ class JobSchedulerType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, array($this, 'onPreSetData'));
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, array($this, 'onPreSubmit'));
         $builder
             ->add('command', ChoiceType::class, array(
+                'required' => true,
+                'empty_data' => 'null',
                 'choices' => array(
                     'synchro' => 'Synchro',
                     'notification' => 'Notification',
                     'rerunerror' => 'reRunError',
                 ),
                 'empty_value' => '- Choice command -',
+
             ))
             ->add('paramName1')
             ->add('paramValue1')
             ->add('paramValue2')
             ->add('paramName2')
-            ->add('period')
-//            ->add('lastRun')
+            ->add('period', NumberType::class, array('required' => true, 'empty_data' => null))
             ->add('active', CheckboxType::class, array(
                 'label' => 'Active ?',
                 'required' => false,
@@ -43,22 +44,6 @@ class JobSchedulerType extends AbstractType
             ->add('jobOrder');
 
 
-    }
-
-    public function onPreSetData(FormEvent $event)
-    {
-        $data = $event->getData();
-        dump($data);
-        $form = $event->getForm();
-        $location = $event->getData();
-        //dynamilcaly fill fields
-    }
-
-    public function onPreSubmit(FormEvent $event)
-    {
-        $form = $event->getForm();
-        $data = $event->getData();
-        dump($data);
     }
 
     /**

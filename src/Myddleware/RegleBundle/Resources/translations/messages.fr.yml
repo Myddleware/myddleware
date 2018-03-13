@@ -682,6 +682,7 @@ jobscheduler:
     total : Total
     actions: Action
     update: Mise à jour
+    new: Creation
     cancel: Annuler
     action :
         new_jobscheduler : Nouvelle commande

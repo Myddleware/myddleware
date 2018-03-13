@@ -680,6 +680,7 @@ jobscheduler:
     paramName2 : Parameter 2
     paramValue2 : Parameter value 2
     actions: Action
+    new: Create
     update: Update
     cancel: Cancel
     action :

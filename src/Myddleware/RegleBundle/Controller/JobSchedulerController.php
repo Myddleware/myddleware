@@ -57,7 +57,6 @@ class JobSchedulerController extends Controller
             $paramValue2 = $paramValue2 ? $paramValue2 : "";
 
             $active = $form->get('active')->getData() == 1 ? true : false;
-
             /**
              * set value by default
              */
@@ -73,7 +72,7 @@ class JobSchedulerController extends Controller
             $em->persist($entity);
             $em->flush();
 
-            return $this->redirect($this->generateUrl('jobscheduler_show', array('id' => $entity->getId())));
+            return $this->redirect($this->generateUrl('jobscheduler', array('id' => $entity->getId())));
         }
 
         return $this->render('RegleBundle:JobScheduler:new.html.twig', array(
@@ -95,6 +94,8 @@ class JobSchedulerController extends Controller
             'action' => $this->generateUrl('jobscheduler_create'),
             'method' => 'POST',
         ));
+
+        $form->add('submit', 'submit', array('label' => 'jobscheduler.new'));
 
         return $form;
     }
@@ -176,6 +177,7 @@ class JobSchedulerController extends Controller
             'method' => 'PUT',
         ));
 
+        $form->add('submit', 'submit', array('label' => 'jobscheduler.update'));
         return $form;
     }
 
@@ -193,20 +195,17 @@ class JobSchedulerController extends Controller
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
         }
 
-        $deleteForm = $this->createDeleteForm($id);
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
 
         if ($editForm->isValid()) {
             $em->flush();
-
-            return $this->redirect($this->generateUrl('jobscheduler_edit', array('id' => $id)));
+            return $this->redirect($this->generateUrl('jobscheduler'));
         }
 
         return $this->render('RegleBundle:JobScheduler:edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
         ));
     }
 
