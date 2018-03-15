@@ -157,6 +157,10 @@ class jobSchedulercore
                 }
 
                 $input = new ArrayInput($arguments);
+				
+                // We round the current date to the minute because the period is on minute
+                $now = new \DateTime('now', new \DateTimeZone('GMT'));
+                $now->setTime($now->format('H'), $now->format('i'), 0);
 
                 // You can use NullOutput() if you don't need the output
                 $output = new BufferedOutput();
@@ -172,9 +176,6 @@ class jobSchedulercore
                 $jobScheduler = $this->em
                     ->getRepository('RegleBundle:JobScheduler')
                     ->findOneById($jobToRun['id']);
-                // We round the current date to the minute because the period is on minute
-                $now = new \DateTime('now', new \DateTimeZone('GMT'));
-                $now->setTime($now->format('H'), $now->format('i'), 0);
                 $jobScheduler->setLastRun($now);
                 $this->em->persist($jobScheduler);
                 $this->em->flush();
