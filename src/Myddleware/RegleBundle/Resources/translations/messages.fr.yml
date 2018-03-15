@@ -684,7 +684,7 @@ jobscheduler:
     update: Mise à jour
     new: Creation
     cancel: Annuler
-    action :
+    action:
         new_jobscheduler : Nouvelle commande
-    view  :
+    view:
         show : Vue detaillé

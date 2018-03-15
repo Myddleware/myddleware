@@ -683,7 +683,7 @@ jobscheduler:
     new: Create
     update: Update
     cancel: Cancel
-    action :
+    action:
         new_jobscheduler : New command
-    view  :
+    view:
         show : View details
