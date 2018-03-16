@@ -24,8 +24,7 @@ class JobSchedulerController extends Controller
     public function indexAction()
     {
         $em = $this->getDoctrine()->getManager();
-
-        $entities = $em->getRepository('RegleBundle:JobScheduler')->findAll();
+        $entities = $em->getRepository('RegleBundle:JobScheduler')->findBy([], ['jobOrder' => 'ASC']);
         return $this->render('RegleBundle:JobScheduler:index.html.twig', array(
             'entities' => $entities,
         ));
