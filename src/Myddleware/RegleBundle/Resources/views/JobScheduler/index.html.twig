@@ -43,7 +43,8 @@
                         <td class="solution_block">
                             {% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}
                         </td>
-                        <td>
+                         <td class="solution_block">
+                            {% if entity.dateModified %}{{ entity.dateModified|date('Y-m-d H:i:s') }}{% endif %}
                         </td>
                         <td>
                             {{ entity.period }}
