@@ -40,6 +40,7 @@ class jobSchedulercore
     protected $env;
     protected $em;
     protected $jobsToRun;
+    protected $jobList = array('cleardata', 'notification', 'rerunerror', 'synchro');
 
 
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection)
@@ -51,7 +52,6 @@ class jobSchedulercore
         $this->em = $this->container->get('doctrine')->getEntityManager();
     }
 
-    protected $jobList = array('cleardata', 'notification', 'rerunerror', 'synchro');
     public function getJobsParams()
     {
         try {
@@ -64,13 +64,7 @@ class jobSchedulercore
                             $list[$job]['param1'] = array(
                                 'rule' => array(
                                     'fieldType' => 'list',
-                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
-                                )
-                            );
-                            $list[$job]['param2'] = array(
-                                'rule' => array(
-                                    'fieldType' => 'list',
-                                    'option' => array('ALL' => 'All active rules', 'TEST' => ' TEST ME')  // Je vais ajouter toutes les règles dans la liste
+                                    'option' => $this->getAllActiveRules()
                                 )
                             );
                             break;
@@ -103,7 +97,28 @@ class jobSchedulercore
         }
     }
 
-
+	// Get all active rules
+	protected function getAllActiveRules() {
+		$rules['ALL'] = 'All active rules';
+		try {
+			$sqlParams = "	SELECT * 
+							FROM Rule
+							WHERE
+									Rule.active = 1
+								AND	Rule.deleted = 0";
+			$stmt = $this->connection->prepare($sqlParams);
+			$stmt->execute();	   				
+			$activeRules = $stmt->fetchAll();
+			if (!empty($activeRules)) {
+				foreach ($activeRules as $activeRule) {
+					$rules[$activeRule['id']] = $activeRule['name'];
+				}
+			}
+		} catch (\Exception $e) {
+            throw new \Exception ('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+        }	
+		return $rules;
+	}
 
     // Get the job to run in the right order
     public function setJobsToRun()
