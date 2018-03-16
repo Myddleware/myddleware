@@ -247,7 +247,9 @@ class databasecore extends solution {
 			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
-			
+			// Query validation
+			$requestSQL = $this->queryValidation($param, 'read_last', $requestSQL);
+		
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
@@ -359,6 +361,8 @@ class databasecore extends solution {
 			}
 			
 			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+			// Query validation
+			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);	
 	
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);		
@@ -429,7 +433,10 @@ class databasecore extends solution {
 					$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
-					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)				
+					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)	
+					// Query validation
+					$sql = $this->queryValidation($param, 'create', $sql);	
+					
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();	
 					if(!$exec) {
@@ -496,7 +503,9 @@ class databasecore extends solution {
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";						
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";	
+					// Query validation
+					$sql = $this->queryValidation($param, 'update', $sql);					
 					// Execute the query					
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
@@ -540,6 +549,11 @@ class databasecore extends solution {
 	protected function getIdFields($module,$type) {
 		// default is id
 		return array('id');
+	}
+	
+	// Function to check, modify or validate the query
+	protected function queryValidation($param, $functionName, $requestSQL) {
+		return $requestSQL;
 	}
 
 	public function getFieldsParamUpd($type, $module) {	
