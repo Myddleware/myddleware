@@ -4,12 +4,10 @@ namespace Myddleware\RegleBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class JobSchedulerType extends AbstractType
@@ -36,12 +34,12 @@ class JobSchedulerType extends AbstractType
             ->add('paramValue1')
             ->add('paramValue2')
             ->add('paramName2')
-            ->add('period', NumberType::class, array('required' => true, 'empty_data' => null))
+            ->add('period', IntegerType::class, array('required' => true, 'data' => 5))
             ->add('active', CheckboxType::class, array(
                 'label' => 'Active ?',
                 'required' => false,
             ))
-            ->add('jobOrder');
+            ->add('jobOrder', IntegerType::class, array('required' => true, 'data' => 1));
 
 
     }
