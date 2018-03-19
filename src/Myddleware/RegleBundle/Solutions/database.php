@@ -228,7 +228,8 @@ class databasecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);	
 			
 			// Construction de la requête SQL
-			$requestSQL = $this->get_query_select_header_read_last();		
+			$param['limit'] = 1;	
+			$requestSQL = $this->get_query_select_header($param);		
 			foreach ($param['fields'] as $field){
 				// If key is id, it has to be replaced by the real name of the id in the target table 
 				if ($field == 'id') {			
@@ -246,7 +247,7 @@ class databasecore extends solution {
 			$requestSQL = rtrim($requestSQL,',').' '; 
 			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
-			$requestSQL .= $this->get_query_select_limit_read_last(); // Ajout de la limite souhaitée	
+			$requestSQL .= $this->get_query_select_limit_offset($param); // Add query limit
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read_last', $requestSQL);
 		
@@ -315,6 +316,9 @@ class databasecore extends solution {
 			if(empty($param['date_ref'])) {
 				$param['date_ref'] = 0;
 			}
+			if (empty($param['limit'])) {
+				$param['limit'] = 100;
+			}
 			
 			// Add requiered fields
 			if(!isset($param['ruleParams']['fieldId'])) {
@@ -333,9 +337,8 @@ class databasecore extends solution {
 			$param['fields'] = array_values($param['fields']);
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
-			// Construction de la requête SQL
-			$requestSQL = "SELECT ";
-			// TODO Ajout des champs id et date de l'utilisateur
+			// Query building
+			$requestSQL = $this->get_query_select_header($param);	
 			
 			foreach ($param['fields'] as $field){
 			    $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
@@ -361,6 +364,7 @@ class databasecore extends solution {
 			}
 			
 			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+			$requestSQL .= $this->get_query_select_limit_offset($param); // Add query limit
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);	
 	
@@ -554,6 +558,11 @@ class databasecore extends solution {
 	// Function to check, modify or validate the query
 	protected function queryValidation($param, $functionName, $requestSQL) {
 		return $requestSQL;
+	}
+	
+	// Get the header of the select query in the read last function
+	protected function get_query_select_header($param) {
+		return "SELECT ";
 	}
 
 	public function getFieldsParamUpd($type, $module) {	

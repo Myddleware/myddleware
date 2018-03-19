@@ -47,14 +47,12 @@ class mysqlcore extends database {
 		return 'DESCRIBE `'.$table.'`';
 	}
 	
-	// Get the header of the select query in the read last function
-	protected function get_query_select_header_read_last() {
-		return "SELECT ";
-	}
-	
 	// Get the limit operator of the select query in the read last function
-	protected function get_query_select_limit_read_last() {
-		return " LIMIT 1";
+	protected function get_query_select_limit_offset($param) {
+		if (empty($param['offset'])) {
+			$param['offset'] = 0;
+		}
+		return " LIMIT ".$param['limit']. " OFFSET ".$param['offset'];
 	}
 	
 }// class mysqlcore
