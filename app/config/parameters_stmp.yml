@@ -1,9 +1,9 @@
 parameters:
-    mailer_transport: gmail
-    mailer_host: 127.0.0.1
-    mailer_port: '3360'
-    mailer_auth_mode: login
-    mailer_user: root
-    mailer_password: root
-    mailer_email: jeanraynal.bebel@gmail.com
-    mailer_name: 'Jean raynal BEBEL'
+    mailer_transport: null
+    mailer_host: null
+    mailer_port: null
+    mailer_auth_mode: null
+    mailer_user: null
+    mailer_password: null
+    mailer_email: null
+    mailer_name: null
