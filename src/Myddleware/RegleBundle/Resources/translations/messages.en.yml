@@ -576,7 +576,8 @@ breadcrumb:
 
 menu_user:
     account: My account
-    logout: Logout     
+    management_smtp: Configuration smtp
+    logout: Logout
 
 help:
     title: Help
@@ -661,3 +662,9 @@ email_alert:
     job_start: The job has begun at 
     job_id: . ID of this job : 
     recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
+
+management_smtp:
+    submit :  Save configuration SMTP
+    cancel: Cancel
+    title : Management SMTP
+

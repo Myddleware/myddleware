@@ -269,3 +269,13 @@ task_stop:
     pattern:  /task/stop/{id}
     defaults: { _controller: RegleBundle:Task:stopTask, page: 1 }
 
+
+management_smtp_index:
+    pattern: /managementsmtp/
+    defaults: {_controller: RegleBundle:ManagementSMTP:index}
+
+management_smtp_create:
+    pattern: /managementsmtp/readConfig
+    defaults: {_controller: RegleBundle:ManagementSMTP:createConfig}
+    methods:  POST
+
