@@ -1,9 +1,0 @@
-parameters:
-    mailer_transport: null
-    mailer_host: fez
-    mailer_port: fez
-    mailer_auth_mode: login
-    mailer_user: root
-    mailer_password: root
-    mailer_email: fz
-    mailer_name: ezfz

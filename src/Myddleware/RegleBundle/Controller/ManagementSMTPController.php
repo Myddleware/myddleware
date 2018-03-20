@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ManagementSMTPController extends Controller
 {
- const PATH = './../app/config/parameters_stmp.yml';
+ const PATH = './../app/config/parameters_smtp.yml';
 
     public function indexAction()
     {
@@ -58,7 +58,7 @@ class ManagementSMTPController extends Controller
 
 
     /***
-     * get data for file parameters_stmp.yml
+     * get data for file parameters_smtp.yml
      * @param $form
      * @return mixed
      */
