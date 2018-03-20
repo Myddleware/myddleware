@@ -18,7 +18,6 @@ class managementSMTPType extends AbstractType
         $builder->add('port', TextType::class, array('required' => false));
         $builder->add('auth_mode', ChoiceType::class, array(
             'empty_data' => 'null',
-            'required' => false,
             'choices' => array(
                 'plain' => 'plain',
                 'login' => 'login',
