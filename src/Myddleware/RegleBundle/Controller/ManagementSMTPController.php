@@ -9,10 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ManagementSMTPController extends Controller
 {
-
-    public function construct()
-    {
-    }
+ const PATH = './../app/config/parameters_stmp.yml';
 
     public function indexAction()
     {
@@ -67,8 +64,7 @@ class ManagementSMTPController extends Controller
      */
     private function getData($form)
     {
-        $path = './../app/config/parameters_stmp.yml';
-        $value = Yaml::parse(file_get_contents($path));
+        $value = Yaml::parse(file_get_contents(self::PATH));
         $form->get('transport')->setData($value['parameters']['mailer_transport']);
         $form->get('host')->setData($value['parameters']['mailer_host']);
         $form->get('port')->setData($value['parameters']['mailer_port']);
@@ -98,6 +94,6 @@ class ManagementSMTPController extends Controller
             'mailer_name' => $form->get('name')->getData(),
         ));
         $yaml = Yaml::dump($array);
-        file_put_contents('./../app/config/parameters_stmp.yml', $yaml);
+        file_put_contents(self::PATH, $yaml);
     }
 }
