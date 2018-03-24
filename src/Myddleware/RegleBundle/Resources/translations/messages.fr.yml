@@ -668,3 +668,8 @@ management_smtp:
     submit : Enregistrer configuration SMTP
     cancel: Annuler
     title : Configuration SMTP
+    sendtestmail: Envoi test mail
+
+management_smtp_sendmail:
+    subject: Myddleware envoie test
+    textMail: Ceci est un mail d'envoi de test par Myddleware

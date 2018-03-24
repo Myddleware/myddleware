@@ -662,9 +662,16 @@ email_alert:
     job_start: The job has begun at 
     job_id: . ID of this job : 
     recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
-
 management_smtp:
     submit :  Save configuration SMTP
     cancel: Cancel
     title : Management SMTP
+    sendtestmail: Send test mail
+
+management_smtp_sendmail:
+    subject: Myddleware send test
+    textMail: This is a sending of an email test by Myddleware
+
+
+
 

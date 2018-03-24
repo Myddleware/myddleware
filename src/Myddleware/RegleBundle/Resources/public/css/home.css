@@ -159,10 +159,10 @@
 .management_smtp{
     padding-top: 30px;
 }
-.management_smtp #link_button{
+.management_smtp .link_button{
     color: #000;
 }
-.management_smtp #link_button:hover{
+.management_smtp .link_button:hover{
     text-decoration: none;
     color: #000;
 }

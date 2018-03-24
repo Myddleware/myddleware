@@ -6,10 +6,19 @@ use Myddleware\RegleBundle\Form\managementSMTPType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Request;
-
+use Myddleware\RegleBundle\Classes\tools as MyddlewareTools;
+use Symfony\Bridge\Monolog\Logger; // Gestion des logs
 class ManagementSMTPController extends Controller
 {
- const PATH = './../app/config/parameters_smtp.yml';
+    const PATH = './../app/config/parameters_smtp.yml';
+    protected $tools;
+
+
+    public function construct()
+    {
+
+
+    }
 
     public function indexAction()
     {
@@ -95,5 +104,51 @@ class ManagementSMTPController extends Controller
         ));
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
+    }
+
+    /**
+     * Get value in the parameters_smtp.yml
+     * @param $parameter
+     * @return mixed
+     */
+    private function getValueParameters($parameter)
+    {
+        $value = Yaml::parse(file_get_contents(self::PATH));
+        return $value['parameters'][$parameter];
+    }
+
+    /**
+     * Send mail for test configuration in the parameters_smtp.yml
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Exception
+     */
+    public function testMailConfigurationAction()
+    {
+        $emailAddresses = $this->getValueParameters('mailer_email');
+        $this->tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));
+        $subject = $this->tools->getTranslation(array('management_smtp_sendmail', 'subject'));
+        try {
+            // Check that we have at least one email address
+            if (empty($emailAddresses)) {
+                throw new \Exception ('No email address found to send notification. You should have at leas one admin user with an email address.');
+            }
+            $contactMail = $this->getValueParameters('mailer_name');
+            $textMail = $this->tools->getTranslation(array('management_smtp_sendmail', 'textMail')).chr(10);
+            $textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
+            $message = \Swift_Message::newInstance()
+                ->setSubject($subject)
+                ->setFrom('no-reply@myddleware.com')
+                ->setBody($textMail);
+            $message->setTo($emailAddresses);
+            $send = $this->container->get('mailer')->send($message);
+            if (!$send) {
+                $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $contactMail);
+                throw new \Exception ('Failed to send email : ' . $textMail . ' to ' . $contactMail);
+            }
+            return $this->redirectToRoute('management_smtp_index');
+        } catch (\Exception $e) {
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            throw new \Exception ($error);
+        }
     }
 }

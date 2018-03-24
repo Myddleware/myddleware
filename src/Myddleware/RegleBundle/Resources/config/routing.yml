@@ -279,3 +279,6 @@ management_smtp_create:
     defaults: {_controller: RegleBundle:ManagementSMTP:createConfig}
     methods:  POST
 
+management_smtp_test:
+    pattern: /managementsmtp/testmail
+    defaults: {_controller: RegleBundle:ManagementSMTP:testMailConfiguration}
