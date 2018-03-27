@@ -564,7 +564,10 @@ class documentcore {
 			$this->updateType($this->type_document);
 			
 			// Update the target ID if we founnd it
-			if ($this->type_document == 'U') {
+			if (
+					$this->type_document == 'U'
+				AND !$this->isChild()
+			) {
 				if (empty($this->targetId)) {
 					throw new \Exception('No target id found for a document with the type Update. ');
 				}
@@ -580,8 +583,8 @@ class documentcore {
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
-				&& $this->type_document == 'U'
-				&& !$this->isChild()
+				AND $this->type_document == 'U'
+				AND !$this->isChild()
 			) {	
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');

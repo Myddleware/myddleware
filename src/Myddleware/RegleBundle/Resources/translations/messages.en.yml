@@ -576,8 +576,7 @@ breadcrumb:
 
 menu_user:
     account: My account
-    jobscheduler: Job scheduler
-    logout: Logout
+    logout: Logout     
 
 help:
     title: Help
@@ -662,28 +661,3 @@ email_alert:
     job_start: The job has begun at 
     job_id: . ID of this job : 
     recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
-
-jobscheduler:
-    command: Comamand
-    date_created: Date created
-    active: Active
-    list: List
-    title: Jobscheduler
-    period: Period
-    job_order: Order job
-    date_modified: Date update
-    total : Total
-    create_by : create by
-    modified_by : modified by
-    paramName1 : Parameter 1
-    paramValue1 : Parameter value 1
-    paramName2 : Parameter 2
-    paramValue2 : Parameter value 2
-    actions: Action
-    new: Create
-    update: Update
-    cancel: Cancel
-    action:
-        new_jobscheduler : New command
-    view:
-        show : View details

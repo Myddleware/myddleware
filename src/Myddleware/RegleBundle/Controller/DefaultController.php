@@ -269,13 +269,6 @@ class DefaultControllerCore extends Controller
                         $this->em->flush();
                     }
                 }
-
-                $stmt = $this->connection->prepare('DELETE FROM RuleRelationShip WHERE id =:id');
-                $stmt->bindValue('id', $rule->getId());
-                $stmt->execute();
-
-                // - - -
-
                 $this->em->remove($rule);
                 $this->em->flush();
             } else { // flag
@@ -1790,20 +1783,22 @@ class DefaultControllerCore extends Controller
     {
         /* @var $sessionService SessionService */
         $sessionService = $this->get('myddleware_session.service');
-        // $ruleKey = $sessionService->getParamRuleLastKey();
-        /**
-         * get rule id in the params in regle.js
-         */
-        if ($this->getRequest()->request->get('params')[1]['name'] === "regleId") {
-            $ruleKey = $this->getRequest()->request->get('params')[1]['value']; // get param
-        } else {
-            $ruleKey = $this->getRequest()->request->get('params')[2]['value']; // get param
-        }
-
+				
         // On récupére l'EntityManager
         $this->getInstanceBdd();
         $this->em->getConnection()->beginTransaction();
         try {
+			/**
+			 * get rule id in the params in regle.js. In creation, regleId = 0
+			 */
+			if (!empty($this->getRequest()->request->get('params'))) {
+				foreach($this->getRequest()->request->get('params') as $searchRuleId) {				
+					if ($searchRuleId['name'] == 'regleId') {
+						$ruleKey = $searchRuleId['value'];
+						break;
+					}
+				}
+			}
 
             // retourne un tableau prêt à l'emploi
             $tab_new_rule = $this->createListeParamsRule(

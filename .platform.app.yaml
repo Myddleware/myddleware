@@ -9,6 +9,12 @@ type: php:7.0
 build:
     flavor: composer
 
+# The extensions you want to enable.
+runtime:
+    extensions:
+        - ssh2
+        - pdo_dblib
+
 # The relationships of the application with services or other applications.
 # The left-hand side is the name of the relationship as it will be exposed
 # to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
@@ -45,7 +51,8 @@ hooks:
         php app/console --env=prod assets:install web
         php app/console d:s:u --force
         php app/console d:f:l --append
-        php app/console fos:user:create admin admin@example.com admin --super-admin
+        php app/console fos:user:create admin admin@example.com admin
+        php app/console fos:user:promote admin ROLE_ADMIN
 
 crons:
     jobScheduler:

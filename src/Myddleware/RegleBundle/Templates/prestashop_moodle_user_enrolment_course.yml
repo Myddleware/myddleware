@@ -1,0 +1,68 @@
+name: prestashop_moodle_user_enrolment_course
+description: 'Enrol your Prestashop Customer to Moodle courses (Prestashop product = Moodle course)'
+rules:
+    -
+        name: Users
+        nameSlug: users
+        sourceSolution: prestashop
+        targetSolution: moodle
+        sourceModule: customers
+        targetModule: users
+        fields:
+            - { target: email, source: email, formula: null }
+            - { target: firstname, source: firstname, formula: null }
+            - { target: lastname, source: lastname, formula: null }
+            - { target: username, source: firstname;lastname, formula: 'lower( substr( {firstname},1).{lastname})' }
+            - { target: password, source: lastname, formula: '{lastname}."?1"' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: email }
+    -
+        name: Course
+        nameSlug: course
+        sourceSolution: prestashop
+        targetSolution: moodle
+        sourceModule: products
+        targetModule: courses
+        fields:
+            - { target: fullname, source: name, formula: null }
+            - { target: shortname, source: name, formula: null }
+            - { target: summary, source: description, formula: null }
+            - { target: categoryid, source: my_value, formula: '"1"' }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Order
+        nameSlug: order
+        sourceSolution: prestashop
+        targetSolution: moodle
+        sourceModule: orders
+        targetModule: users
+        fields:
+            - { target: description, source: gift_message, formula: null }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: users, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Enrolment
+        nameSlug: enrolment
+        sourceSolution: prestashop
+        targetSolution: moodle
+        sourceModule: order_details
+        targetModule: manual_enrol_users
+        fields:
+            - { target: roleid, source: my_value, formula: '"5"' }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: courseid, fieldId: course, parent: false }
+            - { fieldNameSource: id_order, fieldNameTarget: userid, fieldId: order, parent: false }
+        params:
+            - { name: delete, value: '60' }
+            - { name: datereference, value: 0 }
+            - { name: mode, value: '0' }

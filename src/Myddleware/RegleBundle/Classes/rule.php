@@ -1114,9 +1114,11 @@ class rulecore {
 			foreach($duplicate_fields as $duplicate_field) {
 				$concatduplicate .= $rowTransformedData[$duplicate_field];
 			}
-			$searchDuplicate[$docId] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
+			// Empty data aren't used for duplicate search 
+			if (!empty(trim($concatduplicate))) {
+				$searchDuplicate[$docId] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
+			}
 		}
-
 		// Recherche de doublons dans le tableau searchDuplicate
 		// Obtient une liste de colonnes
 		foreach ($searchDuplicate as $key => $row) {
@@ -1137,7 +1139,7 @@ class rulecore {
 				continue;
 			}
 			// Si doublon
-			if ($value['concatKey'] == $previous) {
+			if ($value['concatKey'] == $previous) {	
 				$param['id_doc_myddleware'] = $key;
 				$param['jobId'] = $this->jobId;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
