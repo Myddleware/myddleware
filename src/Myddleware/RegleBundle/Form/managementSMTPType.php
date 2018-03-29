@@ -14,24 +14,33 @@ class managementSMTPType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('transport',ChoiceType::class, array(
-            'empty_data' => 'null',
+            'empty_data' => null,
             'choices' => array(
                 'smtp   ' => 'smtp',
                 'gmail' => 'gmail',
-                'mail' => 'mail',
                 'sendmail' => 'sendmail',
             ),
-            'empty_value' => '- Choice mode transport -'));
+            'empty_value' => '- Choose transport -',
+			'required' => false));
         $builder->add('host', TextType::class, array('required' => false));
         $builder->add('port', TextType::class, array('required' => false));
         $builder->add('auth_mode', ChoiceType::class, array(
-            'empty_data' => 'null',
+            'empty_data' => null,
             'choices' => array(
                 'plain' => 'plain',
                 'login' => 'login',
                 'cram-md5' => 'cram-md5',
             ),
-            'empty_value' => '- Choice mode auth -'));
+            'empty_value' => '- Choose auth mode -',
+			'required' => false));
+        $builder->add('encryption', ChoiceType::class, array(
+            'empty_data' => null,
+            'choices' => array(
+                'tls' => 'tls',
+                'ssl' => 'ssl'
+            ),
+            'empty_value' => '- Choose encryption -',
+			'required' => false));
         $builder->add('user', TextType::class, array('required' => false));
         $builder->add('password', PasswordType ::class, array('required' => false));
     }

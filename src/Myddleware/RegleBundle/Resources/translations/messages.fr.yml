@@ -668,7 +668,8 @@ management_smtp:
     submit : Enregistrer configuration SMTP
     cancel: Annuler
     title : Configuration SMTP
-    sendtestmail: Envoi test mail
+    description : Vous pouvez configurez l'envoi des email ici. Vous trouverez de la documentation ici : <a href="https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html" target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a> 
+    sendtestmail: Envoi test
 
 management_smtp_sendmail:
     subject: Myddleware envoie test

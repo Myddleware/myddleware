@@ -86,6 +86,7 @@ class ManagementSMTPController extends Controller
         $form->get('host')->setData($value['parameters']['mailer_host']);
         $form->get('port')->setData($value['parameters']['mailer_port']);
         $form->get('auth_mode')->setData($value['parameters']['mailer_auth_mode']);
+        $form->get('encryption')->setData($value['parameters']['mailer_encryption']);
         $form->get('user')->setData($value['parameters']['mailer_user']);
         $form->get('password')->setData($value['parameters']['mailer_password']);
         return $form;
@@ -103,6 +104,7 @@ class ManagementSMTPController extends Controller
             'mailer_host' => $form->get('host')->getData(),
             'mailer_port' => $form->get('port')->getData(),
             'mailer_auth_mode' => $form->get('auth_mode')->getData(),
+            'mailer_encryption' => $form->get('encryption')->getData(),
             'mailer_user' => $form->get('user')->getData(),
             'mailer_password' => $form->get('password')->getData(),
         ));
@@ -132,12 +134,21 @@ class ManagementSMTPController extends Controller
         $port = $form->get('port')->getData();
         $user = $form->get('user')->getData();
         $auth_mode = $form->get('auth_mode')->getData();
+        $encryption = $form->get('encryption')->getData();
         $password = $form->get('password')->getData();
         $user_email = $this->getUser()->getEmail();
         // Create the Transport
-        $transport = (new Swift_SmtpTransport($host, $port))
-            ->setUsername($user)
-            ->setPassword($password)->setAuthMode($auth_mode)->setEncryption('ssl');
+        $transport = new Swift_SmtpTransport($host, $port);
+		if (!empty($user)) {
+			$transport->setUsername($user);
+			$transport->setPassword($password);
+		}
+		if (!empty($auth_mode)) {
+			$transport->setAuthMode($auth_mode);
+        }    
+        if (!empty($encryption)) {
+			$transport->setEncryption($encryption);
+        }    
         // Create the Mailer using your created Transport
         $mailer = new \Swift_Mailer($transport);
         $this->tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));
