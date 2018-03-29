@@ -2,7 +2,23 @@
 {% block title %}{{ parent() }} | {{ 'management_smtp.title'|trans }}{% endblock %}
 {% block titlesm %}{{ 'management_smtp.title'| trans }}{% endblock titlesm %}
 {% block body %}
+
+    {% if foo is defined %}
+        <div>
+            {{ error }}
+        </div>
+    {% endif %}
+
     <div class="container management_smtp" id="panel">
+        <h3 class="title-smtp">Title smtp management</h3>
+        <p class="text-smtp">
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
+            standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make
+            a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
+            remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing
+            Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions
+            of Lorem Ipsum.
+        </p>
         {{ form_start(form) }}
         <div class="form-group row">
             <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.transport) }}</label>
@@ -46,29 +62,16 @@
                 {{ form_errors ( form.password) }}
             </div>
         </div>
-        <div class="form-group row">
-            <label for="email" class="col-sm-2 col-form-label"> {{ form_label( form.email) }}</label>
-            <div class="col-sm-10 ">
-                {{ form_widget( form.email, { 'attr': {'class': 'form-control' , 'id' : 'email'} }) }}
-                {{ form_errors ( form.email) }}
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="name" class="col-sm-2 col-form-label"> {{ form_label( form.name) }}</label>
-            <div class="col-sm-10 ">
-                {{ form_widget( form.name, { 'attr': {'class': 'form-control' , 'id' : 'name'} }) }}
-                {{ form_errors ( form.name) }}
-            </div>
-        </div>
+
         <div>
             {{ form_widget( form.submit) }}
-            <button><a class="link_button" href="{{ path('management_smtp_test') }}">{{ 'management_smtp.sendtestmail' | trans }}</a></button>
-            <button><a class="link_button" href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a></button>
+            <button><a id="link_button" href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
+            </button>
         </div>
         {{ form_end(form) }}
     </div>
 {% endblock body %}
 
 {% block css %}
-    <link rel="stylesheet" href="{{ asset('bundles/regle/css/home.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/home.css') }}" type="text/css"/>
 {% endblock css %}

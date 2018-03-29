@@ -13,12 +13,19 @@ class managementSMTPType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('transport', TextType::class, array('required' => false));
+        $builder->add('transport',ChoiceType::class, array(
+            'empty_data' => 'null',
+            'choices' => array(
+                'smtp   ' => 'smtp',
+                'gmail' => 'gmail',
+                'mail' => 'mail',
+                'sendmail' => 'sendmail',
+            ),
+            'empty_value' => '- Choice mode transport -'));
         $builder->add('host', TextType::class, array('required' => false));
         $builder->add('port', TextType::class, array('required' => false));
         $builder->add('auth_mode', ChoiceType::class, array(
-            'required' => false,
-            'empty_data' => '',
+            'empty_data' => 'null',
             'choices' => array(
                 'plain' => 'plain',
                 'login' => 'login',
@@ -27,8 +34,6 @@ class managementSMTPType extends AbstractType
             'empty_value' => '- Choice mode auth -'));
         $builder->add('user', TextType::class, array('required' => false));
         $builder->add('password', PasswordType ::class, array('required' => false));
-        $builder->add('email', TextType::class, array('required' => false));
-        $builder->add('name', TextType::class, array('required' => false));
     }
 
     public function configureOptions(OptionsResolver $resolver)

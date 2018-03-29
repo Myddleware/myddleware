@@ -157,12 +157,24 @@
 }
 
 .management_smtp{
-    padding-top: 30px;
+    padding-top: 30px;  padding-bottom: 30px;
 }
-.management_smtp .link_button{
+.management_smtp #link_button{
     color: #000;
 }
-.management_smtp .link_button:hover{
+.management_smtp #link_button:hover{
     text-decoration: none;
     color: #000;
+}
+.management_smtp #regle_bundlemanagement_smtp_submit_test{
+    margin-top: 10px;
+}
+
+.text-smtp{
+    padding: 0 0 20px 0;
+    text-align: justify;
+}
+.title-smtp{
+
+
 }

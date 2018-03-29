@@ -277,8 +277,7 @@ management_smtp_index:
 management_smtp_create:
     pattern: /managementsmtp/readConfig
     defaults: {_controller: RegleBundle:ManagementSMTP:createConfig}
-    methods:  POST
+    methods:  [POST, GET]
 
-management_smtp_test:
-    pattern: /managementsmtp/testmail
-    defaults: {_controller: RegleBundle:ManagementSMTP:testMailConfiguration}
+
+

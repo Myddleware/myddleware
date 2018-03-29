@@ -3,11 +3,13 @@
 namespace Myddleware\RegleBundle\Controller;
 
 use Myddleware\RegleBundle\Form\managementSMTPType;
+use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Request;
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools;
-use Symfony\Bridge\Monolog\Logger; // Gestion des logs
+use Symfony\Component\HttpFoundation\Session\Session;
+
 class ManagementSMTPController extends Controller
 {
     const PATH = './../app/config/parameters_smtp.yml';
@@ -37,6 +39,12 @@ class ManagementSMTPController extends Controller
             $form = $this->createCreateForm();
             $form->handleRequest($request);
 
+            if ($form->get('submit_test')->isClicked()) {
+                $this->testMailConfiguration($form);
+                //   return $this->redirectToRoute('management_smtp_index');
+
+            }
+
             if ($form->isValid()) {
                 $this->setData($form);
                 return $this->redirect($this->generateUrl('management_smtp_index'));
@@ -59,9 +67,9 @@ class ManagementSMTPController extends Controller
     {
         $form = $this->createForm(new managementSMTPType(), null, array(
             'action' => $this->generateUrl('management_smtp_create'),
-            'method' => 'POST',
         ));
         $form->add('submit', 'submit', array('label' => 'management_smtp.submit'));
+        $form->add('submit_test', 'submit', array('label' => 'management_smtp.sendtestmail'));
         return $form;
     }
 
@@ -80,8 +88,6 @@ class ManagementSMTPController extends Controller
         $form->get('auth_mode')->setData($value['parameters']['mailer_auth_mode']);
         $form->get('user')->setData($value['parameters']['mailer_user']);
         $form->get('password')->setData($value['parameters']['mailer_password']);
-        $form->get('email')->setData($value['parameters']['mailer_email']);
-        $form->get('name')->setData($value['parameters']['mailer_name']);
         return $form;
     }
 
@@ -99,8 +105,6 @@ class ManagementSMTPController extends Controller
             'mailer_auth_mode' => $form->get('auth_mode')->getData(),
             'mailer_user' => $form->get('user')->getData(),
             'mailer_password' => $form->get('password')->getData(),
-            'mailer_email' => $form->get('email')->getData(),
-            'mailer_name' => $form->get('name')->getData(),
         ));
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
@@ -122,33 +126,43 @@ class ManagementSMTPController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      * @throws \Exception
      */
-    public function testMailConfigurationAction()
+    public function testMailConfiguration($form)
     {
-        $emailAddresses = $this->getValueParameters('mailer_email');
+        $host = $form->get('host')->getData();
+        $port = $form->get('port')->getData();
+        $user = $form->get('user')->getData();
+        $auth_mode = $form->get('auth_mode')->getData();
+        $password = $form->get('password')->getData();
+        $user_email = $this->getUser()->getEmail();
+        // Create the Transport
+        $transport = (new Swift_SmtpTransport($host, $port))
+            ->setUsername($user)
+            ->setPassword($password)->setAuthMode($auth_mode)->setEncryption('ssl');
+        // Create the Mailer using your created Transport
+        $mailer = new \Swift_Mailer($transport);
         $this->tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));
         $subject = $this->tools->getTranslation(array('management_smtp_sendmail', 'subject'));
         try {
             // Check that we have at least one email address
-            if (empty($emailAddresses)) {
+            if (empty($user_email)) {
                 throw new \Exception ('No email address found to send notification. You should have at leas one admin user with an email address.');
             }
-            $contactMail = $this->getValueParameters('mailer_name');
-            $textMail = $this->tools->getTranslation(array('management_smtp_sendmail', 'textMail')).chr(10);
-            $textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
-            $message = \Swift_Message::newInstance()
-                ->setSubject($subject)
+            $textMail = $this->tools->getTranslation(array('management_smtp_sendmail', 'textMail')) . chr(10);
+            $textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')) . chr(10) . $this->tools->getTranslation(array('email_notification', 'signature'));
+            $message = \Swift_Message::newInstance($subject);
+            $message
                 ->setFrom('no-reply@myddleware.com')
                 ->setBody($textMail);
-            $message->setTo($emailAddresses);
-            $send = $this->container->get('mailer')->send($message);
+            $message->setTo($user_email);
+            $send = $mailer->send($message);
             if (!$send) {
-                $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $contactMail);
-                throw new \Exception ('Failed to send email : ' . $textMail . ' to ' . $contactMail);
+                $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $user_email);
+                throw new \Exception ('Failed to send email : ' . $textMail . ' to ' . $user_email);
             }
-            return $this->redirectToRoute('management_smtp_index');
         } catch (\Exception $e) {
             $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-            throw new \Exception ($error);
+			$session = new Session();
+			$session->set( 'error', array( $error ));
         }
     }
 }
