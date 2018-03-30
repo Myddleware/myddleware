@@ -1,0 +1,70 @@
+{% extends '::base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'jobscheduler.title'|trans }}{% endblock %}
+{% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
+{% block body %}
+    {{ form_start(edit_form, { 'action': path('jobscheduler_update',{id : entity.id}), 'attr': { 'class': 'myddleware_reglebundle_jobscheduler' ,'novalidate' : ''} }) }}
+    <div class="container">
+        <div class="form-group row">
+            <label for="command" class="col-sm-2 col-form-label"> {{ form_label( edit_form.command) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.command, { 'attr': {'class': 'form-control' , 'id' : 'command'} }) }}
+                {{ form_errors( edit_form.command, { 'attr': {'class': 'form-control' , 'id' : 'command'} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramName1">
+            <label for="paramName1" class="col-sm-2 col-form-label"> {{ form_label( edit_form.paramName1) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.paramName1, { 'attr': {'class': 'form-control' , 'id' : 'paramName1' ,  'readonly' :''} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramvalue1">
+            <label for="paramValue1" class="col-sm-2 col-form-label"> {{ form_label( edit_form.paramValue1) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.paramValue1, { 'attr': {'class': 'form-control' , 'id' : 'paramValue1'} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramName2">
+            <label for="paramName2" class="col-sm-2 col-form-label"> {{ form_label( edit_form.paramName2) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.paramName2, { 'attr': {'class': 'form-control' , 'id' : 'paramName2' ,  'readonly' :''} }) }}
+            </div>
+        </div>
+        <div class="form-group row" id="bloc_paramvalue2">
+            <label for="paramValue2" class="col-sm-2 col-form-label"> {{ form_label( edit_form.paramValue2) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.paramValue2, { 'attr': {'class': 'form-control' , 'id' : 'paramValue2'} }) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="period" class="col-sm-2 col-form-label"> {{ form_label( edit_form.period) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.period, { 'attr': {'class': 'form-control' , 'id' : 'period'} }) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="jobOrder" class="col-sm-2 col-form-label"> {{ form_label( edit_form.jobOrder) }}</label>
+            <div class="col-sm-10">
+                {{ form_widget( edit_form.jobOrder, { 'attr': {'class': 'form-control' , 'id' : 'jobOrder'} }) }}
+            </div>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                {{ form_widget( edit_form.active, { 'attr': {'class': 'form-check-input' , 'id' : 'inlineCheckbox1'} }) }}
+                {{ form_label( edit_form.active) }}
+            </label>
+        </div>
+        {{ form_widget( edit_form.submit, { 'attr': {'class': 'form-check-input' , 'id' : 'inlineCheckbox1'} }) }}
+        <button><a id="link_button" href="{{ path('jobscheduler') }}">{{ 'jobscheduler.cancel' | trans }}</a></button>
+        {{ form_rest(edit_form) }}
+        {{ form_end(edit_form) }}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{{ asset('bundles/regle/js/jobscheduler.js') }}"></script>
+{% endblock js %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/jobscheduler.css') }}" type="text/css"/>
+{% endblock css %}
