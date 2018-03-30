@@ -1,0 +1,37 @@
+jobscheduler:
+    path:     /
+    defaults: { _controller: "RegleBundle:JobScheduler:index" }
+
+jobscheduler_show:
+    path:     /{id}/show
+    defaults: { _controller: "RegleBundle:JobScheduler:show" }
+
+jobscheduler_new:
+    path:     /new
+    defaults: { _controller: "RegleBundle:JobScheduler:new" }
+
+jobscheduler_create:
+    path:     /create
+    defaults: { _controller: "RegleBundle:JobScheduler:create" }
+    methods:  POST
+
+jobscheduler_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "RegleBundle:JobScheduler:edit" }
+
+jobscheduler_update:
+    path:     /{id}/update
+    defaults: { _controller: "RegleBundle:JobScheduler:update" }
+    methods:  [POST, PUT]
+
+jobscheduler_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "RegleBundle:JobScheduler:delete" }
+    methods:  [GET, DELETE]
+
+jobscheduler_input:
+    path:     /getFieldsSelect
+    defaults: { _controller: "RegleBundle:JobScheduler:getFieldsSelect" }
+    options:
+        expose: true
+    methods:  [GET]

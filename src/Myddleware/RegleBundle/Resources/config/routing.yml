@@ -1,3 +1,7 @@
+regle_jobscheduler:
+    resource: "@RegleBundle/Resources/config/routing/jobscheduler.yml"
+    prefix:   /jobscheduler
+
 regle_inputs:
     pattern:  /inputs/
     defaults: { _controller: RegleBundle:Default:ruleInputs }
@@ -278,6 +282,3 @@ management_smtp_create:
     pattern: /managementsmtp/readConfig
     defaults: {_controller: RegleBundle:ManagementSMTP:createConfig}
     methods:  [POST, GET]
-
-
-

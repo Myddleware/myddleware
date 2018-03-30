@@ -1,0 +1,45 @@
+.myddleware_reglebundle_jobscheduler {
+    padding-top: 20px;
+}
+
+#bloc_paramName1,
+#bloc_paramvalue1, #bloc_paramName2,
+#bloc_paramvalue2 {
+    display: none;
+}
+
+#jobsceduler_table {
+    padding-top: 15px;
+}
+
+#jobsceduler_table tr > td > label {
+    color: #0F66A9;
+}
+
+#jobsceduler_table tr > td:nth-child(1) {
+    padding-right: 20px;
+}
+
+#link_button {
+    text-decoration: none;
+    color: #000;
+}
+
+#link_button:hover {
+    text-decoration: none;
+}
+
+.jobscheduler_text {
+    padding: 30px 50px 30px 50px;
+    text-align: justify;
+}
+
+.errors ul {
+    padding-left: 0;
+}
+
+.errors ul li {
+    list-style: none;
+    padding: 5px;
+    color: red;
+}

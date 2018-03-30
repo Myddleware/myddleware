@@ -27,8 +27,7 @@ namespace Myddleware\RegleBundle\Solutions;
 
 class microsoftsqlcore extends database {
 	
-	protected $driver = 'sqlsrv';
-	
+	protected $driver;
 	protected $fieldName = 'COLUMN_NAME';
 	protected $fieldLabel = 'COLUMN_NAME';
 	protected $fieldType = 'DATA_TYPE';
@@ -36,8 +35,23 @@ class microsoftsqlcore extends database {
 	protected $stringSeparatorOpen = '[';
 	protected $stringSeparatorClose = ']';
 
-	protected function generatePdo() {		    
-		return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+	// Generate PDO object
+	protected function generatePdo() {
+		$this->set_driver();
+		if ($this->driver == 'sqlsrv') {
+			return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+		} else {
+			return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+		}
+	}
+	
+	// We use sqlsrv for windows and dblib for linux
+	protected function set_driver() {
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			$this->driver = 'sqlsrv';
+		} else {
+			$this->driver = 'dblib';
+		}
 	}
 	
 	// Query to get all the tables of the database
@@ -50,14 +64,12 @@ class microsoftsqlcore extends database {
 		return 'SELECT * FROM information_schema.columns WHERE table_name = \''.$table.'\'';
 	}
 	
-	// Get the header of the select query in the read last function
-	protected function get_query_select_header_read_last() {
-		return "SELECT TOP 1 ";
-	}
-	
 	// Get the limit operator of the select query in the read last function
-	protected function get_query_select_limit_read_last() {
-		return "";
+	protected function get_query_select_limit_offset($param) {
+		if (empty($param['offset'])) {
+			$param['offset'] = 0;
+		}
+		return " OFFSET ".$param['offset']." ROWS FETCH NEXT ".$param['limit']." ROWS ONLY";
 	}
 	
 	// Function to escape characters 

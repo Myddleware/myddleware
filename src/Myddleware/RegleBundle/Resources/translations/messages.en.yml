@@ -673,6 +673,3 @@ management_smtp_sendmail:
     subject: Myddleware send test
     textMail: This is a sending of an email test by Myddleware
 
-
-
-

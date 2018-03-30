@@ -54,7 +54,7 @@ class notificationCommand extends ContainerAwareCommand
 				}	
 			}
 			// Standard notification
-			elseif (empty($input->getArgument('type'))) {
+			else {
 				try {
 					$logger = $this->getContainer()->get('logger');
 					$job = $this->getContainer()->get('myddleware_job.job');
