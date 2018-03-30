@@ -1,0 +1,77 @@
+{% extends '::base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'management_smtp.title'|trans }}{% endblock %}
+{% block titlesm %}{{ 'management_smtp.title'| trans }}{% endblock titlesm %}
+{% block body %}
+
+    {% if foo is defined %}
+        <div>
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="container management_smtp" id="panel">
+        <h3 class="title-smtp">{{ 'management_smtp.title'| trans }}</h3>
+        <p class="text-smtp">{{'management_smtp.description'|trans|raw}}</p>
+        {{ form_start(form) }}
+        <div class="form-group row">
+            <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.transport) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.transport, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
+                {{ form_errors ( form.transport) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="host" class="col-sm-2 col-form-label"> {{ form_label( form.host) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.host, { 'attr': {'class': 'form-control' , 'id' : 'host'} }) }}
+                {{ form_errors ( form.host) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="port" class="col-sm-2 col-form-label"> {{ form_label( form.port) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.port, { 'attr': {'class': 'form-control' , 'id' : 'port'} }) }}
+                {{ form_errors ( form.port) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="auth_mode" class="col-sm-2 col-form-label"> {{ form_label( form.auth_mode) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.auth_mode, { 'attr': {'class': 'form-control' , 'id' : 'auth_mode'} }) }}
+                {{ form_errors ( form.auth_mode) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="encryption" class="col-sm-2 col-form-label"> {{ form_label( form.encryption) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.encryption, { 'attr': {'class': 'form-control' , 'id' : 'encryption'} }) }}
+                {{ form_errors ( form.encryption) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="user" class="col-sm-2 col-form-label"> {{ form_label( form.user) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.user, { 'attr': {'class': 'form-control' , 'id' : 'user'} }) }}
+                {{ form_errors ( form.user) }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="password" class="col-sm-2 col-form-label"> {{ form_label( form.password) }}</label>
+            <div class="col-sm-10 ">
+                {{ form_widget( form.password, { 'attr': {'class': 'form-control' , 'id' : 'password'} }) }}
+                {{ form_errors ( form.password) }}
+            </div>
+        </div>
+
+        <div>
+            {{ form_widget( form.submit) }}
+            <button><a id="link_button" href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock body %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/home.css') }}" type="text/css"/>
+{% endblock css %}
