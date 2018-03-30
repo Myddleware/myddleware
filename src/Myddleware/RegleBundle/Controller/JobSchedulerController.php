@@ -131,7 +131,6 @@ class JobSchedulerController extends Controller
 
         $user_created = $this->get('fos_user.user_manager')->findUsers(array('id' => $entity->getcreatedBy()));
         $user_modified = $this->get('fos_user.user_manager')->findUsers(array('id' => $entity->getmodifiedBy()));
-        dump($entity);
         return $this->render('RegleBundle:JobScheduler:show.html.twig', array(
             'entity' => $entity,
             'user_created' => $user_created[0],
