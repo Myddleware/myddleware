@@ -1,0 +1,73 @@
+{#/*********************************************************************************
+* This file is part of Myddleware.
+
+* @package Myddleware
+* @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+* @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+* @link http://www.myddleware.com
+
+This file is part of Myddleware.
+
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #}
+
+{% extends '::base.html.twig' %}
+{% block titlesm %}{{ 'title.account.view'|trans }}{% endblock titlesm %}
+{% block body %}
+
+    {#<div id="user_account">#}
+    {#<div id="user_info">#}
+    {#<h2>{{ 'view_account.user_info'|trans }}</h2>#}
+    {#<ul>#}
+    {#<li class="user_info_li">#}
+    {#<label>{{ 'view_account.label.language'|trans }}</label>#}
+    {#<div class="btn-group" role="group" aria-label="...">#}
+    {#<button id="btn-locale-en" type="button"#}
+    {#class="btn {{ locale=='en' ? 'btn-primary disabled' : 'btn-default' }}">English#}
+    {#</button>#}
+    {#<button id="btn-locale-fr" type="button"#}
+    {#class="btn {{ locale=='fr' ? 'btn-primary disabled' : 'btn-default' }}">Français#}
+    {#</button>#}
+    {#</div>#}
+    {#</li>#}
+    {#</ul>#}
+    {#<h2>{{ 'view_account.change_password'|trans }}</h2>#}
+    {#<ul>#}
+    {#<li class="user_info_li">#}
+    {#{{ render(controller('FOSUserBundle:ChangePassword:changePassword')) }}#}
+
+    {#</li>#}
+    {#</ul>#}
+    {#</div>#}
+    {#<div id="myd_change_locale" class="user_account_popup" style="display: none">#}
+    {#<div class="user_account_popup_content">#}
+    {#<p>{{ 'view_account.popup.locale'|trans }}</p>#}
+    {#<img src="{{ asset('bundles/regle/images/') }}locale-loader.gif"/>#}
+    {#</div>#}
+    {#</div>#}
+    {#</div>#}
+    <ul>
+        <li class="user_info_li">
+            {#{% include "FOSUserBundle:ChangePassword:change_password.html.twig" %}#}
+        </li>
+    </ul>
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('bundles/regle/css/account.css') }}" type="text/css"/>
+{% endblock css %}
+
+{% block js %}
+    <script src="{{ asset('bundles/regle/js/account.js') }}" type="text/javascript"></script>
+{% endblock js %}

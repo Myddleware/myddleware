@@ -576,7 +576,8 @@ breadcrumb:
 
 menu_user:
     account: My account
-    logout: Logout     
+    management_smtp: Configuration smtp
+    logout: Logout
 
 help:
     title: Help
@@ -661,3 +662,14 @@ email_alert:
     job_start: The job has begun at 
     job_id: . ID of this job : 
     recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
+management_smtp:
+    submit :  Save configuration SMTP
+    cancel: Cancel
+    title : Management SMTP
+    description : You can configure email parameters here. More info here : <a href="https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html" target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a> 
+    sendtestmail: Send test mail
+
+management_smtp_sendmail:
+    subject: Myddleware send test
+    textMail: This is a sending of an email test by Myddleware
+

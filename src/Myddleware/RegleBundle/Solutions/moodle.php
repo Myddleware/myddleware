@@ -507,6 +507,10 @@ class moodlecore  extends solution {
 				$dataSugar = array();
 				$obj = new \stdClass();
 				foreach ($data as $key => $value) {
+					// We don't send Myddleware_element_id field to Moodle
+					if ($key == 'Myddleware_element_id') {
+						continue;
+					}
 					if (!empty($value)) {
 						$obj->$key = $value;
 					}
@@ -618,6 +622,9 @@ class moodlecore  extends solution {
 				foreach ($data as $key => $value) {
 					if ($key == 'target_id') {
 						continue;
+					// We don't send Myddleware_element_id field to Moodle
+					} elseif ($key == 'Myddleware_element_id') {
+						continue;
 					}
 					if (!empty($value)) {
 						$obj->$key = $value;
@@ -659,7 +666,8 @@ class moodlecore  extends solution {
 					default:
 						throw new \Exception("Module unknown. ");
 						break;
-				}			
+				}	
+			
 				$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;
 				$response = $this->moodleClient->post($serverurl, $params);			
 				$xml = simplexml_load_string($response);

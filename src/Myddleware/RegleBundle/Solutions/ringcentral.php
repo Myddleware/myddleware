@@ -272,17 +272,21 @@ class ringcentralcore  extends solution {
 						$records = $recordsObj;
 					}
 					if (!empty($records->records)) {
-						$nbRecord = count($records->records);
+						$nbRecord = count($records->records);			
 						// For each records
 						foreach($records->records as $record) {
-							// For each fields expected
+							// For each fields expected	
 							foreach($param['fields'] as $field) {
 								// The field could be a structure from_phoneNumber for example
-								$fieldStructure = explode('__',$field);
+								$fieldStructure = explode('__',$field);	
 								// If 2 dimensions						
 								if (!empty($fieldStructure[1])) {
+									// Convert data to string
+									$entryName = (string) $fieldStructure[0];									
+									$subEntryName = (string) $fieldStructure[1];																	
+								
 									// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
-									$record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
+									$record->$field = (isset($record->$entryName->$subEntryName) ? $record->$entryName->$subEntryName : '');
 								}
 								// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
 								if(isset($record->$field)) {

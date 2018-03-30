@@ -38,6 +38,7 @@ class prestashopcore extends solution {
 										'product_options' => array('id'),
 										'product_option_values' => array('id'),
 										'combinations' => array('id'),
+										'stock_availables' => array('id'),
 										'order_histories' => array('id', 'date_add'),
 										'customer_messages' => array('id', 'date_add'),
 										'order_carriers' => array('id', 'date_add'),
@@ -50,7 +51,7 @@ class prestashopcore extends solution {
 	protected $moduleWithLanguage = array('products');
 	
 	// Module without reference date
-	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations','carriers');
+	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations','carriers','stock_availables');
 
 	protected $required_relationships = array(
 												'default' => array()
@@ -489,9 +490,9 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
-					
+				
 				// Call when there is no query (simulation)
-				$xml = $this->webService->get($opt);
+				$xml = $this->webService->get($opt);				
 				$xml = $xml->asXML();
 				$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 				

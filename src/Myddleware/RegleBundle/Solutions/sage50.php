@@ -506,7 +506,8 @@ class sage50core extends solution
 						) {								
 							$result['date_ref'] = $row['date_modified'];
 						}
-
+						// Change the date format
+						$row['date_modified'] = $this->dateTimeToMyddleware($row['date_modified']);
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
 						$row = array();
@@ -516,7 +517,10 @@ class sage50core extends solution
 			} elseif (!empty($response['Message'])) {
 				throw new \Exception($response['Message']);	
 			} elseif (!empty($response['curlData']['message'])) {
-				throw new \Exception($response['curlData']['message']);	
+				// When there is no result, Sage returns this message : Unable to locate the specified object '' 
+				if (strpos($response['curlData']['message'], "Unable to locate the specified object ''") === false) {
+					throw new \Exception($response['curlData']['message']);	
+				}
 			} else {
 				throw new \Exception('Failed to call Sage with no error returned.');	
 			}		
@@ -625,7 +629,7 @@ class sage50core extends solution
 	// Create data in the target solution
 	public function create($param) {
 		$subDocIdArray = array();
-		$this->get_module_fields($param ['module'],'source');		
+		$this->get_module_fields($param ['module'],'target');		
 		foreach($param['data'] as $idDoc => $data) {
 			try {
 				// If update we add the target id in the xml
