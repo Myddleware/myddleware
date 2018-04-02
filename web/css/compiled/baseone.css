@@ -305,7 +305,7 @@ input[type="text"] {
 .fancybox-close,
 .fancybox-prev span,
 .fancybox-next span {
-  background-image: url(../../../fancybox_sprite.png);
+  background-image: url(../../fancybox_sprite.png);
 }
 #fancybox-loading {
   position: fixed;
@@ -321,7 +321,7 @@ input[type="text"] {
 #fancybox-loading div {
   width: 44px;
   height: 44px;
-  background: url(../../../fancybox_loading.gif) center center no-repeat;
+  background: url(../../fancybox_loading.gif) center center no-repeat;
 }
 .fancybox-close {
   position: absolute;
@@ -339,7 +339,7 @@ input[type="text"] {
   height: 100%;
   cursor: pointer;
   text-decoration: none;
-  background: transparent url(../../../blank.gif);
+  background: transparent url(../../blank.gif);
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   z-index: 8040;
 }
@@ -395,7 +395,7 @@ input[type="text"] {
   overflow: hidden;
   display: none;
   z-index: 8010;
-  background: url(../../../fancybox_overlay.png);
+  background: url(../../fancybox_overlay.png);
 }
 .fancybox-overlay-fixed {
   position: fixed;
@@ -461,11 +461,11 @@ input[type="text"] {
   .fancybox-close,
   .fancybox-prev span,
   .fancybox-next span {
-    background-image: url(../../../fancybox_sprite@2x.png);
+    background-image: url(../../fancybox_sprite@2x.png);
     background-size: 44px 152px;
   }
   #fancybox-loading div {
-    background-image: url(../../../fancybox_loading@2x.gif);
+    background-image: url(../../fancybox_loading@2x.gif);
     background-size: 24px 24px;
   }
 }
@@ -881,7 +881,7 @@ x:-o-prefocus,
   left: 0;
 }
 .qtip .qtip-tip .qtip-vml {
-  behavior: url(../../../Resources/public/css/lib/jquery/#default#VML);
+  behavior: url(../../Resources/public/css/lib/jquery/#default#VML);
   display: inline-block;
   visibility: visible;
 }
