@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "472e580953cf065258df1f8070d77f09",
-    "content-hash": "bdf67064f19ae578321a67d0742a496a",
+    "hash": "1327f9a8232cdec03774220e65007ec5",
+    "content-hash": "92258eb672d9a03fc5d550cdc97d7575",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -487,39 +487,39 @@
         },
         {
             "name": "doctrine/doctrine-cache-bundle",
-            "version": "1.3.2",
+            "version": "1.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineCacheBundle.git",
-                "reference": "9baecbd6bfdd1123b0cf8c1b88fee0170a84ddd1"
+                "reference": "4c8e363f96427924e7e519c5b5119b4f54512697"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineCacheBundle/zipball/9baecbd6bfdd1123b0cf8c1b88fee0170a84ddd1",
-                "reference": "9baecbd6bfdd1123b0cf8c1b88fee0170a84ddd1",
+                "url": "https://api.github.com/repos/doctrine/DoctrineCacheBundle/zipball/4c8e363f96427924e7e519c5b5119b4f54512697",
+                "reference": "4c8e363f96427924e7e519c5b5119b4f54512697",
                 "shasum": ""
             },
             "require": {
                 "doctrine/cache": "^1.4.2",
                 "doctrine/inflector": "~1.0",
                 "php": ">=5.3.2",
-                "symfony/doctrine-bridge": "~2.2|~3.0|~4.0"
+                "symfony/doctrine-bridge": "~2.7|~3.3|~4.0"
             },
             "require-dev": {
                 "instaclick/coding-standard": "~1.1",
                 "instaclick/object-calisthenics-sniffs": "dev-master",
                 "instaclick/symfony2-coding-standard": "dev-remaster",
-                "phpunit/phpunit": "~4",
+                "phpunit/phpunit": "~4|~5",
                 "predis/predis": "~0.8",
                 "satooshi/php-coveralls": "^1.0",
                 "squizlabs/php_codesniffer": "~1.5",
-                "symfony/console": "~2.2|~3.0|~4.0",
-                "symfony/finder": "~2.2|~3.0|~4.0",
-                "symfony/framework-bundle": "~2.2|~3.0|~4.0",
-                "symfony/phpunit-bridge": "~2.7|~3.0|~4.0",
-                "symfony/security-acl": "~2.3|~3.0",
-                "symfony/validator": "~2.2|~3.0|~4.0",
-                "symfony/yaml": "~2.2|~3.0|~4.0"
+                "symfony/console": "~2.7|~3.3|~4.0",
+                "symfony/finder": "~2.7|~3.3|~4.0",
+                "symfony/framework-bundle": "~2.7|~3.3|~4.0",
+                "symfony/phpunit-bridge": "~2.7|~3.3|~4.0",
+                "symfony/security-acl": "~2.7|~3.3",
+                "symfony/validator": "~2.7|~3.3|~4.0",
+                "symfony/yaml": "~2.7|~3.3|~4.0"
             },
             "suggest": {
                 "symfony/security-acl": "For using this bundle to cache ACLs"
@@ -571,7 +571,7 @@
                 "cache",
                 "caching"
             ],
-            "time": "2017-10-12 17:23:29"
+            "time": "2018-03-27 09:22:12"
         },
         {
             "name": "doctrine/inflector",
@@ -885,16 +885,16 @@
         },
         {
             "name": "friendsofsymfony/user-bundle",
-            "version": "v2.1.1",
+            "version": "v2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSUserBundle.git",
-                "reference": "32c2eed036dd85620cc5229fa482a7ae9455ded9"
+                "reference": "2fc8a023d7ab482321cf7ec810ed49eab40eb50f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/32c2eed036dd85620cc5229fa482a7ae9455ded9",
-                "reference": "32c2eed036dd85620cc5229fa482a7ae9455ded9",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/2fc8a023d7ab482321cf7ec810ed49eab40eb50f",
+                "reference": "2fc8a023d7ab482321cf7ec810ed49eab40eb50f",
                 "shasum": ""
             },
             "require": {
@@ -958,7 +958,7 @@
             "keywords": [
                 "User management"
             ],
-            "time": "2018-02-20 09:19:29"
+            "time": "2017-11-29 17:01:21"
         },
         {
             "name": "gedmo/doctrine-extensions",
@@ -2287,7 +2287,7 @@
         },
         {
             "name": "symfony/expression-language",
-            "version": "v3.4.4",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/expression-language.git",
@@ -2971,16 +2971,16 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v2.8.31",
+            "version": "v2.8.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "fa9fa59d7bf9d5c73a264d348f0da793cafdc73c"
+                "reference": "e5150a094b08887356b2b90805538836208d4569"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/fa9fa59d7bf9d5c73a264d348f0da793cafdc73c",
-                "reference": "fa9fa59d7bf9d5c73a264d348f0da793cafdc73c",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/e5150a094b08887356b2b90805538836208d4569",
+                "reference": "e5150a094b08887356b2b90805538836208d4569",
                 "shasum": ""
             },
             "require": {
@@ -3062,7 +3062,7 @@
                 "ocramius/proxy-manager": "~0.4|~1.0|~2.0",
                 "phpdocumentor/reflection": "^1.0.7",
                 "sensio/framework-extra-bundle": "^3.0.2",
-                "symfony/phpunit-bridge": "~3.2"
+                "symfony/phpunit-bridge": "~3.4|~4.0"
             },
             "type": "library",
             "extra": {
@@ -3106,7 +3106,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2017-11-16 17:44:10"
+            "time": "2018-04-02 11:38:50"
         },
         {
             "name": "twig/extensions",
@@ -3166,16 +3166,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.35.0",
+            "version": "v1.35.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "daa657073e55b0a78cce8fdd22682fddecc6385f"
+                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/daa657073e55b0a78cce8fdd22682fddecc6385f",
-                "reference": "daa657073e55b0a78cce8fdd22682fddecc6385f",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
+                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
                 "shasum": ""
             },
             "require": {
@@ -3183,8 +3183,8 @@
             },
             "require-dev": {
                 "psr/container": "^1.0",
-                "symfony/debug": "~2.7",
-                "symfony/phpunit-bridge": "~3.3@dev"
+                "symfony/debug": "^2.7",
+                "symfony/phpunit-bridge": "^3.3"
             },
             "type": "library",
             "extra": {
@@ -3227,7 +3227,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2017-09-27 18:06:46"
+            "time": "2018-03-20 04:25:58"
         },
         {
             "name": "twitter/bootstrap",
