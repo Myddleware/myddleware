@@ -22,8 +22,8 @@
             {% if entities is not empty %}
                 <tr>
                     <th>{{ 'jobscheduler.command'|trans }}</th>
-                    <th>{{ 'jobscheduler.date_created'|trans }}</th>
-                    <th>{{ 'jobscheduler.date_modified'|trans }}</th>
+                    <th>{{ 'jobscheduler.paramName1'|trans }}</th>
+                    <th>{{ 'jobscheduler.paramName2'|trans }}</th>
                     <th>{{ 'jobscheduler.period'|trans }}</th>
                     <th>{{ 'jobscheduler.job_order'|trans }}</th>
                     <th>{{ 'jobscheduler.active'|trans }}</th>
@@ -35,10 +35,10 @@
                             {{ entity.command }}
                         </td>
                         <td class="solution_block">
-                            {% if entity.dateCreated %}{{ entity.dateCreated|date('Y-m-d H:i:s') }}{% endif %}
+                            {% if entity.paramName1 %}{{ entity.paramName1 }} : {{ entity.paramValue1 }}{% endif %}
                         </td>
                          <td class="solution_block">
-                            {% if entity.dateModified %}{{ entity.dateModified|date('Y-m-d H:i:s') }}{% endif %}
+                            {% if entity.paramName2 %}{{ entity.paramName2 }} : {{ entity.paramValue2 }}{% endif %}
                         </td>
                         <td>
                             {{ entity.period }}
@@ -66,8 +66,8 @@
                 {% endfor %}
                 <tr>
                     <th>{{ 'jobscheduler.command'|trans }}</th>
-                    <th>{{ 'jobscheduler.date_created'|trans }}</th>
-                    <th>{{ 'jobscheduler.date_modified'|trans }}</th>
+                    <th>{{ 'jobscheduler.paramName1'|trans }}</th>
+                    <th>{{ 'jobscheduler.paramName2'|trans }}</th>
                     <th>{{ 'jobscheduler.period'|trans }}</th>
                     <th>{{ 'jobscheduler.job_order'|trans }}</th>
                     <th>{{ 'jobscheduler.active'|trans }}</th>
