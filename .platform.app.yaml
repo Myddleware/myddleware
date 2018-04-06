@@ -38,6 +38,7 @@ disk: 2048
 mounts:
     "/app/cache": "shared:files/cache"
     "/app/logs": "shared:files/logs"
+    "/app/config/public": "shared:files/config/public"
     "/app/sessions": "shared:files/sessions"
     "/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
 

@@ -1,6 +1,7 @@
 imports:
     - { resource: parameters.yml }
-    - { resource: parameters_smtp.yml }
+    - { resource: public/parameters_smtp.yml }
+    - { resource: public/parameters_public.yml }
     - { resource: security.yml }
     - { resource: parameters_platform.php }
 

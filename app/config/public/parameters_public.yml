@@ -1,0 +1,11 @@
+parameters:
+    php:
+        executable: php
+    locale: en
+    pager: 20
+    migration:
+        mode: 0
+    notification:
+        alert_time_limit: 60
+    transfer:
+        search_limit: 1000

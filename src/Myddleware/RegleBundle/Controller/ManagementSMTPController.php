@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class ManagementSMTPController extends Controller
 {
-    const PATH = './../app/config/parameters_smtp.yml';
+    const PATH = './../app/config/public/parameters_smtp.yml';
     protected $tools;
 
 

@@ -133,7 +133,7 @@ class toolscore {
 	
 	// Change Myddleware parameters
 	public function changeMyddlewareParameter($nameArray, $value) {	
-		$myddlewareParameters = Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));
+		$myddlewareParameters = Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml'));
 		// Search the translation
 		if (!empty($myddlewareParameters)) {
 			$nbLevel = sizeof($nameArray);
@@ -150,7 +150,7 @@ class toolscore {
 				}
 		}
 		$new_yaml = \Symfony\Component\Yaml\Yaml::dump($myddlewareParameters, 4);
-		file_put_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml', $new_yaml);
+		file_put_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml', $new_yaml);
 	}
 }
 

@@ -1,8 +1,8 @@
 parameters:
     mailer_transport: sendmail
     mailer_host: localhost
-    mailer_port: '25'
+    mailer_port: '26'
     mailer_auth_mode: null
     mailer_encryption: null
-    mailer_user: null
-    mailer_password: null
+    mailer_user: admin
+    mailer_password: 'Recette?1'
