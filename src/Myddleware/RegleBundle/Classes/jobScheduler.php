@@ -68,7 +68,7 @@ class jobSchedulercore
                                 )
                             );
                             break;
-                        case 'notification':
+						case 'notification':
                             $list[$job]['param1'] = array(
                                 'type' => array(
                                     'fieldType' => 'list',
@@ -82,7 +82,7 @@ class jobSchedulercore
                                     'fieldType' => 'int'
                                 )
                             );
-                            $list[$job]['param1'] = array(
+                            $list[$job]['param2'] = array(
                                 'attempt' => array(
                                     'fieldType' => 'int'
                                 )

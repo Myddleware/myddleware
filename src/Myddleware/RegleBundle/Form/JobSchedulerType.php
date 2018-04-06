@@ -23,9 +23,10 @@ class JobSchedulerType extends AbstractType
                 'required' => true,
                 'empty_data' => 'null',
                 'choices' => array(
-                    'synchro' => 'Synchro',
-                    'notification' => 'Notification',
-                    'rerunerror' => 'reRunError',
+                    'synchro'		=> 'Synchro',
+                    'notification'	=> 'Notification',
+                    'rerunerror' 	=> 'Rerun Error',
+                    'cleardata' 	=> 'Clear Data',
                 ),
                 'empty_value' => '- Choice command -',
 
