@@ -18,15 +18,17 @@ class JobSchedulerType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
+
         $builder
             ->add('command', ChoiceType::class, array(
                 'required' => true,
                 'empty_data' => 'null',
                 'choices' => array(
-                    'synchro'		=> 'Synchro',
-                    'notification'	=> 'Notification',
-                    'rerunerror' 	=> 'Rerun Error',
-                    'cleardata' 	=> 'Clear Data',
+                    'synchro' => 'Synchro',
+                    'notification' => 'Notification',
+                    'rerunerror' => 'Rerun Error',
+                    'cleardata' => 'Clear Data',
                 ),
                 'empty_value' => '- Choice command -',
 
@@ -35,14 +37,32 @@ class JobSchedulerType extends AbstractType
             ->add('paramValue1')
             ->add('paramValue2')
             ->add('paramName2')
-            ->add('period', IntegerType::class, array('required' => true, 'data' => 5))
+            ->add('period', IntegerType::class, array('required' => true, 'data' => $this->getPeriod($options)))
             ->add('active', CheckboxType::class, array(
                 'label' => 'Active ?',
                 'required' => false,
             ))
-            ->add('jobOrder', IntegerType::class, array('required' => true, 'data' => 1));
+            ->add('jobOrder', IntegerType::class, array('required' => true, 'data' => $this->getJobOrder($options)));
+    }
 
+    /**
+     * get period value
+     * @param $options
+     * @return int
+     */
+    public function getPeriod($options)
+    {
+        return $options['data']->getPeriod() == '' ? $period = 5 : $period = $options['data']->getPeriod();
+    }
 
+    /**
+     * get jobOrder value
+     * @param $options
+     * @return int
+     */
+    public function getJobOrder($options)
+    {
+        return $options['data']->getjobOrder() == '' ? $jobOrder = 1 : $jobOrder = $options['data']->getjobOrder();
     }
 
     /**
