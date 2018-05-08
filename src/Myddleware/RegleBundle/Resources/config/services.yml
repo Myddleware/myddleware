@@ -120,6 +120,9 @@ services:
      myddleware_rule.hubspot:
         class: Myddleware\RegleBundle\Solutions\hubspot
         arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
+     myddleware_rule.erpnext:
+        class: Myddleware\RegleBundle\Solutions\erpnext
+        arguments: [@logger, @service_container, @doctrine.dbal.default_connection]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: [@logger, @service_container, @doctrine.dbal.default_connection, 'rule']

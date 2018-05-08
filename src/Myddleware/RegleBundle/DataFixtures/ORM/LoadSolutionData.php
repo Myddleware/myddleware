@@ -37,8 +37,10 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'eventbrite',		'active' => 0,'source' => 1,'target' => 0),
 									array('name' => 'suitecrm',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'mailchimp',		'active' => 1,'source' => 0,'target' => 1),
+									array('name' => 'bittle',			'active' => 0,'source' => 0,'target' => 1),
 									array('name' => 'sagecrm',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'sapcrm',			'active' => 0,'source' => 1,'target' => 1),
 									array('name' => 'mysql',			'active' => 1,'source' => 1,'target' => 1),
@@ -54,6 +56,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'zuora',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'sage50',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'hubspot',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'erpnext',			'active' => 1,'source' => 1,'target' => 1),
 							);
  
     public function load(ObjectManager $manager){
