@@ -109,50 +109,52 @@ class erpnextcore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			// ERPNext has no function to get the field list for a module
-			// So we read a record and get the fields from there
-			// Get the record link
-			$url = $this->paramConnexion['url'].'/api/resource/'.$module;
+			// Get the list field for a module
+			$url = $this->paramConnexion['url'].'/api/method/frappe.client.get_list?doctype=DocField&parent='.$module.'&fields=*&filters={%22parent%22:%22'.$module.'%22}&limit_page_length=500';
 			$recordList = $this->call($url,'GET','');	
 			
-			// Get the first record	
-			if (!empty($recordList->data[0]->name)) {
-				$url = $this->paramConnexion['url'].'/api/resource/'.$module.'/'.$recordList->data[0]->name;
-				$record = $this->call($url,'GET','');
-				if (!empty($record->data)) {
-					foreach ($record->data as $key => $field) {
-						if ($key == 'links') {
-							if (!empty($record->data->links[0])) {
-								foreach($record->data->links as $link) {
-									$this->fieldsRelate[$link->link_doctype.'_id'] = array(
-																			'label' => $link->link_doctype.'_id',
-																			'type' => 'varchar(255)',
-																			'type_bdd' => 'varchar(255)',
-																			'required' => '',
-																			'required_relationship' => '',
-																		);
+			// Format outpput data
+			if (!empty($recordList->message)) {
+				foreach($recordList->message as $field) {
+					if (empty( $field->label)) {
+						continue;
+					}
+					if ($field->fieldtype == 'Link') {
+						$this->fieldsRelate[$field->fieldname] = array(
+																'label' => $field->label,
+																'type' => 'varchar(255)',
+																'type_bdd' => 'varchar(255)',
+																'required' => '',
+																'required_relationship' => '',
+															);
+					} else {
+						$this->moduleFields[$field->fieldname] = array(
+																'label' => $field->label,
+																'type' => 'varchar(255)',
+																'type_bdd' => 'varchar(255)',
+																'required' => '',
+															);
+						if(!empty($field->options)) {
+							$options = explode(chr(10),$field->options);
+							if (
+									!empty($options)
+								AND count($options) > 1
+							) {
+								foreach ($options as $option) {
+									$this->moduleFields[$field->fieldname]['option'][$option] = $option;
 								}
 							}
-						} else {
-							$this->moduleFields[$key] = array(
-															'label' => $key,
-															'type' => 'varchar(255)',
-															'type_bdd' => 'varchar(255)',
-															'required' => ''
-														);
 						}
 					}
-				} else {
-					throw new \Exception('Failed to read the record '.$record->data[0]->name.'. Failed to get the field list. Please create at least one record to allow Myddleware to read the field list');
 				}
 			} else {
-				throw new \Exception('No data in the module '.$module.'. Failed to get the field list. Please create at least one record to allow Myddleware to read the field list');
+				throw new \Exception('No data in the module '.$module.'. Failed to get the field list.');
 			}
 
 			// Add relate field in the field mapping 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}			 
+			}		 
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -201,393 +203,7 @@ class erpnextcore  extends solution {
 		}
 		return json_decode($response);
     }
-	
-	
-	
-	
-	
-
-	// Get the last data in the application
-	public function read_last($param) {	
-		try {
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			// Remove Myddleware 's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
-			$query = 'SELECT ';
-			// Build the SELECT 
-			if (!empty($param['fields'])) {
-				foreach ($param['fields'] as $field) {
-					$query .= $field.',';
-				}
-				// Delete the last coma 
-				$query = rtrim($query, ',');
-			} else {
-				$query .= ' * ';
-			}
-			
-			// Add the FROM
-			$query .= ' FROM '.$param['module'].' ';
-			
-			// Generate the WHERE
-			if (!empty($param['query'])) {
-				$query .= ' WHERE ';
-				$first = true;
-				foreach ($param['query'] as $key => $value) {
-					// Add the AND only if we are not on the first condition
-					if ($first) {
-						$first = false;
-					} else {
-						$query .= ' AND ';
-					}
-					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-					if ($key == 'id') {
-						$key = 'Id';
-					}
-					// Add the condition
-					$query .= $key." = '".$value."' ";
-				}
-			// The function is called for a simulation (rule creation) if there is no query
-			} else {
-				$query .= " WHERE ModificationDate < '".date('Y-m-d H:i:s')."'" ; // Need to add 'limit 1' here when the command LIMIT will be available
-			}
-	
-			// Buid the input parameter
-			$selectparam = ["authToken" 	=> $this->token,
-							"selectQuery" 	=> $query,
-							];
-			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			$resultQuery = $this->call($url);
-		
-			// If the query return an error 
-			if (!empty($resultQuery['Message'])) {
-				throw new \Exception($resultQuery['Message']);	
-			}	
-			// If no result
-			if (empty($resultQuery)) {
-				$result['done'] = false;
-			}
-			// Format the result
-			// If several results, we take the first one
-			if (!empty($resultQuery[$param['module']][0])) {
-				$record = $resultQuery[$param['module']][0];	
-			// If one result we take the first one
-			} else {
-				$record = $resultQuery[$param['module']];
-			}
-			
-			foreach($param['fields'] as $field) {
-				// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-				if(isset($record[$field])) {
-					// Cirrus return an array when the data is empty
-					if (is_array($record[$field])) {
-						$result['values'][$field] = '';
-					} else {
-						// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-						if ($field == 'Id') {
-							$result['values']['id'] = $record[$field];
-						} else {
-							$result['values'][$field] = $record[$field];
-						}
-					}
-				}
-			}
-			if (!empty($result['values'])) {
-				$result['done'] = true;
-			}
-		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-		}			
-		return $result;
-	}
-
-	public function read($param) {
-		try {
-			$result['date_ref'] = $param['date_ref'];
-			$result['count'] = 0;
-			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			// Remove Myddleware 's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
-			// Get the reference date field name
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
-			// Get the organization timezone
-			if (empty($this->organizationTimezoneOffset)) {
-				$this->getOrganizationTimezone();
-				// If the organization timezone is still empty, we generate an error
-				if (empty($this->organizationTimezoneOffset)) {
-					throw new \Exception('Failed to get the organization Timezone. This timezone is requierd to save the reference date.');
-				}
-			}
-			
-			$query = 'SELECT ';
-			// Build the SELECT 
-			if (!empty($param['fields'])) {
-				foreach ($param['fields'] as $field) {
-					$query .= $field.',';
-				}
-				// Delete the last coma 
-				$query = rtrim($query, ',');
-			} else {
-				$query .= ' * ';
-			}
-			
-			// Add the FROM
-			$query .= ' FROM '.$param['module'].' ';
-			
-			// Generate the WHERE
-			// if a specific query is requeted we don't use date_ref (used for child document)
-			if (!empty($param['query'])) {
-				$query .= ' WHERE ';
-				$first = true;
-				foreach ($param['query'] as $key => $value) {
-					// Add the AND only if we are not on the first condition
-					if ($first) {
-						$first = false;
-					} else {
-						$query .= ' AND ';
-					}
-					// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-					if ($key == 'id') {
-						$key = 'Id';
-					}
-					// Add the condition
-					$query .= $key." = '".$value."' ";
-				}
-			// Function called as a standard read, we use the reference date
-			} else {
-				$query .= " WHERE ".$dateRefField." > ".$param['date_ref'].$this->organizationTimezoneOffset; 
-				// $query .= " WHERE ".$dateRefField." > 2017-03-30 14:42:35-05 "; 
-			}		
-
-			// Buid the parameters to call the solution
-			$selectparam = ["authToken" 	=> $this->token,
-							"selectQuery" 	=> $query,
-							];
-			$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-			$resultQuery = $this->call($url);
-
-			// If the query return an error 
-			if (!empty($resultQuery['Message'])) {
-				throw new \Exception($resultQuery['Message']);	
-			}	
-			// If no result
-			if (!empty($resultQuery[$param['module']])) {
-				// If only one record, we add a dimension to be able to use the foreach below
-				if (empty($resultQuery[$param['module']][0])) {
-					$tmp[$param['module']][0] = $resultQuery[$param['module']];
-					$resultQuery = $tmp;
-				}
-				// For each records
-				foreach($resultQuery[$param['module']] as $record) {				
-					// For each fields expected
-					foreach($param['fields'] as $field) {
-						if ($field == 'id') {
-							$field = 'Id';
-						}					
-						// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-						if(isset($record[$field])) {
-							// If we are on the date ref field, we add the entry date_modified (put to lower case because ModificationDate in the where is modificationdate int the select
-							if ($field == $dateRefField) {
-								$row['date_modified'] = $record[$field];
-							} elseif ($field == 'Id') {
-								$row['id'] = $record[$field];
-							} else {
-								// Cirrus return an array when the data is empty
-								if (is_array($record[$field])) {
-									$row[$field] = '';
-								} else {
-									$row[$field] = $record[$field];
-								}
-							}
-						}
-					}
-					if (
-							!empty($record[$dateRefField])
-						&&	$result['date_ref'] < $record[$dateRefField]
-					) {								
-						// Transform the date with the organization timezone
-						$dateRef = new \DateTime($record[$dateRefField]);
-						$dateRef->modify($this->organizationTimezoneOffset.' hours');
-						$result['date_ref'] = $dateRef->format('Y-m-d H:i:s');
-					}
-					$result['values'][$row['id']] = $row;
-					$result['count']++;
-					$row = array();
-				}
-			}
-		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
-		return $result;
-	}	
-	
-	// Create data in the target solution
-	public function create($param) {	
-		try {
-			$i = 0;
-			$nb_record = count($param['data']);	
-			// XML creation (for the first call)
-			$xmlData = '<Data>';
-			foreach($param['data'] as $idDoc => $data) {
-				$i++;
-				 // Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
-				$xmlData .= '<'.$param['module'].'>';
-				// Save the idoc to manage result
-				$xmlData .= '<OrderId>'.$idDoc.'</OrderId>';
-				foreach ($data as $key => $value) {
-					// Field only used for the update and contains the ID of the record in the target solution			
-					if ($key=='target_id') {					
-						// If updade then we change the key in Id
-						if (!empty($value)) {
-							$key = 'Id';
-						} else { // If creation, we skip this field
-							continue;
-						}
-					}
-					$xmlData .= '<'.$key.'>'.$value.'</'.$key.'>';
-					
-				}
-				$xmlData .= '</'.$param['module'].'>';
-			
-				// If we have finished to read all data or if the package is full we send the data to Sallesforce
-				if (
-						$i == $nb_record
-					 || $i % $this->limitCall  == 0
-				) {	
-					$xmlData .= '</Data>';
-					
-					// Set parameters to send data to the target solution (creation or modification)
-					$selectparam = ["authToken" 		=> $this->token,
-									"action" 			=> ($this->update ? 'update' : 'insert'),
-									"matchingFieldName" => 'Id',
-									"useExternalId" 	=> 'false',
-								];
-					$url = sprintf("%s?%s", $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
-					// Send data to the target solution					
-					$resultCall = $this->call($url,'POST',urlencode($xmlData));
-					if (empty($resultCall)) {
-						throw new \Exception('Result from Cirrus Shield empty');
-					}
-					if (!empty($resultCall['Message'])) {
-						throw new \Exception($resultCall['Message']);
-					}		
-					// XML initialisation (for the next call)
-					$xmlData = '<Data>';
-
-					// If only one result, we add a dimension
-					if (isset($resultCall[$param['module']]['Success'])) {
-						$resultCall[$param['module']] = array($resultCall[$param['module']]);
-						
-					}
-					
-					// Manage results
-					if (!empty($resultCall[$param['module']])) {
-						foreach ($resultCall[$param['module']] as $record) {
-							// General error
-							if (!empty($record['Message'])) {
-								throw new \Exception($record['Message']);
-							}
-
-							// Error managment for the record creation
-							if (!empty($record['Success'])) {
-								if ($record['Success'] == 'False') {
-									$result[$record['orderid']] = array(
-																	'id' => '-1',
-																	'error' => $record['ErrorMessage']
-																);
-								} else {
-									$result[$record['orderid']] = array(
-															'id' => $record['GUID'],
-															'error' => false
-														);
-								}
-							} else {
-								$result[$record['orderid']] = array(
-																'id' => '-1',
-																'error' => 'No success flag returned by Cirrus Shield'
-															);
-
-							}
-							// Transfert status update
-							$this->updateDocumentStatus($record['orderid'],$result[$record['orderid']],$param);	
-						}
-					}
-				}
-			}				
-		}
-		catch (\Exception $e) {
-			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
-			$result['error'] = $error;
-		}	
-		return $result;
-	}
-	
-	// Cirrus Shield use the same function for record's creation and modification
-	public function update($param) {
-		$this->update = true;
-		$result = $this->create($param);
-		$this->update = false;
-		return $result;
-	}
-	
-	// retrun the reference date field name
-	public function getDateRefName($moduleSource, $RuleMode) {
-		// Creation and modification mode
-		if($RuleMode == "0") {
-			return "ModificationDate";
-		// Creation mode only
-		} else if ($RuleMode == "C"){
-			return "CreationDate";
-		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
-		}
-		return null;
-	}
-	
-	protected function getOrganizationTimezone() {
-		// Get the organization in Cirrus
-		$query = 'SELECT DefaultTimeZoneSidKey FROM Organization';
-		// Buid the parameters to call the solution
-		$selectparam = ["authToken" 	=> $this->token,
-						"selectQuery" 	=> $query,
-						];
-		$url = sprintf("%s?%s", $this->url."Query", http_build_query($selectparam));
-		$resultQuery = $this->call($url);
-		if (empty($resultQuery['Organization']['DefaultTimeZoneSidKey'])) {
-			throw new \Exception('Failed to retrieve the organisation timezone : no organization found '.$resultQuery['Organization']['DefaultTimeZoneSidKey'].'. ');	
-		}
-		
-		// Get the list of timeZone  Cirrus
-		$organizationFields = $this->call($this->url.'Describe/Organization?authToken='.$this->token);
-		
-		if (!empty($organizationFields['Fields'])) {
-			// Get the content of the field DefaultTimeZoneSidKey
-			$timezoneFieldKey = array_search('DefaultTimeZoneSidKey', array_column($organizationFields['Fields'], 'Name'));
-			if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'])) {
-				// Get the key of the timezone of the organization
-				$timezoneOrganizationKey = array_search($resultQuery['Organization']['DefaultTimeZoneSidKey'], array_column($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'], 'Name'));		
-				if (!empty($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'])) {
-					// Get the offset of the timezone formatted like (GMT-05:00) Eastern Standard Time (America/New_York)
-					$this->organizationTimezoneOffset = substr($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], strpos($organizationFields['Fields'][$timezoneFieldKey]['PicklistValues'][$timezoneOrganizationKey]['Label'], 'GMT')+3, 3);
-				}
-			}
-		}	
-		// Error management
-		if (empty($this->organizationTimezoneOffset)) {
-			throw new \Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');	
-		}
-	}
-
-	
-	
-	 
+ 
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
