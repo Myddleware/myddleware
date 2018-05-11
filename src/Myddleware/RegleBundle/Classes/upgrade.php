@@ -76,7 +76,7 @@ class upgradecore  {
 			$output->writeln('<comment>Update parameters...</comment>');
 			$this->updateParameters();
 			$output->writeln('<comment>Update parameters OK</comment>');
-exit;			
+		
 			// Update file
 			$output->writeln('<comment>Update files...</comment>');
 			$this->updateFiles();
@@ -115,7 +115,7 @@ exit;
 			// Customize update process
 			$this->afterUpdate($output);
 			
-			$output->writeln('<info>Myddleware has been successfully updated in version '.$this->newParameters['parameters']['myd_version'].'</info>');
+			$output->writeln('<info>Myddleware has been successfully updated in version '.$this->newParameters['parameters']['parameters']['myd_version'].'</info>');
 		
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -293,12 +293,12 @@ exit;
 	// Myddleware upgrade
 	protected function changeVersion() {
 		// Read the file parameters.yml.dist with the new version of Myddleware		
-		if (!empty($this->newParameters['parameters']['myd_version'])) {
-			if ($this->newParameters['parameters']['myd_version'] != $this->currentParameters['parameters']['myd_version']) {
-				$this->currentParameters['parameters']['myd_version'] = $this->newParameters['parameters']['myd_version'];
-				$new_yaml = \Symfony\Component\Yaml\Yaml::dump($this->currentParameters, 4);
+		if (!empty($this->newParameters['parameters']['parameters']['myd_version'])) {
+			if ($this->newParameters['parameters']['parameters']['myd_version'] != $this->currentParameters['parameters']['parameters']['myd_version']) {
+				$this->currentParameters['parameters']['parameters']['myd_version'] = $this->newParameters['parameters']['parameters']['myd_version'];
+				$new_yaml = \Symfony\Component\Yaml\Yaml::dump($this->currentParameters['parameters'], 4);
 				file_put_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml', $new_yaml);
-				$info = 'Version changed to '.$this->newParameters['parameters']['myd_version'].' in the file /config/parameters.yml';
+				$info = 'Version changed to '.$this->newParameters['parameters']['parameters']['myd_version'].' in the file /config/parameters.yml';
 				echo $info.chr(10);
 				$this->logger->info($info);
 			}
