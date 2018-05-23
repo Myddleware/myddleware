@@ -57,7 +57,7 @@ class JobScheduler
     /**
      * @var datetime
      *
-     * @ORM\Column(name="date_modified", columnDefinition="DATETIME on update CURRENT_TIMESTAMP"))
+     * @ORM\Column(name="date_modified", type="datetime")
 	 * 
      */
     private $dateModified;
