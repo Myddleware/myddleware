@@ -57,8 +57,14 @@ class upgradecore  {
 		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml.dist'));	
 		// Current parameters in file parameters.yml
 		$this->currentParameters['parameters'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));	
-		$this->currentParameters['parameters_public'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml'));	
-		$this->currentParameters['parameters_smtp'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml'));	
+		$this->currentParameters['parameters_public'] = '';
+		if (file_exists($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml')){
+			$this->currentParameters['parameters_public'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml'));	
+		}
+		$this->currentParameters['parameters_smtp'] = '';
+		if (file_exists($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml')){
+			$this->currentParameters['parameters_smtp'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml'));
+		}
 		
 		// Get php executable 
 		$phpParameter = $this->container->getParameter('php');
@@ -131,7 +137,10 @@ class upgradecore  {
 		foreach($this->newParameters as $key => $yml) {
 			// Check if a parameter exists in dist file and not in the parameter file
 			foreach ($yml['parameters'] as $newParameterKey => $newParameterValue) {		
-				if(array_key_exists($newParameterKey, $this->currentParameters[$key]['parameters'])===false) {				
+				if (		
+						empty ($this->currentParameters[$key]['parameters'])
+					 OR array_key_exists($newParameterKey, $this->currentParameters[$key]['parameters'])===false
+				) {				
 					// Add it i the parameter file
 					$this->currentParameters[$key]['parameters'][$newParameterKey] = $newParameterValue;
 					$new_yaml = \Symfony\Component\Yaml\Yaml::dump($this->currentParameters[$key], 4);
