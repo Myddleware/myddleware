@@ -179,7 +179,7 @@ class upgradecore  {
 		echo $output2;
 		if (
 				strpos($output2, 'Already up to date') === false
-			OR	strpos($output2, 'Already up-to-date') === false
+			AND	strpos($output2, 'Already up-to-date') === false
 		) {
 			throw new \Exception ('Failed to update Myddleware. Files are not up-to-date.');
 		}
