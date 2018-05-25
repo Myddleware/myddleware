@@ -97,7 +97,7 @@ class JobScheduler
 	/**
      * @var string
      *
-     * @ORM\Column(name="paramValue1", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramValue1", type="text", nullable=false)
 	 * 
      */
     private $paramValue1;
@@ -113,7 +113,7 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="paramValue2", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramValue2", type="text", nullable=false)
 	 * 
      */
     private $paramValue2;
