@@ -305,11 +305,11 @@ class erpnextcore extends solution
             $result = array();
             if ($method === 'update') {
                 $method = "PUT";
-                $url = $this->paramConnexion['url'] . "/api/resource/Contact/" . $param['target_id'];
+                $url = $this->paramConnexion['url'] . "/api/resource/" . $param['module'] . "/" . $param['target_id'];
 
             } elseif ($method === 'create') {
                 $method = "POST";
-                $url = $this->paramConnexion['url'] . "/api/resource/Contact";
+                $url = $this->paramConnexion['url'] . "/api/resource/" . $param['module'];
 
             }
             foreach ($param['data'] as $idDoc => $data) {
