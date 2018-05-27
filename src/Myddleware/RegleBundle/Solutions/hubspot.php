@@ -300,7 +300,7 @@ class hubspotcore extends solution
 								$records[$field] = $identifyProfile["properties"] [$field]['value'];
 
 							}
-							$records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
+							$records['date_modified'] = date('Y-m-d H:i:s', ($identifyProfile["properties"][$modified]['value'] / 1000)); // add date modified
 							$records['id'] = $identifyProfile[$id];
 							$result['values'][$identifyProfile[$id]] = $records;
 						}
