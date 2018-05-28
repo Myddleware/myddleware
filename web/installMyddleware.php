@@ -84,6 +84,16 @@ $symfonyRequirements->addRequirement(
 	'config/parameters.yml file must be writable',
 	'Change the permissions "<strong>config/parameters.yml</strong>" file so that the web server can write into it.'
 );
+$symfonyRequirements->addRequirement(
+	is_writable(__DIR__.'/../app/config/public/parameters_public.yml'),
+	'config/public/parameters_public.yml file must be writable',
+	'Change the permissions "<strong>config/public/parameters_public.yml</strong>" file so that the web server can write into it.'
+);
+$symfonyRequirements->addRequirement(
+	is_writable(__DIR__.'/../app/config/public/parameters_smtp.yml'),
+	'config/public/parameters_smtp.yml file must be writable',
+	'Change the permissions "<strong>config/public/parameters_smtp.yml</strong>" file so that the web server can write into it.'
+);
 
 $iniPath = $symfonyRequirements->getPhpIniConfigPath();
 
@@ -210,6 +220,7 @@ else {
 	$kernel = new \AppKernel("prod", true);	
 	// Get current Myddleware parameters
 	$myddlewareParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($kernel->getRootDir() .'/config/parameters.yml'));
+	$myddlewareParametersPublic = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($kernel->getRootDir() .'/config/public/parameters_public.yml'));
 	$databaseConnection = 0;
 	$userCreated = 0;
 
@@ -280,14 +291,14 @@ else {
 				file_put_contents($kernel->getRootDir() .'/config/parameters.yml', $new_yaml);
 				
 				// Refresh boostrap
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir().'/../vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir().'/../vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
 					throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
 				}
 				
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console cache:clear --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console cache:clear --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -308,7 +319,7 @@ else {
 				// If database OK
 				$pdo->beginTransaction();
 				// Database creation
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:schema:update --force --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:schema:update --force --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -316,14 +327,14 @@ else {
 				}
 				
 				// Init table (instert standard data)
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:fixtures:load --append --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:fixtures:load --append --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
 					throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
 				}
 
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:create '.$_POST['myddleware_username'].' '.$_POST['myddleware_user_email'].' '.$_POST['myddleware_password'].' --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:create '.$_POST['myddleware_username'].' '.$_POST['myddleware_user_email'].' '.$_POST['myddleware_password'].' --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -331,7 +342,7 @@ else {
 				}
 				$userCreated = 1;
 				
-				$process = new \Symfony\Component\Process\Process($myddlewareParameters['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:promote '.$_POST['myddleware_username'].' ROLE_ADMIN --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:promote '.$_POST['myddleware_username'].' ROLE_ADMIN --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {

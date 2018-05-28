@@ -45,7 +45,7 @@ rules:
         fields:
             - { target: description, source: gift_message, formula: null }
         relationships:
-            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: cutomers, parent: false }
+            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: users, parent: false }
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: '1970-01-01 00:00:00' }

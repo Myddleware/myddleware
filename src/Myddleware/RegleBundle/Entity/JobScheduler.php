@@ -57,7 +57,7 @@ class JobScheduler
     /**
      * @var datetime
      *
-     * @ORM\Column(name="date_modified", columnDefinition="DATETIME on update CURRENT_TIMESTAMP"))
+     * @ORM\Column(name="date_modified", type="datetime")
 	 * 
      */
     private $dateModified;
@@ -97,7 +97,7 @@ class JobScheduler
 	/**
      * @var string
      *
-     * @ORM\Column(name="paramValue1", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramValue1", type="text", nullable=false)
 	 * 
      */
     private $paramValue1;
@@ -113,7 +113,7 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="paramValue2", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramValue2", type="text", nullable=false)
 	 * 
      */
     private $paramValue2;

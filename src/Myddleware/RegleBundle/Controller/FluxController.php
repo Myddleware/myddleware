@@ -141,7 +141,7 @@ class FluxControllerCore extends Controller
 		
 		$form = $this->createFormBuilder()
 		
-					 ->add('date_create_start','text', array(
+					 /* ->add('date_create_start','text', array(
 						'data'=> ($sessionService->isFluxFilterCDateCreateStartExist() ? $sessionService->getFluxFilterDateCreateStart() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
@@ -149,7 +149,15 @@ class FluxControllerCore extends Controller
 					 ->add('date_create_end','text', array(
 					 	'data'=> ($sessionService->isFluxFilterCDateCreateEndExist() ? $sessionService->getFluxFilterDateCreateEnd() : false),
 					 	'required'=> false, 
-					 	'attr' => array('class' => 'calendar')))
+					 	'attr' => array('class' => 'calendar'))) */
+						
+					 ->add('source_content','text', array(
+						'data'=> ($sessionService->isFluxFilterCSourceContentExist() ? $sessionService->getFluxFilterSourceContent() : false),
+					 	'required'=> false))
+					 
+					 ->add('target_content','text', array(
+						'data'=> ($sessionService->isFluxFilterCTargetContentExist() ? $sessionService->getFluxFilterTargetContent() : false),
+					 	'required'=> false))
 					 				 
 					 ->add('date_modif_start','text', array(
 					 	'data'=> ($sessionService->isFluxFilterCDateModifStartExist() ? $sessionService->getFluxFilterDateModifStart() : false),
@@ -203,6 +211,7 @@ class FluxControllerCore extends Controller
 	    $form->handleRequest( $this->get('request') );
 		// condition d'affichage
 		$where = '';
+		$from = 'FROM Document ';
 		// $where = ($sessionService->isFluxFilterCWhereExist() ? $sessionService->getFluxFilterWhere() : '');
 		if (!empty($sessionService->getFluxFilterWhere())) {
 			$where = $sessionService->getFluxFilterWhere();
@@ -213,9 +222,9 @@ class FluxControllerCore extends Controller
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
 			$data = $this->getRequest()->get($form->getName());
-			$where = 'WHERE ';
+			$where = 'WHERE ';		
 			
-			if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
+			/* if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
 				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
 				$conditions++;
 				$sessionService->setFluxFilterDateCreateStart($data['date_create_start']);
@@ -233,7 +242,29 @@ class FluxControllerCore extends Controller
 			else {
 				$sessionService->removeFluxFilterDateCreateEnd();
 			}							
-
+ */
+ 
+			if(!empty( $data['source_content'] ) && is_string($data['source_content'])) {
+				$from .= "INNER JOIN DocumentData AS DocumentDataSource ON Document.id = DocumentDataSource.doc_id ";
+				$where .= "DocumentDataSource.data LIKE '%".$data['source_content']."%' AND DocumentDataSource.type = 'S' ";
+				$conditions++;
+				$sessionService->setFluxFilterSourceContent($data['source_content']);
+			}
+			else {
+				$sessionService->removeFluxFilterSourceContent();
+			}			
+			
+			if(!empty( $data['target_content'] ) && is_string($data['target_content'])) {
+				$from .= "INNER JOIN DocumentData AS DocumentDataTarget ON Document.id = DocumentDataTarget.doc_id ";
+				$where .= "DocumentDataTarget.data LIKE '%".$data['target_content']."%' AND DocumentDataTarget.type = 'T' ";
+				$conditions++;
+				$sessionService->setFluxFilterTargetContent($data['target_content']);
+			}
+			else {
+				$sessionService->removeFluxFilterTargetContent();
+			}				
+			
+			
 			if(!empty( $data['date_modif_start'] ) && is_string($data['date_modif_start'])) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.date_modified >= '".$data['date_modif_start']."' ";
@@ -355,7 +386,7 @@ class FluxControllerCore extends Controller
 		}
 		
 		$sql = "SELECT Document.*, users.username, Rule.name rule_name
-				FROM Document  
+				$from  
 				JOIN users ON(users.id = Document.created_by)
 				JOIN Rule ON(Rule.id = Document.rule_id)
 				$where 

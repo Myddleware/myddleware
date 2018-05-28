@@ -48,11 +48,19 @@
 		{# Les erreurs générales du formulaire. #}
 		{{ form_errors(form) }}
 	
+{#
 		<fieldset class="border"><legend>{{'list_flux.filter.date_created'|trans}}</legend>
 			{{ form_label(form.date_create_start, 'list_flux.start'|trans) }}
 			{{ form_widget(form.date_create_start) }} 
 			{{ form_label(form.date_create_start, 'list_flux.end'|trans) }}	
 			{{ form_widget(form.date_create_end) }}
+		</fieldset> 	
+#}		
+		<fieldset class="border"><legend>{{'list_flux.filter.content'|trans}}</legend>
+			{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
+			{{ form_widget(form.source_content) }} 
+			{{ form_label(form.target_content, 'list_flux.filter.target_content'|trans) }}	
+			{{ form_widget(form.target_content) }}
 		</fieldset> 	
 
 		<fieldset class="border"><legend>{{'list_flux.filter.date_modified'|trans}}</legend>

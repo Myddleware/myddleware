@@ -68,7 +68,7 @@ class LoadJobSchedulerData implements FixtureInterface
 		) {	
 			$jobSchedulerObject = new JobScheduler();
 			$jobSchedulerObject->setDateCreated(new \DateTime('now'));
-			// $jobSchedulerObject->setDateModified(new \DateTime('now'));
+			$jobSchedulerObject->setDateModified(new \DateTime('now'));
 			$jobSchedulerObject->setCreatedBy('1');
 			$jobSchedulerObject->setModifiedBy('1');
 			$jobSchedulerObject->setCommand($jobScheduler['command']);

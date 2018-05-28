@@ -5,14 +5,6 @@ parameters:
     database_name: 
     database_user: 
     database_password:
-    mailer_transport: sendmail
-    mailer_host:
-    mailer_user:
-    mailer_password:
-    mailer_port:
-    mailer_auth_mode:
-    mailer_email:
-    mailer_name:
     secret: ThisTokenIsNotSoSecretChangeIt
     myddleware_support: 0
     param:
@@ -20,15 +12,5 @@ parameters:
     extension_allowed:
         - xml
         - wsdl
-    myd_version: 2.3.3f
-    php:
-        executable: php
-    locale: en
-    pager: 20
+    myd_version: 2.3.4
     block_install: 0
-    migration:
-        mode: 0
-    notification:
-        alert_time_limit: 60
-    transfer:
-        search_limit: 1000

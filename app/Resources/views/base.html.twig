@@ -74,6 +74,12 @@
                             <a href="{{ path('my_account') }}"><span class="glyphicon glyphicon-user"></span> {{'menu_user.account'|trans}}</a>
                         </li>
                         <li>
+                            <a href="{{ path('management_smtp_index') }}"><span class="glyphicon glyphicon-envelope"></span> {{'menu_user.management_smtp'|trans}}</a>
+                        </li>
+                        <li>
+							<a href="{{ path('jobscheduler') }}"><span class="glyphicon glyphicon-time"></span> {{'menu_user.jobscheduler'|trans}}</a>
+                        </li>
+                        <li>
                             <a href="{{ path('fos_user_security_logout') }}"><span class="glyphicon glyphicon-off"></span> {{'menu_user.logout'|trans}}</a>
                         </li>                       
                     </ul>
