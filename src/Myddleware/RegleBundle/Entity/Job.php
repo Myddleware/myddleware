@@ -58,7 +58,7 @@ class Job
      * @var string
      *
 	 * 
-     * @ORM\Column(name="param", type="string", length=50, nullable=false)
+     * @ORM\Column(name="param", type="text", nullable=false)
 	 * 
      */
     private $param;

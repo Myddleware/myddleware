@@ -42,7 +42,7 @@ class upgradeCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output) {
 		try {
 			$upgrade = $this->getContainer()->get('myddleware.upgrade');	
-			$upgrade->processUpgrade();	
+			$upgrade->processUpgrade($output);	
 		}
 		catch(\Exception $e) {
 			$output->writeln( '<error>'.$e->getMessage().'</error>');

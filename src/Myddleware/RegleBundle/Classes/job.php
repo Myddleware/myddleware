@@ -324,7 +324,7 @@ class jobcore  {
 		}
 		
 		try {
-			// Formatage du tableau d'idate
+			// Formatage du tableau d'idoc
 			$idsDocArray = explode(',',$idsDoc);	
 			$queryIn = '(';
 			foreach ($idsDocArray as $idDoc) {
@@ -370,6 +370,56 @@ class jobcore  {
 			}
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+		}
+	}
+	
+	
+	// Fonction permettant d'annuler massivement des documents
+	public function readRecord($ruleId, $filterQuery, $filterValues) {
+		try {
+			// Get the fielter values
+			$filterValuesArray = explode(',',$filterValues);	
+			if (empty($filterValuesArray)) {
+				throw new \Exception ('Invalide filter value. Failed to read data.');		
+			}	
+			
+			// Check that the rule value is valid
+			$sqlRule = "SELECT * FROM Rule WHERE id = :filter AND deleted = 0";
+		    $stmt = $this->connection->prepare($sqlRule);
+			$stmt->bindValue("filter", $ruleId);
+		    $stmt->execute();	    
+			$rule = $stmt->fetch(); // 1 row
+			if (empty($rule['id'])) {
+				throw new \Exception ('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
+			}
+			// Instantiate the rule
+			$ruleParam['ruleId'] = $ruleId;
+			$ruleParam['jobId']  = $this->id;				
+			$rule = new rule($this->logger, $this->container, $this->connection, $ruleParam);			
+			
+			// Try to read data for each values
+			foreach ($filterValuesArray as $value) {
+				// Generate documents 
+				$documents = $rule->generateDocuments($value, true, '', $filterQuery);
+				if (!empty($documents->error)) {
+					throw new \Exception($documents->error);
+				}
+				// Run documents
+				if (!empty($documents)) {
+					foreach ($documents as $doc) {
+						$errors = $rule->actionDocument($doc->id,'rerun');
+						// Check errors
+						if (!empty($errors)) {									
+							$this->message .=  'Document '.$doc->id.' in error (rule '.$ruleId.')  : '.$errors[0].'. ';
+						}
+					}
+				}
+			}
+			
+		} catch (\Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage();
+			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			return false;
 		}
 	}
 	

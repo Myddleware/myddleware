@@ -303,6 +303,9 @@ list_flux:
         target_id: Id cible
         confirm: Filtrer
         name: Nom
+        content: Contenu du transfer
+        source_content: Source
+        target_content: Target
     tab:
         id: Doc Id
         name: Nom
