@@ -76,7 +76,7 @@ class upgradecore  {
 	public function processUpgrade($output) {
 		try{
 			// Customize update process
-			$this->beforeUpdate($output);	
+			$this->beforeUpdate($output);
 			
 			// Clear every Symfony cache
 			$output->writeln('<comment>Clear Symfony cache...</comment>');
@@ -116,12 +116,12 @@ class upgradecore  {
 			$output->writeln('<comment>Update version...</comment>');
 			$this->changeVersion();
 			$output->writeln('<comment>Update version OK</comment>');
-			
-			// Clear every Symfony cache again (otherwise cache folder couldn't be writeable by the web user) 
+
+			// Clear every Symfony cache
 			$output->writeln('<comment>Clear Symfony cache...</comment>');
 			$this->clearSymfonycache();
-			$output->writeln('<comment>Clear Symfony cache OK</comment>');		
-			
+			$output->writeln('<comment>Clear Symfony cache OK</comment>');			
+						
 			// Customize update process
 			$this->afterUpdate($output);
 			
