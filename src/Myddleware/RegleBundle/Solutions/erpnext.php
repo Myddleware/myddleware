@@ -246,8 +246,16 @@ class erpnextcore extends solution
             $fields = $param['fields'];
             $date_ref = $param['date_ref'];
             $result = array();
-            $filters = '{"modified": [">", "' . $date_ref . '"]}';
-            $data = array('filters' => $filters, 'fields' => '["*"]');
+
+            if (!empty($param['query']['id'])) { // Je ne vois pas l'id dans les requeetes, idx ?
+                $id = $param['query']['id'];
+                // $id = 'TEST MARTIN';
+                $filters = '{"name": ["=", "' . $id . '"]}';
+                $data = array('filters' => $filters, 'fields' => '["*"]');
+            } else {
+                $filters = '{"modified": [">", "' . $date_ref . '"]}';
+                $data = array('filters' => $filters, 'fields' => '["*"]');
+            }
             $q = http_build_query($data);
             $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
             $resultQuery = $this->call($url, 'GET', '');
@@ -266,7 +274,9 @@ class erpnextcore extends solution
                     $records['id'] = $recordList->name;
                     $result['values'][$recordList->name] = $records; // last record
                 }
-                $result['date_ref'] = $resultQuery[0]->modified;
+                if ($resultQuery[0] && $resultQuery[0]->modified > $result['date_ref']) {
+                    $result['date_ref'] = $resultQuery[0]->modified;
+                }
                 $result['count'] = count($resultQuery);
             }
         } catch (\Exception $e) {
