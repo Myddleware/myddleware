@@ -87,9 +87,18 @@
         "symfony-app-dir": "app",
         "symfony-web-dir": "web",
         "symfony-assets-install": "relative",
-        "incenteev-parameters": {
-            "file": "app/config/parameters.yml"
-        },
+		"incenteev-parameters": [{
+				"file": "app/config/parameters.yml"
+			},
+			{
+				"file": "app/config/public/parameters_smtp.yml",
+				"dist-file": "app/config/parameters_smtp.yml.dist"
+			},
+			{
+				"file": "app/config/public/parameters_public.yml",
+				"dist-file": "app/config/parameters_public.yml.dist"
+			}
+		],
         "branch-alias": {
             "dev-master": "2.7-dev"
         }

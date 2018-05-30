@@ -60,6 +60,7 @@ class JobSchedulerController extends Controller
              * set value by default
              */
             $entity->setDateCreated(new \DateTime());
+            $entity->setDateModified(new \DateTime());
             $entity->setCreatedBy($this->getUser()->getId());
             $entity->setModifiedBy($this->getUser()->getId());
             $entity->setParamName1($paramName1);
