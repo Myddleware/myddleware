@@ -45,8 +45,12 @@ mounts:
 # The hooks that will be performed when the package is deployed.
 hooks:
     build: |
+        cd app/config/
+        cp -r public/. read-only/
+        cd ../..
         php app/console --env=prod assets:install --no-debug
     deploy: |
+        cp -r app/config/read-only/. app/config/public/
         php app/console --env=prod cache:clear
         php app/console --env=prod assetic:dump
         php app/console --env=prod assets:install web
