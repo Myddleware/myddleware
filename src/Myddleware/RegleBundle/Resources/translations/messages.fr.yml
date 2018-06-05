@@ -187,7 +187,7 @@ view_rule:
         save: Sauvegarder
         simule: Simuler Transferts
         result: Nombre de transferts estimé
-        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ces derniers ne vous coûteront pas de crédits s'ils ne sont pas envoyés. De plus, ce nombre sera toujours égal ou inférieur à la limite de transferts créés par exécution de règle de votre système Myddleware (défaut: 100).
+        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ces derniers ne vous coûteront pas de crédits s'ils ne sont pas envoyés. De plus, ce nombre sera toujours égal ou inférieur à la limite de transferts créés par exécution de règle de votre système Myddleware (défaut 100).
 
 rule:
     source: Source
@@ -708,5 +708,5 @@ management_smtp:
     sendtestmail: Envoi test
 
 management_smtp_sendmail:
-    subject: Myddleware : Test de configuration email
+    subject: Myddleware - Test de configuration email
     textMail: Ce message de test a été envoyé par Myddleware. 

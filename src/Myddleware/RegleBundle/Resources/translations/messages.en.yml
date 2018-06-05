@@ -68,7 +68,7 @@ create_rule:
         filter_choice: does not have a filter
         filter_fields: Search a field...
         empty_fields_target: No field found in the target
-        empty_simulate: Warning: there is no data in the source server or fields in the target solution
+        empty_simulate: There is no data in the source server or fields in the target solution
         empty_field_simulate: Empty content
         data: Test data
         infobulle: Double click to remove
@@ -186,7 +186,7 @@ view_rule:
         save: Save
         simule: Simulate Transfers
         result: Estimated transfers
-        details: Represents the number of transfers that will be created for the next lunch of this rule. Those ones won't cost you any credits if they are not send. This number will always be equal or less than your Myddleware system limit of transfers created by lunch (default: 100).
+        details: Represents the number of transfers that will be created for the next lunch of this rule. Those ones won't cost you any credits if they are not send. This number will always be equal or less than your Myddleware system limit of transfers created by lunch (default 100).
 
 rule:
     source: Source
@@ -707,6 +707,6 @@ management_smtp:
     sendtestmail: Send test mail
 
 management_smtp_sendmail:
-    subject: Myddleware : email configuration test
+    subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
 
