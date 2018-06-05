@@ -34,7 +34,8 @@ panel:
         nb: Nombre d'erreurs par règle
     list_job:
         title: Détail des derniers jobs	
-        duration: seconde(s)		
+        duration: seconde(s)	
+        nb : Transferts de données en erreur	
     graph_histo:
         title: Historique des transferts
     graph_job_histo:

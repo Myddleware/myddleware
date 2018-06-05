@@ -35,6 +35,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
+        nb : Data transfers with error
     graph_histo:
         title: Transfer historic
     graph_job_histo:
