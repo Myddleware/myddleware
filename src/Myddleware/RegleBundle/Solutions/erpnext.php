@@ -181,26 +181,39 @@ class erpnextcore extends solution
             $result = array();
             $record = array();
             if (!empty($param['query'])) {
-                if (!empty($param['query']['email'])) {
-                    $email = $param['query']['email'];
-                    $filters = '{"email_id": ["=", "' . $email . '"]}';
-                    $data = array('filters' => $filters, 'fields' => '["*"]');
-                    $q = http_build_query($data);
-                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
-                    $resultQuery = $this->call($url, "GET", '');
-                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
-
-                } elseif (!empty($param['query']['id'])) { // Je ne vois pas l'id dans les requeetes, idx ?
-                    $id = $param['query']['id'];
-                    // $id = 'TEST MARTIN';
-                    $filters = '{"name": ["=", "' . $id . '"]}';
-                    $data = array('filters' => $filters, 'fields' => '["*"]');
-                    $q = http_build_query($data);
-                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
-
-                    $resultQuery = $this->call($url, "GET", '');
-                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
+                foreach ($param['query'] as $key => $value) {
+                    if ($key === 'id') {
+                        $key = 'name';
+                    }
+                    $filters_result[$key] = $value;
                 }
+                $filters = json_encode($filters_result);
+                $data = array('filters' => $filters, 'fields' => '["*"]');
+                $q = http_build_query($data);
+                $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
+                $resultQuery = $this->call($url, "GET", '');
+                $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
+
+//                if (!empty($param['query']['email'])) {
+//                    $email = $param['query']['email'];
+//                    $filters = '{"email_id": ["=", "' . $email . '"]}';
+//                    $data = array('filters' => $filters, 'fields' => '["*"]');
+//                    $q = http_build_query($data);
+//                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
+//                    $resultQuery = $this->call($url, "GET", '');
+//                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
+//
+//                } elseif (!empty($param['query']['id'])) { // Je ne vois pas l'id dans les requeetes, idx ?
+//                    $id = $param['query']['id'];
+//                    // $id = 'TEST MARTIN';
+//                    $filters = '{"name": ["=", "' . $id . '"]}';
+//                    $data = array('filters' => $filters, 'fields' => '["*"]');
+//                    $q = http_build_query($data);
+//                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
+//
+//                    $resultQuery = $this->call($url, "GET", '');
+//                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
+//                }
                 // by query
             } else {
             
@@ -246,11 +259,16 @@ class erpnextcore extends solution
             $fields = $param['fields'];
             $date_ref = $param['date_ref'];
             $result = array();
-
-            if (!empty($param['query']['id'])) { // Je ne vois pas l'id dans les requeetes, idx ?
-                $id = $param['query']['id'];
-                // $id = 'TEST MARTIN';
-                $filters = '{"name": ["=", "' . $id . '"]}';
+            $filters_result = array();
+//            $param['query'] = array("id" => 'TEST MARTIN' ,"first_name"=>"TEST");
+            if (!empty($param['query'])) { // Je ne vois pas l'id dans les requeetes, idx ?
+                foreach ($param['query'] as $key => $value) {
+                    if ($key === 'id') {
+                        $key = 'name';
+                    }
+                    $filters_result[$key] = $value;
+                }
+                $filters = json_encode($filters_result);
                 $data = array('filters' => $filters, 'fields' => '["*"]');
             } else {
                 $filters = '{"modified": [">", "' . $date_ref . '"]}';
@@ -259,6 +277,7 @@ class erpnextcore extends solution
             $q = http_build_query($data);
             $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
             $resultQuery = $this->call($url, 'GET', '');
+
             // If no result
 
             if (empty($resultQuery) && empty($resultQuery->data)) {
