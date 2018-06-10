@@ -194,15 +194,16 @@ class erpnextcore extends solution
                 $resultQuery = $this->call($url, "GET", '');
                 $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
 
-           } else {
-            
+            } else {
+
                 $data = array('limit_page_length' => 1, 'fields' => '["*"]');
                 $q = http_build_query($data);
                 $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
                 //get list of modules
 
                 $resultQuery = $this->call($url, "GET", '');
-                $record = count($resultQuery->data) === 0  ? null : $resultQuery->data[0];
+                $record = $resultQuery->data[0];
+
             }
             if (!empty($record)) {
                 foreach ($fields as $field) {
@@ -212,7 +213,7 @@ class erpnextcore extends solution
                 $result['values']['date_modified'] = $record->modified; // modified
             }
             // If no result
-            if (empty($record)) {
+            if (empty($resultQuery)) {
                 $result['done'] = false;
             } else {
                 if (!empty($result['values'])) {
@@ -259,11 +260,9 @@ class erpnextcore extends solution
             $q = http_build_query($data);
             $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
             $resultQuery = $this->call($url, 'GET', '');
-            var_dump('Eroor request', empty($resultQuery->data));
+            
             // If no result
-
             if (empty($resultQuery)) {
-
                 $result['error'] = "Request error";
             } else if (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
