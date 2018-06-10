@@ -244,7 +244,7 @@ class erpnextcore extends solution
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
         }
-         return $result;
+        return $result;
     } //end read_last
 
     /**
@@ -254,10 +254,13 @@ class erpnextcore extends solution
      */
     public function read($param)
     {
+
+
         try {
             $module = $param['module'];
             $fields = $param['fields'];
             $date_ref = $param['date_ref'];
+            $result['count'] = 0;
             $result = array();
             $filters_result = array();
 //            $param['query'] = array("id" => 'TEST MARTIN' ,"first_name"=>"TEST");
@@ -277,9 +280,9 @@ class erpnextcore extends solution
             $q = http_build_query($data);
             $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
             $resultQuery = $this->call($url, 'GET', '');
-
+            var_dump('Eroor request', empty($resultQuery->data));
             // If no result
-            if (empty($resultQuery) && empty($resultQuery->data)) {
+            if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else if (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
