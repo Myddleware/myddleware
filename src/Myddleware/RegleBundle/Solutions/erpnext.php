@@ -194,28 +194,7 @@ class erpnextcore extends solution
                 $resultQuery = $this->call($url, "GET", '');
                 $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
 
-//                if (!empty($param['query']['email'])) {
-//                    $email = $param['query']['email'];
-//                    $filters = '{"email_id": ["=", "' . $email . '"]}';
-//                    $data = array('filters' => $filters, 'fields' => '["*"]');
-//                    $q = http_build_query($data);
-//                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
-//                    $resultQuery = $this->call($url, "GET", '');
-//                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
-//
-//                } elseif (!empty($param['query']['id'])) { // Je ne vois pas l'id dans les requeetes, idx ?
-//                    $id = $param['query']['id'];
-//                    // $id = 'TEST MARTIN';
-//                    $filters = '{"name": ["=", "' . $id . '"]}';
-//                    $data = array('filters' => $filters, 'fields' => '["*"]');
-//                    $q = http_build_query($data);
-//                    $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
-//
-//                    $resultQuery = $this->call($url, "GET", '');
-//                    $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
-//                }
-                // by query
-            } else {
+           } else {
             
                 $data = array('limit_page_length' => 1, 'fields' => '["*"]');
                 $q = http_build_query($data);
@@ -244,7 +223,7 @@ class erpnextcore extends solution
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
             $result['done'] = -1;
         }
-         return $result;
+        return $result;
     } //end read_last
 
     /**
@@ -254,10 +233,13 @@ class erpnextcore extends solution
      */
     public function read($param)
     {
+
+
         try {
             $module = $param['module'];
             $fields = $param['fields'];
             $date_ref = $param['date_ref'];
+            $result['count'] = 0;
             $result = array();
             $filters_result = array();
 //            $param['query'] = array("id" => 'TEST MARTIN' ,"first_name"=>"TEST");
@@ -277,10 +259,11 @@ class erpnextcore extends solution
             $q = http_build_query($data);
             $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
             $resultQuery = $this->call($url, 'GET', '');
-
+            var_dump('Eroor request', empty($resultQuery->data));
             // If no result
 
-            if (empty($resultQuery) && empty($resultQuery->data)) {
+            if (empty($resultQuery)) {
+
                 $result['error'] = "Request error";
             } else if (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
