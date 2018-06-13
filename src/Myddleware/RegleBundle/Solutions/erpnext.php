@@ -115,7 +115,7 @@ class erpnextcore extends solution
         parent::get_module_fields($module, $type);
         try {
             // Get the list field for a module
-            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . $module . '&fields=*&filters={%22parent%22:%22' . $module . '%22}&limit_page_length=500';
+            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . urlencode($module) . '&fields=*&filters={%22parent%22:%22' . urlencode($module) . '%22}&limit_page_length=500';		
             $recordList = $this->call($url, 'GET', '');
 
             // Format outpput data
@@ -173,10 +173,8 @@ class erpnextcore extends solution
      * @return mixed
      * @throws \Exception
      */
-    public function read_last($param)
-    {
+    public function read_last($param) {
         try {
-            $module = $param['module'];
             // Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -194,7 +192,7 @@ class erpnextcore extends solution
                 $filters = json_encode($filters_result);
                 $data = array('filters' => $filters, 'fields' => '["*"]');
                 $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
+                $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;
                 $resultQuery = $this->call($url, "GET", '');
                 $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
 
@@ -202,7 +200,7 @@ class erpnextcore extends solution
 
                 $data = array('limit_page_length' => 1, 'fields' => '["*"]');
                 $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
+                $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;
                 //get list of modules
 
                 $resultQuery = $this->call($url, "GET", '');
@@ -237,8 +235,7 @@ class erpnextcore extends solution
      * @return mixed
      */
     public function read($param) {
-        try {
-            $module = $param['module'];		
+        try {	
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -268,7 +265,7 @@ class erpnextcore extends solution
 		
 			// Send the query
             $q = http_build_query($data);
-            $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;		
+            $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;		
             $resultQuery = $this->call($url, 'GET', '');				
           
             // If no result
@@ -330,11 +327,11 @@ class erpnextcore extends solution
             $result = array();
             if ($method === 'update') {
                 $method = "PUT";
-                $url = $this->paramConnexion['url'] . "/api/resource/" . $param['module'] . "/" . $param['target_id'];
+                $url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']) . "/" . $param['target_id'];
 
             } elseif ($method === 'create') {
                 $method = "POST";
-                $url = $this->paramConnexion['url'] . "/api/resource/" . $param['module'];
+                $url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']);
 
             }
             foreach ($param['data'] as $idDoc => $data) {
