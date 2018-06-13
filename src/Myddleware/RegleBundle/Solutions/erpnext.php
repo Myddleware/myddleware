@@ -37,7 +37,7 @@ class erpnextcore extends solution
     protected $organizationTimezoneOffset;
     protected $limitCall = 100;
 
-    protected $required_fields = array('default' => array('Id', 'CreationDate', 'ModificationDate'));
+    protected $required_fields = array('default' => array('name', 'creation', 'modified'));
 
     protected $FieldsDuplicate = array('Contact' => array('Email', 'Name'),
         'default' => array('Name')
@@ -177,7 +177,11 @@ class erpnextcore extends solution
     {
         try {
             $module = $param['module'];
-            $fields = $param['fields'];
+            // Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			$fields = $param['fields'];
             $result = array();
             $record = array();
             if (!empty($param['query'])) {
@@ -232,20 +236,24 @@ class erpnextcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read($param)
-    {
-
-
+    public function read($param) {
         try {
-            $module = $param['module'];
+            $module = $param['module'];		
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			// Get the reference date field name
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			
             $fields = $param['fields'];
-            $date_ref = $param['date_ref'];
+            $result['date_ref'] = $param['date_ref'];			
             $result['count'] = 0;
-            $result = array();
             $filters_result = array();
-//            $param['query'] = array("id" => 'TEST MARTIN' ,"first_name"=>"TEST");
-            if (!empty($param['query'])) { // Je ne vois pas l'id dans les requeetes, idx ?
+			// Build the query for ERPNext
+            if (!empty($param['query'])) { 
                 foreach ($param['query'] as $key => $value) {
+					// The id field is name in ERPNext
                     if ($key === 'id') {
                         $key = 'name';
                     }
@@ -254,37 +262,41 @@ class erpnextcore extends solution
                 $filters = json_encode($filters_result);
                 $data = array('filters' => $filters, 'fields' => '["*"]');
             } else {
-                $filters = '{"modified": [">", "' . $date_ref . '"]}';
+                $filters = '{"'.$dateRefField.'": [">", "' . $param['date_ref'] . '"]}';
                 $data = array('filters' => $filters, 'fields' => '["*"]');
-            }
+            }	
+		
+			// Send the query
             $q = http_build_query($data);
-            $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;
-            $resultQuery = $this->call($url, 'GET', '');
-            
+            $url = $this->paramConnexion['url'] . '/api/resource/' . $module . '?' . $q;		
+            $resultQuery = $this->call($url, 'GET', '');				
+          
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else if (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
                 foreach ($resultQuery as $key => $recordList) {
-                    $records = null;
+                    $record = null;
                     foreach ($fields as $field) {
-                        $records[$field] = $recordList->$field;
-                        $records['date_created'] = $recordList->creation;
-                        $records['date_modified'] = $recordList->modified;
+						if ($field == $dateRefField) {
+							$record['date_modified'] = $this->dateTimeToMyddleware($recordList->$field);
+							if ($recordList->$field > $result['date_ref']) {
+								$result['date_ref'] = $recordList->$field;
+							}
+						} 
+						if ($field != 'id') {
+							$record[$field] = $recordList->$field;
+                        }
                     }
-                    $records['id'] = $recordList->name;
-                    $result['values'][$recordList->name] = $records; // last record
-                }
-                if ($resultQuery[0] && $resultQuery[0]->modified > $date_ref) {
-                    $result['date_ref'] = $resultQuery[0]->modified;
+                    $record['id'] = $recordList->name;
+                    $result['values'][$recordList->name] = $record; // last record
                 }
                 $result['count'] = count($resultQuery);
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }
-
+        }		
         return $result;
     }// end function read
 
@@ -347,7 +359,31 @@ class erpnextcore extends solution
         return $result;
     }
 
+	// retrun the reference date field name
+	public function getDateRefName($moduleSource, $ruleMode) {
+		// Creation and modification mode
+		if($ruleMode == "0") {
+			return "modified";
+		// Creation mode only
+		} else if ($ruleMode == "C"){
+			return "creation";
+		} else {
+			throw new \Exception ("$ruleMode is not a correct Rule mode.");
+		}
+		return null;
+	}
 
+	// Function de conversion de datetime format solution à un datetime format Myddleware
+	protected function dateTimeToMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('Y-m-d H:i:s');
+	}// dateTimeToMyddleware($dateTime)	
+	
+	// Function de conversion de datetime format Myddleware à un datetime format solution
+	protected function dateTimeFromMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('Y-m-d H:i:s.u');
+	}// dateTimeFromMyddleware($dateTime)    	
     /**
      * Function call
      * @param $url
