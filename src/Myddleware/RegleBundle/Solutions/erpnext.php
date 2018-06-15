@@ -381,7 +381,8 @@ class erpnextcore extends solution
 	protected function dateTimeFromMyddleware($dateTime) {
 		$date = new \DateTime($dateTime);
 		return $date->format('Y-m-d H:i:s.u');
-	}// dateTimeFromMyddleware($dateTime)    	
+	}// dateTimeFromMyddleware($dateTime)    
+	
     /**
      * Function call
      * @param $url
@@ -415,26 +416,12 @@ class erpnextcore extends solution
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $response = curl_exec($ch);
-// print_r($response);
-// echo 'AAAA'.chr(10);
-// $error = curl_error($ch);
-// print_r($error_no);
-// print_r($error);
 	
 		$error_no = curl_errno($ch);
         curl_close($ch);
         if ($error_no != 200) {
-            // do something for login error
-            // return or exit
-
+            throw new \Exception('Error returnd by ERPNext : code '.$error_no);
         }
-        if (JSON_ERROR_NONE == json_last_error()) {
-            // $response is not valid (as JSON)
-            // do something for login error
-            // return or exit
-        }
-//        var_dump(json_decode($response));
-
         return json_decode($response);
     }
 
