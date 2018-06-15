@@ -39,12 +39,11 @@ class erpnextcore extends solution
 
     protected $required_fields = array('default' => array('name', 'creation', 'modified'));
 
-    protected $FieldsDuplicate = array('Contact' => array('Email', 'Name'),
-        'default' => array('Name')
-    );
+    protected $FieldsDuplicate = array(	'Contact' => array('Email', 'Name'),
+										'default' => array('Name')
+									);
 
-    public function getFieldsLogin()
-    {
+    public function getFieldsLogin() {
         return array(
             array(
                 'name' => 'url',
@@ -65,8 +64,7 @@ class erpnextcore extends solution
     }
 
     // Login to Cirrus Shield
-    public function login($paramConnexion)
-    {
+    public function login($paramConnexion) {
         parent::login($paramConnexion);
         try {
             // Generate parameters to connect to Cirrus Shield
@@ -91,8 +89,7 @@ class erpnextcore extends solution
 
 
     // Get the modules available
-    public function get_modules($type = 'source')
-    {
+    public function get_modules($type = 'source') {
         try {
             $url = $this->paramConnexion['url'] . '/api/resource/DocType';
             $parameters = array("limit_page_length" => 1000);
@@ -117,7 +114,6 @@ class erpnextcore extends solution
             // Get the list field for a module
             $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . urlencode($module) . '&fields=*&filters={%22parent%22:%22' . urlencode($module) . '%22}&limit_page_length=500';		
             $recordList = $this->call($url, 'GET', '');
-
             // Format outpput data
             if (!empty($recordList->message)) {
                 foreach ($recordList->message as $field) {
@@ -297,8 +293,7 @@ class erpnextcore extends solution
         return $result;
     }// end function read
 
-    public function create($param)
-    {
+    public function create($param) {
         return $this->CreateOrUpdate('create', $param);
 
     }// end function create
@@ -308,10 +303,8 @@ class erpnextcore extends solution
      * @param $param
      * @return mixed
      */
-    public function update($param)
-    {
+    public function update($param) {
         return $this->CreateOrUpdate('update', $param);
-
     }// end function create
 
 
@@ -321,37 +314,45 @@ class erpnextcore extends solution
      * @param $param
      * @return array
      */
-    function CreateOrUpdate($method, $param)
-    {
+    function CreateOrUpdate($method, $param) {
         try {
             $result = array();
-            if ($method === 'update') {
+			$url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']);
+            if ($method == 'update') {
                 $method = "PUT";
-                $url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']) . "/" . $param['target_id'];
-
-            } elseif ($method === 'create') {
+            } else {
                 $method = "POST";
-                $url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']);
-
             }
             foreach ($param['data'] as $idDoc => $data) {
-                if (in_array($idDoc, array('target_id', 'Myddleware_element_id'))) {
-                    continue;
-                }
-
-                $resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
-                $result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
-                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+				try {
+					foreach ($data as $key => $value) {
+						// We don't send Myddleware fields
+						if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
+							if ($key == 'target_id') {
+								$url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module'])."/" .$value;
+							}
+							unset($data[$key]);
+						}
+					}
+					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
+					if (!empty($resultQuery->data->name)) {
+						$result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
+					} else {
+						throw new \Exception('No result from ERPNext. ');
+					}
+				} catch (\Exception $e) {
+					$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $e->getMessage()
+					);
+				}
+				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-            var_dump($result);
+			
 
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-            print_r('error', $error);
-            $result[$idDoc] = array(
-                'id' => '-1',
-                'error' => $error
-            );
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['error'] = $error;
         }
         return $result;
     }
@@ -390,10 +391,7 @@ class erpnextcore extends solution
      * @return mixed|void
      * @throws \Exception
      */
-    protected function call($url, $method = 'GET', $parameters = array(), $timeout = 300)
-    {
-
-
+    protected function call($url, $method = 'GET', $parameters = array(), $timeout = 300) {
         if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
             throw new \Exception('curl extension is missing!');
         }
@@ -417,9 +415,13 @@ class erpnextcore extends solution
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $response = curl_exec($ch);
-
-        // 200? 404? or something?
-        $error_no = curl_errno($ch);
+// print_r($response);
+// echo 'AAAA'.chr(10);
+// $error = curl_error($ch);
+// print_r($error_no);
+// print_r($error);
+	
+		$error_no = curl_errno($ch);
         curl_close($ch);
         if ($error_no != 200) {
             // do something for login error
