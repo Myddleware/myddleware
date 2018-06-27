@@ -93,7 +93,7 @@ class erpnextcore extends solution
         try {
             $url = $this->paramConnexion['url'] . '/api/resource/DocType';
             $parameters = array("limit_page_length" => 1000);
-            $APImodules = $this->call($url, 'GET', $parameters);
+            $APImodules = $this->call($url, 'GET', $parameters);			
             if (!empty($APImodules->data)) {
                 foreach ($APImodules->data as $APImodule) {
                     $modules[$APImodule->name] = $APImodule->name;
@@ -107,13 +107,13 @@ class erpnextcore extends solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source')
-    {
+    public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);
         try {
             // Get the list field for a module
-            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . urlencode($module) . '&fields=*&filters={%22parent%22:%22' . urlencode($module) . '%22}&limit_page_length=500';		
+            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . urlencode($module) . '&fields=*&filters={%22parent%22:%22' . urlencode($module) . '%22}&limit_page_length=500';
             $recordList = $this->call($url, 'GET', '');
+
             // Format outpput data
             if (!empty($recordList->message)) {
                 foreach ($recordList->message as $field) {
@@ -123,6 +123,25 @@ class erpnextcore extends solution
                     if ($field->fieldtype == 'Link') {
                         $this->fieldsRelate[$field->fieldname] = array(
                             'label' => $field->label,
+                            'type' => 'varchar(255)',
+                            'type_bdd' => 'varchar(255)',
+                            'required' => '',
+                            'required_relationship' => '',
+                        );
+					// Add field to manage dymamic links
+					} elseif (
+							$field->fieldtype == 'Table'
+						AND $field->options == 'Dynamic Link'
+					) {	
+						$this->moduleFields['link_doctype'] = array(
+                            'label' => 'Link Doc Type',
+                            'type' => 'varchar(255)',
+                            'type_bdd' => 'varchar(255)',
+                            'required' => '',
+							'option' => $this->get_modules()
+                        );
+						$this->fieldsRelate['link_name'] = array(
+                            'label' => 'Link name',
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
@@ -200,12 +219,18 @@ class erpnextcore extends solution
                 //get list of modules
 
                 $resultQuery = $this->call($url, "GET", '');
-                $record = $resultQuery->data[0];
-
+				// If no result
+				if (empty($resultQuery)) {
+					$result['done'] = false;
+				} else {
+					$record = $resultQuery->data[0];
+				}
             }
             if (!empty($record)) {
                 foreach ($fields as $field) {
-                    $result['values'][$field] = $record->$field; // last record
+					if (isset($record->$field)) {
+						$result['values'][$field] = $record->$field; // last record
+					}
                 }
                 $result['values']['id'] = $record->name; // add id
                 $result['values']['date_modified'] = $record->modified; // modified
@@ -332,7 +357,11 @@ class erpnextcore extends solution
 								$url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module'])."/" .$value;
 							}
 							unset($data[$key]);
-						}
+						} elseif ($key == 'link_doctype') {
+							$data['links'] = array(array('link_doctype' =>  $data[$key], 'link_name' => $data['link_name']));
+							unset($data[$key]);
+							unset($data['link_name']);
+						}  
 					}
 					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
 					if (!empty($resultQuery->data->name)) {
@@ -416,11 +445,11 @@ class erpnextcore extends solution
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $response = curl_exec($ch);
-	
+
 		$error_no = curl_errno($ch);
         curl_close($ch);
         if ($error_no != 200) {
-            throw new \Exception('Error returnd by ERPNext : code '.$error_no);
+            // throw new \Exception('Error returnd by ERPNext : code '.$error_no);
         }
         return json_decode($response);
     }
