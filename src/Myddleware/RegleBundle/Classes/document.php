@@ -262,13 +262,13 @@ class documentcore {
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->updateStatus('New');
-			// Insert source data
+			// Insert source data			
 			return $this->insertDataTable($this->data,'S');		
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($this->message);
 			$this->typeError = 'E';
 			$this->updateStatus('Create_KO');
-			$this->logger->error($this->message);
 			return false;
 		}		
 	}
@@ -1049,6 +1049,8 @@ class documentcore {
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
 			$documentData->setType($type); // Source
+			// Make sure we insert utf-8 data 			
+			$dataInsert = array_map("utf8_encode", $dataInsert );		
 			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->em->persist($documentData);
 			$this->em->flush();		
@@ -1086,45 +1088,43 @@ class documentcore {
 	
 	// Mise à jour de la table des données cibles
 	protected function updateTargetTable() {
-		if (!empty($this->sourceData)) {
-			try{			
-				// Loop on every target field and calculate the value
-				if (!empty($this->ruleFields)) {
-					foreach ($this->ruleFields as $ruleField) {
-						$value = $this->getTransformValue($this->sourceData,$ruleField);
-						if ($value === false) {
-							throw new \Exception( 'Failed to transform data.' );
-						}
-						$targetField[$ruleField['target_field_name']] = $value;
+		try{	
+			// Loop on every target field and calculate the value
+			if (!empty($this->ruleFields)) {
+				foreach ($this->ruleFields as $ruleField) {
+					$value = $this->getTransformValue($this->sourceData,$ruleField);
+					if ($value === false) {
+						throw new \Exception( 'Failed to transform data.' );
 					}
+					$targetField[$ruleField['target_field_name']] = $value;
 				}
-				// Loop on every relationship and calculate the value
-				if(isset($this->ruleRelationships)) {
-					// Récupération de l'ID target
-					foreach ($this->ruleRelationships as $ruleRelationships) {
-						$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
-						if ($value === false) {
-							throw new \Exception( 'Failed to transform relationship data.' );
-						}
-						$targetField[$ruleRelationships['field_name_target']] = $value;
-					}
-				}
-				if (!empty($targetField)) {
-					if (!$this->insertDataTable($targetField,'T')) {
-						throw new \Exception( 'Failed insert target data in the table DocumentData.' );
-					}
-				}
-				else {
-					throw new \Exception( 'No target data found. Failed to create target data. ' );
-				}
-				return true;
 			}
-			catch(Exception $e) {
-				$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-				$this->typeError = 'E';
-				$this->logger->error( $this->message );
+			// Loop on every relationship and calculate the value
+			if(isset($this->ruleRelationships)) {
+				// Récupération de l'ID target
+				foreach ($this->ruleRelationships as $ruleRelationships) {
+					$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
+					if ($value === false) {
+						throw new \Exception( 'Failed to transform relationship data.' );
+					}
+					$targetField[$ruleRelationships['field_name_target']] = $value;
+				}
 			}		
+			if (!empty($targetField)) {
+				if (!$this->insertDataTable($targetField,'T')) {
+					throw new \Exception( 'Failed insert target data in the table DocumentData.' );
+				}
+			}
+			else {
+				throw new \Exception( 'No target data found. Failed to create target data. ' );
+			}				
+			return true;
 		}
+		catch(Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->logger->error( $this->message );				
+		}			
 		return false;
 	}
 	

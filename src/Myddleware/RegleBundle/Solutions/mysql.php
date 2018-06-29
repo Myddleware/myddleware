@@ -48,7 +48,7 @@ class mysqlcore extends database {
 	}
 	
 	// Get the limit operator of the select query in the read last function
-	protected function get_query_select_limit_offset($param) {
+	protected function get_query_select_limit_offset($param, $method) {
 		if (empty($param['offset'])) {
 			$param['offset'] = 0;
 		}

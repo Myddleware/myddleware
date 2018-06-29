@@ -20,6 +20,9 @@
 /app/config/public/parameters_public.yml
 /app/config/public/parameters_smtp.yml
 
+# Custom directory
+/src/Myddleware/RegleBundle/Custom/*
+
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache

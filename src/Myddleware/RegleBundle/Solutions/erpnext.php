@@ -363,9 +363,11 @@ class erpnextcore extends solution
 							unset($data['link_name']);
 						}  
 					}
-					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
+					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));				
 					if (!empty($resultQuery->data->name)) {
 						$result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
+					} elseif(!empty($resultQuery)) {
+						throw new \Exception($resultQuery);
 					} else {
 						throw new \Exception('No result from ERPNext. ');
 					}
@@ -445,12 +447,16 @@ class erpnextcore extends solution
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $response = curl_exec($ch);
-
-		$error_no = curl_errno($ch);
+		// if Traceback found, we have an error 
+		if (
+				$method != 'GET'
+			AND	strpos($response,'Traceback') !== false
+		) {
+			// Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'
+			return substr($response, strpos($response,'Traceback'), strpos(substr($response,strpos($response,'Traceback')),'</pre>'));
+		}
         curl_close($ch);
-        if ($error_no != 200) {
-            // throw new \Exception('Error returnd by ERPNext : code '.$error_no);
-        }
+    
         return json_decode($response);
     }
 
