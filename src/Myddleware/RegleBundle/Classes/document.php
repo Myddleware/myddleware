@@ -1863,9 +1863,15 @@ class documentcore {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$this->message = substr(str_replace("'","",$this->message),0,1000);
-			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
+			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)";
 			$stmt = $this->connection->prepare($query_header); 
+			$stmt->bindValue(":created",$now);
+			$stmt->bindValue(":typeError",$this->typeError);
+			$stmt->bindValue(":message", str_replace("'","",$this->message));
+			$stmt->bindValue(":rule_id",$this->ruleId);
+			$stmt->bindValue(":doc_id",$this->id);
+			$stmt->bindValue(":ref_doc_id",$this->docIdRefError);
+			$stmt->bindValue(":job_id",$this->jobId);
 			$stmt->execute();
 			$this->message = '';
 			$this->connection->commit(); // -- COMMIT TRANSACTION
