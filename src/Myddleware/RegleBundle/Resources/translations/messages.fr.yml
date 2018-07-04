@@ -522,6 +522,7 @@ error:
         delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
         delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
         delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: 
+        update: Impossible d'éditer la règle. 
     account:
         language_change: Impossible de modifier le langage :
     template:
