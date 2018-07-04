@@ -32,6 +32,7 @@ class hubspotcore extends solution
 
     protected $url = 'https://api.hubapi.com/';
     protected $version = 'v1';
+    protected $limitCall = 100;
 
     protected $FieldsDuplicate = array(	
 										'contacts' => array('email'),
@@ -244,6 +245,7 @@ class hubspotcore extends solution
                     }
                     $property .= "&properties=hs_lastmodifieddate";
                 }
+				$property .= '&count='.$this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
 
@@ -255,11 +257,12 @@ class hubspotcore extends solution
                     }
                     $property .= "&property=lastmodifieddate";
                 }
+				$property .= '&count='.$this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             }
 
-            if ($dateRefField === "ModificationDate") {
+            if ($dateRefField === "ModificationDate") {	
                 $resultCall = $this->call($url_modified);
                 $resultQuery = $this->getresultQuery($resultCall, $url_modified, $param);
             } else if ($dateRefField === "CreationDate") {
@@ -302,7 +305,7 @@ class hubspotcore extends solution
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }	
+        }		
         return $result;
     }// end function read
 
@@ -453,7 +456,7 @@ class hubspotcore extends solution
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param) {
+    protected function getresultQuery($request, $url, $param) {	
         if ($param['module'] === "contacts") {
             if ($request['exec']['time-offset'] === 0) {
                 $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
@@ -478,10 +481,9 @@ class hubspotcore extends solution
                 $offset = $request['exec']['offset'];
                 $total = $request['exec']['total'];
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-
-                do {
-                    $resultOffset = $this->call($url . "&offset=" . $offset);
-                    $offset = $resultOffset['exec']['offset'];
+                do {				
+                    $resultOffset = $this->call($url . "&offset=" . $offset);				
+                    $offset = $resultOffset['exec']['offset'];				
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
                     $merge = array_merge($result['exec']['results'], $resultOffsetTemps);
                     $result['exec']['results'] = $merge;
