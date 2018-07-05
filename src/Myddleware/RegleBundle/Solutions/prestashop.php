@@ -93,6 +93,8 @@ class prestashopcore extends solution {
 				// Pas de resource à préciser pour la connexion
 				$opt['resource'] = '';
 				
+				// Function to modify opt (used for custom needs)
+				$opt = $this->updateOptions('login',$opt,'');
 				// Call
 				$xml = $this->webService->get($opt);
 
@@ -136,6 +138,9 @@ class prestashopcore extends solution {
 			try { // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
 					$opt['resource'] = '';
+					// Function to modify opt (used for custom needs)
+					$opt = $this->updateOptions('get_modules',$opt,$type);
+					
 					$xml = $this->webService->get($opt);
 					$presta_data = json_decode(json_encode((array) $xml), true);
 					
@@ -209,6 +214,9 @@ class prestashopcore extends solution {
 
 			try{ // try-catch PrestashopWebservice
 				$opt['resource'] = $module.'?schema=synopsis';
+				
+				// Function to modify opt (used for custom needs)
+				$opt = $this->updateOptions('get_module_fields',$opt,$module);
 				
 				// Call
 				$xml = $this->webService->get($opt);
@@ -365,6 +373,8 @@ class prestashopcore extends solution {
 				'resource' => $fields,
 				'id' => $record['@attributes']['id']
 			);
+			// Function to modify opt (used for custom needs)
+			$opt = $this->updateOptions('getList',$opt,$field);
 			// Call
 			$xml = $this->webService->get($opt);
 			$xml = $xml->asXML();
@@ -490,6 +500,8 @@ class prestashopcore extends solution {
 					}				
 					return $result;
 				}
+				// Function to modify opt (used for custom needs)
+				$opt = $this->updateOptions('read_last',$opt,$param);
 				
 				// Call when there is no query (simulation)
 				$xml = $this->webService->get($opt);				
@@ -621,7 +633,11 @@ class prestashopcore extends solution {
 						$opt['filter[id]'] = '[' . $param['date_ref'] .',999999999]';
 						$opt['sort'] = '[id_ASC]';
 					}
-				}					
+				}	
+				
+				// Function to modify opt (used for custom needs)
+				$opt = $this->updateOptions('read',$opt,$param);
+				
 				// Call				
 				$xml = $this->webService->get($opt);			
 
@@ -778,7 +794,8 @@ class prestashopcore extends solution {
 						$opt['sort'] = '[id_ASC]';
 					}
 				}
-
+				// Function to modify opt (used for custom needs)
+				$opt = $this->updateOptions('readManyToMany',$opt,$param);
 				// Call
 				$xml = $this->webService->get($opt);
 				$xml = $xml->asXML();
@@ -884,6 +901,9 @@ class prestashopcore extends solution {
 					    'resource' => $param['module'].'?schema=blank',
 					);
 					
+					// Function to modify opt (used for custom needs)
+					$opt = $this->updateOptions('create1',$opt,$param);
+					
 					// Call
 					$xml = $this->webService->get($opt);
 					$modele = $xml->children()->children();
@@ -922,7 +942,10 @@ class prestashopcore extends solution {
 						'resource' => $param['module'],
 						'postXml' => $xml->asXML()
 					);
-				
+					
+					// Function to modify opt (used for custom needs)
+					$opt = $this->updateOptions('create2',$opt,$param);
+					
 					$new = $this->webService->add($opt);
 					$result[$idDoc] = array(
 							'id' => (string)$new->children()->children()->id,
@@ -967,6 +990,8 @@ class prestashopcore extends solution {
 					    'id' => (int) $data['target_id']
 					);
 					
+					// Function to modify opt (used for custom needs)
+					$opt = $this->updateOptions('update1',$opt,$param);
 					// Call
 					$xml = $this->webService->get($opt);
 			
@@ -1009,7 +1034,9 @@ class prestashopcore extends solution {
 						$toUpdate->message = str_replace(chr(10), "\n", $toUpdate->message);
 					}
 
-				
+					// Function to modify opt (used for custom needs)
+					$opt = $this->updateOptions('update2',$opt,$param);
+					
 					$opt = array(
 						'resource' => $param['module'],
 						'putXml' => $xml->asXML(),
@@ -1122,6 +1149,10 @@ class prestashopcore extends solution {
 			return array();
 			//return $e->getMessage();
 		}
+	}
+	
+	protected function updateOptions($method, $opt, $param){
+		return $opt;
 	}
 	
 	// Fonction permettant de faire l'appel REST
