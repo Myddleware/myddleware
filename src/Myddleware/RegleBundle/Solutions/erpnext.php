@@ -42,6 +42,14 @@ class erpnextcore extends solution
     protected $FieldsDuplicate = array(	'Contact' => array('Email', 'Name'),
 										'default' => array('Name')
 									);
+									
+	// Module list that allows to make parent relationships
+	protected $allowParentRelationship = array('Sales Invoice');
+	
+	protected $childModuleKey = array('Sales Invoice Item' => 'items');
+	
+	// Get isTable parameter for each module
+	protected $isTableModule = array();
 
     public function getFieldsLogin() {
         return array(
@@ -91,14 +99,16 @@ class erpnextcore extends solution
     // Get the modules available
     public function get_modules($type = 'source') {
         try {
-            $url = $this->paramConnexion['url'] . '/api/resource/DocType';
-            $parameters = array("limit_page_length" => 1000);
-            $APImodules = $this->call($url, 'GET', $parameters);			
+			// Get 
+			$url = $this->paramConnexion['url'] .'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';			
+            $APImodules = $this->call($url, 'GET');	
             if (!empty($APImodules->data)) {
                 foreach ($APImodules->data as $APImodule) {
                     $modules[$APImodule->name] = $APImodule->name;
+					// Save istable parameter for each modules
+					$this->isTableModule[$APImodule->name] = $APImodule->istable;
                 }
-            }
+            }			
             return $modules;
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -110,10 +120,12 @@ class erpnextcore extends solution
     public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);
         try {
-            // Get the list field for a module
-            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . urlencode($module) . '&fields=*&filters={%22parent%22:%22' . urlencode($module) . '%22}&limit_page_length=500';
-            $recordList = $this->call($url, 'GET', '');
+			// Call get modules to fill the isTableModule array and ge the module list.
+			$modules = $this->get_modules();			
 
+            // Get the list field for a module
+            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . rawurlencode($module) . '&fields=*&filters={%22parent%22:%22' . rawurlencode($module) . '%22}&limit_page_length=500';
+            $recordList = $this->call($url, 'GET', '');
             // Format outpput data
             if (!empty($recordList->message)) {
                 foreach ($recordList->message as $field) {
@@ -138,7 +150,7 @@ class erpnextcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
-							'option' => $this->get_modules()
+							'option' => $modules
                         );
 						$this->fieldsRelate['link_name'] = array(
                             'label' => 'Link name',
@@ -171,12 +183,48 @@ class erpnextcore extends solution
                 throw new \Exception('No data in the module ' . $module . '. Failed to get the field list.');
             }
 
+			//If the module is a table and the solution is used in target, we add 3 fields
+			if(
+					$type == 'target'
+				AND !empty($this->isTableModule[$module])
+			) {
+				// Parenttype => relate module/DocType de la relation (eg for Sales Invoice Item, it will be Sales Invoice)
+				$this->moduleFields['Parenttype'] = array(
+														'label' => 'Parent type',
+														'type' => 'varchar(255)',
+														'type_bdd' => 'varchar(255)',
+														'required' => '',
+														'option' => $modules
+													);
+				// Parentfield => field name in the parent module (eg. "items" in module Sales Invoice). We can't give the field list because we don't know the module selected yet
+				$this->moduleFields['Parentfield'] = array(
+														'label' => 'Parent field',
+														'type' => 'varchar(255)',
+														'type_bdd' => 'varchar(255)',
+														'required' => ''
+													);
+				// Parent => value of the parent field (eg SINV-00001 which is the "Sales Invoice" parent)
+				$this->fieldsRelate['Parent'] = array(
+                            'label' => 'Parent',
+                            'type' => 'varchar(255)',
+                            'type_bdd' => 'varchar(255)',
+                            'required' => '',
+                            'required_relationship' => '',
+                        );
+			}
+			
             // Add relate field in the field mapping
             if (!empty($this->fieldsRelate)) {
                 $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
             }
+			
+// echo '<pre>';
+// print_r($this->moduleFields);
+// print_r($this->fieldsRelate);
+// die();			
             return $this->moduleFields;
         } catch (\Exception $e) {
+			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
             return false;
         }
     } // get_module_fields($module)
@@ -207,7 +255,7 @@ class erpnextcore extends solution
                 $filters = json_encode($filters_result);
                 $data = array('filters' => $filters, 'fields' => '["*"]');
                 $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;
+                $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
                 $resultQuery = $this->call($url, "GET", '');
                 $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
 
@@ -215,7 +263,7 @@ class erpnextcore extends solution
 
                 $data = array('limit_page_length' => 1, 'fields' => '["*"]');
                 $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;
+                $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
                 //get list of modules
 
                 $resultQuery = $this->call($url, "GET", '');
@@ -244,7 +292,7 @@ class erpnextcore extends solution
                 }
             }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+            $result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['done'] = -1;
         }
         return $result;
@@ -286,7 +334,7 @@ class erpnextcore extends solution
 		
 			// Send the query
             $q = http_build_query($data);
-            $url = $this->paramConnexion['url'] . '/api/resource/' . urlencode($param['module']) . '?' . $q;		
+            $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;		
             $resultQuery = $this->call($url, 'GET', '');				
           
             // If no result
@@ -313,7 +361,7 @@ class erpnextcore extends solution
                 $result['count'] = count($resultQuery);
             }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
+            $result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }		
         return $result;
     }// end function read
@@ -340,9 +388,11 @@ class erpnextcore extends solution
      * @return array
      */
     function CreateOrUpdate($method, $param) {
+// print_r($param);		
         try {
             $result = array();
-			$url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module']);
+			$subDocIdArray = array();
+			$url = $this->paramConnexion['url'] . "/api/resource/" . rawurlencode($param['module']);
             if ($method == 'update') {
                 $method = "PUT";
             } else {
@@ -354,15 +404,46 @@ class erpnextcore extends solution
 						// We don't send Myddleware fields
 						if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
 							if ($key == 'target_id') {
-								$url = $this->paramConnexion['url'] . "/api/resource/" . urlencode($param['module'])."/" .$value;
+								$url = $this->paramConnexion['url'] . "/api/resource/" . rawurlencode($param['module'])."/" .$value;
 							}
 							unset($data[$key]);
+						// if the data is a link 
 						} elseif ($key == 'link_doctype') {
 							$data['links'] = array(array('link_doctype' =>  $data[$key], 'link_name' => $data['link_name']));
 							unset($data[$key]);
 							unset($data['link_name']);
-						}  
+						// If the data is a submodule (eg : invoice lines)	
+						} elseif (is_array($value)) {
+							if(empty($this->childModuleKey[$key])) {
+								throw new \Exception('The childModuleKey is missing for the module '.$key);
+							}	
+							if (!empty($value)) {
+								foreach ($value as $subIdDoc => $subData) {
+									// Save the subIdoc to change the sub data transfer status
+									$subDocIdArray[$subIdDoc] = array('id' => uniqid('', true));
+									foreach ($subData as $subKey => $subValue) {
+										// We don't send Myddleware fields
+										if (in_array($subKey, array('target_id', 'id_doc_myddleware','source_date_modified'))) {
+											unset($subData[$subKey]);
+										// if the data is a link 
+										} elseif ($subKey == 'link_doctype') {
+											$subData['links'] = array(array('link_doctype' =>  $subData[$subKey], 'link_name' => $subData['link_name']));
+											unset($subData[$subKey]);
+											unset($subData['link_name']);
+										} 										
+									} 
+// print_r($subData);	
+									$data[$this->childModuleKey[$key]][] = $subData;
+									// Remove the original array
+								}
+							}
+							unset($data[$key]);
+						}
 					}
+// echo $url.chr(10);			
+// echo $method.chr(10);			
+// print_r(array('data' => json_encode($data)));
+// return null;				
 					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));				
 					if (!empty($resultQuery->data->name)) {
 						$result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
@@ -377,6 +458,15 @@ class erpnextcore extends solution
 						'error' => $e->getMessage()
 					);
 				}
+				// Transfert status update
+				if (
+						!empty($subDocIdArray)
+					AND empty($result[$idDoc]['error'])
+				) {				
+					foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+						$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+					}
+				}
 				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
 			
@@ -385,6 +475,8 @@ class erpnextcore extends solution
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
         }
+// print_r($result);
+// return null;		
         return $result;
     }
 

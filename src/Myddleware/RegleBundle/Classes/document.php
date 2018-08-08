@@ -258,7 +258,8 @@ class documentcore {
 			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, parent_id) VALUES";		
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
-			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$date_modified','$this->ruleMode','$this->parentId')";
+			// Source_id could contain accent
+			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->parentId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->updateStatus('New');
@@ -1709,7 +1710,8 @@ class documentcore {
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
-			$stmt->bindValue(":target_id", $target_id);
+			// Target id could contain accent
+			$stmt->bindValue(":target_id", utf8_encode($target_id));
 			$stmt->bindValue(":id", $this->id); 
 			$stmt->execute();
 			$this->message .= 'Target id : '.$target_id;
@@ -1867,7 +1869,7 @@ class documentcore {
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->bindValue(":created",$now);
 			$stmt->bindValue(":typeError",$this->typeError);
-			$stmt->bindValue(":message", str_replace("'","",$this->message));
+			$stmt->bindValue(":message", str_replace("'","",utf8_encode($this->message)));
 			$stmt->bindValue(":rule_id",$this->ruleId);
 			$stmt->bindValue(":doc_id",$this->id);
 			$stmt->bindValue(":ref_doc_id",$this->docIdRefError);
