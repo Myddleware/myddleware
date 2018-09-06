@@ -78,7 +78,7 @@ class JobSchedulerType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'myddleware_reglebundle_jobscheduler';
     }
