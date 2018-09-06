@@ -2,6 +2,7 @@
 
 namespace Myddleware\RegleBundle\Controller;
 
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Myddleware\RegleBundle\Entity\JobScheduler;
@@ -95,7 +96,7 @@ class JobSchedulerController extends Controller
             'method' => 'POST',
         ));
 
-        $form->add('submit', 'submit', array('label' => 'jobscheduler.new'));
+        $form->add('submit', SubmitType::class, array('label' => 'jobscheduler.new'));
 
         return $form;
     }
@@ -176,7 +177,7 @@ class JobSchedulerController extends Controller
             'method' => 'PUT',
         ));
 
-        $form->add('submit', 'submit', array('label' => 'jobscheduler.update'));
+        $form->add('submit', SubmitType::class, array('label' => 'jobscheduler.update'));
         return $form;
     }
 
@@ -240,7 +241,7 @@ class JobSchedulerController extends Controller
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('jobscheduler_delete', array('id' => $id)))
             ->setMethod('DELETE')
-            ->add('submit', 'submit', array('label' => 'Delete'))
+            ->add('submit', SubmitType::class, array('label' => 'Delete'))
             ->getForm();
     }
 
