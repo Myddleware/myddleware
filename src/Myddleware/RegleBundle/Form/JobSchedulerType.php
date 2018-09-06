@@ -68,7 +68,7 @@ class JobSchedulerType extends AbstractType
     /**
      * @param OptionsResolverInterface $resolver
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions (OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => 'Myddleware\RegleBundle\Entity\JobScheduler'
