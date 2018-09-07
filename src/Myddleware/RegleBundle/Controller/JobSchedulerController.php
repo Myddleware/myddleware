@@ -91,7 +91,7 @@ class JobSchedulerController extends Controller
      */
     private function createCreateForm(JobScheduler $entity)
     {
-        $form = $this->createForm(new JobSchedulerType(), $entity, array(
+        $form = $this->createForm(JobSchedulerType::class, $entity, array(
             'action' => $this->generateUrl('jobscheduler_create'),
             'method' => 'POST',
         ));
@@ -172,7 +172,7 @@ class JobSchedulerController extends Controller
      */
     private function createEditForm(JobScheduler $entity)
     {
-        $form = $this->createForm(new JobSchedulerType(), $entity, array(
+        $form = $this->createForm(JobSchedulerType::class, $entity, array(
             'action' => $this->generateUrl('jobscheduler_update', array('id' => $entity->getId())),
             'method' => 'PUT',
         ));
