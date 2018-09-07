@@ -25,6 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class dolistcore extends solution {
@@ -91,7 +92,7 @@ class dolistcore extends solution {
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                    array(

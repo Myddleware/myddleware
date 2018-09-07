@@ -121,7 +121,7 @@ class moodlecore  extends solution {
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'username' => array('label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'password' => array('label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'password' => array('label' => 'Password', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'createpassword' => array('label' => 'Create password', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
 						'firstname' => array('label' => 'Firstname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'lastname' => array('label' => 'Lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),

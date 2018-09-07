@@ -25,6 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class eventbritecore  extends solution {
@@ -140,7 +141,7 @@ class eventbritecore  extends solution {
 						'created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'modified' => array('label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'privacy' => array('label' => 'Private', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'password' => array('label' => 'Password.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'password' => array('label' => 'Password.', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'capacity' => array('label' => 'Capacity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'url' => array('label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'logo' => array('label' => 'Logo URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),

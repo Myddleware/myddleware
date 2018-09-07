@@ -26,6 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class magentocore extends solution {
@@ -60,7 +61,7 @@ class magentocore extends solution {
                         ), 
                      array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ), 
         );

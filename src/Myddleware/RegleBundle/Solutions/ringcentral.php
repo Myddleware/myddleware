@@ -23,6 +23,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -60,18 +61,18 @@ class ringcentralcore  extends solution {
                             'label' => 'solution.fields.username'
                         ),
 					array(
-                            'name' => 'password',
+                            'name' => PasswordType::class,
                             'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'apikey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikey'
                         ),
 					array(
                             'name' => 'apikeysecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikeysecret'
                         ),
 					array(

@@ -24,6 +24,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -50,7 +51,7 @@ class mailchimpcore  extends solution {
                         ),
 					array(
                             'name' => 'clientsecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.clientsecret'
                         ),
 					array(

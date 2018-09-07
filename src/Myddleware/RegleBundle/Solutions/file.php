@@ -27,6 +27,7 @@ namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
 use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
 
 class filecore extends solution { 
@@ -89,7 +90,7 @@ class filecore extends solution {
                         ),
 					array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
 					array(
