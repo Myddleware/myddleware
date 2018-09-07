@@ -27,6 +27,7 @@ namespace Myddleware\RegleBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
@@ -193,7 +194,7 @@ class FluxControllerCore extends Controller
 							       'required'  => false
 						 ))						 
 						 
-					->add('click_filter', 'submit', array(
+					->add('click_filter', SubmitType::class, array(
 					    'attr' => array(
 					    	'class' => 'btn-mydinv'
 						),
