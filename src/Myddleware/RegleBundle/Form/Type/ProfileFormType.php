@@ -35,7 +35,7 @@ class ProfileFormType extends AbstractType
 
     public function getParent()
     {
-        return "FOS\UserBundle\Form\Type\ProfileFormType";
+        return 'FOS\UserBundle\Form\Type\ProfileFormType';
     }
 
     /**
