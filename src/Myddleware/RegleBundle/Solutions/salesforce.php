@@ -25,6 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class salesforcecore extends solution {
@@ -129,22 +130,22 @@ class salesforcecore extends solution {
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                     array(
                             'name' => 'consumerkey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.consumerkey'
                         ),
                     array(
                             'name' => 'consumersecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.consumersecret'
                         ),
                     array(
                             'name' => 'token',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.token'
                         ),
                     array(

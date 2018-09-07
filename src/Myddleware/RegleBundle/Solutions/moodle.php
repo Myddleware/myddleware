@@ -26,6 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 //use Psr\LoggerInterface;
@@ -78,7 +79,7 @@ class moodlecore  extends solution {
 						),
 					array(
                             'name' => 'token',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.token'
                         )
 		);
