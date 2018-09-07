@@ -25,6 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class salesforcecore extends solution {
 
 	protected $limitCall = 100;
@@ -122,7 +124,7 @@ class salesforcecore extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
@@ -147,7 +149,7 @@ class salesforcecore extends solution {
                         ),
                     array(
                             'name' => 'sandbox',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.sandbox'
                         )
         );

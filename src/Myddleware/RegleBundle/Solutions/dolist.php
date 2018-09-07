@@ -25,6 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class dolistcore extends solution {
 	
 	private $token;
@@ -84,7 +86,7 @@ class dolistcore extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
@@ -94,12 +96,12 @@ class dolistcore extends solution {
                         ),
                    array(
                             'name' => 'accountid',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.accountid'
                         ),
                    array(
                             'name' => 'apikey',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.apikey'
                         )
         );
@@ -222,7 +224,7 @@ class dolistcore extends solution {
 		    	if($field == 'MemberId') {
 		    		$this->fieldsRelate[$field] = array(
 							'label' => $field,
-							'type' => 'text',
+							'type' => TextType::class,
 							'type_bdd' => 'varchar(255)',
 							'required' => false,
 							'required_relationship' => 0
@@ -230,7 +232,7 @@ class dolistcore extends solution {
 				}
 				$this->moduleFields[$field] = array(
 						'label' => $field,
-						'type' => 'text',
+						'type' => TextType::class,
 						'type_bdd' => 'varchar(255)',
 						'required' => false
 				);
@@ -262,7 +264,7 @@ class dolistcore extends solution {
 				foreach ($customFields as $customField) {
 					$this->moduleFields[$customField['Name']] = array(
 							'label' => $customField['Title'],
-							'type' => 'text',
+							'type' => TextType::class,
 							'type_bdd' => 'varchar(255)',
 							'required' => false
 					);					
@@ -305,7 +307,7 @@ class dolistcore extends solution {
 				if($customField['Name'] == 'email') {
 					$this->moduleFields[$customField['Name']] = array(
 							'label' => $customField['Title'],
-							'type' => 'text',
+							'type' => TextType::class,
 							'type_bdd' => 'varchar(255)',
 							'required' => true
 					);
@@ -313,7 +315,7 @@ class dolistcore extends solution {
 				}
 				$this->moduleFields[$customField['Name']] = array(
 						'label' => $customField['Title'],
-						'type' => 'text',
+						'type' => TextType::class,
 						'type_bdd' => 'varchar(255)',
 						'required' => false
 				);					
@@ -340,7 +342,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => $field['Required']
 			);
@@ -382,7 +384,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 			);
@@ -391,7 +393,7 @@ class dolistcore extends solution {
 		foreach ($fieldsRelate as $relate) {
 			$this->fieldsRelate[$relate['Name']] = array(
 					'label' => $relate['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false,
 					'required_relationship' => 0
@@ -440,7 +442,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 			);
@@ -449,7 +451,7 @@ class dolistcore extends solution {
 		foreach ($fieldsRelate as $relate) {
 			$this->fieldsRelate[$relate['Name']] = array(
 					'label' => $relate['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false,
 					'required_relationship' => 0
@@ -493,7 +495,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 			);
@@ -502,7 +504,7 @@ class dolistcore extends solution {
 		foreach ($fieldsRelate as $relate) {
 			$this->fieldsRelate[$relate['Name']] = array(
 					'label' => $relate['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false,
 					'required_relationship' => 0
@@ -546,7 +548,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 			);
@@ -555,7 +557,7 @@ class dolistcore extends solution {
 		foreach ($fieldsRelate as $relate) {
 			$this->fieldsRelate[$relate['Name']] = array(
 					'label' => $relate['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false,
 					'required_relationship' => 0
@@ -599,7 +601,7 @@ class dolistcore extends solution {
 		foreach ($fields as $field) {
 			$this->moduleFields[$field['Name']] = array(
 					'label' => $field['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 			);
@@ -608,7 +610,7 @@ class dolistcore extends solution {
 		foreach ($fieldsRelate as $relate) {
 			$this->fieldsRelate[$relate['Name']] = array(
 					'label' => $relate['Label'],
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false,
 					'required_relationship' => 0
@@ -656,7 +658,7 @@ class dolistcore extends solution {
 		    	if($field == 'ID') {
 		    		$this->fieldsRelate[$field] = array(
 							'label' => $field,
-							'type' => 'text',
+							'type' => TextType::class,
 							'type_bdd' => 'varchar(255)',
 							'required' => false,
 							'required_relationship' => 0
@@ -664,7 +666,7 @@ class dolistcore extends solution {
 				}
 				$this->moduleFields[$field] = array(
 						'label' => $field,
-						'type' => 'text',
+						'type' => TextType::class,
 						'type_bdd' => 'varchar(255)',
 						'required' => false
 				);
@@ -680,14 +682,14 @@ class dolistcore extends solution {
 	public function get_StaticSegmentBody_fields(){
          $this->fieldsRelate['FileName'] = array(
                                     'label' => 'FileName',
-                                    'type' => 'text',
+                                    'type' => TextType::class,
                                     'type_bdd' => 'varchar(255)',
                                     'required' => false,
 									'required_relationship' => 1
                                 );
          $this->fieldsRelate['ContactID'] = array(
                                     'label' => 'ContactID',
-                                    'type' => 'text',
+                                    'type' => TextType::class,
                                     'type_bdd' => 'varchar(255)',
                                     'required' => false,
 									'required_relationship' => 1
@@ -698,19 +700,19 @@ class dolistcore extends solution {
 	public function get_StaticSegmentHeader_fields(){
 		$this->moduleFields['ImportName'] = array(
 				'label' => 'ImportName',
-				'type' => 'text',
+				'type' => TextType::class,
 				'type_bdd' => 'varchar(255)',
 				'required' => true
 		);
 		$this->moduleFields['NumberOfTargets'] = array(
 				'label' => 'NumberOfTargets',
-				'type' => 'text',
+				'type' => TextType::class,
 				'type_bdd' => 'varchar(255)',
 				'required' => true
 		);		
 		$this->moduleFields["ReportAddresse"] = array(
 					'label' => "ReportAddresse",
-					'type' => 'text',
+					'type' => TextType::class,
 					'type_bdd' => 'varchar(255)',
 					'required' => false
 		);	

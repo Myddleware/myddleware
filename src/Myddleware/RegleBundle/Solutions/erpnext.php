@@ -25,6 +25,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use DateTime;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -55,12 +56,12 @@ class erpnextcore extends solution
         return array(
             array(
                 'name' => 'url',
-                'type' => 'text',
+                'type' => TextType::class,
                 'label' => 'solution.fields.url'
             ),
             array(
                 'name' => 'login',
-                'type' => 'text',
+                'type' => TextType::class,
                 'label' => 'solution.fields.login'
             ),
             array(

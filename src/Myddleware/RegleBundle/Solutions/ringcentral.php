@@ -23,6 +23,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class ringcentralcore  extends solution { 
@@ -55,7 +56,7 @@ class ringcentralcore  extends solution {
 		return array(
 					array(
                             'name' => 'username',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.username'
                         ),
 					array(
@@ -75,7 +76,7 @@ class ringcentralcore  extends solution {
                         ),
 					array(
                             'name' => 'sandbox',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.sandbox'
                         )	
 		);
@@ -353,7 +354,7 @@ class ringcentralcore  extends solution {
 			$params[] = array(
 								'id' => 'extensionId',
 								'name' => 'extensionId',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Extension Id',
 								'required'	=> false
 							);	

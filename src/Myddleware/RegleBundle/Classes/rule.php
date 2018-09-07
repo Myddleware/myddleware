@@ -29,6 +29,7 @@ use Symfony\Bridge\Monolog\Logger; // Logs
 use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Service access
 use Doctrine\DBAL\Connection; // Connection database
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -1438,7 +1439,7 @@ class rulecore {
 				'id' 		=> 'datereference',
 				'name' 		=> 'datereference',
 				'required'	=> true,
-				'type'		=> 'text',
+				'type'		=> TextType::class,
 				'label' => 'solution.params.dateref'
 			),
 			array( // clear data

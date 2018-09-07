@@ -24,6 +24,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 
@@ -44,7 +45,7 @@ class zuoracore  extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
@@ -59,7 +60,7 @@ class zuoracore  extends solution {
                         ),
 					array(
 						'name' => 'sandbox',
-						'type' => 'text',
+						'type' => TextType::class,
 						'label' => 'solution.fields.sandbox'
 					)
         );

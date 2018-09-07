@@ -25,7 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
 
 class bittlecore extends solution { 
 	Protected $baseUrl;
@@ -76,7 +77,7 @@ class bittlecore extends solution {
                         ),
 					array(
                             'name' => 'url',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.url'
                         )
 		);

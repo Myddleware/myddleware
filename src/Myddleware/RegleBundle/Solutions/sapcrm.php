@@ -26,6 +26,8 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 //use Psr\LoggerInterface;
 
 class sapcrmcore extends saproot {
@@ -116,8 +118,8 @@ class sapcrmcore extends saproot {
 						'HEADER__CATEGORIE' => array('label' => 'CATEGORIE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__TYPE'),
 						'HEADER__GROUP' => array('label' => 'GROUP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__BU_GROUP'),
 						'HEADER__BUSINESSPARTNEREXTERN' => array('label' => 'BUSINESSPARTNEREXTERN', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__BPEXT'),
-						'CENTRALDATA__PARTNERTYPE' => array('label' => 'PARTNERTYPE', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0, 'readName' => 'ET_BUT000__BPKIND'),
-						'CENTRALDATA__TITLE_KEY' => array('label' => 'TITLE_KEY', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0, 'readName' => 'ET_BUT000__TITLE'),
+						'CENTRALDATA__PARTNERTYPE' => array('label' => 'PARTNERTYPE', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0, 'readName' => 'ET_BUT000__BPKIND'),
+						'CENTRALDATA__TITLE_KEY' => array('label' => 'TITLE_KEY', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0, 'readName' => 'ET_BUT000__TITLE'),
 						'CENTRALDATAPERSON__FIRSTNAME' => array('label' => 'FIRSTNAME', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__NAME_FIRST'),
 						'CENTRALDATAPERSON__LASTNAME' => array('label' => 'LASTNAME', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__NAME_LAST'),
 						'CENTRALDATAPERSON__MIDDLENAME' => array('label' => 'MIDDLENAME', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_BUT000__NAMEMIDDLE'),
@@ -566,7 +568,7 @@ class sapcrmcore extends saproot {
 					$params[] = array(
 								'id' => 'SALES_ORG',
 								'name' => 'SALES_ORG',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Sales Organization',
 								'required'	=> false
 							);
@@ -575,7 +577,7 @@ class sapcrmcore extends saproot {
 					$params[] = array(
 								'id' => 'BU_GROUP',
 								'name' => 'BU_GROUP',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Partner group',
 								'required'	=> false
 							);					
@@ -585,7 +587,7 @@ class sapcrmcore extends saproot {
 					$params[] = array(
 								'id' => 'PROCESS_TYPE',
 								'name' => 'PROCESS_TYPE',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Order type ', //Type d'opération commerciale
 								'required'	=> false
 							);			
@@ -593,7 +595,7 @@ class sapcrmcore extends saproot {
 					$params[] = array(
 								'id' => 'OBJECT',
 								'name' => 'BU_GROUP',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Object type',
 								'required'	=> false
 							);					

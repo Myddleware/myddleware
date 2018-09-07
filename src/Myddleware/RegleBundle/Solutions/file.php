@@ -26,7 +26,8 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
 
 class filecore extends solution { 
 	Protected $baseUrl;
@@ -83,7 +84,7 @@ class filecore extends solution {
 		return array(
 					 array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
 					array(
@@ -93,17 +94,17 @@ class filecore extends solution {
                         ),
 					array(
                             'name' => 'host',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.host'
                         ),
 					array(
                             'name' => 'port',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.ftpport'
                         ),
 					array(
                             'name' => 'directory',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.directory'
                         )	
 		);

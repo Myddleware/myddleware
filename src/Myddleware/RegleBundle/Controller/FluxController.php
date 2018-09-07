@@ -26,6 +26,8 @@
 namespace Myddleware\RegleBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -151,41 +153,41 @@ class FluxControllerCore extends Controller
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar'))) */
 						
-					 ->add('source_content','text', array(
+					 ->add('source_content',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCSourceContentExist() ? $sessionService->getFluxFilterSourceContent() : false),
 					 	'required'=> false))
 					 
-					 ->add('target_content','text', array(
+					 ->add('target_content',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCTargetContentExist() ? $sessionService->getFluxFilterTargetContent() : false),
 					 	'required'=> false))
 					 				 
-					 ->add('date_modif_start','text', array(
+					 ->add('date_modif_start',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCDateModifStartExist() ? $sessionService->getFluxFilterDateModifStart() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 				 
-					 ->add('date_modif_end','text', array(
+					 ->add('date_modif_end',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCDateModifEndExist() ? $sessionService->getFluxFilterDateModifEnd() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 
-					 ->add('rule','text', array( 
+					 ->add('rule',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 					 	'required'=> false	))	
 						
-					 ->add('rule', 'choice', array(
+					 ->add('rule', ChoiceType::class, array(
 							       'choices'   => $lstRuleName,
 								   'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 							       'required'  => false
 						 ))						
 						
-					 ->add('status', 'choice', array(
+					 ->add('status', ChoiceType::class, array(
 							       'choices'   => $lstStatus,
 								   'data'=> ($sessionService->isFluxFilterCStatusExist() ? $sessionService->getFluxFilterStatus() : false),
 							       'required'  => false
 						 ))
 						 
-					 ->add('gblstatus', 'choice', array(
+					 ->add('gblstatus', ChoiceType::class, array(
 							       'choices'   => $lstGblStatus,
 								   'data'=> ($sessionService->isFluxFilterCGblStatusExist() ? $sessionService->getFluxFilterGlobalStatus() : false),
 							       'required'  => false
@@ -198,11 +200,11 @@ class FluxControllerCore extends Controller
 						'label' => $this->get('translator')->trans( 'list_flux.btn.filter' ),
 					))		
 
-					->add('source_id','text', array( 
+					->add('source_id',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCSourceIdExist() ? $sessionService->getFluxFilterSourceId() : false),
 						'required'=> false	))	
 
-					->add('target_id','text', array( 
+					->add('target_id',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCTargetIdExist() ? $sessionService->getFluxFilterTargetId() : false),
 						'required'=> false	))							
 					 					  

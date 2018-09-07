@@ -24,6 +24,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class mailchimpcore  extends solution { 
@@ -44,7 +45,7 @@ class mailchimpcore  extends solution {
 		return array(
 					array(
                             'name' => 'clientid',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.clientid'
                         ),
 					array(
@@ -54,7 +55,7 @@ class mailchimpcore  extends solution {
                         ),
 					array(
                             'name' => 'redirect_uri',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.redirect_uri'
                         )
 		);
@@ -224,7 +225,7 @@ class mailchimpcore  extends solution {
 						'rss_opts__frequency' => array('label' => 'Frequency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('daily' => 'daily','weekly' => 'weekly','monthly' => 'monthly')),
 						'rss_opts__constrain_rss_img' => array('label' => 'Constrain RSS Images', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
 						'social_card__title' => array('label' => 'Social card title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'social_card__description' => array('label' => 'Social card description', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'social_card__description' => array('label' => 'Social card description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'social_card__image_url' => array('label' => 'Social card image_url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'type' => array('label' => 'Campaign Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array('regular' => 'regular','plaintext' => 'plaintext','absplit' => 'absplit','rss' => 'rss','variate' => 'variate'))
 					);

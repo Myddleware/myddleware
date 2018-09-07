@@ -25,6 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class sagecrmcore extends solution {
 	
 	private $wsdl = "";
@@ -126,7 +128,7 @@ class sagecrmcore extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
@@ -136,7 +138,7 @@ class sagecrmcore extends solution {
                         ),
                     array(
                             'name' => 'wsdl',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.wsdl'
                         )
         );

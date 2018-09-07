@@ -24,6 +24,7 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class cirrusshieldcore  extends solution { 
@@ -44,7 +45,7 @@ class cirrusshieldcore  extends solution {
 		return array(
 					array(
 							'name' => 'login',
-							'type' => 'text',
+							'type' => TextType::class,
 							'label' => 'solution.fields.login'
 						),
 					array(

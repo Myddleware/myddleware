@@ -26,6 +26,8 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 //use Psr\LoggerInterface;
 
 require_once('lib/lib_moodle.php');
@@ -71,7 +73,7 @@ class moodlecore  extends solution {
 		return array(
 					array(
 							'name' => 'url',
-							'type' => 'text',
+							'type' => TextType::class,
 							'label' => 'solution.fields.url'
 						),
 					array(
@@ -296,7 +298,7 @@ class moodlecore  extends solution {
 				case 'notes':	
 					$this->moduleFields = array(
 						'publishstate' => array('label' => 'Publish state ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'text' => array('label' => 'Text', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'text' => array('label' => 'Text', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'format' => array('label' => 'Format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'clientnoteid' => array('label' => 'Client note id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					);
