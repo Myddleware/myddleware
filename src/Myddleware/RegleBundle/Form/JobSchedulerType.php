@@ -31,7 +31,7 @@ class JobSchedulerType extends AbstractType
                     'rerunerror' => 'Rerun Error',
                     'cleardata' => 'Clear Data',
                 ),
-                'empty_value' => '- Choice command -',
+                'placeholder' => '- Choice command -',
 
             ))
             ->add('paramName1')
