@@ -20,14 +20,12 @@ class ConnectorParamType extends AbstractType{
     private $_secret;
     private $_solutionFieldsLogin;
     
-    public function __construct($secret, $solutionFieldsLogin) 
-    {
-        $this->_secret = $secret;
-        $this->_solutionFieldsLogin = $solutionFieldsLogin;
-    }
+
     
     public function buildForm(FormBuilderInterface $builder, array $options) 
     {
+        $this->_secret = $options['secret'];
+        $this->_solutionFieldsLogin = $options['fieldsLogin'];
       
         $builder->add('value',TextType::class,['error_bubbling' => true])->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
        
@@ -79,7 +77,9 @@ class ConnectorParamType extends AbstractType{
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => ConnectorParam::class
+            'data_class' => ConnectorParam::class,
+            'secret' => null,
+            'fieldsLogin' => null
         ));
     }
     

@@ -310,7 +310,11 @@ class ConnectorController extends Controller
 
                 $connector = new Connector();
                 $connector->setSolution($solution);
-                $form = $this->createForm(new ConnectorType($this->container), $connector);
+//              $form = $this->createForm(new ConnectorType($this->container), $connector);
+                $form = $this->createForm(ConnectorType::class,$connector,array(
+                    'method'    => 'PUT',
+                    'container' => $this->container,
+                ));
                 
 		if($request->getMethod()=='POST' && $sessionService->isParamConnectorExist()) {		
 			try {
@@ -520,8 +524,15 @@ class ConnectorController extends Controller
               
               
                 // Create connector form
-                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
-                
+//                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
+
+                  $form = $this->createForm(ConnectorType::class,$connector,array(
+                      'action'    => $this->generateUrl('connector_open', ['id' => $id]),
+                      'method'    => 'PUT',
+                      'container' => $this->container,
+                      ));
+
+
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {
                  

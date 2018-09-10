@@ -10,17 +10,15 @@ use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Symfony\Component\Validator\Constraints\Valid;
 
+
 class ConnectorType extends AbstractType{
-      
-    private $_container;
-    
-    public function __construct($container) {
-        $this->_container = $container;
-        
-    }
+
+ private $_container;
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        //dump($options); die();
+//        dump($options); die();
+        $this->_container = $options['container'];
+
         $fieldsLogin = [];
         if( $options['data']->getSolution() !=null ){
             $fieldsLogin = $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin();
@@ -38,8 +36,13 @@ class ConnectorType extends AbstractType{
         $builder->add('connectorParams', CollectionType::class, array(
             'constraints' => new Valid(),
             'error_bubbling' => true,
-            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin)
-        ));
+//            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin),
+            'entry_type' => new ConnectorParamType(),
+            'entry_options' => array(
+                'container' => $this->_container->getParameter('secret'),
+                'fieldsLogin' => $fieldsLogin,
+
+        )));
           
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
                 $builder->add($name, $value['type'],[
@@ -65,7 +68,8 @@ class ConnectorType extends AbstractType{
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Connector::class
+            'data_class' => Connector::class,
+            'container'  => null
         ));
     }
     
