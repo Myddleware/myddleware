@@ -29,6 +29,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -90,7 +91,7 @@ class FluxControllerCore extends Controller
 	}
 	 	 
  	// LISTE DES FLUX
- 	public function fluxListAction($page,$search = 1) {
+ 	public function fluxListAction(Request $request,$page,$search = 1) {
  		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
 		//--- Liste status traduction
@@ -224,7 +225,7 @@ class FluxControllerCore extends Controller
 		$conditions = 0;
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
-			$data = $this->getRequest()->get($form->getName());
+			$data = $request->get($form->getName());
 			$where = 'WHERE ';		
 			
 			/* if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
@@ -584,12 +585,12 @@ class FluxControllerCore extends Controller
 	}
 
 	// Sauvegarde flux
-	public function fluxSaveAction() {
+	public function fluxSaveAction(Request $request) {
 		$request = $this->get('request');
 		if($request->getMethod()=='POST') {
 			// Get the field and value from the request
-			$fields = strip_tags($this->getRequest()->request->get('fields'));
-			$value = strip_tags($this->getRequest()->request->get('value'));
+			$fields = strip_tags($request->request->get('fields'));
+			$value = strip_tags($request->request->get('value'));
 
 			if(isset($value)) {
 				// get the EntityManager
@@ -597,7 +598,7 @@ class FluxControllerCore extends Controller
 				// Get target data for the document
 				$documentDataEntity = $em->getRepository('RegleBundle:DocumentData')
 											->findOneBy( array(
-												'doc_id' => $this->getRequest()->request->get('flux'),
+												'doc_id' => $request->request->get('flux'),
 												'type' => 'T'
 												)
 										);
@@ -611,7 +612,7 @@ class FluxControllerCore extends Controller
 
 					// Insert in audit			  
 					$oneDocAudit = new DocumentAudit();
-					$oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
+					$oneDocAudit->setDoc( $request->request->get('flux') );
 					$oneDocAudit->setDateModified( new \DateTime );
 					$oneDocAudit->setBefore( $beforeValue );
 					$oneDocAudit->setAfter( $value );
