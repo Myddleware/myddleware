@@ -212,7 +212,7 @@ class FluxControllerCore extends Controller
 					 					  
 					->getForm();
 
-	    $form->handleRequest( $this->get('request') );
+	    $form->handleRequest( $request );
 		// condition d'affichage
 		$where = '';
 		$from = 'FROM Document ';
@@ -612,7 +612,7 @@ class FluxControllerCore extends Controller
 
 					// Insert in audit			  
 					$oneDocAudit = new DocumentAudit();
-					$oneDocAudit->setDoc( $request->request->get('flux') );
+					$oneDocAudit->setDoc( $re->request->get('flux') );
 					$oneDocAudit->setDateModified( new \DateTime );
 					$oneDocAudit->setBefore( $beforeValue );
 					$oneDocAudit->setAfter( $value );
