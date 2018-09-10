@@ -13,15 +13,16 @@ use Symfony\Component\Validator\Constraints\Valid;
 
 class ConnectorType extends AbstractType{
 
- private $_container;
+
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
-//        dump($options); die();
-        $this->_container = $options['container'];
-
-        $fieldsLogin = [];
+       //dump($options); die();
+        $fieldsLogin = $options['attr']['fieldsLogin'];
+        $secret = $options['attr']['secret'];
+        $options['attr']['fieldsLogin'] = null;
+        //$fieldsLogin = [];
         if( $options['data']->getSolution() !=null ){
-            $fieldsLogin = $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin();
+//            $fieldsLogin = $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin();
             //Init ConnectorParams
             if(count($options['data']->getConnectorParams()) == 0){
                 foreach ($fieldsLogin as $fieldLogin) {
@@ -39,10 +40,12 @@ class ConnectorType extends AbstractType{
 //            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin),
             'entry_type' => new ConnectorParamType(),
             'entry_options' => array(
-                'container' => $this->_container->getParameter('secret'),
-                'fieldsLogin' => $fieldsLogin,
-
-        )));
+                'attr' => array(
+                        'secret' => $secret,
+                        'fieldsLogin' => $fieldsLogin
+                )
+        )
+        ));
           
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
                 $builder->add($name, $value['type'],[
@@ -69,7 +72,7 @@ class ConnectorType extends AbstractType{
     {
         $resolver->setDefaults(array(
             'data_class' => Connector::class,
-            'container'  => null
+            //'container'  => null
         ));
     }
     

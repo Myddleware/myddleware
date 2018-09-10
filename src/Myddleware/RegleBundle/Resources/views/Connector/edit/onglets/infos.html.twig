@@ -33,7 +33,8 @@
 {# BTN #} 
 
 <div align="center">
-    {{form_start(form)}}
+    {#{{form_start(form)}}#}
+   <form name="connector" method="POST" action="">
         {% if error is defined %}
             <div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
         {% endif %}
@@ -62,7 +63,7 @@
                                     {{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
                                 </a>
                             {% endif %}
-                            
+
                         </td>
                   </tr>
 		{#<tr>
@@ -91,7 +92,7 @@
 		<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
 	</div>
 {#{{form_row(form._token)}}#}
-
-{{form_end(form)}}
+<form>
+{#{{form_end(form)}}#}
 
 </div>  

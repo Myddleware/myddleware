@@ -14,8 +14,9 @@ security:
             pattern: .*
             form_login:
                 provider: fos_userbundle
-                csrf_provider: security.csrf.token_manager
-                
+#                csrf_provider: security.csrf.token_manager
+                csrf_token_generator: security.csrf.token_manager
+
             remember_me:
                 key:       %secret%
                 lifetime:  30000000
