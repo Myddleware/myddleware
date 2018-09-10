@@ -43,7 +43,7 @@ class ProfileFormType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'Myddleware\RegleBundle\ProfileFormType';
+        return 'regle_user_profile';
     }
 
 }

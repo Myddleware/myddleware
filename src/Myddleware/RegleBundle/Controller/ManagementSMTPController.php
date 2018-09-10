@@ -66,7 +66,7 @@ class ManagementSMTPController extends Controller
      */
     private function createCreateForm()
     {
-        $form = $this->createForm(new managementSMTPType(), null, array(
+        $form = $this->createForm( managementSMTPType:: class, null, array(
             'action' => $this->generateUrl('management_smtp_create'),
         ));
         $form->add('submit', SubmitType::class, array('label' => 'management_smtp.submit'));
