@@ -116,7 +116,7 @@ class DefaultController extends Controller
 		try {
 			if ($request->isMethod('POST')) {
 
-				$lastUsername = trim($this->getRequest()->request->get('login'));
+				$lastUsername = trim($request->request->get('login'));
 				
 				// contrôle des tentatives
 				// si le nombre de tentative n'existe pas on affecte 0

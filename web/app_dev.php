@@ -9,7 +9,7 @@ ini_set('session.save_path', __DIR__.'/../app/sessions' );
 // read http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
 //umask(0000);
 
-$loader = require_once __DIR__.'/../app/bootstrap.php.cache';
+require __DIR__.'/../vendor/autoload.php';
 Debug::enable();
 
 require_once __DIR__.'/../app/AppKernel.php';
