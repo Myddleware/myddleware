@@ -90,7 +90,8 @@ fos_user:
             enabled: true
     profile:
         form:
-            type: regle_user_profile
+#            type: regle_user_profile
+            type: "Myddleware\\RegleBundle\\Form\\Type\\ProfileFormType"
     
 # Stof\DoctrineExtensionBundle configuration
 stof_doctrine_extensions:
