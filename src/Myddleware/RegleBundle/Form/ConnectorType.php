@@ -38,7 +38,7 @@ class ConnectorType extends AbstractType{
             'constraints' => new Valid(),
             'error_bubbling' => true,
 //            'entry_type' => new ConnectorParamType($this->_container->getParameter('secret'), $fieldsLogin),
-            'entry_type' => new ConnectorParamType(),
+            'entry_type' =>  ConnectorParamType::class,
             'entry_options' => array(
                 'attr' => array(
                         'secret' => $secret,
