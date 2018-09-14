@@ -16,7 +16,7 @@
         "php": ">=5.5.9",
       "symfony/symfony": "3.2.*",
         "doctrine/orm": "^2.5",
-        "doctrine/doctrine-bundle": "^1.6",
+        "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
 	"twig/twig": "^1.0",
         "symfony/assetic-bundle": "~2.3",
@@ -107,11 +107,11 @@
 			},
 			{
 				"file": "app/config/public/parameters_smtp.yml",
-				"dist-file": "app/config/parameters_smtp.yml.dist"
+				"dist-file": "app/config/public/parameters_smtp.yml.dist"
 			},
 			{
 				"file": "app/config/public/parameters_public.yml",
-				"dist-file": "app/config/parameters_public.yml.dist"
+				"dist-file": "app/config/public/parameters_public.yml.dist"
 			}
 		],
         "branch-alias": {

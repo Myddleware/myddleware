@@ -109,7 +109,7 @@ create_rule:
             rule: Règles
             fields: Champs source
             parent_detail_view: Parent
-            parent: Relation parent : fusion de plusieurs transferts de données
+            parent: "Relation parent : fusion de plusieurs transferts de données"
             record_id: ID enregistrement
             yes: Oui
         params:
@@ -229,10 +229,10 @@ animate:
         template: Choix des modèles prédéfinis
         name: Nom
         description: Description 
-        empty: Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
+        empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
     tutoriel:
-        link: http://community.myddleware.com/index.php/tutorial/#rules
-        textlink: Besoin d'aide ? Lisez notre tutoriel.
+        link: "http://community.myddleware.com/index.php/tutorial/#rules"
+        textlink: "Besoin d'aide ? Lisez notre tutoriel."
 
 create_connector:    
     title: Création d'un connecteur
@@ -240,7 +240,7 @@ create_connector:
     connexion: Nom de la connexion
     test: Tester
     valid: Cliquez-ici pour créer un autre connecteur
-    help: Besoin d'aide ?
+    help: "Besoin d'aide ?"
     source: Source
     target: Cible  
     upload_placeholder: Sélectionner votre fichier 
@@ -253,7 +253,7 @@ create_connector:
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
-    delete: Désirez-vous supprimer ce connecteur ?
+    delete: "Désirez-vous supprimer ce connecteur ?"
     total: Nombre de connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
     th: 
@@ -648,7 +648,7 @@ messages:
         failed_create_directory: Erreur lors de la création du repertoire temporaire.
     template:
         nb_rule: Nombre de règle générées: 
-        help: Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
+        help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
 
 email_notification:
     subject: Notification Myddleware
@@ -664,7 +664,7 @@ email_notification:
     signature: L'équipe Myddleware
 email_alert:
     subject: Alerte Myddleware
-    introduction: Une tâche en cours a dépassé la limite que vous avez autorisée : 
+    introduction: "Une tâche en cours a dépassé la limite que vous avez autorisée :"
     minute: minutes. 
     job_start: La tâche a commencé à  
     job_id: . ID ode la tâche : 
@@ -704,7 +704,7 @@ management_smtp:
     submit : Enregistrer configuration SMTP
     cancel: Annuler
     title : Configuration SMTP
-    description : Vous pouvez configurez l'envoi des email ici. Vous trouverez de la documentation ici : <a href="https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html" target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a> 
+    description : "Vous pouvez configurez l'envoi des email ici. Vous trouverez de la documentation ici : <a href='https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html' target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a>"
     sendtestmail: Envoi test
 
 management_smtp_sendmail:

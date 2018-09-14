@@ -1,8 +1,0 @@
-parameters:
-    mailer_transport: smtp
-    mailer_host: ssl0.ovh.net
-    mailer_port: 587
-    mailer_auth_mode: null
-    mailer_encryption: null
-    mailer_user: dev@karudev-informatique.fr
-    mailer_password: developpeur
