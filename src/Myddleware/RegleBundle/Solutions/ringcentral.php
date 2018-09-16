@@ -23,6 +23,8 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class ringcentralcore  extends solution { 
@@ -55,27 +57,27 @@ class ringcentralcore  extends solution {
 		return array(
 					array(
                             'name' => 'username',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.username'
                         ),
 					array(
-                            'name' => 'password',
+                            'name' => PasswordType::class,
                             'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'apikey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikey'
                         ),
 					array(
                             'name' => 'apikeysecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikeysecret'
                         ),
 					array(
                             'name' => 'sandbox',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.sandbox'
                         )	
 		);
@@ -358,7 +360,7 @@ class ringcentralcore  extends solution {
 			$params[] = array(
 								'id' => 'extensionId',
 								'name' => 'extensionId',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Extension Id',
 								'required'	=> false
 							);	

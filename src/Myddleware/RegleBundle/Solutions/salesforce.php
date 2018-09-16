@@ -25,6 +25,9 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class salesforcecore extends solution {
 
 	protected $limitCall = 100;
@@ -122,32 +125,32 @@ class salesforcecore extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                     array(
                             'name' => 'consumerkey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.consumerkey'
                         ),
                     array(
                             'name' => 'consumersecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.consumersecret'
                         ),
                     array(
                             'name' => 'token',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.token'
                         ),
                     array(
                             'name' => 'sandbox',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.sandbox'
                         )
         );

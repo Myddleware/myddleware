@@ -24,6 +24,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use \Datetime;
 
@@ -42,7 +43,7 @@ class hubspotcore extends solution
         return array(
             array(
                 'name' => 'apikey',
-                'type' => 'password',
+                'type' => PasswordType::class,
                 'label' => 'solution.fields.apikey'
             )
         );

@@ -9,9 +9,9 @@ login:
     text_bottom_right: You will be redirected towards our site
     platform:
         line1: Thanks for using the Platform.sh Continuous Deployment Cloud Hosting
-        line2: For your first connexion, use this login/password : admin/admin
-        line3: Please change your password in "My account" 
+        line2: "For your first connexion, use this login/password : admin/admin"
+        line3: "Please change your password in 'My account'"
     btn:
         here: Click here
         create: create an account
-        pwd_forgot: Forgot your password ?
+        pwd_forgot: "Forgot your password ?"

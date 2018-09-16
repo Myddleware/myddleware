@@ -84,14 +84,14 @@ $symfonyRequirements->addRequirement(
 	'config/parameters.yml file must be writable',
 	'Change the permissions "<strong>config/parameters.yml</strong>" file so that the web server can write into it.'
 );
-$symfonyRequirements->addRequirement(
+$symfonyRequirements->addRecommendation(
 	is_writable(__DIR__.'/../app/config/public/parameters_public.yml'),
-	'config/public/parameters_public.yml file must be writable',
+	'config/public/parameters_public.yml file should be writable',
 	'Change the permissions "<strong>config/public/parameters_public.yml</strong>" file so that the web server can write into it.'
 );
-$symfonyRequirements->addRequirement(
+$symfonyRequirements->addRecommendation(
 	is_writable(__DIR__.'/../app/config/public/parameters_smtp.yml'),
-	'config/public/parameters_smtp.yml file must be writable',
+	'config/public/parameters_smtp.yml file should be writable',
 	'Change the permissions "<strong>config/public/parameters_smtp.yml</strong>" file so that the web server can write into it.'
 );
 

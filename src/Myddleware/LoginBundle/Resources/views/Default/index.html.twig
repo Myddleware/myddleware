@@ -51,7 +51,7 @@
 				    <p>
 				    	<input type="text" autocomplete='off' class="form-control" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
 				    	<input type="password" autocomplete='off' class="form-control" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
-				    	<input type="hidden" name="_csrf_token" value="{{ csrf_token }}" >
+				    	<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
 				    </p>
 				    {% if error %}
    						<div class="alert alert-danger" role="alert">

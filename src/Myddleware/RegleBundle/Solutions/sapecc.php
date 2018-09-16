@@ -26,6 +26,8 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 //use Psr\LoggerInterface;
 
 class sapecccore extends sap {
@@ -109,7 +111,7 @@ class sapecccore extends sap {
 					$bukrsParam = array(
 								'id' => 'BUKRS',
 								'name' => 'BUKRS',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Company Code',
 								'required'	=> true
 							);

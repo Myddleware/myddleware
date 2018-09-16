@@ -25,7 +25,10 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class eventbritecore  extends solution { 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+class eventbritecore  extends solution {
 		
 	protected $typeRead = array(
 				"Organizer" => "User",
@@ -45,7 +48,7 @@ class eventbritecore  extends solution {
 		 return array(
 					array(
 							'name' => 'token',
-							'type' => 'text',
+							'type' => TextType::class,
 							'label' => 'solution.fields.token'
                         )
 					);
@@ -123,7 +126,7 @@ class eventbritecore  extends solution {
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'description' => array('label' => 'Description', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'description' => array('label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'url' => array('label' => 'Profile page URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					);
 					break;
@@ -131,14 +134,14 @@ class eventbritecore  extends solution {
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'title' => array('label' => 'Title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'description' => array('label' => 'Description', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'description' => array('label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'start_date' => array('label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'end_date' => array('label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'timezone' => array('label' => 'Timezone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'created' => array('label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'modified' => array('label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'privacy' => array('label' => 'Private', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'password' => array('label' => 'Password.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'password' => array('label' => 'Password.', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'capacity' => array('label' => 'Capacity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'url' => array('label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'logo' => array('label' => 'Logo URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -153,7 +156,7 @@ class eventbritecore  extends solution {
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'name' => array('label' => 'Name.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'description' => array('label' => 'Description.', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'description' => array('label' => 'Description.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'type' => array('label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'min' => array('label' => 'Minimum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'max' => array('label' => 'Maximum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
@@ -227,7 +230,7 @@ class eventbritecore  extends solution {
 						'modified' => array('label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'event_date' => array('label' => 'Event date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount' => array('label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'notes' => array('label' => 'Notes.', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'notes' => array('label' => 'Notes.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 						'email' => array('label' => 'Email address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'prefix' => array('label' => 'Prefix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'first_name' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),

@@ -16,7 +16,7 @@
                 </tr>
                 <tr>
                     <td class="title"><label>{{ 'jobscheduler.date_modified'|trans }}</label></td>
-                    <td class="value">{{ entity.dateModified }}</td>
+                    <td class="value">{{ entity.dateModified|date('d/m/Y') }}</td>
                 </tr>
                 <tr>
                     <td class="title"><label>{{ 'jobscheduler.create_by'|trans }}</label></td>
