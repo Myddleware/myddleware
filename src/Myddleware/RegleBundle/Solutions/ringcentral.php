@@ -218,12 +218,17 @@ class ringcentralcore  extends solution {
 			$result['count'] = 0;
 			// If extensionID equal ALL, we get all extension ID and search for them
 			if (strtoupper($param['ruleParams']['extensionId']) == 'ALL') {
-				$extensions = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension");
-				if (!empty($extensions)) {
-					foreach($extensions->records as $extension) {
-						$extensionIds[] = $extension->id;
+				$pageNum = 1;
+				do {
+					$extensions = array();
+					$extensions = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension?perPage=".$this->callLimit."&page=".$pageNum); 
+					if (!empty($extensions)) {
+						foreach($extensions->records as $extension) {
+							$extensionIds[] = $extension->id;
+						}
 					}
-				}
+					$pageNum ++;
+				} while (count($extensions->records) == $this->callLimit);
 				// /restapi/v1.0/account/{accountId}/extension
 			}elseif (!empty($param['ruleParams']['extensionId'])) {
 				$extensionIds = explode(';',$param['ruleParams']['extensionId']);
