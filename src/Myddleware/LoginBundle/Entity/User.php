@@ -30,6 +30,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * User
+ * @ORM\Table(name="users")
  * @ORM\Entity()
  */
 class User extends BaseUser
