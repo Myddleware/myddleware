@@ -927,7 +927,7 @@ class DefaultControllerCore extends Controller
                         }
                     }
                 } // Rule
-                elseif ($this->getRequest()->request->get('mod') == 3) {
+                elseif ($request->request->get('mod') == 3) {
 
                     // 0 : solution
                     // 1 : id connector
@@ -1270,8 +1270,8 @@ class DefaultControllerCore extends Controller
             // ---- Mode update ----
             if (!$sessionService->isParamRuleSourceModuleExist($ruleKey) && !$sessionService->isParamRuleCibleModuleExist($ruleKey)) {
                 // RELOAD : Chargement des données d'une règle en édition
-                $sessionService->setParamRuleSourceModule($ruleKey, $this->getRequest()->request->get('source_module'));
-                $sessionService->setParamRuleCibleModule($ruleKey, $this->getRequest()->request->get('cible_module'));
+                $sessionService->setParamRuleSourceModule($ruleKey, $request->request->get('source_module'));
+                $sessionService->setParamRuleCibleModule($ruleKey, $request->request->get('cible_module'));
             }
             // ---- Mode update ----
 
@@ -1289,8 +1289,8 @@ class DefaultControllerCore extends Controller
                 exit;
             }
 
-            if ($this->getRequest()->request->get('cible_module')) {
-                $module['cible'] = $this->getRequest()->request->get('cible_module'); // mode create <<----
+            if ($request->request->get('cible_module')) {
+                $module['cible'] = $request->request->get('cible_module'); // mode create <<----
             } else {
                 $module['cible'] = $sessionService->getParamRuleCibleModule($ruleKey); // mode update <<----
             }
@@ -1326,8 +1326,8 @@ class DefaultControllerCore extends Controller
                 exit;
             }
             $modules = $solution_source->get_modules('source');
-            if ($this->getRequest()->request->get('source_module')) {
-                $module['source'] = $this->getRequest()->request->get('source_module'); // mode create <<----
+            if ($request->request->get('source_module')) {
+                $module['source'] = $request->request->get('source_module'); // mode create <<----
             } else {
                 $module['source'] = $sessionService->getParamRuleSourceModule($ruleKey); // mode update <<----
             }
