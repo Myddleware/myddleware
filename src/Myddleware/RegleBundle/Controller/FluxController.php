@@ -586,7 +586,7 @@ class FluxControllerCore extends Controller
 
 	// Sauvegarde flux
 	public function fluxSaveAction(Request $request) {
-		$request = $this->get('request');
+
 		if($request->getMethod()=='POST') {
 			// Get the field and value from the request
 			$fields = strip_tags($request->request->get('fields'));

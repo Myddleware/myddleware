@@ -46,6 +46,7 @@ class ManagementSMTPController extends Controller
 
             }
 
+            $form->submit($request->request->get($form->getName()));
             if ($form->isValid()) {
                 $this->setData($form);
                 return $this->redirect($this->generateUrl('management_smtp_index'));

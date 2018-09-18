@@ -41,6 +41,7 @@ class JobSchedulerController extends Controller
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
 
+        $form->submit($request->request->get($form->getName()));
         if ($form->isValid()) {
 
             $paramName1 = $form->get('paramName1')->getData();
