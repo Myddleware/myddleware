@@ -26,7 +26,9 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-	
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class magentocore extends solution {
 	
 	protected $token;
@@ -49,17 +51,17 @@ class magentocore extends solution {
         return array(
                     array(
                             'name' => 'url',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.url'
                         ),
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ), 
                      array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ), 
         );
@@ -127,7 +129,7 @@ class magentocore extends solution {
 						'suffix' => array('label' => 'Suffix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'dob' => array('label' => 'Birthdate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'taxvat' => array('label' => 'Taxvat value', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'confirmation' => array('label' => 'Confirmation flag', 'type' => 'text', 'type_bdd' => 'text', 'required' => 0),
+						'confirmation' => array('label' => 'Confirmation flag', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
 					);
 					$this->fieldsRelate = array(
 						'increment_id' => array('label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),

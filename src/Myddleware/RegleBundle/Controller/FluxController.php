@@ -26,6 +26,10 @@
 namespace Myddleware\RegleBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -87,7 +91,7 @@ class FluxControllerCore extends Controller
 	}
 	 	 
  	// LISTE DES FLUX
- 	public function fluxListAction($page,$search = 1) {
+ 	public function fluxListAction(Request $request,$page,$search = 1) {
  		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
 		//--- Liste status traduction
@@ -151,64 +155,64 @@ class FluxControllerCore extends Controller
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar'))) */
 						
-					 ->add('source_content','text', array(
+					 ->add('source_content',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCSourceContentExist() ? $sessionService->getFluxFilterSourceContent() : false),
 					 	'required'=> false))
 					 
-					 ->add('target_content','text', array(
+					 ->add('target_content',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCTargetContentExist() ? $sessionService->getFluxFilterTargetContent() : false),
 					 	'required'=> false))
 					 				 
-					 ->add('date_modif_start','text', array(
+					 ->add('date_modif_start',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCDateModifStartExist() ? $sessionService->getFluxFilterDateModifStart() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 				 
-					 ->add('date_modif_end','text', array(
+					 ->add('date_modif_end',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCDateModifEndExist() ? $sessionService->getFluxFilterDateModifEnd() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar')))
 					 
-					 ->add('rule','text', array( 
+					 ->add('rule',TextType::class, array(
 					 	'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 					 	'required'=> false	))	
 						
-					 ->add('rule', 'choice', array(
+					 ->add('rule', ChoiceType::class, array(
 							       'choices'   => $lstRuleName,
 								   'data'=> ($sessionService->isFluxFilterCRuleExist() ? $sessionService->getFluxFilterRuleName() : false),
 							       'required'  => false
 						 ))						
 						
-					 ->add('status', 'choice', array(
+					 ->add('status', ChoiceType::class, array(
 							       'choices'   => $lstStatus,
 								   'data'=> ($sessionService->isFluxFilterCStatusExist() ? $sessionService->getFluxFilterStatus() : false),
 							       'required'  => false
 						 ))
 						 
-					 ->add('gblstatus', 'choice', array(
+					 ->add('gblstatus', ChoiceType::class, array(
 							       'choices'   => $lstGblStatus,
 								   'data'=> ($sessionService->isFluxFilterCGblStatusExist() ? $sessionService->getFluxFilterGlobalStatus() : false),
 							       'required'  => false
 						 ))						 
 						 
-					->add('click_filter', 'submit', array(
+					->add('click_filter', SubmitType::class, array(
 					    'attr' => array(
 					    	'class' => 'btn-mydinv'
 						),
 						'label' => $this->get('translator')->trans( 'list_flux.btn.filter' ),
 					))		
 
-					->add('source_id','text', array( 
+					->add('source_id',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCSourceIdExist() ? $sessionService->getFluxFilterSourceId() : false),
 						'required'=> false	))	
 
-					->add('target_id','text', array( 
+					->add('target_id',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCTargetIdExist() ? $sessionService->getFluxFilterTargetId() : false),
 						'required'=> false	))							
 					 					  
 					->getForm();
 
-	    $form->handleRequest( $this->get('request') );
+	    $form->handleRequest( $request );
 		// condition d'affichage
 		$where = '';
 		$from = 'FROM Document ';
@@ -221,7 +225,7 @@ class FluxControllerCore extends Controller
 		$conditions = 0;
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
-			$data = $this->getRequest()->get($form->getName());
+			$data = $request->get($form->getName());
 			$where = 'WHERE ';		
 			
 			/* if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
@@ -581,12 +585,12 @@ class FluxControllerCore extends Controller
 	}
 
 	// Sauvegarde flux
-	public function fluxSaveAction() {
+	public function fluxSaveAction(Request $request) {
 		$request = $this->get('request');
 		if($request->getMethod()=='POST') {
 			// Get the field and value from the request
-			$fields = strip_tags($this->getRequest()->request->get('fields'));
-			$value = strip_tags($this->getRequest()->request->get('value'));
+			$fields = strip_tags($request->request->get('fields'));
+			$value = strip_tags($request->request->get('value'));
 
 			if(isset($value)) {
 				// get the EntityManager
@@ -594,7 +598,7 @@ class FluxControllerCore extends Controller
 				// Get target data for the document
 				$documentDataEntity = $em->getRepository('RegleBundle:DocumentData')
 											->findOneBy( array(
-												'doc_id' => $this->getRequest()->request->get('flux'),
+												'doc_id' => $request->request->get('flux'),
 												'type' => 'T'
 												)
 										);
@@ -608,7 +612,7 @@ class FluxControllerCore extends Controller
 
 					// Insert in audit			  
 					$oneDocAudit = new DocumentAudit();
-					$oneDocAudit->setDoc( $this->getRequest()->request->get('flux') );
+					$oneDocAudit->setDoc( $re->request->get('flux') );
 					$oneDocAudit->setDateModified( new \DateTime );
 					$oneDocAudit->setBefore( $beforeValue );
 					$oneDocAudit->setAfter( $value );

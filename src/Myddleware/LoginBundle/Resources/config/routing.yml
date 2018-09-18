@@ -1,19 +1,19 @@
 LoginBundleDefault:
-    pattern:  /
+    path:  /
     defaults: { _controller: LoginBundle:Default:index }
 
 LoginBundleUser:
-    pattern:  /login
+    path:  /login
     defaults: { _controller: LoginBundle:Default:index }
 
 prestashop_account:
-    pattern:  /prestashop/account
+    path:  /prestashop/account
     defaults: { _controller: LoginBundle:Default:accountPrestashop }
 
 login_protect:
-    pattern:  /login/control
+    path:  /login/control
     defaults: { _controller: LoginBundle:Default:verifAccount }
 
 connector_callback:
-    pattern:  /callback/
+    path:  /callback/
     defaults: { _controller: RegleBundle:Connector:callBack }  
