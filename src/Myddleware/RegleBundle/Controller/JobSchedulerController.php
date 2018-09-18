@@ -95,9 +95,7 @@ class JobSchedulerController extends Controller
             'action' => $this->generateUrl('jobscheduler_create'),
             'method' => 'POST',
         ));
-
         $form->add('submit', SubmitType::class, array('label' => 'jobscheduler.new'));
-
         return $form;
     }
 

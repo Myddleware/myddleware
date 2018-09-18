@@ -154,7 +154,7 @@ class FluxControllerCore extends Controller
 					 	'data'=> ($sessionService->isFluxFilterCDateCreateEndExist() ? $sessionService->getFluxFilterDateCreateEnd() : false),
 					 	'required'=> false, 
 					 	'attr' => array('class' => 'calendar'))) */
-						
+
 					 ->add('source_content',TextType::class, array(
 						'data'=> ($sessionService->isFluxFilterCSourceContentExist() ? $sessionService->getFluxFilterSourceContent() : false),
 					 	'required'=> false))

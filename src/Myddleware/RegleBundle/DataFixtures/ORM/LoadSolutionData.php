@@ -3,8 +3,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  StÃ©phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  StÃ©phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -37,7 +37,6 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),
-									array('name' => 'eventbrite',		'active' => 0,'source' => 1,'target' => 0),
 									array('name' => 'suitecrm',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'mailchimp',		'active' => 1,'source' => 0,'target' => 1),
 									array('name' => 'bittle',			'active' => 0,'source' => 0,'target' => 1),

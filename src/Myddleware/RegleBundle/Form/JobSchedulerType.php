@@ -32,7 +32,6 @@ class JobSchedulerType extends AbstractType
                     'cleardata' => 'Clear Data',
                 ),
                 'placeholder' => '- Choice command -',
-
             ))
             ->add('paramName1')
             ->add('paramValue1')
