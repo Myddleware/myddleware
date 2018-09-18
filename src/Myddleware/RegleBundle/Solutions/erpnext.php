@@ -25,165 +25,164 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use DateTime;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
 class erpnextcore extends solution
 {
 
-    // protected $url = 'https://www.cirrus-shield.net/RestApi/';
-    protected $token;
-    protected $update;
-    protected $organizationTimezoneOffset;
-    protected $limitCall = 100;
+	// protected $url = 'https://www.cirrus-shield.net/RestApi/';
+	protected $token;
+	protected $update;
+	protected $organizationTimezoneOffset;
+	protected $limitCall = 100;
 
-    protected $required_fields = array('default' => array('name', 'creation', 'modified'));
+	protected $required_fields = array('default' => array('name', 'creation', 'modified'));
 
-    protected $FieldsDuplicate = array(	'Contact' => array('Email', 'Name'),
+	protected $FieldsDuplicate = array(	'Contact' => array('Email', 'Name'),
 										'default' => array('Name')
 									);
 									
 	// Module list that allows to make parent relationships
-	protected $allowParentRelationship = array('Sales Invoice');
+	protected $allowParentRelationship = array('Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item');
 	
-	protected $childModuleKey = array('Sales Invoice Item' => 'items');
+	protected $childModuleKey = array('Sales Invoice Item' => 'items', 'Sales Order Item' => 'items', 'Payment Entry Reference' => 'references', 'Item Attribute Value' => 'item_attribute_values',
+	'Item Variant Attribute' => 'attributes');
 	
 	// Get isTable parameter for each module
 	protected $isTableModule = array();
 
-    public function getFieldsLogin() {
-        return array(
-            array(
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url'
-            ),
-            array(
-                'name' => 'login',
-                'type' => TextType::class,
-                'label' => 'solution.fields.login'
-            ),
-            array(
-                'name' => 'password',
-                'type' => PasswordType::class,
-                'label' => 'solution.fields.password'
-            )
-        );
-    }
+	public function getFieldsLogin() {
+		return array(
+			array(
+				'name' => 'url',
+				'type' => 'text',
+				'label' => 'solution.fields.url'
+			),
+			array(
+				'name' => 'login',
+				'type' => 'text',
+				'label' => 'solution.fields.login'
+			),
+			array(
+				'name' => 'password',
+				'type' => 'password',
+				'label' => 'solution.fields.password'
+			)
+		);
+	}
 
-    // Login to Cirrus Shield
-    public function login($paramConnexion) {
-        parent::login($paramConnexion);
-        try {
-            // Generate parameters to connect to Cirrus Shield
-            $parameters = array("usr" => $this->paramConnexion['login'],
-                "pwd" => $this->paramConnexion['password']
-            );
-            $url = $this->paramConnexion['url'] . '/api/method/login';
-            // Connect to ERPNext
-            $result = $this->call($url, 'GET', $parameters);
+	// Login to Cirrus Shield
+	public function login($paramConnexion) {
+		parent::login($paramConnexion);
+		try {
+			// Generate parameters to connect to Cirrus Shield
+			$parameters = array("usr" => $this->paramConnexion['login'],
+				"pwd" => $this->paramConnexion['password']
+			);
+			$url = $this->paramConnexion['url'] . '/api/method/login';
+			// Connect to ERPNext
+			$result = $this->call($url, 'GET', $parameters);
 
-            if (empty($result->message)) {
-                throw new \Exception('Login error');
-            }
-            // Connection validation
-            $this->connexion_valide = true;
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            $this->logger->error($error);
-            return array('error' => $error);
-        }
-    } // login($paramConnexion)
+			if (empty($result->message)) {
+				throw new \Exception('Login error');
+			}
+			// Connection validation
+			$this->connexion_valide = true;
+		} catch (\Exception $e) {
+			$error = $e->getMessage();
+			$this->logger->error($error);
+			return array('error' => $error);
+		}
+	} // login($paramConnexion)
 
 
-    // Get the modules available
-    public function get_modules($type = 'source') {
-        try {
+	// Get the modules available
+	public function get_modules($type = 'source') {
+		try {
 			// Get 
 			$url = $this->paramConnexion['url'] .'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';			
-            $APImodules = $this->call($url, 'GET');	
-            if (!empty($APImodules->data)) {
-                foreach ($APImodules->data as $APImodule) {
-                    $modules[$APImodule->name] = $APImodule->name;
+			$APImodules = $this->call($url, 'GET');	
+			if (!empty($APImodules->data)) {
+				foreach ($APImodules->data as $APImodule) {
+					$modules[$APImodule->name] = $APImodule->name;
 					// Save istable parameter for each modules
 					$this->isTableModule[$APImodule->name] = $APImodule->istable;
-                }
-            }			
-            return $modules;
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            return $error;
-        }
-    }
+				}
+			}			
+			return $modules;
+		} catch (\Exception $e) {
+			$error = $e->getMessage();
+			return $error;
+		}
+	}
 
-    // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source') {
-        parent::get_module_fields($module, $type);
-        try {
+	// Get the fields available for the module in input
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
+		try {
 			// Call get modules to fill the isTableModule array and ge the module list.
 			$modules = $this->get_modules();			
 
-            // Get the list field for a module
-            $url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . rawurlencode($module) . '&fields=*&filters={%22parent%22:%22' . rawurlencode($module) . '%22}&limit_page_length=500';
-            $recordList = $this->call($url, 'GET', '');
-            // Format outpput data
-            if (!empty($recordList->message)) {
-                foreach ($recordList->message as $field) {
-                    if (empty($field->label)) {
-                        continue;
-                    }
-                    if ($field->fieldtype == 'Link') {
-                        $this->fieldsRelate[$field->fieldname] = array(
-                            'label' => $field->label,
-                            'type' => 'varchar(255)',
-                            'type_bdd' => 'varchar(255)',
-                            'required' => '',
-                            'required_relationship' => '',
-                        );
+			// Get the list field for a module
+			$url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . rawurlencode($module) . '&fields=*&filters={%22parent%22:%22' . rawurlencode($module) . '%22}&limit_page_length=500';
+			$recordList = $this->call($url, 'GET', '');
+			// Format outpput data
+			if (!empty($recordList->message)) {
+				foreach ($recordList->message as $field) {
+					if (empty($field->label)) {
+						continue;
+					}
+					if ($field->fieldtype == 'Link') {
+						$this->fieldsRelate[$field->fieldname] = array(
+							'label' => $field->label,
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => '',
+							'required_relationship' => '',
+						);
 					// Add field to manage dymamic links
 					} elseif (
 							$field->fieldtype == 'Table'
 						AND $field->options == 'Dynamic Link'
 					) {	
 						$this->moduleFields['link_doctype'] = array(
-                            'label' => 'Link Doc Type',
-                            'type' => 'varchar(255)',
-                            'type_bdd' => 'varchar(255)',
-                            'required' => '',
+							'label' => 'Link Doc Type',
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => '',
 							'option' => $modules
-                        );
+						);
 						$this->fieldsRelate['link_name'] = array(
-                            'label' => 'Link name',
-                            'type' => 'varchar(255)',
-                            'type_bdd' => 'varchar(255)',
-                            'required' => '',
-                            'required_relationship' => '',
-                        );
-                    } else {
-                        $this->moduleFields[$field->fieldname] = array(
-                            'label' => $field->label,
-                            'type' => 'varchar(255)',
-                            'type_bdd' => 'varchar(255)',
-                            'required' => '',
-                        );
-                        if (!empty($field->options)) {
-                            $options = explode(chr(10), $field->options);
-                            if (
-                                !empty($options)
-                                AND count($options) > 1
-                            ) {
-                                foreach ($options as $option) {
-                                    $this->moduleFields[$field->fieldname]['option'][$option] = $option;
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                throw new \Exception('No data in the module ' . $module . '. Failed to get the field list.');
-            }
+							'label' => 'Link name',
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => '',
+							'required_relationship' => '',
+						);
+					} else {
+						$this->moduleFields[$field->fieldname] = array(
+							'label' => $field->label,
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => '',
+						);
+						if (!empty($field->options)) {
+							$options = explode(chr(10), $field->options);
+							if (
+								!empty($options)
+								AND count($options) > 1
+							) {
+								foreach ($options as $option) {
+									$this->moduleFields[$field->fieldname]['option'][$option] = $option;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				throw new \Exception('No data in the module ' . $module . '. Failed to get the field list.');
+			}
 
 			//If the module is a table and the solution is used in target, we add 3 fields
 			if(
@@ -191,7 +190,7 @@ class erpnextcore extends solution
 				AND !empty($this->isTableModule[$module])
 			) {
 				// Parenttype => relate module/DocType de la relation (eg for Sales Invoice Item, it will be Sales Invoice)
-				$this->moduleFields['Parenttype'] = array(
+				$this->moduleFields['parenttype'] = array(
 														'label' => 'Parent type',
 														'type' => 'varchar(255)',
 														'type_bdd' => 'varchar(255)',
@@ -199,114 +198,110 @@ class erpnextcore extends solution
 														'option' => $modules
 													);
 				// Parentfield => field name in the parent module (eg. "items" in module Sales Invoice). We can't give the field list because we don't know the module selected yet
-				$this->moduleFields['Parentfield'] = array(
+				$this->moduleFields['parentfield'] = array(
 														'label' => 'Parent field',
 														'type' => 'varchar(255)',
 														'type_bdd' => 'varchar(255)',
 														'required' => ''
 													);
 				// Parent => value of the parent field (eg SINV-00001 which is the "Sales Invoice" parent)
-				$this->fieldsRelate['Parent'] = array(
-                            'label' => 'Parent',
-                            'type' => 'varchar(255)',
-                            'type_bdd' => 'varchar(255)',
-                            'required' => '',
-                            'required_relationship' => '',
-                        );
+				$this->fieldsRelate['parent'] = array(
+							'label' => 'Parent',
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => '',
+							'required_relationship' => '',
+						);
 			}
 			
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-			
-// echo '<pre>';
-// print_r($this->moduleFields);
-// print_r($this->fieldsRelate);
-// die();			
-            return $this->moduleFields;
-        } catch (\Exception $e) {
+			// Add relate field in the field mapping
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+						
+			return $this->moduleFields;
+		} catch (\Exception $e) {
 			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            return false;
-        }
-    } // get_module_fields($module)
+			return false;
+		}
+	} // get_module_fields($module)
 
 
-    /**
-     * Get the last data in the application
-     * @param $param
-     * @return mixed
-     * @throws \Exception
-     */
-    public function read_last($param) {
-        try {
-            // Add required fields
+	/**
+	 * Get the last data in the application
+	 * @param $param
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	public function read_last($param) {
+		try {
+			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			$fields = $param['fields'];
-            $result = array();
-            $record = array();
-            if (!empty($param['query'])) {
-                foreach ($param['query'] as $key => $value) {
-                    if ($key === 'id') {
-                        $key = 'name';
-                    }
-                    $filters_result[$key] = $value;
-                }
-                $filters = json_encode($filters_result);
-                $data = array('filters' => $filters, 'fields' => '["*"]');
-                $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
-                $resultQuery = $this->call($url, "GET", '');
-                $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
+			$result = array();
+			$record = array();
+			if (!empty($param['query'])) {
+				foreach ($param['query'] as $key => $value) {
+					if ($key === 'id') {
+						$key = 'name';
+					}
+					$filters_result[$key] = $value;
+				}
+				$filters = json_encode($filters_result);
+				$data = array('filters' => $filters, 'fields' => '["*"]');
+				$q = http_build_query($data);
+				$url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
+				$resultQuery = $this->call($url, "GET", '');
+				$record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
 
-            } else {
+			} else {
 
-                $data = array('limit_page_length' => 1, 'fields' => '["*"]');
-                $q = http_build_query($data);
-                $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
-                //get list of modules
+				$data = array('limit_page_length' => 1, 'fields' => '["*"]');
+				$q = http_build_query($data);
+				$url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;
+				//get list of modules
 
-                $resultQuery = $this->call($url, "GET", '');
+				$resultQuery = $this->call($url, "GET", '');
 				// If no result
 				if (empty($resultQuery)) {
 					$result['done'] = false;
 				} else {
 					$record = $resultQuery->data[0];
 				}
-            }
-            if (!empty($record)) {
-                foreach ($fields as $field) {
+			}
+			if (!empty($record)) {
+				foreach ($fields as $field) {
 					if (isset($record->$field)) {
 						$result['values'][$field] = $record->$field; // last record
 					}
-                }
-                $result['values']['id'] = $record->name; // add id
-                $result['values']['date_modified'] = $record->modified; // modified
-            }
-            // If no result
-            if (empty($resultQuery)) {
-                $result['done'] = false;
-            } else {
-                if (!empty($result['values'])) {
-                    $result['done'] = true;
-                }
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
-            $result['done'] = -1;
-        }
-        return $result;
-    } //end read_last
+				}
+				$result['values']['id'] = $record->name; // add id
+				$result['values']['date_modified'] = $record->modified; // modified
+			}
+			// If no result
+			if (empty($resultQuery)) {
+				$result['done'] = false;
+			} else {
+				if (!empty($result['values'])) {
+					$result['done'] = true;
+				}
+			}
+		} catch (\Exception $e) {
+			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['done'] = -1;
+		}
+		return $result;
+	} //end read_last
 
-    /**
-     * Function read data
-     * @param $param
-     * @return mixed
-     */
-    public function read($param) {
-        try {	
+	/**
+	 * Function read data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function read($param) {
+		try {	
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -314,39 +309,39 @@ class erpnextcore extends solution
 			// Get the reference date field name
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
-            $fields = $param['fields'];
-            $result['date_ref'] = $param['date_ref'];			
-            $result['count'] = 0;
-            $filters_result = array();
+			$fields = $param['fields'];
+			$result['date_ref'] = $param['date_ref'];			
+			$result['count'] = 0;
+			$filters_result = array();
 			// Build the query for ERPNext
-            if (!empty($param['query'])) { 
-                foreach ($param['query'] as $key => $value) {
+			if (!empty($param['query'])) { 
+				foreach ($param['query'] as $key => $value) {
 					// The id field is name in ERPNext
-                    if ($key === 'id') {
-                        $key = 'name';
-                    }
-                    $filters_result[$key] = $value;
-                }
-                $filters = json_encode($filters_result);
-                $data = array('filters' => $filters, 'fields' => '["*"]');
-            } else {
-                $filters = '{"'.$dateRefField.'": [">", "' . $param['date_ref'] . '"]}';
-                $data = array('filters' => $filters, 'fields' => '["*"]');
-            }	
+					if ($key === 'id') {
+						$key = 'name';
+					}
+					$filters_result[$key] = $value;
+				}
+				$filters = json_encode($filters_result);
+				$data = array('filters' => $filters, 'fields' => '["*"]');
+			} else {
+				$filters = '{"'.$dateRefField.'": [">", "' . $param['date_ref'] . '"]}';
+				$data = array('filters' => $filters, 'fields' => '["*"]');
+			}	
 		
 			// Send the query
-            $q = http_build_query($data);
-            $url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;		
-            $resultQuery = $this->call($url, 'GET', '');				
-          
-            // If no result
-            if (empty($resultQuery)) {
-                $result['error'] = "Request error";
-            } else if (count($resultQuery->data) > 0) {
-                $resultQuery = $resultQuery->data;
-                foreach ($resultQuery as $key => $recordList) {
-                    $record = null;
-                    foreach ($fields as $field) {
+			$q = http_build_query($data);
+			$url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;		
+			$resultQuery = $this->call($url, 'GET', '');				
+		  
+			// If no result
+			if (empty($resultQuery)) {
+				$result['error'] = "Request error";
+			} else if (count($resultQuery->data) > 0) {
+				$resultQuery = $resultQuery->data;
+				foreach ($resultQuery as $key => $recordList) {
+					$record = null;
+					foreach ($fields as $field) {
 						if ($field == $dateRefField) {
 							$record['date_modified'] = $this->dateTimeToMyddleware($recordList->$field);
 							if ($recordList->$field > $result['date_ref']) {
@@ -355,52 +350,51 @@ class erpnextcore extends solution
 						} 
 						if ($field != 'id') {
 							$record[$field] = $recordList->$field;
-                        }
-                    }
-                    $record['id'] = $recordList->name;
-                    $result['values'][$recordList->name] = $record; // last record
-                }
-                $result['count'] = count($resultQuery);
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
-        }		
-        return $result;
-    }// end function read
+						}
+					}
+					$record['id'] = $recordList->name;
+					$result['values'][$recordList->name] = $record; // last record
+				}
+				$result['count'] = count($resultQuery);
+			}
+		} catch (\Exception $e) {
+			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+		}		
+		return $result;
+	}// end function read
 
-    public function create($param) {
-        return $this->CreateOrUpdate('create', $param);
+	public function create($param) {
+		return $this->CreateOrUpdate('create', $param);
 
-    }// end function create
+	}// end function create
 
-    /**
-     * Function update data
-     * @param $param
-     * @return mixed
-     */
-    public function update($param) {
-        return $this->CreateOrUpdate('update', $param);
-    }// end function create
+	/**
+	 * Function update data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function update($param) {
+		return $this->CreateOrUpdate('update', $param);
+	}// end function create
 
 
-    /**
-     * Function for create or update data
-     * @param $method
-     * @param $param
-     * @return array
-     */
-    function CreateOrUpdate($method, $param) {
-// print_r($param);		
-        try {
-            $result = array();
+	/**
+	 * Function for create or update data
+	 * @param $method
+	 * @param $param
+	 * @return array
+	 */
+	function CreateOrUpdate($method, $param) {	
+		try {
+			$result = array();
 			$subDocIdArray = array();
 			$url = $this->paramConnexion['url'] . "/api/resource/" . rawurlencode($param['module']);
-            if ($method == 'update') {
-                $method = "PUT";
-            } else {
-                $method = "POST";
-            }
-            foreach ($param['data'] as $idDoc => $data) {
+			if ($method == 'update') {
+				$method = "PUT";
+			} else {
+				$method = "POST";
+			}
+			foreach ($param['data'] as $idDoc => $data) {
 				try {
 					foreach ($data as $key => $value) {
 						// We don't send Myddleware fields
@@ -434,19 +428,16 @@ class erpnextcore extends solution
 											unset($subData['link_name']);
 										} 										
 									} 
-// print_r($subData);	
 									$data[$this->childModuleKey[$key]][] = $subData;
-									// Remove the original array
 								}
 							}
+							// Remove the original array
 							unset($data[$key]);
 						}
 					}
-// echo $url.chr(10);			
-// echo $method.chr(10);			
-// print_r(array('data' => json_encode($data)));
-// return null;				
-					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));				
+					
+					// Send data to ERPNExt
+					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
 					if (!empty($resultQuery->data->name)) {
 						$result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
 					} elseif(!empty($resultQuery)) {
@@ -470,17 +461,13 @@ class erpnextcore extends solution
 					}
 				}
 				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-            }
-			
-
-        } catch (\Exception $e) {
+			}
+		} catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-        }
-// print_r($result);
-// return null;		
-        return $result;
-    }
+		}	
+		return $result;
+	}
 
 	// retrun the reference date field name
 	public function getDateRefName($moduleSource, $ruleMode) {
@@ -508,39 +495,39 @@ class erpnextcore extends solution
 		return $date->format('Y-m-d H:i:s.u');
 	}// dateTimeFromMyddleware($dateTime)    
 	
-    /**
-     * Function call
-     * @param $url
-     * @param string $method
-     * @param array $parameters
-     * @param int $timeout
-     * @return mixed|void
-     * @throws \Exception
-     */
-    protected function call($url, $method = 'GET', $parameters = array(), $timeout = 300) {
-        if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
-            throw new \Exception('curl extension is missing!');
-        }
-        $fileTmp = $this->container->getParameter('kernel.cache_dir') . '/myddleware/solutions/erpnext/erpnext.txt';
-        $fs = new Filesystem();
-        try {
-            $fs->mkdir(dirname($fileTmp));
-        } catch (IOException $e) {
-            throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
-        }
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+	/**
+	 * Function call
+	 * @param $url
+	 * @param string $method
+	 * @param array $parameters
+	 * @param int $timeout
+	 * @return mixed|void
+	 * @throws \Exception
+	 */
+	protected function call($url, $method = 'GET', $parameters = array(), $timeout = 300) {
+		if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
+			throw new \Exception('curl extension is missing!');
+		}
+		$fileTmp = $this->container->getParameter('kernel.cache_dir') . '/myddleware/solutions/erpnext/erpnext.txt';
+		$fs = new Filesystem();
+		try {
+			$fs->mkdir(dirname($fileTmp));
+		} catch (IOException $e) {
+			throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
+		}
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
-        // common description bellow
-        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_COOKIEJAR, $fileTmp);
-        curl_setopt($ch, CURLOPT_COOKIEFILE, $fileTmp);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        $response = curl_exec($ch);
+		// common description bellow
+		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_setopt($ch, CURLOPT_COOKIEJAR, $fileTmp);
+		curl_setopt($ch, CURLOPT_COOKIEFILE, $fileTmp);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+		$response = curl_exec($ch);
 		// if Traceback found, we have an error 
 		if (
 				$method != 'GET'
@@ -549,10 +536,10 @@ class erpnextcore extends solution
 			// Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'
 			return substr($response, strpos($response,'Traceback'), strpos(substr($response,strpos($response,'Traceback')),'</pre>'));
 		}
-        curl_close($ch);
-    
-        return json_decode($response);
-    }
+		curl_close($ch);
+	
+		return json_decode($response);
+	}
 
 }
 
@@ -561,11 +548,11 @@ class erpnextcore extends solution
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__ . '/../Custom/Solutions/erpnext.php';
 if (file_exists($file)) {
-    require_once($file);
+	require_once($file);
 } else {
-    //Sinon on met la classe suivante
-    class erpnext extends erpnextcore
-    {
+	//Sinon on met la classe suivante
+	class erpnext extends erpnextcore
+	{
 
-    }
+	}
 }

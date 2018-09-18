@@ -26,9 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
 
 class databasecore extends solution { 
 
@@ -61,27 +59,27 @@ class databasecore extends solution {
 		return array(
 					 array(
                             'name' => 'login',
-                            'type' => TextType::class,
+                            'type' => 'text',
                             'label' => 'solution.fields.login'
                         ),
 					array(
                             'name' => 'password',
-                            'type' => PasswordType::class,
+                            'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'host',
-                            'type' => TextType::class,
+                            'type' => 'text',
                             'label' => 'solution.fields.host'
                         ),
 					array(
                             'name' => 'database_name',
-                            'type' => TextType::class,
+                            'type' => 'text',
                             'label' => 'solution.fields.dbname'
                         ),
 					array(
                             'name' => 'port',
-                            'type' => TextType::class,
+                            'type' => 'text',
                             'label' => 'solution.fields.dbport'
                         )
 		);
@@ -311,7 +309,7 @@ class databasecore extends solution {
 	} // read_last($param)
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {	
+	public function read($param) {
 		$result = array();
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
@@ -361,25 +359,25 @@ class databasecore extends solution {
 						$requestSQL .= " AND ";	
 					}
 				}
-			} else {				
+			} else {
 				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
 			
 			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
 			$requestSQL .= $this->get_query_select_limit_offset($param, 'read'); // Add query limit
 			// Query validation
-			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);	
+			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);		
 			$exec = $q->execute();
-			
+
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
-			
+
 			$row = array();
 			if(!empty($fetchAll)) {
 				$result['count'] = count($fetchAll);
@@ -391,7 +389,7 @@ class databasecore extends solution {
 						} 
 						if($key === $param['ruleParams']['fieldDateRef']) {
 							// If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
-							if ((bool)strtotime($value)) {;							
+							if ((bool)strtotime($value)) {;
 								$row['date_modified'] = $value;
 							} else {							
 								$row['date_modified'] = date('Y-m-d H:i:s');
@@ -401,15 +399,15 @@ class databasecore extends solution {
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
-				    }					
+					}
 					$result['values'][$row['id']] = $row;
 				}
-			} 
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}		
-		return $result;	
+		}
+		return $result;
 	} // read($param)
 	
 	// Permet de créer des données

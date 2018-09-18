@@ -482,7 +482,8 @@ class documentcore {
 			$stmt->bindValue(":source_id", $this->document_data['source_id']);
 			$stmt->bindValue(":date_created", $this->document_data['date_created']);
 			$stmt->execute();	   				
-			$result = $stmt->fetch();						
+			$result = $stmt->fetch();
+		
 			// if id found, we stop to send an error
 			if (!empty($result['id'])) {
 				throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
@@ -546,6 +547,7 @@ class documentcore {
 					$stmt->bindValue(":date_created", $this->document_data['date_created']);
 					$stmt->execute();	   				
 					$result = $stmt->fetch();
+
 					if (!empty($result['id'])) {
 						throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
 					}	
@@ -886,7 +888,8 @@ class documentcore {
 				if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
 					$idQuery = $this->sourceData[$childRuleId['field_name_source']];
 				} else {
-					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+					//throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+					continue;
 				}
 
 				// Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule 
