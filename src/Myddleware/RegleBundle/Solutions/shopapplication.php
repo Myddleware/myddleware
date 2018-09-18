@@ -26,6 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 require_once('lib/shopapplication/Unirest.php');
 
@@ -119,7 +120,7 @@ class shopapplicationcore extends solution {
 						),
                    array(
                             'name' => 'apikey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikey'
                         )
         );

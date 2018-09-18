@@ -122,7 +122,7 @@ class DefaultControllerCore extends Controller
             }
 
             // ---------------
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
 
@@ -330,7 +330,7 @@ class DefaultControllerCore extends Controller
             $this->em->flush();
 
             return new Response($r);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return new JsonResponse($e->getMessage());
         }
     }
@@ -355,7 +355,7 @@ class DefaultControllerCore extends Controller
                 return $this->redirect($this->generateURL('regle_open', array('id' => $id)));
                 exit;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->redirect($this->generateUrl('regle_list'));
         }
     }
@@ -384,7 +384,7 @@ class DefaultControllerCore extends Controller
             }
 
             return new Response(1);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return new JsonResponse($e->getMessage());
         }
     }
@@ -594,7 +594,10 @@ class DefaultControllerCore extends Controller
                 $solution_source_nom = $sessionService->getParamRuleSourceSolution($key);
                 $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
 
-                $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($key)));
+                $login = $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($key)));
+				if (empty($solution_source->connexion_valide)) {
+					throw new \Exception ("failed to login to the source application .".(!empty($login['error']) ? $login['error'] : ""));
+				}
 
                 // SOURCE ----- Récupère la liste des champs source
                 // O récupère le module de la règle
@@ -627,7 +630,7 @@ class DefaultControllerCore extends Controller
                                     }
                                 }
                                 if (!isset($array['source'][$field_source])) {
-                                    throw new \Exception ("Getting label (reload): Field " . $field_source . " not found.");
+                                    throw new \Exception ("failed to get the field ".$field_source);
                                 }
                             }
                             $fields[] = $array;
@@ -676,9 +679,10 @@ class DefaultControllerCore extends Controller
                 exit;
                 //--
             }
-        } catch (Exception $e) {
-            $sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.update'));
-            return $this->redirect($this->generateUrl('regle_stepone_animation'));
+        } catch (\Exception $e) {
+            $sessionService->setCreateRuleError($key, $this->get('translator')->trans('error.rule.update').' '.$e->getMessage());
+			$session->set('error', array($this->get('translator')->trans('error.rule.update').' '.$e->getMessage()));		
+			return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
             exit;
         }
     }
@@ -1058,7 +1062,7 @@ class DefaultControllerCore extends Controller
             }
 
             // ---------------- /SOURCE ----------------------------
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_all');
             $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
@@ -1093,7 +1097,7 @@ class DefaultControllerCore extends Controller
                 exit;
             }
             // ---------------- /TARGET ----------------------------
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_all');
             $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
@@ -1707,7 +1711,7 @@ class DefaultControllerCore extends Controller
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 
             // ----------------
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping'));
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
             exit;
@@ -2344,7 +2348,7 @@ class DefaultControllerCore extends Controller
             } else {
                 return new Response(0);
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return new Response($e->getMessage());
         }
     }

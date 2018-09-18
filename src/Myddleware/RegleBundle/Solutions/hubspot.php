@@ -24,6 +24,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use \Datetime;
 
@@ -32,25 +33,24 @@ class hubspotcore extends solution
 
     protected $url = 'https://api.hubapi.com/';
     protected $version = 'v1';
+    protected $limitCall = 100;
 
     protected $FieldsDuplicate = array(	
 										'contacts' => array('email'),
                                       ); 
 
-    public function getFieldsLogin()
-    {
+    public function getFieldsLogin() {
         return array(
             array(
                 'name' => 'apikey',
-                'type' => 'password',
+                'type' => PasswordType::class,
                 'label' => 'solution.fields.apikey'
             )
         );
     }
 
     // Conect to Hubspot
-    public function login($paramConnexion)
-    {
+    public function login($paramConnexion) {
         parent::login($paramConnexion);
         try {
             $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);	
@@ -68,8 +68,7 @@ class hubspotcore extends solution
     } // login($paramConnexion)*/
 
 
-    public function get_modules($type = 'source')
-    {
+    public function get_modules($type = 'source') {
         $modules = array(
             'companies' => 'Companies',
             'contacts' => 'Contacts',
@@ -84,8 +83,7 @@ class hubspotcore extends solution
     } // get_modules()
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source')
-    {
+    public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);
         try {
 
@@ -216,7 +214,7 @@ class hubspotcore extends solution
                     }
                 }
                 $result['values']['id'] = $identifyProfilesId; // Add id
-                $result['values']['date_modified'] = $identifyProfiles[$modified]['value']; // add date modified
+                $result['values']['date_modified'] = date('Y-m-d H:i:s', $identifyProfiles[$modified]['value']/1000); // add date modified
                 if (!empty($result['values'])) {
                     $result['done'] = true;
                 }
@@ -233,8 +231,7 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read($param)
-    {
+    public function read($param) {
         try {
             $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             $module = $this->getsingular($param['module']);
@@ -249,6 +246,7 @@ class hubspotcore extends solution
                     }
                     $property .= "&properties=hs_lastmodifieddate";
                 }
+				$property .= '&count='.$this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
 
@@ -260,36 +258,35 @@ class hubspotcore extends solution
                     }
                     $property .= "&property=lastmodifieddate";
                 }
+				$property .= '&count='.$this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             }
 
-            if ($dateRefField === "ModificationDate") {
-                $result = $this->call($url_modified);
-                $resultQuery = $this->getresultQuery($result, $url_modified, $param);
-
+            if ($dateRefField === "ModificationDate") {	
+                $resultCall = $this->call($url_modified);
+                $resultQuery = $this->getresultQuery($resultCall, $url_modified, $param);
             } else if ($dateRefField === "CreationDate") {
-
-                $result = $this->call($ur_created);
-                $resultQuery = $this->getresultQuery($result, $ur_created, $param);
+                $resultCall = $this->call($ur_created);
+                $resultQuery = $this->getresultQuery($resultCall, $ur_created, $param);
             }
             $resultQuery = $resultQuery['exec'];		
             if ($module === "companies" || $module === "deal") {
                 $identifyProfiles = $resultQuery['results'];
                 $modified = "hs_lastmodifieddate";
                 $id = $module === "companies" ? "companyId" : "dealId";
-
             } else if ($module === "contact") {
                 $identifyProfiles = $resultQuery[$param['module']];
                 $modified = "lastmodifieddate";
                 $id = 'vid';
             }		
-
+			$result = array();		
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {
 				if (!empty($identifyProfiles)) {
+					// First record is the more recent
 					$timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
 					// Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
 					$result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000)+1);
@@ -298,9 +295,8 @@ class hubspotcore extends solution
 						foreach ($param['fields'] as $field) {
 							if (isset($identifyProfile["properties"] [$field])) {
 								$records[$field] = $identifyProfile["properties"] [$field]['value'];
-
 							}
-							$records['date_modified'] = $identifyProfile["properties"][$modified]['value']; // add date modified
+							$records['date_modified'] =  date('Y-m-d H:i:s', $identifyProfile["properties"][$modified]['value']/1000); // add date modified
 							$records['id'] = $identifyProfile[$id];
 							$result['values'][$identifyProfile[$id]] = $records;
 						}
@@ -310,7 +306,7 @@ class hubspotcore extends solution
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }
+        }		
         return $result;
     }// end function read
 
@@ -320,8 +316,7 @@ class hubspotcore extends solution
      * @return mixed
      */
 
-    public function create($param)
-    {
+    public function create($param) {
         try {
             // Associate deal is always an update to Hubspot
             if ($param['module'] == 'associate_deal') {
@@ -329,7 +324,6 @@ class hubspotcore extends solution
             }
             // Tranform Myddleware data to Mailchimp data
             foreach ($param['data'] as $idDoc => $data) {
-
                 $dataHubspot["properties"] = null;
                 $records = array();
 
@@ -340,7 +334,6 @@ class hubspotcore extends solution
                     $version = $module === "companies" ? "v2" : "v1";
                     $id = $module === "companies" ? "companyId" : "dealId";
                     $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "?hapikey=" . $this->paramConnexion['apikey'];
-
                     $property = "name";
                 } else if ($module === "contact") {
                     $url = $this->url . $param['module'] . "/v1/" . $module . "?hapikey=" . $this->paramConnexion['apikey'];
@@ -348,7 +341,6 @@ class hubspotcore extends solution
                     $property = "property";
                 }
                 foreach ($param['data'][$idDoc] as $key => $value) {
-
                     if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
                         continue;
                     }
@@ -362,7 +354,6 @@ class hubspotcore extends solution
                         'id' => '-1',
                         'error' => 'Failed to create data in hubspot. ' . (!empty($resultQuery['exec']['validationResults'][0]['message']) ? $resultQuery['exec']['validationResults'][0]['message'] : (!empty($resultQuery['exec']['message']) ? $resultQuery['exec']['message'] : ''))
                     );
-
                 } else {
                     $result[$idDoc] = array(
                         'id' => $resultQuery['exec'][$id],
@@ -386,10 +377,8 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function update($param)
-    {
+    public function update($param) {
         try {
-
             $module = $this->getsingular($param['module']);
             if ($module === "companies" || $module === "deal") {
                 $property = "name";
@@ -403,7 +392,6 @@ class hubspotcore extends solution
             // Tranform Myddleware data to hubspot data
             foreach ($param['data'] as $idDoc => $data) {
                 $records = array();
-
                 // No properties for module associate_deal
                 if ($param['module'] != "associate_deal") {
                     $dataHubspot["properties"] = null;
@@ -424,14 +412,11 @@ class hubspotcore extends solution
                     $idProfile = $data['deal_id'];
                     $url = $this->url . "deals/" . $version . "/" . $module . "/" . $idProfile . "/associations/" . $data['object_type'] . "?id=" . $data['record_id'] . "&hapikey=" . $this->paramConnexion['apikey'];
                     $dataHubspot = array();
-
-
                 } elseif ($module === "companies" || $module === "deal") {
                     $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $idProfile . "?hapikey=" . $this->paramConnexion['apikey'];
                 } elseif ($module === "contact") {
                     $url = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $idProfile . "/profile" . "?hapikey=" . $this->paramConnexion['apikey'];
                 } else {
-
                     throw new \Exception('Module ' . $module . ' unknown.');
                 }
                 // Call Hubspot
@@ -472,8 +457,7 @@ class hubspotcore extends solution
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param)
-    {
+    protected function getresultQuery($request, $url, $param) {	
         if ($param['module'] === "contacts") {
             if ($request['exec']['time-offset'] === 0) {
                 $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
@@ -494,15 +478,13 @@ class hubspotcore extends solution
         } elseif ($param['module'] === "deals" || $param['module'] === "companies") {
             if ($request['exec']['offset'] === $request['exec']['total']) {
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-
             } else {
                 $offset = $request['exec']['offset'];
                 $total = $request['exec']['total'];
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-
-                do {
-                    $resultOffset = $this->call($url . "&offset=" . $offset);
-                    $offset = $resultOffset['exec']['offset'];
+                do {				
+                    $resultOffset = $this->call($url . "&offset=" . $offset);				
+                    $offset = $resultOffset['exec']['offset'];				
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
                     $merge = array_merge($result['exec']['results'], $resultOffsetTemps);
                     $result['exec']['results'] = $merge;
@@ -521,8 +503,7 @@ class hubspotcore extends solution
      * @return array
      *
      */
-    protected function getresultQueryBydate($request, $param, $offset)
-    {
+    protected function getresultQueryBydate($request, $param, $offset) {
         $param['module'] === "deals" || $param['module'] === "companies" ? $modified = "hs_lastmodifieddate" : $modified = "lastmodifieddate";
         if (!$offset) {
             if ($param['module'] === "deals" || $param['module'] === "companies") {
@@ -536,21 +517,22 @@ class hubspotcore extends solution
             $result = [];
         }
         $dateTimestamp = $this->dateTimeToTimestamp($param["date_ref"]);
-        foreach ($request as $key => $item) {
-            if ($item['properties'][$modified]['value'] > $dateTimestamp) {
-                if (!$offset) {
-                    array_push($result['exec'][$module], $item);
-                } else {
-                    array_push($result, $item);
-                }
-            }
-        }
+        if (!empty($request)) {
+			foreach ($request as $key => $item) {
+				if ($item['properties'][$modified]['value'] > $dateTimestamp) {
+					if (!$offset) {
+						array_push($result['exec'][$module], $item);
+					} else {
+						array_push($result, $item);
+					}
+				}
+			}
+		}
         return $result;
     }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToTimestamp($dateTime)
-    {
+    protected function dateTimeToTimestamp($dateTime) {
         $date = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
         return $date->getTimestamp() * 1000;
     }// dateTimeToMyddleware($dateTime)
@@ -562,8 +544,7 @@ class hubspotcore extends solution
      * @return null|string
      * @throws \Exception
      */
-    public function getDateRefName($moduleSource, $RuleMode)
-    {
+    public function getDateRefName($moduleSource, $RuleMode) {
         // Creation and modification mode
         if ($RuleMode == "0") {
             return "ModificationDate";
@@ -581,8 +562,7 @@ class hubspotcore extends solution
      * @param $name
      * @return string
      */
-    public function getsingular($name)
-    {
+    public function getsingular($name) {
         if ($name === "contacts") {
             return "contact";
         } else if ($name === "companies") {
@@ -598,9 +578,7 @@ class hubspotcore extends solution
      * @param  array $args Assoc array of parameters to be passed
      * @return array          Assoc array of decoded result
      */
-    protected
-    function call($url, $method = 'GET', $args = array(), $timeout = 120)
-    {
+    protected function call($url, $method = 'GET', $args = array(), $timeout = 120) {
         try {
             if (function_exists('curl_init') && function_exists('curl_setopt')) {
                 $ch = curl_init($url);
@@ -623,9 +601,7 @@ class hubspotcore extends solution
                 $resultCurl['exec'] = json_decode($result, true);
                 $resultCurl['info'] = curl_getinfo($ch);
                 curl_close($ch);
-
                 return $resultCurl;
-
             }
         } catch (\Exception $e) {
             throw new \Exception('curl extension is missing!');

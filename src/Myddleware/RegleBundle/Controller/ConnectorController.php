@@ -308,9 +308,24 @@ class ConnectorController extends Controller
                 ->findOneByName($sessionService->getParamConnectorSourceSolution());
 
 
+
+
                 $connector = new Connector();
                 $connector->setSolution($solution);
-                $form = $this->createForm(new ConnectorType($this->container), $connector);
+
+        if( $connector->getSolution() !=null ){
+
+            $fieldsLogin = $this->container->get('myddleware_rule.' . $connector->getSolution()->getName())->getFieldsLogin();
+        }else{
+            $fieldsLogin = [];
+        }
+
+
+//              $form = $this->createForm(new ConnectorType($this->container), $connector);
+                $form = $this->createForm(ConnectorType::class,$connector,array(
+                    'method'    => 'PUT',
+                    'attr' =>  array('fieldsLogin' => $fieldsLogin, 'secret' => $this->container->getParameter('secret'))
+                ));
                 
 		if($request->getMethod()=='POST' && $sessionService->isParamConnectorExist()) {		
 			try {
@@ -520,8 +535,24 @@ class ConnectorController extends Controller
               
               
                 // Create connector form
-                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
-                
+//                $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
+
+        if( $connector->getSolution() !=null ){
+
+            $fieldsLogin = $this->container->get('myddleware_rule.' . $connector->getSolution()->getName())->getFieldsLogin();
+        }else{
+            $fieldsLogin = [];
+        }
+
+
+                  $form = $this->createForm(ConnectorType::class,$connector, array(
+                      'action'    => $this->generateUrl('connector_open', ['id' => $id]),
+                      'method'    => 'PUT',
+                      'attr' =>  array('fieldsLogin' => $fieldsLogin, 'secret' => $this->container->getParameter('secret'))
+                  ));
+
+
+
 		// If the connector has been changed
 		if($request->getMethod()=='POST') {
                  
@@ -585,7 +616,8 @@ class ConnectorController extends Controller
 		}
 		// Display the connector
 		else {
-			
+
+		    //dump($form->createView());
 			    
 
 	        return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 

@@ -26,6 +26,9 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 //use Psr\LoggerInterface;
 
 class saprootcore extends solution {
@@ -84,17 +87,17 @@ class saprootcore extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                     array(
                             'name' => 'wsdl',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.wsdl'
                         )
         );

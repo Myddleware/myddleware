@@ -25,7 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
 
 class sapcore extends saproot {
 
@@ -160,7 +161,7 @@ class sapcore extends saproot {
 					$bukrsParam = array(
 								'id' => 'BUKRS',
 								'name' => 'BUKRS',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Company Code',
 								'required'	=> true
 							);

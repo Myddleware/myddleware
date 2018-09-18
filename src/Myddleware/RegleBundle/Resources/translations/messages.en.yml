@@ -35,6 +35,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
+        nb : Data transfers with error
     graph_histo:
         title: Transfer historic
     graph_job_histo:
@@ -67,7 +68,7 @@ create_rule:
         filter_choice: does not have a filter
         filter_fields: Search a field...
         empty_fields_target: No field found in the target
-        empty_simulate: Warning: there is no data in the source server or fields in the target solution
+        empty_simulate: 'There is no data in the source server or fields in the target solution'
         empty_field_simulate: Empty content
         data: Test data
         infobulle: Double click to remove
@@ -185,7 +186,7 @@ view_rule:
         save: Save
         simule: Simulate Transfers
         result: Estimated transfers
-        details: Represents the number of transfers that will be created for the next lunch of this rule. Those ones won't cost you any credits if they are not send. This number will always be equal or less than your Myddleware system limit of transfers created by lunch (default: 100).
+        details: " Represents the number of transfers that will be created for the next lunch of this rule. Those ones won't cost you any credits if they are not send. This number will always be equal or less than your Myddleware system limit of transfers created by lunch (default 100)."
 
 rule:
     source: Source
@@ -521,6 +522,7 @@ error:
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
         delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
+        update: Failed to edit the rule.  
     account:
         language_change: Failed to change the language :
     template:
@@ -644,7 +646,7 @@ messages:
         failed_create_directory: An error occured while creating your directory.
     template:
         nb_rule: Number of generated rules: 
-        help: Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
+        help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
   
 email_notification:
     subject: Myddleware notification
@@ -694,17 +696,17 @@ jobscheduler:
     description:
         top : Schedule your Myddleware tasks by creating or modifiyng this table. <a href="http://community.myddleware.com/index.php/administration-guide/#taches-planifiees" target=_blank>More information here.</a> 
         bottom : > 
-                 Add this task in your Linux or Windows task scheduler : php app/console myddleware:jobScheduler --env=background <BR>
+                 Add this task in your Linux or Windows task scheduler : php bin/console myddleware:jobScheduler --env=background <BR>
                  For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
-                   */5 * * * * cd <myddleware_directory>; php app/console myddleware:jobScheduler --env=background > /dev/null 2>&1
+                   */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
 management_smtp:
     submit :  Save configuration SMTP
     cancel: Cancel
     title : Management SMTP
-    description : You can configure email parameters here. More info here : <a href="https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html" target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a> 
+    description : 'You can configure email parameters here. More info here : <a href="https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html" target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a>'
     sendtestmail: Send test mail
 
 management_smtp_sendmail:
-    subject: Myddleware : email configuration test
+    subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
 

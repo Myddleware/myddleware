@@ -23,6 +23,8 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class ringcentralcore  extends solution { 
@@ -55,27 +57,27 @@ class ringcentralcore  extends solution {
 		return array(
 					array(
                             'name' => 'username',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.username'
                         ),
 					array(
-                            'name' => 'password',
+                            'name' => PasswordType::class,
                             'type' => 'password',
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'apikey',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikey'
                         ),
 					array(
                             'name' => 'apikeysecret',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.apikeysecret'
                         ),
 					array(
                             'name' => 'sandbox',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.sandbox'
                         )	
 		);
@@ -218,12 +220,17 @@ class ringcentralcore  extends solution {
 			$result['count'] = 0;
 			// If extensionID equal ALL, we get all extension ID and search for them
 			if (strtoupper($param['ruleParams']['extensionId']) == 'ALL') {
-				$extensions = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension");
-				if (!empty($extensions)) {
-					foreach($extensions->records as $extension) {
-						$extensionIds[] = $extension->id;
+				$pageNum = 1;
+				do {
+					$extensions = array();
+					$extensions = $this->makeRequest( $this->server, $this->token->access_token, "/restapi".self::API_VERSION."/account/~/extension?perPage=".$this->callLimit."&page=".$pageNum); 
+					if (!empty($extensions)) {
+						foreach($extensions->records as $extension) {
+							$extensionIds[] = $extension->id;
+						}
 					}
-				}
+					$pageNum ++;
+				} while (count($extensions->records) == $this->callLimit);
 				// /restapi/v1.0/account/{accountId}/extension
 			}elseif (!empty($param['ruleParams']['extensionId'])) {
 				$extensionIds = explode(';',$param['ruleParams']['extensionId']);
@@ -353,7 +360,7 @@ class ringcentralcore  extends solution {
 			$params[] = array(
 								'id' => 'extensionId',
 								'name' => 'extensionId',
-								'type' => 'text',
+								'type' => TextType::class,
 								'label' => 'Extension Id',
 								'required'	=> false
 							);	

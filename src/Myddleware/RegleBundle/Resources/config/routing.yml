@@ -3,282 +3,282 @@ regle_jobscheduler:
     prefix:   /jobscheduler
 
 regle_inputs:
-    pattern:  /inputs/
+    path:  /inputs/
     defaults: { _controller: RegleBundle:Default:ruleInputs }
     requirements:
-        _method:  POST    
+        methods:  POST    
  
 regle_inputs_name_unique:
-    pattern:  /inputs/name_unique/
+    path:  /inputs/name_unique/
     defaults: { _controller: RegleBundle:Default:ruleNameUniq }
     requirements:
-        _method:  POST
+        methods:  POST
 
 regle_panel:
-    pattern:  /panel/
+    path:  /panel/
     defaults: { _controller: RegleBundle:Default:panel }
 
 regle_update:
-    pattern:  /update/{id}
+    path:  /update/{id}
     defaults: { _controller: RegleBundle:Default:ruleUpdActive }
 
 regle_logs:
-    pattern: /getlogs/{id}
+    path: /getlogs/{id}
     defaults: { _controller: RegleBundle:Default:displayLogs }
 
 path_fiche_params_update:
-    pattern:  /update/params/{id}
+    path:  /update/params/{id}
     defaults: { _controller: RegleBundle:Default:ruleUpdParams }
 
 path_fiche_params_simulate:
-    pattern:  /simule/{id}
+    path:  /simule/{id}
     defaults: { _controller: RegleBundle:Default:ruleSimulateTransfers }
 
 path_info_field:
-    pattern:  /info/{type}/{field}/
+    path:  /info/{type}/{field}/
     defaults: { _controller: RegleBundle:Default:infoField }
     requirements:
-        _method:  GET  
+        methods:  GET  
 
 path_info_field_not_param:
-    pattern:  /info/
+    path:  /info/
     defaults: { _controller: RegleBundle:Default:infoField }
 
 graph_type_error_doc:
-    pattern:  /graph/type/error/doc
+    path:  /graph/type/error/doc
     defaults: { _controller: RegleBundle:Default:graphTypeError }    
 
 graph_type_transfer_rule:
-    pattern:  /graph/type/transfer/rule
+    path:  /graph/type/transfer/rule
     defaults: { _controller: RegleBundle:Default:graphTransferRule }    
 
 graph_type_transfer_histo:
-    pattern:  /graph/type/transfer/histo
+    path:  /graph/type/transfer/histo
     defaults: { _controller: RegleBundle:Default:graphTransferHisto }    
 
 graph_type_job_histo:
-    pattern:  /graph/type/job/histo
+    path:  /graph/type/job/histo
     defaults: { _controller: RegleBundle:Default:graphJobHisto }  	
 
 regle_template:
-    pattern:  /list/template/
+    path:  /list/template/
     defaults: { _controller: RegleBundle:Default:listTemplate }
 
 regle_submodules:
-    pattern:  /submodules/
+    path:  /submodules/
     defaults: { _controller: RegleBundle:Default:listSubModules }
     requirements:
-        _method:  POST    
+        methods:  POST    
 
 regle_validation_animation:
-    pattern:  /validation/
+    path:  /validation/
     defaults: { _controller: RegleBundle:Default:validationAnimation }
 
 regle_stepone_animation:
-    pattern:  /create/
+    path:  /create/
     defaults: { _controller: RegleBundle:Default:ruleStepOneAnimation }  
 
 regle_list_module:
-    pattern:  /list/module/
+    path:  /list/module/
     defaults: { _controller: RegleBundle:Default:ruleListModule }
 
 regle_steptwo:
-    pattern:  /create/step2/
+    path:  /create/step2/
     defaults: { _controller: RegleBundle:Default:ruleStepTwo }
     requirements:
-        _method:  POST
+        methods:  POST
         
 regle_stepthree:
-    pattern:  /create/step3/{id}
+    path:  /create/step3/{id}
     defaults: { _controller: RegleBundle:Default:ruleStepThree, id: 0 }
 
 regle_validation:
-    pattern:  /create/step3/validation/
+    path:  /create/step3/validation/
     defaults: { _controller: RegleBundle:Default:ruleValidation }
     requirements:
-        _method:  POST
+        methods:  POST
 
 regle_simulation:
-    pattern:  /create/step3/simulation/
+    path:  /create/step3/simulation/
     defaults: { _controller: RegleBundle:Default:ruleSimulation }
     requirements:
-        _method:  POST
+        methods:  POST
         
 regle_formula:
-    pattern:  /create/step3/formula/
+    path:  /create/step3/formula/
     defaults: { _controller: RegleBundle:Default:ruleVerifFormula }
     requirements:
-        _method:  POST        
+        methods:  POST        
         
 regle_connector_create:
-    pattern:  /connector/create/
+    path:  /connector/create/
     defaults: { _controller: RegleBundle:Connector:create }
     
 regle_connector_create_out:
-    pattern:  /connector/createout/{type}
+    path:  /connector/createout/{type}
     defaults: { _controller: RegleBundle:Connector:createOut }   
        
 regle_connector_insert_solution:
-    pattern:  /connector/insert/solution/
+    path:  /connector/insert/solution/
     defaults: { _controller: RegleBundle:Connector:connectorInsertSolution }
     
 regle_connector_insert:
-    pattern:  /connector/insert/
+    path:  /connector/insert/
     defaults: { _controller: RegleBundle:Connector:connectorInsert }
     
 connector_callback:
-    pattern:  /connector/callback/
+    path:  /connector/callback/
     defaults: { _controller: RegleBundle:Connector:callBack }    
         
 regle_connector_by_solution:
-    pattern:  /connector/list/solution/
+    path:  /connector/list/solution/
     defaults: { _controller: RegleBundle:Connector:connectorListSolution }
     
 regle_connector_list:
-    pattern:  /connector/list/
+    path:  /connector/list/
     defaults: { _controller: RegleBundle:Connector:connectorList, page: 1 }
 
 regle_connector_page:
-    pattern:  /connector/list/page-{page}
+    path:  /connector/list/page-{page}
     defaults: { _controller: RegleBundle:Connector:connectorList }
     requirements:
         page: \d+
 
 connector_delete:
-    pattern:  /connector/delete/{id}
+    path:  /connector/delete/{id}
     defaults: { _controller: RegleBundle:Connector:connectorDelete }
     
 upload:
-    pattern:  /connector/upload/{solution}
+    path:  /connector/upload/{solution}
     defaults: { _controller: RegleBundle:Connector:upload }    
 
 connector_open:
-    pattern:  /connector/view/{id}
+    path:  /connector/view/{id}
     defaults: { _controller: RegleBundle:Connector:connectorOpen }
 
 flux_error_rule:
-    pattern:  /flux/error/{id}/
+    path:  /flux/error/{id}/
     defaults: { _controller: RegleBundle:Flux:fluxErrorByRule  }
 
 flux_info:
-    pattern:  /flux/{id}/log/
+    path:  /flux/{id}/log/
     defaults: { _controller: RegleBundle:Flux:fluxInfo, page: 1  }
 
 flux_info_page:
-    pattern: /flux/{id}/log/page-{page}
+    path: /flux/{id}/log/page-{page}
     defaults: { _controller: RegleBundle:Flux:fluxInfo }
     requirements:
         page: \d+
 
 flux_list_delete_filter:
-    pattern:  /flux/list/delete/filter/
+    path:  /flux/list/delete/filter/
     defaults: { _controller: RegleBundle:Flux:fluxListDeleteFilter }
 
 flux_rerun:
-    pattern:  /flux/rerun/{id}
+    path:  /flux/rerun/{id}
     defaults: { _controller: RegleBundle:Flux:fluxRerun }
     
 flux_cancel:
-    pattern:  /flux/cancel/{id}
+    path:  /flux/cancel/{id}
     defaults: { _controller: RegleBundle:Flux:fluxCancel }    
 
 flux_save:
-    pattern:  /flux/save/
+    path:  /flux/save/
     defaults: { _controller: RegleBundle:Flux:fluxSave }
 
 flux_btn_dyn:
-    pattern:  /flux/{id}/action/{method}/solution/{solution}
+    path:  /flux/{id}/action/{method}/solution/{solution}
     defaults: { _controller: RegleBundle:Flux:fluxBtnDyn }
 
 flux_list:
-    pattern:  /flux/list/search-{search}
+    path:  /flux/list/search-{search}
     defaults: { _controller: RegleBundle:Flux:fluxList, page: 1 }
 
 flux_list_page:
-    pattern:  /flux/list/page-{page}
+    path:  /flux/list/page-{page}
     defaults: { _controller: RegleBundle:Flux:fluxList }
     requirements:
         page: \d+   
 
 flux_mass_cancel:
-    pattern:  /flux/masscancel/
+    path:  /flux/masscancel/
     defaults: { _controller: RegleBundle:Flux:fluxMassCancel }
 
 flux_mass_run:
-    pattern:  /flux/massrun/
+    path:  /flux/massrun/
     defaults: { _controller: RegleBundle:Flux:fluxMassRun }
 
 regle_list:
-    pattern:  /list/
+    path:  /list/
     defaults: { _controller: RegleBundle:Default:ruleList, page: 1 }
 
 regle_list_page:
-    pattern:  /list/page-{page}
+    path:  /list/page-{page}
     defaults: { _controller: RegleBundle:Default:ruleList }
     requirements:
         page: \d+    
 
 regle_delete:
-    pattern:  /delete/{id}
+    path:  /delete/{id}
     defaults: { _controller: RegleBundle:Default:ruleDelete }
     
 regle_displayflux:
-    pattern:  /displayflux/{id}
+    path:  /displayflux/{id}
     defaults: { _controller: RegleBundle:Default:displayFlux }
 
 regle_edit:
-    pattern:  /edit/{id}
+    path:  /edit/{id}
     defaults: { _controller: RegleBundle:Default:ruleEdit }  
 
 regle_open:
-    pattern:  /view/{id}
+    path:  /view/{id}
     defaults: { _controller: RegleBundle:Default:ruleOpen }
 
 regle_exec:
-    pattern:  /exec/{id}
+    path:  /exec/{id}
     defaults: { _controller: RegleBundle:Default:ruleExec }  
 
 my_account:
-    pattern:  /account/
+    path:  /account/
     defaults: { _controller: RegleBundle:Account:myAccount }
 
 
 account_locale:
-    pattern:  /account/locale/
+    path:  /account/locale/
     defaults: { _controller: RegleBundle:Account:changeLocale }
     options:
         expose: true
 
 task_list:
-    pattern:  /task/list/
+    path:  /task/list/
     defaults: { _controller: RegleBundle:Task:taskList, page: 1 }
 
 task_list_page:
-    pattern:  /task/list/page-{page}
+    path:  /task/list/page-{page}
     defaults: { _controller: RegleBundle:Task:taskList }
     requirements:
         page: \d+
 
 task_view:
-    pattern:  /task/view/{id}/log/
+    path:  /task/view/{id}/log/
     defaults: { _controller: RegleBundle:Task:viewTask, page: 1 }
 
 task_view_page:
-    pattern:  /task/view/{id}/log/page-{page}
+    path:  /task/view/{id}/log/page-{page}
     defaults: { _controller: RegleBundle:Task:viewTask }
     requirements:
         page: \d+
 
 task_stop:
-    pattern:  /task/stop/{id}
+    path:  /task/stop/{id}
     defaults: { _controller: RegleBundle:Task:stopTask, page: 1 }
 
 
 management_smtp_index:
-    pattern: /managementsmtp/
+    path: /managementsmtp/
     defaults: {_controller: RegleBundle:ManagementSMTP:index}
 
 management_smtp_create:
-    pattern: /managementsmtp/readConfig
+    path: /managementsmtp/readConfig
     defaults: {_controller: RegleBundle:ManagementSMTP:createConfig}
     methods:  [POST, GET]

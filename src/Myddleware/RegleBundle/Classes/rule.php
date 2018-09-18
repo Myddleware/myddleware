@@ -29,6 +29,7 @@ use Symfony\Bridge\Monolog\Logger; // Logs
 use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Service access
 use Doctrine\DBAL\Connection; // Connection database
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -74,9 +75,7 @@ class rulecore {
 		if (!empty($param['manual'])) {
 			$this->manual = $param['manual'];
 		}	
-		if (!empty($param['limit'])) {
-			$this->limit = $param['limit'];
-		}
+
 		$this->setRuleParam();
 		$this->setRuleRelationships();
 		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
@@ -392,43 +391,18 @@ class rulecore {
 		// si champs vide
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
-			if ($connect === true) {
+			if ($connect === true) {												
 				$this->dataSource = $this->solutionSource->read($read);
-													
-				// Si on a $this->limit résultats et que la date de référence n'a pas changée alors on récupère les enregistrements suivants
-				// Récupération de la date de modification du premier enregistrement
-				$value['date_modified'] = '';
-				if (!empty($this->dataSource['values'])) {
-					$value = current($this->dataSource['values']);
-				}
+				
+				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (
 						!empty($this->dataSource['count'])
 					&&	$this->dataSource['count'] == $this->limit
-					&& $this->dataSource['date_ref'] == $value['date_modified']
 				) {
-					$i = 0;
-					$dataSource = $this->dataSource;
-					// On boucle tant que l'on a pas de modification de date... Il faut prendre tous les enregistrement s'il y en a plus de $this->limit qui ont été créés à la même heure.
-					while (
-							$dataSource['count'] == $this->limit
-						&& $dataSource['date_ref'] == $value['date_modified']
-						&& empty($dataSource['whileStop']) // Force stop in some case (example connector file where all recoe
-					) {
-						// Gestion de l'offset
-						$i++;
-						$read['offset'] = $i*$this->limit;
-						// On récupère les enregistrements suivants
-						$dataSource = $this->solutionSource->read($read);
-						if(
-								empty($dataSource) 
-							 || $dataSource['count'] == 0
-						) {
-							break;
-						}
-						// Sauvegarde des élément dans le tableau final
-						$this->dataSource['values'] = array_merge($this->dataSource['values'],$dataSource['values']);
-						$this->dataSource['count'] += $dataSource['count'];
-						$this->dataSource['date_ref'] = $dataSource['date_ref'];		
+					// Check and clean data source
+					$validateReadDataSource = $this->validateReadDataSource();
+					if (!empty($validateReadDataSource['error'])){				
+						return $validateReadDataSource;
 					}
 				}			
 				// Logout (source solution)
@@ -449,6 +423,41 @@ class rulecore {
 		}
 		return array('error' => 'No field to read in source system. ');
 	} 
+	
+	// Check every record haven't the same reference date
+	// Make sure the next record hasn't the same date modified, so we delete at least the last one
+	// This function run only when the limit call has been reached
+	protected function validateReadDataSource() {
+		if (!empty($this->dataSource['values'])) {
+			$dataSourceValues = $this->dataSource['values'];
+			
+			// Order data in the date_modified order
+			$modified  = array_column($dataSourceValues, 'date_modified');
+			array_multisort($modified, SORT_DESC, $dataSourceValues);
+			
+			foreach ($dataSourceValues as $value) {
+				// Check if the previous record has the same date_modified than the current record
+				if (
+						empty($previousValue)   // first call
+					OR (
+							!empty($previousValue['date_modified'])
+						AND $previousValue['date_modified'] == $value['date_modified']
+					)
+				) {
+					// Remove the current item, it will be read in the next call
+					unset($this->dataSource['values'][$value['id']]); // id equal the key in the dataSource table
+					$this->dataSource['count']--;
+					$previousValue = $value;
+					continue;
+				}
+				break;
+			}
+			if (empty($this->dataSource['values'])) {
+				return array('error' => 'All records read have the same reference date. Myddleware cannot garanty all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribut in job and rule class.');
+			}
+			return true;
+		}
+	}
 	
 	// Permet de filtrer les nouveau documents d'une règle
 	public function filterDocuments($documents = null) {
@@ -828,7 +837,8 @@ class rulecore {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
 			
-			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -1430,7 +1440,7 @@ class rulecore {
 				'id' 		=> 'datereference',
 				'name' 		=> 'datereference',
 				'required'	=> true,
-				'type'		=> 'text',
+				'type'		=> TextType::class,
 				'label' => 'solution.params.dateref'
 			),
 			array( // clear data

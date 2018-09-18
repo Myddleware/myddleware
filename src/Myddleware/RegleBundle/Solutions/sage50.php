@@ -21,6 +21,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+
 class sage50core extends solution
 {
 
@@ -125,7 +127,7 @@ class sage50core extends solution
             ),
             array(
                 'name' => 'password',
-                'type' => 'password',
+                'type' => PasswordType::class,
                 'label' => 'solution.fields.password'
             ),
             array(

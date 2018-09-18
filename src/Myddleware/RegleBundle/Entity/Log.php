@@ -93,7 +93,7 @@ class Log
     /**
      * @var string
      *
-     * @ORM\Column(name="ref_doc_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="ref_doc_id", type="string", length=255, nullable=true)
 	 * 
      */
     private $ref;

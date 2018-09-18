@@ -22,7 +22,7 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface {
         if(strlen($string) > 200){
             $value->setValue($encrypter->encrypt('XXXX'));  
         }else{
-            $value->setValue($encrypter->encrypt(htmlentities($value->getValue())));  
+            $value->setValue($encrypter->encrypt($value->getValue()));  
         }
         
         return $value;

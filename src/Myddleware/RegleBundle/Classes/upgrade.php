@@ -78,11 +78,6 @@ class upgradecore  {
 			// Customize update process
 			$this->beforeUpdate($output);
 			
-			// Clear every Symfony cache
-			$output->writeln('<comment>Clear Symfony cache...</comment>');
-			$this->clearSymfonycache();
-			$output->writeln('<comment>Clear Symfony cache OK</comment>');			
-			
 		 	// Add new parameters
 			$output->writeln('<comment>Update parameters...</comment>');
 			$this->updateParameters();
@@ -108,9 +103,19 @@ class upgradecore  {
 			$this->updateDatabase();
 			$output->writeln('<comment>Update database OK</comment>');
 			
+			// Clear cache
+			$output->writeln('<comment>Clear Symfony cache...</comment>');
+			$this->clearSymfonycache();
+			$output->writeln('<comment>Clear Symfony cache OK</comment>');
+			
 			// Change Myddleware version
 			$output->writeln('<comment>Finish install...</comment>');
 			$this->finishInstall();
+			
+			// Change Myddleware version
+			$output->writeln('<comment>Update version...</comment>');
+			$this->changeVersion();
+			$output->writeln('<comment>Update version OK</comment>');
 			
 			// Change Myddleware version
 			$output->writeln('<comment>Update version...</comment>');
@@ -250,11 +255,22 @@ class upgradecore  {
 	
 	// Clear Symfony cache
 	protected function clearSymfonycache() {
-		$process = new Process('rm -rf app/cache/*');
-		$process->run();
-		// executes after the command finishes
-		if (!$process->isSuccessful()) {
-			throw new ProcessFailedException($process);
+		// Update schema
+		$application = new Application($this->container->get('kernel'));
+		$application->setAutoExit(false);
+		$arguments = array(
+			'command' => 'cache:clear',
+			'--env' => $this->env,
+		);
+		
+		$input = new ArrayInput($arguments);
+		$output = new BufferedOutput();
+		$application->run($input, $output);
+
+		$content = $output->fetch();
+		// Send output to the logfile if debug mode selected
+		if (!empty($content)) {
+		  echo $content.chr(10);
 		}
 	}
 	

@@ -258,17 +258,18 @@ class documentcore {
 			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, parent_id) VALUES";		
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
-			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','$this->sourceId','$date_modified','$this->ruleMode','$this->parentId')";
+			// Source_id could contain accent
+			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->parentId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->updateStatus('New');
-			// Insert source data
+			// Insert source data			
 			return $this->insertDataTable($this->data,'S');		
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($this->message);
 			$this->typeError = 'E';
 			$this->updateStatus('Create_KO');
-			$this->logger->error($this->message);
 			return false;
 		}		
 	}
@@ -481,7 +482,8 @@ class documentcore {
 			$stmt->bindValue(":source_id", $this->document_data['source_id']);
 			$stmt->bindValue(":date_created", $this->document_data['date_created']);
 			$stmt->execute();	   				
-			$result = $stmt->fetch();						
+			$result = $stmt->fetch();
+		
 			// if id found, we stop to send an error
 			if (!empty($result['id'])) {
 				throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
@@ -545,6 +547,7 @@ class documentcore {
 					$stmt->bindValue(":date_created", $this->document_data['date_created']);
 					$stmt->execute();	   				
 					$result = $stmt->fetch();
+
 					if (!empty($result['id'])) {
 						throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
 					}	
@@ -885,7 +888,8 @@ class documentcore {
 				if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
 					$idQuery = $this->sourceData[$childRuleId['field_name_source']];
 				} else {
-					throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+					//throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+					continue;
 				}
 
 				// Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule 
@@ -1049,6 +1053,8 @@ class documentcore {
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
 			$documentData->setType($type); // Source
+			// Make sure we insert utf-8 data 			
+			$dataInsert = array_map("utf8_encode", $dataInsert );		
 			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->em->persist($documentData);
 			$this->em->flush();		
@@ -1086,45 +1092,43 @@ class documentcore {
 	
 	// Mise à jour de la table des données cibles
 	protected function updateTargetTable() {
-		if (!empty($this->sourceData)) {
-			try{			
-				// Loop on every target field and calculate the value
-				if (!empty($this->ruleFields)) {
-					foreach ($this->ruleFields as $ruleField) {
-						$value = $this->getTransformValue($this->sourceData,$ruleField);
-						if ($value === false) {
-							throw new \Exception( 'Failed to transform data.' );
-						}
-						$targetField[$ruleField['target_field_name']] = $value;
+		try{	
+			// Loop on every target field and calculate the value
+			if (!empty($this->ruleFields)) {
+				foreach ($this->ruleFields as $ruleField) {
+					$value = $this->getTransformValue($this->sourceData,$ruleField);
+					if ($value === false) {
+						throw new \Exception( 'Failed to transform data.' );
 					}
+					$targetField[$ruleField['target_field_name']] = $value;
 				}
-				// Loop on every relationship and calculate the value
-				if(isset($this->ruleRelationships)) {
-					// Récupération de l'ID target
-					foreach ($this->ruleRelationships as $ruleRelationships) {
-						$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
-						if ($value === false) {
-							throw new \Exception( 'Failed to transform relationship data.' );
-						}
-						$targetField[$ruleRelationships['field_name_target']] = $value;
-					}
-				}
-				if (!empty($targetField)) {
-					if (!$this->insertDataTable($targetField,'T')) {
-						throw new \Exception( 'Failed insert target data in the table DocumentData.' );
-					}
-				}
-				else {
-					throw new \Exception( 'No target data found. Failed to create target data. ' );
-				}
-				return true;
 			}
-			catch(Exception $e) {
-				$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-				$this->typeError = 'E';
-				$this->logger->error( $this->message );
+			// Loop on every relationship and calculate the value
+			if(isset($this->ruleRelationships)) {
+				// Récupération de l'ID target
+				foreach ($this->ruleRelationships as $ruleRelationships) {
+					$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
+					if ($value === false) {
+						throw new \Exception( 'Failed to transform relationship data.' );
+					}
+					$targetField[$ruleRelationships['field_name_target']] = $value;
+				}
 			}		
+			if (!empty($targetField)) {
+				if (!$this->insertDataTable($targetField,'T')) {
+					throw new \Exception( 'Failed insert target data in the table DocumentData.' );
+				}
+			}
+			else {
+				throw new \Exception( 'No target data found. Failed to create target data. ' );
+			}				
+			return true;
 		}
+		catch(Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->logger->error( $this->message );				
+		}			
 		return false;
 	}
 	
@@ -1709,7 +1713,8 @@ class documentcore {
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
-			$stmt->bindValue(":target_id", $target_id);
+			// Target id could contain accent
+			$stmt->bindValue(":target_id", utf8_encode($target_id));
 			$stmt->bindValue(":id", $this->id); 
 			$stmt->execute();
 			$this->message .= 'Target id : '.$target_id;
@@ -1863,9 +1868,15 @@ class documentcore {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$this->message = substr(str_replace("'","",$this->message),0,1000);
-			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES ('$now','$this->typeError','$this->message','$this->ruleId','$this->id','$this->docIdRefError','$this->jobId')";
+			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)";
 			$stmt = $this->connection->prepare($query_header); 
+			$stmt->bindValue(":created",$now);
+			$stmt->bindValue(":typeError",$this->typeError);
+			$stmt->bindValue(":message", str_replace("'","",utf8_encode($this->message)));
+			$stmt->bindValue(":rule_id",$this->ruleId);
+			$stmt->bindValue(":doc_id",$this->id);
+			$stmt->bindValue(":ref_doc_id",$this->docIdRefError);
+			$stmt->bindValue(":job_id",$this->jobId);
 			$stmt->execute();
 			$this->message = '';
 			$this->connection->commit(); // -- COMMIT TRANSACTION
