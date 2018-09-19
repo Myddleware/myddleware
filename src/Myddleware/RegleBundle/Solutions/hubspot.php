@@ -35,11 +35,12 @@ class hubspotcore extends solution
     protected $version = 'v1';
     protected $limitCall = 100;
 
-    protected $FieldsDuplicate = array(	
-										'contacts' => array('email'),
-                                      ); 
+    protected $FieldsDuplicate = array(
+        'contacts' => array('email'),
+    );
 
-    public function getFieldsLogin() {
+    public function getFieldsLogin()
+    {
         return array(
             array(
                 'name' => 'apikey',
@@ -50,10 +51,11 @@ class hubspotcore extends solution
     }
 
     // Conect to Hubspot
-    public function login($paramConnexion) {
+    public function login($paramConnexion)
+    {
         parent::login($paramConnexion);
         try {
-            $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);	
+            $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);
             if (!empty($result['exec']['message'])) {
                 throw new \Exception($result['exec']['message']);
             } elseif (empty($result)) {
@@ -61,18 +63,26 @@ class hubspotcore extends solution
             }
             $this->connexion_valide = true;
         } catch (\Exception $e) {
-            $error =  $e->getMessage();
+            $error = $e->getMessage();
             $this->logger->error($error);
             return array('error' => $error);
         }
     } // login($paramConnexion)*/
 
 
-    public function get_modules($type = 'source') {
+    public function get_modules($type = 'source')
+    {
         $modules = array(
             'companies' => 'Companies',
             'contacts' => 'Contacts',
             'deals' => 'Deals',
+            'owners' => 'Owners',
+            'deal_pipeline' => 'Deal pipeline',
+            'engagement_task' => 'Engagement Task',
+            'engagement_call' => 'Engagement Call',
+            'engagement_email' => 'Engagement Email',
+            'engagement_meeting' => 'Engagement Meeting',
+            'engagement_note' => 'Engagement Note',
         );
 
         // Module to create relationship between deals and contacts/companies
@@ -83,9 +93,13 @@ class hubspotcore extends solution
     } // get_modules()
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source') {
+    public function get_module_fields($module, $type = 'source')
+    {
         parent::get_module_fields($module, $type);
         try {
+
+            $engagement = explode("_", $module) [0] === 'engagement' ? true : false;
+            $engagement_module = explode("_", $module);
 
             // Manage custom module to deal with associate_deal
             if ($module == 'associate_deal') {
@@ -94,16 +108,114 @@ class hubspotcore extends solution
                     array('name' => 'record_id', 'label' => 'Contact or company ID', 'type' => 'varchar(36)'),
                     array('name' => 'object_type', 'label' => 'Object Type', 'type' => 'varchar(36)', 'options' => array(array('value' => 'CONTACT', 'label' => 'Contact'), array('value' => 'COMPANY', 'label' => 'Company')))
                 );
+            } else if ($module === "owners") {
+                $result = array(
+                    array('name' => 'portal Id', 'label' => 'PortalId', 'type' => 'varchar(36)'),
+                    array('name' => 'owner Id', 'label' => 'OwnerId', 'type' => 'varchar(36)'),
+                    array('name' => 'Type', 'label' => 'Type', 'type' => 'varchar(36)'),
+                    array('name' => 'firstName', 'label' => 'Firstname', 'type' => 'varchar(255)'),
+                    array('name' => 'lastName', 'label' => 'Lastname', 'type' => 'varchar(255)'),
+                    array('name' => 'email', 'label' => 'Email', 'type' => 'varchar(255)'),
+                    array('name' => 'created_at', 'label' => 'Created at', 'type' => 'varchar(36)'),
+                    array('name' => 'updated_at', 'label' => 'Updated at', 'type' => 'varchar(36)'),
+                    array('name' => 'remoteList__portalId', 'label' => 'RemoteList portal Id', 'type' => 'varchar(36)'),
+                    array('name' => 'remoteList__ownerId', 'label' => 'RemoteList owner Id', 'type' => 'varchar(36)'),
+                    array('name' => 'remoteList__remoteId', 'label' => 'RemoteList remote Id', 'type' => 'varchar(36)'),
+                    array('name' => 'remoteList__remoteType', 'label' => 'RemoteList remote Type', 'type' => 'varchar(36)'),
+                    array('name' => 'remoteList__active', 'label' => 'RemoteList active', 'type' => 'varchar(36)'),
+                );
+            } elseif ($module === "deal_pipeline") {
+                $result = array(
+                    array('name' => 'active', 'label' => 'Active', 'type' => 'varchar(1)'),
+                    array('name' => 'label', 'label' => 'Label', 'type' => 'varchar(255)'),
+                    array('name' => 'pipelineId', 'label' => 'Pipeline Id', 'type' => 'varchar(36)'),
+                    array('name' => 'stages__active', 'label' => 'Stages Active', 'type' => 'varchar(1)'),
+                    array('name' => 'stages__closedWon', 'label' => 'Stages closedWon', 'type' => 'varchar(255)'),
+                    array('name' => 'stages__displayOrder', 'label' => 'Stages displayOrder', 'type' => 'varchar(255)'),
+                    array('name' => 'stages__label', 'label' => 'Stages label', 'type' => 'varchar(255)'),
+                    array('name' => 'stages__probability', 'label' => 'Stages probability', 'type' => 'varchar(255)'),
+                    array('name' => 'stages__id', 'label' => 'Stages id', 'type' => 'varchar(36)'),
+                );
+            } elseif ($engagement) {
+                $result = array(
+                    array('name' => 'engagement__id', 'label' => 'Id', 'type' => 'varchar(36)'),
+                    array('name' => 'engagement__portalId', 'label' => 'Portal id', 'type' => 'varchar(36)'),
+                    array('name' => 'engagement__createdAt', 'label' => 'Created at', 'type' => 'varchar(255)'),
+                    array('name' => 'engagement__lastUpdated', 'label' => 'Last updated', 'type' => 'varchar(255)'),
+                    array('name' => 'engagement__timestamp', 'label' => 'Timestamp', 'type' => 'varchar(255)'),
+                    array('name' => 'associations__contactIds', 'label' => 'Contact Ids', 'type' => 'varchar(36)'),
+                    array('name' => 'associations__companyIds', 'label' => 'Company Ids', 'type' => 'varchar(36)'),
+                    array('name' => 'associations__dealIds', 'label' => 'Deal Ids', 'type' => 'varchar(36)'),
+                );
+
+                switch ($engagement_module[1]) {
+                    case 'note':
+                        array_push($result,
+                            array('name' => 'metadata__body', 'label' => 'Note body', 'type' => 'text')
+                        );
+                        break;
+                     case 'call':
+                        array_push($result,
+                            array('name' => 'metadata__toNumber', 'label' => 'To number', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__fromNumber', 'label' => 'From number', 'type' => 'varchar(25)'),
+                            array('name' => 'metadata__status', 'label' => 'Status', 'type' => 'varchar(36)', 'options' => array(array('value' => 'COMPLETED', 'label' => 'COMPLETED'))),
+                            array('name' => 'metadata__externalId', 'label' => 'External Id', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__durationMilliseconds', 'label' => 'Duration Milliseconds', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__externalAccountId', 'label' => 'External Account Id', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__recordingUrl', 'label' => 'RecordingUrl', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__body', 'label' => 'Body', 'type' => 'text'),
+                            array('name' => 'metadata__disposition', 'label' => 'Disposition', 'type' => 'varchar(255)')
+                        );
+                        break;
+                    case 'task':
+                        array_push($result,
+                            //metadata
+                            array('name' => 'metadata__body', 'label' => 'Body', 'type' => 'text'),
+                            array('name' => 'metadata__status', 'label' => 'Status', 'type' => 'varchar(255)', 'options' => array(
+																																array('value' => 'NOT_STARTED', 'label' => 'NOT_STARTED'), 
+																																array('value' => 'COMPLETED', 'label' => 'COMPLETED'), 
+																																array('value' => 'IN_PROGRESS', 'label' => 'IN_PROGRESS'), 
+																																array('value' => 'WAITING', 'label' => 'WAITING'), 
+																																array('value' => 'DEFERRED', 'label' => 'DEFERRED'))),
+                            array('name' => 'metadata__subject', 'label' => 'Subject', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__forObjectType', 'label' => 'Object Type', 'type' => 'varchar(255)', 'options' => array(array('value' => 'CONTACT', 'label' => 'Contact'), array('value' => 'COMPANY', 'label' => 'Company')))
+                        );
+                        break;
+
+                    case 'meeting':
+                        array_push($result,
+                            //metadata
+                            array('name' => 'metadata__body', 'label' => 'Body', 'type' => 'text'),
+                            array('name' => 'metadata__startTime', 'label' => 'startTime', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__endTime', 'label' => 'endTime', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__title', 'label' => 'Title', 'type' => 'varchar(255)')
+                        );
+                        break;
+
+                    case 'email':
+                        array_push($result,
+                            //metadata
+                            array('name' => 'metadata__from__email', 'label' => 'From email', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__from__firstName', 'label' => 'From firstName', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__from__lastName', 'label' => 'From lastName', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__to__email', 'label' => 'To email', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__cc', 'label' => 'CC', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__bcc', 'label' => 'BCC', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__subject', 'label' => 'Subject', 'type' => 'varchar(255)'),
+                            array('name' => 'metadata__html', 'label' => 'HTML', 'type' => 'text'),
+                            array('name' => 'metadata__text', 'label' => 'Text', 'type' => 'text')
+                        );
+                        break;
+                }
             } else {
                 $result = $this->call($this->url . 'properties/' . $this->version . '/' . $module . '/properties?hapikey=' . $this->paramConnexion['apikey']);
                 $result = $result['exec'];
             }
-
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
             } elseif (empty($result)) {
                 throw new \Exception('No fields returned by Hubspot. ');
-            }
+            }		
             // Add each field in the right list (relate fields or normal fields)
             foreach ($result as $field) {
                 // Field not editable can't be display on the target side
@@ -114,7 +226,10 @@ class hubspotcore extends solution
                     continue;
                 }
                 // If the fields is a relationship
-                if (substr($field['name'], -2) == 'id') {
+                if (
+						strtoupper(substr($field['name'], -2)) == 'ID'
+					 or	strtoupper(substr($field['name'], -3)) == 'IDS'
+				) {
                     $this->fieldsRelate[$field['name']] = array(
                         'label' => $field['label'],
                         'type' => 'varchar(36)',
@@ -148,10 +263,11 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read_last($param) {
+    public function read_last($param)
+    {
         try {
-            $module = $this->getsingular($param['module']);
 
+            $module = $this->getsingular($param['module']);
             if (!empty($param['fields'])) { //add properties for request
                 $property = "";
                 // Get the reference date field name
@@ -167,15 +283,31 @@ class hubspotcore extends solution
                     $property .= "&property=lastmodifieddate";
                     $id = "vid";
                     $modified = "lastmodifieddate";
+                } else if ($module === "owners") {
+                    $version = "v2";
+                    $properties = "properties";
+                    $id = "portalId";
+                    $modified = "updatedAt";
+                } else if ($module === "deals") {
+                    $version = "v1";
+                    $properties = "properties";
+                    $id = "pipelineId";
+                    $modified = "updatedAt";
+                } else if ($module === "engagements") {
+                    $version = "v1";
+                    $properties = "properties";
+                    $id = "id";
+                    $modified = "lastUpdated";
                 }
                 foreach ($param['fields'] as $fields) {
                     $property .= "&" . $properties . "=" . $fields;
                 }
+
             }
 
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $module . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);				
+                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $module . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
                     if ($module === "companies" || $module === "deal") {
                         $url_id = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
@@ -197,24 +329,62 @@ class hubspotcore extends solution
                 } else if ($module === "contact") {
                     $url = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/all?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
                     $resultQuery = $this->call($url);
+                } else if ($module === "owners") {
+                    $url = $this->url . $param['module'] . "/" . $version . "/" . $module . "?hapikey=" . $this->paramConnexion['apikey'];
+                    $resultQuery = $this->call($url);
+                } else if ($module === "deals") {
+                    $url = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];
+                    $resultQuery = $this->call($url);
+                } else if ($module === "engagements") {
+                    $url = $this->url . $module . "/" . $version . "/" . $module . "/paged?hapikey=" . $this->paramConnexion['apikey'];
+                    $resultQuery = $this->call($url);
+                    $resultQuery = $this->selectType($resultQuery, [$param['module']][0], true);
                 }
 
-                $identifyProfilesId = $resultQuery['exec'][$param['module']][0][$id];
-
-                //on ajoute l'email car elle se trouve dans la proprietes
-                $identifyProfiles = $resultQuery['exec'][$param['module']][0]['properties'];
+                if ($module === "companies" || $module === "deal" || $module === "contact") {
+                    $identifyProfilesId = $resultQuery['exec'][$param['module']][0][$id];
+                    $identifyProfiles = $resultQuery['exec'][$param['module']][0]['properties'];
+                } else if ($module === "engagements") {
+                    $identifyProfilesId = $resultQuery['engagement'][$id];
+                    $identifyProfiles = $resultQuery;
+                } else if ($module === "deals" || $module === "owners") {
+                    $identifyProfilesId = $resultQuery["exec"][0][$id];
+                    $identifyProfiles = $resultQuery["exec"][0];
+                }
             }
+
             // If no result
             if (empty($resultQuery)) {
                 $result['done'] = false;
             } else {
                 foreach ($param['fields'] as $field) {
-                    if (isset($identifyProfiles[$field])) {
-                        $result['values'][$field] = $identifyProfiles[$field]['value'];
-                    }
+                    $fieldStructure = explode('__', $field);  //si on des fields avec la format metadata__body
+	
+					if (sizeof($fieldStructure) > 2) {							
+						$result['values'][$field] = $identifyProfiles[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]];							
+					} elseif (sizeof($fieldStructure) > 1) {
+						if (isset($identifyProfiles[$fieldStructure[0]][$fieldStructure[1]])) {
+							// In case of associations with several entries we take only the first one (example associations__contactIds)
+							if (is_array($identifyProfiles[$fieldStructure[0]][$fieldStructure[1]])) {
+								$result['values'][$field] = current($identifyProfiles[$fieldStructure[0]][$fieldStructure[1]]);				
+							} else {				
+								$result['values'][$field] = $identifyProfiles[$fieldStructure[0]][$fieldStructure[1]];
+							}
+						}		
+					} else {			
+						if (isset($identifyProfiles["properties"][$field])) {
+							$result['values'][$field] = $identifyProfiles["properties"] [$field]['value'];
+						// The structure is different for the module owner 
+						} elseif (
+								$module === "owners"
+							and isset($identifyProfiles[$field])
+						) {
+							$result['values'][$field] = $identifyProfiles[$field];
+						} else { // Hubspot doesn't return empty field but Myddleware need it
+							$result['values'][$field] = '';	
+						}
+					}
                 }
-                $result['values']['id'] = $identifyProfilesId; // Add id
-                $result['values']['date_modified'] = date('Y-m-d H:i:s', $identifyProfiles[$modified]['value']/1000); // add date modified
                 if (!empty($result['values'])) {
                     $result['done'] = true;
                 }
@@ -231,12 +401,12 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read($param) {
+    public function read($param)
+    {
         try {
             $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             $module = $this->getsingular($param['module']);
-
-            // Get the reference date field name
+            // Get the reference date field name			
             if ($module === "companies" || $module === "deal") {
                 $version = $module === "companies" ? "v2" : "v1";
                 if (!empty($param['fields'])) { //add properties for request
@@ -246,7 +416,7 @@ class hubspotcore extends solution
                     }
                     $property .= "&properties=hs_lastmodifieddate";
                 }
-				$property .= '&count='.$this->limitCall;
+                $property .= '&count=' . $this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
 
@@ -258,19 +428,33 @@ class hubspotcore extends solution
                     }
                     $property .= "&property=lastmodifieddate";
                 }
-				$property .= '&count='.$this->limitCall;
+                $property .= '&count=' . $this->limitCall;
                 $url_modified = $this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+            } else if ($module === "owners") {
+                $version = "v2";
+                $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1";
+            } else if ($module === "deals") {
+                $version = "v1";
+                $url_modified = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];
+            } else if ($module === "engagements") {
+                $version = "v1";
+                $url_modified = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'];
             }
-
-            if ($dateRefField === "ModificationDate") {	
+		
+            if ($dateRefField === "ModificationDate") {
                 $resultCall = $this->call($url_modified);
+                if ($module === "engagements") {
+                    //fields with double level ex: engagement__module_id
+                    $resultCall = $this->selectType($resultCall, $param['module'], false);
+                }
                 $resultQuery = $this->getresultQuery($resultCall, $url_modified, $param);
             } else if ($dateRefField === "CreationDate") {
                 $resultCall = $this->call($ur_created);
                 $resultQuery = $this->getresultQuery($resultCall, $ur_created, $param);
             }
-            $resultQuery = $resultQuery['exec'];		
+
+            $resultQuery = $resultQuery['exec'];
             if ($module === "companies" || $module === "deal") {
                 $identifyProfiles = $resultQuery['results'];
                 $modified = "hs_lastmodifieddate";
@@ -279,35 +463,82 @@ class hubspotcore extends solution
                 $identifyProfiles = $resultQuery[$param['module']];
                 $modified = "lastmodifieddate";
                 $id = 'vid';
-            }		
-			$result = array();		
+            } else if ($module === "engagements") {
+                $identifyProfiles = $resultQuery[$param['module']];
+                $modified = "lastUpdated";
+                $id = 'id';
+            } else if ($module === "deals" || $module === "owners") {
+                $identifyProfiles = $resultQuery[$param['module']];
+                $modified = "updatedAt";
+                $id = $module === "deals" ? 'id' : 'portalId';
+            }
+            $result = array();
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {
-				if (!empty($identifyProfiles)) {
-					// First record is the more recent
-					$timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
-					// Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
-					$result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000)+1);
-					foreach ($identifyProfiles as $identifyProfile) {
-						$records = null;
-						foreach ($param['fields'] as $field) {
-							if (isset($identifyProfile["properties"] [$field])) {
-								$records[$field] = $identifyProfile["properties"] [$field]['value'];
-							}
-							$records['date_modified'] =  date('Y-m-d H:i:s', $identifyProfile["properties"][$modified]['value']/1000); // add date modified
-							$records['id'] = $identifyProfile[$id];
-							$result['values'][$identifyProfile[$id]] = $records;
-						}
-					}
-					$result['count'] = count($result['values']);
-				}
+                if (!empty($identifyProfiles)) {
+                    if ($module === "engagements") {
+                        // First record is the more recent
+                        $timestampLastmodified = $identifyProfiles[0]["engagement"][$modified];
+                    } elseif ($module === "owners") {
+                        $timestampLastmodified = $identifyProfiles[0][$modified];
+                    } else {
+                        // First record is the more recent
+                        $timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
+                    }
+
+                    // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
+                    $result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000) + 1);					
+                    foreach ($identifyProfiles as $identifyProfile) {
+                        $records = null;
+                        foreach ($param['fields'] as $field) {
+                            $fieldStructure = explode('__', $field);  //si on des fields avec la format metadata__body	
+                            // In case of 3 structures, example : metadata__from__email
+							if (sizeof($fieldStructure) > 2) {							
+								$records[$field] = $identifyProfile[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]];							
+							} elseif (sizeof($fieldStructure) > 1) {
+                                if (isset($identifyProfile[$fieldStructure[0]][$fieldStructure[1]])) {
+									// In case of associations with several entries we take only the first one (example associations__contactIds)
+									if (is_array($identifyProfile[$fieldStructure[0]][$fieldStructure[1]])) {
+										$records[$field] = current($identifyProfile[$fieldStructure[0]][$fieldStructure[1]]);				
+									} else {				
+										$records[$field] = $identifyProfile[$fieldStructure[0]][$fieldStructure[1]];
+									}
+                                }		
+                            } else {			
+                                if (isset($identifyProfile["properties"][$field])) {
+                                    $records[$field] = $identifyProfile["properties"] [$field]['value'];
+								// The structure is different for the module owner 
+								} elseif (
+										$module === "owners"
+									and isset($identifyProfile[$field])
+								) {
+									$records[$field] = $identifyProfile[$field];
+                                } else { // Hubspot doesn't return empty field but Myddleware need it
+									 $records[$field] = '';	
+								}
+                            }
+//                            $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile["engagement"][$modified] / 1000); // add date modified
+                            $records['date_modified'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000); // add date modified
+                            if ($module === "engagements") {
+                                $records['id'] = $identifyProfile["engagement"][$id];
+                                $result['values'][$identifyProfile["engagement"][$id]] = $records;
+                            } else {
+                                $records['id'] = $identifyProfile[$id];
+                                $result['values'][$identifyProfile[$id]] = $records;
+                            }
+                            $result['count'] = count($result['values']);
+                        }
+                    }
+                }
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }		
-        return $result;
+        }	
+// print_r($result);		
+// return null;		
+		return $result;
     }// end function read
 
     /**
@@ -450,6 +681,30 @@ class hubspotcore extends solution
 
 
     /**
+     * Select les engagements+6+
+     * 9***.selon le type
+     * @param $results
+     * @param $module
+     * @return array
+     */
+    public function selectType($results, $module, $first = true) {
+        $moduleResult = explode('_', $module);
+        $resultFinal = [];
+
+        foreach ($results["exec"]["results"] as $result) {
+            if ($result['engagement']['type'] == strtoupper($moduleResult[1]))
+                array_push($resultFinal, $result);
+        }
+        if ($first) {
+            $resultFinal = count($resultFinal) > 0 ? $resultFinal[0] : null;
+        } else {
+            $resultFinal["exec"] = $resultFinal;
+        }
+        return $resultFinal;
+
+    }
+
+    /**
      * Function for get data
      * @param $request
      * @param $url
@@ -457,7 +712,7 @@ class hubspotcore extends solution
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param) {	
+    protected function getresultQuery($request, $url, $param) {
         if ($param['module'] === "contacts") {
             if ($request['exec']['time-offset'] === 0) {
                 $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
@@ -475,21 +730,31 @@ class hubspotcore extends solution
                     $result['exec'][$param['module']] = $merge;
                 } while ($timeOffset >= $this->dateTimeToTimestamp($param["date_ref"]));
             }
-        } elseif ($param['module'] === "deals" || $param['module'] === "companies") {
+        } elseif ($param['module'] === "companies") {
             if ($request['exec']['offset'] === $request['exec']['total']) {
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
             } else {
                 $offset = $request['exec']['offset'];
                 $total = $request['exec']['total'];
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-                do {				
-                    $resultOffset = $this->call($url . "&offset=" . $offset);				
-                    $offset = $resultOffset['exec']['offset'];				
+                do {
+                    $resultOffset = $this->call($url . "&offset=" . $offset);
+                    $offset = $resultOffset['exec']['offset'];
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
                     $merge = array_merge($result['exec']['results'], $resultOffsetTemps);
                     $result['exec']['results'] = $merge;
                 } while ($offset !== $total);
             }
+        } elseif ($param['module'] === "owners") {
+            $result = $this->getresultQueryBydate($request["exec"], $param, false);
+        } elseif (
+				$param['module'] === "engagement_call" 
+			 or $param['module'] === "engagement_task"
+			 or $param['module'] === "engagement_email"
+			 or $param['module'] === "engagement_note"
+			 or $param['module'] === "engagement_meeting"
+			 or $param['module'] === "deal_pipeline") {
+            $result = $this->getresultQueryBydate($request['exec'], $param, false);
         }
         return $result;
     }
@@ -505,6 +770,18 @@ class hubspotcore extends solution
      */
     protected function getresultQueryBydate($request, $param, $offset) {
         $param['module'] === "deals" || $param['module'] === "companies" ? $modified = "hs_lastmodifieddate" : $modified = "lastmodifieddate";
+        if ($param['module'] === "owners") {
+            $modified = "updatedAt";
+        } else if (
+				$param['module'] === "engagement_call" 
+			 or $param['module'] === "engagement_task" 
+			 or $param['module'] === "engagement_note" 
+			 or $param['module'] === "engagement_meeting" 
+			 or $param['module'] === "engagement_email") {
+            $modified = "lastUpdated";
+        } else if ($param['module'] === "deal_pipeline") {
+            $modified = "updatedAt";
+        }
         if (!$offset) {
             if ($param['module'] === "deals" || $param['module'] === "companies") {
                 $module = 'results';
@@ -517,21 +794,64 @@ class hubspotcore extends solution
             $result = [];
         }
         $dateTimestamp = $this->dateTimeToTimestamp($param["date_ref"]);
-        if (!empty($request)) {
-			foreach ($request as $key => $item) {
-				if ($item['properties'][$modified]['value'] > $dateTimestamp) {
-					if (!$offset) {
-						array_push($result['exec'][$module], $item);
-					} else {
-						array_push($result, $item);
-					}
-				}
-			}
-		}
+        if (
+				$param['module'] === "engagement_call" 
+			 or	$param['module'] === "engagement_task" 
+			 or	$param['module'] === "engagement_meeting" 
+			 or	$param['module'] === "engagement_note" 
+			 or $param['module'] === "engagement_email") {
+            if (!empty($request)) {
+                foreach ($request as $key => $item) {
+                    if ($item['engagement'][$modified] > $dateTimestamp) {
+                        if (!$offset) {
+                            array_push($result['exec'][$param['module']], $item);
+                        } else {
+                            array_push($result, $item);
+                        }
+                    }
+                }
+            }
+        } else if ($param['module'] === "deal_pipeline") {
+            if (!empty($request)) {
+                foreach ($request as $key => $item) {
+                    if ($item[$modified] > $dateTimestamp) {
+                        if (!$offset) {
+                            array_push($result['exec'][$module], $item);
+                        } else {
+                            array_push($result, $item);
+                        }
+                    }
+                }
+            }
+        } else if ($param['module'] === "owners") {
+            if (!empty($request)) {
+                foreach ($request as $key => $item) {
+                    if ($item[$modified] > $dateTimestamp) {
+                        if (!$offset) {
+                            array_push($result['exec'][$module], $item);
+                        } else {
+                            array_push($result, $item);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (!empty($request)) {
+                foreach ($request as $key => $item) {
+                    if ($item['properties'][$modified]['value'] > $dateTimestamp) {
+                        if (!$offset) {
+                            array_push($result['exec'][$module], $item);
+                        } else {
+                            array_push($result, $item);
+                        }
+                    }
+                }
+            }
+        }
         return $result;
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+// Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToTimestamp($dateTime) {
         $date = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
         return $date->getTimestamp() * 1000;
@@ -569,6 +889,18 @@ class hubspotcore extends solution
             return "companies";
         } else if ($name === "deals" OR $name === "associate_deal") {
             return "deal";
+        } else if ($name === "owners") {
+            return "owners";
+        } else if ($name === "deal_pipeline") {
+            return "deals";
+        } else if (
+				$name === "engagement_call" 
+			 or	$name === "engagement_task" 
+			 or $name === "engagement_email" 
+			 or $name === "engagement_note"
+			 or $name === "engagement_meeting"
+		) {
+            return "engagements";
         }
     }
 
@@ -578,7 +910,9 @@ class hubspotcore extends solution
      * @param  array $args Assoc array of parameters to be passed
      * @return array          Assoc array of decoded result
      */
-    protected function call($url, $method = 'GET', $args = array(), $timeout = 120) {
+    protected
+    function call($url, $method = 'GET', $args = array(), $timeout = 120)
+    {
         try {
             if (function_exists('curl_init') && function_exists('curl_setopt')) {
                 $ch = curl_init($url);

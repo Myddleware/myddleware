@@ -1129,39 +1129,41 @@ class rulecore {
 				$searchDuplicate[$docId] = array('concatKey' => $concatduplicate, 'source_date_modified' => $rowTransformedData['source_date_modified']);
 			}
 		}
+	
 		// Recherche de doublons dans le tableau searchDuplicate
-		// Obtient une liste de colonnes
-		foreach ($searchDuplicate as $key => $row) {
-			$concatKey[$key]  = $row['concatKey'];
-			$source_date_modified[$key] = $row['source_date_modified'];
-		}
+		if (!empty($searchDuplicate)) {
+			// Obtient une liste de colonnes
+			foreach ($searchDuplicate as $key => $row) {
+				$concatKey[$key]  = $row['concatKey'];
+				$source_date_modified[$key] = $row['source_date_modified'];
+			}
 
-		// Trie les données par volume décroissant, edition croissant
-		// Ajoute $data en tant que dernier paramètre, pour trier par la clé commune
-		array_multisort($concatKey, SORT_ASC, $source_date_modified, SORT_ASC, $searchDuplicate);
-				
-		// Si doublon charge on charge les documents doublons, on récupère les plus récents et on les passe à transformed sans les envoyer à la cible. 
-		// Le plus ancien est envoyé.
-		$previous = '';	
-		foreach ($searchDuplicate as $key => $value) {
-			if (empty($previous)) {
+			// Trie les données par volume décroissant, edition croissant
+			// Ajoute $data en tant que dernier paramètre, pour trier par la clé commune
+			array_multisort($concatKey, SORT_ASC, $source_date_modified, SORT_ASC, $searchDuplicate);
+					
+			// Si doublon charge on charge les documents doublons, on récupère les plus récents et on les passe à transformed sans les envoyer à la cible. 
+			// Le plus ancien est envoyé.
+			$previous = '';	
+			foreach ($searchDuplicate as $key => $value) {
+				if (empty($previous)) {
+					$previous = $value['concatKey'];
+					continue;
+				}
+				// Si doublon
+				if ($value['concatKey'] == $previous) {	
+					$param['id_doc_myddleware'] = $key;
+					$param['jobId'] = $this->jobId;
+					$doc = new document($this->logger, $this->container, $this->connection, $param);
+					$doc->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
+					$doc->setTypeError('W');
+					$doc->updateStatus('Transformed');
+					// Suppression du document dans l'envoi
+					unset($transformedData[$key]);
+				}
 				$previous = $value['concatKey'];
-				continue;
-			}
-			// Si doublon
-			if ($value['concatKey'] == $previous) {	
-				$param['id_doc_myddleware'] = $key;
-				$param['jobId'] = $this->jobId;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
-				$doc->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
-				$doc->setTypeError('W');
-				$doc->updateStatus('Transformed');
-				// Suppression du document dans l'envoi
-				unset($transformedData[$key]);
-			}
-			$previous = $value['concatKey'];
+			}			
 		}
-		
 		if (!empty($transformedData)) {
 			return $transformedData;
 		}
