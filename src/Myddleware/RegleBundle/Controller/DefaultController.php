@@ -1138,7 +1138,7 @@ class DefaultControllerCore extends Controller
             // retourne un tableau prêt à l'emploi
             $target = $this->createListeParamsRule(
                 $request->request->get('champs'), // Fields
-                $$request->request->get('formules'), // Formula
+                $request->request->get('formules'), // Formula
                 '' // Params flux
             );
 
