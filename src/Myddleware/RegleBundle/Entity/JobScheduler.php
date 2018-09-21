@@ -89,7 +89,7 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="paramName1", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramName1", type="string", length=50, nullable=true)
 	 * 
      */
     private $paramName1;
@@ -97,7 +97,7 @@ class JobScheduler
 	/**
      * @var string
      *
-     * @ORM\Column(name="paramValue1", type="text", nullable=false)
+     * @ORM\Column(name="paramValue1", type="text", nullable=true)
 	 * 
      */
     private $paramValue1;
@@ -105,7 +105,7 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="paramName2", type="string", length=50, nullable=false)
+     * @ORM\Column(name="paramName2", type="string", length=50, nullable=true)
 	 * 
      */
     private $paramName2;
@@ -113,7 +113,7 @@ class JobScheduler
 	 /**
      * @var string
      *
-     * @ORM\Column(name="paramValue2", type="text", nullable=false)
+     * @ORM\Column(name="paramValue2", type="text", nullable=true)
 	 * 
      */
     private $paramValue2;

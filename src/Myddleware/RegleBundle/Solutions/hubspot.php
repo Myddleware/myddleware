@@ -147,6 +147,8 @@ class hubspotcore extends solution
                     array('name' => 'engagement__portalId', 'label' => 'Portal id', 'type' => 'varchar(36)'),
                     array('name' => 'engagement__createdAt', 'label' => 'Created at', 'type' => 'varchar(255)'),
                     array('name' => 'engagement__lastUpdated', 'label' => 'Last updated', 'type' => 'varchar(255)'),
+                    array('name' => 'engagement__ownerId', 'label' => 'OwnerId', 'type' => 'varchar(36)'),
+                    array('name' => 'engagement__type', 'label' => 'Type', 'type' => 'varchar(255)'),
                     array('name' => 'engagement__timestamp', 'label' => 'Timestamp', 'type' => 'varchar(255)'),
                     array('name' => 'associations__contactIds', 'label' => 'Contact Ids', 'type' => 'varchar(36)'),
                     array('name' => 'associations__companyIds', 'label' => 'Company Ids', 'type' => 'varchar(36)'),
@@ -458,17 +460,17 @@ class hubspotcore extends solution
                 $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             } else if ($module === "owners") {
                 $version = "v2";
-                $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1";
+                $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
             } else if ($module === "deals") {
                 $version = "v1";
                 $url_modified = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];
             } else if ($module === "engagements") {
                 $version = "v1";
                 $url_modified = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'];
-            }
-		
+            }	
+
             if ($dateRefField === "ModificationDate") {
-                $resultCall = $this->call($url_modified);
+                $resultCall = $this->call($url_modified);				
                 if ($module === "engagements") {
                     //fields with double level ex: engagement__module_id
                     $resultCall = $this->selectType($resultCall, $param['module'], false);
@@ -498,7 +500,7 @@ class hubspotcore extends solution
 				} elseif ($param['module'] === "deal_pipeline_stage"){
 					$id = "stageId";
 				} else {
-					$id = $module === "deals" ? 'id' : 'portalId';
+					$id = $module === "deals" ? 'id' : 'ownerId';
 				}
 				// if the module is deal_pipeline_stage, we have called the module deal_pipeline and we generate the stage module from ths call
 				// A pipeline can have several stages. We format the result to be compatible with the following code
@@ -517,7 +519,7 @@ class hubspotcore extends solution
 						}
 					}					
 				} else {
-					$identifyProfiles = $resultQuery[$param['module']];
+					$identifyProfiles = $resultQuery[$param['module']];				
                 }
 				$modified = "updatedAt";
             }
@@ -544,7 +546,7 @@ class hubspotcore extends solution
                     }
 						
                     // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
-                    $result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000) + 1);					
+                    $result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000) + 1);						
                     foreach ($identifyProfiles as $identifyProfile) {						
                         $records = null;
                         foreach ($param['fields'] as $field) {
@@ -577,8 +579,7 @@ class hubspotcore extends solution
                                 } else { // Hubspot doesn't return empty field but Myddleware need it
 									 $records[$field] = '';	
 								}
-                            }
-							
+                            }								
 							// Format date modified
                             $records['date_modified'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000); // add date modified
                             if ($module === "engagements") {
@@ -595,7 +596,7 @@ class hubspotcore extends solution
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }		
+        }	
 		return $result;
     }// end function read
 
@@ -849,7 +850,8 @@ class hubspotcore extends solution
 			 or	$param['module'] === "engagement_task" 
 			 or	$param['module'] === "engagement_meeting" 
 			 or	$param['module'] === "engagement_note" 
-			 or $param['module'] === "engagement_email") {
+			 or $param['module'] === "engagement_email"
+		) {
             if (!empty($request)) {
                 foreach ($request as $key => $item) {
                     if ($item['engagement'][$modified] > $dateTimestamp) {
@@ -875,7 +877,7 @@ class hubspotcore extends solution
 					}
                 }
             }
-        } elseif ($param['module'] === "owners") {
+        } elseif ($param['module'] === "owners") {			
             if (!empty($request)) {
                 foreach ($request as $key => $item) {
                     if ($item[$modified] > $dateTimestamp) {

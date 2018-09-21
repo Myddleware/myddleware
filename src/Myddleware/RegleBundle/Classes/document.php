@@ -503,7 +503,7 @@ class documentcore {
 			
 			// Check predecessor in the child rule
 			// Get all child rules 
-			$sqlGetChildRules = "	SELECT 
+			$sqlGetChildRules = "	SELECT DISTINCT
 										RuleRelationShip.rule_id 											
 									FROM Document
 										INNER JOIN RuleRelationShip
