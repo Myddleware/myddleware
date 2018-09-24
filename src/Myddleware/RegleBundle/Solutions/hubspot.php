@@ -33,12 +33,26 @@ class hubspotcore extends solution
 
     protected $url = 'https://api.hubapi.com/';
     protected $version = 'v1';
-    protected $limitCall = 100;
 
     protected $FieldsDuplicate = array(
         'contacts' => array('email'),
     );
 
+	protected $modifiedField = array(
+									'companies' 	=> 'hs_lastmodifieddate',
+									'deal' 			=> 'hs_lastmodifieddate',
+									'contact' 		=> 'lastmodifieddate',
+									'owners' 		=> 'updatedAt',
+									'deals' 		=> 'updatedAt',
+									'engagements' 	=> 'lastUpdated'
+								);
+								
+	protected $defaultLimit = array(
+									'companies' => 100,  // 250 max
+									'deal' => 100,  // 250 max
+									'contact' => 1, // 100 max
+								);
+						
     public function getFieldsLogin(){
         return array(
             array(
@@ -259,7 +273,7 @@ class hubspotcore extends solution
             return false;
         }
     } // get_module_fields($module)
-
+	
     /**
      * Get the last data in the application
      * @param $param
@@ -273,61 +287,38 @@ class hubspotcore extends solution
 		
             if (!empty($param['fields'])) { //add properties for request
                 $property = "";
+				$version = $this->getVersion($param, $module);
+				// Property label is different for contacts
+				$properties = ( $module === "contact" ? "property" : "properties" );
+				// Get the id field label
+				$id = $this->getIdField($param, $module);
+				// Get modified field label
+				$modified = $this->modifiedField[$module];
+				
                 // Get the reference date field name
                 if ($module === "companies" || $module === "deal") {
-                    $properties = "properties";
-                    $property .= "&properties=hs_lastmodifieddate";
-                    $id = $module === "companies" ? "companyId" : "dealId";
-                    $version = $module === "companies" ? "v2" : "v1";
-                    $modified = "hs_lastmodifieddate";
-
+                    $property .= "&" . $properties. "=hs_lastmodifieddate";
                 } else if ($module === "contact") {
-                    $properties = "property";
-                    $property .= "&property=lastmodifieddate";
-                    $id = "vid";
-                    $modified = "lastmodifieddate";
-                } else if ($module === "owners") {
-                    $version = "v2";
-                    $properties = "properties";
-                    $id = "portalId";
-                    $modified = "updatedAt";
-                } else if ($module === "deals") {
-                    $version = "v1";
-                    $properties = "properties";				
-                    $id = "pipelineId";
-                    $modified = "updatedAt";
-					if ($param['module'] === "deal_pipeline") {
-						$id = "pipelineId";
-					} elseif ($param['module'] === "deal_pipeline_stage"){
-						$id = "stageId";
-					} else {
-						$id = $module === "deals" ? 'id' : 'portalId';
-					}
-                } else if ($module === "engagements") {
-                    $version = "v1";
-                    $properties = "properties";
-                    $id = "id";
-                    $modified = "lastUpdated";
-                }
+                    $property .= "&" . $properties. "=lastmodifieddate";
+                } 
                 foreach ($param['fields'] as $fields) {
                     $property .= "&" . $properties . "=" . $fields;
                 }
-
             }
 
             if (!empty($param['query'])) {
                 if (!empty($param['query']['email'])) {
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/" . $module . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/" . $version . "/" . $module . "/email/" . $param['query']['email'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property);
                 } elseif (!empty($param['query']['id'])) {
                     if ($module === "companies" || $module === "deal") {
                         $url_id = $this->url . $param['module'] . "/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'] . "&count=1" . $property;
                     } else if ($module === "contact") {
-                        $url_id = $this->url . $param['module'] . "/v1/" . $module . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                        $url_id = $this->url . $param['module'] . "/" . $version . "/" . $module . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'] . $property;
                     }
                     $resultQuery = $this->call($url_id);
                 } else {
                     //@todo  get word for request
-                    $resultQuery = $this->call($this->url . $param['module'] . "/v1/search/query?q=hubspot" . "&count=1&hapikey=" . $this->paramConnexion['apikey'] . $property);
+                    $resultQuery = $this->call($this->url . $param['module'] . "/" . $version . "/search/query?q=hubspot" . "&count=1&hapikey=" . $this->paramConnexion['apikey'] . $property);
                 }
                 $identifyProfiles = $resultQuery['exec']['properties'];
                 $identifyProfilesId = $resultQuery['exec'][$id];
@@ -431,9 +422,20 @@ class hubspotcore extends solution
 
             $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             $module = $this->getsingular($param['module']);
+			// Get the version label
+			$version = $this->getVersion($param, $module);
+			// Get the id field label
+			$id = $this->getIdField($param, $module);
+			// Get modified field label
+			$modified = $this->modifiedField[$module];
+			// Get default limit 
+			$limit = $this->defaultLimit[$module];
+			if (empty($limit)) {
+				$limit = $param['limit'];
+			}
+			
             // Get the reference date field name			
             if ($module === "companies" || $module === "deal") {
-                $version = $module === "companies" ? "v2" : "v1";
                 if (!empty($param['fields'])) { //add properties for request
                     $property = "";
                     foreach ($param['fields'] as $fields) {
@@ -441,7 +443,7 @@ class hubspotcore extends solution
                     }
                     $property .= "&properties=hs_lastmodifieddate";
                 }
-                $property .= '&count=' . $this->limitCall;
+                $property .= '&count=' . $limit;
                 $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
                 $ur_created = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
 
@@ -453,17 +455,14 @@ class hubspotcore extends solution
                     }
                     $property .= "&property=lastmodifieddate";
                 }
-                $property .= '&count=' . $this->limitCall;
-                $url_modified = $this->url . $param['module'] . "/v1/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
-                $ur_created = $this->url . $param['module'] . "/v1/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                $property .= '&count=' . $limit;
+                $url_modified = $this->url . $param['module'] . "/" . $version . "/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
+                $ur_created = $this->url . $param['module'] . "/" . $version . "/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             } else if ($module === "owners") {
-                $version = "v2";
                 $url_modified = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
             } else if ($module === "deals") {
-                $version = "v1";
                 $url_modified = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];
             } else if ($module === "engagements") {
-                $version = "v1";
                 $url_modified = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'];
             }	
 
@@ -482,24 +481,11 @@ class hubspotcore extends solution
             $resultQuery = $resultQuery['exec'];
             if ($module === "companies" || $module === "deal") {
                 $identifyProfiles = $resultQuery['results'];
-                $modified = "hs_lastmodifieddate";
-                $id = $module === "companies" ? "companyId" : "dealId";
             } else if ($module === "contact") {
                 $identifyProfiles = $resultQuery[$param['module']];
-                $modified = "lastmodifieddate";
-                $id = 'vid';
             } else if ($module === "engagements") {
                 $identifyProfiles = $resultQuery[$param['module']];
-                $modified = "lastUpdated";
-                $id = 'id';
             } else if ($module === "deals" || $module === "owners") {
-				if ($param['module'] === "deal_pipeline") {
-					$id = "pipelineId";
-				} elseif ($param['module'] === "deal_pipeline_stage"){
-					$id = "stageId";
-				} else {
-					$id = $module === "deals" ? 'id' : 'ownerId';
-				}
 				// if the module is deal_pipeline_stage, we have called the module deal_pipeline and we generate the stage module from ths call
 				// A pipeline can have several stages. We format the result to be compatible with the following code
 				if ($param['module'] === "deal_pipeline_stage"){
@@ -519,7 +505,6 @@ class hubspotcore extends solution
 				} else {
 					$identifyProfiles = $resultQuery[$param['module']];				
                 }
-				$modified = "updatedAt";
             }
 
             $result = array();
@@ -595,6 +580,8 @@ class hubspotcore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
         }	
+echo '<pre>';
+print_r($result);		
 		return $result;
     }// end function read
 
@@ -760,6 +747,49 @@ class hubspotcore extends solution
         return $resultFinal;
 
     }
+		
+	// Get version label
+	protected function getVersion($param, $module) {
+		if (
+				$module === "companies"
+			 or $module === "owners"	
+		) {
+			return "v2";
+		}
+		return "v1";
+	}
+	
+	//Get the id label depending of the module
+	protected function getIdField($param, $module) {
+		switch ($module) {
+			case "companies":
+				return "companyId";
+				break;
+			case "deal":
+				return "dealId";
+				break;
+			case "contact":
+				return "vid";
+				break;
+			case "owners":
+				return "ownerId";
+				break;
+			case "deals":
+				if ($param['module'] === "deal_pipeline") {
+					return "pipelineId";
+				} elseif ($param['module'] === "deal_pipeline_stage"){
+					return "stageId";
+				} else {
+					return 'id';
+				}
+				break;
+			case "engagements":
+				return "id";
+				break;
+			default:
+			   return "id";
+		}
+	}
 
     /**
      * Function for get data
