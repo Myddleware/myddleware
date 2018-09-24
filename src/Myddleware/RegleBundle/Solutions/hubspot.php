@@ -39,8 +39,7 @@ class hubspotcore extends solution
         'contacts' => array('email'),
     );
 
-    public function getFieldsLogin()
-    {
+    public function getFieldsLogin(){
         return array(
             array(
                 'name' => 'apikey',
@@ -51,8 +50,7 @@ class hubspotcore extends solution
     }
 
     // Conect to Hubspot
-    public function login($paramConnexion)
-    {
+    public function login($paramConnexion) {
         parent::login($paramConnexion);
         try {
             $result = $this->call($this->url . 'properties/' . $this->version . '/contacts/properties?hapikey=' . $this->paramConnexion['apikey']);
@@ -70,8 +68,7 @@ class hubspotcore extends solution
     } // login($paramConnexion)*/
 
 
-    public function get_modules($type = 'source')
-    {
+    public function get_modules($type = 'source') {
         $modules = array(
             'companies' => 'Companies',
             'contacts' => 'Contacts',
@@ -94,8 +91,7 @@ class hubspotcore extends solution
     } // get_modules()
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source')
-    {
+    public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);
         try {
 
@@ -112,7 +108,6 @@ class hubspotcore extends solution
             } else if ($module === "owners") {
                 $result = array(
                     array('name' => 'portal Id', 'label' => 'PortalId', 'type' => 'varchar(36)'),
-                    array('name' => 'owner Id', 'label' => 'OwnerId', 'type' => 'varchar(36)'),
                     array('name' => 'Type', 'label' => 'Type', 'type' => 'varchar(36)'),
                     array('name' => 'firstName', 'label' => 'Firstname', 'type' => 'varchar(255)'),
                     array('name' => 'lastName', 'label' => 'Lastname', 'type' => 'varchar(255)'),
@@ -270,9 +265,10 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read_last($param)
-    {
+    public function read_last($param) {
         try {		
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             $module = $this->getsingular($param['module']);
 		
             if (!empty($param['fields'])) { //add properties for request
@@ -428,9 +424,11 @@ class hubspotcore extends solution
      * @param $param
      * @return mixed
      */
-    public function read($param)
-    {
+    public function read($param) {
         try {
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
             $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             $module = $this->getsingular($param['module']);
             // Get the reference date field name			
@@ -971,9 +969,7 @@ class hubspotcore extends solution
      * @param  array $args Assoc array of parameters to be passed
      * @return array          Assoc array of decoded result
      */
-    protected
-    function call($url, $method = 'GET', $args = array(), $timeout = 120)
-    {
+    protected function call($url, $method = 'GET', $args = array(), $timeout = 120) {
         try {
             if (function_exists('curl_init') && function_exists('curl_setopt')) {
                 $ch = curl_init($url);
