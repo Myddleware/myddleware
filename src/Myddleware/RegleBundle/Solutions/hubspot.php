@@ -50,7 +50,8 @@ class hubspotcore extends solution
 	protected $defaultLimit = array(
 									'companies' => 100,  // 250 max
 									'deal' => 100,  // 250 max
-									'contact' => 1, // 100 max
+									'contact' => 20, // 100 max
+									'engagements' => 2, // 100 max
 								);
 						
     public function getFieldsLogin(){
@@ -292,8 +293,6 @@ class hubspotcore extends solution
 				$properties = ( $module === "contact" ? "property" : "properties" );
 				// Get the id field label
 				$id = $this->getIdField($param, $module);
-				// Get modified field label
-				$modified = $this->modifiedField[$module];
 				
                 // Get the reference date field name
                 if ($module === "companies" || $module === "deal") {
@@ -343,8 +342,8 @@ class hubspotcore extends solution
                 }		
 
                 if ($module === "engagements") {
-                    $identifyProfilesId = $resultQuery['engagement'][$id];
-                    $identifyProfiles = $resultQuery;
+                    $identifyProfilesId = $resultQuery['exec']['engagement'][0][$id];
+                    $identifyProfiles = $resultQuery['exec']['engagement'][0];
 				// if the module is deal_pipeline_stage, we have called the module deal_pipeline and we generate the stage module from ths call
 				// A pipeline can have several stages. We format the result to be compatible with the following code
 				} elseif ($param['module'] === "deal_pipeline_stage") {
@@ -427,17 +426,18 @@ class hubspotcore extends solution
 			// Get the id field label
 			$id = $this->getIdField($param, $module);
 			// Get modified field label
-			$modified = $this->modifiedField[$module];
+			$modifiedFieldName = $this->modifiedField[$module];
 			// Get default limit 
-			$limit = $this->defaultLimit[$module];
-			if (empty($limit)) {
+			if (!empty($this->defaultLimit[$module])) {
+				$limit = $this->defaultLimit[$module];
+			} elseif (!empty($param['limit'])) {
 				$limit = $param['limit'];
 			}
 			
             // Get the reference date field name			
+			$property = "";
             if ($module === "companies" || $module === "deal") {
                 if (!empty($param['fields'])) { //add properties for request
-                    $property = "";
                     foreach ($param['fields'] as $fields) {
                         $property .= "&properties=" . $fields;
                     }
@@ -449,7 +449,6 @@ class hubspotcore extends solution
 
             } else if ($module === "contact") {
                 if (!empty($param['fields'])) { //add properties for request
-                    $property = "";
                     foreach ($param['fields'] as $fields) {
                         $property .= "&property=" . $fields;
                     }
@@ -463,27 +462,30 @@ class hubspotcore extends solution
             } else if ($module === "deals") {
                 $url_modified = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];
             } else if ($module === "engagements") {
-                $url_modified = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'];
+                $property .= '&count=' . $limit;
+				$url_modified = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'] . $property;
             }	
 
             if ($dateRefField === "ModificationDate") {
-                $resultCall = $this->call($url_modified);				
+                $resultCall = $this->call($url_modified);
+                $resultQuery = $this->getresultQuery($resultCall, $url_modified, $param, $modifiedFieldName);
                 if ($module === "engagements") {
-                    //fields with double level ex: engagement__module_id
-                    $resultCall = $this->selectType($resultCall, $param['module'], false);
+                    // Fileter on the right engagement type
+                    $resultQuery = $this->selectType($resultQuery, $param['module'], false);						
                 }
-                $resultQuery = $this->getresultQuery($resultCall, $url_modified, $param);
             } else if ($dateRefField === "CreationDate") {
                 $resultCall = $this->call($ur_created);
-                $resultQuery = $this->getresultQuery($resultCall, $ur_created, $param);
+                $resultQuery = $this->getresultQuery($resultCall, $ur_created, $param, $modifiedFieldName);
             }
 
             $resultQuery = $resultQuery['exec'];
-            if ($module === "companies" || $module === "deal") {
+            if (
+					$module === "companies" 
+				 or	$module === "deal"
+				 or	$module === "engagements"
+			) {
                 $identifyProfiles = $resultQuery['results'];
             } else if ($module === "contact") {
-                $identifyProfiles = $resultQuery[$param['module']];
-            } else if ($module === "engagements") {
                 $identifyProfiles = $resultQuery[$param['module']];
             } else if ($module === "deals" || $module === "owners") {
 				// if the module is deal_pipeline_stage, we have called the module deal_pipeline and we generate the stage module from ths call
@@ -515,9 +517,9 @@ class hubspotcore extends solution
                 if (!empty($identifyProfiles)) {
                     if ($module === "engagements") {
                         // First record is the more recent
-                        $timestampLastmodified = $identifyProfiles[0]["engagement"][$modified];
+                        $timestampLastmodified = $identifyProfiles[0]["engagement"][$modifiedFieldName];
                     } elseif ($module === "owners") {
-                        $timestampLastmodified = $identifyProfiles[0][$modified];
+                        $timestampLastmodified = $identifyProfiles[0][$modifiedFieldName];
                     // No date for module deal_pipeline
 					} elseif (	
 							$param['module'] === "deal_pipeline"
@@ -525,7 +527,7 @@ class hubspotcore extends solution
                         $timestampLastmodified = 0;
                     } else {
                         // First record is the more recent
-                        $timestampLastmodified = $identifyProfiles[0]["properties"][$modified]["value"];
+                        $timestampLastmodified = $identifyProfiles[0]["properties"][$modifiedFieldName]["value"];
                     }
 						
                     // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
@@ -580,8 +582,7 @@ class hubspotcore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
         }	
-echo '<pre>';
-print_r($result);		
+// print_r($result);		
 		return $result;
     }// end function read
 
@@ -733,18 +734,14 @@ print_r($result);
      */
     public function selectType($results, $module, $first = true) {
         $moduleResult = explode('_', $module);
-        $resultFinal = [];
-
-        foreach ($results["exec"]["results"] as $result) {
-            if ($result['engagement']['type'] == strtoupper($moduleResult[1]))
-                array_push($resultFinal, $result);
+        $resultFinal = array();
+        // Delete all engagement not in the type searched
+		foreach ($results["exec"]["results"] as $key => $record) {
+            if ($record['engagement']['type'] != strtoupper($moduleResult[1])) {
+                unset($results["exec"]["results"][$key]);
+			}
         }
-        if ($first) {
-            $resultFinal = count($resultFinal) > 0 ? $resultFinal[0] : null;
-        } else {
-            $resultFinal["exec"] = $resultFinal;
-        }
-        return $resultFinal;
+        return $results;
 
     }
 		
@@ -799,42 +796,68 @@ print_r($result);
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param) {
+    protected function getresultQuery($request, $url, $param, $modifiedFieldName) {		
+		// Module contact
         if ($param['module'] === "contacts") {
-            if ($request['exec']['time-offset'] === 0) {
+			// If there is no more data to read
+            if (empty($request['exec']['has-more'])) {
                 $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
-            } else {
-                $timeOffset = $request['exec']['time-offset'];
+            // If we have to make several calls to read all the data
+			} else {
+				// Get the offset contact id
                 $vidOffset = $request['exec']['vid-offset'];
                 $result = $this->getresultQueryBydate($request['exec'][$param['module']], $param, false);
-
                 do {
-                    $resultOffset = $this->call($url . "&timeOffset=" . $timeOffset . "&vidOffset=" . $vidOffset);
+                    // Call the next page
+					$resultOffset = $this->call($url . "&vidOffset=" . $vidOffset);
                     $timeOffset = $resultOffset['exec']['time-offset'];
-                    $vidOffset = $resultOffset['exec']['vid-offset'];
+                    $vidOffset = $resultOffset['exec']['vid-offset'];	
+					// Format results
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);
-                    $merge = array_merge($result['exec'][$param['module']], $resultOffsetTemps);
+                    // Add result to the main array
+					$merge = array_merge($result['exec'][$param['module']], $resultOffsetTemps);
                     $result['exec'][$param['module']] = $merge;
-                } while ($timeOffset >= $this->dateTimeToTimestamp($param["date_ref"]));
+				// Call again only if we haven't reached the reference date
+                } while ($timeOffset > $this->dateTimeToTimestamp($param["date_ref"]));
             }
-        } elseif ($param['module'] === "companies") {
-            if ($request['exec']['offset'] === $request['exec']['total']) {
+		// Module Company or Engagement	
+        } elseif (
+					$param['module'] === "companies"
+				 or substr($param['module'],0,10) === "engagement"	
+		) {
+// echo '0'.chr(10);
+// print_r($request);
+// die();			
+            // if ($request['exec']['offset'] === $request['exec']['total']) {
+			// If there is no more data to read	
+            if (
+					empty($request['exec']['hasMore'])  // Engagement module
+				and empty($request['exec']['has-more']) // Company module
+			) {			
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
             } else {
+				// If we have to call the API several times
                 $offset = $request['exec']['offset'];
                 $total = $request['exec']['total'];
                 $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-                do {
+                do {				
                     $resultOffset = $this->call($url . "&offset=" . $offset);
                     $offset = $resultOffset['exec']['offset'];
+                    // $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
-                    $merge = array_merge($result['exec']['results'], $resultOffsetTemps);
-                    $result['exec']['results'] = $merge;
+// print_r($resultOffset);
+// print_r($resultOffsetTemps);
+// print_r($result);
+					$merge = array_merge($result['exec']['results'], $resultOffsetTemps);
+					$result['exec']['results'] = $merge;
                 } while ($offset !== $total);
             }
         } else {
             $result = $this->getresultQueryBydate($request['exec'], $param, false);
         }
+// echo '<pre>';
+// print_r($result);
+// die();				
         return $result;
     }
 
@@ -861,8 +884,14 @@ print_r($result);
         } else if ($param['module'] === "deal_pipeline") {
             $modified = "updatedAt";
         }
+// print_r($param);
+// die();		
         if (!$offset) {
-            if ($param['module'] === "deals" || $param['module'] === "companies") {
+            if (
+					$param['module'] === "deals" 
+				 or $param['module'] === "companies"
+				 or substr($param['module'],0,10) === "engagement"	
+			) {
                 $module = 'results';
                 $result['exec'][$module] = [];
             } else {
@@ -884,8 +913,11 @@ print_r($result);
                 foreach ($request as $key => $item) {
                     if ($item['engagement'][$modified] > $dateTimestamp) {
                         if (!$offset) {
-                            array_push($result['exec'][$param['module']], $item);
+// echo 'A'.chr(10);							
+                            // array_push($result['exec'][$param['module']], $item);
+                            array_push($result['exec']['results'], $item);
                         } else {
+// echo 'B'.chr(10);							
                             array_push($result, $item);
                         }
                     }
@@ -933,7 +965,9 @@ print_r($result);
                     }
                 }
             }
-        }		
+        }
+// print_r($result);		
+// die();		
         return $result;
     }
 
