@@ -59,10 +59,10 @@ class hubspotcore extends solution {
 								);
 								
 	protected $defaultLimit = array(
-									'companies' => 100,  // 250 max
-									'deal' => 100,  // 250 max
-									'contact' => 20, // 100 max
-									'engagements' => 20, // 100 max
+									'companies' => 2,  // 250 max
+									'deal' => 2,  // 250 max
+									'contact' => 2, // 100 max
+									'engagements' => 2, // 100 max
 								);
 						
     public function getFieldsLogin(){
@@ -315,9 +315,7 @@ class hubspotcore extends solution {
 		return $result; 
     }// end function read_last
 
-	protected function getUrl($param) {
-// print_r($param);		
-
+	protected function getUrl($param) {	
 		// Format the module name
 		$module = $this->formatModuleName($param['module']);
 		// Get the version label
@@ -328,13 +326,11 @@ class hubspotcore extends solution {
 			$url = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
 		} elseif ($module === "deals") {
 			$url = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];	
-		} else {
-// print_r($param);		
+		} else {		
 			// calculate the difference between date_ref and now
 			$now = new DateTime("now");
 			$dateRef = new DateTime($param['date_ref']);
 			$interval = $dateRef->diff($now);
-	// echo $interval->format('%a');
 
 			// Get default limit 
 			if (!empty($this->defaultLimit[$module])) {
@@ -345,6 +341,7 @@ class hubspotcore extends solution {
 			// ModificationDate or CreationDate
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
+			$property = "";
 			// If date_ref is more than 30 days in the past, we will call all records for the module not only the recent ones
 			if ($interval->format('%a') >= 30 ) {
 				switch ($module) {
@@ -357,7 +354,7 @@ class hubspotcore extends solution {
 								$property .= "&properties=" . $fields;
 							}
 						}
-						$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&limit=' . $limit;
 						break;
 					case "contact":
 						if (!empty($param['fields'])) {// Add fields in the call
@@ -412,8 +409,6 @@ class hubspotcore extends solution {
 				}	   
 			} 
 		}
-// echo $url.chr(10);		
-// die();
 		return $url;
 	}
 	
@@ -431,8 +426,6 @@ class hubspotcore extends solution {
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 			
-// print_r($module);
-// print_r($param);
 			// Get the id field label
 			$id = $this->getIdField($param, $module);
 			// Get modified field label
@@ -441,23 +434,13 @@ class hubspotcore extends solution {
 			
 			// Créer une fonction qui génère l'URL et si la différence entre la date de reference et aujourd'hui > 30 jours alors on fait l'appel sur tous les enregistrements.
 			$url = $this->getUrl($param);
-// echo $url.chr(10);				
-// die('test');	
 
-            // if ($dateRefField === "ModificationDate") {
-                // $resultCall = $this->call($url_modified);
-                $resultCall = $this->call($url);
-// print_r($resultCall);
-// die('resultCall');				
-                $resultQuery = $this->getresultQuery($resultCall, $url, $param, $modifiedFieldName);
-                if ($module === "engagements") {
-                    // Fileter on the right engagement type
-                    $resultQuery = $this->selectType($resultQuery, $param['module'], false);						
-                }
-            // } else if ($dateRefField === "CreationDate") {
-                // $resultCall = $this->call($ur_created);
-                // $resultQuery = $this->getresultQuery($resultCall, $ur_created, $param, $modifiedFieldName);
-            // }
+			$resultCall = $this->call($url);				
+			$resultQuery = $this->getresultQuery($resultCall, $url, $param);
+			if ($module === "engagements") {
+				// Fileter on the right engagement type
+				$resultQuery = $this->selectType($resultQuery, $param['module'], false);						
+			}
 
             $resultQuery = $resultQuery['exec'];
             if (
@@ -494,10 +477,7 @@ class hubspotcore extends solution {
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
-            } else {
-// print_r($identifyProfiles);
-// print_r(current($identifyProfiles));
-// die();				
+            } else {			
                 if (!empty($identifyProfiles)) {
                     if ($module === "engagements") {
                         // First record is the more recent
@@ -566,8 +546,6 @@ class hubspotcore extends solution {
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
         }	
-// print_r($result);	
-// return null;	
 		return $result;
     }// end function read
 
@@ -781,7 +759,7 @@ class hubspotcore extends solution {
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param, $modifiedFieldName) {		
+    protected function getresultQuery($request, $url, $param) {		
 		// Module contact
         if ($param['module'] === "contacts") {
 			// If there is no more data to read
@@ -798,25 +776,35 @@ class hubspotcore extends solution {
                 do {
                     // Call the next page
 					$resultOffset = $this->call($url . "&vidOffset=" . $vidOffset);
-                    $timeOffset = $resultOffset['exec']['time-offset'];
+                    // $timeOffset = $resultOffset['exec']['time-offset'];
                     $vidOffset = $resultOffset['exec']['vid-offset'];	
 					// Format results
-                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);
+                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);			
                     // Add result to the main array
 					$merge = array_merge($result['exec'][$param['module']], $resultOffsetTemps);
                     $result['exec'][$param['module']] = $merge;
 				// Call again only if we haven't reached the reference date
-                } while ($timeOffset > $this->dateTimeToTimestamp($param["date_ref"]));
+                } while (
+						!empty($resultOffset['exec']['has-more']) // No more data to read
+					AND !empty($resultOffsetTemps)				  // Date_ref has been reached (no result in getresultQueryBydate)
+				);
             }
 		// Module Company or Engagement	
         } elseif (
 					$param['module'] === "companies"
 				 or substr($param['module'],0,10) === "engagement"	
-		) {
-// echo '0'.chr(10);
-// print_r($request);
-// die();			
-            // if ($request['exec']['offset'] === $request['exec']['total']) {
+		) {	
+			// The response key can be different depending the API call
+			if ($param['module'] === "companies") {
+				if (strpos($url,'paged')!==false) {
+					$key = $param['module'];
+				} else {
+					$key = 'results';
+				}
+			} else {
+				$key = 'results';
+			}
+
 			// If there is no more data to read	
             if (
 				(
@@ -824,39 +812,29 @@ class hubspotcore extends solution {
 					and empty($request['exec']['has-more']) // Company module
 				)
 				or $this->readLast == true  // Only one call if read_last is requested
-			) {		
-                $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-// print_r($result);				
-// echo 'ZZZZ';
-// die();			
-            } else {
+			) {				
+                $result = $this->getresultQueryBydate($request['exec'][$key], $param, false);
+            } else {			
 				// If we have to call the API several times
                 $offset = $request['exec']['offset'];
                 // $total = $request['exec']['total'];
-                $result = $this->getresultQueryBydate($request['exec']['results'], $param, false);
-                do {				
+                $result = $this->getresultQueryBydate($request['exec'][$key], $param, false);
+                do {					
                     $resultOffset = $this->call($url . "&offset=" . $offset);
                     $offset = $resultOffset['exec']['offset'];
-                    // $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
-                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec']['results'], $param, true);
-// print_r($resultOffset);
-// print_r($resultOffsetTemps);
-// print_r($resultOffset);
-// echo 'A'.chr(10);
+                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$key], $param, true);
 					$merge = array_merge($result['exec']['results'], $resultOffsetTemps);
 					$result['exec']['results'] = $merge;
-                // } while ($offset !== $total);
                 } while (
-						!empty($resultOffset['exec']['hasMore'])
-					 or	!empty($resultOffset['exec']['has-more'])
+						!empty($resultOffsetTemps)	// Date_ref has been reached (no result in getresultQueryBydate)
+					and	(	!empty($resultOffset['exec']['hasMore']) // No more data to read
+						 or	!empty($resultOffset['exec']['has-more'])
+						)
 				);
             }
         } else {
             $result = $this->getresultQueryBydate($request['exec'], $param, false);
-        }
-// echo '<pre>';
-// print_r($result);
-// die();				
+        }				
         return $result;
     }
 
@@ -882,9 +860,7 @@ class hubspotcore extends solution {
             $modified = "lastUpdated";
         } else if ($param['module'] === "deal_pipeline") {
             $modified = "updatedAt";
-        }
-// print_r($param);
-// die();		
+        }		
         if (!$offset) {
             if (
 					$param['module'] === "deals" 
@@ -911,12 +887,10 @@ class hubspotcore extends solution {
             if (!empty($request)) {
                 foreach ($request as $key => $item) {
                     if ($item['engagement'][$modified] > $dateTimestamp) {
-                        if (!$offset) {
-// echo 'A'.chr(10);							
+                        if (!$offset) {							
                             // array_push($result['exec'][$param['module']], $item);
                             array_push($result['exec']['results'], $item);
-                        } else {
-// echo 'B'.chr(10);							
+                        } else {							
                             array_push($result, $item);
                         }
                     }
@@ -951,8 +925,9 @@ class hubspotcore extends solution {
         } else {
             if (!empty($request)) {
 				// An entry result exists for the module deals
-				if ($param['module'] === "deals") {
-					$request = $request['results'];
+				if ($param['module'] === "deals") {				
+					// The response key can be different : deals for deal/paged/ and result for recent/modified/
+					$request = (isset($request['deals']) ? $request['deals'] : $request['results']);
 				}
                 foreach ($request as $key => $item) {
                     if ($item['properties'][$modified]['value'] > $dateTimestamp) {
@@ -964,9 +939,7 @@ class hubspotcore extends solution {
                     }
                 }
             }
-        }
-// print_r($result);		
-// die();		
+        }	
         return $result;
     }
 
