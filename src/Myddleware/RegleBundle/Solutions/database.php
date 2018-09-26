@@ -28,7 +28,7 @@ namespace Myddleware\RegleBundle\Solutions;
 use Symfony\Bridge\Monolog\Logger;
 use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
+use Symfony\Component\Form\Extension\Core\Type\TextType; 
 
 class databasecore extends solution { 
 

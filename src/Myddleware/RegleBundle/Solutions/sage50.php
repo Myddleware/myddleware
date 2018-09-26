@@ -22,6 +22,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sage50core extends solution
 {
@@ -122,7 +123,7 @@ class sage50core extends solution
         return array(
             array(
                 'name' => 'login',
-                'type' => 'text',
+                'type' => TextType::class,
                 'label' => 'solution.fields.login'
             ),
             array(
@@ -132,7 +133,7 @@ class sage50core extends solution
             ),
             array(
                 'name' => 'host',
-                'type' => 'text',
+                'type' => TextType::class,
                 'label' => 'solution.fields.host'
             )
         );

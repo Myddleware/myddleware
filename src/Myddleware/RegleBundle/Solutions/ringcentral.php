@@ -61,8 +61,8 @@ class ringcentralcore  extends solution {
                             'label' => 'solution.fields.username'
                         ),
 					array(
-                            'name' => PasswordType::class,
-                            'type' => 'password',
+                            'name' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
 					array(

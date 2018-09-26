@@ -48,7 +48,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'moodle',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'file',				'active' => 1,'source' => 1,'target' => 0),
-									array('name' => 'shopapplication',	'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'shopapplication',	'active' => 0,'source' => 1,'target' => 1),
 									array('name' => 'sagelive',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'microsoftsql',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'ringcentral',		'active' => 1,'source' => 1,'target' => 0),
