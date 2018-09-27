@@ -342,7 +342,7 @@ class hubspotcore extends solution {
 			
 			// Créer une fonction qui génère l'URL et si la différence entre la date de reference et aujourd'hui > 30 jours alors on fait l'appel sur tous les enregistrements.
 			$url = $this->getUrl($param);
-			$resultCall = $this->call($url);				
+			$resultCall = $this->call($url);		
 			$resultQuery = $this->getresultQuery($resultCall, $url, $param);
 			if ($module === "engagements") {
 				// Fileter on the right engagement type
@@ -408,8 +408,10 @@ class hubspotcore extends solution {
                         foreach ($param['fields'] as $field) {
                             $fieldStructure = explode('__', $field);  //si on des fields avec la format metadata__body	
                             // In case of 3 structures, example : metadata__from__email
-							if (sizeof($fieldStructure) > 2) {							
-								$records[$field] = $identifyProfile[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]];							
+							if (sizeof($fieldStructure) > 2) {			
+								if (isset($identifyProfile[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]])) {
+									$records[$field] = $identifyProfile[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]];
+								}
 							} elseif (sizeof($fieldStructure) > 1) {
                                 if (isset($identifyProfile[$fieldStructure[0]][$fieldStructure[1]])) {
 									// In case of associations with several entries we take only the first one (example associations__contactIds)
@@ -432,10 +434,12 @@ class hubspotcore extends solution {
 									and isset($identifyProfile[$field])
 								) {
 									$records[$field] = $identifyProfile[$field];
-                                } else { // Hubspot doesn't return empty field but Myddleware need it
-									 $records[$field] = '';	
-								}
-                            }								
+                                }
+                            }	
+							// Hubspot doesn't return empty field but Myddleware need it
+							if (!isset($records[$field])) {	
+								$records[$field] = '';	
+							}							
 							// Format date modified
                             $records['date_modified'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000); // add date modified
                             if ($module === "engagements") {
@@ -452,7 +456,7 @@ class hubspotcore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }	
+        }			
 		return $result;
     }// end function read
 
