@@ -59,10 +59,10 @@ class hubspotcore extends solution {
 								);
 								
 	protected $defaultLimit = array(
-									'companies' => 2,  // 250 max
-									'deal' => 2,  // 250 max
-									'contact' => 2, // 100 max
-									'engagements' => 2, // 100 max
+									'companies' => 20,  // 100 max
+									'deal' => 20,  // 100 max
+									'contact' => 20, // 100 max
+									'engagements' => 20, // 100 max
 								);
 						
     public function getFieldsLogin(){
@@ -315,103 +315,7 @@ class hubspotcore extends solution {
 		return $result; 
     }// end function read_last
 
-	protected function getUrl($param) {	
-		// Format the module name
-		$module = $this->formatModuleName($param['module']);
-		// Get the version label
-		$version = $this->getVersion($param, $module);
-		
-		// Module with only one url
-		if ($module === "owners") {
-			$url = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
-		} elseif ($module === "deals") {
-			$url = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];	
-		} else {		
-			// calculate the difference between date_ref and now
-			$now = new DateTime("now");
-			$dateRef = new DateTime($param['date_ref']);
-			$interval = $dateRef->diff($now);
 
-			// Get default limit 
-			if (!empty($this->defaultLimit[$module])) {
-				$limit = $this->defaultLimit[$module];
-			} elseif (!empty($param['limit'])) {
-				$limit = $param['limit'];
-			}
-			// ModificationDate or CreationDate
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
-			$property = "";
-			// If date_ref is more than 30 days in the past, we will call all records for the module not only the recent ones
-			if ($interval->format('%a') >= 30 ) {
-				switch ($module) {
-					case (
-							$module === "companies" 
-						 or	$module === "deal"
-						) :
-						if (!empty($param['fields'])) { // Add fields in the call
-							foreach ($param['fields'] as $fields) {
-								$property .= "&properties=" . $fields;
-							}
-						}
-						$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&limit=' . $limit;
-						break;
-					case "contact":
-						if (!empty($param['fields'])) {// Add fields in the call
-							foreach ($param['fields'] as $fields) {
-								$property .= "&property=" . $fields;
-							}
-						}
-						$url = $this->url . $param['module'] . "/" . $version . "/lists/all/" . $param['module'] . "/all" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
-						break;
-					case "engagements":
-						$url = $this->url . $module . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . '&limit=' . $limit;
-						break;
-					default:
-						throw new \Exception('No API call for search more than 30 days in the past with the module '.$module);
-				}
-			} else {
-				switch ($module) {
-					case (
-							$module === "companies" 
-						 or	$module === "deal"
-						) :
-						if (!empty($param['fields'])) { // Add fields in the call
-							foreach ($param['fields'] as $fields) {
-								$property .= "&properties=" . $fields;
-							}
-						}
-						// Calls are different for creation or modification
-						if ($dateRefField === "ModificationDate") {
-							$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
-						} else {
-							$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
-						}
-						break;
-					case "contact":
-						if (!empty($param['fields'])) { // Add fields in the call
-							foreach ($param['fields'] as $fields) {
-								$property .= "&property=" . $fields;
-							}
-						}
-						// Calls are different for creation or modification
-						if ($dateRefField === "ModificationDate") {
-							$url = $this->url . $param['module'] . "/" . $version . "/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
-						} else {
-							$url = $this->url . $param['module'] . "/" . $version . "/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
-						}
-						break;
-					case "engagements":
-						$url = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'] . '&count=' . $limit;
-						break;
-					default:
-					   throw new \Exception('No API call with the module '.$module);
-				}	   
-			} 
-		}
-		return $url;
-	}
-	
     /**
      * Function read data
      * @param $param
@@ -430,11 +334,14 @@ class hubspotcore extends solution {
 			$id = $this->getIdField($param, $module);
 			// Get modified field label
 			$modifiedFieldName = $this->modifiedField[$module];
-			
+
+			// In case we search a specific record, we set a date_ref far in the past to be sure to not filter the result by date
+			if (!empty($param['query']['id'])) {
+				$param['date_ref'] = '1970-01-01 00:00:00';			
+			}
 			
 			// Créer une fonction qui génère l'URL et si la différence entre la date de reference et aujourd'hui > 30 jours alors on fait l'appel sur tous les enregistrements.
 			$url = $this->getUrl($param);
-
 			$resultCall = $this->call($url);				
 			$resultQuery = $this->getresultQuery($resultCall, $url, $param);
 			if ($module === "engagements") {
@@ -493,7 +400,7 @@ class hubspotcore extends solution {
                         // First record is the more recent
                         $timestampLastmodified = current($identifyProfiles)["properties"][$modifiedFieldName]["value"];
                     }
-						
+					
                     // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
                     $result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000) + 1);						
                     foreach ($identifyProfiles as $identifyProfile) {						
@@ -688,6 +595,122 @@ class hubspotcore extends solution {
     }// end function update
 
 
+	protected function getUrl($param) {	
+		// Format the module name
+		$module = $this->formatModuleName($param['module']);
+		// Get the version label
+		$version = $this->getVersion($param, $module);
+		
+		// In case we search a specific record
+		if (!empty($param['query']['id'])) {
+			// Calls can be differents depending on the modules
+			switch ($module) {
+				case "deal":
+					return $this->url . "deals/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'];
+					break; 
+				case "contact":
+					return $this->url . "contacts/" . $version . "/" . $module . "/vid/" . $param['query']['id'] . "/profile?hapikey=" . $this->paramConnexion['apikey'];
+					break;
+				case "deals":
+					return $this->url . "deals/" . $version . "/pipelines/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'];
+					break;
+				default:
+					return $this->url . $module . "/" . $version . "/" . $module . "/" . $param['query']['id'] . "?hapikey=" . $this->paramConnexion['apikey'];
+			}
+		}
+
+		// Module with only one url
+		if ($module === "owners") {
+			$url = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
+		} elseif ($module === "deals") {
+			$url = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];	
+		} else {		
+			// calculate the difference between date_ref and now
+			$now = new DateTime("now");
+			$dateRef = new DateTime($param['date_ref']);
+			$interval = $dateRef->diff($now);
+
+			// Get default limit 
+			if (!empty($this->defaultLimit[$module])) {
+				$limit = $this->defaultLimit[$module];
+			} elseif (!empty($param['limit'])) {
+				$limit = $param['limit'];
+			}
+			// ModificationDate or CreationDate
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			
+			$property = "";
+			// If date_ref is more than 30 days in the past, we will call all records for the module not only the recent ones
+			if ($interval->format('%a') >= 30 ) {
+				switch ($module) {
+					case (
+							$module === "companies" 
+						 or	$module === "deal"
+						) :
+						if (!empty($param['fields'])) { // Add fields in the call
+							foreach ($param['fields'] as $fields) {
+								$property .= "&properties=" . $fields;
+							}
+						}
+						$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&limit=' . $limit;
+						break;
+					case "contact":
+						if (!empty($param['fields'])) {// Add fields in the call
+							foreach ($param['fields'] as $fields) {
+								$property .= "&property=" . $fields;
+							}
+						}
+						$url = $this->url . $param['module'] . "/" . $version . "/lists/all/" . $param['module'] . "/all" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						break;
+					case "engagements":
+						$url = $this->url . $module . "/" . $version . "/" . $module . "/paged" . "?hapikey=" . $this->paramConnexion['apikey'] . '&limit=' . $limit;
+						break;
+					default:
+						throw new \Exception('No API call for search more than 30 days in the past with the module '.$module);
+				}
+			} else {
+				switch ($module) {
+					case (
+							$module === "companies" 
+						 or	$module === "deal"
+						) :
+						if (!empty($param['fields'])) { // Add fields in the call
+							foreach ($param['fields'] as $fields) {
+								$property .= "&properties=" . $fields;
+							}
+						}
+						// Calls are different for creation or modification
+						if ($dateRefField === "ModificationDate") {
+							$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/modified/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						} else {
+							$url = $this->url . $param['module'] . "/" . $version . "/" . $module . "/recent/created/" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						}
+						break;
+					case "contact":
+						if (!empty($param['fields'])) { // Add fields in the call
+							foreach ($param['fields'] as $fields) {
+								$property .= "&property=" . $fields;
+							}
+						}
+						// Calls are different for creation or modification
+						if ($dateRefField === "ModificationDate") {
+							$url = $this->url . $param['module'] . "/" . $version . "/lists/recently_updated/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						} else {
+							$url = $this->url . $param['module'] . "/" . $version . "/lists/all/" . $param['module'] . "/recent" . "?hapikey=" . $this->paramConnexion['apikey'] . $property . '&count=' . $limit;
+						}
+						break;
+					case "engagements":
+						$url = $this->url . $module . "/" . $version . "/" . $module . "/recent/modified" . "?hapikey=" . $this->paramConnexion['apikey'] . '&count=' . $limit;
+						break;
+					default:
+					   throw new \Exception('No API call with the module '.$module);
+				}	   
+			} 
+		}
+		return $url;
+	}
+	
+	
     /**
      * Select les engagements+6+
      * 9***.selon le type
@@ -762,6 +785,12 @@ class hubspotcore extends solution {
     protected function getresultQuery($request, $url, $param) {		
 		// Module contact
         if ($param['module'] === "contacts") {
+			// In case on the search for a specific record is requested we add a dimension to the result array
+			if (!empty($param['query']['id'])) {
+				$requestTmp['exec'][$param['module']][0] = $request['exec'];
+				$request = $requestTmp;
+			}
+			
 			// If there is no more data to read
             if (
 					empty($request['exec']['has-more'])
@@ -804,7 +833,11 @@ class hubspotcore extends solution {
 			} else {
 				$key = 'results';
 			}
-
+			// In case on the search for a specific record is requested we add a dimension to the result array
+			if (!empty($param['query']['id'])) {
+				$requestTmp['exec'][$key][0] = $request['exec'];
+				$request = $requestTmp;
+			}		
 			// If there is no more data to read	
             if (
 				(
@@ -833,8 +866,21 @@ class hubspotcore extends solution {
 				);
             }
         } else {
+			// In case on the search for a specific record is requested we add a dimension to the result array
+			if (!empty($param['query']['id'])) {
+				if (
+						$param['module'] === "owners"
+					 or $param['module'] === "deal_pipeline"		
+				) {	
+					$requestTmp['exec'][0] = $request['exec'];
+					$request = $requestTmp;
+				} else {	
+					$requestTmp['exec'][$param['module']][0] = $request['exec'];
+					$request = $requestTmp;
+				}
+			}			
             $result = $this->getresultQueryBydate($request['exec'], $param, false);
-        }				
+        }							
         return $result;
     }
 
@@ -884,7 +930,7 @@ class hubspotcore extends solution {
 			 or	$param['module'] === "engagement_note" 
 			 or $param['module'] === "engagement_email"
 		) {
-            if (!empty($request)) {
+            if (!empty($request)) {				
                 foreach ($request as $key => $item) {
                     if ($item['engagement'][$modified] > $dateTimestamp) {
                         if (!$offset) {							
@@ -899,7 +945,7 @@ class hubspotcore extends solution {
         } elseif (
 				$param['module'] === "deal_pipeline"
 			 or	$param['module'] === "deal_pipeline_stage"
-		) {
+		) {					
             if (!empty($request)) {		
 				// For pipeline, we read all data
                 foreach ($request as $key => $item) {
@@ -925,10 +971,11 @@ class hubspotcore extends solution {
         } else {
             if (!empty($request)) {
 				// An entry result exists for the module deals
-				if ($param['module'] === "deals") {				
+				if ($param['module'] === "deals") {						
 					// The response key can be different : deals for deal/paged/ and result for recent/modified/
 					$request = (isset($request['deals']) ? $request['deals'] : $request['results']);
 				}
+
                 foreach ($request as $key => $item) {
                     if ($item['properties'][$modified]['value'] > $dateTimestamp) {
                         if (!$offset) {
