@@ -322,7 +322,8 @@ class hubspotcore extends solution {
      * @return mixed
      */
     public function read($param) {
-        try {			
+        try {	
+			$result = array();
 			// Remove Myddleware 's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			// Format the module name
@@ -344,6 +345,12 @@ class hubspotcore extends solution {
 			$url = $this->getUrl($param);
 			$resultCall = $this->call($url);		
 			$resultQuery = $this->getresultQuery($resultCall, $url, $param);
+			 // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
+			$result['date_ref'] = $param['date_ref'];
+			if (!empty($resultQuery['date_ref'])) {
+				$result['date_ref'] = date('Y-m-d H:i:s', ($resultQuery['date_ref'] / 1000) + 1);	
+			}
+			
 			if ($module === "engagements") {
 				// Fileter on the right engagement type
 				$resultQuery = $this->selectType($resultQuery, $param['module'], false);						
@@ -380,29 +387,11 @@ class hubspotcore extends solution {
                 }
             }
 
-            $result = array();
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
             } else {			
-                if (!empty($identifyProfiles)) {
-                    if ($module === "engagements") {
-                        // First record is the more recent
-                        $timestampLastmodified = current($identifyProfiles)["engagement"][$modifiedFieldName];						
-                    } elseif ($module === "owners") {
-                        $timestampLastmodified = current($identifyProfiles)[$modifiedFieldName];
-                    // No date for module deal_pipeline
-					} elseif (	
-							$param['module'] === "deal_pipeline"
-						or	$param['module'] === "deal_pipeline_stage") {
-                        $timestampLastmodified = 0;
-                    } else {
-                        // First record is the more recent
-                        $timestampLastmodified = current($identifyProfiles)["properties"][$modifiedFieldName]["value"];
-                    }
-					
-                    // Add 1 second to the date ref because the call to Hubspot includes the date ref.. Otherwise we will always read the last record
-                    $result['date_ref'] = date('Y-m-d H:i:s', ($timestampLastmodified / 1000) + 1);						
+                if (!empty($identifyProfiles)) {										
                     foreach ($identifyProfiles as $identifyProfile) {						
                         $records = null;
                         foreach ($param['fields'] as $field) {
@@ -439,19 +428,21 @@ class hubspotcore extends solution {
 							// Hubspot doesn't return empty field but Myddleware need it
 							if (!isset($records[$field])) {	
 								$records[$field] = '';	
-							}							
-							// Format date modified
-                            $records['date_modified'] = date('Y-m-d H:i:s', $timestampLastmodified / 1000); // add date modified
+							}	
+							
+							// Result are different with the engagement module
                             if ($module === "engagements") {
                                 $records['id'] = $identifyProfile["engagement"][$id];
+                                $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile["engagement"][$modifiedFieldName] / 1000);
                                 $result['values'][$identifyProfile["engagement"][$id]] = $records;
                             } else {								
                                 $records['id'] = $identifyProfile[$id];
+                                $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile[$modifiedFieldName] / 1000);
                                 $result['values'][$identifyProfile[$id]] = $records;
                             }
-                            $result['count'] = count($result['values']);
                         }
                     }
+					$result['count'] = count($result['values']);
                 }
             }
         } catch (\Exception $e) {
@@ -786,7 +777,10 @@ class hubspotcore extends solution {
      * @return array
      *
      */
-    protected function getresultQuery($request, $url, $param) {		
+    protected function getresultQuery($request, $url, $param) {	
+		// Init date ref 
+		$result['date_ref'] = 0;
+		
 		// Module contact
         if ($param['module'] === "contacts") {
 			// In case on the search for a specific record is requested we add a dimension to the result array
@@ -812,7 +806,11 @@ class hubspotcore extends solution {
                     // $timeOffset = $resultOffset['exec']['time-offset'];
                     $vidOffset = $resultOffset['exec']['vid-offset'];	
 					// Format results
-                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);			
+                    $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$param['module']], $param, true);
+					// We keep the highest date_ref
+					if ($resultOffsetTemps['date_ref'] > $result['date_ref']) {
+						$result['date_ref'] = $resultOffsetTemps['date_ref'];
+					}
                     // Add result to the main array
 					$merge = array_merge($result['exec'][$param['module']], $resultOffsetTemps);
                     $result['exec'][$param['module']] = $merge;
@@ -860,6 +858,10 @@ class hubspotcore extends solution {
                     $resultOffset = $this->call($url . "&offset=" . $offset);
                     $offset = $resultOffset['exec']['offset'];
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$key], $param, true);
+					// We keep the highest date_ref
+					if ($resultOffsetTemps['date_ref'] > $result['date_ref']) {
+						$result['date_ref'] = $resultOffsetTemps['date_ref'];
+					}
 					$merge = array_merge($result['exec']['results'], $resultOffsetTemps);
 					$result['exec']['results'] = $merge;
                 } while (
@@ -884,7 +886,7 @@ class hubspotcore extends solution {
 				}
 			}			
             $result = $this->getresultQueryBydate($request['exec'], $param, false);
-        }							
+        }		
         return $result;
     }
 
@@ -927,6 +929,8 @@ class hubspotcore extends solution {
             $result = [];
         }
         $dateTimestamp = $this->dateTimeToTimestamp($param["date_ref"]);
+		// Init the reference with the current date_ref
+		$result['date_ref'] = $dateTimestamp;
         if (
 				$param['module'] === "engagement_call" 
 			 or	$param['module'] === "engagement_task" 
@@ -937,6 +941,10 @@ class hubspotcore extends solution {
             if (!empty($request)) {				
                 foreach ($request as $key => $item) {
                     if ($item['engagement'][$modified] > $dateTimestamp) {
+						// We keep the highest reference date
+						if ($item['engagement'][$modified] > $result['date_ref']) {
+							$result['date_ref'] = $item['engagement'][$modified];
+						}
                         if (!$offset) {							
                             // array_push($result['exec'][$param['module']], $item);
                             array_push($result['exec']['results'], $item);
@@ -964,6 +972,10 @@ class hubspotcore extends solution {
             if (!empty($request)) {
                 foreach ($request as $key => $item) {
                     if ($item[$modified] > $dateTimestamp) {
+						// We keep the highest reference date
+						if ($item[$modified] > $result['date_ref']) {
+							$result['date_ref'] = $item[$modified];
+						}
                         if (!$offset) {
                             array_push($result['exec'][$module], $item);
                         } else {
@@ -982,6 +994,10 @@ class hubspotcore extends solution {
 
                 foreach ($request as $key => $item) {
                     if ($item['properties'][$modified]['value'] > $dateTimestamp) {
+						// We keep the highest reference date
+						if ($item['properties'][$modified]['value'] > $result['date_ref']) {
+							$result['date_ref'] = $item['properties'][$modified]['value'];
+						}
                         if (!$offset) {
                             array_push($result['exec'][$module], $item);
                         } else {
@@ -990,7 +1006,7 @@ class hubspotcore extends solution {
                     }
                 }
             }
-        }	
+        }				
         return $result;
     }
 
