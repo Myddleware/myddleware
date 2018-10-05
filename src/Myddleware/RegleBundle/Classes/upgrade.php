@@ -137,8 +137,7 @@ class upgradecore  {
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			$this->message .= $error.chr(10);
-			// Error are displayed in the command
-			throw new \Exception($error);
+			$output->writeln('<error>'.$error.'</error>');
 		}	
 		return $this->message;
 	}

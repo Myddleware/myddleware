@@ -51,16 +51,15 @@ class upgradeCommand extends ContainerAwareCommand
 					$output->writeln($job->message);
 					$logger->error($job->message);
 				} 	
-			}
-			
-			// Close job if it has been created
-			if($job->createdJob === true) {
-				$job->closeJob();
-			}
+			}			
 		}
 		catch(\Exception $e) {
 			$output->writeln( '<error>'.$e->getMessage().'</error>');
 		}	
+		// Close job if it has been created
+		if($job->createdJob === true) {
+			$job->closeJob();
+		}
 	}
 
 
