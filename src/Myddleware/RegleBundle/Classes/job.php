@@ -210,13 +210,12 @@ class jobcore  {
 	public function initJob($paramJob) {	
 		$this->paramJob = $paramJob;
 		$this->id = uniqid('', true);
-		$this->start = microtime(true);
-		
+		$this->start = microtime(true);		
 		// Check if a job is already running
 		$sqlJobOpen = "SELECT * FROM Job WHERE status = 'Start' LIMIT 1";
 		$stmt = $this->connection->prepare($sqlJobOpen);
 		$stmt->execute();	    
-		$job = $stmt->fetch(); // 1 row
+		$job = $stmt->fetch(); // 1 row		
 		// Error if one job is still running
 		if (!empty($job)) {
 			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
@@ -280,7 +279,7 @@ class jobcore  {
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
 			}
-			exec($php['executable'].' '.__DIR__.'/../../../../app/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -608,6 +607,12 @@ class jobcore  {
 		$stmt->execute();	   				
 		$config = $stmt->fetch();
 		return $config['conf_value'];
+	}
+	
+	// Myddleware upgrade
+	public function upgrade($output) {
+		$upgrade = new upgrade($this->logger, $this->container, $this->connection);			
+		$this->message = $upgrade->processUpgrade($output);		
 	}
 
 	// Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle

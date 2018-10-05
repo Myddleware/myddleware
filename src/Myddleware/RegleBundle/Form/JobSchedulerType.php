@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class JobSchedulerType extends AbstractType
@@ -25,13 +26,12 @@ class JobSchedulerType extends AbstractType
                 'required' => true,
                 'empty_data' => 'null',
                 'choices' => array(
-                    'synchro' => 'Synchro',
-                    'notification' => 'Notification',
-                    'rerunerror' => 'Rerun Error',
-                    'cleardata' => 'Clear Data',
+                    'Synchro' => 'synchro',
+                    'Notification' => 'notification',
+                    'Rerun Error' => 'rerunerror',
+                    'Clear Data' => 'cleardata',
                 ),
-                'empty_value' => '- Choice command -',
-
+                'placeholder' => '- Choice command -',
             ))
             ->add('paramName1')
             ->add('paramValue1')
@@ -66,9 +66,9 @@ class JobSchedulerType extends AbstractType
     }
 
     /**
-     * @param OptionsResolverInterface $resolver
+     * @param OptionsResolver $resolver
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions (OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => 'Myddleware\RegleBundle\Entity\JobScheduler'
@@ -78,7 +78,7 @@ class JobSchedulerType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'myddleware_reglebundle_jobscheduler';
     }

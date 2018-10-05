@@ -56,7 +56,7 @@ class microsoftsqlcore extends database {
 	
 	// Query to get all the tables of the database
 	protected function get_query_show_tables() {
-		return 'SELECT table_name FROM information_schema.tables';
+		return 'SELECT table_name FROM information_schema.tables WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
 	}
 	
 	// Query to get all the flieds of the table
@@ -65,7 +65,11 @@ class microsoftsqlcore extends database {
 	}
 	
 	// Get the limit operator of the select query in the read last function
-	protected function get_query_select_limit_offset($param) {
+	protected function get_query_select_limit_offset($param, $method) {
+		// The limit is managed with TOP if we don't have the offset parameter
+		if ($method == 'read_last') {
+			return null;
+		}
 		if (empty($param['offset'])) {
 			$param['offset'] = 0;
 		}
@@ -77,6 +81,13 @@ class microsoftsqlcore extends database {
 		return str_replace("'", "''", $value);
 	}
 	
+	protected function get_query_select_header($param, $method) {
+		// The limit is managed with TOP if we don't have the offset parameter
+		if ($method == 'read_last') {
+			return "SELECT TOP 1 ";
+		}
+		return parent::get_query_select_header($param, $method);
+	}
 
 }// class microsoftsqlcore
 

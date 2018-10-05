@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\SecurityContext;
 use Myddleware\RegleBundle\Solutions\crm;
 
@@ -14,16 +15,17 @@ class DefaultController extends Controller
     public function indexAction(Request $request)
     {				
 		$session = $request->getSession();	
-        $csrfToken = $this->container->has('form.csrf_provider')
-        ? $this->container->get('form.csrf_provider')->generateCsrfToken('authenticate')
-        : null;
+//        $csrfToken = $this->container->has('form.csrf_provider')
+//        ? $this->container->get('form.csrf_provider')->generateCsrfToken('authenticate')
+//        : null;
 
         // get the error if any (works with forward and redirect -- see below)
-        if ($request->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
-            $error = $request->attributes->get(SecurityContext::AUTHENTICATION_ERROR);
-        } elseif (null !== $session && $session->has(SecurityContext::AUTHENTICATION_ERROR)) {
-            $error = $session->get(SecurityContext::AUTHENTICATION_ERROR);
-            $session->remove(SecurityContext::AUTHENTICATION_ERROR);
+        if ($request->attributes->has(Security::AUTHENTICATION_ERROR)) {
+            $error = $request->attributes->get(Security::AUTHENTICATION_ERROR);
+        } elseif (null !== $session && $session->has(Security::AUTHENTICATION_ERROR)) {
+            $error = $session->get(Security::AUTHENTICATION_ERROR);
+            $error = $session->get(Security::AUTHENTICATION_ERROR);
+            $session->remove(Security::AUTHENTICATION_ERROR);
         } else {
             $error = '';
         }
@@ -33,9 +35,9 @@ class DefaultController extends Controller
             $error = $error->getMessage();
         }
         // last username entered by the user
-        $lastUsername = (null === $session) ? '' : $session->get(SecurityContext::LAST_USERNAME);
+        $lastUsername = (null === $session) ? '' : $session->get(Security::LAST_USERNAME);
 	
-		$securityContext = $this->get('security.context');
+		$securityContext = $this->get('security.authorization_checker');
 		if( $securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED') ){
 			return $this->redirect( $this->generateUrl('regle_panel') );				 
 		}	
@@ -66,7 +68,7 @@ class DefaultController extends Controller
 			return $this->render('LoginBundle:Default:index.html.twig',array(
 				'last_username' => $lastUsername,
 				'error'         => $error,
-				'csrf_token' => $csrfToken,
+//				'csrf_token' => $csrfToken,
 				'attempt' => $attempt,
 				'remaining' => $remaining,
 				'password_message' => $passwordMessage,
@@ -114,7 +116,7 @@ class DefaultController extends Controller
 		try {
 			if ($request->isMethod('POST')) {
 
-				$lastUsername = trim($this->getRequest()->request->get('login'));
+				$lastUsername = trim($request->request->get('login'));
 				
 				// contrôle des tentatives
 				// si le nombre de tentative n'existe pas on affecte 0

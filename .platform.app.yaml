@@ -5,7 +5,7 @@
 name: myddleware
 
 # The type of the application to build.
-type: php:7.0
+type: php:7.1
 build:
     flavor: composer
 
@@ -36,30 +36,28 @@ disk: 2048
 
 # The mounts that will be performed when the package is deployed.
 mounts:
-    "/app/cache": "shared:files/cache"
-    "/app/logs": "shared:files/logs"
+    "/var/cache": "shared:files/cache"
+    "/var/logs": "shared:files/logs"
     "/app/config/public": "shared:files/config/public"
-    "/app/sessions": "shared:files/sessions"
-    "/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
+    "/var/sessions": "shared:files/sessions"
+    "/src": "shared:files/src"
+    "/web": "shared:files/web"
+    "/vendor": "shared:files/vendor"
 
 # The hooks that will be performed when the package is deployed.
 hooks:
     build: |
-        cd app/config/
-        cp -r public/. read-only/
-        cd ../..
-        php app/console --env=prod assets:install --no-debug
+        php bin/console --env=prod assets:install --no-debug
     deploy: |
-        cp -r app/config/read-only/. app/config/public/
-        php app/console --env=prod cache:clear
-        php app/console --env=prod assetic:dump
-        php app/console --env=prod assets:install web
-        php app/console d:s:u --force
-        php app/console d:f:l --append
-        php app/console fos:user:create admin admin@example.com admin
-        php app/console fos:user:promote admin ROLE_ADMIN
+        php bin/console --env=prod cache:clear
+        php bin/console --env=prod assetic:dump
+        php bin/console --env=prod assets:install web
+        php bin/console d:s:u --force
+        php bin/console d:f:l --append
+        php bin/console fos:user:create admin admin@example.com admin
+        php bin/console fos:user:promote admin ROLE_ADMIN
 
 crons:
     jobScheduler:
         spec: '*/5 * * * *'
-        cmd: 'php app/console myddleware:jobScheduler --env=background'
+        cmd: 'php bin/console myddleware:jobScheduler --env=background'

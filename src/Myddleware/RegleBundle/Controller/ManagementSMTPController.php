@@ -5,6 +5,7 @@ namespace Myddleware\RegleBundle\Controller;
 use Myddleware\RegleBundle\Form\managementSMTPType;
 use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Request;
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools;
@@ -45,6 +46,7 @@ class ManagementSMTPController extends Controller
 
             }
 
+            $form->submit($request->request->get($form->getName()));
             if ($form->isValid()) {
                 $this->setData($form);
                 return $this->redirect($this->generateUrl('management_smtp_index'));
@@ -65,11 +67,11 @@ class ManagementSMTPController extends Controller
      */
     private function createCreateForm()
     {
-        $form = $this->createForm(new managementSMTPType(), null, array(
+        $form = $this->createForm( managementSMTPType:: class, null, array(
             'action' => $this->generateUrl('management_smtp_create'),
         ));
-        $form->add('submit', 'submit', array('label' => 'management_smtp.submit'));
-        $form->add('submit_test', 'submit', array('label' => 'management_smtp.sendtestmail'));
+        $form->add('submit', SubmitType::class, array('label' => 'management_smtp.submit'));
+        $form->add('submit_test', SubmitType::class, array('label' => 'management_smtp.sendtestmail'));
         return $form;
     }
 

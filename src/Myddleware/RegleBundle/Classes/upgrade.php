@@ -43,6 +43,7 @@ class upgradecore  {
 	protected $newParameters;
 	protected $currentParameters;
 	protected $phpExecutable = 'php';
+	protected $message = '';
 
 	public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {				
 		$this->logger = $logger; // gestion des logs symfony monolog
@@ -53,8 +54,8 @@ class upgradecore  {
 		
 		// New parameters in file parameters.yml.dist
 		$this->newParameters['parameters'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
-		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters_public.yml.dist'));	
-		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters_smtp.yml.dist'));	
+		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml.dist'));	
+		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml.dist'));	
 		// Current parameters in file parameters.yml
 		$this->currentParameters['parameters'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));	
 		$this->currentParameters['parameters_public'] = '';
@@ -78,61 +79,67 @@ class upgradecore  {
 			// Customize update process
 			$this->beforeUpdate($output);
 			
-			// Clear every Symfony cache
-			$output->writeln('<comment>Clear Symfony cache...</comment>');
-			$this->clearSymfonycache();
-			$output->writeln('<comment>Clear Symfony cache OK</comment>');			
-			
 		 	// Add new parameters
 			$output->writeln('<comment>Update parameters...</comment>');
 			$this->updateParameters();
 			$output->writeln('<comment>Update parameters OK</comment>');
+			$this->message .= 'Update parameters OK'.chr(10);
 		
 			// Update file
 			$output->writeln('<comment>Update files...</comment>');
 			$this->updateFiles();
 			$output->writeln('<comment>Update files OK</comment>');
+			$this->message .= 'Update files OK'.chr(10);
 			
 			// Update vendor via composer
 			$output->writeln('<comment>Update vendors...</comment>');
 			$this->updateVendors();
 			$output->writeln('<comment>Update vendors OK</comment>');
+			$this->message .= 'Update vendors OK'.chr(10);
 			
-			// Clear boostrap cache
+			/* // Clear boostrap cache
 			$output->writeln('<comment>Clear boostrap cache...</comment>');
 			$this->clearBoostrapCache();
-			$output->writeln('<comment>Clear boostrap cache OK</comment>');
+			$output->writeln('<comment>Clear boostrap cache OK</comment>'); */
 			 
 			// Update database
 			$output->writeln('<comment>Update database...</comment>');
 			$this->updateDatabase();
 			$output->writeln('<comment>Update database OK</comment>');
+			$this->message .= 'Update database OK'.chr(10);
+			
+			// Clear cache
+			$output->writeln('<comment>Clear Symfony cache...</comment>');
+			$this->clearSymfonycache();
+			$output->writeln('<comment>Clear Symfony cache OK</comment>');
+			$this->message .= 'Clear Symfony cache OK'.chr(10);
+			
 			
 			// Change Myddleware version
 			$output->writeln('<comment>Finish install...</comment>');
 			$this->finishInstall();
+			$output->writeln('<comment>Finish install OK</comment>');
+			$this->message .= 'Finish install OK'.chr(10);
 			
 			// Change Myddleware version
 			$output->writeln('<comment>Update version...</comment>');
 			$this->changeVersion();
 			$output->writeln('<comment>Update version OK</comment>');
-
-			// Clear every Symfony cache
-			$output->writeln('<comment>Clear Symfony cache...</comment>');
-			$this->clearSymfonycache();
-			$output->writeln('<comment>Clear Symfony cache OK</comment>');			
-						
+			$this->message .= 'Update version OK'.chr(10);
+			
 			// Customize update process
 			$this->afterUpdate($output);
 			
 			$output->writeln('<info>Myddleware has been successfully updated in version '.$this->newParameters['parameters']['parameters']['myd_version'].'</info>');
+			$this->message .= 'Myddleware has been successfully updated in version '.$this->newParameters['parameters']['parameters']['myd_version'].chr(10);
 		
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
-			// Error are displayed in the command
-			throw new \Exception($error);
+			$this->message .= $error.chr(10);
+			$output->writeln('<error>'.$error.'</error>');
 		}	
+		return $this->message;
 	}
 	
 	// Update parameters with dist file
@@ -152,6 +159,7 @@ class upgradecore  {
 					$info = 'New parameter '.$newParameterKey.' added to the file config/'.($key == 'parameters' ? '' : 'public/').$key.'.yml';
 					echo $info.chr(10);
 					$this->logger->info($info);
+					$this->message .= $info.chr(10);
 				}
 			}
 		}
@@ -169,6 +177,8 @@ class upgradecore  {
 		$output1 = $process->getOutput();
 		if (strpos($output1, 'Aborting') !== false) {
 			echo $process->getOutput();
+			$this->logger->error($process->getOutput());
+			$this->message .= $process->getOutput().chr(10);
 			throw new \Exception ('Failed to update Myddleware. Failed to update Myddleware files by using git');
 		}
 		
@@ -181,6 +191,7 @@ class upgradecore  {
 		}
 		$output2 = $process->getOutput();
 		echo $output2;
+		$this->message .= $output2.chr(10);
 		if (
 				strpos($output2, 'Already up to date') === false
 			AND	strpos($output2, 'Already up-to-date') === false
@@ -225,9 +236,10 @@ class upgradecore  {
 		$application->run($input, $output);
 
 		$content = $output->fetch();
-		// Send output to the logfile if debug mode selected
 		if (!empty($content)) {
-		  echo $content.chr(10);
+			echo $content.chr(10);
+			$this->logger->info($content);
+			$this->message .= $content.chr(10);
 		}
 
 		// Update data
@@ -244,17 +256,32 @@ class upgradecore  {
 		$content = $output->fetch();
 		// Send output to the logfile if debug mode selected
 		if (!empty($content)) {
-		  echo $content.chr(10);
+			echo $content.chr(10);
+			$this->logger->info($content);
+			$this->message .= $content.chr(10);
 		}
 	}
 	
 	// Clear Symfony cache
 	protected function clearSymfonycache() {
-		$process = new Process('rm -rf app/cache/*');
-		$process->run();
-		// executes after the command finishes
-		if (!$process->isSuccessful()) {
-			throw new ProcessFailedException($process);
+		// Update schema
+		$application = new Application($this->container->get('kernel'));
+		$application->setAutoExit(false);
+		$arguments = array(
+			'command' => 'cache:clear',
+			'--env' => $this->env,
+		);
+		
+		$input = new ArrayInput($arguments);
+		$output = new BufferedOutput();
+		$application->run($input, $output);
+
+		$content = $output->fetch();
+		// Send output to the logfile if debug mode selected
+		if (!empty($content)) {
+			echo $content.chr(10);
+			$this->logger->info($content);
+			$this->message .= $content.chr(10);
 		}
 	}
 	
@@ -275,7 +302,9 @@ class upgradecore  {
 		$content = $output->fetch();
 		// Send output to the logfile if debug mode selected
 		if (!empty($content)) {
-		  echo $content.chr(10);
+			echo $content.chr(10);
+			$this->logger->info($content);
+			$this->message .= $content.chr(10);
 		}
 
 		// Update data
@@ -291,7 +320,9 @@ class upgradecore  {
 		$content = $output->fetch();
 		// Send output to the logfile if debug mode selected
 		if (!empty($content)) {
-		  echo $content.chr(10);
+			echo $content.chr(10);
+			$this->logger->info($content);
+			$this->message .= $content.chr(10);
 		}
 	}
 	
@@ -306,12 +337,12 @@ class upgradecore  {
 				$info = 'Version changed to '.$this->newParameters['parameters']['parameters']['myd_version'].' in the file /config/parameters.yml';
 				echo $info.chr(10);
 				$this->logger->info($info);
+				$this->message .= $info.chr(10);
 			}
 		} else {
 			throw new \Exception ('No version in the file parameters.yml.dist. Failed to update the version of Myddleware.');
 		}		
 	}	
-	
 	
 	// Function to customize the update process
 	protected function beforeUpdate($output) {

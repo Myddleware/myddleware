@@ -60,10 +60,10 @@ class AccountController extends BaseController
         ));
     }
 
-    public function changeLocaleAction()
+    public function changeLocaleAction(Request $request)
     {
         try {
-            $request = $this->get('request');
+
             $session = $request->getSession();
 
             if (isset($_POST['locale'])) {

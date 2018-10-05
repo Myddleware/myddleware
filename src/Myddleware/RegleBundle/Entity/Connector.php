@@ -372,6 +372,6 @@ class Connector
     {
         return $this->connectorParams = $connectorParams;
     }
-    
+
    
 }

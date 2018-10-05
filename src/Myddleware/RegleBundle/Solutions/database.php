@@ -26,7 +26,9 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType; 
 
 class databasecore extends solution { 
 
@@ -59,27 +61,27 @@ class databasecore extends solution {
 		return array(
 					 array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
 					array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'host',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.host'
                         ),
 					array(
                             'name' => 'database_name',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.dbname'
                         ),
 					array(
                             'name' => 'port',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.dbport'
                         )
 		);
@@ -123,12 +125,12 @@ class databasecore extends solution {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
 			}
-			// Get field ID
-			$idFields = $this->getIdFields($module,$type);			
 			// Format the fields
-			$fetchAll = $q->fetchAll();		
+			$fields = $q->fetchAll();		
+			// Get field ID
+			$idFields = $this->getIdFields($module,$type,$fields);			
 		
-			foreach ($fetchAll as $field) {
+			foreach ($fields as $field) {
 				$this->moduleFields[$field[$this->fieldName]] = array(
 						'label' => $field[$this->fieldLabel],
 						'type' => $field[$this->fieldType],
@@ -229,7 +231,7 @@ class databasecore extends solution {
 			
 			// Construction de la requête SQL
 			$param['limit'] = 1;	
-			$requestSQL = $this->get_query_select_header($param);		
+			$requestSQL = $this->get_query_select_header($param, 'read_last');		
 			foreach ($param['fields'] as $field){
 				// If key is id, it has to be replaced by the real name of the id in the target table 
 				if ($field == 'id') {			
@@ -247,7 +249,7 @@ class databasecore extends solution {
 			$requestSQL = rtrim($requestSQL,',').' '; 
 			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
-			$requestSQL .= $this->get_query_select_limit_offset($param); // Add query limit
+			$requestSQL .= $this->get_query_select_limit_offset($param, 'read_last'); // Add query limit
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read_last', $requestSQL);
 		
@@ -309,7 +311,7 @@ class databasecore extends solution {
 	} // read_last($param)
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {
 		$result = array();
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
@@ -338,7 +340,7 @@ class databasecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
 			// Query building
-			$requestSQL = $this->get_query_select_header($param);	
+			$requestSQL = $this->get_query_select_header($param, 'read');	
 			
 			foreach ($param['fields'] as $field){
 			    $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
@@ -353,31 +355,31 @@ class databasecore extends solution {
 				$nbFilter = count($param['query']);
 				$requestSQL .= " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
-					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose.' = '.$queryValue.' ';
+					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
 					$nbFilter--;
 					if ($nbFilter > 0){
 						$requestSQL .= " AND ";	
 					}
 				}
-			} else {				
+			} else {
 				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
 			
 			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
-			$requestSQL .= $this->get_query_select_limit_offset($param); // Add query limit
+			$requestSQL .= $this->get_query_select_limit_offset($param, 'read'); // Add query limit
 			// Query validation
-			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);	
-	
+			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
+
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);		
 			$exec = $q->execute();
-			
+
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
-			
+
 			$row = array();
 			if(!empty($fetchAll)) {
 				$result['count'] = count($fetchAll);
@@ -386,22 +388,28 @@ class databasecore extends solution {
 					foreach ($elem as $key => $value) {
 						if($key === $param['ruleParams']['fieldId']) {
 							$row["id"] = $value;
-						} elseif($key === $param['ruleParams']['fieldDateRef']) {
-							$row['date_modified'] = $value;
+						} 
+						if($key === $param['ruleParams']['fieldDateRef']) {
+							// If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
+							if ((bool)strtotime($value)) {;
+								$row['date_modified'] = $value;
+							} else {							
+								$row['date_modified'] = date('Y-m-d H:i:s');
+							}
 							$result['date_ref'] = $value;
 						}
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
-				    }					
+					}
 					$result['values'][$row['id']] = $row;
 				}
-			} 
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}		
-		return $result;	
+		}
+		return $result;
 	} // read($param)
 	
 	// Permet de créer des données
@@ -550,7 +558,7 @@ class databasecore extends solution {
 	}
 	
 	// Get the strings which can identify what field is an id in the table
-	protected function getIdFields($module,$type) {
+	protected function getIdFields($module,$type,$fields) {
 		// default is id
 		return array('id');
 	}
@@ -561,7 +569,7 @@ class databasecore extends solution {
 	}
 	
 	// Get the header of the select query in the read last function
-	protected function get_query_select_header($param) {
+	protected function get_query_select_header($param, $method) {
 		return "SELECT ";
 	}
 

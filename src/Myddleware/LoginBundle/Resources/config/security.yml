@@ -14,10 +14,11 @@ security:
             pattern: .*
             form_login:
                 provider: fos_userbundle
-                csrf_provider: form.csrf_provider
-                
+#                csrf_provider: security.csrf.token_manager
+                csrf_token_generator: security.csrf.token_manager
+
             remember_me:
-                key:       %secret%
+                secret:    %secret%
                 lifetime:  30000000
                 path:      /
                 domain:    ~  

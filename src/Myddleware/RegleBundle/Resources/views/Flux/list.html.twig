@@ -28,7 +28,7 @@
 {% block body %}
     
 	<div id="flux" >
-	<form action="{{ path('flux_list', {'search': 1}) }}" method="post" {{ form_enctype(form) }}>
+	<form action="{{ path('flux_list', {'search': 1}) }}" method="post" enctype="multipart/form-data">
 	{% if nb > 0 %}
 	
 	<div id="fd-title-small" class="left">
@@ -96,7 +96,7 @@
 				{% endif %}				
 			</p>
 		</div>
-		</form>
+        {{ form_end(form) }}
 
 	<div class="massbtn">
 		<p><a id="cancelflux" class="btn-mydinv" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}} (<span></span>)</a>

@@ -25,7 +25,10 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class suitecrmcore  extends solution { 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+class suitecrmcore  extends solution {
 
 	protected $urlSuffix = '/service/v4/rest.php';
 	
@@ -155,17 +158,17 @@ class suitecrmcore  extends solution {
 		return array(
 					array(
 							'name' => 'login',
-							'type' => 'text',
+							'type' => TextType::class,
 							'label' => 'solution.fields.login'
 						),
 					array(
 							'name' => 'password',
-							'type' => 'password',
+							'type' => PasswordType::class,
 							'label' => 'solution.fields.password'
 						),
 					array(
 							'name' => 'url',
-							'type' => 'text',
+							'type' => TextType::class,
 							'label' => 'solution.fields.url'
 						)
 		);

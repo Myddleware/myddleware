@@ -41,12 +41,25 @@ class upgradeCommand extends ContainerAwareCommand
 	// Process to the upgrade
     protected function execute(InputInterface $input, OutputInterface $output) {
 		try {
-			$upgrade = $this->getContainer()->get('myddleware.upgrade');	
-			$upgrade->processUpgrade($output);	
+			$logger = $this->getContainer()->get('logger');	
+			$job = $this->getContainer()->get('myddleware_job.job');			
+			if ($job->initJob('upgrade')) {			
+				$job->upgrade($output);			
+			} else {
+				// Display message on the console
+				if (!empty($job->message)) {
+					$output->writeln($job->message);
+					$logger->error($job->message);
+				} 	
+			}			
 		}
 		catch(\Exception $e) {
 			$output->writeln( '<error>'.$e->getMessage().'</error>');
 		}	
+		// Close job if it has been created
+		if($job->createdJob === true) {
+			$job->closeJob();
+		}
 	}
 
 

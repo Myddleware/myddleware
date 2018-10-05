@@ -24,6 +24,8 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Solutions;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 
@@ -44,22 +46,22 @@ class zuoracore  extends solution {
         return array(
                     array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                     array(
                             'name' => 'wsdl',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.wsdl'
                         ),
 					array(
 						'name' => 'sandbox',
-						'type' => 'text',
+						'type' => TextType::class,
 						'label' => 'solution.fields.sandbox'
 					)
         );
