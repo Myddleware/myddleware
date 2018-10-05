@@ -52,7 +52,7 @@ class DocumentData
 	/**
      * @var string
      *
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="id")
+     * @ORM\ManyToOne(targetEntity="Document")
      * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
 	 * 
      */

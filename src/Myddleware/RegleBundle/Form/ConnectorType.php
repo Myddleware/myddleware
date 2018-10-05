@@ -1,7 +1,9 @@
 <?php
 namespace  Myddleware\RegleBundle\Form;
+use FOS\UserBundle\Event\FormEvent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -16,13 +18,10 @@ class ConnectorType extends AbstractType{
 
     
     public function buildForm(FormBuilderInterface $builder, array $options) {
-       //dump($options); die();
-        $fieldsLogin = $options['attr']['fieldsLogin'];
-        $secret = $options['attr']['secret'];
+        $fieldsLogin = isset($options['attr']['fieldsLogin']) ? $options['attr']['fieldsLogin'] : null;
+        $secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
         $options['attr']['fieldsLogin'] = null;
-        //$fieldsLogin = [];
         if( $options['data']->getSolution() !=null ){
-//            $fieldsLogin = $this->_container->get('myddleware_rule.' . $options['data']->getSolution()->getName())->getFieldsLogin();
             //Init ConnectorParams
             if(count($options['data']->getConnectorParams()) == 0){
                 foreach ($fieldsLogin as $fieldLogin) {
@@ -46,7 +45,7 @@ class ConnectorType extends AbstractType{
                 )
         )
         ));
-          
+
        /*foreach ($this->connectorParams['params'] as $name =>  $value) { 
                 $builder->add($name, $value['type'],[
                     'data' => $value['value'],

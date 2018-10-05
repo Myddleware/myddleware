@@ -24,8 +24,8 @@ class ConnectorParamType extends AbstractType{
     
     public function buildForm(FormBuilderInterface $builder, array $options) 
     {
-        $this->_secret = $options['attr']['secret'];
-        $this->_solutionFieldsLogin = $options['attr']['fieldsLogin'];
+        $this->_secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
+        $this->_solutionFieldsLogin = isset($options['attr']['fieldsLogin']) ? $options['attr']['fieldsLogin'] : null;
 
       
         $builder->add('value',TextType::class,['error_bubbling' => true])->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));

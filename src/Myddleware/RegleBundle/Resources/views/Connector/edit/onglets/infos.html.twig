@@ -21,7 +21,7 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
-
+{% form_theme form '::form_div_layout.html.twig' %}
 {# BTN #}
 <div class="block-btn-infos">
 	<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
@@ -33,8 +33,8 @@
 {# BTN #} 
 
 <div align="center">
-    {#{{form_start(form)}}#}
-   <form name="connector" method="POST" action="">
+    {{form_start(form)}}
+   {#<form name="connector" method="POST" action="">#}
         {% if error is defined %}
             <div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
         {% endif %}

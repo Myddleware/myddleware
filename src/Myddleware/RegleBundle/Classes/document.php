@@ -504,7 +504,7 @@ class documentcore {
 			
 			// Check predecessor in the child rule
 			// Get all child rules 
-			$sqlGetChildRules = "	SELECT 
+			$sqlGetChildRules = "	SELECT DISTINCT
 										RuleRelationShip.rule_id 											
 									FROM Document
 										INNER JOIN RuleRelationShip
@@ -810,7 +810,7 @@ class documentcore {
 						if (!empty($searchFieldValue)) {
 							$searchFields[$duplicate_field] = $searchFieldValue;
 						// If no value, we check if the field is a relationship
-						} else {	
+						} elseif (!empty($this->ruleRelationships)) {	
 							foreach ($this->ruleRelationships as $ruleRelationship) {	
 								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
 									$sourceDuplicateFieldRelationship = $ruleRelationship;

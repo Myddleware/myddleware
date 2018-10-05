@@ -26,6 +26,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class sagecrmcore extends solution {
 	
@@ -133,7 +134,7 @@ class sagecrmcore extends solution {
                         ),
                     array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
                     array(

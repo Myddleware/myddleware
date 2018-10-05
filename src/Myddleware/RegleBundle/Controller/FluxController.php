@@ -97,7 +97,7 @@ class FluxControllerCore extends Controller
 		//--- Liste status traduction
 		$lstStatusTwig = doc::lstStatus();		
 		foreach ($lstStatusTwig as $key => $value) {
-			$lstStatus[ $key ] = $this->get('translator')->trans( $value );
+			$lstStatus[ $this->get('translator')->trans( $value ) ] = $key;
 		}	
 		asort($lstStatus);
 		//---
@@ -106,7 +106,7 @@ class FluxControllerCore extends Controller
 		$lstGblStatusTwig = doc::lstGblStatus();
 		
 		foreach ($lstGblStatusTwig as $key => $value) {
-			$lstGblStatus[ $key ] = $this->get('translator')->trans( $value );
+			$lstGblStatus[ $this->get('translator')->trans( $value ) ] = $key;
 		}	
 		asort($lstGblStatus);		
 		//---
@@ -586,7 +586,6 @@ class FluxControllerCore extends Controller
 
 	// Sauvegarde flux
 	public function fluxSaveAction(Request $request) {
-		$request = $this->get('request');
 		if($request->getMethod()=='POST') {
 			// Get the field and value from the request
 			$fields = strip_tags($request->request->get('fields'));

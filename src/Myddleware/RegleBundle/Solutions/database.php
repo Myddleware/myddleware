@@ -26,7 +26,9 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Bridge\Monolog\Logger;
-use Myddleware\RegleBundle\Classes\rule as ruleMyddleware; // SugarCRM Myddleware
+use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType; 
 
 class databasecore extends solution { 
 
@@ -59,27 +61,27 @@ class databasecore extends solution {
 		return array(
 					 array(
                             'name' => 'login',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.login'
                         ),
 					array(
                             'name' => 'password',
-                            'type' => 'password',
+                            'type' => PasswordType::class,
                             'label' => 'solution.fields.password'
                         ),
 					array(
                             'name' => 'host',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.host'
                         ),
 					array(
                             'name' => 'database_name',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.dbname'
                         ),
 					array(
                             'name' => 'port',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.dbport'
                         )
 		);

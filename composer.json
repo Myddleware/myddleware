@@ -30,7 +30,7 @@
 	"friendsofsymfony/user-bundle": "~2.0.2",
         "jquery/jquery": "2.1.3",
         "jquery/jquery_ui": "1.11.1",
-        "twitter/bootstrap": "dev-master#f9dd7466cfbc89c2ed458ec83cd29db7aa83525a",
+        "twitter/bootstrap": "3.3.7",
         "leafo/lessphp": "0.4.0",
 	"phpsec/phpsec":"0.6.*",
 	"white-october/pagerfanta-bundle": "dev-master",

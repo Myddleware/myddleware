@@ -56,7 +56,7 @@ class zuoracore  extends solution {
                         ),
                     array(
                             'name' => 'wsdl',
-                            'type' => 'text',
+                            'type' => TextType::class,
                             'label' => 'solution.fields.wsdl'
                         ),
 					array(
