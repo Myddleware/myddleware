@@ -21,25 +21,26 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+<link type="text/css" href="<?php echo $urlBase; ?>/web/css/compiled/main_layout_2.css" rel="stylesheet">
 *********************************************************************************/
 ?>
-<?php $urlBase = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['SERVER_NAME'].str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(dirname(__FILE__))); ?>
+<?php $urlBase = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['SERVER_NAME'].$_SERVER['BASE']; ?>
 
 <html class="" lang="us">
 <head>
-<link type="text/css" href="<?php echo $urlBase; ?>/web/bundles/regle/css/account.css" rel="stylesheet">
-<link type="text/css" href="<?php echo $urlBase; ?>/web/css/compiled/main_bootstrap.min_1.css" rel="stylesheet">
-<link type="text/css" href="<?php echo $urlBase; ?>/web/css/compiled/main_layout_2.css" rel="stylesheet">
+<link type="text/css" href="<?php echo $urlBase; ?>/bundles/regle/css/account.css" rel="stylesheet">
+<link type="text/css" href="<?php echo $urlBase; ?>/bundles/regle/css/layout.css" rel="stylesheet">
+<link type="text/css" href="<?php echo $urlBase; ?>/css/bootstrap/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <style type="text/css"> 
 
 body {
-	background:  url(<?php echo $urlBase.'/web/bundles/regle/images/template/fd.jpg' ?>) repeat-y; 
+	background:  url(<?php echo $urlBase.'/bundles/regle/images/template/fd.jpg' ?>) repeat-y; 
 	background-color: #9DC0E1;
 }
 #logo {
-	background: url(<?php echo $urlBase.'/web//bundles/regle/images/template/logo.png' ?>) no-repeat; 
+	background: url(<?php echo $urlBase.'//bundles/regle/images/template/logo.png' ?>) no-repeat; 
 	background-size: 158px;
 	height: 113px;
 	width: 160px;
@@ -64,7 +65,7 @@ table, th, td {
 
 <div id="myd_top"></div>
 <div id="logo"></div>
-<div id="myd_title"><span class="glyphicon glyphicon-chevron-right"></span>Myddleware installation</div>
+<div id="myd_title">Myddleware installation</div>
 <section>
 <div id="user_account">
 <div id="user_info">
@@ -74,7 +75,7 @@ table, th, td {
 <?php
 ini_set('display_errors', 1); 
 error_reporting(E_ALL); 
-require_once dirname(__FILE__).'/../app/SymfonyRequirements.php';
+require_once dirname(__FILE__).'/../var/SymfonyRequirements.php';
 $lineSize = 70;
 $symfonyRequirements = new SymfonyRequirements();
 
@@ -158,10 +159,14 @@ echo_style('title', 'Note');
 echo '  The command console could use a different php.ini file'.'<BR>';
 echo_style('title', '~~~~');
 echo '  than the one used with your web server. To be on the'.'<BR>';
-echo '      safe side, please check the requirements from your web'.'<BR>';
-echo '      server using the ';
-echo_style('orange', 'web/config.php');
-echo ' script.'.'<BR>';
+echo_style('title', '~~~~');
+echo '  safe side, please check the requirements from your web'.'<BR>';
+echo_style('title', '~~~~');
+echo '  server using the command from your Myddleware directory'.'<BR>';
+echo_style('title', '~~~~');
+echo '  '; 
+echo_style('green', 'php bin/symfony_requirements');
+echo '<BR>';
 echo '<BR>';
 
 function get_error_message(Requirement $requirement, $lineSize)
@@ -205,7 +210,7 @@ function echo_block($style, $title, $message)
 }
   
 ?>
-<button class="btn-mydinv" type="button" onClick="window.location.reload()"><span class="glyphicon glyphicon-repeat"></span> Re check</button>
+<button class="btn-mydinv" type="button" onClick="window.location.reload()"></span> Re check</button>
 </td>
 <td>
 <?php 
@@ -218,6 +223,9 @@ else {
 	// Start of the Symfony Kernel
 	require_once(__DIR__ . "/../app/AppKernel.php");	
 	$kernel = new \AppKernel("prod", true);	
+	
+	$binDir = $kernel->getRootDir().'/../bin/';
+
 	// Get current Myddleware parameters
 	$myddlewareParameters = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($kernel->getRootDir() .'/config/parameters.yml'));
 	$myddlewareParametersPublic = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($kernel->getRootDir() .'/config/public/parameters_public.yml'));
@@ -290,15 +298,15 @@ else {
 				$new_yaml = \Symfony\Component\Yaml\Yaml::dump($myddlewareParameters, 4);
 				file_put_contents($kernel->getRootDir() .'/config/parameters.yml', $new_yaml);
 				
-				// Refresh boostrap
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir().'/../vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
+				/* // Refresh boostrap
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir.'/../vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
 					throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
-				}
+				} */
 				
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console cache:clear --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir .'/console cache:clear --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -319,7 +327,7 @@ else {
 				// If database OK
 				$pdo->beginTransaction();
 				// Database creation
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:schema:update --force --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir .'/console doctrine:schema:update --force --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -327,14 +335,14 @@ else {
 				}
 				
 				// Init table (instert standard data)
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console doctrine:fixtures:load --append --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir .'/console doctrine:fixtures:load --append --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
 					throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
 				}
 
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:create '.$_POST['myddleware_username'].' '.$_POST['myddleware_user_email'].' '.$_POST['myddleware_password'].' --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir .'/console fos:user:create '.$_POST['myddleware_username'].' '.$_POST['myddleware_user_email'].' '.$_POST['myddleware_password'].' --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -342,7 +350,7 @@ else {
 				}
 				$userCreated = 1;
 				
-				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $kernel->getRootDir() .'/console fos:user:promote '.$_POST['myddleware_username'].' ROLE_ADMIN --env='. $kernel->getEnvironment());
+				$process = new \Symfony\Component\Process\Process($myddlewareParametersPublic['parameters']['php']['executable'].' '. $binDir .'/console fos:user:promote '.$_POST['myddleware_username'].' ROLE_ADMIN --env='. $kernel->getEnvironment());
 				$process->run();
 				// executes after the command finishes
 				if (!$process->isSuccessful()) {
@@ -408,8 +416,8 @@ else {
 			<table id="tab_rule">
 				<tr><th colspan="2">Myddleware is installed</th></tr>
 				<tr><th colspan="2">You can access to Myddleware here </th></tr>
-				<tr><th colspan="2"><a href="<?php echo $urlBase. '/web/app.php';?>"><?php echo $urlBase . '/web/app.php';?></a></th></tr>
-				<tr><th colspan="2">For security reasons, please delete the file : <?php echo $urlBase. '/web/installMyddleware.php';?></th></tr>				
+				<tr><th colspan="2"><a href="<?php echo $urlBase. '/app.php';?>"><?php echo $urlBase . '/app.php';?></a></th></tr>
+				<tr><th colspan="2">For security reasons, please delete the file : <?php echo $urlBase. '/installMyddleware.php';?></th></tr>				
 			 </table>	
 		</div>	
 	<?php } ?>
@@ -426,7 +434,7 @@ else {
 </div>
 </section>	
 <footer>
-<p>© Myddleware 2014-2017</p>
+<p>© Myddleware 2014-2018</p>
 <p>v<?php echo $myddlewareParameters['parameters']['myd_version'];?></p>
 </footer>
 </body>
