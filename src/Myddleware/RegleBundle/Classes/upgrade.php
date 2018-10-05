@@ -53,8 +53,8 @@ class upgradecore  {
 		
 		// New parameters in file parameters.yml.dist
 		$this->newParameters['parameters'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
-		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters_public.yml.dist'));	
-		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters_smtp.yml.dist'));	
+		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml.dist'));	
+		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml.dist'));	
 		// Current parameters in file parameters.yml
 		$this->currentParameters['parameters'] =  \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml'));	
 		$this->currentParameters['parameters_public'] = '';
@@ -93,10 +93,10 @@ class upgradecore  {
 			$this->updateVendors();
 			$output->writeln('<comment>Update vendors OK</comment>');
 			
-			// Clear boostrap cache
+			/* // Clear boostrap cache
 			$output->writeln('<comment>Clear boostrap cache...</comment>');
 			$this->clearBoostrapCache();
-			$output->writeln('<comment>Clear boostrap cache OK</comment>');
+			$output->writeln('<comment>Clear boostrap cache OK</comment>'); */
 			 
 			// Update database
 			$output->writeln('<comment>Update database...</comment>');
