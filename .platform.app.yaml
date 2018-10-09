@@ -40,15 +40,17 @@ mounts:
     "/var/logs": "shared:files/logs"
     "/app/config/public": "shared:files/config/public"
     "/var/sessions": "shared:files/sessions"
-    "/src": "shared:files/src"
-    "/web": "shared:files/web"
-    "/vendor": "shared:files/vendor"
+    "/src/Myddleware/RegleBundle/Custom": "shared:files/custom"
 
 # The hooks that will be performed when the package is deployed.
 hooks:
     build: |
+        cd app/config/
+        cp -r public/. read-only/
+        cd ../..
         php bin/console --env=prod assets:install --no-debug
     deploy: |
+        cp -r app/config/read-only/. app/config/public/
         php bin/console --env=prod cache:clear
         php bin/console --env=prod assetic:dump
         php bin/console --env=prod assets:install web
