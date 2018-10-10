@@ -44,6 +44,7 @@ class upgradecore  {
 	protected $currentParameters;
 	protected $phpExecutable = 'php';
 	protected $message = '';
+	protected $defaultEnvironment = array('prod'=>'prod','background'=>'background');
 
 	public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {				
 		$this->logger = $logger; // gestion des logs symfony monolog
@@ -264,24 +265,29 @@ class upgradecore  {
 	
 	// Clear Symfony cache
 	protected function clearSymfonycache() {
-		// Update schema
-		$application = new Application($this->container->get('kernel'));
-		$application->setAutoExit(false);
-		$arguments = array(
-			'command' => 'cache:clear',
-			'--env' => $this->env,
-		);
+		// Add current environement  to the default list		
+		$this->defaultEnvironment[$this->env] = $this->env;	
 		
-		$input = new ArrayInput($arguments);
-		$output = new BufferedOutput();
-		$application->run($input, $output);
+		foreach ($this->defaultEnvironment as $env) {
+			// Clear cache
+			$application = new Application($this->container->get('kernel'));
+			$application->setAutoExit(false);
+			$arguments = array(
+				'command' => 'cache:clear',
+				'--env' => $env,
+			);	
+			
+			$input = new ArrayInput($arguments);
+			$output = new BufferedOutput();
+			$application->run($input, $output);
 
-		$content = $output->fetch();
-		// Send output to the logfile if debug mode selected
-		if (!empty($content)) {
-			echo $content.chr(10);
-			$this->logger->info($content);
-			$this->message .= $content.chr(10);
+			$content = $output->fetch();
+			// Send output to the logfile if debug mode selected
+			if (!empty($content)) {
+				echo $content.chr(10);
+				$this->logger->info($content);
+				$this->message .= $content.chr(10);
+			}
 		}
 	}
 	

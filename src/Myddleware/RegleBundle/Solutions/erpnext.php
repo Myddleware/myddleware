@@ -439,7 +439,8 @@ class erpnextcore extends solution
 					// Send data to ERPNExt
 					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
 					if (!empty($resultQuery->data->name)) {
-						$result[$idDoc] = array('id' => $resultQuery->data->name, 'error' => '');
+						// utf8_decode because the id could be a name with special characters
+						$result[$idDoc] = array('id' => utf8_decode($resultQuery->data->name), 'error' => '');
 					} elseif(!empty($resultQuery)) {
 						throw new \Exception($resultQuery);
 					} else {

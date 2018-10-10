@@ -12,5 +12,5 @@ parameters:
     extension_allowed:
         - xml
         - wsdl
-    myd_version: 2.4.0a
+    myd_version: 2.4.0b
     block_install: 0
