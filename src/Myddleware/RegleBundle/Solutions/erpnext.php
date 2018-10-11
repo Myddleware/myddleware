@@ -27,6 +27,8 @@ namespace Myddleware\RegleBundle\Solutions;
 use DateTime;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class erpnextcore extends solution
 {
@@ -56,17 +58,17 @@ class erpnextcore extends solution
 		return array(
 			array(
 				'name' => 'url',
-				'type' => 'text',
+				'type' => TextType::class,
 				'label' => 'solution.fields.url'
 			),
 			array(
 				'name' => 'login',
-				'type' => 'text',
+				'type' => TextType::class,
 				'label' => 'solution.fields.login'
 			),
 			array(
 				'name' => 'password',
-				'type' => 'password',
+				'type' => PasswordType::class,
 				'label' => 'solution.fields.password'
 			)
 		);
