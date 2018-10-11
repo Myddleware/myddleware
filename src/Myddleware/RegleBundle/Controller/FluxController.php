@@ -506,7 +506,7 @@ class FluxControllerCore extends Controller
 				if (isset($target[$targetField])) {			
 					$targetData[$targetField] = $target[$targetField];
 					if (
-							!empty($history[$targetField])
+							isset($history[$targetField])
 						 &&	!empty($history)
 					) {
 						$historyData[$targetField] = $history[$targetField];

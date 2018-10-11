@@ -1258,7 +1258,7 @@ class documentcore {
 	
 	// Fonction permettant de contrôle les données. 
 	protected function checkField($value) {
-		if (!empty($value)) {
+		if (isset($value)) {
 			return $value; 
 		}
 		return null;
