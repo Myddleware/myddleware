@@ -28,63 +28,43 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class mailchimpcore  extends solution { 
-	public $callback = true;
-	public $js = true;
-	public $nameFieldGet = 'code';
-	
-	protected $clientid;
-	protected $clientsecret;
-	protected $redirect_uri;
-	protected $access_token;
-	protected $api_endpoint;
-	protected $dc;
-  
-    protected $verifySsl = false;
+class mailchimpcore  extends solution {
+
+	protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+	protected $apiKey;
+	protected $verify_ssl = true;
+	const TIMEOUT = 60;
 
 	public function getFieldsLogin() {	
 		return array(
 					array(
-                            'name' => 'clientid',
-                            'type' => TextType::class,
-                            'label' => 'solution.fields.clientid'
-                        ),
-					array(
-                            'name' => 'clientsecret',
-                            'type' => PasswordType::class,
-                            'label' => 'solution.fields.clientsecret'
-                        ),
-					array(
-                            'name' => 'redirect_uri',
-                            'type' => TextType::class,
-                            'label' => 'solution.fields.redirect_uri'
-                        )
+						'name' => 'apikey',
+						'type' => PasswordType::class,
+						'label' => 'solution.fields.apikey'
+					)
 		);
 	}
 	
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {
-			$this->init($this->paramConnexion);
-			// If we don't have the token, we are in the process of login otherwise we just connect to Mailchimp to read/write data
-			if (empty($this->paramConnexion['token'])) {
-				$session = $this->container->get('session');
-				$myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
-				// We always add data again in session because these data are removed after the call of the get
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-				$myddlewareSession['param']['myddleware']['connector']['mailchimp'][$paramConnexion['redirect_uri']]['paramConnexion'] = $this->paramConnexion;
-				$myddlewareSession['param']['myddleware']['connector']['solution']['callback'] = 'mailchimp';		
-				$session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);	
-			} else {	
-				// Call Mailchimp to get the api endpoint
-				$metadata = $this->call('https://login.mailchimp.com/oauth2/metadata', 'POST', array('oauth_token' => $this->access_token));				
-				if (empty($metadata['api_endpoint'])) {
-					throw new \Exception('No API endpoint found.'.(!empty($metadata['error_description']) ? ' '.$metadata['error'].': '.$metadata['error_description'] : ''));
-				}
-				$this->api_endpoint = $metadata['api_endpoint'];
-				$this->dc = $metadata['dc'];
-				$this->connexion_valide = true; 
+			// Get the api key
+			$this->apiKey = $this->paramConnexion['apikey'];
+			// Api key has to cointain "-"
+			if (strpos($this->apiKey, '-') === false) {
+                throw new \Exception("Invalid MailChimp API key supplied.");
+            }
+			// Add the dc in the endpoint
+			list(, $data_center) = explode('-', $this->apiKey);
+            $this->apiEndpoint = str_replace('<dc>', $data_center, $this->apiEndpoint);
+			// Call the root function to check the API
+			$result = $this->call($this->apiEndpoint);
+print_r($result);;			
+			if (empty($result['account_id'])) {
+				throw new \Exception('Login error');
 			}
+			// Connection validation
+			$this->connexion_valide = true;
 		}
 		catch (\Exception $e) {
 			$error = $e->getMessage();
@@ -92,62 +72,7 @@ class mailchimpcore  extends solution {
 			return array('error' => $error);
 		}
 	} // login($paramConnexion)
- 
-	public function init($paramConnexion) {
-		$this->clientid = $paramConnexion['clientid'];
-		$this->clientsecret = $paramConnexion['clientsecret'];
-		$this->redirect_uri = $paramConnexion['redirect_uri'];	
-		if (!empty($paramConnexion['token'])) {
-			$this->access_token = $paramConnexion['token'];				
-		}
-	}
-	
-	public function getCreateAuthUrl($callbackUrl ) {
-		return 'https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id='.$this->clientid.'&redirect_uri='.$this->redirect_uri;
-	}
-	
-	public function testToken(){	
-		$result = array();
-		try {	
-			$this->call('https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id='.$this->clientid.'&redirect_uri='.$this->redirect_uri);				
-			$result['error']['code'] = false;
-			$result['error']['message'] = false;	
-		}
-		catch (\Exception $e){
-			$result['error']['code'] = $e->getCode();
-			$result['error']['message'] = $e->getMessage();
-		}
-		return $result;				
-	}
-	
-	
-	// Get the access token with the code 
-	public function setAuthenticate($code) {
-		try {	
-			$parameters = array(
-				'grant_type'	=> 'authorization_code',
-				'client_id'		=> $this->clientid,
-				'client_secret'	=> $this->clientsecret,
-				'redirect_uri'	=> $this->redirect_uri,
-				'code'			=> $code
-			);	
-			$response = $this->call( 'https://login.mailchimp.com/oauth2/token', 'POST', $parameters);
-			if (!empty($response['access_token'])) {
-				$this->setAccessToken($response['access_token']);
-			}
-		}
-		catch (\Exception $e){
-			$response = $e->getMessage();
-		}
-	}
-	
-	public function getAccessToken() {
-		return 	$this->access_token;
-	}
-	
-	public function setAccessToken($token) {
-		$this->access_token = $token;			
-	}
+
  	// Renvoie les modules passés en paramètre
 	public function get_modules($type = 'source') {
 		try{
@@ -456,32 +381,35 @@ class mailchimpcore  extends solution {
 		return $param['module'];
 	}
 	
-     /**
+	     /**
      * Performs the underlying HTTP request. Not very exciting
      * @param  string $method The API method to be called
      * @param  array  $args   Assoc array of parameters to be passed
      * @return array          Assoc array of decoded result
      */   
-    protected function call($url, $method = 'GET', $args=array(), $timeout = 10){   
-	 if (function_exists('curl_init') && function_exists('curl_setopt')) {
+    protected function call($url, $method = 'GET', $args=array(), $timeout = self::TIMEOUT){   
+		if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json\r\n'));  
-            curl_setopt($ch, CURLOPT_USERAGENT, 'oauth2-draft-v10');
+			$httpHeader = array(
+				'Accept: application/vnd.api+json',
+				'Content-Type: application/vnd.api+json',
+				'Authorization: apikey ' . $this->apiKey
+			);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $httpHeader); 
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			if (!empty($this->access_token) and empty($args['oauth_token'])) {
-				curl_setopt($ch, CURLOPT_USERPWD, "user:".$this->access_token.'-'.$this->dc);
-            }
+			// if (!empty($this->access_token) and empty($args['oauth_token'])) {
+				// curl_setopt($ch, CURLOPT_USERPWD, "user:".$this->access_token.'-'.$this->dc);
+            // }
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
 			// For metadata and authentificate call only
-			if (!empty($args['oauth_token']) || !empty($args['grant_type'])) {
+			/* if (!empty($args['oauth_token']) || !empty($args['grant_type'])) {
 				$value = http_build_query($args); //params is an array	
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $value);
 			}
-            elseif (!empty($args)) {
+            else */if (!empty($args)) {
                 $jsonData = json_encode($args);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             }
@@ -493,7 +421,7 @@ class mailchimpcore  extends solution {
         }
         throw new \Exception('curl extension is missing!');
     }	
-	 
+	
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
