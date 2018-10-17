@@ -611,7 +611,7 @@ class FluxControllerCore extends Controller
 
 					// Insert in audit			  
 					$oneDocAudit = new DocumentAudit();
-					$oneDocAudit->setDoc( $re->request->get('flux') );
+					$oneDocAudit->setDoc( $request->get('flux') );
 					$oneDocAudit->setDateModified( new \DateTime );
 					$oneDocAudit->setBefore( $beforeValue );
 					$oneDocAudit->setAfter( $value );
