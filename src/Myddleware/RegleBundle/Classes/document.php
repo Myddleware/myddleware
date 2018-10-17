@@ -1027,7 +1027,7 @@ class documentcore {
 					} else {
 						// Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
 						if (
-								empty($data[$ruleField['target_field_name']])
+								!isset($data[$ruleField['target_field_name']])
 							 && $type == 'H'	
 						) { 				
 							continue;
@@ -1258,7 +1258,7 @@ class documentcore {
 	
 	// Fonction permettant de contrôle les données. 
 	protected function checkField($value) {
-		if (!empty($value)) {
+		if (isset($value)) {
 			return $value; 
 		}
 		return null;

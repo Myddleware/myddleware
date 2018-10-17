@@ -264,6 +264,7 @@ class rulecore {
 			if (empty($readSource['error'])) {
 				$readSource['error'] = '';
 			}
+	
 			// Si erreur
 			if (!isset($readSource['count'])) {
 				return $readSource;
@@ -401,7 +402,10 @@ class rulecore {
 				) {
 					// Check and clean data source
 					$validateReadDataSource = $this->validateReadDataSource();
-					if (!empty($validateReadDataSource['error'])){				
+					if (!empty($validateReadDataSource['error'])){
+						// If the run isn't validated, we set back the previous reference date 
+						// so Myddleware won't continue to read next data during the next run
+						$this->dataSource['date_ref'] = $this->ruleParams['datereference'];						
 						return $validateReadDataSource;
 					}
 				}			
@@ -434,7 +438,6 @@ class rulecore {
 			// Order data in the date_modified order
 			$modified  = array_column($dataSourceValues, 'date_modified');
 			array_multisort($modified, SORT_DESC, $dataSourceValues);
-			
 			foreach ($dataSourceValues as $value) {
 				// Check if the previous record has the same date_modified than the current record
 				if (
@@ -450,6 +453,8 @@ class rulecore {
 					$previousValue = $value;
 					continue;
 				}
+				// Keep the reference date of the next record to read
+				$this->dataSource['date_ref'] = $previousValue['date_modified'];			
 				break;
 			}
 			if (empty($this->dataSource['values'])) {
