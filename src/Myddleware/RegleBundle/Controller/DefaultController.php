@@ -1053,10 +1053,10 @@ class DefaultControllerCore extends Controller
             $solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
 
-            $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
+            $sourceConnection = $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 
             if (empty($solution_source->connexion_valide)) {
-                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
+                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect').' '.(!empty($sourceConnection['error']) ? $sourceConnection['error'] : 'No message returned by '.$solution_source_nom);
                 $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
@@ -1088,10 +1088,10 @@ class DefaultControllerCore extends Controller
                 $solution_cible_nom = $myddlewareSession['param']['rule']['cible']['solution'];
                 $solution_cible = $this->get('myddleware_rule.' . $solution_cible_nom);
             }
-            $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
+            $targetConnection = $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
 
             if (empty($solution_cible->connexion_valide)) {
-                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect');
+                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect').' '.(!empty($targetConnection['error']) ? $targetConnection['error'] : 'No message returned by '.$solution_cible_nom);
                 $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
@@ -1289,10 +1289,10 @@ class DefaultControllerCore extends Controller
             // TARGET ------------------------------------------------------------------
             // We retriev first all data from the target application and the from the source application
             // We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
-            $solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($ruleKey)));
+            $targetConnection = $solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($ruleKey)));
 
             if ($solution_cible->connexion_valide == false) {
-                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect'));
+                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.target_module_connect').' '.(!empty($targetConnection['error']) ? $targetConnection['error'] : 'No message returned by '.$sessionService->getParamRuleCibleSolution($ruleKey)));
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
             }
@@ -1325,11 +1325,11 @@ class DefaultControllerCore extends Controller
             // SOURCE ------------------------------------------------------------------
             // Connexion au service de la solution source
             $solution_source = $this->get('myddleware_rule.' . $sessionService->getParamRuleSourceSolution($ruleKey));
-            $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($ruleKey)));
+            $sourceConnection = $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($ruleKey)));
 
             // Contrôle que la connexion est valide
             if ($solution_source->connexion_valide == false) {
-                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect'));
+                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect').' '.(!empty($sourceConnection['error']) ? $sourceConnection['error'] : 'No message returned by '.$sessionService->getParamRuleSourceSolution($ruleKey)));
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
             }
