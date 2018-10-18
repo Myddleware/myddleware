@@ -366,7 +366,7 @@ class erpnextcore extends solution
 	}// end function read
 
 	public function create($param) {
-		return $this->CreateOrUpdate('create', $param);
+		return $this->createUpdate('create', $param);
 
 	}// end function create
 
@@ -376,7 +376,7 @@ class erpnextcore extends solution
 	 * @return mixed
 	 */
 	public function update($param) {
-		return $this->CreateOrUpdate('update', $param);
+		return $this->createUpdate('update', $param);
 	}// end function create
 
 
@@ -386,7 +386,7 @@ class erpnextcore extends solution
 	 * @param $param
 	 * @return array
 	 */
-	function CreateOrUpdate($method, $param) {	
+	function createUpdate($method, $param) {	
 		try {
 			$result = array();
 			$subDocIdArray = array();

@@ -33,6 +33,7 @@ class mailchimpcore  extends solution {
 	protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
 	protected $apiKey;
 	protected $verify_ssl = true;
+	protected $update = false;
 	const TIMEOUT = 60;
 
 	public function getFieldsLogin() {	
@@ -58,8 +59,7 @@ class mailchimpcore  extends solution {
 			list(, $data_center) = explode('-', $this->apiKey);
             $this->apiEndpoint = str_replace('<dc>', $data_center, $this->apiEndpoint);
 			// Call the root function to check the API
-			$result = $this->call($this->apiEndpoint);
-print_r($result);;			
+			$result = $this->call($this->apiEndpoint);	
 			if (empty($result['account_id'])) {
 				throw new \Exception('Login error');
 			}
@@ -96,106 +96,20 @@ print_r($result);;
 	// Renvoie les champs du module passé en paramètre
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
-		try{
-			// Pour chaque module, traitement différent
-			switch ($module) {
-				case 'lists':	
-					// Si on a le module list en target alors on est en mode search. Il faut juste faire le lien entre le nom de la source et le nom de la liste
-					$this->moduleFields = array(
-						'name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__company' => array('label' => 'Contact - Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__address1' => array('label' => 'Contact - Adsress1', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__address2' => array('label' => 'Contact - address2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'contact__city' => array('label' => 'Contact - city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__state' => array('label' => 'Contact - state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__zip' => array('label' => 'Contact - zip', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__country' => array('label' => 'Contact - country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'contact__phone' => array('label' => 'Contact - phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'permission_reminder' => array('label' => 'Permission reminder', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'use_archive_bar' => array('label' => 'Use archive bar', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'campaign_defaults__from_name' => array('label' => 'Campaign defaults from name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__from_email' => array('label' => 'Campaign defaults from email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__subject' => array('label' => 'Campaign defaults subject', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'campaign_defaults__language' => array('label' => 'Campaign defaults language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'notify_on_subscribe' => array('label' => 'Notify on subscribe', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'notify_on_unsubscribe' => array('label' => 'Notify on unsubscribe', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'email_type_option' => array('label' => 'Email type option', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 1),
-						'visibility' => array('label' => 'Visibility', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					);
-					break;
-				case 'campaigns':	
-					$this->moduleFields = array(
-						'settings__title' => array('label' => 'Title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'settings__subject_line' => array('label' => 'Subject', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'settings__from_name' => array('label' => 'From name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'settings__reply_to' => array('label' => 'Reply to', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'settings__use_conversation' => array('label' => 'Use conversation', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'settings__to_name' => array('label' => 'To name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'settings__authenticate' => array('label' => 'Authenticate', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'settings__auto_footer' => array('label' => 'Auto footer', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'settings__inline_css' => array('label' => 'Inline css', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'settings__auto_tweet' => array('label' => 'Auto tweet', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'settings__fb_comments' => array('label' => 'Fb comments', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'variate_settings__winner_criteria' => array('label' => 'Winning Criteria', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('opens' => 'opens','clicks' => 'clicks','manual' => 'manual','total_revenue' => 'total_revenue')),
-						'variate_settings__wait_time' => array('label' => 'Wait_time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'variate_settings__test_size' => array('label' => 'Test size', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'variate_settings__test_size' => array('label' => 'Test size', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'tracking__opens' => array('label' => 'Opens', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'tracking__html_clicks' => array('label' => 'HTML Click Tracking', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'tracking__text_clicks' => array('label' => 'Plain-Text Click Tracking', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'tracking__goal_tracking' => array('label' => 'MailChimp Goal Tracking', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'tracking__ecomm360' => array('label' => 'E-commerce Tracking', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'tracking__google_analytics' => array('label' => 'Google Analytics Tracking', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'tracking__clicktale' => array('label' => 'ClickTale Analytics Tracking', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'rss_opts__feed_url' => array('label' => 'Feed URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'rss_opts__frequency' => array('label' => 'Frequency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('daily' => 'daily','weekly' => 'weekly','monthly' => 'monthly')),
-						'rss_opts__constrain_rss_img' => array('label' => 'Constrain RSS Images', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'social_card__title' => array('label' => 'Social card title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'social_card__description' => array('label' => 'Social card description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
-						'social_card__image_url' => array('label' => 'Social card image_url', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'type' => array('label' => 'Campaign Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array('regular' => 'regular','plaintext' => 'plaintext','absplit' => 'absplit','rss' => 'rss','variate' => 'variate'))
-					);
-					$this->fieldsRelate = array(
-						'recipients__list_id' => array('label' => 'List ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
-					);
-					break;	
-				case 'members':	
-					$this->moduleFields = array(
-						'email_address' => array('label' => 'Email address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'email_type' => array('label' => 'Email Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('text' => 'text','html' => 'html')),
-						'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array('pending' => 'pending','subscribed' => 'subscribed','unsubscribed' => 'unsubscribed','cleaned' => 'cleaned')),
-						'language' => array('label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'vip' => array('label' => 'VIP', 'type' => 'bool', 'type_bdd' => 'tinyint(1)', 'required' => 0),
-						'location__latitude' => array('label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'location__longitude' => array('label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'ip_signup' => array('label' => 'Ip signup', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'timestamp_signup' => array('Timestamp signup' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'ip_opt' => array('label' => 'Ip opt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'timestamp_opt' => array('label' => 'Timestamp opt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'merge_fields__FNAME' => array('label' => 'MERGE0', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'merge_fields__LNAME' => array('label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					);
-					$this->fieldsRelate = array(
-						'list_id' => array('label' => 'List ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
-					);	
-					break;	
-				default:
-					throw new \Exception("Fields unreadable");
-					break;
+		try {
+			require_once('lib/mailchimp/metadata.php');	
+			
+			if (!empty($moduleFields[$module])) {
+				$this->moduleFields = $moduleFields[$module];
 			}
-			// Ajout des champ relate au mapping des champs 
+
+			if (!empty($fieldsRelate[$module])) {
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}	
+			
+			// Add relate field in the field mapping 
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			// Add list of list in the field list_id
-			if (!empty($this->moduleFields['list_id'])) {
-				$dataMailchimp['count'] = 100;
-				$mailchimpLists = $this->call($this->api_endpoint.'/3.0/lists?count=100','GET');
-				if (!empty($mailchimpLists['lists'])) {
-					foreach($mailchimpLists['lists'] as $mailchimpList) {
-						$this->moduleFields['list_id']['option'][$mailchimpList['id']] = $mailchimpList['name'];
-					}
-				}			
 			}
 			return $this->moduleFields;
 		}
@@ -206,16 +120,17 @@ print_r($result);;
 		
 	
 	// Permet de créer des données
-	public function create($param) {
+	public function createUpdate($method,$param) {		
 		// Get module fields to check if the fiels is a boolean
 		$this->get_module_fields($param['module'], 'target');
 		
-		// Tranform Myddleware data to Mailchimp data
+		// Tranform Myddleware data to Mailchimp data	
 		foreach($param['data'] as $idDoc => $data) {
 			try {
 				// Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
 				$dataMailchimp = array();
+
 				foreach ($data as $key => $value) {
 					// We jump the filed target_id for creation
 					if ($key == 'target_id') {
@@ -237,10 +152,9 @@ print_r($result);;
 					}
 				}
 
-				// Creation du Mailchimp
-				
-				$urlParam = $this->createUrlParam($param,$data);
-				$resultMailchimp = $this->call($this->api_endpoint.'/3.0/'.$urlParam,'POST',$dataMailchimp);				
+				// Send data to Mailchimp
+				$urlParam = $this->createUrlParam($param,$data,$method);
+				$resultMailchimp = $this->call($this->apiEndpoint.$urlParam,$method,$dataMailchimp);						
 
 				// Error management
 				if (
@@ -255,7 +169,7 @@ print_r($result);;
 					}
 					throw new \Exception((!empty($resultMailchimp['title']) ? $resultMailchimp['title'] : 'Error').' ('.$resultMailchimp['status'].'): '.(!empty($resultMailchimp['detail']) ? $resultMailchimp['detail'] : '').(!empty($errorMsg) ? ' => '.$errorMsg : ''));
 				}
-
+				// Save Mailchimp record ID to Myddleware
 				if (!empty($resultMailchimp['id'])) {
 					$result[$idDoc] = array(
 											'id' => $resultMailchimp['id'],
@@ -279,77 +193,14 @@ print_r($result);;
 		return $result;
 	}
 	
-	// Permet de créer des données
+	// Create data to Mailchimp
+	public function create($param) {
+		return $this->createUpdate('POST', $param);
+	}
+	
+	// Update data to Mailchimp
 	public function update($param) {
-		// Get module fields to check if the fiels is a boolean
-		$this->get_module_fields($param['module'], 'target');
-		
-		// Tranform Myddleware data to Mailchimp data
-		foreach($param['data'] as $idDoc => $data) {
-			try {
-				// Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
-				$dataMailchimp = array();
-				foreach ($data as $key => $value) {
-					// We jump the filed target_id
-					if ($key == 'target_id') {
-						continue;
-					}
-					// Transform data, for example for the type boolean : from 1 to true and from 0 to false
-					$value = $this->transformValueType($key, $value);
-					
-					// Formattage des données à envoyer
-					$filedStructure = explode('__',$key);
-					if (!empty($filedStructure[1])) {
-						$dataMailchimp[$filedStructure[0]][$filedStructure[1]] = $value;
-					}
-					elseif (!empty($filedStructure[0])) { 
-						$dataMailchimp[$filedStructure[0]] = $value;
-					}
-					else {
-						throw new \Exception('Field '.$filedStructure.' invalid');
-					}
-				}
-				// Creation du Mailchimp
-				$urlParam = $this->createUrlParam($param,$data);
-				$resultMailchimp = $this->call($this->api_endpoint.'/3.0/'.$urlParam.'/'.$data['target_id'],'PATCH',$dataMailchimp);				
-
-				// Error management
-				if (
-						!empty($resultMailchimp['status'])
-					&& $resultMailchimp['status'] >= 400
-				) {
-					$errorMsg = '';
-					if (!empty($resultMailchimp['errors'])) {		
-						foreach ($resultMailchimp['errors']  as $error) {
-							$errorMsg .= print_r($error,true).' ';
-						}
-					}
-					throw new \Exception((!empty($resultMailchimp['title']) ? $resultMailchimp['title'] : 'Error').' ('.$resultMailchimp['status'].'): '.(!empty($resultMailchimp['detail']) ? $resultMailchimp['detail'] : '').(!empty($errorMsg) ? ' => '.$errorMsg : ''));
-				}
-
-
-				if (!empty($resultMailchimp['id'])) {
-					$result[$idDoc] = array(
-											'id' => $resultMailchimp['id'],
-											'error' => false
-									);
-				}
-				else  {
-					throw new \Exception("Error webservice. There is no ID in the result of the function $param[module]. ");
-				}				
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
-				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);		
-			}
-			// Change the transfer status in Myddleware
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}
-		return $result;
+		return $this->createUpdate('PATCH', $param);
 	}
 	
 	// Transform data, for example for the type boolean : from 1 to true and from 0 to false
@@ -369,19 +220,30 @@ print_r($result);;
 	}
 	
 	// Create the url parameters depending the module
-	protected function createUrlParam($param,$data) {
+	protected function createUrlParam($param,$data,$method) {
+		$urlParam = '';
+		// Manage parameters for list
 		if ($param['module'] == 'members') {
 			if (empty($data['list_id'])) {
-				throw new \Exception('No list id in the data transfer. Failed to create member.');
+				throw new \Exception('No list id in the data transfer. Failed to create or update member.');
 			}
 			else {
-				return 'lists/'.$data['list_id'].'/'.$param['module'];
+				$urlParam = 'lists/'.$data['list_id'].'/'.$param['module'];
 			}
+		} else {
+			$urlParam = $param['module'];
+		}
+		// Manage update param
+		if ($method == 'PATCH') {
+			if (empty($data['target_id'])) {
+				throw new \Exception('No record ID in the data. Failed to update the record.');
+			}
+			$urlParam .= '/'.$data['target_id'];
 		}	
-		return $param['module'];
+		return $urlParam;
 	}
 	
-	     /**
+	/**
      * Performs the underlying HTTP request. Not very exciting
      * @param  string $method The API method to be called
      * @param  array  $args   Assoc array of parameters to be passed
@@ -399,17 +261,9 @@ print_r($result);;
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $httpHeader); 
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			// if (!empty($this->access_token) and empty($args['oauth_token'])) {
-				// curl_setopt($ch, CURLOPT_USERPWD, "user:".$this->access_token.'-'.$this->dc);
-            // }
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
-			// For metadata and authentificate call only
-			/* if (!empty($args['oauth_token']) || !empty($args['grant_type'])) {
-				$value = http_build_query($args); //params is an array	
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $value);
-			}
-            else */if (!empty($args)) {
+			if (!empty($args)) {
                 $jsonData = json_encode($args);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             }
