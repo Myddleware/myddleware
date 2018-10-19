@@ -45,7 +45,6 @@ class jobcore  {
 	
 	protected $rule;
 	protected $ruleId;
-	protected $limit = 100;
 	protected $logData;
 	protected $start;
 	protected $paramJob;
@@ -98,7 +97,6 @@ class jobcore  {
 			// We instance the rule
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
-			$param['limit'] = $this->limit;
 			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			if ($this->rule->isChild()) {
@@ -114,21 +112,12 @@ class jobcore  {
 
 	// Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
 	public function createDocuments() {		
-		if ($this->limit > 0) {
-			$createDocuments = $this->rule->createDocuments();
-			if (!empty($createDocuments['error'])) {
-				$this->message .= print_r($createDocuments['error'],true);
-			}
-			if (!empty($createDocuments['count'])) {
-				$this->limit = $this->limit-$createDocuments['count'];
-				if ($this->limit < 0) {
-					$this->limit = 0;
-				}
-				return $createDocuments['count'];
-			}
-			else {
-				return 0;
-			}
+		$createDocuments = $this->rule->createDocuments();
+		if (!empty($createDocuments['error'])) {
+			$this->message .= print_r($createDocuments['error'],true);
+		}
+		if (!empty($createDocuments['count'])) {
+			return $createDocuments['count'];
 		}
 		else {
 			return 0;

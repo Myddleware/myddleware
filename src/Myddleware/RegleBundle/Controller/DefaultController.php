@@ -366,18 +366,25 @@ class DefaultControllerCore extends Controller
         try {
             // On récupére l'EntityManager
             $this->getInstanceBdd();
-
+print_r($_POST);
             if (isset($_POST['params']) && is_array($_POST['params'])) {
                 foreach ($_POST['params'] as $p) {
                     $param = $this->em->getRepository('RegleBundle:RuleParam')
                         ->findOneBy(array(
                                 'rule' => $id,
-                                'id' => (int)$p['id']
+                                'name' => $p['name']
                             )
                         );
-
-                    $param->setValue($p['value']);
-                    $this->em->persist($param);
+					// In a few case, the parameter could not exist, in this case we create it
+					if (empty($param)) {
+						$param = new RuleParam();
+						$param->setRule($id);
+                        $param->setName($p['name']);
+						$param->setValue($p['value']);					
+					} else {
+						$param->setValue($p['value']);
+                    }
+					$this->em->persist($param);
                     $this->em->flush();
                 }
             }
@@ -395,13 +402,23 @@ class DefaultControllerCore extends Controller
             // On récupére l'EntityManager
             $this->getInstanceBdd();
 
-            // Récupération de date_ref
+            // Get the rule reference
             $param['date_ref'] = $this->em->getRepository('RegleBundle:RuleParam')
                 ->findOneBy(array(
                     'rule' => $id,
                     'name' => 'datereference'
                 ))
                 ->getValue();
+				
+			// Get the rule limit
+            $limitParam = $this->em->getRepository('RegleBundle:RuleParam')
+                ->findOneBy(array(
+                    'rule' => $id,
+                    'name' => 'limit'
+                ));
+			if (!empty($limitParam)) {
+                $param['limit'] = $limitParam->getValue();
+			} 
 
             // Get the other rule params
             $connectorParams = $this->getDoctrine()
@@ -777,22 +794,14 @@ class DefaultControllerCore extends Controller
             foreach ($Params as $field) {
                 $standardField = false;
                 foreach ($ruleParam as $index => $value) {
+					// Init the parameter in case it doesn't exist in the database yet
+					if (!isset($ruleParam[$index]['id_bdd'])) {
+						$ruleParam[$index]['id_bdd'] = '';
+                        $ruleParam[$index]['value_bdd'] = '';
+					}
                     if ($field->getName() == $value['name']) {
                         $ruleParam[$index]['id_bdd'] = $field->getId();
                         $ruleParam[$index]['value_bdd'] = $field->getValue();
-                        if ($field->getName() == 'datereference') {
-                            // Test si la date est valide
-                            $date = $field->getValue();
-                            $format = 'Y-m-d H:i:s';
-                            $d = \DateTime::createFromFormat($format, $date);
-                            $r = $d && $d->format($format) == $date;
-
-                            if (!$r) {
-                                $ruleParam[$index]['id'] = 'datereference_txt';
-                                $ruleParam[$index]['name'] = 'datereference_txt';
-                                $ruleParam[$index]['label'] = $autorization_source . '.' . $autorization_module_trans . '.ref';
-                            }
-                        }
                         $standardField = true;
                         break;
                     }

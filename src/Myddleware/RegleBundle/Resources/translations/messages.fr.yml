@@ -187,7 +187,7 @@ view_rule:
         save: Sauvegarder
         simule: Simuler Transferts
         result: Nombre de transferts estimé
-        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ces derniers ne vous coûteront pas de crédits s'ils ne sont pas envoyés. De plus, ce nombre sera toujours égal ou inférieur à la limite de transferts créés par exécution de règle de votre système Myddleware (défaut 100).
+        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
 
 rule:
     source: Source
@@ -484,9 +484,10 @@ solution:
         redirect_uri: URL de redirection
         applicationName: Nom de l'application	
     params: 
-        dateref: Date de référence
+        dateref: Référence (Les données seront lues à partir de ce paramètre)
+        limit: Limite (Nombre de données lues maximum par appel)
         active: Activation
-        delete: Suppression des données
+        delete: Suppression de données (délais de suppression des données des documents dans Myddleware) 
         activate: Activé
         desactivate: Désactivé
         1_minute: 1 minute
