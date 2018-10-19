@@ -360,13 +360,10 @@ class DefaultControllerCore extends Controller
     }
 
     // MODIFIE LES PARAMETRES D UNE REGLE
-    public function ruleUpdParamsAction($id)
-    {
-
+    public function ruleUpdParamsAction($id) {
         try {
             // On récupére l'EntityManager
             $this->getInstanceBdd();
-print_r($_POST);
             if (isset($_POST['params']) && is_array($_POST['params'])) {
                 foreach ($_POST['params'] as $p) {
                     $param = $this->em->getRepository('RegleBundle:RuleParam')

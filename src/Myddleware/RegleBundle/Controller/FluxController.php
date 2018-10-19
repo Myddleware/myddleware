@@ -450,8 +450,7 @@ class FluxControllerCore extends Controller
 	}
 
 	// Info d'un flux
-	public function fluxInfoAction($id,$page) {
-		
+	public function fluxInfoAction($id,$page) {		
 		try {
 			$em = $this->getDoctrine()->getManager();
 
@@ -461,7 +460,7 @@ class FluxControllerCore extends Controller
 				
 			// Infos des flux
 			$doc = $em->getRepository('RegleBundle:Document')
-	                  ->findById($list_fields_sql);						  
+	                  ->findById($list_fields_sql);					  
 			if( !$permission->isAdmin($this->getUser()->getId()) ) {		  
 				if(
 						empty($doc[0])
@@ -542,25 +541,54 @@ class FluxControllerCore extends Controller
 												),				
 				'maxPerPage' => $this->container->getParameter('pager'),
 				'page' => $page
-			),false);		
+			),false);
+
+			// Get the child documents
 			$childDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
 			// Get the rule name of every child doc
 			$childDocumentsRule = array();
 			foreach ($childDocuments as $childDocument) {
 				$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
 			}
-	
+			
+			// Get the relate documents
+			$documentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_id'=> $doc[0]->getId()));
+
+			// Get the detail of documents related
+			$i = 0;
+			$relateDocuments = array();
+			$relateDocumentsRule = array();
+			foreach ($documentRelationships as $documentRelationship) {
+				$relateDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $documentRelationship->getDocRelId());
+				$relateDocuments[$i]->sourceField = $documentRelationship->getSourceField();
+				// Get the rule name of every relate doc
+				foreach ($relateDocuments as $relateDocument) {
+					$relateDocumentsRule[$relateDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $relateDocument->getRule())->getName();
+				}
+				$i++;
+			}	
+
+			// Get the predecessor documents
+			$predecessorDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
+			// If only one record, the history is the current document, so we remove it => no predecessor
+			if (count($predecessorDocuments) == 1) {
+				$predecessorDocuments = array();
+			}
+			
+			// Add custom button
 			$name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
-				$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
-				$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
-				$solution_target = (($solution_target == NULL) ? array() : $solution_target );
+			$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
+			$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
+			$solution_target = (($solution_target == NULL) ? array() : $solution_target );
 					
 			$name_solution_source = $rule->getConnectorSource()->getSolution()->getName();
-				$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
-				$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
-				$solution_source = (($solution_source == NULL) ? array() : $solution_source );
+			$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
+			$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
+			$solution_source = (($solution_source == NULL) ? array() : $solution_source );
 		
-			$list_btn = array_merge( $solution_target, $solution_source );													
+			$list_btn = array_merge( $solution_target, $solution_source );		
+
+			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
 				'source' => $sourceData,
 				'target' => $targetData,
@@ -573,6 +601,11 @@ class FluxControllerCore extends Controller
 		        'child_documents' => $childDocuments,
 		        'child_Documents_Rule' => $childDocumentsRule,
 		        'nb_child_documents' => count($childDocuments),
+				'relate_documents' => $relateDocuments,
+		        'relate_Documents_Rule' => $relateDocumentsRule,
+		        'nb_relate_documents' => count($relateDocuments),
+				'predecessor_documents' => $predecessorDocuments,
+				'nb_predecessor_documents' => count($predecessorDocuments),
 		        'ctm_btn' => $list_btn			
 				)
 			);			

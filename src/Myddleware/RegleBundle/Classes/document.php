@@ -30,6 +30,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Ac
 use Doctrine\DBAL\Connection; // Connexion BDD
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // SugarCRM Myddleware
 use Myddleware\RegleBundle\Entity\DocumentData as DocumentDataEntity;
+use Myddleware\RegleBundle\Entity\DocumentRelationship as DocumentRelationship;
 
 class documentcore { 
 	
@@ -631,14 +632,17 @@ class documentcore {
 					// If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
 					if (!empty($ruleRelationship['parent'])) {
 						continue;
-					}		
+					}	
 					
+
 					// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed		
 					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']]);
 					if (empty($targetId['record_id'])) {
 						$error = true;
 						break;
 					}
+					// Save document relationship to keep the relate id and display document linked into Myddleware
+					$this->insertDocumentRelationship($ruleRelationship, $targetId['document_id']);
 				}
 				// Si aucun document parent n'est trouvé alors bloque le document
 				if ($error) {
@@ -670,6 +674,7 @@ class documentcore {
 					$this->updateType('U');
 				}
 			}
+			
 			$this->updateStatus('Relate_OK');
 					
 			$this->connection->commit(); // -- COMMIT TRANSACTION	
@@ -1657,6 +1662,26 @@ class documentcore {
 			$this->logger->error( $this->message );
 			$this->createDocLog();
 		}
+	}
+	
+	// Save document relationship
+	protected function insertDocumentRelationship ($ruleRelationship, $docRelId) {		
+		try {	
+			// Add the relationship in the table document Relationship
+			$documentRelationship = new DocumentRelationship();
+			$documentRelationship->setDocId($this->id);
+			$documentRelationship->setDocRelId($docRelId);
+			$documentRelationship->setDateCreated(new \DateTime);
+			$documentRelationship->setCreatedBy((int)$this->userId);
+			$documentRelationship->setSourceField($ruleRelationship['field_name_source']);				
+			$this->em->persist($documentRelationship);
+			$this->em->flush();	
+		} catch (\Exception $e) {
+			$this->message .= 'Failed to save the document relationship for the field '.$ruleRelationship['field_name_source'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'W';
+			$this->logger->error($this->message);
+			return false;
+		}		
 	}
 	
 	// Permet d'intervenir avant le changement de statut
