@@ -295,26 +295,26 @@ class ringcentralcore  extends solution {
 									// If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
 									$record->$field = (isset($record->$entryName->$subEntryName) ? $record->$entryName->$subEntryName : '');
 								}
-								// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
 								if(isset($record->$field)) {
-									// The field id in Cirrus shield as a capital letter for the I, not in Myddleware
 									if ($field == $dateRefField) {
 										$dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
-										$row['date_modified'] = $dateMyddlewareFormat;
+										// Add one second to the date modified (and so reference date) to not read the last record 2 times 
+										// Read function for Ring central allows only ">=" not ">"
+										$date = new \DateTime($dateMyddlewareFormat);					
+										$date = date_modify($date, '+1 seconde');						
+										$row['date_modified'] = $date->format('Y-m-d H:i:s');
 									}
 									$row[$field] = $record->$field;
 								} else {
 									$row[$field] = '';
 								}
 							}
-							// date à gérer
+							// date ref management
 							if (
 									!empty($row['date_modified'])
 								&&	$dateRefExt[$extensionId] <= $row['date_modified']
-							) {
-								$date = new \DateTime($row['date_modified']);					
-								$date = date_modify($date, '+1 seconde');						
-								$dateRefExt[$extensionId] = $date->format('Y-m-d H:i:s');
+							) {						
+								$dateRefExt[$extensionId] = $row['date_modified'];
 							}
 							$result['values'][$record->id] = $row;
 							$result['count']++;

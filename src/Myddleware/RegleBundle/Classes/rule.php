@@ -466,8 +466,8 @@ class rulecore {
 					$previousValue = $value;
 					continue;
 				}
-				// Keep the reference date of the next record to read
-				$this->dataSource['date_ref'] = $previousValue['date_modified'];			
+				// Keep the reference date of the last record we have read
+				$this->dataSource['date_ref'] = $value['date_modified'];			
 				break;
 			}
 			if (empty($this->dataSource['values'])) {

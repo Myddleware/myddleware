@@ -561,7 +561,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function read($param) {		
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -660,7 +660,7 @@ class prestashopcore extends solution {
 								$date_ref = date_create($value);							
 								date_modify($date_ref, '+1 seconde');
 								$result['date_ref'] = date_format($date_ref, 'Y-m-d H:i:s');
-								$record['date_modified'] = (string)$value;
+								$record['date_modified'] = $result['date_ref'];
 							}
 							// Si la clé de référence est un id et que celui-ci est supérieur alors on sauvegarde cette référence
 							elseif (
