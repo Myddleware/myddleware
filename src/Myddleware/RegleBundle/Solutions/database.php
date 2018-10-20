@@ -355,6 +355,10 @@ class databasecore extends solution {
 				$nbFilter = count($param['query']);
 				$requestSQL .= " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
+					// Manage query with id, to be replaced by the ref Id fieldname
+					if ($queryKey == 'Id') {
+						$queryKey = $param['ruleParams']['fieldId'];
+					}
 					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
 					$nbFilter--;
 					if ($nbFilter > 0){
