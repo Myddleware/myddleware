@@ -353,8 +353,9 @@ view_flux:
     id: Id
     nblogs: Number of logs
     nbChildDocuments: Child transfers
-    nbPredecessorDocuments: Transfers history
-    nbRelateDocuments: Related Transfers
+    nbParentDocuments: Parent transfers
+    nbHistoryDocuments: History transfers
+    nbPostDocuments: Post transfers    
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 

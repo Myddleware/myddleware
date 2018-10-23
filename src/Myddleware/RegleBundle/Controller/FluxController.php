@@ -543,36 +543,55 @@ class FluxControllerCore extends Controller
 				'page' => $page
 			),false);
 
-			// Get the child documents
-			$childDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
+			// POST DOCUMENT
+			// Get the post documents (Document coming from a child rule)
+			$postDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
 			// Get the rule name of every child doc
-			$childDocumentsRule = array();
-			foreach ($childDocuments as $childDocument) {
-				$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
+			$postDocumentsRule = array();
+			foreach ($postDocuments as $postDocument) {
+				$postDocumentsRule[$postDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $postDocument->getRule())->getName();
 			}
 			
-			// Get the relate documents
-			$documentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_id'=> $doc[0]->getId()));
-
+			// PARENT RELATE DOCUMENT
+			// Document link to other document, the parent ones
+			$parentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_id'=> $doc[0]->getId()));
 			// Get the detail of documents related
 			$i = 0;
-			$relateDocuments = array();
-			$relateDocumentsRule = array();
-			foreach ($documentRelationships as $documentRelationship) {
-				$relateDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $documentRelationship->getDocRelId());
-				$relateDocuments[$i]->sourceField = $documentRelationship->getSourceField();
+			$parentDocuments = array();
+			$parentDocumentsRule = array();
+			foreach ($parentRelationships as $parentRelationship) {
+				$parentDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $parentRelationship->getDocRelId());
+				$parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
 				// Get the rule name of every relate doc
-				foreach ($relateDocuments as $relateDocument) {
-					$relateDocumentsRule[$relateDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $relateDocument->getRule())->getName();
+				foreach ($parentDocuments as $parentDocument) {
+					$parentDocumentsRule[$parentDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $parentDocument->getRule())->getName();
+				}
+				$i++;
+			}	
+			
+			// CHILD RELATE DOCUMENT
+			// Document link to other document, the child ones
+			$childRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_rel_id'=> $doc[0]->getId()));
+			// Get the detail of documents related
+			$i = 0;
+			$childDocuments = array();
+			$childDocumentsRule = array();
+			foreach ($childRelationships as $childRelationship) {
+				$childDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $childRelationship->getDocId());
+				$childDocuments[$i]->sourceField = $childRelationship->getSourceField();
+				// Get the rule name of every relate doc
+				foreach ($childDocuments as $childDocument) {
+					$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
 				}
 				$i++;
 			}	
 
-			// Get the predecessor documents
-			$predecessorDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
-			// If only one record, the history is the current document, so we remove it => no predecessor
-			if (count($predecessorDocuments) == 1) {
-				$predecessorDocuments = array();
+			// HISTORY DOCUMENT
+			// Get the history documents (all document for the same source)
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
+			// If only one record, the history is the current document, so we remove it => no parent
+			if (count($historyDocuments) == 1) {
+				$historyDocuments = array();
 			}
 			
 			// Add custom button
@@ -598,14 +617,17 @@ class FluxControllerCore extends Controller
 		        'entities' => $compact['entities'],
 		        'pager' => $compact['pager'],
 		        'rule' => $rule,
-		        'child_documents' => $childDocuments,
+		        'post_documents' => $postDocuments,
+		        'post_Documents_Rule' => $postDocumentsRule,
+		        'nb_post_documents' => count($postDocuments),
+				'child_documents' => $childDocuments,
 		        'child_Documents_Rule' => $childDocumentsRule,
 		        'nb_child_documents' => count($childDocuments),
-				'relate_documents' => $relateDocuments,
-		        'relate_Documents_Rule' => $relateDocumentsRule,
-		        'nb_relate_documents' => count($relateDocuments),
-				'predecessor_documents' => $predecessorDocuments,
-				'nb_predecessor_documents' => count($predecessorDocuments),
+		        'parent_documents' => $parentDocuments,
+		        'parent_Documents_Rule' => $parentDocumentsRule,
+		        'nb_parent_documents' => count($parentDocuments),
+				'history_documents' => $historyDocuments,
+				'nb_history_documents' => count($historyDocuments),
 		        'ctm_btn' => $list_btn			
 				)
 			);			

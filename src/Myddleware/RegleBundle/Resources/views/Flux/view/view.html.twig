@@ -172,16 +172,18 @@
     	<div class="clr"></div>
     	</div>
 
-		{# ------------- CHILD DOCUMENTS ------------- #}
-		{% if nb_child_documents > 0 %}
+		
+		
+		{# ------------- POST DOCUMENTS ------------- #}
+		{% if nb_post_documents > 0 %}
 		<div id="fd-title-small" class="left">
-			<p>{{'view_flux.nbChildDocuments'|trans}}<p><span class="nb">{{ nb_child_documents }}</span>
+			<p>{{'view_flux.nbPostDocuments'|trans}}<p><span class="nb">{{ nb_post_documents }}</span>
 		</div>
 		<div class="clr"></div>	 
 		{% endif %}   	
-		{# ------------- CHILD DOCUMENTS ------------- #}
+		{# ------------- POST DOCUMENTS ------------- #}
 		<div id="message" align="center">
-			{% if nb_child_documents > 0 %}		
+			{% if nb_post_documents > 0 %}		
 		    	<table class="listepager">
 					{% if entities is not empty %}	
 						<tr>
@@ -193,10 +195,10 @@
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
-					   {% for flux in child_documents %}
+					   {% for flux in post_documents %}
 						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td>
-							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a></td>		     				
+							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a></td>		     				
 							<td class="ctr">{{ flux.source }}</td>     	
 							<td class="ctr">{{ flux.target }}</td>     	
 							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
@@ -242,29 +244,31 @@
 		
 		
 		
-		{# ------------- PREDECESSOR DOCUMENTS ------------- #}
-		{% if nb_predecessor_documents > 0 %}
+		{# ------------- HISTORY DOCUMENTS ------------- #}
+		{% if nb_history_documents > 0 %}
 		<div id="fd-title-small" class="left">
-			<p>{{'view_flux.nbPredecessorDocuments'|trans}}<p><span class="nb">{{ nb_predecessor_documents }}</span>
+			<p>{{'view_flux.nbHistoryDocuments'|trans}}<p><span class="nb">{{ nb_history_documents }}</span>
 		</div>
 		<div class="clr"></div>	 
 		{% endif %}   	
-		{# ------------- PREDECESSOR DOCUMENTS ------------- #}
+		{# ------------- HISTORY DOCUMENTS ------------- #}
 		<div id="message" align="center">
-			{% if nb_predecessor_documents > 0 %}		
+			{% if nb_history_documents > 0 %}		
 		    	<table class="listepager">
 					{% if entities is not empty %}	
 						<tr>
 							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
 							<th>{{'list_flux.tab.date_created'|trans}}</th>
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
-					   {% for flux in predecessor_documents %}
+					   {% for flux in history_documents %}
 						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
-							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td>     				
+							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td> 
+							<td class="ctr"><a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a></td>							
 							<td class="ctr">{{ flux.source }}</td>     	
 							<td class="ctr">{{ flux.target }}</td>     	
 							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
@@ -286,6 +290,7 @@
 						{% endfor %}		
 						<tr>
 							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
 							<th>{{'list_flux.tab.date_created'|trans}}</th>
@@ -309,16 +314,16 @@
 		
 		
 		
-		{# ------------- RELATE DOCUMENTS ------------- #}
-		{% if nb_relate_documents > 0 %}
+		{# ------------- PARENT RELATE DOCUMENTS ------------- #}
+		{% if nb_parent_documents > 0 %}
 		<div id="fd-title-small" class="left">
-			<p>{{'view_flux.nbRelateDocuments'|trans}}<p><span class="nb">{{ nb_relate_documents }}</span>
+			<p>{{'view_flux.nbParentDocuments'|trans}}<p><span class="nb">{{ nb_parent_documents }}</span>
 		</div>
 		<div class="clr"></div>	 
 		{% endif %}   	
-		{# ------------- PREDECESSOR DOCUMENTS ------------- #}
+		{# ------------- PARENT RELATE DOCUMENTS ------------- #}
 		<div id="message" align="center">
-			{% if nb_relate_documents > 0 %}		
+			{% if nb_parent_documents > 0 %}		
 		    	<table class="listepager">
 					{% if entities is not empty %}	
 						<tr>
@@ -330,10 +335,10 @@
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
-					   {% for flux in relate_documents %}
+					   {% for flux in parent_documents %}
 						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td> 
-							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(relate_Documents_Rule,flux.id) }}</a></td>		     											
+							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a></td>		     											
 							<td class="ctr">{{ flux.sourceField }}</td>     	
 							<td class="ctr">{{ flux.source }}</td>     	   	
 							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
@@ -379,6 +384,75 @@
 		
 		
 
+		{# ------------- CHILD RELATE DOCUMENTS ------------- #}
+		{% if nb_child_documents > 0 %}
+		<div id="fd-title-small" class="left">
+			<p>{{'view_flux.nbChildDocuments'|trans}}<p><span class="nb">{{ nb_child_documents }}</span>
+		</div>
+		<div class="clr"></div>	 
+		{% endif %}   	
+		{# ------------- CHILD RELATE DOCUMENTS ------------- #}
+		<div id="message" align="center">
+			{% if nb_child_documents > 0 %}		
+		    	<table class="listepager">
+					{% if entities is not empty %}	
+						<tr>
+							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
+							<th>{{'list_flux.tab.source_field'|trans}}</th>
+							<th>{{'list_flux.tab.source_id'|trans}}</th>
+							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.statut'|trans}}</th>
+						</tr> 
+					   {% for flux in child_documents %}
+						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
+							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td> 
+							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a></td>		     											
+							<td class="ctr">id</td>     	
+							<td class="ctr">{{ flux.source }}</td>     	   	
+							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">
+								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
+								{% if flux.globalStatus|lower == 'close' %}
+									<span class="glyphicon glyphicon-ok"></span>
+								{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
+									<span class="glyphicon glyphicon-remove"></span>
+								{% elseif flux.globalStatus|lower == 'open' %}
+									<span class="glyphicon glyphicon-repeat"></span>						
+								{% elseif flux.globalStatus|lower == 'cancel' %}
+									<span class="glyphicon glyphicon-exclamation-sign"></span>
+								{% endif %}
+								</div>
+							</td>	     			     	
+						</tr>			
+						{% endfor %}		
+						<tr>
+							<th>{{'list_flux.tab.id'|trans}}</th>
+							<th>{{'list_flux.tab.name'|trans}}</th>
+							<th>{{'list_flux.tab.source_field'|trans}}</th>
+							<th>{{'list_flux.tab.source_id'|trans}}</th>
+							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.statut'|trans}}</th>
+						</tr>			
+					{% endif %}
+				</table>
+				<div align="center">
+					{% if pager.haveToPaginate %}
+						<div align="center">
+							{% if pager.haveToPaginate %}
+								{{ pagerfanta(pager, 'twitter_bootstrap3', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+							{% endif %}
+						</div>	 				      
+					{% endif %}
+				</div>		 
+			{% endif %}
+    	</div>
+		
+		
+		
     	{# ------------- MESSAGE ------------- #}
 		{% if nb > 0 %}
 		<div id="fd-title-small" class="left">

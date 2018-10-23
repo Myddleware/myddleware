@@ -34,6 +34,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
+ *  @ORM\Index(name="index_doc_rel_id", columns={"doc_rel_id"}),
  *}) 
  */ 
 class DocumentRelationship

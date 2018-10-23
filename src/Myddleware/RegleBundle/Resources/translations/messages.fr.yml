@@ -354,8 +354,9 @@ view_flux:
     id: Identifiant
     nblogs: Nombre de logs
     nbChildDocuments: Tranferts fils
-    nbPredecessorDocuments: Historique des transferts
-    nbRelateDocuments: Tranferts liés
+    nbParentDocuments: Tranferts parents
+    nbHistoryDocuments: Historique des transferts
+    nbPostDocuments: Tranferts post
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
