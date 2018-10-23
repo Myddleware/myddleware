@@ -49,7 +49,7 @@ class moodlecore  extends solution {
 			$this->moodleClient = new \curl;
 			$params = array();
 			$functionname = 'core_webservice_get_site_info';
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken='.trim($this->paramConnexion['token']).'&wsfunction='.$functionname;
 			$response = $this->moodleClient->post($serverurl, $params);
 			$xml = simplexml_load_string($response);
 			
