@@ -31,7 +31,7 @@ class mysqlcore extends database {
 	
 	protected $fieldName = 'Field';
 	protected $fieldLabel = 'Field';
-	protected $fieldType = 'Type';
+	protected $fieldType = 'Type';	
 	
 	protected function generatePdo() {		    
 		return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);

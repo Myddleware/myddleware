@@ -46,21 +46,29 @@
 			{% endif %}
 
 			{% if doc %}
+				{% if read_record_btn %}
+					<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
+						<button type="button" class="btn-mydinv">
+						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.readrecord'|trans}}
+						</button>
+					</a>
+				{% endif %}
+				
 				{# si le flux n'est pas au statut Cancel ou Close #}
 				{% if doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' %}
 				
 				
-				<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}" title="{{'view_flux.btn.reload'|trans}}">
-					<button type="button" class="btn-mydinv">
-					  <span class="glyphicon glyphicon-repeat"></span>  {{'view_flux.btn.reload'|trans}}
-					</button>
-				</a>
-				
-				<a class="btn_action_loading" href="{{ path('flux_cancel',{'id' : doc.getId }) }}" title="{{'view_flux.btn.cancel'|trans}}">
-					<button type="button" class="btn-mydinv">
-					  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.cancel'|trans}}
-					</button>
-				</a>
+					<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}" title="{{'view_flux.btn.reload'|trans}}">
+						<button type="button" class="btn-mydinv">
+						  <span class="glyphicon glyphicon-repeat"></span>  {{'view_flux.btn.reload'|trans}}
+						</button>
+					</a>
+					
+					<a class="btn_action_loading" href="{{ path('flux_cancel',{'id' : doc.getId }) }}" title="{{'view_flux.btn.cancel'|trans}}">
+						<button type="button" class="btn-mydinv">
+						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.cancel'|trans}}
+						</button>
+					</a>
 				
 			{# BTN #}
 			{% endif %}

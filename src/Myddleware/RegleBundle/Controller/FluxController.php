@@ -597,15 +597,13 @@ class FluxControllerCore extends Controller
 			// Add custom button
 			$name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
 			$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
-			$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
-			$solution_target = (($solution_target == NULL) ? array() : $solution_target );
+			$solution_target_btn = $solution_target->getDocumentButton( $doc[0]->getId() );	
 					
 			$name_solution_source = $rule->getConnectorSource()->getSolution()->getName();
 			$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
-			$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
-			$solution_source = (($solution_source == NULL) ? array() : $solution_source );
+			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );			
 		
-			$list_btn = array_merge( $solution_target, $solution_source );		
+			$list_btn = array_merge( $solution_target_btn, $solution_source_btn );		
 
 			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
@@ -628,7 +626,8 @@ class FluxControllerCore extends Controller
 		        'nb_parent_documents' => count($parentDocuments),
 				'history_documents' => $historyDocuments,
 				'nb_history_documents' => count($historyDocuments),
-		        'ctm_btn' => $list_btn			
+		        'ctm_btn' => $list_btn,
+		        'read_record_btn' => $solution_source->getReadRecord()			
 				)
 			);			
 		}
