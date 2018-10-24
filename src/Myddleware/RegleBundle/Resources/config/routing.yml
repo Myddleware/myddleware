@@ -182,6 +182,10 @@ flux_cancel:
     path:  /flux/cancel/{id}
     defaults: { _controller: RegleBundle:Flux:fluxCancel }    
 
+flux_readrecord:
+    path:  /flux/readrecord/{id}
+    defaults: { _controller: RegleBundle:Flux:fluxReadRecord }    
+
 flux_save:
     path:  /flux/save/
     defaults: { _controller: RegleBundle:Flux:fluxSave }

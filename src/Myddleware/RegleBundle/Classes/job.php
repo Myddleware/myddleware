@@ -246,7 +246,7 @@ class jobcore  {
 	}
 	
 	// Lancement d'un job manuellement en arrière plan 
-	protected function runBackgroundJob($job,$param) {
+	public function runBackgroundJob($job,$param) {
 		try{
 			// Création d'un fichier temporaire
 			$guid = uniqid();
@@ -295,7 +295,7 @@ class jobcore  {
 			}
 			// Renvoie du message en session
 			$session = new Session();
-			$session->set( 'info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>$idJob)).'">'.$this->container->get('translator')->trans('session.task.msglink').'</a>. '.$this->container->get('translator')->trans('session.task.msginfo')));
+			$session->set( 'info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>$idJob)).'" target="_blank">'.$this->container->get('translator')->trans('session.task.msglink').'</a>. '.$this->container->get('translator')->trans('session.task.msginfo')));
 			return $idJob;
 		} catch (\Exception $e) {
 			$session = new Session();

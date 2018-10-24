@@ -275,7 +275,13 @@
 						</tr> 
 					   {% for flux in history_documents %}
 						 <tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
-							<td class="ctr"><a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td> 
+							<td class="ctr">
+								{% if current_document == flux.id %}
+									<span class="glyphicon glyphicon-ok">
+								{% else %}
+									<span class="glyphicon glyphicon-minus">
+								{% endif %}
+								 <a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a></td> 
 							<td class="ctr"><a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a></td>							
 							<td class="ctr">{{ flux.source }}</td>     	
 							<td class="ctr">{{ flux.target }}</td>     	

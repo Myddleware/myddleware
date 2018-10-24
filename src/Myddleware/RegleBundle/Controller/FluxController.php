@@ -607,6 +607,7 @@ class FluxControllerCore extends Controller
 
 			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
+				'current_document' => $id,
 				'source' => $sourceData,
 				'target' => $targetData,
 				'history' => $historyData,
@@ -701,6 +702,27 @@ class FluxControllerCore extends Controller
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
 				$job->actionMassTransfer('cancel',array($id));			
+			}
+			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
+		}
+		catch(Exception $e) {
+			return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
+		}													
+	}
+	
+	// Read record
+	public function fluxReadRecordAction($id) {	
+		try {
+			if(!empty($id)) {
+				// Get the rule id and the source_id from the document id
+				$em = $this->getDoctrine()->getManager();
+				$doc = $em->getRepository('RegleBundle:Document')->findOneById($id);
+				if (!empty($doc)) {
+					if (!empty($doc->getSource())) {	
+						$job = $this->get('myddleware_job.job');	
+						$job->runBackgroundJob('readrecord',array($doc->getRule(),'id',$doc->getSource()));		
+					}
+				}
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
