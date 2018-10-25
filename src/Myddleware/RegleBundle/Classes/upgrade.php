@@ -109,12 +109,6 @@ class upgradecore  {
 			$output->writeln('<comment>Update database OK</comment>');
 			$this->message .= 'Update database OK'.chr(10);
 			
-			// Clear cache
-			$output->writeln('<comment>Clear Symfony cache...</comment>');
-			$this->clearSymfonycache();
-			$output->writeln('<comment>Clear Symfony cache OK</comment>');
-			$this->message .= 'Clear Symfony cache OK'.chr(10);
-			
 			
 			// Change Myddleware version
 			$output->writeln('<comment>Finish install...</comment>');
@@ -127,6 +121,12 @@ class upgradecore  {
 			$this->changeVersion();
 			$output->writeln('<comment>Update version OK</comment>');
 			$this->message .= 'Update version OK'.chr(10);
+			
+			// Clear cache
+			$output->writeln('<comment>Clear Symfony cache...</comment>');
+			$this->clearSymfonycache();
+			$output->writeln('<comment>Clear Symfony cache OK</comment>');
+			$this->message .= 'Clear Symfony cache OK'.chr(10);
 			
 			// Customize update process
 			$this->afterUpdate($output);
@@ -265,16 +265,45 @@ class upgradecore  {
 	
 	// Clear Symfony cache
 	protected function clearSymfonycache() {
-		$command = 'rm -rf var/cache/*';
-		$process = new Process($command);
-		$process->run();
-		// executes after the command finishes
-		if (!$process->isSuccessful()) {
-			throw new ProcessFailedException($process);
-		}
-		echo $process->getOutput();
-		$this->logger->error($process->getOutput());
-		$this->message .= $process->getOutput().chr(10);	
+		// Add current environement  to the default list		
+		$this->defaultEnvironment[$this->env] = $this->env;	
+		
+		foreach ($this->defaultEnvironment as $env) {
+			// Command clear cach remove only current environment cache
+			if ($this->env == $env) {
+				// Clear cache
+				$application = new Application($this->container->get('kernel'));
+				$application->setAutoExit(false);
+				$arguments = array(
+					'command' => 'cache:clear',
+					'--env' => $env,
+				);	
+				
+				$input = new ArrayInput($arguments);
+				$output = new BufferedOutput();
+				$application->run($input, $output);
+
+				$content = $output->fetch();
+				// Send output to the logfile if debug mode selected
+				if (!empty($content)) {
+					echo $content.chr(10);
+					$this->logger->info($content);
+					$this->message .= $content.chr(10);
+				}
+			} else {
+				// CLear other environment cache via command
+				$command = 'rm -rf var/cache/'.$env.'/*';
+				$process = new Process($command);
+				$process->run();
+				// executes after the command finishes
+				if (!$process->isSuccessful()) {
+					throw new ProcessFailedException($process);
+				}
+				echo $process->getOutput();
+				$this->logger->error($process->getOutput());
+				$this->message .= $process->getOutput().chr(10);				
+			}
+		} 
 	}
 	
 	// Finish install
