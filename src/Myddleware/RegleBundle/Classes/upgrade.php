@@ -203,7 +203,7 @@ class upgradecore  {
 	
 	// Update vendors via composer
 	protected function updateVendors() {		
-		$process = new Process($this->phpExecutable.' composer.phar install --no-plugins --no-scripts');
+		$process = new Process($this->phpExecutable.' composer.phar install --no-plugins');
 		$process->run();
 		// executes after the command finishes
 		if (!$process->isSuccessful()) {
@@ -265,30 +265,16 @@ class upgradecore  {
 	
 	// Clear Symfony cache
 	protected function clearSymfonycache() {
-		// Add current environement  to the default list		
-		$this->defaultEnvironment[$this->env] = $this->env;	
-		
-		foreach ($this->defaultEnvironment as $env) {
-			// Clear cache
-			$application = new Application($this->container->get('kernel'));
-			$application->setAutoExit(false);
-			$arguments = array(
-				'command' => 'cache:clear',
-				'--env' => $env,
-			);	
-			
-			$input = new ArrayInput($arguments);
-			$output = new BufferedOutput();
-			$application->run($input, $output);
-
-			$content = $output->fetch();
-			// Send output to the logfile if debug mode selected
-			if (!empty($content)) {
-				echo $content.chr(10);
-				$this->logger->info($content);
-				$this->message .= $content.chr(10);
-			}
+		$command = 'rm -rf var/cache/*';
+		$process = new Process($command);
+		$process->run();
+		// executes after the command finishes
+		if (!$process->isSuccessful()) {
+			throw new ProcessFailedException($process);
 		}
+		echo $process->getOutput();
+		$this->logger->error($process->getOutput());
+		$this->message .= $process->getOutput().chr(10);	
 	}
 	
 	// Finish install
