@@ -1057,9 +1057,7 @@ class documentcore {
 	                          ->findOneById( $this->id );	
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
-			$documentData->setType($type); // Source
-			// Make sure we insert utf-8 data 			
-			$dataInsert = array_map("utf8_encode", $dataInsert );		
+			$documentData->setType($type); // Source		
 			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->em->persist($documentData);
 			$this->em->flush();		
