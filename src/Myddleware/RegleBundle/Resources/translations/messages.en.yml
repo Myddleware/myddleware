@@ -369,6 +369,7 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
+        dateref: Reference date
     log:
         id: Id
         ref: Reference
