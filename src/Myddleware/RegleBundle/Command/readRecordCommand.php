@@ -54,7 +54,8 @@ class readRecordCommand extends ContainerAwareCommand
 			// Get the Job container
 			$job = $this->getContainer()->get('myddleware_job.job');
 			
-			if ($job->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')')) {	
+			if ($job->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')')) {
+				$output->writeln( $job->id );  // This is requiered to display the log (link creation with job id) when the job is run manually
 				$job->readRecord($ruleId, $filterQuery, $filterValues);	
 			}
 		}

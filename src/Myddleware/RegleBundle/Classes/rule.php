@@ -30,6 +30,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Se
 use Doctrine\DBAL\Connection; // Connection database
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -77,8 +78,20 @@ class rulecore {
 		}	
 
 		$this->setRuleParam();
+		$this->setLimit();
 		$this->setRuleRelationships();
 		$this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
+	}
+	
+	// Set the limit rule
+	protected function setLimit() {
+		// Change the default value if a limit exists on the rule
+		if (!empty($this->ruleParams['limit'])) {
+			$this->limit = $this->ruleParams['limit'];
+		}
+		// Add one to the rule limit because when we reach the limit in the read finction,
+		// we remove at least one record (see function validateReadDataSource)
+		$this->limit++;
 	}
 	
 	public function setRule($idRule) {
@@ -453,8 +466,8 @@ class rulecore {
 					$previousValue = $value;
 					continue;
 				}
-				// Keep the reference date of the next record to read
-				$this->dataSource['date_ref'] = $previousValue['date_modified'];			
+				// Keep the reference date of the last record we have read
+				$this->dataSource['date_ref'] = $value['date_modified'];			
 				break;
 			}
 			if (empty($this->dataSource['values'])) {
@@ -1433,6 +1446,7 @@ class rulecore {
 		return array(
 			'active' => false,
 			'RuleParam' => array(
+				'limit' => '100',
 				'delete' => '60',
 				'datereference' => date('Y-m-d').' 00:00:00'			
 			),
@@ -1448,6 +1462,13 @@ class rulecore {
 				'required'	=> true,
 				'type'		=> TextType::class,
 				'label' => 'solution.params.dateref'
+			),
+			array(
+				'id' 		=> 'limit',
+				'name' 		=> 'limit',
+				'required'	=> true,
+				'type'		=> IntegerType::class,
+				'label' => 'solution.params.limit'
 			),
 			array( // clear data
 				'id' 		=> 'delete',

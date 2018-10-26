@@ -409,7 +409,7 @@ x:-o-prefocus,
   left: 0;
 }
 .qtip .qtip-tip .qtip-vml {
-  behavior: url(../../../Resources/public/css/lib/jquery/#default#VML);
+  behavior: url(../../Resources/public/css/lib/jquery/#default#VML);
   display: inline-block;
   visibility: visible;
 }

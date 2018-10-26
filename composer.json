@@ -13,8 +13,8 @@
 
   "prefer-stable": true,
     "require": {
-        "php": ">=5.5.9",
-      "symfony/symfony": "3.2.*",
+        "php": ">=7.1",
+      "symfony/symfony": "3.4.17",
         "doctrine/orm": "^2.5",
         "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
@@ -34,7 +34,7 @@
         "leafo/lessphp": "0.4.0",
 	"phpsec/phpsec":"0.6.*",
 	"white-october/pagerfanta-bundle": "dev-master",
-	"pagerfanta/pagerfanta": "dev-master",
+	"pagerfanta/pagerfanta": "^2.0.0",
 	"illuminate/encryption": "5.3.*@dev",
         "friendsofsymfony/jsrouting-bundle": "^1.6"
     },

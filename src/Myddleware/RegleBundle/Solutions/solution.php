@@ -78,7 +78,10 @@ class solutioncore {
 	
 	// Module list that allows to make parent relationships
 	protected $allowParentRelationship = array();
-		
+	
+	// Enable the read record button on the data transfer detail view for the source solution
+	protected $readRecord = true;		
+	
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
     	$this->logger = $logger;
@@ -372,6 +375,7 @@ class solutioncore {
 	// Permet d'ajouter des boutoon sur la page flux en fonction de la solution source ou targe
 	// Type : source ou target
 	public function getDocumentButton($type) {	
+		return array();
 	}
 	
 	// Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
@@ -382,6 +386,11 @@ class solutioncore {
 	// Permet de lancer l'action demandée dans la page flux
 	public function documentAction($idDocument,$function) {
 		return $this->$function($idDocument);
+	}
+	
+	// Return if the read record button has to be display on the data transfert view
+	public function getReadRecord() {
+		return $this->readRecord;
 	}
 
 	// Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle

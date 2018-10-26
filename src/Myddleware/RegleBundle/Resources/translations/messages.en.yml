@@ -186,7 +186,7 @@ view_rule:
         save: Save
         simule: Simulate Transfers
         result: Estimated transfers
-        details: " Represents the number of transfers that will be created for the next lunch of this rule. Those ones won't cost you any credits if they are not send. This number will always be equal or less than your Myddleware system limit of transfers created by lunch (default 100)."
+        details: " Represents the number of transfers that will be created for the next lunch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
 
 rule:
     source: Source
@@ -317,6 +317,7 @@ list_flux:
         statut: Status
         source_date_modified: Date of reference
         type: Type
+        source_field: Field linked
 
 flux:
     gbl_status:
@@ -352,9 +353,13 @@ view_flux:
     id: Id
     nblogs: Number of logs
     nbChildDocuments: Child transfers
+    nbParentDocuments: Parent transfers
+    nbHistoryDocuments: History transfers
+    nbPostDocuments: Post transfers    
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
+        readrecord: Run the same record
     header:
         rule: Rule
         statut: Status
@@ -483,9 +488,10 @@ solution:
         redirect_uri: Redirect URI
         applicationName: Application name		
     params: 
-        dateref: Date of reference
+        dateref: Reference (data will be read from this parameter)
+        limit: Limit (read limit for each call)
         active: Activation
-        delete: Deleting data
+        delete: Data deletion (period after document data will be deleted in Myddleware) 
         activate: activated
         desactivate: Deactivate
         1_minute: 1 minute

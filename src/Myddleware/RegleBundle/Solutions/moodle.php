@@ -48,6 +48,7 @@ class moodlecore  extends solution {
 		try {
 			$this->moodleClient = new \curl;
 			$params = array();
+			$this->paramConnexion['token'] = trim($this->paramConnexion['token']);
 			$functionname = 'core_webservice_get_site_info';
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
 			$response = $this->moodleClient->post($serverurl, $params);

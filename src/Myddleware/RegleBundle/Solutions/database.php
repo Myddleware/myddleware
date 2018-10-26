@@ -355,6 +355,10 @@ class databasecore extends solution {
 				$nbFilter = count($param['query']);
 				$requestSQL .= " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
+					// Manage query with id, to be replaced by the ref Id fieldname
+					if ($queryKey == 'Id') {
+						$queryKey = $param['ruleParams']['fieldId'];
+					}
 					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
 					$nbFilter--;
 					if ($nbFilter > 0){
@@ -576,8 +580,11 @@ class databasecore extends solution {
 	public function getFieldsParamUpd($type, $module) {	
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
+			// List only real database field so we remove the Myddleware_element_id field
+			unset($fieldsSource['Myddleware_element_id']);
 			if(!empty($fieldsSource)) {
 				if ($type == 'source'){
+					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(
 								'id' => 'fieldId',
 								'name' => 'fieldId',
@@ -585,6 +592,7 @@ class databasecore extends solution {
 								'label' => 'Primary key in your source table',
 								'required'	=> true
 							);
+					// Add param to store the fieldname corresponding to the record reference date		
 					$dateParam = array(
 								'id' => 'fieldDateRef',
 								'name' => 'fieldDateRef',
@@ -592,6 +600,7 @@ class databasecore extends solution {
 								'label' => 'Field Date Reference',
 								'required'	=> true
 							);
+					// Add all fieds to the list
 					foreach ($fieldsSource as $key => $value) {
 						$idParam['option'][$key] = $value['label'];
 						$dateParam['option'][$key] = $value['label'];
@@ -599,6 +608,7 @@ class databasecore extends solution {
 					$params[] = $idParam;
 					$params[] = $dateParam;
 				} else {
+					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(
 								'id' => 'targetFieldId',
 								'name' => 'targetFieldId',
@@ -606,10 +616,8 @@ class databasecore extends solution {
 								'label' => 'Primary key in your target table',
 								'required'	=> true
 							);
+					// Add all fieds to the list
 					foreach ($fieldsSource as $key => $value) {
-						if ($key== 'Myddleware_element_id') {
-							continue;
-						}
 						$idParam['option'][$key] = $value['label'];
 					}
 					$params[] = $idParam;

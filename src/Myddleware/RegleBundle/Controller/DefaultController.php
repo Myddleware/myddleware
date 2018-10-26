@@ -360,24 +360,28 @@ class DefaultControllerCore extends Controller
     }
 
     // MODIFIE LES PARAMETRES D UNE REGLE
-    public function ruleUpdParamsAction($id)
-    {
-
+    public function ruleUpdParamsAction($id) {
         try {
             // On récupére l'EntityManager
             $this->getInstanceBdd();
-
             if (isset($_POST['params']) && is_array($_POST['params'])) {
                 foreach ($_POST['params'] as $p) {
                     $param = $this->em->getRepository('RegleBundle:RuleParam')
                         ->findOneBy(array(
                                 'rule' => $id,
-                                'id' => (int)$p['id']
+                                'name' => $p['name']
                             )
                         );
-
-                    $param->setValue($p['value']);
-                    $this->em->persist($param);
+					// In a few case, the parameter could not exist, in this case we create it
+					if (empty($param)) {
+						$param = new RuleParam();
+						$param->setRule($id);
+                        $param->setName($p['name']);
+						$param->setValue($p['value']);					
+					} else {
+						$param->setValue($p['value']);
+                    }
+					$this->em->persist($param);
                     $this->em->flush();
                 }
             }
@@ -395,13 +399,23 @@ class DefaultControllerCore extends Controller
             // On récupére l'EntityManager
             $this->getInstanceBdd();
 
-            // Récupération de date_ref
+            // Get the rule reference
             $param['date_ref'] = $this->em->getRepository('RegleBundle:RuleParam')
                 ->findOneBy(array(
                     'rule' => $id,
                     'name' => 'datereference'
                 ))
                 ->getValue();
+				
+			// Get the rule limit
+            $limitParam = $this->em->getRepository('RegleBundle:RuleParam')
+                ->findOneBy(array(
+                    'rule' => $id,
+                    'name' => 'limit'
+                ));
+			if (!empty($limitParam)) {
+                $param['limit'] = $limitParam->getValue();
+			} 
 
             // Get the other rule params
             $connectorParams = $this->getDoctrine()
@@ -777,22 +791,14 @@ class DefaultControllerCore extends Controller
             foreach ($Params as $field) {
                 $standardField = false;
                 foreach ($ruleParam as $index => $value) {
+					// Init the parameter in case it doesn't exist in the database yet
+					if (!isset($ruleParam[$index]['id_bdd'])) {
+						$ruleParam[$index]['id_bdd'] = '';
+                        $ruleParam[$index]['value_bdd'] = '';
+					}
                     if ($field->getName() == $value['name']) {
                         $ruleParam[$index]['id_bdd'] = $field->getId();
                         $ruleParam[$index]['value_bdd'] = $field->getValue();
-                        if ($field->getName() == 'datereference') {
-                            // Test si la date est valide
-                            $date = $field->getValue();
-                            $format = 'Y-m-d H:i:s';
-                            $d = \DateTime::createFromFormat($format, $date);
-                            $r = $d && $d->format($format) == $date;
-
-                            if (!$r) {
-                                $ruleParam[$index]['id'] = 'datereference_txt';
-                                $ruleParam[$index]['name'] = 'datereference_txt';
-                                $ruleParam[$index]['label'] = $autorization_source . '.' . $autorization_module_trans . '.ref';
-                            }
-                        }
                         $standardField = true;
                         break;
                     }
@@ -1053,10 +1059,10 @@ class DefaultControllerCore extends Controller
             $solution_source_nom = $myddlewareSession['param']['rule']['source']['solution'];
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
 
-            $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
+            $sourceConnection = $solution_source->login($this->decrypt_params($myddlewareSession['param']['rule']['source']));
 
             if (empty($solution_source->connexion_valide)) {
-                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect');
+                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.source_module_connect').' '.(!empty($sourceConnection['error']) ? $sourceConnection['error'] : 'No message returned by '.$solution_source_nom);
                 $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
@@ -1088,10 +1094,10 @@ class DefaultControllerCore extends Controller
                 $solution_cible_nom = $myddlewareSession['param']['rule']['cible']['solution'];
                 $solution_cible = $this->get('myddleware_rule.' . $solution_cible_nom);
             }
-            $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
+            $targetConnection = $solution_cible->login($this->decrypt_params($myddlewareSession['param']['rule']['cible']));
 
             if (empty($solution_cible->connexion_valide)) {
-                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect');
+                $myddlewareSession['error']['create_rule'] = $this->get('translator')->trans('error.rule.target_module_connect').' '.(!empty($targetConnection['error']) ? $targetConnection['error'] : 'No message returned by '.$solution_cible_nom);
                 $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
@@ -1289,10 +1295,10 @@ class DefaultControllerCore extends Controller
             // TARGET ------------------------------------------------------------------
             // We retriev first all data from the target application and the from the source application
             // We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
-            $solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($ruleKey)));
+            $targetConnection = $solution_cible->login($this->decrypt_params($sessionService->getParamRuleCible($ruleKey)));
 
             if ($solution_cible->connexion_valide == false) {
-                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect'));
+                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.target_module_connect').' '.(!empty($targetConnection['error']) ? $targetConnection['error'] : 'No message returned by '.$sessionService->getParamRuleCibleSolution($ruleKey)));
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
             }
@@ -1325,11 +1331,11 @@ class DefaultControllerCore extends Controller
             // SOURCE ------------------------------------------------------------------
             // Connexion au service de la solution source
             $solution_source = $this->get('myddleware_rule.' . $sessionService->getParamRuleSourceSolution($ruleKey));
-            $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($ruleKey)));
+            $sourceConnection = $solution_source->login($this->decrypt_params($sessionService->getParamRuleSource($ruleKey)));
 
             // Contrôle que la connexion est valide
             if ($solution_source->connexion_valide == false) {
-                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect'));
+                $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.source_module_connect').' '.(!empty($sourceConnection['error']) ? $sourceConnection['error'] : 'No message returned by '.$sessionService->getParamRuleSourceSolution($ruleKey)));
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 exit;
             }

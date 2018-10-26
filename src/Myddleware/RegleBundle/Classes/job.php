@@ -45,7 +45,6 @@ class jobcore  {
 	
 	protected $rule;
 	protected $ruleId;
-	protected $limit = 100;
 	protected $logData;
 	protected $start;
 	protected $paramJob;
@@ -98,7 +97,6 @@ class jobcore  {
 			// We instance the rule
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
-			$param['limit'] = $this->limit;
 			$param['manual'] = $this->manual;		
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			if ($this->rule->isChild()) {
@@ -114,21 +112,12 @@ class jobcore  {
 
 	// Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
 	public function createDocuments() {		
-		if ($this->limit > 0) {
-			$createDocuments = $this->rule->createDocuments();
-			if (!empty($createDocuments['error'])) {
-				$this->message .= print_r($createDocuments['error'],true);
-			}
-			if (!empty($createDocuments['count'])) {
-				$this->limit = $this->limit-$createDocuments['count'];
-				if ($this->limit < 0) {
-					$this->limit = 0;
-				}
-				return $createDocuments['count'];
-			}
-			else {
-				return 0;
-			}
+		$createDocuments = $this->rule->createDocuments();
+		if (!empty($createDocuments['error'])) {
+			$this->message .= print_r($createDocuments['error'],true);
+		}
+		if (!empty($createDocuments['count'])) {
+			return $createDocuments['count'];
 		}
 		else {
 			return 0;
@@ -257,7 +246,7 @@ class jobcore  {
 	}
 	
 	// Lancement d'un job manuellement en arrière plan 
-	protected function runBackgroundJob($job,$param) {
+	public function runBackgroundJob($job,$param) {
 		try{
 			// Création d'un fichier temporaire
 			$guid = uniqid();
@@ -306,7 +295,7 @@ class jobcore  {
 			}
 			// Renvoie du message en session
 			$session = new Session();
-			$session->set( 'info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>$idJob)).'">'.$this->container->get('translator')->trans('session.task.msglink').'</a>. '.$this->container->get('translator')->trans('session.task.msginfo')));
+			$session->set( 'info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>$idJob)).'" target="_blank">'.$this->container->get('translator')->trans('session.task.msglink').'</a>. '.$this->container->get('translator')->trans('session.task.msginfo')));
 			return $idJob;
 		} catch (\Exception $e) {
 			$session = new Session();

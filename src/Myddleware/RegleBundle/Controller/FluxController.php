@@ -450,8 +450,7 @@ class FluxControllerCore extends Controller
 	}
 
 	// Info d'un flux
-	public function fluxInfoAction($id,$page) {
-		
+	public function fluxInfoAction($id,$page) {		
 		try {
 			$em = $this->getDoctrine()->getManager();
 
@@ -461,7 +460,7 @@ class FluxControllerCore extends Controller
 				
 			// Infos des flux
 			$doc = $em->getRepository('RegleBundle:Document')
-	                  ->findById($list_fields_sql);						  
+	                  ->findById($list_fields_sql);					  
 			if( !$permission->isAdmin($this->getUser()->getId()) ) {		  
 				if(
 						empty($doc[0])
@@ -542,26 +541,73 @@ class FluxControllerCore extends Controller
 												),				
 				'maxPerPage' => $this->container->getParameter('pager'),
 				'page' => $page
-			),false);		
-			$childDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
+			),false);
+
+			// POST DOCUMENT
+			// Get the post documents (Document coming from a child rule)
+			$postDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
 			// Get the rule name of every child doc
-			$childDocumentsRule = array();
-			foreach ($childDocuments as $childDocument) {
-				$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
+			$postDocumentsRule = array();
+			foreach ($postDocuments as $postDocument) {
+				$postDocumentsRule[$postDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $postDocument->getRule())->getName();
 			}
-	
+			
+			// PARENT RELATE DOCUMENT
+			// Document link to other document, the parent ones
+			$parentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_id'=> $doc[0]->getId()));
+			// Get the detail of documents related
+			$i = 0;
+			$parentDocuments = array();
+			$parentDocumentsRule = array();
+			foreach ($parentRelationships as $parentRelationship) {
+				$parentDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $parentRelationship->getDocRelId());
+				$parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
+				// Get the rule name of every relate doc
+				foreach ($parentDocuments as $parentDocument) {
+					$parentDocumentsRule[$parentDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $parentDocument->getRule())->getName();
+				}
+				$i++;
+			}	
+			
+			// CHILD RELATE DOCUMENT
+			// Document link to other document, the child ones
+			$childRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_rel_id'=> $doc[0]->getId()));
+			// Get the detail of documents related
+			$i = 0;
+			$childDocuments = array();
+			$childDocumentsRule = array();
+			foreach ($childRelationships as $childRelationship) {
+				$childDocuments[$i] = $em->getRepository('RegleBundle:Document')->findOneById( $childRelationship->getDocId());
+				$childDocuments[$i]->sourceField = $childRelationship->getSourceField();
+				// Get the rule name of every relate doc
+				foreach ($childDocuments as $childDocument) {
+					$childDocumentsRule[$childDocument->getId()] = $em->getRepository('RegleBundle:Rule')->findOneById( $childDocument->getRule())->getName();
+				}
+				$i++;
+			}	
+
+			// HISTORY DOCUMENT
+			// Get the history documents (all document for the same source)
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
+			// If only one record, the history is the current document, so we remove it => no parent
+			if (count($historyDocuments) == 1) {
+				$historyDocuments = array();
+			}
+			
+			// Add custom button
 			$name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
-				$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
-				$solution_target = $solution_target->getDocumentButton( $doc[0]->getId() );	
-				$solution_target = (($solution_target == NULL) ? array() : $solution_target );
+			$solution_target = $this->get('myddleware_rule.'.$name_solution_target);
+			$solution_target_btn = $solution_target->getDocumentButton( $doc[0]->getId() );	
 					
 			$name_solution_source = $rule->getConnectorSource()->getSolution()->getName();
-				$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
-				$solution_source = $solution_source->getDocumentButton( $doc[0]->getId() );			
-				$solution_source = (($solution_source == NULL) ? array() : $solution_source );
+			$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
+			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );			
 		
-			$list_btn = array_merge( $solution_target, $solution_source );													
+			$list_btn = array_merge( $solution_target_btn, $solution_source_btn );		
+
+			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
+				'current_document' => $id,
 				'source' => $sourceData,
 				'target' => $targetData,
 				'history' => $historyData,
@@ -570,10 +616,19 @@ class FluxControllerCore extends Controller
 		        'entities' => $compact['entities'],
 		        'pager' => $compact['pager'],
 		        'rule' => $rule,
-		        'child_documents' => $childDocuments,
+		        'post_documents' => $postDocuments,
+		        'post_Documents_Rule' => $postDocumentsRule,
+		        'nb_post_documents' => count($postDocuments),
+				'child_documents' => $childDocuments,
 		        'child_Documents_Rule' => $childDocumentsRule,
 		        'nb_child_documents' => count($childDocuments),
-		        'ctm_btn' => $list_btn			
+		        'parent_documents' => $parentDocuments,
+		        'parent_Documents_Rule' => $parentDocumentsRule,
+		        'nb_parent_documents' => count($parentDocuments),
+				'history_documents' => $historyDocuments,
+				'nb_history_documents' => count($historyDocuments),
+		        'ctm_btn' => $list_btn,
+		        'read_record_btn' => $solution_source->getReadRecord()			
 				)
 			);			
 		}
@@ -647,6 +702,27 @@ class FluxControllerCore extends Controller
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
 				$job->actionMassTransfer('cancel',array($id));			
+			}
+			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
+		}
+		catch(Exception $e) {
+			return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
+		}													
+	}
+	
+	// Read record
+	public function fluxReadRecordAction($id) {	
+		try {
+			if(!empty($id)) {
+				// Get the rule id and the source_id from the document id
+				$em = $this->getDoctrine()->getManager();
+				$doc = $em->getRepository('RegleBundle:Document')->findOneById($id);
+				if (!empty($doc)) {
+					if (!empty($doc->getSource())) {	
+						$job = $this->get('myddleware_job.job');	
+						$job->runBackgroundJob('readrecord',array($doc->getRule(),'id',$doc->getSource()));		
+					}
+				}
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
