@@ -39,6 +39,7 @@ use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Myddleware\RegleBundle\Entity\Rule;
 use Myddleware\RegleBundle\Entity\RuleParam;
+use Myddleware\RegleBundle\Entity\RuleParamAudit;
 use Myddleware\RegleBundle\Entity\RuleFilter;
 use Myddleware\RegleBundle\Entity\RuleField;
 use Myddleware\RegleBundle\Entity\RuleRelationShip;
@@ -379,9 +380,19 @@ class DefaultControllerCore extends Controller
                         $param->setName($p['name']);
 						$param->setValue($p['value']);					
 					} else {
+						// Save param modification in the audit table
+						if ($p['value'] != $param->getValue()) {
+							$paramAudit = new RuleParamAudit();
+							$paramAudit->setRuleParamId($p['id']);
+							$paramAudit->setDateModified(new \DateTime);
+							$paramAudit->setBefore($param->getValue());
+							$paramAudit->setAfter($p['value']);
+							$paramAudit->setByUser($this->getUser()->getId());
+							$this->em->persist($paramAudit);					
+						}
 						$param->setValue($p['value']);
-                    }
-					$this->em->persist($param);
+                    }				
+					$this->em->persist($param);					
                     $this->em->flush();
                 }
             }

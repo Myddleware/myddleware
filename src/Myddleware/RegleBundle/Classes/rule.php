@@ -356,7 +356,17 @@ class rulecore {
 		$stmt = $this->connection->prepare($sqlDateReference);
 		$stmt->bindValue(":ruleId", $this->ruleId);
 		$stmt->bindValue(":date_ref", $date_ref);
-		$stmt->execute();			
+		$stmt->execute();	
+		
+	/* 	// Save the reference modification
+		$paramAudit = new RuleParamAudit();
+		$paramAudit->setRuleParamId($p['id']);
+		$paramAudit->setDateModified(new \DateTime);
+		$paramAudit->setBefore($param->getValue());
+		$paramAudit->setAfter($p['value']);
+		$paramAudit->setByUser($this->getUser()->getId());
+		$this->em->persist($paramAudit);	
+		$this->em->flush();		 */
 	}
 	
 	// Update/create rule parameter
