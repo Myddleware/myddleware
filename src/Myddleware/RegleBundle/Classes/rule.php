@@ -33,6 +33,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
+use Myddleware\RegleBundle\Entity\RuleParamAudit as RuleParamAudit;
+
 
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // Tools
 use Myddleware\RegleBundle\Entity\RuleParam;
@@ -351,14 +353,43 @@ class rulecore {
 	
 	// Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible
 	protected function updateReferenceDate() {			
-		$date_ref = $this->dataSource['date_ref'];
+		$param = $this->em->getRepository('RegleBundle:RuleParam')
+			->findOneBy(array(
+					'rule' => $this->ruleId,
+					'name' => 'datereference'
+				)
+			);
+		// Every rules should have the param datereference
+		if (empty($param)) {
+			throw new \Exception ('No reference date for the rule '.$this->ruleId.'.');	
+		} else {
+			// Save param modification in the audit table		
+			if ($param->getValue() != $this->dataSource['date_ref']) {
+				$paramAudit = new RuleParamAudit();
+				$paramAudit->setRuleParamId($param->getId());
+				$paramAudit->setDateModified(new \DateTime);
+				$paramAudit->setBefore($param->getValue());
+				$paramAudit->setAfter($this->dataSource['date_ref']);
+				$paramAudit->setByUser('1');  // User information is on the job =TO BE MODIFIED
+				$paramAudit->setJob($this->jobId);
+				$this->em->persist($paramAudit);					
+			}
+			// Update reference 
+			$param->setValue($this->dataSource['date_ref']);
+			$this->em->persist($param);					
+			$this->em->flush();
+		}				
+		
+		
+		
+		/* $date_ref = $this->dataSource['date_ref'];
 		$sqlDateReference = "UPDATE RuleParam SET value = :date_ref WHERE name = 'datereference' AND rule_id = :ruleId";
 		$stmt = $this->connection->prepare($sqlDateReference);
 		$stmt->bindValue(":ruleId", $this->ruleId);
 		$stmt->bindValue(":date_ref", $date_ref);
 		$stmt->execute();	
 		
-	/* 	// Save the reference modification
+		// Save the reference modification
 		$paramAudit = new RuleParamAudit();
 		$paramAudit->setRuleParamId($p['id']);
 		$paramAudit->setDateModified(new \DateTime);
@@ -366,7 +397,7 @@ class rulecore {
 		$paramAudit->setAfter($p['value']);
 		$paramAudit->setByUser($this->getUser()->getId());
 		$this->em->persist($paramAudit);	
-		$this->em->flush();		 */
+		$this->em->flush();		  */
 	}
 	
 	// Update/create rule parameter
