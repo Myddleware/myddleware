@@ -370,7 +370,6 @@ class rulecore {
 				$paramAudit->setDateModified(new \DateTime);
 				$paramAudit->setBefore($param->getValue());
 				$paramAudit->setAfter($this->dataSource['date_ref']);
-				$paramAudit->setByUser('1');  // User information is on the job =TO BE MODIFIED
 				$paramAudit->setJob($this->jobId);
 				$this->em->persist($paramAudit);					
 			}

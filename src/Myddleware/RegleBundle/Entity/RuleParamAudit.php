@@ -91,7 +91,7 @@ class RuleParamAudit
      * @var string
      *
 	 * 
-     * @ORM\Column(name="user", type="string", nullable=false)
+     * @ORM\Column(name="user", type="string", nullable=true)
 	 * 
      */
     private $byUser;
