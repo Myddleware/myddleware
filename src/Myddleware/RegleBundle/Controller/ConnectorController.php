@@ -306,7 +306,6 @@ class ConnectorController extends Controller
                 ->getManager()
                 ->getRepository('RegleBundle:Solution')
                 ->findOneByName($sessionService->getParamConnectorSourceSolution());
-
 		$connector = new Connector();
 		$connector->setSolution($solution);
 
@@ -316,7 +315,6 @@ class ConnectorController extends Controller
             $fieldsLogin = [];
         }
 
-//      $form = $this->createForm(new ConnectorType($this->container), $connector);
 		$form = $this->createForm(ConnectorType::class,$connector,array(
 			'method'    => 'PUT',
 			'attr' =>  array('fieldsLogin' => $fieldsLogin, 'secret' => $this->container->getParameter('secret'))
@@ -330,29 +328,26 @@ class ConnectorController extends Controller
 					$solution = $connector->getSolution();
 					$multi = $solution->getSource() + $solution->getTarget();
 
-				//if(!empty($myddlewareSession['param']['myddleware']['connector']['animation'])) {
 					if($sessionService->getConnectorAnimation()){
 						// animation add connector
 						$type = $sessionService->getParamConnectorAddType();
 						// si la solution ajouté n'existe pas dans la page en cours on va la rajouter manuellement
-											$solution = $sessionService->getParamConnectorSourceSolution();
+						$solution = $sessionService->getParamConnectorSourceSolution();
 						if( !in_array($solution, json_decode($sessionService->getSolutionType($type))) ) {
 							$sessionService->setParamConnectorValues($type.';'.$solution.';'.$multi.';'.$solution->getId());
 						}
 					}
 
 					// On récupére l'EntityManager
-					$em = $this->getDoctrine()
-							   ->getManager();
+					$em = $this->getDoctrine()->getManager();
 
-									$connectorParams = $connector->getConnectorParams();
-									$connector->setConnectorParams(null);
+					$connectorParams = $connector->getConnectorParams();
+					$connector->setConnectorParams(null);
 					$connector->setNameSlug($connector->getName());
 					$connector->setDateCreated(new \DateTime);
 					$connector->setDateModified(new \DateTime);
 					$connector->setCreatedBy( $this->getUser()->getId() );
 					$connector->setModifiedBy( $this->getUser()->getId() );
-
 					$em->persist($connector);
 					$em->flush();
 
@@ -360,7 +355,6 @@ class ConnectorController extends Controller
 						$cp->setConnector($connector);
 						$em->persist($cp);
 						$em->flush();
-
 					}
 
 					$sessionService->removeConnector();
@@ -543,36 +537,24 @@ class ConnectorController extends Controller
 		) {
 			$form->handleRequest($request);   
 
-			if($form->isValid()){     
+			// if($form->isValid()){     
 					// SAVE
 				try {					   						   
-					$params = $connector->getConnectorParams();
-									
-					// SAVE PARAMS CONNECTEUR		   						   
-					if(count($params) > 0) {
-						// Generate object to encrypt data
-						//$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
-						
-											
-							// Get the param with the token_get_all
-							/*$connectorParam = $em->getRepository('RegleBundle:ConnectorParam')->findOneBy( array(
-															'connector' => $connector,
-															'name' => 'token'
-														));*/				
-							// If not connector param for the token, we create one (should never happen)							
-							/*if (empty($connectorParam)) {
-								$connectorParam = new ConnectorParam();		
-								$connectorParam->setConnector($connector->getId());
-								$connectorParam->setName('token');
-							}*/
-							// Save the token in the connector param
-							//$connectorParam->setValue($encrypter->encrypt($sessionService->getParamConnectorSourceToken()));
-							//$em->persist($connectorParam);
-													//$connector->addConnectorParam($connectorParam);
-											
-						
-											
-					   
+					$connectorParams = $connector->getConnectorParams();
+					// Upadet the connector		   						   
+					if(count($connectorParams) > 0) {
+						$newParams = $request->request->get('connector');
+						$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
+						foreach ($connectorParams as $key => $cp) {
+							if (isset($newParams['connectorParams'][$key]['value'])) {
+								// Encript the parameter
+								$cp->setValue($encrypter->encrypt($newParams['connectorParams'][$key]['value']));
+								$em->persist($cp);
+							}
+						}
+						// Update the connector
+						$connector->setDateModified(new \DateTime);
+						$connector->setModifiedBy($this->getUser()->getId());
 						$em->persist($connector); 
 						$em->flush(); 
 						return $this->redirect($this->generateUrl('regle_connector_list'));					
@@ -586,13 +568,13 @@ class ConnectorController extends Controller
 					return new Response($e->getMessage());
 				}
 				// SAVE
-			}else{     
-				return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array(
-							'error' => true,
-							'connector' => $connector,
-							'form' => $form->createView())
-				);			
-			}
+			// }else{     
+				// return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array(
+							// 'error' => true,
+							// 'connector' => $connector,
+							// 'form' => $form->createView())
+				// );			
+			// }
 		}
 		// Display the connector
 		else {
