@@ -3,6 +3,9 @@ api_platform:
     type: api_platform
     prefix: /api
 
+api_login_check:
+    path: /api/login_check
+
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 

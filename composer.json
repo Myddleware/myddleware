@@ -38,7 +38,8 @@
 	"illuminate/encryption": "5.3.*@dev",
         "friendsofsymfony/jsrouting-bundle": "^1.6",
         "api-platform/core": "2.2.9",
-        "api-platform/api-pack": "^1.1"
+        "api-platform/api-pack": "^1.1",
+        "lexik/jwt-authentication-bundle": "^2.6"
     },
     "repositories": [
         {

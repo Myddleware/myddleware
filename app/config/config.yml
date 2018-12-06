@@ -99,6 +99,12 @@ stof_doctrine_extensions:
         default:
             sluggable: true
 
+lexik_jwt_authentication:
+    secret_key:       '%kernel.project_dir%/app/config/jwt/private.pem' # required for token creation
+    public_key:       '%kernel.project_dir%/app/config/jwt/public.pem'  # required for token verification
+    pass_phrase:      'myddleware' # required for token creation, usage of an environment variable is recommended
+    token_ttl:        3600
+
             
 # Activation de l'extension Twig intl
 services:
