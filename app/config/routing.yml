@@ -1,3 +1,8 @@
+api_platform:
+    resource: .
+    type: api_platform
+    prefix: /api
+
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 

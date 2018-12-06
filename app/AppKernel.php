@@ -26,6 +26,7 @@ class AppKernel extends Kernel
             new Myddleware\RegleBundle\RegleBundle(),   
             new Myddleware\UserBundle\UserBundle(), 
             new FOS\JsRoutingBundle\FOSJsRoutingBundle(), // Expose routes on JS
+            new ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle()
 			
         );
 

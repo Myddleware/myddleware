@@ -98,6 +98,7 @@ stof_doctrine_extensions:
     orm:
         default:
             sluggable: true
+
             
 # Activation de l'extension Twig intl
 services:
@@ -105,4 +106,4 @@ services:
        class: Twig_Extensions_Extension_Intl
        tags:
            - { name: twig.extension }
-           
+
