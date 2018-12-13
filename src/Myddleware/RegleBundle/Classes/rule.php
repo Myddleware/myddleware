@@ -1267,12 +1267,16 @@ class rulecore {
 	}
 	
 	protected function getSendDocuments($type,$documentId,$table = 'target',$parentDocId = '',$parentRuleId = '') {	
+		// Init $limit parameter
+		$limit = " LIMIT ".$this->limit;
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
 			$documentFilter = " Document.id = '$documentId'";
 		}
 		elseif (!empty($parentDocId)) {
-			$documentFilter = " Document.parent_id = '$parentDocId' AND Document.rule_id = '$parentRuleId' ";
+			$documentFilter = " Document.parent_id = '$parentDocId' AND Document.rule_id = '$parentRuleId' "; 
+			// No limit when it comes to child rule. A document could have more than $limit child documents
+			$limit = "";
 		}
 		// Sinon on récupère tous les documents élligible pour l'envoi
 		else {
@@ -1285,7 +1289,7 @@ class rulecore {
 				FROM Document
 				WHERE $documentFilter 
 				ORDER BY Document.source_date_modified ASC
-				LIMIT $this->limit";
+				$limit";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute();	    
 		$documents = $stmt->fetchAll();
