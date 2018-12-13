@@ -2,4 +2,4 @@ api_hello_world:
     path:  /hello-world
     defaults: { _controller: MyddlewareApiBundle:Default:index }
     requirements:
-        methods:  GET
+        methods:  POST

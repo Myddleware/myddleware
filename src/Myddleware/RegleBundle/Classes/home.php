@@ -52,7 +52,7 @@ class homecore {
 		try {	
 
 			if($is_support == false) {
-				$where = ' WHERE created_by='.$id;
+				$where = ' WHERE Rule.created_by='.$id;
 			}
 			else {
 				$where = '';

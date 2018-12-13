@@ -13,6 +13,10 @@ class DefaultController extends Controller
     {
         $data = $request->request->all();
 
+        // return new JsonResponse($request);
+        // return new JsonResponse($request->get('enterprise'));
+        // return new JsonResponse(print_r($request->request,true));
+        // return new JsonResponse('test');
         return new JsonResponse($data);
 
     }
