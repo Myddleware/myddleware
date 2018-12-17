@@ -380,6 +380,7 @@ class FluxControllerCore extends Controller
 			AND $page == 1
 		) {
 			$where = " WHERE 0";
+			$user = "";
 		}
 		
 		// Add limit to the query
