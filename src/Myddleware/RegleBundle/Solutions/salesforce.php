@@ -553,7 +553,6 @@ class salesforcecore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {
-		$parameters = array();
 		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
@@ -562,7 +561,7 @@ class salesforcecore extends solution {
 		// Get the type of each fields by calling Salesforce
 		$moduleFields = $this->get_module_fields($param['module'],'target');
 		try{
-			$parameters = '';
+			$parameters = array();
 			$i=0;
 			$nb_record = count($param['data']);			
 			foreach($param['data'] as $idDoc => $data) {
@@ -646,8 +645,8 @@ class salesforcecore extends solution {
 							$this->updateDocumentStatus($idDocReference[$result_record['referenceId']],$result[$idDocReference[$result_record['referenceId']]],$param);	
 						}
 					}
-					$query_request_data = '';
-					$parameters = '';
+					$query_request_data = array();
+					$parameters = array();
 				}
 			}			
 		} catch (\Exception $e) {
@@ -659,7 +658,6 @@ class salesforcecore extends solution {
 	
 	// Permet de modifier des données
 	public function update($param) {		
-		$parameters = array();
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
 		}
@@ -669,7 +667,7 @@ class salesforcecore extends solution {
 			try{
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-				$parameters = '';
+				$parameters = array();
 				// Instanciation de l'URL d'appel				
 				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
