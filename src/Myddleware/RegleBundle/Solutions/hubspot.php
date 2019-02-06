@@ -102,17 +102,20 @@ class hubspotcore extends solution {
             'owners' => 'Owners',
             'deal_pipeline' => 'Deal pipeline',
             'deal_pipeline_stage' => 'Deal pipeline stage',
-            'engagement_task' => 'Engagement Task',
-            'engagement_call' => 'Engagement Call',
-            'engagement_email' => 'Engagement Email',
-            'engagement_meeting' => 'Engagement Meeting',
-            'engagement_note' => 'Engagement Note',
         );
 
         // Module to create relationship between deals and contacts/companies
         if ($type == 'target') {
             $modules['associate_deal'] = 'Associate deals with companies/contacts';
         }
+		// Module only available in source
+		if ($type == 'source') {
+			$modules['engagement_task'] = 'Engagement Task';
+			$modules['engagement_call'] = 'Engagement Call';
+			$modules['engagement_email'] = 'Engagement Email';
+			$modules['engagement_meeting'] = 'Engagement Meeting';
+			$modules['engagement_note'] = 'Engagement Note';
+		}
         return $modules;
     } // get_modules()
 
@@ -1025,7 +1028,7 @@ class hubspotcore extends solution {
      */
     public function getDateRefName($moduleSource, $RuleMode) {
         // Creation and modification mode
-        if ($RuleMode == "0") {
+        if(in_array($RuleMode,array("0","S"))) {
             return "ModificationDate";
             // Creation mode only
         } else if ($RuleMode == "C") {

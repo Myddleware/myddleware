@@ -1387,6 +1387,10 @@ class DefaultControllerCore extends Controller
             if (empty($intersectMode)) {
                 $intersectMode['C'] = 'create_only';
             }
+			// If duplicate field exist for the target solution, we allow search rule type
+            if (!empty($fieldsDuplicateTarget)) {
+                $intersectMode['S'] = 'search_only';
+            }
             $sessionService->setParamRuleCibleMode($ruleKey, $intersectMode);
 
 
@@ -1908,6 +1912,14 @@ class DefaultControllerCore extends Controller
                     $tab_new_rule['params'] = array_merge($tab_new_rule['params'], $before_save['params']);
                 }
             }
+			
+			// Check if search rule then duplicate field shouldn't be empty
+			if (
+					$tab_new_rule['params']['mode'] == 'S'
+				AND empty($tab_new_rule['params']['rule']['duplicate_fields'])
+			) {
+				throw new \Exception($this->get('translator')->trans('Failed to save the rule. If you choose to retrieve data with your rule, you have to select at least one duplicate field.'));
+			}
 
             // Edit mode
             if (!$sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {

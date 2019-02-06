@@ -334,6 +334,7 @@ flux:
         ready_to_send: Prêt à être envoyé
         filter_ok: Filtre OK
         send: Envoyé
+        found: Trouvé
         filter: Filtre annulé
         no_send: Non envoyé
         cancel: Envoi annulé
@@ -344,6 +345,7 @@ flux:
         error_transformed: Transformation en erreur
         error_checking: Vérification en erreur
         error_sending: Envoi en erreur
+        Not_found: Non trouvée
  
 view_flux:
     empty: Pas de données

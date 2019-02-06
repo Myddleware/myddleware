@@ -73,6 +73,7 @@ class documentcore {
 										'Ready_to_send' => 'Open',
 										'Filter_OK' => 'Open',
 										'Send' => 'Close',
+										'Found' => 'Close',
 										'Filter' => 'Cancel',
 										'No_send' => 'Cancel',
 										'Cancel' => 'Cancel',
@@ -82,7 +83,8 @@ class documentcore {
 										'Relate_KO' => 'Error',
 										'Error_transformed' => 'Error',
 										'Error_checking' => 'Error',
-										'Error_sending' => 'Error'
+										'Error_sending' => 'Error',
+										'Not_found' => 'Error'
 								);
 	
 	protected $container;
@@ -766,38 +768,6 @@ class documentcore {
 					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
-			// Si on est en mode recherche on récupère la donnée cible avec les paramètre de la source
-			elseif ($this->type_document == 'S') {
-				if (!empty($this->sourceData)) {
-					// Un seul champ de recherche pour l'instant. Les règle recherche ne peuvent donc n'avoir qu'un seul champ
-					$searchFields[$this->ruleField[0]['target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
-				}
-				else {
-					throw new \Exception('Failed to search data because there is no field in the query. This document is queued. ');
-				}
-
-				if(!empty($searchFields)) {
-					$history = $this->getDocumentHistory($searchFields);
-				} 
-				else {
-					$history = -1;
-				}
-		
-				// Gestion de l'erreur
-				if ($history === -1) {
-					throw new \Exception('Failed to search data because the query is empty. This document is queued. ');
-				}
-				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
-				elseif ($history === false) {
-					$rule = $this->getRule();
-					throw new \Exception('No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ');
-				}
-				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on passe le flux à envoyé car le lien est fait
-				else {
-					$this->updateStatus('Send');
-					$this->updateTargetId($history);
-				}
-			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);		
@@ -839,13 +809,24 @@ class documentcore {
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
-					$this->updateStatus('Ready_to_send');
+					// If search document and don't found the record, we return an error
+					if ($this->type_document == 'S') {
+						$this->typeError = 'E';
+						$this->updateStatus('Not_found');
+					} else {
+						$this->updateStatus('Ready_to_send');
+					}
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
-					$this->updateStatus('Ready_to_send');
+					// If search document we close it. 
+					if ($this->type_document == 'S') {
+						$this->updateStatus('Found');
+					} else {
+						$this->updateStatus('Ready_to_send');
+						$this->updateType('U');
+					}
 					$this->updateTargetId($history);
-					$this->updateType('U');
 				}
 			}
 			// Sinon on mets directement le document en ready to send (example child rule)
@@ -853,7 +834,7 @@ class documentcore {
 				$this->updateStatus('Ready_to_send');
 			}		
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
-			// Si le document est en type recherche, alors la sible est forcément égal à la source et il ne fait pas annuler le doc. 
+			// Si le document est en type recherche, alors la cible est forcément égale à la source et il ne fait pas annuler le doc. 
 			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
 			if (	
 					$this->type_document != 'S' 

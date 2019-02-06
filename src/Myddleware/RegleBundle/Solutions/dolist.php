@@ -2678,7 +2678,7 @@ class dolistcore extends solution {
 	public function getDateRefName($moduleSource, $RuleMode) {
 		if($moduleSource != "contact") {
 			return null;
-		} else if ($RuleMode == "0"){
+		} else if(in_array($RuleMode,array("0","S"))) {
 			return "UpdateDate";
 		} else if ($RuleMode == "C"){
 			return "SubscribeDate";
