@@ -46,13 +46,6 @@
 			{% endif %}
 
 			{% if doc %}
-				{% if read_record_btn %}
-					<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
-						<button type="button" class="btn-mydinv">
-						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.readrecord'|trans}}
-						</button>
-					</a>
-				{% endif %}
 				
 				{# si le flux n'est pas au statut Cancel ou Close #}
 				{% if doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' %}
@@ -70,9 +63,16 @@
 						</button>
 					</a>
 				
-			{# BTN #}
-			{% endif %}
-			</div>	
+				{% endif %}
+				{% if read_record_btn %}
+					<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
+						<button type="button" class="btn-mydinv">
+						  <span class="glyphicon glyphicon-plus-sign"></span>  {{'view_flux.btn.readrecord'|trans}}
+						</button>
+					</a>
+				{% endif %}
+				{# BTN #}
+				</div>	
 				<table id="headertab" class="listepager">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>
@@ -80,6 +80,7 @@
 						<th>{{'view_flux.header.type'|trans}}</th>
 						<th>{{'view_flux.header.attempt'|trans}}</th>		
 						<th>{{'view_flux.header.gblstatut'|trans}}</th>
+						<th>{{'view_flux.header.dateref'|trans}}</th>
 						{% if doc.getParentId %}
 							<th>{{'view_flux.header.parent'|trans}}</th>
 						{% endif %}	
@@ -110,6 +111,7 @@
 				     		{% endif %}
 				     		</div>
 						</td>
+						<td class="ctr">{{ doc.getSourceDateModified|date("d/m/Y H:i:s") }}</td>
 						{% if doc.getParentId %}
 							<td><a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a></td>
 						{% endif %}
