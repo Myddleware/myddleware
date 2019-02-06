@@ -333,6 +333,7 @@ flux:
         ready_to_send: Ready to be sent
         filter_ok: Filter OK
         send: Sent
+        found: Found
         filter: Filter Cancelled
         no_send: Not sent
         cancel: Sending cancelled
@@ -343,6 +344,7 @@ flux:
         error_transformed: Transformation error
         error_checking: Checking error
         error_sending: Sending error
+        not_found: Not found
 
 view_flux:
     empty: No data
@@ -530,7 +532,7 @@ error:
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
         delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
-        update: Failed to edit the rule.  
+        update: Failed to edit the rule.
     account:
         language_change: Failed to change the language :
     template:
