@@ -486,7 +486,7 @@ class cirrusshieldcore  extends solution {
 	// retrun the reference date field name
 	public function getDateRefName($moduleSource, $RuleMode) {
 		// Creation and modification mode
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "ModificationDate";
 		// Creation mode only
 		} else if ($RuleMode == "C"){

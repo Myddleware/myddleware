@@ -1103,7 +1103,7 @@ class prestashopcore extends solution {
 		if (in_array($moduleSource, array('order_histories','order_payments','order_carriers','customer_messages'))) {
 			return "date_add";
 		}
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "date_upd";
 		} else if ($RuleMode == "C"){
 			return "date_add";
