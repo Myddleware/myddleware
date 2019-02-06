@@ -478,6 +478,7 @@ solution:
         user: User ID        
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
+        file: Fichier
         host: Serveur Host
         dbname: Nom de la base de données
         database_name: Nom de la base de données

@@ -15,5 +15,13 @@ class DefaultController extends Controller
 
         return new JsonResponse($data);
 
+    } 
+	
+	public function generateDocumentsAction(Request $request)
+    {
+        $data = $request->request->all();
+
+        return new JsonResponse($data);
+
     }
 }

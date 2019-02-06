@@ -184,27 +184,24 @@ class ConnectorController extends Controller
 
 	// Contrôle si le fichier upload est valide puis le déplace
     public function uploadAction($solution) // REV 1.1.0
-    {
-			
+    {			
 		if( isset($solution) ) {
-			if(in_array(trim($solution), array('sagecrm','sapcrm','sap','zuora'))){
-				$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/wsdl/";
-				// Get canonicalized absolute pathname
-				$path = realpath($output_dir);
-				// If it exist, check if it's a directory
-				if($path === false || !is_dir($path)) {
-					try {
-						if(!mkdir($output_dir,755,true)) {
-							echo '0;'.'Directory '.$output_dir.' doesn\'t exist. Failed to create this directory. Please check directory Custom is readable by webuser. You can create manually the directory for the Sage wsdl too. ';
-							exit;	
-						}
-					}
-					catch (\Exception $e) {
-						echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+			$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/file/";
+			// Get canonicalized absolute pathname
+			$path = realpath($output_dir);
+			// If it exist, check if it's a directory
+			if($path === false || !is_dir($path)) {
+				try {
+					if(!mkdir($output_dir,755,true)) {
+						echo '0;'.'Directory '.$output_dir.' doesn\'t exist. Failed to create this directory. Please check directory Custom is readable by webuser. You can create manually the directory for the Sage wsdl too. ';
 						exit;	
 					}
 				}
-			}		
+				catch (\Exception $e) {
+					echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+					exit;	
+				}
+			}	
 		}
 		/* @var $sessionService SessionService */
                 $sessionService = $this->get('myddleware_session.service');

@@ -46,7 +46,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         <div class="col-md-3">{{ form_label(field.value) }}</div>
         <div class="col-md-9">
                 {{ form_widget(field.name) }}
-            {% if field.vars.value.name !='wsdl' %}
+            {% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
                 {{ form_widget(field.value) }}
             {% else %}
                 <a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': form.vars.value.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
