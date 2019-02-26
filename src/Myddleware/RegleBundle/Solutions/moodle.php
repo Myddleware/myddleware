@@ -93,7 +93,9 @@ class moodlecore  extends solution {
 				return array(
 					'get_users_completion'			=> 'Get users completion',
 					'get_users_last_access'			=> 'Get users last access',
-					'get_courses_by_date'			=> 'Get courses'
+					'get_courses_by_date'			=> 'Get courses',
+					'get_users_by_date'				=> 'Get users',
+					'get_enrolments_by_date'		=> 'Get enrolments'
 				);	
 			}
 			else {
@@ -120,6 +122,7 @@ class moodlecore  extends solution {
 			// Pour chaque module, traitement différent
 			switch ($module) {
 				case 'users':
+				case 'get_users_by_date':
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'username' => array('label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
@@ -267,6 +270,7 @@ class moodlecore  extends solution {
 					);	
 					break;	
 				case 'manual_enrol_users':	
+				case 'get_enrolments_by_date':	
 					$this->moduleFields = array(
 						'roleid' => array('label' => 'Role ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'timestart' => array('label' => 'Time start', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -437,7 +441,7 @@ class moodlecore  extends solution {
 			$result['count'] = 0;
 			// Put date ref in Moodle format
 			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);
@@ -455,9 +459,11 @@ class moodlecore  extends solution {
 					$functionname = 'local_myddleware_get_users_last_access';
 					break;	
 				case 'get_courses_by_date':
+				case 'get_users_by_date':
+				case 'get_enrolments_by_date':
 					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
 					$parameters = array('time_modified' => $result['date_ref']);
-					$functionname = 'local_myddleware_get_courses_by_date';
+					$functionname = 'local_myddleware_'.$param['module'];
 					break;	
 				default:
 					throw new \Exception("Module unknown. ");
@@ -466,10 +472,10 @@ class moodlecore  extends solution {
 
 			// Call to Moodle
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;
-// echo $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			
+// echo $serverurl; 		
 			$response = $this->moodleClient->post($serverurl, $parameters);				
+// print_r($response);					
 			$xml = simplexml_load_string($response);
-		
 			if (!empty($xml->ERRORCODE)) {
 				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
 			}
@@ -477,17 +483,18 @@ class moodlecore  extends solution {
 			// Transform the data to Myddleware format
 			if (!empty($xml->MULTIPLE->SINGLE)) {
 				foreach ($xml->MULTIPLE->SINGLE AS $data) {
+// print_r($data);					
 					foreach ($data AS $field) {
 						// Save the new date ref
 						if (
-								$field->attributes()->__toString() == $DateRefField
+								$field->attributes()->__toString() == $dateRefField
 							&&	$result['date_ref'] < $field->VALUE->__toString()
 						) {
 							$result['date_ref'] = $field->VALUE->__toString();
 						}
 						// Get the date modified
 						if (
-								$field->attributes()->__toString() == $DateRefField
+								$field->attributes()->__toString() == $dateRefField
 						) {
 							$row['date_modified'] = $field->VALUE->__toString();
 						}
@@ -506,7 +513,8 @@ class moodlecore  extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
 		}	
-// print_r($result);
+// print_r($result);	
+// return null;	
 		return $result;
 	}
 	
@@ -755,6 +763,8 @@ class moodlecore  extends solution {
 		switch ($moduleSource) {
 			case 'get_users_completion':
 			case 'get_courses_by_date':
+			case 'get_users_by_date':
+			case 'get_enrolments_by_date':
 				return 'timemodified';
 				break;	
 			case 'get_users_last_access':
