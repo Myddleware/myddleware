@@ -165,82 +165,55 @@ class moodlecore  extends solution {
 	} // get_module_fields($module)	 
 
 
-	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {		
-		$query = '';
-		try {
-			// Si le tableau de requête est présent alors construction de la requête
-			if (!empty($param['query'])) {
-				foreach ($param['query'] as $key => $value) {
-					$filters[] = array( 'key' => $key, 'value' => $value );
-				}
-			}
-			switch ($param['module']) {
-				case 'users':
-					$parameters = array( 'criteria' => $filters );
-					$functionname = 'core_user_get_users';
-					break;
-				case 'get_users_completion':
-					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
-					$parameters = array('time_modified' => date('U', strtotime('-1 week')));
-					$functionname = 'local_myddleware_get_users_completion';
-					break;	
-				case 'get_users_last_access':
-					// For the simulation we get the last access from last week (we don't put 0 for peformance matters)
-					$parameters = array('time_modified' => date('U', strtotime('-1 week')));
-					$functionname = 'local_myddleware_get_users_last_access';
-					break;	
-				default:
-					$result['done'] = false;					
-					return $result;	
-					break;
-			}
-
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;			
-			$response = $this->moodleClient->post($serverurl, $parameters);				
-			$xml = simplexml_load_string($response);
-			if (!empty($xml->ERRORCODE)) {
-				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
-			}
-			
-			// Get the data from the output structure
-			if (in_array($param['module'], array('get_users_completion','get_users_last_access'))) {		
-				if (!empty($xml->MULTIPLE->SINGLE[0]->KEY[0]->VALUE)) {
-					$data = $xml->MULTIPLE->SINGLE[0]->KEY;
-				}
-			}
-			elseif (!empty($xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY->VALUE)) {
-				$param['fields'] = $this->addRequiredField($param['fields']);
-				$data = $xml->SINGLE->KEY[0]->MULTIPLE->SINGLE->KEY;
-				
-			}
-			
-			// Transform the data to Myddleware format
-			if (!empty($data)) {
-				foreach ($data AS $value) {
-					// Si le champ est demandé
-					if (array_search($value->attributes()->__toString(), $param['fields']) !== false) {
-						$result['values'][$value->attributes()->__toString()] = $value->VALUE->__toString();
-					}
-				}
-				$result['done'] = true;
-			}
-			else {
-				$result['done'] = false;
-			}				
-			return $result;		 
+ /**
+     * Get the last data in the application
+     * @param $param
+     * @return mixed
+     */
+    public function read_last($param) {	
+		// Query empty when the rule simulation is requested
+		if (empty($param['query'])) {
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters)
+			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime('-1 year'));
 		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-			return $result;
+		// Init rule mode 
+		$param['rule']['mode'] = '0';
+		
+// echo '<pre>';
+// print_r($param);		
+		// We re use read function for the read_last 
+		$read = $this->read($param);
+// print_r($read);		
+// $result['done'] = false;
+// return $result; 
+		// Format output values
+		if (!empty($read['error'])) {
+			$result['error'] = $read['error'];
+		} else {
+			if (!empty($read['values'])) {
+				$result['done'] = true;
+				// Get only one record
+				$result['values'] = current($read['values']);
+			} else {
+				$result['done'] = false;
+			}
 		}	
-	}
+		return $result; 
+    }
+	// end function read_last
+	
 	
 	// Read data in Moodle
 	public function read($param) {	
 		try {
+// print_r($param);			
 			$result['count'] = 0;
+			
+			// In case we search a specific record, we set a date_ref far in the past 
+			if (!empty($param['query']['id'])) {
+				$param['date_ref'] = '1970-01-01 00:00:00';			
+			}
+			
 			// Put date ref in Moodle format
 			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
@@ -249,13 +222,38 @@ class moodlecore  extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 
 			// Set parameters
-			$parameters = array('time_modified' => $result['date_ref']);
-			$functionname = 'local_myddleware_'.$param['module'];
-
+			$parameters['time_modified'] = $result['date_ref'];
+			if (
+					!empty($param['query']['id'])
+				AND !in_array($param['module'], array('users')) // User is used bellow
+			) {
+				$parameters['id'] = $param['query']['id'];
+			}
+			elseif (!empty($param['query'])) {
+				if (in_array($param['module'], array('users'))) {
+					foreach ($param['query'] as $key => $value) {
+						$filters[] = array( 'key' => $key, 'value' => $value );
+						$parameters = array( 'criteria' => $filters );
+					}
+				} else {
+					throw new \Exception("Specific filter criteria not allowed for the module ".$param['module']);
+				}
+			} 
+			
+			// We use the standard function to search for a user (allow Myddleware to search a user by username or email)
+			if($param['module'] == 'users') {
+				$functionname = 'core_user_get_users';
+			} else {
+				$functionname = 'local_myddleware_'.$param['module'];
+			}
+			
 			// Call to Moodle
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;
+// echo 'ZZZZZZZZZZZZZ<BR>';
+// print_r($parameters);					
 // echo $serverurl; 		
 			$response = $this->moodleClient->post($serverurl, $parameters);				
+// echo 'YYYYYYYYYYYY<BR>';
 // print_r($response);					
 			$xml = simplexml_load_string($response);
 			if (!empty($xml->ERRORCODE)) {
