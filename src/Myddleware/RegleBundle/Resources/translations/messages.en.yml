@@ -361,7 +361,7 @@ view_flux:
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
-        readrecord: Run the same record
+        readrecord: Generate new transfer
     header:
         rule: Rule
         statut: Status
