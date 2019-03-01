@@ -43,6 +43,8 @@ class moodlecore  extends solution {
 								);
 								
 	protected $FieldsDuplicate = array(	'users' => array('email', 'username')  );
+	
+	protected $delaySearch = '-1 year';
 		
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
@@ -173,19 +175,15 @@ class moodlecore  extends solution {
     public function read_last($param) {	
 		// Query empty when the rule simulation is requested
 		if (empty($param['query'])) {
-			// For the simulation we set the search date to last week (we don't put 0 for peformance matters)
-			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime('-1 year'));
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redifine it)
+			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch));
 		}
 		// Init rule mode 
 		$param['rule']['mode'] = '0';
-		
-// echo '<pre>';
-// print_r($param);		
+			
 		// We re use read function for the read_last 
 		$read = $this->read($param);
-// print_r($read);		
-// $result['done'] = false;
-// return $result; 
+
 		// Format output values
 		if (!empty($read['error'])) {
 			$result['error'] = $read['error'];
@@ -205,8 +203,7 @@ class moodlecore  extends solution {
 	
 	// Read data in Moodle
 	public function read($param) {	
-		try {
-// print_r($param);			
+		try {	
 			$result['count'] = 0;
 			
 			// In case we search a specific record, we set a date_ref far in the past 
@@ -217,7 +214,7 @@ class moodlecore  extends solution {
 			// Put date ref in Moodle format
 			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
+		
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);
 
@@ -248,13 +245,8 @@ class moodlecore  extends solution {
 			}
 			
 			// Call to Moodle
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;
-// echo 'ZZZZZZZZZZZZZ<BR>';
-// print_r($parameters);					
-// echo $serverurl; 		
-			$response = $this->moodleClient->post($serverurl, $parameters);				
-// echo 'YYYYYYYYYYYY<BR>';
-// print_r($response);					
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;		
+			$response = $this->moodleClient->post($serverurl, $parameters);								
 			$xml = simplexml_load_string($response);
 			if (!empty($xml->ERRORCODE)) {
 				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
@@ -262,8 +254,7 @@ class moodlecore  extends solution {
 			
 			// Transform the data to Myddleware format
 			if (!empty($xml->MULTIPLE->SINGLE)) {
-				foreach ($xml->MULTIPLE->SINGLE AS $data) {
-// print_r($data);					
+				foreach ($xml->MULTIPLE->SINGLE AS $data) {				
 					foreach ($data AS $field) {
 						// Save the new date ref
 						if (
@@ -271,7 +262,10 @@ class moodlecore  extends solution {
 									$field->attributes()->__toString() == $dateRefField
 								AND	$result['date_ref'] < $field->VALUE->__toString()
 								)
-							 OR $field->attributes()->__toString() == 'date_ref_override' // The webservice could return a date to override the date_ref
+							 OR (
+									$field->attributes()->__toString() == 'date_ref_override' // The webservice could return a date to override the date_ref
+								AND $field->VALUE->__toString() > 0
+								)
 						) {
 							$result['date_ref'] = $field->VALUE->__toString();
 						}
@@ -296,8 +290,6 @@ class moodlecore  extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
 		}	
-// print_r($result);	
-// return null;	
 		return $result;
 	}
 	
