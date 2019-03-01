@@ -362,7 +362,7 @@ view_flux:
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
-        readrecord: Lancer la même donnée 
+        readrecord: Générer un nouveau transfer
     header:
         rule: Règle
         statut: Status

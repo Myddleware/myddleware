@@ -847,7 +847,11 @@ class documentcore {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
-			$this->updateStatus('Error_checking');
+			if ($this->type_document == 'S') {
+				$this->updateStatus('Not_found');
+			} else {
+				$this->updateStatus('Error_checking');
+			}
 			$this->logger->error($this->message);
 			return false;
 		}	
@@ -946,6 +950,8 @@ class documentcore {
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
+		// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
+		$read['date_ref'] = '1970-01-02 00:00:00';	
 		$dataTarget = $this->solutionTarget->read_last($read);		
 		if (empty($dataTarget['done'])) {
 			return false;

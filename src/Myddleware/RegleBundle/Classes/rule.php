@@ -134,7 +134,10 @@ class rulecore {
 				if ($idFiledName == 'Myddleware_element_id') {
 					$idFiledName = 'id';
 				}	
-				$read['query'] = array($idFiledName => $idSource);			
+				$read['query'] = array($idFiledName => $idSource);	
+				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
+				$read['date_ref'] = '1970-01-02 00:00:00';			
+			
 				$dataSource = $this->solutionSource->read($read);			;				
 				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
@@ -960,17 +963,17 @@ class rulecore {
 			}
 		}
 		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking','Not_found'))) {
-			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
+			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));			
 			if ($response[$id_document] === true) {
 				if ($this->rule['mode'] == 'S') {
-					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
 				}
 				else {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
 				}
 			}
 			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_checking';
+				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
 			}
 		}
 		// Si la règle est en mode recherche alors on n'envoie pas de données

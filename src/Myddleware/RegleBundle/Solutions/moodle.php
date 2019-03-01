@@ -42,7 +42,10 @@ class moodlecore  extends solution {
 										'get_course_completion_by_date' => array('id','timecompleted')
 								);
 								
-	protected $FieldsDuplicate = array(	'users' => array('email', 'username')  );
+	protected $FieldsDuplicate = array(	
+										'users' => array('email', 'username'),  
+										'courses' => array('shortname', 'idnumber')  
+									);
 	
 	protected $delaySearch = '-1 year';
 		
@@ -167,7 +170,7 @@ class moodlecore  extends solution {
 	} // get_module_fields($module)	 
 
 
- /**
+	/**
      * Get the last data in the application
      * @param $param
      * @return mixed
@@ -182,7 +185,7 @@ class moodlecore  extends solution {
 		$param['rule']['mode'] = '0';
 			
 		// We re use read function for the read_last 
-		$read = $this->read($param);
+		$read = $this->read($param);		
 
 		// Format output values
 		if (!empty($read['error'])) {
@@ -200,54 +203,29 @@ class moodlecore  extends solution {
     }
 	// end function read_last
 	
-	
 	// Read data in Moodle
 	public function read($param) {	
 		try {	
 			$result['count'] = 0;
 			
-			// In case we search a specific record, we set a date_ref far in the past 
-			if (!empty($param['query']['id'])) {
-				$param['date_ref'] = '1970-01-01 00:00:00';			
-			}
-			
 			// Put date ref in Moodle format
-			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
+			$result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);			
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 		
 			// Add requiered fields 
 			$param['fields'] = $this->addRequiredField($param['fields']);
+			
+			// Set parameters to call Moodle
+			$parameters = $this->setParameters($param);
+			
+			// Get function to call Moodle
+			$functionName = $this->getFunctionName($param);
 
-			// Set parameters
-			$parameters['time_modified'] = $result['date_ref'];
-			if (
-					!empty($param['query']['id'])
-				AND !in_array($param['module'], array('users')) // User is used bellow
-			) {
-				$parameters['id'] = $param['query']['id'];
-			}
-			elseif (!empty($param['query'])) {
-				if (in_array($param['module'], array('users'))) {
-					foreach ($param['query'] as $key => $value) {
-						$filters[] = array( 'key' => $key, 'value' => $value );
-						$parameters = array( 'criteria' => $filters );
-					}
-				} else {
-					throw new \Exception("Specific filter criteria not allowed for the module ".$param['module']);
-				}
-			} 
-			
-			// We use the standard function to search for a user (allow Myddleware to search a user by username or email)
-			if($param['module'] == 'users') {
-				$functionname = 'core_user_get_users';
-			} else {
-				$functionname = 'local_myddleware_'.$param['module'];
-			}
-			
-			// Call to Moodle
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionname;		
+			// Call to Moodle		
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionName;		
 			$response = $this->moodleClient->post($serverurl, $parameters);								
-			$xml = simplexml_load_string($response);
+			$xml = $this->formatResponse('read', $response, $param);		
+
 			if (!empty($xml->ERRORCODE)) {
 				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
 			}
@@ -255,6 +233,7 @@ class moodlecore  extends solution {
 			// Transform the data to Myddleware format
 			if (!empty($xml->MULTIPLE->SINGLE)) {
 				foreach ($xml->MULTIPLE->SINGLE AS $data) {				
+
 					foreach ($data AS $field) {
 						// Save the new date ref
 						if (
@@ -292,6 +271,7 @@ class moodlecore  extends solution {
 		}	
 		return $result;
 	}
+
 	
 	// Permet de créer des données
 	public function create($param) {
@@ -533,15 +513,60 @@ class moodlecore  extends solution {
 		return $date->format('U');
 	}// dateTimeFromMyddleware($dateTime)    
 	
+		
+	// Format webservice result if needed
+	protected function formatResponse($method, $response, $param) {
+		$xml = simplexml_load_string($response);
+		if ($method == 'read') {
+			if (in_array($param['module'], array('users','courses'))) {
+				$xml = $xml->SINGLE->KEY[0];
+			}
+		}
+		return $xml;
+	}
+	
+	// Get the function name 
+	protected function getFunctionName($param) {
+		// We use the standard function to search for a user (allow Myddleware to search a user by username or email)
+		if($param['module'] == 'users') {
+			$functionname = 'core_user_get_users';
+		} elseif($param['module'] == 'courses') {
+			$functionname = 'core_course_get_courses_by_field';
+		} else {
+			$functionname = 'local_myddleware_'.$param['module'];
+		}	
+		return $functionname;
+	}
+	
+	// Prepare parameters for read function
+	protected function setParameters($param) {
+		$parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);	
+		if (
+				!empty($param['query']['id'])
+			AND !in_array($param['module'], array('users', 'courses')) // User is used below
+		) {
+			$parameters['id'] = $param['query']['id'];
+		}
+		elseif (!empty($param['query'])) {
+			if (in_array($param['module'], array('users','courses'))) {
+				foreach ($param['query'] as $key => $value) {
+					if ($param['module'] == 'users') {
+						$filters[] = array( 'key' => $key, 'value' => $value );
+						$parameters = array( 'criteria' => $filters );
+					} else { // course
+						$parameters = array('field'=> $key, 'value' => $value);
+					}
+				}
+			} else {
+				throw new \Exception("Specific filter criteria not allowed for the module ".$param['module']);
+			}
+		} 
+		return $parameters;
+	}
+	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
 		switch ($moduleSource) {
-			case 'get_users_completion':
-			case 'get_courses_by_date':
-			case 'get_users_by_date':
-			case 'get_enrolments_by_date':
-				return 'timemodified';
-				break;	
 			case 'get_course_completion_by_date':
 				return 'timecompleted';
 				break;	
@@ -549,7 +574,7 @@ class moodlecore  extends solution {
 				return 'lastaccess';
 				break;	
 			default:
-				throw new \Exception("Module unknown. ");
+				return 'timemodified';
 				break;
 		}
 		return null;
