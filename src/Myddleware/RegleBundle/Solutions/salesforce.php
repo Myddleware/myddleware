@@ -434,6 +434,9 @@ class salesforcecore extends solution {
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
 		}
+		if (!isset($param['offset'])) {
+			$param['offset'] = 0;
+		}
 			 
 		try {
 			$param['fields'] = array_unique($param['fields']);
@@ -463,11 +466,11 @@ class salesforcecore extends solution {
 			
 			// On lit les données dans Salesforce
 			do {		
-				if(isset($param['offset'])) {
+				if(!empty($param['offset'])) {
 					$queryOffset = "+OFFSET+".$param['offset'];
 				}
 				// Appel de la requête
-				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;			
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
 			
@@ -510,7 +513,7 @@ class salesforcecore extends solution {
 						$result['values'][$record['Id']] = $row;
 						$row = array();
 					}
-					// Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
+					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
 					$param['offset'] += $param['limit'];
 					// Récupération de la date de référence de l'avant dernier enregistrement afin de savoir si on doit faire un appel supplémentaire 
 					// currentCount -2 car si 5 résultats dans la tableau alors on veut l'entrée 3 (l'index des tableau commence à 0)
@@ -767,28 +770,34 @@ class salesforcecore extends solution {
 	
 	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
 	protected function getWhere($param) {
-		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-
-		// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
-		$tab = explode(' ', $param['date_ref']);
-		$date = $tab[0] . 'T' . $tab[1];
-
-		// Encodage de la date
-		$startDateAndTime = urlencode($date . '+00:00');
-		if($DateRefField == 'LastModifiedDate') {
-			$queryWhere = "+WHERE+LastModifiedDate+>+" . $startDateAndTime;
-		} else {
-			$queryWhere = "+WHERE+CreatedDate+>+" . $startDateAndTime;
-		}
-	
-		// Si le module est CampaignMember alors on ne récupère que les membre compatible avec la règle : piste ou contact
-		if ($param['module'] == 'CampaignMember') {
-			if (array_search('ContactId',$param['fields']) !== false){
-				$queryWhere .= "+AND+ContactId+!=+''";
+		if (!empty($param['query'])) {
+			foreach ($param['query'] as $key => $value) {
+				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
 			}
-			else {
-				$queryWhere .= "+AND+LeadId+!=+''";
+		} else {
+			// On va chercher le nom du champ pour la date de référence: Création ou Modification
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+
+			// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
+			$tab = explode(' ', $param['date_ref']);
+			$date = $tab[0] . 'T' . $tab[1];
+
+			// Encodage de la date
+			$startDateAndTime = urlencode($date . '+00:00');
+			if($DateRefField == 'LastModifiedDate') {
+				$queryWhere = "+WHERE+LastModifiedDate+>+" . $startDateAndTime;
+			} else {
+				$queryWhere = "+WHERE+CreatedDate+>+" . $startDateAndTime;
+			}
+		
+			// Si le module est CampaignMember alors on ne récupère que les membre compatible avec la règle : piste ou contact
+			if ($param['module'] == 'CampaignMember') {
+				if (array_search('ContactId',$param['fields']) !== false){
+					$queryWhere .= "+AND+ContactId+!=+''";
+				}
+				else {
+					$queryWhere .= "+AND+LeadId+!=+''";
+				}
 			}
 		}
 		return $queryWhere;
