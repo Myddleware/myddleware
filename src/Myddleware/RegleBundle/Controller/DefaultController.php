@@ -39,6 +39,7 @@ use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Myddleware\RegleBundle\Entity\Rule;
 use Myddleware\RegleBundle\Entity\RuleParam;
+use Myddleware\RegleBundle\Entity\RuleParamAudit;
 use Myddleware\RegleBundle\Entity\RuleFilter;
 use Myddleware\RegleBundle\Entity\RuleField;
 use Myddleware\RegleBundle\Entity\RuleRelationShip;
@@ -379,9 +380,19 @@ class DefaultControllerCore extends Controller
                         $param->setName($p['name']);
 						$param->setValue($p['value']);					
 					} else {
+						// Save param modification in the audit table
+						if ($p['value'] != $param->getValue()) {
+							$paramAudit = new RuleParamAudit();
+							$paramAudit->setRuleParamId($p['id']);
+							$paramAudit->setDateModified(new \DateTime);
+							$paramAudit->setBefore($param->getValue());
+							$paramAudit->setAfter($p['value']);
+							$paramAudit->setByUser($this->getUser()->getId());
+							$this->em->persist($paramAudit);					
+						}
 						$param->setValue($p['value']);
-                    }
-					$this->em->persist($param);
+                    }				
+					$this->em->persist($param);					
                     $this->em->flush();
                 }
             }
@@ -517,8 +528,12 @@ class DefaultControllerCore extends Controller
                 );
             // Return to the view detail fo the rule if we found a document open or in error
             if (!empty($docErrorOpen)) {
-                $session->set('error', array($this->get('translator')->trans('error.rule.edit_document_error_open')));
-                return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				if ($this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
+					$session->set('warning', array($this->get('translator')->trans('error.rule.edit_document_error_open_admin')));
+				} else {
+					$session->set('error', array($this->get('translator')->trans('error.rule.edit_document_error_open')));
+					return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				}
             }
 
             /* @var $sessionService SessionService */
