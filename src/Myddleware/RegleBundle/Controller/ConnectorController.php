@@ -165,8 +165,7 @@ class ConnectorController extends Controller
 							return new Response(1); // Connexion réussi
 						}
 					}		
-				}
-                                
+				}        
 				return new Response('<script type="text/javascript" language="javascript">window.close();</script>'); // Ferme la popup automatiquement			
 			} // fin 
 			// SOLUTION AVEC POPUP ---------------------------------------------------------------------
@@ -175,10 +174,8 @@ class ConnectorController extends Controller
 			}
 		}
 		catch (\Exception $e) {
-			
 			return new Response($e->getMessage());
 		}
-		
 		return new Response('');
 	} 
 
@@ -207,7 +204,7 @@ class ConnectorController extends Controller
 			}		
 		}
 		/* @var $sessionService SessionService */
-                $sessionService = $this->get('myddleware_session.service');
+		$sessionService = $this->get('myddleware_session.service');
 		
 		// Supprime ancien fichier de config s'il existe
 		if(isset($_GET['file']) && $_GET['file'] != '') {
@@ -564,7 +561,7 @@ class ConnectorController extends Controller
 	// LISTE DES CONNECTEURS POUR ANIMATION
 	public function connectorListSolutionAction(Request $request) {
 		
-                $id = $request->get('id',null);
+		$id = $request->get('id',null);
                 
 		if($id !=null) {
 							
@@ -582,8 +579,8 @@ class ConnectorController extends Controller
 			}
 			// Detecte si la session est le support ---------			
 							
-			 $em = $this->getDoctrine()->getManager();
-			 $listConnector = $em->getRepository('RegleBundle:Connector')
+			$em = $this->getDoctrine()->getManager();
+			$listConnector = $em->getRepository('RegleBundle:Connector')
 								 ->findBy( $list_fields_sql );
 			
 			$lstArray = array();			   			
@@ -601,8 +598,8 @@ class ConnectorController extends Controller
 	// CREATION D UN CONNECTEUR LISTE animation
     public function createOutAction($type)
     {           
-                /* @var $sessionService SessionService */
-                $sessionService = $this->get('myddleware_session.service');
+		/* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
 
 		$em = $this->getDoctrine()->getManager();
 		
@@ -632,8 +629,8 @@ class ConnectorController extends Controller
 	// RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY	
 	public function connectorInsertSolutionAction() {
             
-                /* @var $sessionService SessionService */
-                $sessionService = $this->get('myddleware_session.service');
+		/* @var $sessionService SessionService */
+		$sessionService = $this->get('myddleware_session.service');
 
 		if($sessionService->isConnectorValuesExist()) {
 			$values = $sessionService->getConnectorValues();	
@@ -691,8 +688,4 @@ class ConnectorController extends Controller
 			return false;
 		}		
 	}
-
-
-
-	
 }
