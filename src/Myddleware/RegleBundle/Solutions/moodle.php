@@ -130,7 +130,7 @@ class moodlecore  extends solution {
 			$this->fieldsRelate = array();
 			
 			// Use Moodle metadata
-			require_once('lib/moodle/metadata.php');	
+			require('lib/moodle/metadata.php');	
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
 			}
@@ -223,7 +223,7 @@ class moodlecore  extends solution {
 
 			// Call to Moodle		
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionName;		
-			$response = $this->moodleClient->post($serverurl, $parameters);								
+			$response = $this->moodleClient->post($serverurl, $parameters);
 			$xml = $this->formatResponse('read', $response, $param);		
 
 			if (!empty($xml->ERRORCODE)) {

@@ -104,7 +104,7 @@ class erpnextcore extends solution
 		try {
 			// Get 
 			$url = $this->paramConnexion['url'] .'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';			
-			$APImodules = $this->call($url, 'GET');	
+			$APImodules = $this->call($url, 'GET');
 			if (!empty($APImodules->data)) {
 				foreach ($APImodules->data as $APImodule) {
 					$modules[$APImodule->name] = $APImodule->name;
