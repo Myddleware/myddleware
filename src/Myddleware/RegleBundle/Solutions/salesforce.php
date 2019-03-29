@@ -653,8 +653,20 @@ class salesforcecore extends solution {
 				}
 			}			
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			// Global error
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['error'] = $error;
+			// Erro on each data transfer
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Please open the task to get more detail.';
+			// Set status for all data transfer when an error happens in a mass action
+			foreach($param['data'] as $idDoc => $data) {
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+				// Change status for all records
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
 		}					
 		return $result;
 	} // create($param)

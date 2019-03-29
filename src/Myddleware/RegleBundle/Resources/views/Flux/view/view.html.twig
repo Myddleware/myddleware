@@ -45,8 +45,8 @@
 
 			{% endif %}
 
+
 			{% if doc %}
-				
 				{# si le flux n'est pas au statut Cancel ou Close #}
 				{% if doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' %}
 				

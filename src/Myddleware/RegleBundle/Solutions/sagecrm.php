@@ -209,7 +209,7 @@ class sagecrmcore extends solution {
 		$tmp = explode("_", $module, 2);
 		$module = $tmp[1];
 		$prefix = $tmp[0];
-		$dropdownvalues = '';
+		$dropdownvalues = array();
 		
 		try{
 			try{
@@ -250,7 +250,10 @@ class sagecrmcore extends solution {
 				if (!empty($lists->result->records)) {
 					foreach ($lists->result->records as $list) {
 						// Some lists aren't array
-						if (is_array($list->records)) {
+						if (
+								!empty($list->records)
+							AND	is_array($list->records)
+						) {
 							$dropdownvalues[$list->fieldname] = $list->records;
 						}
 					}

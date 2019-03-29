@@ -165,8 +165,7 @@ class ConnectorController extends Controller
 							return new Response(1); // Connexion réussi
 						}
 					}		
-				}
-                                
+				}        
 				return new Response('<script type="text/javascript" language="javascript">window.close();</script>'); // Ferme la popup automatiquement			
 			} // fin 
 			// SOLUTION AVEC POPUP ---------------------------------------------------------------------
@@ -175,10 +174,8 @@ class ConnectorController extends Controller
 			}
 		}
 		catch (\Exception $e) {
-			
 			return new Response($e->getMessage());
 		}
-		
 		return new Response('');
 	} 
 
@@ -207,7 +204,7 @@ class ConnectorController extends Controller
 			}		
 		}
 		/* @var $sessionService SessionService */
-                $sessionService = $this->get('myddleware_session.service');
+		$sessionService = $this->get('myddleware_session.service');
 		
 		// Supprime ancien fichier de config s'il existe
 		if(isset($_GET['file']) && $_GET['file'] != '') {
@@ -274,7 +271,7 @@ class ConnectorController extends Controller
 	// CREATION D UN CONNECTEUR LISTE
     public function createAction()
     {	
-                $sessionService = $this->get('myddleware_session.service');
+		$sessionService = $this->get('myddleware_session.service');
 		
 		$em = $this->getDoctrine()->getManager();
 		$solution = $em->getRepository('RegleBundle:Solution')
@@ -288,7 +285,7 @@ class ConnectorController extends Controller
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));	
 		$sessionService->setConnectorAnimation(false);
-                $sessionService->setConnectorAddMessage('list');       
+		$sessionService->setConnectorAddMessage('list');       
                
         return $this->render('RegleBundle:Connector:index.html.twig',array(
 			'solutions'=> $lst_solution )
@@ -298,14 +295,14 @@ class ConnectorController extends Controller
 	// CREATION D UN CONNECTEUR
 	public function connectorInsertAction(Request $request) {
 		/* @var $sessionService SessionService */
-		$sessionService = $this->get('myddleware_session.service');
-          
+		$sessionService = $this->get('myddleware_session.service');    
 		$type = '';	
 		
 		$solution = $this->getDoctrine()
-                ->getManager()
-                ->getRepository('RegleBundle:Solution')
-                ->findOneByName($sessionService->getParamConnectorSourceSolution());
+							->getManager()
+							->getRepository('RegleBundle:Solution')
+							->findOneByName($sessionService->getParamConnectorSourceSolution());
+
 		$connector = new Connector();
 		$connector->setSolution($solution);
 
@@ -322,14 +319,13 @@ class ConnectorController extends Controller
                 
 		if($request->getMethod()=='POST' && $sessionService->isParamConnectorExist()) {		
 			try {
-                $form->handleRequest($request);
+				$form->handleRequest($request);
                 $form->submit($request->request->get($form->getName()));
-                if($form->isValid()){
+				if($form->isValid()){
 					$solution = $connector->getSolution();
 					$multi = $solution->getSource() + $solution->getTarget();
-
 					if($sessionService->getConnectorAnimation()){
-						// animation add connector
+					// animation add connector
 						$type = $sessionService->getParamConnectorAddType();
 						// si la solution ajouté n'existe pas dans la page en cours on va la rajouter manuellement
 						$solution = $sessionService->getParamConnectorSourceSolution();
@@ -358,7 +354,6 @@ class ConnectorController extends Controller
 					}
 
 					$sessionService->removeConnector();
-
 					if(
 							!empty($sessionService->getConnectorAddMessage())
 						&&  $sessionService->getConnectorAddMessage() == 'list'
@@ -378,19 +373,16 @@ class ConnectorController extends Controller
 							)
 						);
 					}
-
-				}else{
+				} else {
 					dump($form); die();
 					return $this->redirect($this->generateUrl('regle_connector_list'));
 				}//-----------
 			}
-			catch(Exception $e) {
-				
+			catch(Exception $e) {			
 				throw $this->createNotFoundException('Error');
 			}		
 		}
-		else {
-			
+		else {		
 			throw $this->createNotFoundException('Error');
 		}		
 	}
@@ -493,16 +485,28 @@ class ConnectorController extends Controller
 	}
 
 	// FICHE D UN CONNECTEUR
-	public function connectorOpenAction(Request $request, $id) {           
+	public function connectorOpenAction(Request $request, $id) {     
 		// On récupére l'EntityManager
 		$em = $this->getDoctrine()->getManager();
                 
 		$qb = $em->getRepository('RegleBundle:Connector')->createQueryBuilder('c');
-		$qb->select('c','cp')
-		   ->leftjoin('c.connectorParams','cp');
+		$qb->select('c','cp')->leftjoin('c.connectorParams','cp');
 		
 		// Detecte si la session est le support ---------
 		$permission = $this->get('myddleware.permission');
+
+		if ($permission->isAdmin($this->getUser()->getId())) {
+			$qb->where('c.id =:id')->setParameter('id',$id); 
+		} else {
+			$qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+		}
+		// Detecte si la session est le support ---------			
+		// Infos du connecteur
+		$connector = $qb->getQuery()->getOneOrNullResult();
+   
+		if (!$connector) {
+			throw $this->createNotFoundException("This connector doesn't exist");
+		}
               
 		if ($permission->isAdmin($this->getUser()->getId())) {
 			$qb->where('c.id =:id')->setParameter('id',$id); 
@@ -517,67 +521,42 @@ class ConnectorController extends Controller
 			throw $this->createNotFoundException("This connector doesn't exist");
 		}
               
+		// Create connector form
+		// $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
         if( $connector->getSolution() !=null ){
-
             $fieldsLogin = $this->container->get('myddleware_rule.' . $connector->getSolution()->getName())->getFieldsLogin();
         }else{
             $fieldsLogin = [];
         }
 
 		$form = $this->createForm(ConnectorType::class,$connector, array(
-		  'action'    => $this->generateUrl('connector_open', ['id' => $id]),
-		  'method'    => 'PUT',
-		  'attr' =>  array('fieldsLogin' => $fieldsLogin, 'secret' => $this->container->getParameter('secret'))
+			'action'    => $this->generateUrl('connector_open', ['id' => $id]),
+			'method'    => 'PUT',
+			'attr' =>  array('fieldsLogin' => $fieldsLogin, 'secret' => $this->container->getParameter('secret'))
 		));
 
 		// If the connector has been changed
-		if(
-				$request->getMethod()=='POST'
-			 OR	$request->getMethod()=='PUT'		
-		) {
-			$form->handleRequest($request);   
-
-			// if($form->isValid()){     
-					// SAVE
-				try {					   						   
-					$connectorParams = $connector->getConnectorParams();
-					// Upadet the connector		   						   
-					if(count($connectorParams) > 0) {
-						$newParams = $request->request->get('connector');
-						$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'),-16));
-						foreach ($connectorParams as $key => $cp) {
-							if (isset($newParams['connectorParams'][$key]['value'])) {
-								// Encript the parameter
-								$cp->setValue($encrypter->encrypt($newParams['connectorParams'][$key]['value']));
-								$em->persist($cp);
-							}
-						}
-						// Update the connector
-						$connector->setDateModified(new \DateTime);
-						$connector->setModifiedBy($this->getUser()->getId());
-						$em->persist($connector); 
-						$em->flush(); 
-						return $this->redirect($this->generateUrl('regle_connector_list'));					
-					}
-					else {
-						return new Response(0);
-					}	
-									
-				}
-				catch(\Exception $e) {
-					return new Response($e->getMessage());
-				}
+		if($request->getMethod()=='PUT') {
+			try {					   						   
+				$form->handleRequest($request);
 				// SAVE
-			// }else{     
-				// return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array(
-							// 'error' => true,
-							// 'connector' => $connector,
-							// 'form' => $form->createView())
-				// );			
-			// }
+				$params = $connector->getConnectorParams();			
+				// SAVE PARAMS CONNECTEUR	
+				if(count($params) > 0) {									   
+					$em->persist($connector); 
+					$em->flush(); 
+					return $this->redirect($this->generateUrl('regle_connector_list'));					
+				}
+				else {
+					return new Response(0);
+				}			
+			}
+			catch(\Exception $e) {				
+				return new Response($e->getMessage());
+			}
 		}
 		// Display the connector
-		else {
+		else {		
 	        return $this->render('RegleBundle:Connector:edit/fiche.html.twig',array( 
                                 'connector' => $connector,
 				'form' => $form->createView())
@@ -592,7 +571,7 @@ class ConnectorController extends Controller
 	// LISTE DES CONNECTEURS POUR ANIMATION
 	public function connectorListSolutionAction(Request $request) {
 		
-                $id = $request->get('id',null);
+		$id = $request->get('id',null);
                 
 		if($id !=null) {
 							
@@ -610,8 +589,8 @@ class ConnectorController extends Controller
 			}
 			// Detecte si la session est le support ---------			
 							
-			 $em = $this->getDoctrine()->getManager();
-			 $listConnector = $em->getRepository('RegleBundle:Connector')
+			$em = $this->getDoctrine()->getManager();
+			$listConnector = $em->getRepository('RegleBundle:Connector')
 								 ->findBy( $list_fields_sql );
 			
 			$lstArray = array();			   			

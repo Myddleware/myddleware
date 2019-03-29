@@ -134,7 +134,7 @@ class ringcentralcore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			require_once('lib/ringcentral/metadata.php');	
+			require('lib/ringcentral/metadata.php');	
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
 			}
