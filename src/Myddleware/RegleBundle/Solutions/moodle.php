@@ -225,9 +225,7 @@ class moodlecore  extends solution {
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionName;		
 			$response = $this->moodleClient->post($serverurl, $parameters);
 			$xml = $this->formatResponse('read', $response, $param);		
-print_r($serverurl);
-print_r($param);
-print_r($response);
+
 			if (!empty($xml->ERRORCODE)) {
 				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
 			}
@@ -269,8 +267,7 @@ print_r($response);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
-		}
-print_r($result);		
+		}	
 		return $result;
 	}
 
