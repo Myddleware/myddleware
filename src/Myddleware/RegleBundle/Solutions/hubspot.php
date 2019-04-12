@@ -1076,35 +1076,32 @@ class hubspotcore extends solution {
      * @return array          Assoc array of decoded result
      */
     protected function call($url, $method = 'GET', $args = array(), $timeout = 120) {
-        try {
-            if (function_exists('curl_init') && function_exists('curl_setopt')) {
-                $ch = curl_init($url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-                $headers = array();
-                $headers[] = "Content-Type: application/json";
-                if (!empty($this->token)) {
-                    $headers[] = "Authorization: Bearer " . $this->token;
-                }
-                if (!empty($args)) {
-                    $jsonArgs = json_encode($args);
+		if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
+			throw new \Exception('curl extension is missing!');
+		}
+		
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		$headers = array();
+		$headers[] = "Content-Type: application/json";
+		if (!empty($this->token)) {
+			$headers[] = "Authorization: Bearer " . $this->token;
+		}
+		if (!empty($args)) {
+			$jsonArgs = json_encode($args);
 
-                    $headers[] = "Content-Lenght: " . $jsonArgs;
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
-                }
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                $result = curl_exec($ch);
-                $resultCurl['exec'] = json_decode($result, true);
-                $resultCurl['info'] = curl_getinfo($ch);
-                curl_close($ch);
-                return $resultCurl;
-            }
-        } catch (\Exception $e) {
-            throw new \Exception('curl extension is missing!');
-        }
+			$headers[] = "Content-Lenght: " . $jsonArgs;
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
+		}
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		$result = curl_exec($ch);
+		$resultCurl['exec'] = json_decode($result, true);
+		$resultCurl['info'] = curl_getinfo($ch);
+		curl_close($ch);
+		return $resultCurl;
     }
-
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
