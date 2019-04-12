@@ -97,10 +97,10 @@ class moodlecore  extends solution {
 	    try {
 			if ($type == 'source') {
 				return array(
+					'users'							=> 'Users',
+					'courses'						=> 'Courses',
 					'get_users_completion'			=> 'Get course activity completion',
 					'get_users_last_access'			=> 'Get users last access',
-					'get_courses_by_date'			=> 'Get courses',
-					'get_users_by_date'				=> 'Get users',
 					'get_enrolments_by_date'		=> 'Get enrolments',
 					'get_course_completion_by_date'	=> 'Get course completion'
 				);	
@@ -225,7 +225,9 @@ class moodlecore  extends solution {
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken=' .$this->paramConnexion['token']. '&wsfunction='.$functionName;		
 			$response = $this->moodleClient->post($serverurl, $parameters);
 			$xml = $this->formatResponse('read', $response, $param);		
-
+print_r($serverurl);
+print_r($param);
+print_r($response);
 			if (!empty($xml->ERRORCODE)) {
 				throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
 			}
@@ -233,7 +235,6 @@ class moodlecore  extends solution {
 			// Transform the data to Myddleware format
 			if (!empty($xml->MULTIPLE->SINGLE)) {
 				foreach ($xml->MULTIPLE->SINGLE AS $data) {				
-
 					foreach ($data AS $field) {
 						// Save the new date ref
 						if (
@@ -268,7 +269,8 @@ class moodlecore  extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
-		}	
+		}
+print_r($result);		
 		return $result;
 	}
 
@@ -517,8 +519,9 @@ class moodlecore  extends solution {
 	// Format webservice result if needed
 	protected function formatResponse($method, $response, $param) {
 		$xml = simplexml_load_string($response);
+		$functionName = $this->getFunctionName($param);
 		if ($method == 'read') {
-			if (in_array($param['module'], array('users','courses'))) {
+			if (in_array($functionName, array('core_user_get_users','core_course_get_courses_by_field'))) {
 				$xml = $xml->SINGLE->KEY[0];
 			}
 		}
@@ -527,28 +530,36 @@ class moodlecore  extends solution {
 	
 	// Get the function name 
 	protected function getFunctionName($param) {
-		// We use the standard function to search for a user (allow Myddleware to search a user by username or email)
-		if($param['module'] == 'users') {
-			$functionname = 'core_user_get_users';
-		} elseif($param['module'] == 'courses') {
-			$functionname = 'core_course_get_courses_by_field';
+		// In case of duplicate search (search with a criteria)
+		if (
+				!empty($param['query'])
+			AND empty($param['query']['id'])	
+		) {
+			// We use the standard function to search for a user (allow Myddleware to search a user by username or email)
+			if($param['module'] == 'users') {
+				return 'core_user_get_users';
+			} elseif($param['module'] == 'courses') {
+				return 'core_course_get_courses_by_field';
+			}
+		// In case of read by date or search a specific record with an id for specific modules user or course	
 		} else {
-			$functionname = 'local_myddleware_'.$param['module'];
-		}	
-		return $functionname;
+			if($param['module'] == 'users') {
+				return 'local_myddleware_get_users_by_date';
+			} elseif($param['module'] == 'courses') {
+				return 'local_myddleware_get_courses_by_date';
+			}
+		}
+		// In all other cases
+		return 'local_myddleware_'.$param['module'];
 	}
 	
 	// Prepare parameters for read function
 	protected function setParameters($param) {
-		$parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);	
-		if (
-				!empty($param['query']['id'])
-			AND !in_array($param['module'], array('users', 'courses')) // User is used below
-		) {
-			$parameters['id'] = $param['query']['id'];
-		}
-		elseif (!empty($param['query'])) {
-			if (in_array($param['module'], array('users','courses'))) {
+		$functionName = $this->getFunctionName($param);
+		$parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);
+		// If standard function called to search by criteria
+		if (in_array($functionName, array('core_user_get_users','core_course_get_courses_by_field'))) {
+			if (!empty($param['query'])) {
 				foreach ($param['query'] as $key => $value) {
 					if ($param['module'] == 'users') {
 						$filters[] = array( 'key' => $key, 'value' => $value );
@@ -558,9 +569,11 @@ class moodlecore  extends solution {
 					}
 				}
 			} else {
-				throw new \Exception("Specific filter criteria not allowed for the module ".$param['module']);
+				throw new \Exception('Filter criteria empty. Not allowed to run function '.$functionName.' without filter criteria.');
 			}
-		} 
+		} elseif (!empty($param['query']['id'])) {
+			$parameters['id'] = $param['query']['id'];
+		}
 		return $parameters;
 	}
 	
