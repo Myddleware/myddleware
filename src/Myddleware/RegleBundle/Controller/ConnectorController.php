@@ -344,6 +344,7 @@ class ConnectorController extends Controller
 					$connector->setDateModified(new \DateTime);
 					$connector->setCreatedBy( $this->getUser()->getId() );
 					$connector->setModifiedBy( $this->getUser()->getId() );
+
 					$em->persist($connector);
 					$em->flush();
 
@@ -523,6 +524,7 @@ class ConnectorController extends Controller
               
 		// Create connector form
 		// $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
+
         if( $connector->getSolution() !=null ){
             $fieldsLogin = $this->container->get('myddleware_rule.' . $connector->getSolution()->getName())->getFieldsLogin();
         }else{

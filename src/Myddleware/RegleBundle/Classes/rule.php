@@ -1003,7 +1003,7 @@ class rulecore {
 			}
 		}
 		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking','Not_found'))) {
-			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));
+			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));			
 			if ($response[$id_document] === true) {
 				if ($this->rule['mode'] == 'S') {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
