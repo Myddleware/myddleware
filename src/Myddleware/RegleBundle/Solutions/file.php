@@ -263,9 +263,7 @@ class filecore extends solution {
 					$values[$field] = $rowFile[$column];
 				}
 				$done=true;
-			}
-			// Close the file
-			fclose($stream);			
+			}		
 			$result = array(
 							'values'=>$values,
 							'done' => true
@@ -273,6 +271,10 @@ class filecore extends solution {
 		} catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = "-1";
+		}	
+		// Close the file
+		if (!empty($stream)) {
+			fclose($stream);
 		}		
 		return $result;
 	}
@@ -446,12 +448,14 @@ class filecore extends solution {
 			if (empty($param['query'])) {
 				$result['ruleParams'] = array(array('name' => $file, 'value' => $this->lineNumber));
 			}
-			// Close the file
-			fclose($stream);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'File '.(!empty($fileName) ? ' : '.$fileName : '').' : Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 		}	
+		// Close the file
+		if (!empty($stream)) {
+			fclose($stream);
+		}
 		return $result;
 	} // read($param)
 	
