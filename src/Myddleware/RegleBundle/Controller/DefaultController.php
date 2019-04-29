@@ -61,8 +61,10 @@ class DefaultControllerCore extends Controller
     protected $em;
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
-
-    protected function getInstanceBdd()
+	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete');
+    
+	protected function getInstanceBdd()
     {
         if (empty($this->em)) {
             $this->em = $this->getDoctrine()->getManager();
@@ -1959,8 +1961,10 @@ class DefaultControllerCore extends Controller
                         if ($ruleParam->getName() == 'datereference') {
                             $date_reference = $ruleParam->getValue();
                         }
-                        $this->em->remove($ruleParam);
-                        $this->em->flush();
+						if (in_array($ruleParam->getName(), $this->standardRuleParam)) {
+							$this->em->remove($ruleParam);
+							$this->em->flush();
+						}
                     }
                 }
             } // Create mode
