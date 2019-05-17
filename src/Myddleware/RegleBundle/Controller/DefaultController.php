@@ -2276,7 +2276,7 @@ class DefaultControllerCore extends Controller
         $countTransferRule = array();
         $i = 1;
         $values = $home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
-        if (!empty($values) > 0) {
+        if (!empty($values)) {
             foreach ($values as $field => $value) {
                 if ($i == 1) {
                     $countTransferRule[] = array('test', 'test2');
@@ -2460,7 +2460,7 @@ class DefaultControllerCore extends Controller
         $solutionSource = $this->em->getRepository('RegleBundle:Solution')
             ->solutionConnector('source', $permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
 
-        if (!empty($solutionSource) > 0) {
+        if (!empty($solutionSource)) {
             foreach ($solutionSource as $s) {
                 $source[] = $s->getName();
             }
@@ -2471,7 +2471,7 @@ class DefaultControllerCore extends Controller
         $solutionTarget = $this->em->getRepository('RegleBundle:Solution')
             ->solutionConnector('target', $permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
 
-        if (!empty($solutionTarget) > 0) {
+        if (!empty($solutionTarget)) {
             foreach ($solutionTarget as $t) {
                 $target[] = $t->getName();
             }
