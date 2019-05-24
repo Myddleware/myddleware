@@ -803,8 +803,7 @@ class hubspotcore extends solution {
 			if (!empty($param['query']['id'])) {
 				$requestTmp['exec'][$param['module']][0] = $request['exec'];
 				$request = $requestTmp;
-			}
-			
+			}			
 			// If there is no more data to read
             if (
 					empty($request['exec']['has-more'])
@@ -863,7 +862,7 @@ class hubspotcore extends solution {
 					and empty($request['exec']['has-more']) // Company module
 				)
 				or $this->readLast == true  // Only one call if read_last is requested
-			) {				
+			) {		
                 $result = $this->getresultQueryBydate($request['exec'][$key], $param, false);
             } else {			
 				// If we have to call the API several times
@@ -872,7 +871,8 @@ class hubspotcore extends solution {
                 $result = $this->getresultQueryBydate($request['exec'][$key], $param, false);
                 do {					
                     $resultOffset = $this->call($url . "&offset=" . $offset);
-                    $offset = $resultOffset['exec']['offset'];
+					// Offset can be empty for the last call
+                    $offset = (!empty($resultOffset['exec']['offset']) ? $resultOffset['exec']['offset'] : 0);		
                     $resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$key], $param, true);
 					// We keep the highest date_ref
 					if ($resultOffsetTemps['date_ref'] > $result['date_ref']) {
@@ -885,6 +885,7 @@ class hubspotcore extends solution {
 					and	(	!empty($resultOffset['exec']['hasMore']) // No more data to read
 						 or	!empty($resultOffset['exec']['has-more'])
 						)
+					and !empty($offset) // Make sure we don't create an infinite loop	
 				);
             }
         } else {
