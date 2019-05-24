@@ -415,7 +415,7 @@ class hubspotcore extends solution {
                                 }		
                             } else {			
                                 if (isset($identifyProfile["properties"][$field])) {
-                                    $records[$field] = $identifyProfile["properties"] [$field]['value'];
+                                    $records[$field] = $identifyProfile["properties"][$field]['value'];
 								// The structure is different for the module owner 
 								} elseif (
 									(	
@@ -434,18 +434,31 @@ class hubspotcore extends solution {
 							}	
 							
 							// Result are different with the engagement module
-                            if ($module === "engagements") {
-                                $records['id'] = $identifyProfile["engagement"][$id];
-                                $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile["engagement"][$modifiedFieldName] / 1000);
-                                $result['values'][$identifyProfile["engagement"][$id]] = $records;
-                            } else {								
-                                $records['id'] = $identifyProfile[$id];
-                                $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile[$modifiedFieldName] / 1000);
-                                $result['values'][$identifyProfile[$id]] = $records;
-                            }
+							if (
+									$module === "engagements"
+								AND !empty($identifyProfile["engagement"][$id])
+							) {
+								$records['id'] = $identifyProfile["engagement"][$id];
+								if (isset($identifyProfile["engagement"]["properties"][$modifiedFieldName])) {
+									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile["engagement"]['properties'][$modifiedFieldName]['value'] / 1000);
+								} else {
+									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile["engagement"][$modifiedFieldName] / 1000);
+								}
+								$result['values'][$identifyProfile["engagement"][$id]] = $records;
+							} elseif (!empty($identifyProfile[$id])) {								
+								$records['id'] = $identifyProfile[$id];
+								if (isset($identifyProfile["properties"][$modifiedFieldName])) {
+									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile['properties'][$modifiedFieldName]['value'] / 1000);
+								} else {
+									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile[$modifiedFieldName] / 1000);
+								}
+								$result['values'][$identifyProfile[$id]] = $records;
+							}
                         }
                     }
-					$result['count'] = count($result['values']);
+					if (!empty($result['values'])) {
+						$result['count'] = count($result['values']);
+					}
                 }
             }
         } catch (\Exception $e) {
@@ -1076,35 +1089,32 @@ class hubspotcore extends solution {
      * @return array          Assoc array of decoded result
      */
     protected function call($url, $method = 'GET', $args = array(), $timeout = 120) {
-        try {
-            if (function_exists('curl_init') && function_exists('curl_setopt')) {
-                $ch = curl_init($url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-                $headers = array();
-                $headers[] = "Content-Type: application/json";
-                if (!empty($this->token)) {
-                    $headers[] = "Authorization: Bearer " . $this->token;
-                }
-                if (!empty($args)) {
-                    $jsonArgs = json_encode($args);
+		if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
+			throw new \Exception('curl extension is missing!');
+		}
+		
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		$headers = array();
+		$headers[] = "Content-Type: application/json";
+		if (!empty($this->token)) {
+			$headers[] = "Authorization: Bearer " . $this->token;
+		}
+		if (!empty($args)) {
+			$jsonArgs = json_encode($args);
 
-                    $headers[] = "Content-Lenght: " . $jsonArgs;
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
-                }
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                $result = curl_exec($ch);
-                $resultCurl['exec'] = json_decode($result, true);
-                $resultCurl['info'] = curl_getinfo($ch);
-                curl_close($ch);
-                return $resultCurl;
-            }
-        } catch (\Exception $e) {
-            throw new \Exception('curl extension is missing!');
-        }
+			$headers[] = "Content-Lenght: " . $jsonArgs;
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
+		}
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		$result = curl_exec($ch);
+		$resultCurl['exec'] = json_decode($result, true);
+		$resultCurl['info'] = curl_getinfo($ch);
+		curl_close($ch);
+		return $resultCurl;
     }
-
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
