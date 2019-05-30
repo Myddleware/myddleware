@@ -102,7 +102,8 @@ class moodlecore  extends solution {
 					'get_courses_by_date'			=> 'Get courses',
 					'get_users_by_date'				=> 'Get users',
 					'get_enrolments_by_date'		=> 'Get enrolments',
-					'get_course_completion_by_date'	=> 'Get course completion'
+					'get_course_completion_by_date'	=> 'Get course completion',
+					'get_user_compentencies_by_date'=> 'Get user compentency'
 				);	
 			}
 			else {

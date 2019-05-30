@@ -275,10 +275,38 @@ $moduleFields = array (
 	
 					'get_users_last_access' => array(
 						'lastaccess' => array('label' => 'Last access', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					),
+					
+					'get_user_compentencies_by_date' => array(
+						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'status' => array('label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'proficiency' => array('label' => 'Proficiency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'grade' => array('label' => 'Grade', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'timecreated' => array('label' => 'Time created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'usermodified' => array('label' => 'User modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_shortname' => array('label' => 'Competency shortname ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_description' => array('label' => 'Competency description ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_descriptionformat' => array('label' => 'Competency description format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
+																																											'0' => 'MOODLE',
+																																											'1' => 'HTML',
+																																											'2' => 'PLAIN',
+																																											'4' => 'MARKDOWN'
+																																										)),
+						'competency_idnumber' => array('label' => 'Competency idnumber', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_path' => array('label' => 'Competency path', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_sortorder' => array('label' => 'Competency sort order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_ruletype' => array('label' => 'Competency rule type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_ruleoutcome' => array('label' => 'Competency rule outcome', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_ruleconfig' => array('label' => 'Competency rule config', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_scaleconfiguration' => array('label' => 'Competency scale configuration', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_timecreated' => array('label' => 'Competency time created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_timemodified' => array('label' => 'Competency time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'competency_usermodified' => array('label' => 'Competency user modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 					)
 				);
 	
-	
+
 $fieldsRelate = array (
 					'groups' => array(
 						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
@@ -322,6 +350,15 @@ $fieldsRelate = array (
 					'get_users_last_access' => array(
 						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
 						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+					),
+					
+					'get_user_compentencies_by_date' => array(
+						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'competencyid' => array('label' => 'Competency ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'reviewerid' => array('label' => 'Reviewer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'competency_competencyframeworkid' => array('label' => 'Competency framework ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'competency_parentid' => array('label' => 'Competency parent ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'competency_scaleid' => array('label' => 'Competency scale ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
 					)
 				);
 
