@@ -52,10 +52,10 @@ class ConnectorController extends Controller
 	// CALLBACK POUR LES APIS
 	public function callBackAction() { // REV 1.1.1
 		try {	
-                        /* @var $sessionService SessionService */
-                        $sessionService = $this->get('myddleware_session.service');
+			/* @var $sessionService SessionService */
+			$sessionService = $this->get('myddleware_session.service');
                         
-                        // Nom de la solution
+			// Nom de la solution
 			if(!$sessionService->isSolutionNameExist()) {
 				return new Response('');
 			}
@@ -509,6 +509,18 @@ class ConnectorController extends Controller
 			throw $this->createNotFoundException("This connector doesn't exist");
 		}
               
+		if ($permission->isAdmin($this->getUser()->getId())) {
+			$qb->where('c.id =:id')->setParameter('id',$id); 
+		} else {
+			$qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+		}
+		// Detecte si la session est le support ---------			
+		// Infos du connecteur
+		$connector = $qb->getQuery()->getOneOrNullResult();             
+	   
+		if (!$connector) {
+			throw $this->createNotFoundException("This connector doesn't exist");
+		}
               
 		// Create connector form
 		// $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
@@ -615,9 +627,9 @@ class ConnectorController extends Controller
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));
 
-                $sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
-                $sessionService->setParamConnectorAddType(strip_tags($type));
-                $sessionService->setConnectorAnimation(true);
+		$sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
+		$sessionService->setParamConnectorAddType(strip_tags($type));
+		$sessionService->setConnectorAnimation(true);
                 
               			  
         return $this->render('RegleBundle:Connector:createout.html.twig',array(
