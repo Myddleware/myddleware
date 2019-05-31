@@ -447,6 +447,7 @@ function:
             utf8decode: utf8decode ( string $data ) / Converts a string with ISO-8859-1 characters encoded with UTF-8 to single-byte ISO-8859-1 
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert all applicable characters to HTML entities
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert special characters to HTML entities
+            chr: chr ( int $bytevalue ) : string / Generate a single-byte string from a number
         mathematical:
             round: Rounding a floating point number
             ceil: Rounding up
