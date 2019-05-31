@@ -64,48 +64,7 @@ $moduleFields = array (
 						'middlename' => array('label' => 'Middlename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'alternatename' => array('label' => 'Alternatename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
-					
-					'get_users_by_date' => array(
-						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'username' => array('label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'password' => array('label' => 'Password', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'createpassword' => array('label' => 'Create password', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'firstname' => array('label' => 'Firstname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'lastname' => array('label' => 'Lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'email' => array('label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'auth' => array('label' => 'Auth', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'email' => 'Email-based self-registration',
-																																				'manual' => 'Manual accounts',
-																																				'nologin' => 'No login',
-																																				'cas' => 'CAS server (SSO)',
-																																				'db' => 'External database',
-																																				'fc' => 'FirstClass server',
-																																				'imap' => 'IMAP server',
-																																				'ldap' => 'LDAP server',
-																																				'mnet' => 'MNet authentication',
-																																				'nntp' => 'NNTP server',
-																																				'none' => 'No authentication',
-																																				'pam' => 'PAM (Pluggable Authentication Modules)',
-																																				'pop3' => 'POP3 server',
-																																				'radius' => 'RADIUS server',
-																																				'shibboleth' => 'Shibboleth',
-																																				'webservice' => 'Web services authentication'
-						)),
-						'idnumber' => array('label' => 'Id number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'lang' => array('label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'calendartype' => array('label' => 'Calendar type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'theme' => array('label' => 'Theme ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'timezone' => array('label' => 'Timezone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'mailformat' => array('label' => 'Mail format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'description' => array('label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'city' => array('label' => 'City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'country' => array('label' => 'Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'firstnamephonetic' => array('label' => 'Firstname phonetic', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'lastnamephonetic' => array('label' => 'Lastname phonetic', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'middlename' => array('label' => 'Middlename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'alternatename' => array('label' => 'Alternatename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-					),	
-					
+				
 					'courses' => array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'fullname' => array('label' => 'Full name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
@@ -157,57 +116,6 @@ $moduleFields = array (
 						'forcetheme' => array('label' => 'Force theme', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 					),
 					
-					'get_courses_by_date' => array(
-						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'fullname' => array('label' => 'Full name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'shortname' => array('label' => 'Short name  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'categoryid' => array('label' => 'Category ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-						'idnumber' => array('label' => 'ID number  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'summary' => array('label' => 'Summary', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'summaryformat' => array('label' => 'Summary format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'0' => 'MOODLE',
-																																				'1' => 'HTML',
-																																				'2' => 'PLAIN',
-																																				'4' => 'MARKDOWN'
-																																			)),
-						'format' => array('label' => 'Format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'singleactivity' => 'Single activity format',
-																																				'social' => 'Social format',
-																																				'topics' => 'Topics format',
-																																				'weeks' => 'Weekly format'
-																																			)),
-						'showgrades' => array('label' => 'Showgrades', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'newsitems' => array('label' => 'News items', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'startdate' => array('label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'numsections' => array('label' => 'Num sections', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'maxbytes' => array('label' => 'Max bytes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'0' => 'Site upload limit (2MB)',
-																																				'2097152' => '2MB',
-																																				'1048576' => '1MB',
-																																				'512000' => '500KB',
-																																				'102400' => '100KB',
-																																				'51200' => '50KB',
-																																				'10240' => '10KB'
-																																			)),
-						'showreports' => array('label' => 'Show reports', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'visible' => array('label' => 'Visible', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'hiddensections' => array('label' => 'Hidden sections', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'0' => 'Hidden sections are shown in collapsed form',
-																																				'1' => 'Hidden sections are completely invisible'
-																																			)),
-						'groupmode' => array('label' => 'Group mode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array(
-																																				'0' => 'No groups',
-																																				'1' => 'Separate groups',
-																																				'2' => 'Visible groups'
-																																			)),
-						'groupmodeforce' => array('label' => 'Group mode force', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'defaultgroupingid' => array('label' => 'default grouping ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'enablecompletion' => array('label' => 'Enable completion', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'completionnotify' => array('label' => 'Completion notify', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0),
-						'lang' => array('label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'forcetheme' => array('label' => 'Force theme', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					),
-
 					'groups' => array(
 						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
