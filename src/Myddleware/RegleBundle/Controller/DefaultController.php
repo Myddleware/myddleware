@@ -2112,6 +2112,7 @@ class DefaultControllerCore extends Controller
             }
 
             //------------------------------- RuleFilter ------------------------
+
             if (!empty($request->request->get('filter'))) {
                 foreach ($request->request->get('filter') as $filter) {
                     $oneRuleFilter = new RuleFilter();
