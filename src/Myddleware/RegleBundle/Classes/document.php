@@ -63,6 +63,7 @@ class documentcore {
 	protected $jobId;
 	protected $key;
 	protected $docIdRefError;
+	protected $transformError = false;
 	protected $tools;
 	protected $ruleDocuments;
 	protected $globalStatus = array(
@@ -1087,7 +1088,7 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					$value = $this->getTransformValue($this->sourceData,$ruleField);
-					if ($value === false) {
+					if (!empty($this->transformError)) {
 						throw new \Exception( 'Failed to transform data.' );
 					}
 					$targetField[$ruleField['target_field_name']] = $value;
@@ -1098,7 +1099,7 @@ class documentcore {
 				// Récupération de l'ID target
 				foreach ($this->ruleRelationships as $ruleRelationships) {
 					$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
-					if ($value === false) {
+					if (!empty($this->transformError)) {
 						throw new \Exception( 'Failed to transform relationship data.' );
 					}
 					$targetField[$ruleRelationships['field_name_target']] = $value;
@@ -1241,7 +1242,9 @@ class documentcore {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
-			return false;
+			// Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
+			$this->transformError = true;
+			return null;
 		}
 
 	}
