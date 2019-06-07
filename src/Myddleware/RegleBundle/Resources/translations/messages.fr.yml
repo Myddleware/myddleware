@@ -449,6 +449,7 @@ function:
             utf8decode: utf8decode ( string $data ) / Convertit une chaîne UTF-8 en ISO-8859-1
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit tous les caractères éligibles en entités HTML
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit les caractères spéciaux en entités HTML
+            chr: chr ( int $bytevalue ) : string / Générer une chaîne d'un octet à partir d'un nombre
         mathematical:
             round: Arrondit un nombre à virgule flottante
             ceil: Arrondit au nombre supérieur
