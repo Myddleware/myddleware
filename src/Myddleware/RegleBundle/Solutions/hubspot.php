@@ -454,8 +454,10 @@ class hubspotcore extends solution {
 								$records['id'] = $identifyProfile[$id];
 								if (isset($identifyProfile["properties"][$modifiedFieldName])) {
 									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile['properties'][$modifiedFieldName]['value'] / 1000);
-								} else {
+								} elseif(isset($identifyProfile[$modifiedFieldName])) {
 									$records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile[$modifiedFieldName] / 1000);
+								} else { //deal_pipeline_stage has no reference field
+									$records['date_modified'] = date('Y-m-d H:i:s');
 								}
 								$result['values'][$identifyProfile[$id]] = $records;
 							}
@@ -477,7 +479,7 @@ class hubspotcore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }
+        }		
 		return $result;
     }// end function read
 
