@@ -481,8 +481,8 @@ class hubspotcore extends solution {
                 }
             }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';
-        }
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
+        }		
 		return $result;
     }// end function read
 
@@ -876,7 +876,7 @@ class hubspotcore extends solution {
 					$keyResult = (isset($result['exec'][$param['module']]) ? $param['module'] : 'results');	
 					$merge = array_merge($result['exec'][$keyResult], $resultOffsetTemps);
 				
-                    $result['exec'][$keyResult] = $merge;
+                    $result['exec']['results'] = $merge;
 			
 				// Call again only if we haven't reached the reference date
                 } while (
@@ -934,10 +934,6 @@ class hubspotcore extends solution {
 				
 						$offset = $resultOffset['exec']['offset'];
 						$resultOffsetTemps = $this->getresultQueryBydate($resultOffset['exec'][$key], $param, true);
-						// We keep the highest date_ref
-						// if ($resultOffsetTemps['date_ref'] > $result['date_ref']) {
-							// $result['date_ref'] = $resultOffsetTemps['date_ref'];
-						// }
 						$merge = array_merge($result['exec']['results'], $resultOffsetTemps);
 						$result['exec']['results'] = $merge;
 					}
@@ -965,13 +961,20 @@ class hubspotcore extends solution {
 			}			
             $result = $this->getresultQueryBydate($request['exec'], $param, false);		
         }	
+	
 		// If we have read all records we set the migration mode to false and let the read function set the reference date thanks to the default value '1970-01-01 00:00:00'
-		if (count($result['exec']['results']) < ($param['limit'] - 1)) { // (-1 see method rule->setLimit)
+		if (
+				empty($result['exec']['results']) // We can have another index than result, with deal_pipeline for example 
+			 OR	count($result['exec']['results']) < ($param['limit'] - 1) // (-1 see method rule->setLimit)
+		) { 
 			$this->migrationMode = false;
 			$result['date_ref'] = '1970-01-01 00:00:00';
 		// If there is still data to read, we set the offset in the result date ref
 		} else {
 			$result['date_ref'] = $offset;
+			// We set again migrationMode = true because a rule could have a reference date less than 30 days in a past and reach the rule limit.
+			// In this case we use the offset as a reference not the date
+			$this->migrationMode = true;
 		}		
         return $result;
     }
