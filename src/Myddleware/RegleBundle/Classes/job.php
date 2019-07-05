@@ -454,7 +454,7 @@ class jobcore  {
 							ON Rule.id = RuleRelationShip.rule_id
 					WHERE
 						Rule.deleted = 0
-					GROUP BY Rule.id, field_id";
+					GROUP BY Rule.id";
 			$stmt = $this->connection->prepare($sql);
 			$stmt->execute();	    
 			$rules = $stmt->fetchAll(); 	
