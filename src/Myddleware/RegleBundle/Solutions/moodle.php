@@ -97,13 +97,14 @@ class moodlecore  extends solution {
 	    try {
 			if ($type == 'source') {
 				return array(
-					'users'							=> 'Users',
-					'courses'						=> 'Courses',
-					'get_users_completion'			=> 'Get course activity completion',
-					'get_users_last_access'			=> 'Get users last access',
-					'get_enrolments_by_date'		=> 'Get enrolments',
-					'get_course_completion_by_date'	=> 'Get course completion',
-					'get_user_compentencies_by_date'=> 'Get user compentency'
+					'users'										=> 'Users',
+					'courses'									=> 'Courses',
+					'get_users_completion'						=> 'Get course activity completion',
+					'get_users_last_access'						=> 'Get users last access',
+					'get_enrolments_by_date'					=> 'Get enrolments',
+					'get_course_completion_by_date'				=> 'Get course completion',
+					'get_user_compentencies_by_date'			=> 'Get user compentency',
+					'get_competency_module_completion_by_date'	=> 'Get compentency module completion'
 				);	
 			}
 			else {
