@@ -172,6 +172,8 @@ $moduleFields = array (
 						'section' => array('label' => 'Section', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'moduletype' => array('label' => 'Module', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'completionstate' => array('label' => 'Completion state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'modulename' => array('label' => 'Module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'coursemodulename' => array('label' => 'Course module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
 
