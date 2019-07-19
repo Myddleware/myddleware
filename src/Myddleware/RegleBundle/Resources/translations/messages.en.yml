@@ -718,4 +718,3 @@ management_smtp:
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
-
