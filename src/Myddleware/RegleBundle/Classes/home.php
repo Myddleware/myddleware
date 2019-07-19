@@ -174,7 +174,7 @@ class homecore {
 		try {
 			$where = '';
 			if($isAdmin == false) {
-				$where = ' AND created_by='.$id;
+				$where = ' AND Document.created_by='.$id;
 			}		
 							
 		    $sql = "SELECT count(*) as nb, Rule.name

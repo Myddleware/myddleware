@@ -172,6 +172,8 @@ $moduleFields = array (
 						'section' => array('label' => 'Section', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'moduletype' => array('label' => 'Module', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'completionstate' => array('label' => 'Completion state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'modulename' => array('label' => 'Module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'coursemodulename' => array('label' => 'Course module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
 
@@ -220,6 +222,8 @@ $moduleFields = array (
 						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'usermodified' => array('label' => 'User modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'sortorder' => array('label' => 'Sort order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'modulename' => array('label' => 'Module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'coursemodulename' => array('label' => 'Course module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'ruleoutcome' => array('label' => 'Rule outcome', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
 					)
 				);
@@ -282,7 +286,8 @@ $fieldsRelate = array (
 					
 					'get_competency_module_completion_by_date' => array(
 						'cmid' => array('label' => 'Course module ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
-						'competencyid' => array('label' => 'Competency ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
+						'competencyid' => array('label' => 'Competency ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
+						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
 					)
 				);
 
