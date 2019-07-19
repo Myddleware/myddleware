@@ -573,6 +573,7 @@ class salesforcecore extends solution {
 				// Generate a reference and store it in an array
 				$i++;	
 				$idDocReference['Ref'.$i] = $idDoc;
+				$parameter = array();
 				$parameter['attributes'] = array('type' => $param['module'], 'referenceId' => 'Ref'.$i);
 			    foreach ($data as $key => $value) {		
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
