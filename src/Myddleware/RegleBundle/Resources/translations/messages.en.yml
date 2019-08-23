@@ -489,7 +489,9 @@ solution:
         directory: Directory with files
         shop: Shop
         redirect_uri: Redirect URI
-        applicationName: Application name		
+        applicationName: Application name
+        hashkey: Hash key
+        id_auth: Auth ID
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)

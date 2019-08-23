@@ -490,7 +490,9 @@ solution:
         directory: Répertoire avec les fichiers
         shop: Magasin
         redirect_uri: URL de redirection
-        applicationName: Nom de l'application	
+        applicationName: Nom de l'application
+        hashkey: Clé de hachage
+        authid: Id auth
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
