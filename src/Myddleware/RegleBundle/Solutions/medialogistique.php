@@ -33,6 +33,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class medialogistiquecore extends solution {
 	
 	protected $url = 'https://gestion.mvsbusiness.com/rest_ext/';
+	
+	// Module list that allows to make parent relationships
+	protected $allowParentRelationship = array('gestion_commande');
 
 	public function getFieldsLogin() {
 		return array(
@@ -68,8 +71,8 @@ class medialogistiquecore extends solution {
 						'auth' => hash('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande')
 			);
 // print_r($parameters);			
-			// $result = $this->call($this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters));
-			$result = $this->call($this->url.'gestion_commande/date/2019-08-22?'.http_build_query($parameters));
+			$result = $this->call($this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters));
+			// $result = $this->call($this->url.'gestion_commande/date/2019-08-22?'.http_build_query($parameters));
 // echo $this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters);			
 // print_r($result);			
 			
@@ -119,6 +122,91 @@ class medialogistiquecore extends solution {
 		}
 	} // get_module_fields($module)	 
 
+	
+	// Permet de créer des données
+	public function create($param) {
+		$result = array();
+		try {
+// print_r($param);
+			foreach($param['data'] as $idDoc => $data) {
+				try {
+					// Order management only for now
+					if ($param['module']== 'gestion_commande') {
+						$csvArray = array();
+						$articles = array();
+						$subDocIdArray = array();
+						$csv = '';
+						// Search for article line as we have to generate one line in the csv file for each article
+						if (!empty($data['gestion_commande'])){
+							foreach($data['gestion_commande'] as $subOrderObjectId => $subOrderObjectValue) {
+								// Save the subIdoc to change the sub data transfer status
+								$subDocIdArray[$subOrderObjectId] = array('id' => uniqid('', true));
+								// Remove Myddleware fields (not relevant), we keep only the ones of the orderObject (not subOrderObject)
+								unset($subOrderObjectValue['id_doc_myddleware']);
+								unset($subOrderObjectValue['target_id']);
+								unset($subOrderObjectValue['source_date_modified']);
+								// In case of article object
+								if (isset($subOrderObjectValue['article_EAN'])) {
+									$articles[$subOrderObjectId] = $subOrderObjectValue;
+								} else {
+									$csvArray = array_merge($csvArray, $subOrderObjectValue);
+								}
+								
+							}
+							// Build the scv array in the right order
+							$csv = $this->buildCsv($data, $articles, $csvArray);
+echo $csv;							
+						}
+					}
+				} catch (\Exception $e) {
+					$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $e->getMessage()
+					);
+				}
+				// Transfert status update
+				// if (
+						// !empty($subDocIdArray)
+					// AND empty($result[$idDoc]['error'])
+				// ) {				
+					// foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+						// $this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+					// }
+				// }
+				// $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+			}
+		} catch (\Exception $e) {
+			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['error'] = $error;
+		}	
+		return $result;
+	}
+	
+	// Build csv
+	protected function buildCsv($order, $articles, $csvArray) {
+		// Error if no article
+		if (empty($articles)) {
+			throw new \Exception('No article found in this order. Failed to create the order into Media Logistique.');
+		}
+		// Build the csv string
+		$csv = '';
+		foreach ($articles as $article) {	
+			$csv .=  $order['code_interne'].';'.$order['compte_client'].';'.$order['ref_commande'].';'.$order['date_commande'].';'.$order['date_livraison_demandee'];
+			$csv .=  (!empty($order['commentaire']) ? $order['commentaire'] : '').';'; 								// Not requiered fields
+			$csv .=  (!empty($order['origine']) ? $order['origine'] : '').';'; 										// Not requiered fields
+			$csv .=  (!empty($csvArray['transporteur']) ? $csvArray['transporteur'] : '').';'; 						// Not requiered fields
+			$csv .=  (!empty($csvArray['fichier_source']) ? $csvArray['fichier_source'] : '').';'; 					// Not requiered fields
+			$csv .=  (!empty($csvArray['reference_destinataire']) ? $csvArray['reference_destinataire'] : '').';'; 	// Not requiered fields
+			$csv .=  $csvArray['Livr_nom'].';'.$csvArray['Livr_adresse1'].';'.$csvArray['Livr_adresse2'].';'.$csvArray['Livr_cp'];
+			$csv .=  $csvArray['Livr_ville'].';'.$csvArray['Livr_pays'].';'.$csvArray['Fact_nom'].';'.$csvArray['Fact_adresse1'].';'.$csvArray['Fact_adresse2'];
+			$csv .=  $csvArray['Fact_cp'].';'.$csvArray['Fact_ville'].';'.$csvArray['Fact_pays'].';'.$csvArray['email'].';'.$csvArray['telephone'].';'.$article['article_EAN'].';';
+			$csv .=  (!empty($article['article_ref_client']) ? $article['article_ref_client'] : '').';'; 			// Not requiered fields
+			$csv .=  $article['quantite'].';'.$article['prix_unit_TTC'].';';
+			$csv .=  (!empty($article['remise']) ? $article['remise'] : '').';'; 									// Not requiered fields
+			$csv .=  $order['total_frais_port_TTC'].';'.$order['total_commande_TTC'].chr(10).chr(13);
+		}
+		return $csv;
+	}
 	
 	/**
 	 * Function call
