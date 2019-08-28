@@ -2,8 +2,8 @@ name: prestashop_medialogistique_create_order
 description: 'Send order from Prestashop to Media Logistique'
 rules:
     -
-        name: 'Order datail'
-        nameSlug: order_datail
+        name: 'Order detail'
+        nameSlug: order_detail
         sourceSolution: prestashop
         targetSolution: medialogistique
         sourceModule: order_details
@@ -86,7 +86,7 @@ rules:
             - { target: code_interne, source: my_value, formula: '"CW1"' }
             - { target: compte_client, source: my_value, formula: '"CLIENT"' }
         relationships:
-            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: id_order, fieldId: order_datail, parent: true }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: id_order, fieldId: order_detail, parent: true }
             - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: customers, parent: true }
             - { fieldNameSource: id_address_delivery, fieldNameTarget: Myddleware_element_id, fieldId: shipping_address, parent: true }
             - { fieldNameSource: id_address_invoice, fieldNameTarget: Myddleware_element_id, fieldId: billing_address, parent: true }

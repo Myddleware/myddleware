@@ -275,16 +275,28 @@ class prestashopcore extends solution {
 				}
 				// Récupération des listes déroulantes
 				if($module == 'orders' && isset($this->moduleFields['current_state'])) {
-					$order_states = $this->getList('order_state','order_states');				
-					$this->moduleFields['current_state']['option'] = $order_states;
+					try {
+						$order_states = $this->getList('order_state','order_states');				
+						$this->moduleFields['current_state']['option'] = $order_states;
+					} catch (\Exception $e) {
+						// No error if order_state not accessible, the order status list won't accessible
+					}	
 				}
 				if($module == 'order_histories' && isset($this->fieldsRelate['id_order_state'])) {
-					$order_states = $this->getList('order_state','order_states');			
-					$this->fieldsRelate['id_order_state']['option'] = $order_states;
+					try {
+						$order_states = $this->getList('order_state','order_states');			
+						$this->fieldsRelate['id_order_state']['option'] = $order_states;
+					} catch (\Exception $e) {
+						// No error if order_state not accessible, the order status list won't accessible
+					}		
 				}
 				if($module == 'supply_orders' && isset($this->moduleFields['id_supply_order_state'])) {
-					$supply_order_states = $this->getList('supply_order_state','supply_order_states');
-					$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
+					try {
+						$supply_order_states = $this->getList('supply_order_state','supply_order_states');
+						$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
+					} catch (\Exception $e) {
+						// No error if supply_order_state not accessible, the supply order status list won't accessible
+					}	
 				}
 				// Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
 				if($module == 'customer_messages') {
