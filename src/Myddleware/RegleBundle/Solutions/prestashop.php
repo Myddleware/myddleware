@@ -177,7 +177,8 @@ class prestashopcore extends solution {
 			$authorized = array("customers" => "The e-shop's customers",
 								"customer_threads" => "Customer services threads",
 								"customer_messages" => "Customer services messages",
-								"products" => "The products"
+								"products" => "The products",
+								"order_histories" => "The Order histories"
 								);
 			
 			return array_intersect_key($authorized, $modulesSource);
@@ -1100,7 +1101,7 @@ class prestashopcore extends solution {
 	public function getRuleMode($module,$type) {
 		if(
 				$type == 'target'
-			&&	in_array($module, array('customer_messages'))
+			&&	in_array($module, array('customer_messages','order_histories'))
 		) { // Si le module est dans le tableau alors c'est uniquement de la création
 			return array(
 				'C' => 'create_only'

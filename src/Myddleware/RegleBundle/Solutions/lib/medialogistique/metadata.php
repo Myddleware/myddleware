@@ -56,9 +56,15 @@ $moduleFields = array (
 						'remise' => array('label' => 'Remise (%)', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'total_frais_port_TTC' => array('label' => 'Total frais port TTC', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'total_commande_TTC' => array('label' => 'Total commande TTC', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),		
+						'valide' => array('label' => 'Statut commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array(
+																																				'3' => 'En préparation',
+																																				'4' => 'Expédiée',
+																																				'9' => 'Facturée',
+																																				'10' => 'Expédiée Facturation externe',
+																																				'21' => 'Annulée'
+						)),		
 					),
 				);
-	
 
 $fieldsRelate = array();
 

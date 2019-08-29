@@ -122,6 +122,75 @@ class medialogistiquecore extends solution {
 		}
 	} // get_module_fields($module)	 
 
+	/**
+	 * Function read data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function read($param) {
+		try {	
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+		 	// Get the reference date field name
+			// $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			
+			$fields = $param['fields'];
+			$result['date_ref'] = $param['date_ref'];			
+			$result['count'] = 0;
+		/*	$filters_result = array();
+			// Build the query for ERPNext
+			if (!empty($param['query'])) { 
+				foreach ($param['query'] as $key => $value) {
+					// The id field is name in ERPNext
+					if ($key === 'id') {
+						$key = 'name';
+					}
+					$filters_result[$key] = $value;
+				}
+				$filters = json_encode($filters_result);
+				$data = array('filters' => $filters, 'fields' => '["*"]');
+			} else {
+				$filters = '{"'.$dateRefField.'": [">", "' . $param['date_ref'] . '"]}';
+				$data = array('filters' => $filters, 'fields' => '["*"]');
+			}	
+		
+			// Send the query
+			$q = http_build_query($data);
+			$url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;		
+			$resultQuery = $this->call($url, 'GET', '');				
+		  
+			// If no result
+			if (empty($resultQuery)) {
+				$result['error'] = "Request error";
+			} else if (count($resultQuery->data) > 0) {
+				$resultQuery = $resultQuery->data;
+				foreach ($resultQuery as $key => $recordList) {
+					$record = null;
+					foreach ($fields as $field) {
+						if ($field == $dateRefField) {
+							$record['date_modified'] = $this->dateTimeToMyddleware($recordList->$field);
+							if ($recordList->$field > $result['date_ref']) {
+								$result['date_ref'] = $recordList->$field;
+							}
+						} 
+						if ($field != 'id') {
+							$record[$field] = $recordList->$field;
+						}
+					}
+					$record['id'] = $recordList->name;
+					$result['values'][$recordList->name] = $record; // last record
+				}
+				$result['count'] = count($resultQuery);
+			}*/
+		} catch (\Exception $e) {
+			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+		}		 
+return null;		
+		return $result;
+	}// end function read
+
 	
 	// Permet de créer des données
 	public function create($param) {
@@ -141,14 +210,14 @@ class medialogistiquecore extends solution {
 					);
 				}
 				// Transfert status update
-				// if (
-						// !empty($subDocIdArray)
-					// AND empty($result[$idDoc]['error'])
-				// ) {				
+				if (
+						!empty($subDocIdArray)
+					AND empty($result[$idDoc]['error'])
+				) {				
 					// foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
 						// $this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
 					// }
-				// }
+				}
 				// $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
 		} catch (\Exception $e) {
@@ -231,6 +300,20 @@ print_r($result);
 		return $csv;
 	}
 	
+	
+	public function getRuleMode($module,$type) {
+		// only creationallowed for gestion_commande
+		if(
+				$type == 'target'
+			&&	in_array($module, array('gestion_commande'))
+		) { 
+			return array(
+				'C' => 'create_only'
+			);
+		}
+		return parent::getRuleMode($module,$type);
+	}
+	
 	/**
 	 * Function call
 	 * @param $url
@@ -244,13 +327,6 @@ print_r($result);
 		if (!function_exists('curl_init') OR !function_exists('curl_setopt')) {
 			throw new \Exception('curl extension is missing!');
 		}
-		// $fileTmp = $this->container->getParameter('kernel.cache_dir') . '/myddleware/solutions/erpnext/erpnext.txt';
-		// $fs = new Filesystem();
-		// try {
-			// $fs->mkdir(dirname($fileTmp));
-		// } catch (IOException $e) {
-			// throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
-		// }
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
@@ -258,21 +334,10 @@ print_r($result);
 
 		// common description bellow
 		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-		// curl_setopt($ch, CURLOPT_COOKIEJAR, $fileTmp);
-		// curl_setopt($ch, CURLOPT_COOKIEFILE, $fileTmp);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 		$response = curl_exec($ch);
-		
-		// if Traceback found, we have an error 
-		if (
-				$method != 'GET'
-			AND	strpos($response,'Traceback') !== false
-		) {
-			// Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'
-			return substr($response, strpos($response,'Traceback'), strpos(substr($response,strpos($response,'Traceback')),'</pre>'));
-		}
 		curl_close($ch);
 	
 		return json_decode($response);
