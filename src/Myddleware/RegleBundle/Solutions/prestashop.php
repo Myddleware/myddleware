@@ -424,7 +424,7 @@ class prestashopcore extends solution {
 	
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {	
+	public function read_last($param) {
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -472,6 +472,11 @@ class prestashopcore extends solution {
 
 				// Si le tableau de requête est présent alors construction de la requête
 				if (!empty($param['query'])) {
+					// We return no result for order_histories as we never modify this module, always add a line. Avoid "no send" status
+					if ($param['module'] == 'order_histories') {
+						$result['done'] = false;
+						return $result;
+					}
 					// Building of the option array
 					if(!empty($param['query']['id'])) {
 						$options['id'] = (int) $param['query']['id'];
@@ -574,7 +579,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -919,7 +924,6 @@ class prestashopcore extends solution {
 					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('create1',$opt,$param);
-					
 					// Call
 					$xml = $this->webService->get($opt);
 					$modele = $xml->children()->children();
@@ -961,7 +965,6 @@ class prestashopcore extends solution {
 					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('create2',$opt,$param);
-					
 					$new = $this->webService->add($opt);
 					$result[$idDoc] = array(
 							'id' => (string)$new->children()->children()->id,
@@ -995,6 +998,12 @@ class prestashopcore extends solution {
 	
 	// Permet de modifier des données
 	public function update($param) {
+		// We never update order_histories even if the methode update is called 
+		// For this module we always create a new line (so create methode is called)
+		if ($param['module'] == 'order_histories') {
+			return $this->create($param);
+		}
+	
 		foreach($param['data'] as $idDoc => $data) {
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
@@ -1101,7 +1110,7 @@ class prestashopcore extends solution {
 	public function getRuleMode($module,$type) {
 		if(
 				$type == 'target'
-			&&	in_array($module, array('customer_messages','order_histories'))
+			&&	in_array($module, array('customer_messages'))
 		) { // Si le module est dans le tableau alors c'est uniquement de la création
 			return array(
 				'C' => 'create_only'
