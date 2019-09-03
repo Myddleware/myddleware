@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+
+  vtiger1:
+    image: javanile/vtiger:7.1.0
+    ports:
+      - 30081:80
+    environment:
+      - MYSQL_HOST=mysql1
+      - MYSQL_DATABASE=vtiger
+      - MYSQL_ROOT_PASSWORD=secret
+    links:
+      - mysql1
+
+  mysql1:
+    image: mysql:5.5
+    environment:
+      - MYSQL_DATABASE=vtiger
+      - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+      - mysql1:/var/lib/mysql:rw
+
+  vtiger2:
+    image: javanile/vtiger:7.1.0
+    ports:
+      - 30082:80
+    environment:
+      - MYSQL_HOST=mysql2
+      - MYSQL_DATABASE=vtiger
+      - MYSQL_ROOT_PASSWORD=secret
+    links:
+      - mysql2
+
+  mysql2:
+    image: mysql:5.5
+    environment:
+      - MYSQL_DATABASE=vtiger
+      - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+      - mysql2:/var/lib/mysql:rw
+
+volumes:
+  mysql1:
+  mysql2:

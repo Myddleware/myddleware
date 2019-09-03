@@ -50,3 +50,9 @@
 
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
+
+# IDEs
+.idea/
+
+# Docker
+docker-compose.override.yml
