@@ -34,6 +34,7 @@ class LoadSolutionData implements FixtureInterface
     private $manager; 
 	protected $solutionData = array(
 									array('name' => 'sugarcrm',			'active' => 1,'source' => 1,'target' => 1),
+                                    array('name' => 'vtigercrm',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),

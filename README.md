@@ -24,7 +24,7 @@ docker-compose run --rm myddleware php composer.phar install
 ```
 
 ```bash
-sudo chmod 775 -R var/cache var/logs
+sudo chmod 777 -R var/cache var/logs
 ```
 
 
