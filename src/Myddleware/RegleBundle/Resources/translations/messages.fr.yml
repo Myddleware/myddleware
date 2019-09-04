@@ -462,7 +462,9 @@ function:
 solution:
     fields:
         login: Utilisateur
+        username: Nom d'utilisateur
         password: Mot de passe
+        accesskey: Clé d'accès
         url: Url
         token: Jeton
         tokensecret: Secret jeton

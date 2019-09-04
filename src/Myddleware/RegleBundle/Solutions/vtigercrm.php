@@ -28,8 +28,8 @@ namespace Myddleware\RegleBundle\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class vtigercrmcore extends solution {
-
+class vtigercrmcore extends solution
+{
 	protected $limitCall = 100;
 	protected $urlSuffix = '/service/v4/rest.php';
 	
@@ -103,11 +103,18 @@ class vtigercrmcore extends solution {
 	
 
 	protected $customRelationship = 'MydCustRelSugar';
-	
-	
-    public function login($paramConnexion) {
+
+    /**
+     * @param $paramConnexion
+     * @return array
+     */
+    public function login($paramConnexion)
+    {
 		parent::login($paramConnexion);
+
 		try {
+            var_ump($this->paramConnexion);
+
 			$login_paramaters = array( 
 			'user_auth' => array( 
 				'user_name' => $this->paramConnexion['login'], 
@@ -135,15 +142,18 @@ class vtigercrmcore extends solution {
 			else {
 				throw new \Exception('Please check url');
 			}
-		} 
-		catch (\Exception $e) {
+		} catch (\Exception $e) {
 			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		} 
     }
-	
-	public function logout() {	
+
+    /**
+     * @return bool
+     */
+	public function logout()
+    {
 		try {
 			$logout_parameters = array("session" => $this->session);
 			$this->call('logout',$logout_parameters,$this->paramConnexion['url']); 	
@@ -154,24 +164,28 @@ class vtigercrmcore extends solution {
 			return false;
 		} 
     }
-	
-	public function getFieldsLogin() {	
+
+    /**
+     * @return array
+     */
+	public function getFieldsLogin()
+    {
 		return array(
-					array(
-							'name' => 'login',
-							'type' => TextType::class,
-							'label' => 'solution.fields.login'
-						),
-					array(
-							'name' => 'password',
-							'type' => PasswordType::class,
-							'label' => 'solution.fields.password'
-						),
-					array(
-							'name' => 'url',
-							'type' => TextType::class,
-							'label' => 'solution.fields.url'
-						)
+            array(
+                'name' => 'username',
+                'type' => TextType::class,
+                'label' => 'solution.fields.username'
+            ),
+            array(
+                'name' => 'accesskey',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.accesskey'
+            ),
+            array(
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url'
+            ),
 		);
 	}
 	

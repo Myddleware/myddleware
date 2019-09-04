@@ -461,7 +461,9 @@ function:
 solution:
     fields:
         login: User
+        username: Username
         password: Password
+        accesskey: Access key
         url: Url
         token: Token
         tokensecret: Secret token

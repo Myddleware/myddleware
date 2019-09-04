@@ -27,5 +27,12 @@ docker-compose run --rm myddleware php composer.phar install
 sudo chmod 777 -R var/cache var/logs
 ```
 
+```bash
+sudo rm -fr var/cache/*
+docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
+```
+
+
+
 
 
