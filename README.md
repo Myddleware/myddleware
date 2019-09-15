@@ -31,6 +31,11 @@ Find us here : <a href="http://www.myddleware.com">www.myddleware.com</a>
 docker-compose up -d
 ```
 
+## Verifica stato containers
+```bash
+docker-compose ps
+```
+
 ## Installare le dipendence
 ```bash
 docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
