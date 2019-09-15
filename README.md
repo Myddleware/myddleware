@@ -36,15 +36,34 @@ docker-compose up -d
 docker-compose ps
 ```
 
+## Dati di accesso Vtiger
+Vtiger1: admin/admin
+Vtiger2: admin/admin
+
 ## Installare le dipendence
+```bash
+docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
+```
+
+## Preparazione dei file e cartelle
+```bash
+docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
+```
+
+## Installare il database
 ```bash
 docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 ```
 
 ## Permessi di scrittura
 ```bash
-sudo chmod 777 -R var/cache var/logs
+linux: sudo chmod 777 -R var/cache var/logs
+macos: find var/cache -type d -exec sudo chmod 0777 {} +
+       find var/logs -type d -exec sudo chmod 0777 {} +
 ```
+
+## Dati di accesso Myddleware
+Myddleware: admin/admin
 
 ## Aggiornare le dipendenze
 ```bash
