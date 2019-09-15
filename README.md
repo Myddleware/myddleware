@@ -18,15 +18,17 @@ Find us here : <a href="http://www.myddleware.com">www.myddleware.com</a>
 
 <img class="alignnone size-medium wp-image-161" src="http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg" alt="myddleware_logo" width="300" height="215" />
 
-
+## Installare le dipendence
 ```bash
-docker-compose run --rm myddleware php composer.phar install
+docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 ```
 
+## Permessi di scrittura
 ```bash
 sudo chmod 777 -R var/cache var/logs
 ```
 
+## Aggiornare le dipendenze
 ```bash
 sudo rm -fr var/cache/*
 sudo rm -rf vendor && composer update -v --ignore-platform-reqs --no-scripts
