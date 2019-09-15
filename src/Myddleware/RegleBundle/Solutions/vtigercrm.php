@@ -176,6 +176,13 @@ class vtigercrmcore extends solution
      */
 	public function get_modules($type = 'source')
     {
+        //  Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L135
+        //
+        //  $client = new Client...
+        //  $modules = $client->listTypes();
+        //  return $modules['results']
+        //
+
 	    try {
 			$get_available_modules_parameters  = array( 
 				'session' => $this->session
@@ -207,6 +214,8 @@ class vtigercrmcore extends solution
 	
 	// Permet de récupérer tous les champs d'un module
 	public function get_module_fields($module, $type = 'source') {
+	    // Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L160
+
 		parent::get_module_fields($module, $type);
 		try {
 			$this->moduleFields = array();
