@@ -18,6 +18,15 @@ Find us here : <a href="http://www.myddleware.com">www.myddleware.com</a>
 
 <img class="alignnone size-medium wp-image-161" src="http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg" alt="myddleware_logo" width="300" height="215" />
 
+
+
+# Sviluppo
+
+## Avviare i containers
+```bash
+docker-compose up -d
+```
+
 ## Installare le dipendence
 ```bash
 docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
