@@ -22,6 +22,10 @@ Find us here : <a href="http://www.myddleware.com">www.myddleware.com</a>
 
 # Sviluppo
 
+## Requisiti sul PC
+- Docker 18 o superiore 
+- Docker Compose 1.17 o superiore
+
 ## Avviare i containers
 ```bash
 docker-compose up -d
