@@ -29,6 +29,7 @@ sudo chmod 777 -R var/cache var/logs
 
 ```bash
 sudo rm -fr var/cache/*
+sudo rm -rf vendor && composer update -v --ignore-platform-reqs --no-scripts
 docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 ```
 

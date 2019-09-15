@@ -43,7 +43,7 @@
     "pagerfanta/pagerfanta": "^2.0.0",
     "illuminate/encryption": "5.3.*@dev",
     "friendsofsymfony/jsrouting-bundle": "^1.6",
-    "javanile/vtiger-client": "^0.0.12"
+    "javanile/vtiger-client": "^0.0.13"
   },
   "repositories": [
     {

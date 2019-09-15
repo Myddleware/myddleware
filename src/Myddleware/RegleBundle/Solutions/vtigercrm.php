@@ -25,6 +25,7 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
+use Javanile\VtigerClient\VtigerClient;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -113,35 +114,16 @@ class vtigercrmcore extends solution
 		parent::login($paramConnexion);
 
 		try {
-            var_ump($this->paramConnexion);
+            $client = new VtigerClient($this->paramConnexion['url']);
+            $result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
 
-			$login_paramaters = array( 
-			'user_auth' => array( 
-				'user_name' => $this->paramConnexion['login'], 
-				'password' => md5($this->paramConnexion['password']), 
-				'version' => '.01' 
-			), 
-			'application_name' => 'myddleware',
-			); 
-			// remove index.php in the url
-			$this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
-			// Add the suffix with rest parameters to the url
-			$this->paramConnexion['url'] .= $this->urlSuffix;
+            if (!$result['success']) {
+                throw new \Exception($result['error']['message']);
+            }
 
-			$result = $this->call('login',$login_paramaters,$this->paramConnexion['url']); 
-			
-			if($result != false) {
-				if ( empty($result->id) ) {
-				   throw new \Exception($result->description);
-				}
-				else {
-					$this->session = $result->id;
-					$this->connexion_valide = true;
-				}				
-			}
-			else {
-				throw new \Exception('Please check url');
-			}
+            $this->session = $client->getSessionName();
+            $this->connexion_valide = true;
+
 		} catch (\Exception $e) {
 			$error = $e->getMessage();
 			$this->logger->error($error);
@@ -158,8 +140,7 @@ class vtigercrmcore extends solution
 			$logout_parameters = array("session" => $this->session);
 			$this->call('logout',$logout_parameters,$this->paramConnexion['url']); 	
 			return true;
-		} 
-		catch (\Exception $e) {
+		} catch (\Exception $e) {
 			$this->logger->error('Error logout REST '.$e->getMessage());
 			return false;
 		} 
@@ -188,9 +169,13 @@ class vtigercrmcore extends solution
             ),
 		);
 	}
-	
-	// Permet de récupérer tous les modules accessibles à l'utilisateur
-	public function get_modules($type = 'source') {
+
+    /**
+     * @param string $type
+     * @return bool
+     */
+	public function get_modules($type = 'source')
+    {
 	    try {
 			$get_available_modules_parameters  = array( 
 				'session' => $this->session
@@ -531,13 +516,19 @@ class vtigercrmcore extends solution
 		return $result;	
 	}
 
-
-	protected function readRelationship($param,$dataParent) {
+    /**
+     * @param $param
+     * @param $dataParent
+     * @return mixed
+     */
+	protected function readRelationship($param, $dataParent)
+    {
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
 		}	
 		$result['error'] = '';
 		$i = 0;
+
 		// Pour toutes les données parents, on récupère toutes les données liées de la relation
 		if (!empty($dataParent['values']))	 {
 			$module_relationship_many_to_many = $this->module_relationship_many_to_many[$param['module']];
@@ -817,7 +808,8 @@ class vtigercrmcore extends solution
 	}
 		
 	//function to make cURL request	
-	protected function call($method, $parameters){
+	protected function call($method, $parameters)
+    {
 		try {
 			ob_start();
 			$curl_request = curl_init();
