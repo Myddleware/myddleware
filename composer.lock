@@ -176,7 +176,7 @@
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.3"
+                "php": ">=7.3"
             },
             "require-dev": {
                 "chuyskywalker/rolling-curl": "^3.1",
@@ -4305,7 +4305,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.1"
+        "php": ">=7.3"
     },
     "platform-dev": []
 }
