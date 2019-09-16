@@ -434,53 +434,76 @@ class ConnectorController extends Controller
 	}
 	
 	// SUPPRESSION DU CONNECTEUR
-	public function connectorDeleteAction($id) {
-
+	public function connectorDeleteAction(Request $request, $id) {		
+		$session = $request->getSession();
 		if(isset($id)) {
-			
-			// Detecte si la session est le support ---------
+			// Check permission
 			$permission =  $this->get('myddleware.permission');
-			
 			if( $permission->isAdmin($this->getUser()->getId()) ) {
 				$list_fields_sql = array('id' => $id);
 			}
 			else {
 				$list_fields_sql = 
 					array('id' => $id,
-					      'createdBy' => $this->getUser()->getId()
+						  'createdBy' => $this->getUser()->getId()
 				);
-			}
-			// Detecte si la session est le support ---------			
-						
-			// Récupère le connecteur en fonction de son id
+			}			
+			
+			// Get the connector using its id
 			$connector = $this->getDoctrine()
-                         ->getManager()
-                         ->getRepository('RegleBundle:Connector')
-                         ->findOneBy( $list_fields_sql );	
-						 
+						 ->getManager()
+						 ->getRepository('RegleBundle:Connector')
+						 ->findOneBy( $list_fields_sql );	
+// echo $connector->getId();
+// die();						 
 			if($connector === null) {
 				return $this->redirect($this->generateUrl('regle_connector_list'));	
 			}			 
-
-		    // On récupére l'EntityManager
-		    $em = $this->getDoctrine()
-		               ->getManager();	
-					   		
-			$connector_params = $this->getDoctrine()
-                     ->getManager()
-                     ->getRepository('RegleBundle:ConnectorParam')
-                     ->findByConnector( $id );	
- 			
-			if($connector_params) {
-				foreach ( $connector_params as $connector_param ) {
-					$em->remove($connector_param);
+			try{
+				// Check if a rule uses this connector (source and target)
+				$rule = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:Rule')
+							  ->findOneBy(array(
+												'connectorTarget' => $connector,
+												'deleted' => 0
+										  ));
+				if (empty($rule)) {
+					$rule = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:Rule')
+							  ->findOneBy(array(
+												'connectorSource' => $connector,
+												'deleted' => 0
+										  ));
+				}	
+				// Error message in case a rule using this connector exists
+				if (!empty($rule)) {			
+					$session->set('error', array($this->get('translator')->trans('error.connector.remove_with_rule').' '.$rule->getName()));
+				} else {
+					// Get the EntityManager
+					$em = $this->getDoctrine()
+							   ->getManager();	
+									
+					$connector_params = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:ConnectorParam')
+							 ->findByConnector( $id );	
+					// Remove connector param first
+					if($connector_params) {
+						foreach ( $connector_params as $connector_param ) {
+							$em->remove($connector_param);
+							$em->flush();
+						}				
+					}
+					
+					// Then remove connector
+					$em->remove($connector);
 					$em->flush();
-				}				
-			}
-			
-			$em->remove($connector);
-			$em->flush();			
-			
+				}
+			} catch (\Doctrine\DBAL\DBALException $e) {
+				$session->set('error', array($e->getPrevious()->getMessage()));
+			} 
 			return $this->redirect($this->generateUrl('regle_connector_list'));	
 		}
 	}

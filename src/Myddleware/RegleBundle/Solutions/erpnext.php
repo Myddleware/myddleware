@@ -132,11 +132,11 @@ class erpnextcore extends solution
 			$modules = $this->get_modules();			
 
 			// Get the list field for a module
-			$url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . rawurlencode($module) . '&fields=*&filters={%22parent%22:%22' . rawurlencode($module) . '%22}&limit_page_length=500';
+			$url = $this->paramConnexion['url'] . '/api/method/frappe.desk.form.load.getdoctype?doctype='.$module;
 			$recordList = $this->call($url, 'GET', '');
-			// Format outpput data
-			if (!empty($recordList->message)) {
-				foreach ($recordList->message as $field) {
+			// Format outpput data					
+			if (!empty($recordList->docs[0]->fields)) {
+				foreach ($recordList->docs[0]->fields as $field) {
 					if (empty($field->label)) {
 						continue;
 					}
@@ -224,11 +224,10 @@ class erpnextcore extends solution
 			// Add relate field in the field mapping
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-						
+			}	
 			return $this->moduleFields;
-		} catch (\Exception $e) {
-			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+		} catch (\Exception $e) {		
+			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
 			return false;
 		}
 	} // get_module_fields($module)

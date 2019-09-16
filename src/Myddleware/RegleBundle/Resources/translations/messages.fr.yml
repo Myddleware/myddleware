@@ -539,6 +539,8 @@ error:
         language_change: Impossible de modifier le langage :
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
+    connector:
+        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
          
 title:
     account:
