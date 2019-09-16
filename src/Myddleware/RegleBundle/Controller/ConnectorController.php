@@ -454,8 +454,7 @@ class ConnectorController extends Controller
 						 ->getManager()
 						 ->getRepository('RegleBundle:Connector')
 						 ->findOneBy( $list_fields_sql );	
-// echo $connector->getId();
-// die();						 
+					 
 			if($connector === null) {
 				return $this->redirect($this->generateUrl('regle_connector_list'));	
 			}			 
