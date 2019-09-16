@@ -56,6 +56,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'sage50',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'hubspot',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'erpnext',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'myddlewareapi',	'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'medialogistique',	'active' => 1,'source' => 1,'target' => 1),
 							);
  

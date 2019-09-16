@@ -1,6 +1,6 @@
 <?php
 
-namespace Myddleware\ApiBundle\Controller;
+namespace Myddleware\ApiBundle\v1_0\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -10,6 +10,14 @@ class DefaultController extends Controller
 {
 
     public function indexAction(Request $request)
+    {
+        $data = $request->request->all();
+
+        return new JsonResponse($data);
+
+    } 
+	
+	public function generateDocumentsAction(Request $request)
     {
         $data = $request->request->all();
 

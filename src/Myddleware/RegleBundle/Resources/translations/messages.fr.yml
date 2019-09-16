@@ -334,7 +334,6 @@ flux:
         ready_to_send: Prêt à être envoyé
         filter_ok: Filtre OK
         send: Envoyé
-        found: Trouvé
         filter: Filtre annulé
         no_send: Non envoyé
         cancel: Envoi annulé
@@ -345,7 +344,6 @@ flux:
         error_transformed: Transformation en erreur
         error_checking: Vérification en erreur
         error_sending: Envoi en erreur
-        Not_found: Non trouvée
  
 view_flux:
     empty: Pas de données
@@ -362,7 +360,7 @@ view_flux:
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
-        readrecord: Générer un nouveau transfer
+        readrecord: Lancer la même donnée 
     header:
         rule: Règle
         statut: Status
@@ -372,6 +370,7 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
+        dateref: Date de référence
     log:
         id: Id
         ref: Référence
@@ -448,7 +447,6 @@ function:
             utf8decode: utf8decode ( string $data ) / Convertit une chaîne UTF-8 en ISO-8859-1
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit tous les caractères éligibles en entités HTML
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit les caractères spéciaux en entités HTML
-            chr: chr ( int $bytevalue ) Générer une chaîne d'un octet à partir d'un nombre
         mathematical:
             round: Arrondit un nombre à virgule flottante
             ceil: Arrondit au nombre supérieur
@@ -480,6 +478,7 @@ solution:
         user: User ID        
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
+        file: Fichier
         host: Serveur Host
         dbname: Nom de la base de données
         database_name: Nom de la base de données
@@ -490,9 +489,7 @@ solution:
         directory: Répertoire avec les fichiers
         shop: Magasin
         redirect_uri: URL de redirection
-        applicationName: Nom de l'application
-        hashkey: Clé de hachage
-        authid: Id auth
+        applicationName: Nom de l'application	
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
@@ -530,6 +527,7 @@ error:
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
         edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
+        edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
         delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
         delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
@@ -539,8 +537,6 @@ error:
         language_change: Impossible de modifier le langage :
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
-    connector:
-        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
          
 title:
     account:

@@ -333,7 +333,6 @@ flux:
         ready_to_send: Ready to be sent
         filter_ok: Filter OK
         send: Sent
-        found: Found
         filter: Filter Cancelled
         no_send: Not sent
         cancel: Sending cancelled
@@ -344,7 +343,6 @@ flux:
         error_transformed: Transformation error
         error_checking: Checking error
         error_sending: Sending error
-        not_found: Not found
 
 view_flux:
     empty: No data
@@ -361,7 +359,7 @@ view_flux:
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
-        readrecord: Generate new transfer
+        readrecord: Run the same record
     header:
         rule: Rule
         statut: Status
@@ -371,6 +369,7 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
+        dateref: Reference date
     log:
         id: Id
         ref: Reference
@@ -447,7 +446,6 @@ function:
             utf8decode: utf8decode ( string $data ) / Converts a string with ISO-8859-1 characters encoded with UTF-8 to single-byte ISO-8859-1 
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert all applicable characters to HTML entities
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert special characters to HTML entities
-            chr: chr ( int $bytevalue ) Generate a single-byte string from a number
         mathematical:
             round: Rounding a floating point number
             ceil: Rounding up
@@ -479,6 +477,7 @@ solution:
         user: User ID
         sandbox: Sandbox (1 if yes, 0 if not)
         wsdl: File wsdl
+        file: File
         host: Host Server
         dbname: Database name
         database_name: Database name
@@ -489,9 +488,7 @@ solution:
         directory: Directory with files
         shop: Shop
         redirect_uri: Redirect URI
-        applicationName: Application name
-        hashkey: Hash key
-        id_auth: Auth ID
+        applicationName: Application name		
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -529,18 +526,17 @@ error:
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
         edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
+        edit_document_error_open_admin: There is at least one transfer open or in error in this rule. We advise you to manage these transfers before editing this rule.
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
         delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
         delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
-        update: Failed to edit the rule.
+        update: Failed to edit the rule.  
     account:
         language_change: Failed to change the language :
     template:
         creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
-    connector:
-        remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
-         
+  
 title:
     account:
         view: My account

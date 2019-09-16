@@ -1,6 +1,6 @@
 <?php
 
-namespace Myddleware\ApiBundle;
+namespace Myddleware\ApiBundle\v1_0;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
