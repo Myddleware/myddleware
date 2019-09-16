@@ -177,7 +177,8 @@ class prestashopcore extends solution {
 			$authorized = array("customers" => "The e-shop's customers",
 								"customer_threads" => "Customer services threads",
 								"customer_messages" => "Customer services messages",
-								"products" => "The products"
+								"products" => "The products",
+								"order_histories" => "The Order histories"
 								);
 			
 			return array_intersect_key($authorized, $modulesSource);
@@ -275,16 +276,28 @@ class prestashopcore extends solution {
 				}
 				// Récupération des listes déroulantes
 				if($module == 'orders' && isset($this->moduleFields['current_state'])) {
-					$order_states = $this->getList('order_state','order_states');				
-					$this->moduleFields['current_state']['option'] = $order_states;
+					try {
+						$order_states = $this->getList('order_state','order_states');				
+						$this->moduleFields['current_state']['option'] = $order_states;
+					} catch (\Exception $e) {
+						// No error if order_state not accessible, the order status list won't accessible
+					}	
 				}
 				if($module == 'order_histories' && isset($this->fieldsRelate['id_order_state'])) {
-					$order_states = $this->getList('order_state','order_states');			
-					$this->fieldsRelate['id_order_state']['option'] = $order_states;
+					try {
+						$order_states = $this->getList('order_state','order_states');			
+						$this->fieldsRelate['id_order_state']['option'] = $order_states;
+					} catch (\Exception $e) {
+						// No error if order_state not accessible, the order status list won't accessible
+					}		
 				}
 				if($module == 'supply_orders' && isset($this->moduleFields['id_supply_order_state'])) {
-					$supply_order_states = $this->getList('supply_order_state','supply_order_states');
-					$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
+					try {
+						$supply_order_states = $this->getList('supply_order_state','supply_order_states');
+						$this->moduleFields['id_supply_order_state']['option'] = $supply_order_states;
+					} catch (\Exception $e) {
+						// No error if supply_order_state not accessible, the supply order status list won't accessible
+					}	
 				}
 				// Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
 				if($module == 'customer_messages') {
@@ -411,7 +424,7 @@ class prestashopcore extends solution {
 	
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {	
+	public function read_last($param) {
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -459,6 +472,11 @@ class prestashopcore extends solution {
 
 				// Si le tableau de requête est présent alors construction de la requête
 				if (!empty($param['query'])) {
+					// We return no result for order_histories as we never modify this module, always add a line. Avoid "no send" status
+					if ($param['module'] == 'order_histories') {
+						$result['done'] = false;
+						return $result;
+					}
 					// Building of the option array
 					if(!empty($param['query']['id'])) {
 						$options['id'] = (int) $param['query']['id'];
@@ -561,7 +579,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -906,7 +924,6 @@ class prestashopcore extends solution {
 					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('create1',$opt,$param);
-					
 					// Call
 					$xml = $this->webService->get($opt);
 					$modele = $xml->children()->children();
@@ -948,7 +965,6 @@ class prestashopcore extends solution {
 					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('create2',$opt,$param);
-					
 					$new = $this->webService->add($opt);
 					$result[$idDoc] = array(
 							'id' => (string)$new->children()->children()->id,
@@ -982,6 +998,12 @@ class prestashopcore extends solution {
 	
 	// Permet de modifier des données
 	public function update($param) {
+		// We never update order_histories even if the methode update is called 
+		// For this module we always create a new line (so create methode is called)
+		if ($param['module'] == 'order_histories') {
+			return $this->create($param);
+		}
+	
 		foreach($param['data'] as $idDoc => $data) {
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
@@ -1103,7 +1125,7 @@ class prestashopcore extends solution {
 		if (in_array($moduleSource, array('order_histories','order_payments','order_carriers','customer_messages'))) {
 			return "date_add";
 		}
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "date_upd";
 		} else if ($RuleMode == "C"){
 			return "date_add";

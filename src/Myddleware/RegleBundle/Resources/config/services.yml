@@ -125,6 +125,8 @@ services:
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.myddlewareapi:
         class: Myddleware\RegleBundle\Solutions\myddlewareapi
+     myddleware_rule.medialogistique:
+        class: Myddleware\RegleBundle\Solutions\medialogistique
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule

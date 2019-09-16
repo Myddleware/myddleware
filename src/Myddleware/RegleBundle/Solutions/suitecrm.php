@@ -30,6 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class suitecrmcore  extends solution {
 
+	protected $limitCall = 100;
 	protected $urlSuffix = '/service/v4/rest.php';
 	
     protected $required_fields = array('default' => array('id','date_modified','date_entered'));
@@ -353,27 +354,8 @@ class suitecrmcore  extends solution {
 			$result['done'] = true;					
 			return $result;
 		}	
-		$query = '';
-		// Si le tableau de requête est présent alors construction de la requête
-		if (!empty($param['query'])) {
-			foreach ($param['query'] as $key => $value) {
-				if (!empty($query)) {
-					$query .= ' AND ';
-				}
-				if ($key == 'email1') {
-					$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
-				}
-				else {	
-					// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-					if($param['module'] == 'ProspectLists') {	
-						$query .= "prospect_lists.".$key." = '".$value."' ";
-					}
-					else {
-						$query .= strtolower($param['module']).".".$key." = '".$value."' ";
-					}
-				}
-			}
-		}
+		// Build the query to read data 
+		$query = $this->generateQuery($param, 'read_last');
 
 		try {
 			if(!isset($param['fields'])) {
@@ -422,7 +404,7 @@ class suitecrmcore  extends solution {
 	}
 	
 	// Permet de lire les données
-	public function read($param) {
+	public function read($param) {		
 		try {
 			$result = array();
 			$result['error'] = '';
@@ -447,38 +429,9 @@ class suitecrmcore  extends solution {
 
 			// Ajout des champs obligatoires
 			$param['fields'] = $this->addRequiredField($param['fields']);
-			$param['fields'] = array_unique($param['fields']);
-			
+			$param['fields'] = array_unique($param['fields']);			
 			// Construction de la requête pour SugarCRM
-			// if a specific query is requeted we don't use date_ref
-			if (!empty($param['query'])) {
-				foreach ($param['query'] as $key => $value) {
-					if (!empty($query)) {
-						$query .= ' AND ';
-					}
-					if ($key == 'email1') {
-						$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
-					}
-					else {	
-						// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-						if($param['module'] == 'ProspectLists') {	
-							$query .= "prospect_lists.".$key." = '".$value."' ";
-						}
-						else {
-							$query .= strtolower($param['module']).".".$key." = '".$value."' ";
-						}
-					}
-				}
-			} else {
-				// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-				if($param['module'] == 'ProspectLists') {	
-					$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
-				}
-				else {
-					$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
-				}
-			}
-
+			$query = $this->generateQuery($param, 'read');		
 			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
 			$link_name_to_fields_array = array();
 			foreach ($param['fields'] as $field) {
@@ -496,11 +449,12 @@ class suitecrmcore  extends solution {
 												'offset' => $param['offset'],
 												'select_fields' => $param['fields'],
 												'link_name_to_fields_array' => $link_name_to_fields_array,
-												'max_results' => $param['limit'],
+												'max_results' => $this->limitCall,
 												'deleted' => 0,
 												'Favorites' => '',
-											);							
-				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);
+											);		
+										
+				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
 				// Construction des données de sortie
 				if (isset($get_entry_list_result->result_count)) {
 					$currentCount = $get_entry_list_result->result_count;
@@ -535,14 +489,14 @@ class suitecrmcore  extends solution {
 						$record = array();
 					}
 					 // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
-                    $param['offset'] += $param['limit'];
+                    $param['offset'] += $this->limitCall;
 				}
 				else {
 					$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				}
+				}			
 			}
             // On continue si le nombre de résultat du dernier appel est égal à la limite
-            while ($currentCount == $param['limit']);
+            while ($currentCount == $this->limitCall AND $result['count'] < $param['limit']-1); // -1 because a limit of 1000 = 1001 in the system				
 			// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
 			if (!empty($paramSave)) {
 				$resultRel = $this->readRelationship($paramSave,$result);
@@ -555,15 +509,15 @@ class suitecrmcore  extends solution {
 				else {
 					return null;
 				}
-			}
-			return $result;	
+			}	
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			return $result;
-		}
+		}	
+		return $result;	
 	}
-	
+
+
 	protected function readRelationship($param,$dataParent) {
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
@@ -731,7 +685,7 @@ class suitecrmcore  extends solution {
 		// Transformation du tableau d'entrée pour être compatible webservice Sugar
 		foreach($param['data'] as $idDoc => $data) {
 			try {	
-				// Check control before update
+				// Check control before update	
 				$data = $this->checkDataBeforeUpdate($param, $data);
 				$dataSugar = array();
 				foreach ($data as $key => $value) {
@@ -779,6 +733,43 @@ class suitecrmcore  extends solution {
 		return $result;			
 	}
 	
+		
+	// Build the query for read data to SuiteCRM
+	protected function generateQuery($param, $method){				
+		$query = '';
+		// if a specific query is requeted we don't use date_ref
+		if (!empty($param['query'])) {
+			foreach ($param['query'] as $key => $value) {
+				if (!empty($query)) {
+					$query .= ' AND ';
+				}
+				if ($key == 'email1') {
+					$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+				}
+				else {	
+					// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
+					if($param['module'] == 'ProspectLists') {	
+						$query .= "prospect_lists.".$key." = '".$value."' ";
+					}
+					else {
+						$query .= strtolower($param['module']).".".$key." = '".$value."' ";
+					}
+				}
+			}
+		// Filter by date only for read method (no need for read_last method	
+		} elseif ($method == 'read') {
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
+			if($param['module'] == 'ProspectLists') {	
+				$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
+			}
+			else {
+				$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
+			}
+		}		
+		return $query;
+	}
+	
 	// Permet de renvoyer le mode de la règle en fonction du module target
 	// Valeur par défaut "0"
 	// Si la règle n'est qu'en création, pas en modicication alors le mode est C
@@ -796,7 +787,7 @@ class suitecrmcore  extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "date_modified";
 		} else if ($RuleMode == "C"){
 			return "date_entered";

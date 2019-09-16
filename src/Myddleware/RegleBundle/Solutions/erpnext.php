@@ -46,10 +46,15 @@ class erpnextcore extends solution
 									);
 									
 	// Module list that allows to make parent relationships
-	protected $allowParentRelationship = array('Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item');
+	protected $allowParentRelationship = array('Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment');
 	
-	protected $childModuleKey = array('Sales Invoice Item' => 'items', 'Sales Order Item' => 'items', 'Payment Entry Reference' => 'references', 'Item Attribute Value' => 'item_attribute_values',
-	'Item Variant Attribute' => 'attributes');
+	protected $childModuleKey = array(	'Sales Invoice Item' => 'items', 
+										'Sales Order Item' => 'items', 
+										'Payment Entry Reference' => 'references', 
+										'Item Attribute Value' => 'item_attribute_values',
+										'Item Variant Attribute' => 'attributes', 
+										'Sales Invoice Payment' => 'payments'
+									);
 	
 	// Get isTable parameter for each module
 	protected $isTableModule = array();
@@ -104,7 +109,7 @@ class erpnextcore extends solution
 		try {
 			// Get 
 			$url = $this->paramConnexion['url'] .'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';			
-			$APImodules = $this->call($url, 'GET');	
+			$APImodules = $this->call($url, 'GET');
 			if (!empty($APImodules->data)) {
 				foreach ($APImodules->data as $APImodule) {
 					$modules[$APImodule->name] = $APImodule->name;
@@ -127,11 +132,11 @@ class erpnextcore extends solution
 			$modules = $this->get_modules();			
 
 			// Get the list field for a module
-			$url = $this->paramConnexion['url'] . '/api/method/frappe.client.get_list?doctype=DocField&parent=' . rawurlencode($module) . '&fields=*&filters={%22parent%22:%22' . rawurlencode($module) . '%22}&limit_page_length=500';
+			$url = $this->paramConnexion['url'] . '/api/method/frappe.desk.form.load.getdoctype?doctype='.$module;
 			$recordList = $this->call($url, 'GET', '');
-			// Format outpput data
-			if (!empty($recordList->message)) {
-				foreach ($recordList->message as $field) {
+			// Format outpput data					
+			if (!empty($recordList->docs[0]->fields)) {
+				foreach ($recordList->docs[0]->fields as $field) {
 					if (empty($field->label)) {
 						continue;
 					}
@@ -219,11 +224,10 @@ class erpnextcore extends solution
 			// Add relate field in the field mapping
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-						
+			}	
 			return $this->moduleFields;
-		} catch (\Exception $e) {
-			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+		} catch (\Exception $e) {		
+			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
 			return false;
 		}
 	} // get_module_fields($module)
@@ -475,7 +479,7 @@ class erpnextcore extends solution
 	// retrun the reference date field name
 	public function getDateRefName($moduleSource, $ruleMode) {
 		// Creation and modification mode
-		if($ruleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "modified";
 		// Creation mode only
 		} else if ($ruleMode == "C"){

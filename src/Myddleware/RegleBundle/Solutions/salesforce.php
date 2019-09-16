@@ -434,6 +434,9 @@ class salesforcecore extends solution {
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
 		}
+		if (!isset($param['offset'])) {
+			$param['offset'] = 0;
+		}
 			 
 		try {
 			$param['fields'] = array_unique($param['fields']);
@@ -463,11 +466,11 @@ class salesforcecore extends solution {
 			
 			// On lit les données dans Salesforce
 			do {		
-				if(isset($param['offset'])) {
+				if(!empty($param['offset'])) {
 					$queryOffset = "+OFFSET+".$param['offset'];
 				}
 				// Appel de la requête
-				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;			
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
 			
@@ -510,7 +513,7 @@ class salesforcecore extends solution {
 						$result['values'][$record['Id']] = $row;
 						$row = array();
 					}
-					// Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
+					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
 					$param['offset'] += $param['limit'];
 					// Récupération de la date de référence de l'avant dernier enregistrement afin de savoir si on doit faire un appel supplémentaire 
 					// currentCount -2 car si 5 résultats dans la tableau alors on veut l'entrée 3 (l'index des tableau commence à 0)
@@ -553,7 +556,6 @@ class salesforcecore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {
-		$parameters = array();
 		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
@@ -562,7 +564,7 @@ class salesforcecore extends solution {
 		// Get the type of each fields by calling Salesforce
 		$moduleFields = $this->get_module_fields($param['module'],'target');
 		try{
-			$parameters = '';
+			$parameters = array();
 			$i=0;
 			$nb_record = count($param['data']);			
 			foreach($param['data'] as $idDoc => $data) {
@@ -571,6 +573,7 @@ class salesforcecore extends solution {
 				// Generate a reference and store it in an array
 				$i++;	
 				$idDocReference['Ref'.$i] = $idDoc;
+				$parameter = array();
 				$parameter['attributes'] = array('type' => $param['module'], 'referenceId' => 'Ref'.$i);
 			    foreach ($data as $key => $value) {		
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
@@ -646,20 +649,31 @@ class salesforcecore extends solution {
 							$this->updateDocumentStatus($idDocReference[$result_record['referenceId']],$result[$idDocReference[$result_record['referenceId']]],$param);	
 						}
 					}
-					$query_request_data = '';
-					$parameters = '';
+					$query_request_data = array();
+					$parameters = array();
 				}
 			}			
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			// Global error
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['error'] = $error;
+			// Erro on each data transfer
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Please open the task to get more detail.';
+			// Set status for all data transfer when an error happens in a mass action
+			foreach($param['data'] as $idDoc => $data) {
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+				// Change status for all records
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
 		}					
 		return $result;
 	} // create($param)
 	
 	// Permet de modifier des données
 	public function update($param) {		
-		$parameters = array();
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
 		}
@@ -669,7 +683,7 @@ class salesforcecore extends solution {
 			try{
 				// Check control before update
 				$data = $this->checkDataBeforeUpdate($param, $data);
-				$parameters = '';
+				$parameters = array();
 				// Instanciation de l'URL d'appel				
 				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
@@ -769,28 +783,34 @@ class salesforcecore extends solution {
 	
 	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
 	protected function getWhere($param) {
-		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-
-		// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
-		$tab = explode(' ', $param['date_ref']);
-		$date = $tab[0] . 'T' . $tab[1];
-
-		// Encodage de la date
-		$startDateAndTime = urlencode($date . '+00:00');
-		if($DateRefField == 'LastModifiedDate') {
-			$queryWhere = "+WHERE+LastModifiedDate+>+" . $startDateAndTime;
-		} else {
-			$queryWhere = "+WHERE+CreatedDate+>+" . $startDateAndTime;
-		}
-	
-		// Si le module est CampaignMember alors on ne récupère que les membre compatible avec la règle : piste ou contact
-		if ($param['module'] == 'CampaignMember') {
-			if (array_search('ContactId',$param['fields']) !== false){
-				$queryWhere .= "+AND+ContactId+!=+''";
+		if (!empty($param['query'])) {
+			foreach ($param['query'] as $key => $value) {
+				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
 			}
-			else {
-				$queryWhere .= "+AND+LeadId+!=+''";
+		} else {
+			// On va chercher le nom du champ pour la date de référence: Création ou Modification
+			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+
+			// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
+			$tab = explode(' ', $param['date_ref']);
+			$date = $tab[0] . 'T' . $tab[1];
+
+			// Encodage de la date
+			$startDateAndTime = urlencode($date . '+00:00');
+			if($DateRefField == 'LastModifiedDate') {
+				$queryWhere = "+WHERE+LastModifiedDate+>+" . $startDateAndTime;
+			} else {
+				$queryWhere = "+WHERE+CreatedDate+>+" . $startDateAndTime;
+			}
+		
+			// Si le module est CampaignMember alors on ne récupère que les membre compatible avec la règle : piste ou contact
+			if ($param['module'] == 'CampaignMember') {
+				if (array_search('ContactId',$param['fields']) !== false){
+					$queryWhere .= "+AND+ContactId+!=+''";
+				}
+				else {
+					$queryWhere .= "+AND+LeadId+!=+''";
+				}
 			}
 		}
 		return $queryWhere;
@@ -824,7 +844,7 @@ class salesforcecore extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "LastModifiedDate";
 		} else if ($RuleMode == "C"){
 			return "CreatedDate";

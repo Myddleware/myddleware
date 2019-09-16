@@ -62,8 +62,10 @@ class DefaultControllerCore extends Controller
     protected $em;
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
-
-    protected function getInstanceBdd()
+	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId');
+    
+	protected function getInstanceBdd()
     {
         if (empty($this->em)) {
             $this->em = $this->getDoctrine()->getManager();
@@ -204,7 +206,7 @@ class DefaultControllerCore extends Controller
             $rule = $rule[0];
 
             // si je supprime une règle qui ne m'appartient pas alors redirection
-            if (count($rule) < 1) {
+            if (empty($rule)) {
                 return $this->redirect($this->generateUrl('regle_list'));
             }
 
@@ -1222,9 +1224,10 @@ class DefaultControllerCore extends Controller
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
 
-                            if (empty($k['champs']))
+							$k['fields'] = array();
+                            if (empty($k['champs'])) {
                                 $k['fields']['Formula'] = ((isset($k['formule'][0]) ? $k['formule'][0] : ''));
-                            else if (count($k['champs']) > 0) {
+                            } else {
                                 foreach ($k['champs'] as $fields) {
                                     // Fields couldn't be return. For example Magento return only field not empty
                                     if (!empty($source['values'][$fields])) {
@@ -1233,8 +1236,6 @@ class DefaultControllerCore extends Controller
                                         $k['fields'][$fields] = '';
                                     }
                                 }
-                            } else {
-                                $k['fields'] = array();
                             }
 
                             $tab_simulation[] = array(
@@ -1401,6 +1402,10 @@ class DefaultControllerCore extends Controller
             // Si jamais l'intersection venait à être vide (ce qui ne devrait jamais arriver) on met par défaut le mode CREATE
             if (empty($intersectMode)) {
                 $intersectMode['C'] = 'create_only';
+            }
+			// If duplicate field exist for the target solution, we allow search rule type
+            if (!empty($fieldsDuplicateTarget)) {
+                $intersectMode['S'] = 'search_only';
             }
             $sessionService->setParamRuleCibleMode($ruleKey, $intersectMode);
 
@@ -1923,6 +1928,14 @@ class DefaultControllerCore extends Controller
                     $tab_new_rule['params'] = array_merge($tab_new_rule['params'], $before_save['params']);
                 }
             }
+			
+			// Check if search rule then duplicate field shouldn't be empty
+			if (
+					$tab_new_rule['params']['mode'] == 'S'
+				AND empty($tab_new_rule['params']['rule']['duplicate_fields'])
+			) {
+				throw new \Exception($this->get('translator')->trans('Failed to save the rule. If you choose to retrieve data with your rule, you have to select at least one duplicate field.'));
+			}
 
             // Edit mode
             if (!$sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
@@ -1962,8 +1975,10 @@ class DefaultControllerCore extends Controller
                         if ($ruleParam->getName() == 'datereference') {
                             $date_reference = $ruleParam->getValue();
                         }
-                        $this->em->remove($ruleParam);
-                        $this->em->flush();
+						if (in_array($ruleParam->getName(), $this->standardRuleParam)) {
+							$this->em->remove($ruleParam);
+							$this->em->flush();
+						}
                     }
                 }
             } // Create mode
@@ -2113,7 +2128,7 @@ class DefaultControllerCore extends Controller
 
             //------------------------------- RuleFilter ------------------------
 
-            if (count($request->request->get('filter')) > 0) {
+            if (!empty($request->request->get('filter'))) {
                 foreach ($request->request->get('filter') as $filter) {
                     $oneRuleFilter = new RuleFilter();
                     $oneRuleFilter->setTarget($filter['target']);
@@ -2277,7 +2292,7 @@ class DefaultControllerCore extends Controller
         $countTransferRule = array();
         $i = 1;
         $values = $home->countTransferRule($permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
-        if (count($values) > 0) {
+        if (!empty($values)) {
             foreach ($values as $field => $value) {
                 if ($i == 1) {
                     $countTransferRule[] = array('test', 'test2');
@@ -2461,7 +2476,7 @@ class DefaultControllerCore extends Controller
         $solutionSource = $this->em->getRepository('RegleBundle:Solution')
             ->solutionConnector('source', $permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
 
-        if (count($solutionSource) > 0) {
+        if (!empty($solutionSource)) {
             foreach ($solutionSource as $s) {
                 $source[] = $s->getName();
             }
@@ -2472,7 +2487,7 @@ class DefaultControllerCore extends Controller
         $solutionTarget = $this->em->getRepository('RegleBundle:Solution')
             ->solutionConnector('target', $permission->isAdmin($this->getUser()->getId()), $this->getUser()->getId());
 
-        if (count($solutionTarget) > 0) {
+        if (!empty($solutionTarget)) {
             foreach ($solutionTarget as $t) {
                 $target[] = $t->getName();
             }

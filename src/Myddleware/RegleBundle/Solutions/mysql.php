@@ -39,12 +39,12 @@ class mysqlcore extends database {
 	
 	// Generate query
 	protected function get_query_show_tables() {
-		return 'SHOW TABLES FROM '.$this->paramConnexion['database_name'];
+		return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->paramConnexion['database_name'].$this->stringSeparatorClose;
 	}
 	
 	// Query to get all the flieds of the table
 	protected function get_query_describe_table($table) {
-		return 'DESCRIBE `'.$table.'`';
+		return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
 	}
 	
 	// Get the limit operator of the select query in the read last function

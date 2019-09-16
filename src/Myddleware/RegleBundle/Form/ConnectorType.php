@@ -22,8 +22,8 @@ class ConnectorType extends AbstractType{
         $secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
         $options['attr']['fieldsLogin'] = null;
         if( $options['data']->getSolution() !=null ){
-            //Init ConnectorParams
-            if(count($options['data']->getConnectorParams()) == 0){
+            //Init ConnectorParams	
+            if(empty($options['data']->getConnectorParams())){
                 foreach ($fieldsLogin as $fieldLogin) {
                    $connectorParam = new ConnectorParam;
                    $connectorParam  ->setName($fieldLogin['name']);

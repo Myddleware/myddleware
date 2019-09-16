@@ -251,8 +251,8 @@ class sagecrmcore extends solution {
 					foreach ($lists->result->records as $list) {
 						// Some lists aren't array
 						if (
-								!empty($list->records) 
-							AND is_array($list->records)
+								!empty($list->records)
+							AND	is_array($list->records)
 						) {
 							$dropdownvalues[$list->fieldname] = $list->records;
 						}
@@ -779,7 +779,7 @@ class sagecrmcore extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		if($RuleMode == "0") {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "updateddate";
 		} else if ($RuleMode == "C"){
 			return "createddate";

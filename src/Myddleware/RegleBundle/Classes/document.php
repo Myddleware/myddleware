@@ -63,6 +63,7 @@ class documentcore {
 	protected $jobId;
 	protected $key;
 	protected $docIdRefError;
+	protected $transformError = false;
 	protected $tools;
 	protected $ruleDocuments;
 	protected $globalStatus = array(
@@ -73,6 +74,7 @@ class documentcore {
 										'Ready_to_send' => 'Open',
 										'Filter_OK' => 'Open',
 										'Send' => 'Close',
+										'Found' => 'Close',
 										'Filter' => 'Cancel',
 										'No_send' => 'Cancel',
 										'Cancel' => 'Cancel',
@@ -82,7 +84,8 @@ class documentcore {
 										'Relate_KO' => 'Error',
 										'Error_transformed' => 'Error',
 										'Error_checking' => 'Error',
-										'Error_sending' => 'Error'
+										'Error_sending' => 'Error',
+										'Not_found' => 'Error'
 								);
 	
 	protected $container;
@@ -635,9 +638,19 @@ class documentcore {
 					}	
 					
 
-					// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed		
+					// Select previous document in the same rule with the same id and status different than closed
 					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']]);
-					if (empty($targetId['record_id'])) {
+					if (empty($targetId['record_id'])) {					
+						// If no target id found, we check if the parent has been filtered, in this case we filter the relate document too
+						$documentSearch = $this->searchRelateDocumentByStatus($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']], 'Filter');
+						if (!empty($documentSearch['id'])) {
+							$this->docIdRefError = $documentSearch['id'];
+							$this->typeError = 'W';
+							$this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
+							$this->updateStatus('Filter');
+							$this->connection->commit(); // -- COMMIT TRANSACTION	
+							return false;
+						} 
 						$error = true;
 						break;
 					}
@@ -766,38 +779,6 @@ class documentcore {
 					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
-			// Si on est en mode recherche on récupère la donnée cible avec les paramètre de la source
-			elseif ($this->type_document == 'S') {
-				if (!empty($this->sourceData)) {
-					// Un seul champ de recherche pour l'instant. Les règle recherche ne peuvent donc n'avoir qu'un seul champ
-					$searchFields[$this->ruleField[0]['target_field_name']] = $this->getTransformValue($this->sourceData,$this->ruleFields[0]);
-				}
-				else {
-					throw new \Exception('Failed to search data because there is no field in the query. This document is queued. ');
-				}
-
-				if(!empty($searchFields)) {
-					$history = $this->getDocumentHistory($searchFields);
-				} 
-				else {
-					$history = -1;
-				}
-		
-				// Gestion de l'erreur
-				if ($history === -1) {
-					throw new \Exception('Failed to search data because the query is empty. This document is queued. ');
-				}
-				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
-				elseif ($history === false) {
-					$rule = $this->getRule();
-					throw new \Exception('No data found in the target application. To synchronize data, you have to create a record in the target module ('.$rule['module_target'].') with these data : '.print_r($searchFields,true).'. Then rerun this document. This document is queued. ');
-				}
-				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on passe le flux à envoyé car le lien est fait
-				else {
-					$this->updateStatus('Send');
-					$this->updateTargetId($history);
-				}
-			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);		
@@ -839,13 +820,24 @@ class documentcore {
 				}
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
-					$this->updateStatus('Ready_to_send');
+					// If search document and don't found the record, we return an error
+					if ($this->type_document == 'S') {
+						$this->typeError = 'E';
+						$this->updateStatus('Not_found');
+					} else {
+						$this->updateStatus('Ready_to_send');
+					}
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
-					$this->updateStatus('Ready_to_send');
+					// If search document we close it. 
+					if ($this->type_document == 'S') {
+						$this->updateStatus('Found');
+					} else {
+						$this->updateStatus('Ready_to_send');
+						$this->updateType('U');
+					}
 					$this->updateTargetId($history);
-					$this->updateType('U');
 				}
 			}
 			// Sinon on mets directement le document en ready to send (example child rule)
@@ -853,7 +845,7 @@ class documentcore {
 				$this->updateStatus('Ready_to_send');
 			}		
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
-			// Si le document est en type recherche, alors la sible est forcément égal à la source et il ne fait pas annuler le doc. 
+			// Si le document est en type recherche, alors la cible est forcément égale à la source et il ne fait pas annuler le doc. 
 			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
 			if (	
 					$this->type_document != 'S' 
@@ -866,7 +858,11 @@ class documentcore {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
-			$this->updateStatus('Error_checking');
+			if ($this->type_document == 'S') {
+				$this->updateStatus('Not_found');
+			} else {
+				$this->updateStatus('Error_checking');
+			}
 			$this->logger->error($this->message);
 			return false;
 		}	
@@ -965,6 +961,8 @@ class documentcore {
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
+		// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
+		$read['date_ref'] = '1970-01-02 00:00:00';	
 		$dataTarget = $this->solutionTarget->read_last($read);		
 		if (empty($dataTarget['done'])) {
 			return false;
@@ -1046,7 +1044,7 @@ class documentcore {
 				foreach ($this->ruleRelationships as $ruleRelationship) {			
 					// if field = Myddleware_element_id then we take the id record in the osurce application
 					if ($type == 'S') {
-						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_source']]);
+						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : (!empty($data[$ruleRelationship['field_name_source']]) ? $data[$ruleRelationship['field_name_source']] : ''));
 					} else {	
 						$dataInsert[$ruleRelationship['field_name_target']] = (!empty($data[$ruleRelationship['field_name_target']]) ? $data[$ruleRelationship['field_name_target']] : '');
 					}
@@ -1100,7 +1098,7 @@ class documentcore {
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $ruleField) {
 					$value = $this->getTransformValue($this->sourceData,$ruleField);
-					if ($value === false) {
+					if (!empty($this->transformError)) {
 						throw new \Exception( 'Failed to transform data.' );
 					}
 					$targetField[$ruleField['target_field_name']] = $value;
@@ -1111,7 +1109,7 @@ class documentcore {
 				// Récupération de l'ID target
 				foreach ($this->ruleRelationships as $ruleRelationships) {
 					$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
-					if ($value === false) {
+					if (!empty($this->transformError)) {
 						throw new \Exception( 'Failed to transform relationship data.' );
 					}
 					$targetField[$ruleRelationships['field_name_target']] = $value;
@@ -1254,7 +1252,9 @@ class documentcore {
 			$this->typeError = 'E';
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( $this->message );
-			return false;
+			// Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
+			$this->transformError = true;
+			return null;
 		}
 
 	}
@@ -1874,6 +1874,49 @@ class documentcore {
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}	
+	}
+	
+	// Search relate document by status
+	protected function searchRelateDocumentByStatus($ruleRelationship,$record_id, $status) {
+		try {		
+			$direction = $this->getRelationshipDirection($ruleRelationship);		
+			// En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
+			// Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
+			if ($direction == '-1') {
+				$sqlParams = "	SELECT *								
+								FROM Document
+								WHERE  
+										Document.rule_id = :ruleRelateId 
+									AND Document.target_id = :record_id 
+									AND Document.status = :status 
+								LIMIT 1";	
+			}
+			elseif ($direction == '1') {
+				$sqlParams = "	SELECT *
+								FROM Document 
+								WHERE  
+										Document.rule_id = :ruleRelateId 
+									AND Document.source_id = :record_id 
+									AND Document.status = :status 
+								LIMIT 1";	
+			}
+			else {
+				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
+			}			
+			$stmt = $this->connection->prepare($sqlParams);
+			$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
+			$stmt->bindValue(":record_id", $record_id);
+			$stmt->bindValue(":status", $status);
+			$stmt->execute();	   				
+			$result = $stmt->fetch();
+			if (!empty($result['id'])) {
+				return $result;
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error( $this->message );
+		}	
+		return null;
 	}
 	
 	// Permet de renvoyer le statut du document

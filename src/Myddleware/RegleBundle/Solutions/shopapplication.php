@@ -734,7 +734,7 @@ class shopapplicationcore extends solution {
 	
 	// Return the filed reference
 	public function getDateRefName($moduleSource, $ruleMode) {
-		if ($ruleMode == '0') {
+		if(in_array($RuleMode,array("0","S"))) {
 			return 'date_modified';
 		} elseif ($ruleMode == 'C'){
 			return 'date_created';

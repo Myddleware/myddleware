@@ -45,8 +45,7 @@
 
 			{% endif %}
 
-			{% if doc %}
-				
+			{% if doc %}				
 				{# si le flux n'est pas au statut Cancel ou Close #}
 				{% if doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' %}
 				
@@ -62,17 +61,21 @@
 						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.cancel'|trans}}
 						</button>
 					</a>
-				
+
+				{# BTN #}
 				{% endif %}
+				
+				{# BTN #}
+				{% endif %}
+				
 				{% if read_record_btn %}
 					<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
 						<button type="button" class="btn-mydinv">
-						  <span class="glyphicon glyphicon-plus-sign"></span>  {{'view_flux.btn.readrecord'|trans}}
+						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.readrecord'|trans}}
 						</button>
 					</a>
 				{% endif %}
-				{# BTN #}
-				</div>	
+			</div>	
 				<table id="headertab" class="listepager">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>

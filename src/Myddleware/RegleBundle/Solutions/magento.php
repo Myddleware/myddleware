@@ -665,7 +665,7 @@ class magentocore extends solution {
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 	public function getDateRefName($moduleSource, $RuleMode) {
-		if(in_array($RuleMode, array('0'))) {
+		if(in_array($RuleMode,array("0","S"))) {
 			return "updated_at";
 		} else if ($RuleMode == "C"){
 			return "created_at";

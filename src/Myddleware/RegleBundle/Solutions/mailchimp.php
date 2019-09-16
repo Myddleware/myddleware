@@ -97,7 +97,7 @@ class mailchimpcore  extends solution {
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try {
-			require_once('lib/mailchimp/metadata.php');	
+			require('lib/mailchimp/metadata.php');	
 			
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
