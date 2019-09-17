@@ -198,147 +198,30 @@ class vtigercrmcore extends solution
 	// Permet de récupérer tous les champs d'un module
 	public function get_module_fields($module, $type = 'source')
 	{
-		// Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L160
-
-		parent::get_module_fields($module, $type);
-		try {
-			$this->moduleFields = array();
-
-			// Si le module est un module "fictif" relation créé pour Myddlewar
-			if(array_key_exists($module, $this->module_relationship_many_to_many)) {
-
-				foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {
-					$this->moduleFields[$name] = array(
-												'label' => $name,
-												'type' => 'varchar(255)',
-												'type_bdd' => 'varchar(255)',
-												'required' => 0
-											);						
-				}
-				foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
-					$this->fieldsRelate[$relationship] = array(
-												'label' => $relationship,
-												'type' => 'varchar(36)',
-												'type_bdd' => 'varchar(36)',
-												'required' => 0,
-												'required_relationship' => 0
-											);
-				}
-			}
-			else {
-				$get_module_fields_parameters  = array(
-					'session' 		=> $this->session,
-					'module_name' 	=> $module
-				);
-				
-				$get_module_fields = $this->call('get_module_fields',$get_module_fields_parameters);
-				foreach ($get_module_fields->module_fields AS $field) {
-					if(isset($this->exclude_field_list['default']) ){
-						// Certains champs ne peuvent pas être modifiés
-						if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
-							continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-					}
-		
-					if (!in_array($field->type,$this->type_valide)) { 
-						if(isset($this->exclude_field_list[$module])){
-							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
-								continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-						}
-						$type_bdd = 'varchar(255)';
-					}
-					else {
-						$type_bdd = $field->type;
-					}
-					if (
-							substr($field->name,-3) == '_id' 
-						|| substr($field->name,-4) == '_ida'
-						|| substr($field->name,-4) == '_idb'
-						|| (
-								$field->type == 'id' 
-							&& $field->name != 'id'
-						)
-						|| $field->name	== 'created_by'
-					) {
-						$this->fieldsRelate[$field->name] = array(
-													'label' => $field->label,
-													'type' => 'varchar(36)',
-													'type_bdd' => 'varchar(36)',
-													'required' => $field->required,
-													'required_relationship' => 0
-												);
-					}
-					//To enable to take out all fields where there are 'relate' in the type of the field
-					else {	
-						// Le champ id n'est envoyé qu'en source
-						if($field->name != 'id' || $type == 'source') {
-							$this->moduleFields[$field->name] = array(
-													'label' => $field->label,
-													'type' => $field->type,
-													'type_bdd' => $type_bdd,
-													'required' => $field->required
-												);
-						}   
-						// Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
-						if (
-								!empty($field->options) 
-							&& !in_array($field->type, array('datetime','bool')) 
-						){
-							foreach($field->options as $option) {
-								$this->moduleFields[$field->name]['option'][$option->name] = $option->value;
-							}
-						}	
-					}
-				}
-				
-				// Ajout des champ type link (custom relationship ou custom module souvent)
-				if (!empty($get_module_fields->link_fields)) {
-					foreach ($get_module_fields->link_fields AS $field) {
-						if(isset($this->exclude_field_list['default'])){
-							if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
-								continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-						}
-						if (!in_array($field->type,$this->type_valide)) { 
-							if(isset($this->exclude_field_list[$module])){
-								if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
-									continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-							}
-							$type_bdd = 'varchar(255)';
-						}
-						else {
-							$type_bdd = $field->type;
-						}
-						if (
-								substr($field->name,-3) == '_id' 
-							|| substr($field->name,-4) == '_ida'
-							|| substr($field->name,-4) == '_idb'
-							|| (
-									$field->type == 'id' 
-								&& $field->name != 'id'
-							)
-						) {
-							// On met un préfix pour les relation custom afin de pouvoir les détecter dans le read
-							$this->fieldsRelate[$this->customRelationship.$field->name] = array(
-														'label' => $field->relationship,
-														'type' => 'varchar(36)',
-														'type_bdd' => 'varchar(36)',
-														'required' => 0,
-														'required_relationship' => 0
-													);
-						}
-					}
-				}
-			}
-			// Ajout des champ relate au mapping des champs 
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			return $this->moduleFields;					
-		}	
-		catch (\Exception $e) {
+		if(empty($this->vtigerClient))
 			return false;
-		}		
+
+		$fields = $this->vtigerClient->describe($module)["result"]["fields"] ?? null;
+
+		if(empty($fields))
+			return false;
+
+		$options = array();
+
+		foreach ($fields as $field) {
+			if ($field["name"] != "id")
+			{
+				$options[$field["name"]] = array(
+											"label" => $field["label"],
+											'required' => $field["mandatory"],
+											//'type' => 'varchar(255)', // TODO: Settare il type giusto
+							);
+			}
+		}
+
+		return $options ?: false;
 	}
-	
+
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
 	public function read_last($param) {
 		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
@@ -394,9 +277,9 @@ class vtigercrmcore extends solution
 			return $result;
 		}	
 	}
-	
+
 	// Permet de lire les données
-	public function read($param) {		
+	public function read($param) {
 		try {
 			$result = array();
 			$result['error'] = '';
@@ -404,7 +287,7 @@ class vtigercrmcore extends solution
 			if (empty($param['offset'])) {
 				$param['offset'] = 0;
 			}
-			$currentCount = 0;		
+			$currentCount = 0;
 			$query = '';
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
@@ -575,7 +458,8 @@ class vtigercrmcore extends solution
 
 	
 	// Permet de créer des données
-	public function create($param) {	
+	public function create($param)
+	{
 		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
 		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 			return $this->createRelationship($param);
