@@ -105,25 +105,28 @@ class vtigercrmcore extends solution
 
 	protected $customRelationship = 'MydCustRelSugar';
 
-    /**
-     * @param $paramConnexion
-     * @return array
-     */
+	/** @var VtigerClient */
+	protected $vtigerClient;
+
+	/**
+	 * @param $paramConnexion
+	 * @return array|VtigerClient
+	 */
     public function login($paramConnexion)
     {
 		parent::login($paramConnexion);
 
 		try {
-            $client = new VtigerClient($this->paramConnexion['url']);
+			$client = new VtigerClient($this->paramConnexion['url']);
             $result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
 
             if (!$result['success']) {
                 throw new \Exception($result['error']['message']);
             }
 
-            $this->session = $client->getSessionName();
-            $this->connexion_valide = true;
-
+			$this->session = $client->getSessionName();
+			$this->connexion_valide = true;
+			$this->vtigerClient = $client;
 		} catch (\Exception $e) {
 			$error = $e->getMessage();
 			$this->logger->error($error);
@@ -172,55 +175,36 @@ class vtigercrmcore extends solution
 
     /**
      * @param string $type
-     * @return bool
+     * @return bool!array
      */
 	public function get_modules($type = 'source')
     {
-        //  Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L135
-        //
-        //  $client = new Client...
-        //  $modules = $client->listTypes();
-        //  return $modules['results']
-        //
-
-	    try {
-			$get_available_modules_parameters  = array( 
-				'session' => $this->session
-			);	
-			$get_available_modules = $this->call('get_available_modules',$get_available_modules_parameters);
-			if (!empty($get_available_modules->modules)) {
-				foreach ($get_available_modules->modules as $module) {			
-					// On ne renvoie que les modules autorisés
-					if (
-							!in_array($module->module_key,$this->exclude_module_list['default'])
-						&&	!in_array($module->module_key,$this->exclude_module_list[$type])
-					) {
-						$modules[$module->module_key] = $module->module_label;
-					}
-				}
-			}
-			// Création des modules type relationship
-			if (!empty($this->module_relationship_many_to_many)) {
-				foreach ($this->module_relationship_many_to_many as $key => $value) {
-					$modules[$key] = $value['label'];
-				}
-			}
-			return ((isset($modules)) ? $modules : false );	    	
-	    }
-		catch (\Exception $e) {
+		if(empty($this->vtigerClient))
 			return false;
+
+		$modules = $this->vtigerClient->listTypes()["result"] ?? null;
+
+		if(empty($modules))
+			return false;
+
+		$options = array();
+		foreach ($modules["information"] as $moduleName => $moduleInfo) {
+			$options[$moduleName] = $moduleInfo["label"];
 		}
+
+		return $options ?: false;
 	}
-	
+
 	// Permet de récupérer tous les champs d'un module
-	public function get_module_fields($module, $type = 'source') {
-	    // Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L160
+	public function get_module_fields($module, $type = 'source')
+	{
+		// Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L160
 
 		parent::get_module_fields($module, $type);
 		try {
 			$this->moduleFields = array();
 
-			// Si le module est un module "fictif" relation créé pour Myddlewar	
+			// Si le module est un module "fictif" relation créé pour Myddlewar
 			if(array_key_exists($module, $this->module_relationship_many_to_many)) {
 
 				foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {
@@ -242,7 +226,7 @@ class vtigercrmcore extends solution
 				}
 			}
 			else {
-				$get_module_fields_parameters  = array( 
+				$get_module_fields_parameters  = array(
 					'session' 		=> $this->session,
 					'module_name' 	=> $module
 				);
