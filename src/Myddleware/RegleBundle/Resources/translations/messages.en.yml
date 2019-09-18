@@ -543,7 +543,9 @@ error:
         creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
         remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
-         
+    document:
+        deleted_flag: This data transfer is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
+        
 title:
     account:
         view: My account

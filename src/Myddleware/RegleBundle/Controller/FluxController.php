@@ -63,8 +63,7 @@ class FluxControllerCore extends Controller
 		$permission =  $this->get('myddleware.permission');
 		if( $permission->isAdmin($this->getUser()->getId()) ) {
 			$list_fields_sql = 
-				array('id' => $id
-			);			
+				array('id' => $id);			
 		}
 		else {
 			$list_fields_sql = 
@@ -226,7 +225,7 @@ class FluxControllerCore extends Controller
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
 			$data = $request->get($form->getName());
-			$where = 'WHERE ';		
+			$where = 'WHERE Document.deleted = 0 AND ';		
 			
 			/* if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
 				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
@@ -451,8 +450,9 @@ class FluxControllerCore extends Controller
 	}
 
 	// Info d'un flux
-	public function fluxInfoAction($id,$page) {		
+	public function fluxInfoAction(Request $request,$id,$page) {		
 		try {
+			$session = $request->getSession();
 			$em = $this->getDoctrine()->getManager();
 
 			// Detecte si la session est le support ---------
@@ -461,7 +461,11 @@ class FluxControllerCore extends Controller
 				
 			// Infos des flux
 			$doc = $em->getRepository('RegleBundle:Document')
-	                  ->findById($list_fields_sql);					  
+	                  ->findBy($list_fields_sql);
+					  
+			if($doc[0]->getDeleted()) {
+				$session->set('warning', array($this->get('translator')->trans('error.document.deleted_flag')));
+			}
 			if( !$permission->isAdmin($this->getUser()->getId()) ) {		  
 				if(
 						empty($doc[0])
