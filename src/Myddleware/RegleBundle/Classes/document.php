@@ -1617,6 +1617,10 @@ class documentcore {
 		$this->updateStatus('Cancel'); 
 	}
 	
+	public function changeDeleteFlag($deleteFlag) {
+		$this->updateDeleteFlag($deleteFlag);
+	}
+	
 	public function updateStatus($new_status) {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
@@ -1656,6 +1660,35 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .=  'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->logger->error( $this->message );
+			$this->createDocLog();
+		}
+	}
+	
+	public function updateDeleteFlag($deleted) {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+			$now = gmdate('Y-m-d H:i:s');
+			$query = "	UPDATE Document 
+								SET 
+									date_modified = :now,
+									deleted = :deleted
+								WHERE
+									id = :id
+								";
+			echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			$stmt = $this->connection->prepare($query);
+			$stmt->bindValue(":now", $now);
+			$stmt->bindValue(":deleted", $deleted);
+			$stmt->bindValue(":id", $this->id);
+			$stmt->execute();
+			$this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
+			$this->connection->commit(); // -- COMMIT TRANSACTION
+			$this->createDocLog();
+		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			$this->message .=  'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 			$this->createDocLog();

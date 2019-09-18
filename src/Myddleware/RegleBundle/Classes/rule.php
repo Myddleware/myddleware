@@ -698,13 +698,22 @@ class rulecore {
 		return $sendTarget;
 	}
 	
-	public function actionDocument($id_document,$event) {
+	public function actionDocument($id_document,$event, $param1 = null) {
 		switch ($event) { 
 			case 'rerun':
 				return $this->rerun($id_document);
 				break;
 			case 'cancel':
 				return $this->cancel($id_document);
+				break;
+			case 'remove':
+				return $this->changeDeleteFlag($id_document,true);
+				break;
+			case 'restore':
+				return $this->changeDeleteFlag($id_document,false);
+				break;
+			case 'changeStatus':
+				return $this->changeStatus($id_document,$param1);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
@@ -869,12 +878,41 @@ class rulecore {
 		// On affiche alors le message directement dans Myddleware
 		if (empty($this->jobId)) {
 			if (empty($message)) {
-				$session->set( 'success', array('Annulation du transfert effectuée avec succès.'));
+				$session->set( 'success', array('Data transfer has been successfully cancelled.'));
 			}
 			else {
 				$session->set( 'error', array($doc->getMessage()));
 			}
 		}
+	}
+	
+	// Remove a document 
+	protected function changeDeleteFlag($id_document,$deleteFlag) {	
+		$param['id_doc_myddleware'] = $id_document;
+		$param['jobId'] = $this->jobId;
+		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc->changeDeleteFlag($deleteFlag); 
+		$session = new Session();
+		$message = $doc->getMessage();
+		
+		// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
+		// On affiche alors le message directement dans Myddleware
+		if (empty($this->jobId)) {
+			if (empty($message)) {
+				$session->set( 'success', array('Data transfer has been successfully removed.'));
+			}
+			else {
+				$session->set( 'error', array($doc->getMessage()));
+			}
+		}
+	}
+	
+	// Remove a document 
+	protected function changeStatus($id_document,$toStatus) {	
+		$param['id_doc_myddleware'] = $id_document;
+		$param['jobId'] = $this->jobId;
+		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc->updateStatus($toStatus);
 	}
 	
 	protected function runMyddlewareJob($ruleSlugName) {

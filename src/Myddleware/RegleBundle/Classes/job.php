@@ -305,14 +305,9 @@ class jobcore  {
 	}
 
 	// Fonction permettant d'annuler massivement des documents
-	public function massAction($action,$idsDoc) {
-		if (empty($idsDoc)) {
-			$this->message .=  'No Ids in parameters of the job massAction.';		
-			return false;
-		}
-		
+	public function massAction($action, $dataType, $idsDoc, $forceAll, $fromStatus, $toStatus) {	
 		try {
-			// Formatage du tableau d'idoc
+			// Build IN parameter²
 			$idsDocArray = explode(',',$idsDoc);	
 			$queryIn = '(';
 			foreach ($idsDocArray as $idDoc) {
@@ -321,17 +316,42 @@ class jobcore  {
 			$queryIn = rtrim($queryIn,',');
 			$queryIn .= ')';
 			
-			// Création de la requête
+			// Buid WHERE section
+			// Filter on rule or docuement depending on the data type
+			$where = ' WHERE ';
+			if ($dataType == 'rule') {
+				$where .= " Rule.id IN $queryIn ";
+			} elseif ($dataType == 'document') {
+				$where .= " Document.id IN $queryIn ";
+			}
+			// No filter on status if the action is restore/changeStatus or if forceAll = 'Y'
+			if (
+					$forceAll != 'Y'
+				AND $action	!= 'restore'
+				AND $action	!= 'changeStatus'
+			) {
+				$where .= " AND Document.global_status IN ('Open','Error') ";
+			}
+			// Filter on relevant delete flag (select deleted = 1 only for restore action)
+			if ($action	== 'restore') {
+				$where .= " AND Document.deleted = 1 ";
+			} else {
+				$where .= " AND Document.deleted = 0 ";
+			}
+			// Filter on status for the changeStatus action
+			if ($action	== 'changeStatus') {
+				$where .= " AND Document.status = '$fromStatus' ";
+			}
+			
+			// Build the query
 			$sqlParams = "	SELECT 
 								Document.id,
 								Document.rule_id
 							FROM Document	
 								INNER JOIN Rule
-									ON Document.rule_id = Rule.id
-							WHERE
-									Document.global_status IN ('Open','Error')
-								AND Document.id IN $queryIn
-							ORDER BY Rule.id";
+									ON Document.rule_id = Rule.id"
+							.$where."
+							ORDER BY Rule.id";						
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$documents = $stmt->fetchAll();
@@ -346,7 +366,7 @@ class jobcore  {
 						$param['jobId'] = $this->id;						
 						$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					}
-					$errorActionDocument = $rule->actionDocument($document['id'],$action);
+					$errorActionDocument = $rule->actionDocument($document['id'],$action, $toStatus);
 					if (!empty($errorActionDocument)) {
 						$this->message .= print_r($errorActionDocument,true);
 					}

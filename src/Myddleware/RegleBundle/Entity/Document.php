@@ -163,6 +163,14 @@ class Document
     private $parentId;	
 
     /**
+     * @var boolean
+     *
+	 * @ORM\Column(name="deleted", type="boolean", nullable=false)
+	 * 
+     */
+    private $deleted; 
+
+    /**
      * Set id
      *
      * @param string $id
@@ -506,4 +514,28 @@ class Document
     {
         return $this->parentId;
     }
+
+   /**
+     * Set deleted
+     *
+     * @param integer $deleted
+     * @return Rule
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return integer 
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
+
 }
