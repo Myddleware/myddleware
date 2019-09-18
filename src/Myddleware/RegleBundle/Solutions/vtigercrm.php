@@ -280,13 +280,16 @@ class vtigercrmcore extends solution
 	public function read($param)
 	{
 		if(empty($this->vtigerClient))
-			return false;
+			return array(
+						"error" => "Error: no VtigerClient setup",
+						"done" => false
+					);
 
 		if (count($param["fields"]) == 0) {
 			return array(
-				"error" => "Error: no Param Given",
-				"done" => false
-			);
+						"error" => "Error: no Param Given",
+						"done" => false
+					);
 		}
 
 		if (empty($param['offset'])) {
@@ -322,7 +325,7 @@ class vtigercrmcore extends solution
 						"count" => 0
 					);
 
-		foreach ($query["result"] as $key => $value) {
+		foreach ($query["result"] as $value) {
 			$result['values'][$value["id"]] = $value;
 			$result['date_ref'] = $value["modifiedtime"];
 			$result["count"]++;
@@ -496,12 +499,13 @@ class vtigercrmcore extends solution
 	public function create($param)
 	{
 		if(empty($this->vtigerClient))
-			return array("error" => "Error: no Param Given",);
+			return array("error" => "Error: no VtigerClient setup");
 
 		$result = [];
 
 		foreach($param['data'] as $idDoc => $data) {
-			$resultCreate = $this->vtigerClient->create($param["module"], array_diff_key($data, ["target_id"]));
+			unset($data["target_id"]);
+			$resultCreate = $this->vtigerClient->create($param["module"], array_diff_key($data, ["target_id" => 0]));
 
 			if (!empty($resultCreate) && $resultCreate["success"] && !empty($resultCreate["result"]))
 				$result[$idDoc] = array(
@@ -572,56 +576,33 @@ class vtigercrmcore extends solution
 	}
 	
 	// Permet de mettre à jour un enregistrement
-	public function update($param) {
-		// Transformation du tableau d'entrée pour être compatible webservice Sugar
+	public function update($param)
+	{
+		if(empty($this->vtigerClient))
+			return array("error" => "Error: no VtigerClient setup");
+
+		$result = [];
+
 		foreach($param['data'] as $idDoc => $data) {
-			try {	
-				// Check control before update	
-				$data = $this->checkDataBeforeUpdate($param, $data);
-				$dataSugar = array();
-				foreach ($data as $key => $value) {
-					// Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
-					if ($key == 'target_id') {
-						$key = 'id';
-					}
-					// Si un champ est une relation custom alors on enlève le prefix
-					if (substr($key,0,strlen($this->customRelationship)) == $this->customRelationship) {
-						$key = substr($key, strlen($this->customRelationship));
-					}
-					
-					if($key == 'Birthdate' && $value == '0000-00-00') {
-						continue;
-					}
-					$dataSugar[] = array('name' => $key, 'value' => $value);
-				}
-				$setEntriesListParameters = array(
-												'session' => $this->session,
-												'module_name' => $param['module'],
-												'name_value_lists' => $dataSugar
-											);
-	
-				$get_entry_list_result = $this->call("set_entry", $setEntriesListParameters);
-				if (!empty($get_entry_list_result->id)) {
-					$result[$idDoc] = array(
-											'id' => $get_entry_list_result->id,
-											'error' => false
-									);
-				}
-				else  {
-					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
-				} 
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
+			$data["id"] = $data["target_id"];
+			unset($data["target_id"]);
+			$resultUpdate = $this->vtigerClient->update($param["module"], $data);
+
+			if (!empty($resultUpdate) && $resultUpdate["success"] && !empty($resultUpdate["result"]))
 				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}	
-		return $result;			
+									'id' => $resultUpdate["result"]["id"],
+									'error' => false
+								);
+			else
+				$result[$idDoc] = array(
+									'id' => '-1',
+									'error' => "Errore"
+								);
+
+			$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+		}
+
+		return $result;
 	}
 	
 		
