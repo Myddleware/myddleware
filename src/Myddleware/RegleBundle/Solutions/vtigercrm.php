@@ -182,7 +182,12 @@ class vtigercrmcore extends solution
 		if(empty($this->vtigerClient))
 			return false;
 
-		$modules = $this->vtigerClient->listTypes()["result"] ?? null;
+		$result = $this->vtigerClient->listTypes();
+
+		if(!$result["success"] || ($result["success"] && count($result["result"]) == 0))
+			return false;
+
+		$modules = $result["result"] ?? null;
 
 		if(empty($modules))
 			return false;
@@ -201,7 +206,12 @@ class vtigercrmcore extends solution
 		if(empty($this->vtigerClient))
 			return false;
 
-		$fields = $this->vtigerClient->describe($module)["result"]["fields"] ?? null;
+		$describe = $this->vtigerClient->describe($module);
+
+		if(!$describe["success"] || ($describe["success"] && count($describe["result"]) == 0))
+			return false;
+
+		$fields = $describe["result"]["fields"] ?? null;
 
 		if(empty($fields))
 			return false;
@@ -223,63 +233,49 @@ class vtigercrmcore extends solution
 	}
 
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			$result['done'] = true;					
-			return $result;
-		}	
-		// Build the query to read data 
-		$query = $this->generateQuery($param, 'read_last');
+	public function read_last($param)
+	{
+		if(empty($this->vtigerClient))
+			return false;
 
-		try {
-			if(!isset($param['fields'])) {
-				$param['fields'] = array();
-			}
-			// Ajout des champs obligatoires pour 
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			$get_entry_list_parameters = array(
-											'session' => $this->session,
-											'module_name' => $param['module'],
-											'query' => $query,
-											'order_by' => "date_entered DESC",
-											'offset' => '0',
-											'select_fields' => $param['fields'],
-											'link_name_to_fields_array' => '',
-											'max_results' => '1',
-											'deleted' => 0,
-											'Favorites' => '',
-										);										
-			$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
-			// Si as d'erreur
-			if (isset($get_entry_list_result->result_count)) {
-				// Si pas de résultat
-				if(!isset($get_entry_list_result->entry_list[0])) {
-					$result['done'] = false;
-				}
-				else {
-					foreach ($get_entry_list_result->entry_list[0]->name_value_list as $key => $value) {
-						$result['values'][$key] = $value->value;
-					}
-					$result['done'] = true;
-				}
-			}	
-			// Si erreur
-			else {
-				$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				$result['done'] = false;
-			}												
-			return $result;		
+		if (count($param["fields"]) == 0) {
+			return array(
+				"error" => "Error: no Param Given",
+				"done" => false
+			);
 		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-			return $result;
-		}	
+
+		$queryParam = implode(",", $param["fields"]) ?: "*";
+		$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] ORDER BY modifiedtime DESC LIMIT 0,1;");
+
+		if (empty($query) || (!empty($query) && !$query["success"])) {
+			return array(
+				"error" => "Error: Request Failed!",
+				"done" => false
+			);
+		}
+
+		if (count($query["result"]) == 0) {
+			return array(
+				"error" => "No Data Retrived",
+				"done" => false
+			);
+		}
+
+		$fields = $query["result"][0];
+		$result = ["done" => true];
+
+
+		foreach ($fields as $fieldName => $value) {
+			$result["values"][$fieldName] = $value;
+		}
+
+		return $result;
 	}
 
 	// Permet de lire les données
-	public function read($param) {
+	public function read($param)
+	{
 		try {
 			$result = array();
 			$result['error'] = '';
@@ -291,10 +287,10 @@ class vtigercrmcore extends solution
 			$query = '';
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
-			}	
+			}
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
 			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
+
 			// Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 				$paramSave = $param;
