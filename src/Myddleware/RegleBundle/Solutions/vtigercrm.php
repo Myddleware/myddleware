@@ -225,7 +225,7 @@ class vtigercrmcore extends solution
 											"label" => $field["label"],
 											'required' => $field["mandatory"],
 											//'type' => 'varchar(255)', // TODO: Settare il type giusto
-							);
+										);
 			}
 		}
 
@@ -236,7 +236,10 @@ class vtigercrmcore extends solution
 	public function read_last($param)
 	{
 		if(empty($this->vtigerClient))
-			return false;
+			return array(
+				"error" => "Error: no VtigerClient setup",
+				"done" => false
+			);
 
 		if (count($param["fields"]) == 0) {
 			return array(
@@ -250,16 +253,16 @@ class vtigercrmcore extends solution
 
 		if (empty($query) || (!empty($query) && !$query["success"])) {
 			return array(
-				"error" => "Error: Request Failed!",
-				"done" => false
-			);
+						"error" => "Error: Request Failed!",
+						"done" => false
+					);
 		}
 
 		if (count($query["result"]) == 0) {
 			return array(
-				"error" => "No Data Retrived",
-				"done" => false
-			);
+						"error" => "No Data Retrived",
+						"done" => false
+					);
 		}
 
 		$fields = $query["result"][0];
@@ -276,6 +279,57 @@ class vtigercrmcore extends solution
 	// Permet de lire les données
 	public function read($param)
 	{
+		if(empty($this->vtigerClient))
+			return false;
+
+		if (count($param["fields"]) == 0) {
+			return array(
+				"error" => "Error: no Param Given",
+				"done" => false
+			);
+		}
+
+		if (empty($param['offset'])) {
+			$param['offset'] = 0;
+		}
+		if (empty($param['limit'])) {
+			$param['limit'] = 100;
+		}
+
+		// Considerare di implementare Sync API in VtigerClient
+		$queryParam = implode(",", $param["fields"]) ?: "*";
+		if($queryParam != "*")
+			$queryParam = "id," . $queryParam;
+
+		$time = !empty($param["date_ref"]) ? "WHERE modifiedtime > '$param[date_ref]'" : "";
+		$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $time ORDER BY modifiedtime ASC LIMIT $param[offset], $param[limit];");
+
+		if (empty($query) || (!empty($query) && !$query["success"])) {
+			return array(
+						"error" => "Error: Request Failed!",
+						"count" => 0
+					);
+		}
+
+		if (count($query["result"]) == 0) {
+			return array(
+						"error" => "No Data Retrived",
+						"count" => 0
+					);
+		}
+
+		$result = array(
+						"count" => 0
+					);
+
+		foreach ($query["result"] as $key => $value) {
+			$result['values'][$value["id"]] = $value;
+			$result['date_ref'] = $value["modifiedtime"];
+			$result["count"]++;
+		}
+
+		return $result;
+
 		try {
 			$result = array();
 			$result['error'] = '';
@@ -299,17 +353,11 @@ class vtigercrmcore extends solution
 			}
 
 			// Ajout des champs obligatoires
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			$param['fields'] = array_unique($param['fields']);			
+			//$param['fields'] = $this->addRequiredField($param['fields']);
+			$param['fields'] = array_unique($param['fields']);
 			// Construction de la requête pour SugarCRM
-			$query = $this->generateQuery($param, 'read');		
+			$query = $this->generateQuery($param, 'read');
 			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
-			$link_name_to_fields_array = array();
-			foreach ($param['fields'] as $field) {
-				if (substr($field,0,strlen($this->customRelationship)) == $this->customRelationship) {
-					$link_name_to_fields_array[] = array('name' => substr($field, strlen($this->customRelationship)), 'value' => array('id'));
-				}
-			}
 			// On lit les données dans le CRM
             do {
 				$get_entry_list_parameters = array(
@@ -319,38 +367,29 @@ class vtigercrmcore extends solution
 												'order_by' => $DateRefField.' ASC',
 												'offset' => $param['offset'],
 												'select_fields' => $param['fields'],
-												'link_name_to_fields_array' => $link_name_to_fields_array,
 												'max_results' => $this->limitCall,
 												'deleted' => 0,
 												'Favorites' => '',
 											);		
-										
-				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
+
+				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);
 				// Construction des données de sortie
 				if (isset($get_entry_list_result->result_count)) {
 					$currentCount = $get_entry_list_result->result_count;
 					$result['count'] += $currentCount;
 					$record = array();
 					$i = 0;
-					for ($i = 0; $i < $currentCount; $i++) {
-						$entry = $get_entry_list_result->entry_list[$i]; 
+					for ($i = 0; $i < $currentCount; $i++)
+					{
+						$entry = $get_entry_list_result->entry_list[$i];
 						foreach ($entry->name_value_list as $value){
 							$record[$value->name] = $value->value;
-							if (
-									$value->name == $DateRefField
-								&&	(
-										empty($result['date_ref'])
-									|| (
-											!empty($result['date_ref'])
-										&&	$result['date_ref'] < $value->value
-									)
-								)
-							) {
+							if ($value->name == $DateRefField && (empty($result['date_ref']) || (!empty($result['date_ref']) &&	$result['date_ref'] < $value->value))) {
 								$result['date_ref'] = $value->value;
 							}
-						}	
+						}
 						
-						// S'il y a des relation custom, on ajoute la relation custom 
+						// S'il y a des relation custom, on ajoute la relation custom
 						if (!empty($get_entry_list_result->relationship_list[$i]->link_list)) {
 							foreach ($get_entry_list_result->relationship_list[$i]->link_list as $Relationship) {
 								$record[$this->customRelationship.$Relationship->name] = $Relationship->records[0]->link_value->id->value;
@@ -364,10 +403,10 @@ class vtigercrmcore extends solution
 				}
 				else {
 					$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				}			
+				}
 			}
             // On continue si le nombre de résultat du dernier appel est égal à la limite
-            while ($currentCount == $this->limitCall AND $result['count'] < $param['limit']-1); // -1 because a limit of 1000 = 1001 in the system				
+            while ($currentCount == $this->limitCall AND $result['count'] < $param['limit']-1); // -1 because a limit of 1000 = 1001 in the system
 			// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
 			if (!empty($paramSave)) {
 				$resultRel = $this->readRelationship($paramSave,$result);
@@ -376,16 +415,16 @@ class vtigercrmcore extends solution
 					$result['count'] = $resultRel['count'];
 					$result['values'] = $resultRel['values'];
 				}
-				// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé. 
+				// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
 				else {
 					return null;
 				}
-			}	
+			}
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
-		return $result;	
+		}
+		return $result;
 	}
 
     /**
@@ -456,57 +495,31 @@ class vtigercrmcore extends solution
 	// Permet de créer des données
 	public function create($param)
 	{
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			return $this->createRelationship($param);
-		}
-	
-		// Transformation du tableau d'entrée pour être compatible webservice Sugar
-		foreach($param['data'] as $idDoc => $data) {
-			try {
-				// Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
-				$dataSugar = array();
-				foreach ($data as $key => $value) {
-					if($key == 'Birthdate' && $value == '0000-00-00') {
-						continue;
-					}
-					// Si un champ est une relation custom alors on enlève le prefix
-					if (substr($key,0,strlen($this->customRelationship)) == $this->customRelationship) {
-						$key = substr($key, strlen($this->customRelationship));
-					}
-					$dataSugar[] = array('name' => $key, 'value' => $value);
-				}
-				$setEntriesListParameters = array(
-												'session' => $this->session,
-												'module_name' => $param['module'],
-												'name_value_lists' => $dataSugar
-											);							
-				$get_entry_list_result = $this->call("set_entry", $setEntriesListParameters);
+		if(empty($this->vtigerClient))
+			return array("error" => "Error: no Param Given",);
 
-				if (!empty($get_entry_list_result->id)) {
-					$result[$idDoc] = array(
-											'id' => $get_entry_list_result->id,
-											'error' => false
-									);
-				}
-				else  {
-					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
-				}
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
+		$result = [];
+
+		foreach($param['data'] as $idDoc => $data) {
+			$resultCreate = $this->vtigerClient->create($param["module"], array_diff_key($data, ["target_id"]));
+
+			if (!empty($resultCreate) && $resultCreate["success"] && !empty($resultCreate["result"]))
 				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+									'id' => $resultCreate["result"]["id"],
+									'error' => false
+								);
+			else
+				$result[$idDoc] = array(
+									'id' => '-1',
+									'error' => "Errore"
+								);
+
+			$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 		}
+
 		return $result;
 	}
-	
+
 	// Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
 	protected function createRelationship($param) {
 		foreach($param['data'] as $key => $data) {
@@ -543,7 +556,7 @@ class vtigercrmcore extends solution
 											'error' => '01'
 									);
 				}
-				
+
 			}
 			catch (\Exception $e) {
 				$error = $e->getMessage();
@@ -553,7 +566,7 @@ class vtigercrmcore extends solution
 				);
 			}
 			// Modification du statut du flux
-			$this->updateDocumentStatus($key,$result[$key],$param);	
+			$this->updateDocumentStatus($key,$result[$key],$param);
 		}
 		return $result;
 	}
@@ -613,7 +626,7 @@ class vtigercrmcore extends solution
 	
 		
 	// Build the query for read data to SuiteCRM
-	protected function generateQuery($param, $method){				
+	protected function generateQuery($param, $method){
 		$query = '';
 		// if a specific query is requeted we don't use date_ref
 		if (!empty($param['query'])) {
