@@ -381,25 +381,6 @@ class rulecore {
 			$this->em->persist($param);					
 			$this->em->flush();
 		}				
-		
-		
-		
-		/* $date_ref = $this->dataSource['date_ref'];
-		$sqlDateReference = "UPDATE RuleParam SET value = :date_ref WHERE name = 'datereference' AND rule_id = :ruleId";
-		$stmt = $this->connection->prepare($sqlDateReference);
-		$stmt->bindValue(":ruleId", $this->ruleId);
-		$stmt->bindValue(":date_ref", $date_ref);
-		$stmt->execute();	
-		
-		// Save the reference modification
-		$paramAudit = new RuleParamAudit();
-		$paramAudit->setRuleParamId($p['id']);
-		$paramAudit->setDateModified(new \DateTime);
-		$paramAudit->setBefore($param->getValue());
-		$paramAudit->setAfter($p['value']);
-		$paramAudit->setByUser($this->getUser()->getId());
-		$this->em->persist($paramAudit);	
-		$this->em->flush();		  */
 	}
 	
 	// Update/create rule parameter
@@ -1275,6 +1256,7 @@ class rulecore {
 									WHERE 
 											rule_id = :ruleId
 										AND status = :status
+										AND Document.deleted = 0 
 									ORDER BY Document.source_date_modified ASC	
 									LIMIT $this->limit
 								";							
@@ -1290,7 +1272,8 @@ class rulecore {
 	
 	// Permet de récupérer les données d'un document
 	protected function getDocumentHeader($documentId) {
-		try {			
+		try {
+			// We allow to get date from a document flagged deleted
 			$query_document = "SELECT * FROM Document WHERE id = :documentId";
 			$stmt = $this->connection->prepare($query_document);
 			$stmt->bindValue(":documentId", $documentId);
@@ -1323,6 +1306,7 @@ class rulecore {
 		else {
 			$documentFilter = 	"	Document.rule_id = '$this->ruleId'
 								AND Document.status = 'Ready_to_send'
+								AND Document.deleted = 0 
 								AND Document.type = '$type' ";
 		}
 		// Sélection de tous les documents au statut transformed en attente de création pour la règle en cours

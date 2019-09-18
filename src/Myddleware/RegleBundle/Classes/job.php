@@ -170,6 +170,7 @@ class jobcore  {
 									ON Document.rule_id = RuleOrder.rule_id
 							WHERE 
 									global_status = 'Error'
+								AND deleted = 0 
 								AND attempt <= :attempt 
 							ORDER BY RuleOrder.order ASC, source_date_modified ASC	
 							LIMIT $limit";
@@ -233,10 +234,12 @@ class jobcore  {
 	
 	
 	// Permet d'exécuter des jobs manuellement depuis Myddleware
-	public function actionMassTransfer($event,$param) {
+	public function actionMassTransfer($event, $datatype, $param) {
 		if (in_array($event, array('rerun','cancel'))) { 
-			// Pour ces 2 actions, l'event est le premier paramètre et ce sont les ids des cocuments qui sont envoyés dans le $param
+			// Pour ces 2 actions, l'event est le premier paramètre, le type de donnée est le deuxième
+			// et ce sont les ids des documents ou règles qui sont envoyés dans le $param
 			$paramJob[] = $event;
+			$paramJob[] = $datatype;
 			$paramJob[] = implode(',',$param);
 			return $this->runBackgroundJob('massaction',$paramJob);
 		}
@@ -656,6 +659,7 @@ class jobcore  {
 						WHERE 
 								Document.rule_id = :ruleId
 							AND Document.global_status IN ('Close','Cancel')
+							AND Document.deleted = 0 
 							AND Document.date_modified < :limitDate	";							
 					$stmt = $this->connection->prepare($deleteSource);
 					$stmt->bindValue("ruleId", $rule['id']);
@@ -683,6 +687,7 @@ class jobcore  {
 								Log.rule_id = :ruleId
 							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
 							AND Document.global_status IN ('Close','Cancel')
+							AND Document.deleted = 0 
 							AND Document.date_modified < :limitDate	";						
 					$stmt = $this->connection->prepare($deleteLog);
 					$stmt->bindValue("ruleId", $rule['id']);

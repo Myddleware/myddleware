@@ -478,7 +478,8 @@ class documentcore {
 									Document.rule_id = :rule_id 
 								AND Document.source_id = :source_id 
 								AND Document.date_created < :date_created  
-								AND global_status IN ('Error','Open')
+								AND Document.deleted = 0 
+								AND Document.global_status IN ('Error','Open')
 							LIMIT 1	
 							";								
 			$stmt = $this->connection->prepare($sqlParams);
@@ -518,6 +519,7 @@ class documentcore {
 											ON Rule.id = RuleRelationShip.rule_id 									
 									WHERE 
 											Document.rule_id = :rule_id 
+										AND Document.deleted = 0 
 										AND	Rule.deleted = 0";					
 			$stmt = $this->connection->prepare($sqlGetChildRules);
 			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
@@ -534,6 +536,7 @@ class documentcore {
 									WHERE 
 											Document.rule_id = :rule_id 
 										AND Document.source_id = :source_id 
+										AND Document.deleted = 0 
 										AND Document.date_created < :date_created  
 										AND (
 												global_status = 'Error'
@@ -1309,7 +1312,7 @@ class documentcore {
 	// Check if the document is a child
 	protected function getChildDocuments() {	
 		try {
-			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId";		
+			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId AND deleted = 0 ";		
 			$stmt = $this->connection->prepare($sqlGetChilds);
 			$stmt->bindValue(":docId", $this->id);
 			$stmt->execute();	    
@@ -1427,6 +1430,7 @@ class documentcore {
 								)
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
+								AND Document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";
 							
@@ -1447,6 +1451,7 @@ class documentcore {
 								)
 								AND	Document.target_id = :id
 								AND Document.id != :id_doc
+								AND Document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";	
 					
@@ -1829,6 +1834,7 @@ class documentcore {
 								WHERE  
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id != '' 
+									AND Document.deleted = 0 
 									AND Document.target_id = :record_id 
 									AND (
 											Document.global_status = 'Close' 
@@ -1844,6 +1850,7 @@ class documentcore {
 								WHERE  
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id = :record_id 
+									AND Document.deleted = 0 
 									AND Document.target_id != '' 
 									AND (
 											Document.global_status = 'Close' 
@@ -1922,6 +1929,7 @@ class documentcore {
 										Document.rule_id = :ruleRelateId 
 									AND Document.target_id = :record_id 
 									AND Document.status = :status 
+									AND Document.deleted = 0 
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
@@ -1931,6 +1939,7 @@ class documentcore {
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id = :record_id 
 									AND Document.status = :status 
+									AND Document.deleted = 0 
 								LIMIT 1";	
 			}
 			else {

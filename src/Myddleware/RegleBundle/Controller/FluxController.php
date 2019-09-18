@@ -593,7 +593,7 @@ class FluxControllerCore extends Controller
 
 			// HISTORY DOCUMENT
 			// Get the history documents (all document for the same source)
-			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0));
 			// If only one record, the history is the current document, so we remove it => no parent
 			if (count($historyDocuments) == 1) {
 				$historyDocuments = array();
@@ -692,7 +692,7 @@ class FluxControllerCore extends Controller
 		try {
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
-				$job->actionMassTransfer('rerun',array($id));			
+				$job->actionMassTransfer('rerun','document',array($id));			
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
@@ -706,7 +706,7 @@ class FluxControllerCore extends Controller
 		try {
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
-				$job->actionMassTransfer('cancel',array($id));			
+				$job->actionMassTransfer('cancel','document',array($id));			
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
@@ -749,7 +749,7 @@ class FluxControllerCore extends Controller
 	public function fluxMassCancelAction() {							
 		if(isset($_POST['ids']) && count($_POST['ids']) > 0) {
 			$job = $this->get('myddleware_job.job');	
-			$job->actionMassTransfer('cancel',$_POST['ids']);			
+			$job->actionMassTransfer('cancel','document',$_POST['ids']);			
 		}													
 		exit; 
 	}
@@ -758,7 +758,7 @@ class FluxControllerCore extends Controller
 
 		if(isset($_POST['ids']) && count($_POST['ids']) > 0) {
 			$job = $this->get('myddleware_job.job');	
-			$job->actionMassTransfer('rerun',$_POST['ids']);			
+			$job->actionMassTransfer('rerun','document',$_POST['ids']);			
 		}
 		
 		exit;

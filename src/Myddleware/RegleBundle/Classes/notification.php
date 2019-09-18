@@ -121,7 +121,8 @@ class notificationcore  {
 								INNER JOIN Rule
 									ON Log.rule_id = Rule.id
 								INNER JOIN Document
-									ON Document.id = Log.doc_id
+									 ON Document.id = Log.doc_id
+									AND Document.deleted = 0
 							WHERE
 									Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 								AND (
@@ -194,7 +195,8 @@ class notificationcore  {
 									INNER JOIN Rule
 										ON Log.rule_id = Rule.id
 									INNER JOIN Document
-										ON Document.id = Log.doc_id
+										 ON Document.id = Log.doc_id
+										AND Document.deleted = 0
 								WHERE
 										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 									AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
