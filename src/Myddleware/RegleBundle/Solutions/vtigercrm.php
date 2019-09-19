@@ -31,39 +31,19 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
-	protected $limitCall = 100;
-	protected $urlSuffix = '/service/v4/rest.php';
-	
-    protected $required_fields = array('default' => array('id','date_modified','date_entered'));
-	
-	protected $FieldsDuplicate = array(	'Contacts' => array('email1', 'last_name'),
-										'Accounts' => array('email1', 'name'),
-										'Users' => array('email1', 'last_name'),
-										'Leads' => array('email1', 'last_name'),
-										'Prospects' => array('email1', 'name'),
-										'default' => array('name')
-									  );
+    protected $required_fields	= array(
+									"default"	=>	array("id", "modifiedtime")
+								);
 
-	protected $required_relationships = array(
-												'default' => array(),
-												'Contacts' => array(),
-												'Cases' => array()
-										);
-	
-	// liste des modules à exclure pour chaque solution
 	protected $exclude_module_list = array(
-										'default' => array('Home','Calendar','Documents','Administration','Currencies','CustomFields','Connectors','Dropdown','Dynamic','DynamicFields','DynamicLayout','EditCustomFields','Help','Import','MySettings','FieldsMetaData','UpgradeWizard','Sync','Versions','LabelEditor','Roles','OptimisticLock','TeamMemberships','TeamSets','TeamSetModule','Audit','MailMerge','MergeRecords','Schedulers','Schedulers_jobs','Groups','InboundEmail','ACLActions','ACLRoles','DocumentRevisions','ACL','Configurator','UserPreferences','SavedSearch','Studio','SugarFeed','EAPM','OAuthKeys','OAuthTokens'),
-										'target' => array(),
-										'source' => array(),
+										"default"	=>	array("LineItem"),
+										"target"	=>	array(),
+										"source"	=>	array(),
 									);
-									
+
 	protected $exclude_field_list = array(
-											'default' => array('date_entered','date_modified','created_by_name','modified_by_name','created_by','modified_user_id'),
-											'Contacts' => array('c_accept_status_fields','m_accept_status_fields','accept_status_id','accept_status_name','opportunity_role_fields','opportunity_role_id','opportunity_role','email'),
-											'Leads' => array('email'),
-											'Accounts' => array('email'),
-											'Cases' => array('case_number')
-										);
+										"default"	=>	array("id", "modifiedby", "modifiedtime")
+									);
 	
 	
 	// Tableau représentant les relation many-to-many de Sugar
@@ -101,9 +81,7 @@ class vtigercrmcore extends solution
 													'fp_events_leads_1' => array('label' => 'Relationship Event Lead', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_leads_1', 'fields' => array(), 'relationships' => array('fp_events_leads_1fp_events_ida','fp_events_leads_1leads_idb')),
 													'fp_events_prospects_1' => array('label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => array(), 'relationships' => array('fp_events_prospects_1fp_events_ida','fp_events_prospects_1prospects_idb'))
 												);
-	
 
-	protected $customRelationship = 'MydCustRelSugar';
 
 	/** @var VtigerClient */
 	protected $vtigerClient;
@@ -139,8 +117,7 @@ class vtigercrmcore extends solution
      */
 	public function logout()
     {
-		// TODO: Usare il loguot di vtiger
-
+		// TODO: Creare ed usare il loguot di vtiger
 		/*
 		if(empty($this->vtigerClient))
 			return false;
@@ -194,9 +171,11 @@ class vtigercrmcore extends solution
 		if(empty($modules))
 			return false;
 
+		$escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list["default"];
 		$options = array();
 		foreach ($modules["information"] as $moduleName => $moduleInfo) {
-			$options[$moduleName] = $moduleInfo["label"];
+			if (!in_array($moduleName, $escludedModule))
+				$options[$moduleName] = $moduleInfo["label"];
 		}
 
 		return $options ?: false;
@@ -218,15 +197,15 @@ class vtigercrmcore extends solution
 		if(empty($fields))
 			return false;
 
+		$escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list["default"];
 		$options = array();
-
 		foreach ($fields as $field) {
-			if ($field["name"] != "id")
+			if (!in_array($field["name"], $escludeField))
 			{
 				$options[$field["name"]] = array(
 											"label" => $field["label"],
 											'required' => $field["mandatory"],
-											//'type' => 'varchar(255)', // TODO: Settare il type giusto
+											//'type' => 'varchar(255)', // TODO: Settare il type giusto?
 										);
 			}
 		}
@@ -312,8 +291,11 @@ class vtigercrmcore extends solution
 
 		// Considerare di implementare Sync API in VtigerClient
 		$queryParam = implode(",", $param["fields"]) ?: "*";
-		if($queryParam != "*")
-			$queryParam = "id,modifiedtime," . $queryParam;
+		if($queryParam != "*") {
+			$requiredField = $this->required_fields[$param["module"]] ?? $this->required_fields["default"];
+			$queryParam = implode(",", $requiredField) . "," . $queryParam;
+		}
+		$queryParam = rtrim($queryParam, ",");
 
 		$where = !empty($param["date_ref"]) ? "WHERE modifiedtime > '$param[date_ref]'" : "";
 		if (!empty($param["query"])) {
@@ -527,76 +509,12 @@ class vtigercrmcore extends solution
 
 		return $result;
 	}
-	
-		
-	// Build the query for read data to SuiteCRM
-	protected function generateQuery($param, $method){
-		$query = '';
-		// if a specific query is requeted we don't use date_ref
-		if (!empty($param['query'])) {
-			foreach ($param['query'] as $key => $value) {
-				if (!empty($query)) {
-					$query .= ' AND ';
-				}
-				if ($key == 'email1') {
-					$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
-				}
-				else {	
-					// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-					if($param['module'] == 'ProspectLists') {	
-						$query .= "prospect_lists.".$key." = '".$value."' ";
-					}
-					else {
-						$query .= strtolower($param['module']).".".$key." = '".$value."' ";
-					}
-				}
-			}
-		// Filter by date only for read method (no need for read_last method	
-		} elseif ($method == 'read') {
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-			if($param['module'] == 'ProspectLists') {	
-				$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
-			}
-			else {
-				$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
-			}
-		}		
-		return $query;
-	}
-	
-	// Permet de renvoyer le mode de la règle en fonction du module target
-	// Valeur par défaut "0"
-	// Si la règle n'est qu'en création, pas en modicication alors le mode est C
-	public function getRuleMode($module,$type) {
-		if(
-				$type == 'target'
-			&&	array_key_exists($module, $this->module_relationship_many_to_many)
-		) {
-			return array(
-				'C' => 'create_only'
-			);
-		}
-		return parent::getRuleMode($module,$type);
-	} 
-	
-	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getDateRefName($moduleSource, $RuleMode) {
-		if(in_array($RuleMode,array("0","S"))) {
-			return "date_modified";
-		} else if ($RuleMode == "C"){
-			return "date_entered";
-		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
-		}
-		return null;
-	}
-	
+
 	// Permet de supprimer un enregistrement
 	public function delete($id) {
-	
+
 	}
-		
+
 	//function to make cURL request	
 	protected function call($method, $parameters)
     {
@@ -632,8 +550,8 @@ class vtigercrmcore extends solution
 		catch(\Exception $e) {
 			return false;	
 		}	
-    }	
-	
+    }
+
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
