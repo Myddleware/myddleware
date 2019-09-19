@@ -8,7 +8,7 @@
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
- 
+
  Myddleware is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
-    protected $required_fields	= array(
+	protected $required_fields	= array(
 									"default"	=>	array("id", "modifiedtime")
 								);
 
@@ -45,7 +45,7 @@ class vtigercrmcore extends solution
 										"default"	=>	array("id", "modifiedby", "modifiedtime")
 									);
 	
-	
+
 	// Tableau représentant les relation many-to-many de Sugar
 	protected $module_relationship_many_to_many = array(
 													'calls_contacts' => array('label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('call_id','contact_id')),
@@ -90,17 +90,17 @@ class vtigercrmcore extends solution
 	 * @param $paramConnexion
 	 * @return array|VtigerClient
 	 */
-    public function login($paramConnexion)
-    {
+	public function login($paramConnexion)
+	{
 		parent::login($paramConnexion);
 
 		try {
 			$client = new VtigerClient($this->paramConnexion['url']);
-            $result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
+			$result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
 
-            if (!$result['success']) {
-                throw new \Exception($result['error']['message']);
-            }
+			if (!$result['success']) {
+				throw new \Exception($result['error']['message']);
+			}
 
 			$this->session = $client->getSessionName();
 			$this->connexion_valide = true;
@@ -110,13 +110,13 @@ class vtigercrmcore extends solution
 			$this->logger->error($error);
 			return array('error' => $error);
 		} 
-    }
+	}
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 */
 	public function logout()
-    {
+	{
 		// TODO: Creare ed usare il loguot di vtiger
 		/*
 		if(empty($this->vtigerClient))
@@ -126,38 +126,38 @@ class vtigercrmcore extends solution
 		*/
 
 		return true;
-    }
+	}
 
-    /**
-     * @return array
-     */
+	/**
+	 * @return array
+	 */
 	public function getFieldsLogin()
-    {
+	{
 		return array(
-            array(
-                'name' => 'username',
-                'type' => TextType::class,
-                'label' => 'solution.fields.username'
-            ),
-            array(
-                'name' => 'accesskey',
-                'type' => PasswordType::class,
-                'label' => 'solution.fields.accesskey'
-            ),
-            array(
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url'
-            ),
+			array(
+				'name' => 'username',
+				'type' => TextType::class,
+				'label' => 'solution.fields.username'
+			),
+			array(
+				'name' => 'accesskey',
+				'type' => PasswordType::class,
+				'label' => 'solution.fields.accesskey'
+			),
+			array(
+				'name' => 'url',
+				'type' => TextType::class,
+				'label' => 'solution.fields.url'
+			),
 		);
 	}
 
-    /**
-     * @param string $type
-     * @return bool!array
-     */
+	/**
+	 * @param string $type
+	 * @return bool!array
+	 */
 	public function get_modules($type = 'source')
-    {
+	{
 		if(empty($this->vtigerClient))
 			return false;
 
@@ -335,13 +335,13 @@ class vtigercrmcore extends solution
 		return $result;
 	}
 
-    /**
-     * @param $param
-     * @param $dataParent
-     * @return mixed
-     */
+	/**
+	 * @param $param
+	 * @param $dataParent
+	 * @return mixed
+	 */
 	protected function readRelationship($param, $dataParent)
-    {
+	{
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
 		}	
@@ -391,7 +391,7 @@ class vtigercrmcore extends solution
 					}
 				}
 				else {
-					$result['error'] .= $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description.'       ';
+					$result['error'] .= $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description.'	   ';
 				}
 			}
 		}
@@ -430,7 +430,8 @@ class vtigercrmcore extends solution
 	}
 
 	// Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
-	protected function createRelationship($param) {
+	protected function createRelationship($param)
+	{
 		foreach($param['data'] as $key => $data) {
 			try {
 				// Check control before create
@@ -511,13 +512,11 @@ class vtigercrmcore extends solution
 	}
 
 	// Permet de supprimer un enregistrement
-	public function delete($id) {
-
-	}
+	public function delete($id) { }
 
 	//function to make cURL request	
 	protected function call($method, $parameters)
-    {
+	{
 		try {
 			ob_start();
 			$curl_request = curl_init();
@@ -550,8 +549,7 @@ class vtigercrmcore extends solution
 		catch(\Exception $e) {
 			return false;	
 		}	
-    }
-
+	}
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
