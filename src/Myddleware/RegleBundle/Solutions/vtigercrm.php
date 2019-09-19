@@ -44,7 +44,8 @@ class vtigercrmcore extends solution
 	protected $exclude_field_list = array(
 										"default"	=>	array("id", "modifiedby", "modifiedtime")
 									);
-	
+
+	protected $FieldsDuplicate = array();
 
 	// Tableau représentant les relation many-to-many de Sugar
 	protected $module_relationship_many_to_many = array(
