@@ -934,6 +934,22 @@ class SessionService{
         $myddlewareSession = $this->getMyddlewareSession();
         return $myddlewareSession['flux_filter']['c']['status'];
     }
+	
+	public function setFluxFilterType($type)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['flux_filter']['c']['type'] = $type;
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+    
+    public function getFluxFilterType()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return $myddlewareSession['flux_filter']['c']['type'];
+    }
+    
+    
     
     public function setFluxFilterSourceId($sourceId)
     {
@@ -1131,6 +1147,14 @@ class SessionService{
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
     }
     
+	public function removeFluxFilterType()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['type']);
+        
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX,$myddlewareSession);
+    }
+	
     public function removeFluxFilterSourceId()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -1171,6 +1195,12 @@ class SessionService{
     {
         $myddlewareSession = $this->getMyddlewareSession();
         return isset($myddlewareSession['flux_filter']['c']['status']);
+    }
+	
+	public function isFluxFilterTypeExist()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        return isset($myddlewareSession['flux_filter']['c']['type']);
     }
     
     public function isFluxFilterCRuleExist()

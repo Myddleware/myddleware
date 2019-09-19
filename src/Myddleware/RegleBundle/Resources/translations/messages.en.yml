@@ -297,7 +297,7 @@ list_flux:
         date_modified: Date of modification
         rule: Rule
         status: Status
-        global_status: Global status
+        global_status: Global status / Type
         id: Id
         source_id: Source id
         target_id: Target id
@@ -345,7 +345,11 @@ flux:
         error_checking: Checking error
         error_sending: Sending error
         not_found: Not found
-
+    type:
+        update: Update
+        create: Create
+        search: Search
+        
 view_flux:
     empty: No data
     empty_log: No log

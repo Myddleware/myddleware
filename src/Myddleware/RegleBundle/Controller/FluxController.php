@@ -109,7 +109,15 @@ class FluxControllerCore extends Controller
 		}	
 		asort($lstGblStatus);		
 		//---
-	
+		
+		//--- Liste type translation
+		$lstTypeTwig = doc::lstType();
+		
+		foreach ($lstTypeTwig as $key => $value) {
+			$lstType[ $this->get('translator')->trans( $value ) ] = $key;
+		}		
+		//---
+		
 		$em = $this->getDoctrine()->getManager();
 		
 		// Detecte si la session est le support ---------
@@ -191,6 +199,12 @@ class FluxControllerCore extends Controller
 					 ->add('gblstatus', ChoiceType::class, array(
 							       'choices'   => $lstGblStatus,
 								   'data'=> ($sessionService->isFluxFilterCGblStatusExist() ? $sessionService->getFluxFilterGlobalStatus() : false),
+							       'required'  => false
+						 ))	
+						 
+					->add('type', ChoiceType::class, array(
+							       'choices'   => $lstType,
+								   'data'=> ($sessionService->isFluxFilterTypeExist() ? $sessionService->getFluxFilterType() : false),
 							       'required'  => false
 						 ))						 
 						 
@@ -313,6 +327,16 @@ class FluxControllerCore extends Controller
 				$where .= "Document.global_status='".$data['gblstatus']."' ";
 				$conditions++;
 				$sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+			}
+			else {
+				$sessionService->removeFluxFilterGblStatus();
+			}
+			
+			if(!empty( $data['type'] )) {
+				$where .= (($conditions > 0) ? "AND " : "" );
+				$where .= "Document.type='".$data['type']."' ";
+				$conditions++;
+				$sessionService->setFluxFilterType($data['type']);
 			}
 			else {
 				$sessionService->removeFluxFilterGblStatus();

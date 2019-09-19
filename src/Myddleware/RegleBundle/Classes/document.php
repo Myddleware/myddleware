@@ -122,6 +122,15 @@ class documentcore {
 		);		
 	}
 	
+	static function lstType() {				
+		return array(
+			'C' => 'flux.type.create',
+			'U' => 'flux.type.update',
+			'S' => 'flux.type.search'
+		);		
+	}
+
+	
     // Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param) {
 		$this->connection = $dbalConnection;
