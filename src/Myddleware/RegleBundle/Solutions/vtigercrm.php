@@ -8,7 +8,7 @@
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
- 
+
  Myddleware is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -31,41 +31,22 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
-	protected $limitCall = 100;
-	protected $urlSuffix = '/service/v4/rest.php';
-	
-    protected $required_fields = array('default' => array('id','date_modified','date_entered'));
-	
-	protected $FieldsDuplicate = array(	'Contacts' => array('email1', 'last_name'),
-										'Accounts' => array('email1', 'name'),
-										'Users' => array('email1', 'last_name'),
-										'Leads' => array('email1', 'last_name'),
-										'Prospects' => array('email1', 'name'),
-										'default' => array('name')
-									  );
+	protected $required_fields	= array(
+									"default"	=>	array("id", "modifiedtime")
+								);
 
-	protected $required_relationships = array(
-												'default' => array(),
-												'Contacts' => array(),
-												'Cases' => array()
-										);
-	
-	// liste des modules à exclure pour chaque solution
 	protected $exclude_module_list = array(
-										'default' => array('Home','Calendar','Documents','Administration','Currencies','CustomFields','Connectors','Dropdown','Dynamic','DynamicFields','DynamicLayout','EditCustomFields','Help','Import','MySettings','FieldsMetaData','UpgradeWizard','Sync','Versions','LabelEditor','Roles','OptimisticLock','TeamMemberships','TeamSets','TeamSetModule','Audit','MailMerge','MergeRecords','Schedulers','Schedulers_jobs','Groups','InboundEmail','ACLActions','ACLRoles','DocumentRevisions','ACL','Configurator','UserPreferences','SavedSearch','Studio','SugarFeed','EAPM','OAuthKeys','OAuthTokens'),
-										'target' => array(),
-										'source' => array(),
+										"default"	=>	array("LineItem"),
+										"target"	=>	array(),
+										"source"	=>	array(),
 									);
-									
+
 	protected $exclude_field_list = array(
-											'default' => array('date_entered','date_modified','created_by_name','modified_by_name','created_by','modified_user_id'),
-											'Contacts' => array('c_accept_status_fields','m_accept_status_fields','accept_status_id','accept_status_name','opportunity_role_fields','opportunity_role_id','opportunity_role','email'),
-											'Leads' => array('email'),
-											'Accounts' => array('email'),
-											'Cases' => array('case_number')
-										);
-	
-	
+										"default"	=>	array("id", "modifiedby", "modifiedtime")
+									);
+
+	protected $FieldsDuplicate = array();
+
 	// Tableau représentant les relation many-to-many de Sugar
 	protected $module_relationship_many_to_many = array(
 													'calls_contacts' => array('label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('call_id','contact_id')),
@@ -101,437 +82,267 @@ class vtigercrmcore extends solution
 													'fp_events_leads_1' => array('label' => 'Relationship Event Lead', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_leads_1', 'fields' => array(), 'relationships' => array('fp_events_leads_1fp_events_ida','fp_events_leads_1leads_idb')),
 													'fp_events_prospects_1' => array('label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => array(), 'relationships' => array('fp_events_prospects_1fp_events_ida','fp_events_prospects_1prospects_idb'))
 												);
-	
 
-	protected $customRelationship = 'MydCustRelSugar';
 
-    /**
-     * @param $paramConnexion
-     * @return array
-     */
-    public function login($paramConnexion)
-    {
+	/** @var VtigerClient */
+	protected $vtigerClient;
+
+	/**
+	 * @param $paramConnexion
+	 * @return array|VtigerClient
+	 */
+	public function login($paramConnexion)
+	{
 		parent::login($paramConnexion);
 
 		try {
-            $client = new VtigerClient($this->paramConnexion['url']);
-            $result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
+			$client = new VtigerClient($this->paramConnexion['url']);
+			$result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
 
-            if (!$result['success']) {
-                throw new \Exception($result['error']['message']);
-            }
+			if (!$result['success']) {
+				throw new \Exception($result['error']['message']);
+			}
 
-            $this->session = $client->getSessionName();
-            $this->connexion_valide = true;
-
+			$this->session = $client->getSessionName();
+			$this->connexion_valide = true;
+			$this->vtigerClient = $client;
 		} catch (\Exception $e) {
 			$error = $e->getMessage();
 			$this->logger->error($error);
 			return array('error' => $error);
 		} 
-    }
+	}
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 */
 	public function logout()
-    {
-		try {
-			$logout_parameters = array("session" => $this->session);
-			$this->call('logout',$logout_parameters,$this->paramConnexion['url']); 	
-			return true;
-		} catch (\Exception $e) {
-			$this->logger->error('Error logout REST '.$e->getMessage());
+	{
+		// TODO: Creare ed usare il loguot di vtiger
+		/*
+		if(empty($this->vtigerClient))
 			return false;
-		} 
-    }
 
-    /**
-     * @return array
-     */
+		return $this->vtigerClient->logout();
+		*/
+
+		return true;
+	}
+
+	/**
+	 * @return array
+	 */
 	public function getFieldsLogin()
-    {
+	{
 		return array(
-            array(
-                'name' => 'username',
-                'type' => TextType::class,
-                'label' => 'solution.fields.username'
-            ),
-            array(
-                'name' => 'accesskey',
-                'type' => PasswordType::class,
-                'label' => 'solution.fields.accesskey'
-            ),
-            array(
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url'
-            ),
+			array(
+				'name' => 'username',
+				'type' => TextType::class,
+				'label' => 'solution.fields.username'
+			),
+			array(
+				'name' => 'accesskey',
+				'type' => PasswordType::class,
+				'label' => 'solution.fields.accesskey'
+			),
+			array(
+				'name' => 'url',
+				'type' => TextType::class,
+				'label' => 'solution.fields.url'
+			),
 		);
 	}
 
-    /**
-     * @param string $type
-     * @return bool
-     */
+	/**
+	 * @param string $type
+	 * @return bool!array
+	 */
 	public function get_modules($type = 'source')
-    {
-        //  Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L135
-        //
-        //  $client = new Client...
-        //  $modules = $client->listTypes();
-        //  return $modules['results']
-        //
-
-	    try {
-			$get_available_modules_parameters  = array( 
-				'session' => $this->session
-			);	
-			$get_available_modules = $this->call('get_available_modules',$get_available_modules_parameters);
-			if (!empty($get_available_modules->modules)) {
-				foreach ($get_available_modules->modules as $module) {			
-					// On ne renvoie que les modules autorisés
-					if (
-							!in_array($module->module_key,$this->exclude_module_list['default'])
-						&&	!in_array($module->module_key,$this->exclude_module_list[$type])
-					) {
-						$modules[$module->module_key] = $module->module_label;
-					}
-				}
-			}
-			// Création des modules type relationship
-			if (!empty($this->module_relationship_many_to_many)) {
-				foreach ($this->module_relationship_many_to_many as $key => $value) {
-					$modules[$key] = $value['label'];
-				}
-			}
-			return ((isset($modules)) ? $modules : false );	    	
-	    }
-		catch (\Exception $e) {
+	{
+		if(empty($this->vtigerClient))
 			return false;
+
+		$result = $this->vtigerClient->listTypes();
+
+		if(!$result["success"] || ($result["success"] && count($result["result"]) == 0))
+			return false;
+
+		$modules = $result["result"] ?? null;
+
+		if(empty($modules))
+			return false;
+
+		$escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list["default"];
+		$options = array();
+		foreach ($modules["information"] as $moduleName => $moduleInfo) {
+			if (!in_array($moduleName, $escludedModule))
+				$options[$moduleName] = $moduleInfo["label"];
 		}
+
+		return $options ?: false;
 	}
-	
+
 	// Permet de récupérer tous les champs d'un module
-	public function get_module_fields($module, $type = 'source') {
-	    // Ref: https://github.com/javanile/vtiger-client/blob/master/src/VtigerClient.php#L160
-
-		parent::get_module_fields($module, $type);
-		try {
-			$this->moduleFields = array();
-
-			// Si le module est un module "fictif" relation créé pour Myddlewar	
-			if(array_key_exists($module, $this->module_relationship_many_to_many)) {
-
-				foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {
-					$this->moduleFields[$name] = array(
-												'label' => $name,
-												'type' => 'varchar(255)',
-												'type_bdd' => 'varchar(255)',
-												'required' => 0
-											);						
-				}
-				foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
-					$this->fieldsRelate[$relationship] = array(
-												'label' => $relationship,
-												'type' => 'varchar(36)',
-												'type_bdd' => 'varchar(36)',
-												'required' => 0,
-												'required_relationship' => 0
-											);
-				}
-			}
-			else {
-				$get_module_fields_parameters  = array( 
-					'session' 		=> $this->session,
-					'module_name' 	=> $module
-				);
-				
-				$get_module_fields = $this->call('get_module_fields',$get_module_fields_parameters);
-				foreach ($get_module_fields->module_fields AS $field) {
-					if(isset($this->exclude_field_list['default']) ){
-						// Certains champs ne peuvent pas être modifiés
-						if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
-							continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-					}
-		
-					if (!in_array($field->type,$this->type_valide)) { 
-						if(isset($this->exclude_field_list[$module])){
-							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
-								continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-						}
-						$type_bdd = 'varchar(255)';
-					}
-					else {
-						$type_bdd = $field->type;
-					}
-					if (
-							substr($field->name,-3) == '_id' 
-						|| substr($field->name,-4) == '_ida'
-						|| substr($field->name,-4) == '_idb'
-						|| (
-								$field->type == 'id' 
-							&& $field->name != 'id'
-						)
-						|| $field->name	== 'created_by'
-					) {
-						$this->fieldsRelate[$field->name] = array(
-													'label' => $field->label,
-													'type' => 'varchar(36)',
-													'type_bdd' => 'varchar(36)',
-													'required' => $field->required,
-													'required_relationship' => 0
-												);
-					}
-					//To enable to take out all fields where there are 'relate' in the type of the field
-					else {	
-						// Le champ id n'est envoyé qu'en source
-						if($field->name != 'id' || $type == 'source') {
-							$this->moduleFields[$field->name] = array(
-													'label' => $field->label,
-													'type' => $field->type,
-													'type_bdd' => $type_bdd,
-													'required' => $field->required
-												);
-						}   
-						// Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
-						if (
-								!empty($field->options) 
-							&& !in_array($field->type, array('datetime','bool')) 
-						){
-							foreach($field->options as $option) {
-								$this->moduleFields[$field->name]['option'][$option->name] = $option->value;
-							}
-						}	
-					}
-				}
-				
-				// Ajout des champ type link (custom relationship ou custom module souvent)
-				if (!empty($get_module_fields->link_fields)) {
-					foreach ($get_module_fields->link_fields AS $field) {
-						if(isset($this->exclude_field_list['default'])){
-							if(in_array($field->name, $this->exclude_field_list['default']) && $type == 'target')
-								continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-						}
-						if (!in_array($field->type,$this->type_valide)) { 
-							if(isset($this->exclude_field_list[$module])){
-								if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
-									continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-							}
-							$type_bdd = 'varchar(255)';
-						}
-						else {
-							$type_bdd = $field->type;
-						}
-						if (
-								substr($field->name,-3) == '_id' 
-							|| substr($field->name,-4) == '_ida'
-							|| substr($field->name,-4) == '_idb'
-							|| (
-									$field->type == 'id' 
-								&& $field->name != 'id'
-							)
-						) {
-							// On met un préfix pour les relation custom afin de pouvoir les détecter dans le read
-							$this->fieldsRelate[$this->customRelationship.$field->name] = array(
-														'label' => $field->relationship,
-														'type' => 'varchar(36)',
-														'type_bdd' => 'varchar(36)',
-														'required' => 0,
-														'required_relationship' => 0
-													);
-						}
-					}
-				}
-			}
-			// Ajout des champ relate au mapping des champs 
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			return $this->moduleFields;					
-		}	
-		catch (\Exception $e) {
+	public function get_module_fields($module, $type = 'source')
+	{
+		if(empty($this->vtigerClient))
 			return false;
-		}		
+
+		$describe = $this->vtigerClient->describe($module);
+
+		if(!$describe["success"] || ($describe["success"] && count($describe["result"]) == 0))
+			return false;
+
+		$fields = $describe["result"]["fields"] ?? null;
+
+		if(empty($fields))
+			return false;
+
+		$escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list["default"];
+		$options = array();
+		foreach ($fields as $field) {
+			if (!in_array($field["name"], $escludeField))
+			{
+				$options[$field["name"]] = array(
+											"label" => $field["label"],
+											'required' => $field["mandatory"],
+											//'type' => 'varchar(255)', // TODO: Settare il type giusto?
+										);
+			}
+		}
+
+		return $options ?: false;
 	}
-	
+
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			$result['done'] = true;					
-			return $result;
-		}	
-		// Build the query to read data 
-		$query = $this->generateQuery($param, 'read_last');
+	public function read_last($param)
+	{
+		if(empty($this->vtigerClient))
+			return array(
+				"error" => "Error: no VtigerClient setup",
+				"done" => false
+			);
 
-		try {
-			if(!isset($param['fields'])) {
-				$param['fields'] = array();
-			}
-			// Ajout des champs obligatoires pour 
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			$get_entry_list_parameters = array(
-											'session' => $this->session,
-											'module_name' => $param['module'],
-											'query' => $query,
-											'order_by' => "date_entered DESC",
-											'offset' => '0',
-											'select_fields' => $param['fields'],
-											'link_name_to_fields_array' => '',
-											'max_results' => '1',
-											'deleted' => 0,
-											'Favorites' => '',
-										);										
-			$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
-			// Si as d'erreur
-			if (isset($get_entry_list_result->result_count)) {
-				// Si pas de résultat
-				if(!isset($get_entry_list_result->entry_list[0])) {
-					$result['done'] = false;
-				}
-				else {
-					foreach ($get_entry_list_result->entry_list[0]->name_value_list as $key => $value) {
-						$result['values'][$key] = $value->value;
-					}
-					$result['done'] = true;
-				}
-			}	
-			// Si erreur
-			else {
-				$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				$result['done'] = false;
-			}												
-			return $result;		
+		if (count($param["fields"]) == 0) {
+			return array(
+				"error" => "Error: no Param Given",
+				"done" => false
+			);
 		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;
-			return $result;
-		}	
+
+		$queryParam = implode(",", $param["fields"]) ?: "*";
+		$where = "";
+		if (!empty($param["query"])) {
+			$where = "WHERE ";
+			foreach ($param["query"] as $key => $item) {
+				if(substr($where, -strlen("'")) === "'")
+					$where .= " AND ";
+				$where .= "$key = '$item'";
+			}
+		}
+		$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
+
+		if (empty($query) || (!empty($query) && !$query["success"])) {
+			return array(
+						"error" => "Error: Request Failed!",
+						"done" => false
+					);
+		}
+
+		if (count($query["result"]) == 0) {
+			return array(
+						"error" => "No Data Retrived",
+						"done" => false
+					);
+		}
+
+		$fields = $query["result"][0];
+		$result = ["done" => true];
+
+
+		foreach ($fields as $fieldName => $value) {
+			$result["values"][$fieldName] = $value;
+		}
+
+		return $result;
 	}
-	
+
 	// Permet de lire les données
-	public function read($param) {		
-		try {
-			$result = array();
-			$result['error'] = '';
-			$result['count'] = 0;
-			if (empty($param['offset'])) {
-				$param['offset'] = 0;
-			}
-			$currentCount = 0;		
-			$query = '';
-			if (empty($param['limit'])) {
-				$param['limit'] = 100;
-			}	
-			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
-			// Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
-			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-				$paramSave = $param;
-				$param['fields'] = array();
-				$param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
-			}
+	public function read($param)
+	{
+		if(empty($this->vtigerClient))
+			return array(
+						"error" => "Error: no VtigerClient setup",
+						"done" => false
+					);
 
-			// Ajout des champs obligatoires
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			$param['fields'] = array_unique($param['fields']);			
-			// Construction de la requête pour SugarCRM
-			$query = $this->generateQuery($param, 'read');		
-			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
-			$link_name_to_fields_array = array();
-			foreach ($param['fields'] as $field) {
-				if (substr($field,0,strlen($this->customRelationship)) == $this->customRelationship) {
-					$link_name_to_fields_array[] = array('name' => substr($field, strlen($this->customRelationship)), 'value' => array('id'));
-				}
-			}
-			// On lit les données dans le CRM
-            do {
-				$get_entry_list_parameters = array(
-												'session' => $this->session,
-												'module_name' => $param['module'],
-												'query' => $query,
-												'order_by' => $DateRefField.' ASC',
-												'offset' => $param['offset'],
-												'select_fields' => $param['fields'],
-												'link_name_to_fields_array' => $link_name_to_fields_array,
-												'max_results' => $this->limitCall,
-												'deleted' => 0,
-												'Favorites' => '',
-											);		
-										
-				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
-				// Construction des données de sortie
-				if (isset($get_entry_list_result->result_count)) {
-					$currentCount = $get_entry_list_result->result_count;
-					$result['count'] += $currentCount;
-					$record = array();
-					$i = 0;
-					for ($i = 0; $i < $currentCount; $i++) {
-						$entry = $get_entry_list_result->entry_list[$i]; 
-						foreach ($entry->name_value_list as $value){
-							$record[$value->name] = $value->value;
-							if (
-									$value->name == $DateRefField
-								&&	(
-										empty($result['date_ref'])
-									|| (
-											!empty($result['date_ref'])
-										&&	$result['date_ref'] < $value->value
-									)
-								)
-							) {
-								$result['date_ref'] = $value->value;
-							}
-						}	
-						
-						// S'il y a des relation custom, on ajoute la relation custom 
-						if (!empty($get_entry_list_result->relationship_list[$i]->link_list)) {
-							foreach ($get_entry_list_result->relationship_list[$i]->link_list as $Relationship) {
-								$record[$this->customRelationship.$Relationship->name] = $Relationship->records[0]->link_value->id->value;
-							}
-						}
-						$result['values'][$entry->id] = $record;
-						$record = array();
-					}
-					 // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
-                    $param['offset'] += $this->limitCall;
-				}
-				else {
-					$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-				}			
-			}
-            // On continue si le nombre de résultat du dernier appel est égal à la limite
-            while ($currentCount == $this->limitCall AND $result['count'] < $param['limit']-1); // -1 because a limit of 1000 = 1001 in the system				
-			// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
-			if (!empty($paramSave)) {
-				$resultRel = $this->readRelationship($paramSave,$result);
-				// Récupération des données sauf de la date de référence qui dépend des enregistrements parent
-				if(!empty($resultRel['count'])) {
-					$result['count'] = $resultRel['count'];
-					$result['values'] = $resultRel['values'];
-				}
-				// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé. 
-				else {
-					return null;
-				}
-			}	
+		if (count($param["fields"]) == 0) {
+			return array(
+						"error" => "Error: no Param Given",
+						"done" => false
+					);
 		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
-		return $result;	
+
+		if (empty($param['offset'])) {
+			$param['offset'] = 0;
+		}
+		if (empty($param['limit'])) {
+			$param['limit'] = 100;
+		}
+
+		// Considerare di implementare Sync API in VtigerClient
+		$queryParam = implode(",", $param["fields"]) ?: "*";
+		if($queryParam != "*") {
+			$requiredField = $this->required_fields[$param["module"]] ?? $this->required_fields["default"];
+			$queryParam = implode(",", $requiredField) . "," . $queryParam;
+		}
+		$queryParam = rtrim($queryParam, ",");
+
+		$where = !empty($param["date_ref"]) ? "WHERE modifiedtime > '$param[date_ref]'" : "";
+		if (!empty($param["query"])) {
+			$where = empty($where) ? "WHERE " : " AND ";
+			foreach ($param["query"] as $key => $item) {
+				if(substr($where, -strlen("'")) === "'")
+					$where .= " AND ";
+				$where .= "$key = '$item'";
+			}
+		}
+		$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $param[limit];");
+
+		if (empty($query) || (!empty($query) && !$query["success"])) {
+			return array(
+						"error" => "Error: Request Failed!",
+						"count" => 0
+					);
+		}
+
+		if (count($query["result"]) == 0) {
+			return array(
+						//"error" => "No Data Retrived",
+						"count" => 0
+					);
+		}
+
+		$result = array(
+						"count" => 0
+					);
+
+		foreach ($query["result"] as $value) {
+			$result['values'][$value["id"]] = $value;
+			$result['date_ref'] = $value["modifiedtime"];
+			$result["count"]++;
+		}
+
+		return $result;
 	}
 
-    /**
-     * @param $param
-     * @param $dataParent
-     * @return mixed
-     */
+	/**
+	 * @param $param
+	 * @param $dataParent
+	 * @return mixed
+	 */
 	protected function readRelationship($param, $dataParent)
-    {
+	{
 		if (empty($param['limit'])) {
 			$param['limit'] = 100;
 		}	
@@ -581,7 +392,7 @@ class vtigercrmcore extends solution
 					}
 				}
 				else {
-					$result['error'] .= $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description.'       ';
+					$result['error'] .= $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description.'	   ';
 				}
 			}
 		}
@@ -589,62 +400,39 @@ class vtigercrmcore extends solution
 		return $result;
 	}
 
-	
-	// Permet de créer des données
-	public function create($param) {	
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			return $this->createRelationship($param);
-		}
-	
-		// Transformation du tableau d'entrée pour être compatible webservice Sugar
-		foreach($param['data'] as $idDoc => $data) {
-			try {
-				// Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
-				$dataSugar = array();
-				foreach ($data as $key => $value) {
-					if($key == 'Birthdate' && $value == '0000-00-00') {
-						continue;
-					}
-					// Si un champ est une relation custom alors on enlève le prefix
-					if (substr($key,0,strlen($this->customRelationship)) == $this->customRelationship) {
-						$key = substr($key, strlen($this->customRelationship));
-					}
-					$dataSugar[] = array('name' => $key, 'value' => $value);
-				}
-				$setEntriesListParameters = array(
-												'session' => $this->session,
-												'module_name' => $param['module'],
-												'name_value_lists' => $dataSugar
-											);							
-				$get_entry_list_result = $this->call("set_entry", $setEntriesListParameters);
 
-				if (!empty($get_entry_list_result->id)) {
-					$result[$idDoc] = array(
-											'id' => $get_entry_list_result->id,
-											'error' => false
-									);
-				}
-				else  {
-					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
-				}
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
+	// Permet de créer des données
+	public function create($param)
+	{
+		if(empty($this->vtigerClient))
+			return array("error" => "Error: no VtigerClient setup");
+
+		$result = [];
+
+		foreach($param['data'] as $idDoc => $data) {
+			unset($data["target_id"]);
+			$resultCreate = $this->vtigerClient->create($param["module"], $data);
+
+			if (!empty($resultCreate) && $resultCreate["success"] && !empty($resultCreate["result"]))
 				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+									'id' => $resultCreate["result"]["id"],
+									'error' => false
+								);
+			else
+				$result[$idDoc] = array(
+									'id' => '-1',
+									'error' => "Errore"
+								);
+
+			$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 		}
+
 		return $result;
 	}
-	
+
 	// Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
-	protected function createRelationship($param) {
+	protected function createRelationship($param)
+	{
 		foreach($param['data'] as $key => $data) {
 			try {
 				// Check control before create
@@ -679,7 +467,7 @@ class vtigercrmcore extends solution
 											'error' => '01'
 									);
 				}
-				
+
 			}
 			catch (\Exception $e) {
 				$error = $e->getMessage();
@@ -689,136 +477,47 @@ class vtigercrmcore extends solution
 				);
 			}
 			// Modification du statut du flux
-			$this->updateDocumentStatus($key,$result[$key],$param);	
+			$this->updateDocumentStatus($key,$result[$key],$param);
 		}
 		return $result;
 	}
 	
 	// Permet de mettre à jour un enregistrement
-	public function update($param) {
-		// Transformation du tableau d'entrée pour être compatible webservice Sugar
+	public function update($param)
+	{
+		if(empty($this->vtigerClient))
+			return array("error" => "Error: no VtigerClient setup");
+
+		$result = [];
+
 		foreach($param['data'] as $idDoc => $data) {
-			try {	
-				// Check control before update	
-				$data = $this->checkDataBeforeUpdate($param, $data);
-				$dataSugar = array();
-				foreach ($data as $key => $value) {
-					// Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
-					if ($key == 'target_id') {
-						$key = 'id';
-					}
-					// Si un champ est une relation custom alors on enlève le prefix
-					if (substr($key,0,strlen($this->customRelationship)) == $this->customRelationship) {
-						$key = substr($key, strlen($this->customRelationship));
-					}
-					
-					if($key == 'Birthdate' && $value == '0000-00-00') {
-						continue;
-					}
-					$dataSugar[] = array('name' => $key, 'value' => $value);
-				}
-				$setEntriesListParameters = array(
-												'session' => $this->session,
-												'module_name' => $param['module'],
-												'name_value_lists' => $dataSugar
-											);
-	
-				$get_entry_list_result = $this->call("set_entry", $setEntriesListParameters);
-				if (!empty($get_entry_list_result->id)) {
-					$result[$idDoc] = array(
-											'id' => $get_entry_list_result->id,
-											'error' => false
-									);
-				}
-				else  {
-					throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : "").' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ""));
-				} 
-			}
-			catch (\Exception $e) {
-				$error = $e->getMessage();
+			$data["id"] = $data["target_id"];
+			unset($data["target_id"]);
+			$resultUpdate = $this->vtigerClient->update($param["module"], $data);
+
+			if (!empty($resultUpdate) && $resultUpdate["success"] && !empty($resultUpdate["result"]))
 				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
-			}
-			// Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-		}	
-		return $result;			
-	}
-	
-		
-	// Build the query for read data to SuiteCRM
-	protected function generateQuery($param, $method){				
-		$query = '';
-		// if a specific query is requeted we don't use date_ref
-		if (!empty($param['query'])) {
-			foreach ($param['query'] as $key => $value) {
-				if (!empty($query)) {
-					$query .= ' AND ';
-				}
-				if ($key == 'email1') {
-					$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
-				}
-				else {	
-					// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-					if($param['module'] == 'ProspectLists') {	
-						$query .= "prospect_lists.".$key." = '".$value."' ";
-					}
-					else {
-						$query .= strtolower($param['module']).".".$key." = '".$value."' ";
-					}
-				}
-			}
-		// Filter by date only for read method (no need for read_last method	
-		} elseif ($method == 'read') {
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
-			if($param['module'] == 'ProspectLists') {	
-				$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
-			}
-			else {
-				$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
-			}
-		}		
-		return $query;
-	}
-	
-	// Permet de renvoyer le mode de la règle en fonction du module target
-	// Valeur par défaut "0"
-	// Si la règle n'est qu'en création, pas en modicication alors le mode est C
-	public function getRuleMode($module,$type) {
-		if(
-				$type == 'target'
-			&&	array_key_exists($module, $this->module_relationship_many_to_many)
-		) {
-			return array(
-				'C' => 'create_only'
-			);
+									'id' => $resultUpdate["result"]["id"],
+									'error' => false
+								);
+			else
+				$result[$idDoc] = array(
+									'id' => '-1',
+									'error' => "Errore"
+								);
+
+			$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 		}
-		return parent::getRuleMode($module,$type);
-	} 
-	
-	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getDateRefName($moduleSource, $RuleMode) {
-		if(in_array($RuleMode,array("0","S"))) {
-			return "date_modified";
-		} else if ($RuleMode == "C"){
-			return "date_entered";
-		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
-		}
-		return null;
+
+		return $result;
 	}
-	
+
 	// Permet de supprimer un enregistrement
-	public function delete($id) {
-	
-	}
-		
+	public function delete($id) { }
+
 	//function to make cURL request	
 	protected function call($method, $parameters)
-    {
+	{
 		try {
 			ob_start();
 			$curl_request = curl_init();
@@ -851,8 +550,7 @@ class vtigercrmcore extends solution
 		catch(\Exception $e) {
 			return false;	
 		}	
-    }	
-	
+	}
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 
