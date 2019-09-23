@@ -87,9 +87,10 @@ class vtigercrmcore extends solution
     protected $vtigerClient;
 
     /**
-     * @param $paramConnexion
+     * Make the login
      *
-     * @return array|VtigerClient
+     * @param array $paramConnexion
+     * @return void|array
      */
     public function login($paramConnexion)
     {
@@ -115,11 +116,13 @@ class vtigercrmcore extends solution
     }
 
     /**
+     * Make the logout
+     *
      * @return bool
      */
     public function logout()
     {
-        // TODO: Creare ed usare il loguot di vtiger
+        // TODO: Creare ed usare il loguot di vtiger (Non Funziona)
         /*
         if(empty($this->vtigerClient))
             return false;
@@ -131,6 +134,8 @@ class vtigercrmcore extends solution
     }
 
     /**
+     * Return the login fields
+     *
      * @return array
      */
     public function getFieldsLogin()
@@ -155,9 +160,10 @@ class vtigercrmcore extends solution
     }
 
     /**
-     * @param string $type
+     * Return of the modules without the specified ones
      *
-     * @return bool!array
+     * @param string $type
+     * @return array|bool
      */
     public function get_modules($type = 'source')
     {
@@ -188,7 +194,13 @@ class vtigercrmcore extends solution
         return $options ?: false;
     }
 
-    // Permet de récupérer tous les champs d'un module
+    /**
+     * Return the fields for a specific module without the specified ones
+     *
+     * @param string $module
+     * @param string $type
+     * @return array|bool
+     */
     public function get_module_fields($module, $type = 'source')
     {
         if (empty($this->vtigerClient)) {
@@ -222,7 +234,12 @@ class vtigercrmcore extends solution
         return $options ?: false;
     }
 
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
+    /**
+     * Read Last
+     *
+     * @param array $param
+     * @return array
+     */
     public function read_last($param)
     {
         if (empty($this->vtigerClient)) {
@@ -276,7 +293,12 @@ class vtigercrmcore extends solution
         return $result;
     }
 
-    // Permet de lire les données
+    /**
+     * Read
+     *
+     * @param array $param
+     * @return array
+     */
     public function read($param)
     {
         if (empty($this->vtigerClient)) {
@@ -348,70 +370,11 @@ class vtigercrmcore extends solution
     }
 
     /**
-     * @param $param
-     * @param $dataParent
+     * Create new record in target
      *
-     * @return mixed
+     * @param array $param
+     * @return array
      */
-    protected function readRelationship($param, $dataParent)
-    {
-        if (empty($param['limit'])) {
-            $param['limit'] = 100;
-        }
-        $result['error'] = '';
-        $i = 0;
-
-        // Pour toutes les données parents, on récupère toutes les données liées de la relation
-        if (!empty($dataParent['values'])) {
-            $module_relationship_many_to_many = $this->module_relationship_many_to_many[$param['module']];
-
-            foreach ($dataParent['values'] as $parent) {
-                $get_relationships_parameters = [
-                                                 'session'                                  => $this->session,
-                                                 'module_name'                              => $module_relationship_many_to_many['module_name'],
-                                                 'module_id'                                => $parent['id'],
-                                                 'link_field_name'                          => $module_relationship_many_to_many['link_field_name'],
-                                                 'related_module_query'                     => '',
-                                                 'related_fields'                           => ['id'],
-                                                 'related_module_link_name_to_fields_array' => [],
-                                                 'deleted'                                  => '0',
-                                                 'order_by'                                 => '',
-                                                 'offset'                                   => 0,
-                                                 'limit'                                    => $param['limit'],
-                                            ];
-                $get_entry_list_result = $this->call('get_relationships', $get_relationships_parameters);
-
-                if (!empty($get_entry_list_result)) {
-                    $record = [];
-                    foreach ($get_entry_list_result->entry_list as $entry) {
-                        // R2cupération de l'id parent
-                        $record[$module_relationship_many_to_many['relationships'][0]] = $parent['id'];
-                        foreach ($entry->name_value_list as $value) {
-                            if ($value->name == 'id') {
-                                $record[$module_relationship_many_to_many['relationships'][1]] = $value->value;
-                            } else {
-                                $record[$value->name] = $value->value;
-                            }
-                        }
-                        // La date de référence de chaque relation est égale à la date de référence du parent
-                        $record['date_modified'] = $parent['date_modified'];
-                        // L'id de la relation est généré en concatenant les 2 id
-                        $record['id'] = $record[$module_relationship_many_to_many['relationships'][0]].$record[$module_relationship_many_to_many['relationships'][1]];
-                        $result['values'][$record['id']] = $record;
-                        $record = [];
-                        $i++;
-                    }
-                } else {
-                    $result['error'] .= $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description.'	   ';
-                }
-            }
-        }
-        $result['count'] = $i;
-
-        return $result;
-    }
-
-    // Permet de créer des données
     public function create($param)
     {
         if (empty($this->vtigerClient)) {
@@ -442,57 +405,12 @@ class vtigercrmcore extends solution
         return $result;
     }
 
-    // Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
-    protected function createRelationship($param)
-    {
-        foreach ($param['data'] as $key => $data) {
-            try {
-                // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
-                $dataSugar = [];
-                if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
-                    foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
-                        if (isset($data[$field])) {
-                            $dataSugar[] = ['name'=> $field, 'value' => $data[$field]];
-                        }
-                    }
-                }
-                $set_relationship_params = [
-                    'session'         => $this->session,
-                    'module_name'     => $this->module_relationship_many_to_many[$param['module']]['module_name'],
-                    'module_id'       => $data[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]],
-                    'link_field_name' => $this->module_relationship_many_to_many[$param['module']]['link_field_name'],
-                    'related_ids'     => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
-                    'name_value_list' => $dataSugar,
-                ];
-                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
-
-                if (!empty($set_relationship_result->created)) {
-                    $result[$key] = [
-                                            'id'    => $key, // On met $key car onn a pas l'id de la relation
-                                            'error' => false,
-                                    ];
-                } else {
-                    $result[$key] = [
-                                            'id'    => '-1',
-                                            'error' => '01',
-                                    ];
-                }
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-                $result[$key] = [
-                        'id'    => '-1',
-                        'error' => $error,
-                ];
-            }
-            // Modification du statut du flux
-            $this->updateDocumentStatus($key, $result[$key], $param);
-        }
-
-        return $result;
-    }
-
-    // Permet de mettre à jour un enregistrement
+    /**
+     * Update exist record in target
+     *
+     * @param array $param
+     * @return array
+     */
     public function update($param)
     {
         if (empty($this->vtigerClient)) {
@@ -527,44 +445,6 @@ class vtigercrmcore extends solution
     // Permet de supprimer un enregistrement
     public function delete($id)
     {
-    }
-
-    //function to make cURL request
-    protected function call($method, $parameters)
-    {
-        try {
-            ob_start();
-            $curl_request = curl_init();
-            curl_setopt($curl_request, CURLOPT_URL, $this->paramConnexion['url']);
-            curl_setopt($curl_request, CURLOPT_POST, 1);
-            curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-            curl_setopt($curl_request, CURLOPT_HEADER, 1);
-            curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
-
-            $jsonEncodedData = json_encode($parameters);
-            $post = [
-                'method'        => $method,
-                'input_type'    => 'JSON',
-                'response_type' => 'JSON',
-                'rest_data'     => $jsonEncodedData,
-            ];
-
-            curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
-            $result = curl_exec($curl_request);
-            curl_close($curl_request);
-            if (empty($result)) {
-                return false;
-            }
-            $result = explode("\r\n\r\n", $result, 2);
-            $response = json_decode($result[1]);
-            ob_end_flush();
-
-            return $response;
-        } catch (\Exception $e) {
-            return false;
-        }
     }
 }
 
