@@ -31,18 +31,20 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
+    protected $limitPerCall = 100;
+
     protected $required_fields = [
-                                    'default'	=> ['id', 'modifiedtime'],
+                                    'default'    => ['id', 'modifiedtime'],
                                 ];
 
     protected $exclude_module_list = [
-                                        'default'	=> ['LineItem'],
-                                        'target'	 => [],
-                                        'source'	 => [],
+                                        'default'    => ['LineItem'],
+                                        'target'     => [],
+                                        'source'     => [],
                                     ];
 
     protected $exclude_field_list = [
-                                        'default'	=> ['id', 'modifiedby', 'modifiedtime'],
+                                        'default'    => ['id', 'modifiedby', 'modifiedtime'],
                                     ];
 
     protected $FieldsDuplicate = [];
@@ -220,18 +222,32 @@ class vtigercrmcore extends solution
         }
 
         $escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
-        $options = [];
+        $this->moduleFields = [];
         foreach ($fields as $field) {
             if (!in_array($field['name'], $escludeField)) {
-                $options[$field['name']] = [
-                                            'label'    => $field['label'],
-                                            'required' => $field['mandatory'],
-                                            //'type' => 'varchar(255)', // TODO: Settare il type giusto?
-                                        ];
+                if (substr($field['name'],-3) == '_id') {
+                    $this->fieldsRelate[$field['name']] = array(
+                                                'label' => $field['label'],
+                                                'type' => 'varchar(36)',
+                                                'type_bdd' => 'varchar(36)',
+                                                'required' => $field['mandatory'],
+                                                'required_relationship' => 0
+                                            );
+                } else {
+                    $this->moduleFields[$field['name']] = [
+                                                'label'    => $field['label'],
+                                                'required' => $field['mandatory'],
+                                                'type' => 'varchar(255)', // TODO: Settare il type giusto?
+                                            ];
+                }
             }
         }
 
-        return $options ?: false;
+        if (!empty($this->fieldsRelate)) {
+            $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+        }
+
+        return $this->moduleFields ?: false;
     }
 
     /**
@@ -329,7 +345,6 @@ class vtigercrmcore extends solution
             $queryParam = implode(',', $requiredField).','.$queryParam;
         }
         $queryParam = rtrim($queryParam, ',');
-
         $where = !empty($param['date_ref']) ? "WHERE modifiedtime > '$param[date_ref]'" : '';
         if (!empty($param['query'])) {
             $where = empty($where) ? 'WHERE ' : ' AND ';
@@ -340,31 +355,43 @@ class vtigercrmcore extends solution
                 $where .= "$key = '$item'";
             }
         }
-        $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $param[limit];");
 
-        if (empty($query) || (!empty($query) && !$query['success'])) {
-            return [
-                        'error' => 'Error: Request Failed!',
-                        'count' => 0,
-                    ];
-        }
-
-        if (count($query['result']) == 0) {
-            return [
-                        //"error" => "No Data Retrived",
-                        'count' => 0,
-                    ];
-        }
 
         $result = [
-                        'count' => 0,
-                    ];
+            'count' => 0,
+		];
 
-        foreach ($query['result'] as $value) {
-            $result['values'][$value['id']] = $value;
-            $result['date_ref'] = $value['modifiedtime'];
-            $result['count']++;
-        }
+		$dataLeft = $param["limit"];
+        do {
+            $limit = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
+            $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $limit;");
+
+            if (empty($query) || (!empty($query) && !$query['success'])) {
+                return [
+                            'error' => 'Error: Request Failed!',
+                            'count' => 0,
+                        ];
+            }
+    
+            if ($result['count'] == 0 && count($query['result']) == 0) {
+                return [
+                            //"error" => "No Data Retrived",
+                            'count' => 0,
+                        ];
+            }
+    
+            foreach ($query['result'] as $value) {
+                $result['values'][$value['id']] = $value;
+                $result['date_ref'] = $value['modifiedtime'];
+                $result['count']++;
+            }
+
+			$param["offset"] += $limit;
+
+			$dataLeft -= $limit;
+
+        } while ($dataLeft > 0);
+
 
         return $result;
     }
