@@ -34,7 +34,10 @@ class vtigercrmcore extends solution
     protected $limitPerCall = 100;
 
     protected $required_fields = [
-                                    'default'    => ['id', 'modifiedtime'],
+                                    'default'    => [
+                                                        'id',
+                                                        'modifiedtime'
+                                                    ],
                                 ];
 
     protected $exclude_module_list = [
@@ -44,46 +47,15 @@ class vtigercrmcore extends solution
                                     ];
 
     protected $exclude_field_list = [
-                                        'default'    => ['id', 'modifiedby', 'modifiedtime'],
+                                        'default'    => [
+                                                            'id',
+                                                            'modifiedby',
+                                                            'modifiedtime',
+                                                            "createdtime"
+                                                        ],
                                     ];
 
     protected $FieldsDuplicate = [];
-
-    // Tableau représentant les relation many-to-many de Sugar
-    protected $module_relationship_many_to_many = [
-                                                    'calls_contacts'                 => ['label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['call_id', 'contact_id']],
-                                                    'calls_users'                    => ['label' => 'Relationship Call User', 'module_name' => 'Calls', 'link_field_name' => 'users', 'fields' => [], 'relationships' => ['call_id', 'user_id']],
-                                                    'calls_leads'                    => ['label' => 'Relationship Call Lead', 'module_name' => 'Calls', 'link_field_name' => 'leads', 'fields' => [], 'relationships' => ['call_id', 'lead_id']],
-                                                    'cases_bugs'                     => ['label' => 'Relationship Case Bug', 'module_name' => 'Cases', 'link_field_name' => 'bugs', 'fields' => [], 'relationships' => ['case_id', 'bug_id']],
-                                                    'contacts_bugs'                  => ['label' => 'Relationship Contact Bug', 'module_name' => 'Contacts', 'link_field_name' => 'bugs', 'fields' => [], 'relationships' => ['contact_id', 'bug_id']],
-                                                    'contacts_cases'                 => ['label' => 'Relationship Contact Case', 'module_name' => 'Contacts', 'link_field_name' => 'cases', 'fields' => [], 'relationships' => ['contact_id', 'case_id']],
-                                                    'meetings_contacts'              => ['label' => 'Relationship Metting Contact', 'module_name' => 'Meetings', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['meeting_id', 'contact_id']],
-                                                    'meetings_users'                 => ['label' => 'Relationship Meeting User', 'module_name' => 'Meetings', 'link_field_name' => 'users', 'fields' => [], 'relationships' => ['meeting_id', 'user_id']],
-                                                    'meetings_leads'                 => ['label' => 'Relationship Meeting Lead', 'module_name' => 'Meetings', 'link_field_name' => 'leads', 'fields' => [], 'relationships' => ['meeting_id', 'lead_id']],
-                                                    'opportunities_contacts'         => ['label' => 'Relationship Opportunity Contact', 'module_name' => 'Opportunities', 'link_field_name' => 'contacts', 'fields' => ['contact_role'], 'relationships' => ['opportunity_id', 'contact_id']], // contact_role exist in opportunities vardef for module contact (entry rel_fields)
-                                                    'prospect_list_campaigns'        => ['label' => 'Relationship Prospect_list Campaign', 'module_name' => 'ProspectLists', 'link_field_name' => 'campaigns', 'fields' => [], 'relationships' => ['prospect_list_id', 'campaign_id']],
-                                                    'prospect_list_contacts'         => ['label' => 'Relationship Prospect_list Contact', 'module_name' => 'ProspectLists', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['prospect_list_id', 'contact_id']],
-                                                    'prospect_list_prospects'        => ['label' => 'Relationship Prospect_list Prospect', 'module_name' => 'ProspectLists', 'link_field_name' => 'prospects', 'fields' => [], 'relationships' => ['prospect_list_id', 'Prospect_id']],
-                                                    'prospect_list_leads'            => ['label' => 'Relationship Prospect_list Lead', 'module_name' => 'ProspectLists', 'link_field_name' => 'leads', 'fields' => [], 'relationships' => ['prospect_list_id', 'lead_id']],
-                                                    'prospect_list_users'            => ['label' => 'Relationship Prospect_list User', 'module_name' => 'ProspectLists', 'link_field_name' => 'users', 'fields' => [], 'relationships' => ['prospect_list_id', 'user_id']],
-                                                    'prospect_list_accounts'         => ['label' => 'Relationship Prospect_list Account', 'module_name' => 'ProspectLists', 'link_field_name' => 'accounts', 'fields' => [], 'relationships' => ['prospect_list_id', 'account_id']],
-                                                    'projects_bugs'                  => ['label' => 'Relationship Project Bug', 'module_name' => 'Projects', 'link_field_name' => 'bugs', 'fields' => [], 'relationships' => ['project_id', 'bug_id']],
-                                                    'projects_cases'                 => ['label' => 'Relationship Project Case', 'module_name' => 'Projects', 'link_field_name' => 'cases', 'fields' => [], 'relationships' => ['project_id', 'case_id']],
-                                                    'projects_accounts'              => ['label' => 'Relationship Project Account', 'module_name' => 'Projects', 'link_field_name' => 'accounts', 'fields' => [], 'relationships' => ['project_id', 'account_id']],
-                                                    'projects_contacts'              => ['label' => 'Relationship Project Contact', 'module_name' => 'Projects', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['project_id', 'contact_id']],
-                                                    'projects_opportunities'         => ['label' => 'Relationship Project Opportunity', 'module_name' => 'Projects', 'link_field_name' => 'opportunities', 'fields' => [], 'relationships' => ['project_id', 'opportunity_id']],
-                                                    'email_marketing_prospect_lists' => ['label' => 'Relationship Email_marketing Prospect_list', 'module_name' => 'EmailMarketing', 'link_field_name' => 'prospect_lists', 'fields' => [], 'relationships' => ['email_marketing_id', 'prospect_list_id']],
-                                                    'leads_documents'                => ['label' => 'Relationship Lead Document', 'module_name' => 'Leads', 'link_field_name' => 'documents', 'fields' => [], 'relationships' => ['lead_id', 'document_id']],
-                                                    'documents_accounts'             => ['label' => 'Relationship Document Account', 'module_name' => 'Documents', 'link_field_name' => 'accounts', 'fields' => [], 'relationships' => ['document_id', 'account_id']],
-                                                    'documents_contacts'             => ['label' => 'Relationship Document Contact', 'module_name' => 'Documents', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['document_id', 'contact_id']],
-                                                    'documents_opportunities'        => ['label' => 'Relationship Document Opportunity', 'module_name' => 'Documents', 'link_field_name' => 'opportunities', 'fields' => [], 'relationships' => ['document_id', 'opportunity_id']],
-                                                    'documents_cases'                => ['label' => 'Relationship Document Case', 'module_name' => 'Documents', 'link_field_name' => 'cases', 'fields' => [], 'relationships' => ['document_id', 'case_id']],
-                                                    'documents_bugs'                 => ['label' => 'Relationship Document Bug', 'module_name' => 'Documents', 'link_field_name' => 'bugs', 'fields' => [], 'relationships' => ['document_id', 'bug_id']],
-                                                    'aos_quotes_aos_invoices'        => ['label' => 'Relationship Quote Invoice', 'module_name' => 'AOS_Quotes', 'link_field_name' => 'aos_quotes_aos_invoices', 'fields' => [], 'relationships' => ['aos_quotes77d9_quotes_ida', 'aos_quotes6b83nvoices_idb']],
-                                                    'fp_events_contacts'             => ['label' => 'Relationship Event Contact', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_contacts', 'fields' => [], 'relationships' => ['fp_events_contactsfp_events_ida', 'fp_events_contactscontacts_idb']],
-                                                    'fp_events_leads_1'              => ['label' => 'Relationship Event Lead', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_leads_1', 'fields' => [], 'relationships' => ['fp_events_leads_1fp_events_ida', 'fp_events_leads_1leads_idb']],
-                                                    'fp_events_prospects_1'          => ['label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => [], 'relationships' => ['fp_events_prospects_1fp_events_ida', 'fp_events_prospects_1prospects_idb']],
-                                                ];
 
     /** @var VtigerClient */
     protected $vtigerClient;
@@ -225,19 +197,20 @@ class vtigercrmcore extends solution
         $this->moduleFields = [];
         foreach ($fields as $field) {
             if (!in_array($field['name'], $escludeField)) {
-                if (substr($field['name'],-3) == '_id') {
+                if ($field['type']["name"] == "reference" || $field['type']["name"] == "owner") {
                     $this->fieldsRelate[$field['name']] = array(
                                                 'label' => $field['label'],
-                                                'type' => 'varchar(36)',
-                                                'type_bdd' => 'varchar(36)',
                                                 'required' => $field['mandatory'],
+                                                'type' => 'varchar(127)',
+                                                'type_bdd' => 'varchar(127)',
                                                 'required_relationship' => 0
                                             );
                 } else {
                     $this->moduleFields[$field['name']] = [
                                                 'label'    => $field['label'],
                                                 'required' => $field['mandatory'],
-                                                'type' => 'varchar(255)', // TODO: Settare il type giusto?
+                                                'type' => 'varchar(127)', // ? Settare il type giusto?
+                                                'type_bdd' => 'varchar(127)'
                                             ];
                 }
             }
@@ -338,7 +311,6 @@ class vtigercrmcore extends solution
             $param['limit'] = 100;
         }
 
-        // Considerare di implementare Sync API in VtigerClient
         $queryParam = implode(',', $param['fields']) ?: '*';
         if ($queryParam != '*') {
             $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
@@ -355,43 +327,40 @@ class vtigercrmcore extends solution
                 $where .= "$key = '$item'";
             }
         }
-
+        
 
         $result = [
             'count' => 0,
-		];
+        ];
 
-		$dataLeft = $param["limit"];
+        $dataLeft = $param["limit"];
         do {
-            $limit = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
-            $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $limit;");
+            $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
+            // TODO: Considerare di implementare Sync API in VtigerClient
+            $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
 
             if (empty($query) || (!empty($query) && !$query['success'])) {
                 return [
-                            'error' => 'Error: Request Failed!',
+                    'error' => 'Error: Request Failed!',
                             'count' => 0,
                         ];
             }
-    
-            if ($result['count'] == 0 && count($query['result']) == 0) {
-                return [
-                            //"error" => "No Data Retrived",
-                            'count' => 0,
-                        ];
+
+            if (count($query['result']) == 0) {
+                break;
             }
-    
+
             foreach ($query['result'] as $value) {
                 $result['values'][$value['id']] = $value;
                 $result['date_ref'] = $value['modifiedtime'];
-                $result['count']++;
             }
 
-			$param["offset"] += $limit;
+            $result['count'] += count($query['result']);
+            $param["offset"] += $nDataCall;
 
-			$dataLeft -= $limit;
+            $dataLeft -= $nDataCall;
 
-        } while ($dataLeft > 0);
-
+        } while ($dataLeft > 0 && count($query['result']) >= $nDataCall);
 
         return $result;
     }
