@@ -42,7 +42,7 @@ class ConnectorRepository extends EntityRepository
 	  $qb = $this->createQueryBuilder('c');	
 	  $qb->select('c.id as id_connector, c.label,s.name')
 	  	 ->leftJoin('c.solution', 's')
-	     ->where('c.createdBy = :user_id AND s.active = 1 AND s.'.$type.' = 1 ');
+	     ->where('c.createdBy = :user_id AND c.deleted AND s.active = 1 AND s.'.$type.' = 1 ');
 	     // ->setParameter('user_id', $id);
 
 	    return $qb->getQuery()
@@ -56,10 +56,13 @@ class ConnectorRepository extends EntityRepository
 		 		 
 		 $qb->innerJoin('c.solution', 'sol')	
 			->addSelect('sol.name solution');
-					
+		
+		// Get all connector not deleted depending on the user is support or not
 		if($is_support === false) {
-			$qb->where('c.createdBy = :user_id')
+			$qb->where('c.createdBy = :user_id AND c.deleted = 0')
 			   ->setParameter('user_id', $id);
+		} else {
+			$qb->where('c.deleted = 0');
 		}
 				
 		$qb->orderBy('c.id', 'DESC');

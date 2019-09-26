@@ -434,6 +434,15 @@ class jobcore  {
 		}
 	}
 	
+	// Remove all data flagged deleted in the database
+	public function pruneDatabase() {
+		// Documents		
+		
+		// Rules
+		
+		// Connectors
+	}
+	
 	public function getRules() {
 		try {
 			$sqlParams = "	SELECT name_slug 

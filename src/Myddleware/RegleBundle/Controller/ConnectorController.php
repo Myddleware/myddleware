@@ -477,25 +477,10 @@ class ConnectorController extends Controller
 				if (!empty($rule)) {			
 					$session->set('error', array($this->get('translator')->trans('error.connector.remove_with_rule').' '.$rule->getName()));
 				} else {
-					// Get the EntityManager
-					$em = $this->getDoctrine()
-							   ->getManager();	
-									
-					$connector_params = $this->getDoctrine()
-							 ->getManager()
-							 ->getRepository('RegleBundle:ConnectorParam')
-							 ->findByConnector( $id );	
-					// Remove connector param first
-					if($connector_params) {
-						foreach ( $connector_params as $connector_param ) {
-							$em->remove($connector_param);
-							$em->flush();
-						}				
-					}
-					
-					// Then remove connector
-					$em->remove($connector);
-					$em->flush();
+					// Flag the connector as deleted
+					$connector->setDeleted(1);
+					$this->getDoctrine()->getManager()->persist($connector);
+					$this->getDoctrine()->getManager()->flush();
 				}
 			} catch (\Doctrine\DBAL\DBALException $e) {
 				$session->set('error', array($e->getPrevious()->getMessage()));
@@ -516,9 +501,9 @@ class ConnectorController extends Controller
 		$permission = $this->get('myddleware.permission');
 
 		if ($permission->isAdmin($this->getUser()->getId())) {
-			$qb->where('c.id =:id')->setParameter('id',$id); 
+			$qb->where('c.id =:id AND c.deleted')->setParameter('id',$id); 
 		} else {
-			$qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+			$qb->where('c.id =:id and c.createdBy =:createdBy AND c.deleted')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
 		}
 		// Detecte si la session est le support ---------			
 		// Infos du connecteur
@@ -600,12 +585,15 @@ class ConnectorController extends Controller
 			$permission =  $this->get('myddleware.permission');
 			
 			if( $permission->isAdmin($this->getUser()->getId()) ) {
-				$list_fields_sql = array('solution' => (int)$id);
+				$list_fields_sql = array(	'solution' => (int)$id,
+											'deleted' => 0
+										);
 			}
 			else {
 				$list_fields_sql = 
-					array('solution' => (int)$id,
-					      'createdBy' => $this->getUser()->getId()
+					array(	'solution' => (int)$id,
+							'deleted' => 0,
+							'createdBy' => $this->getUser()->getId()
 				);
 			}
 			// Detecte si la session est le support ---------			

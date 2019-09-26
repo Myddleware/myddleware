@@ -128,8 +128,8 @@ filter:
     different: est différent de
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
-    in: est compris dans le tableau suivant séparé par des ;
-    notin: n’est pas compris dans le tableau suivant séparé par des ;      
+    in: est compris dans le tableau suivant séparé par des points virgules
+    notin: n’est pas compris dans le tableau suivant séparé par des points virgules
             
 view_rule:
     action:
@@ -538,8 +538,7 @@ error:
         edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
         edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
-        delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
-        delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
+        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.	
         delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: 
         update: Impossible d'éditer la règle. 
     account:

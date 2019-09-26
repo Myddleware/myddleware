@@ -137,19 +137,18 @@ class DefaultControllerCore extends Controller
     {
         $session = $request->getSession();
 
-        // First, checking that the rule has document sent (close)
+        // First, checking that the rule has document not deleted
         $docClose = $this->getDoctrine()
             ->getManager()
             ->getRepository('RegleBundle:Document')
             ->findOneBy(array(
                     'rule' => $id,
-					'deleted' => 0,
-                    'globalStatus' => array('Close')
+					'deleted' => 0
                 )
             );
         // Return to the view detail for the rule if we found a document close
         if (!empty($docClose)) {
-            $session->set('error', array($this->get('translator')->trans('error.rule.delete_document_close')));
+            $session->set('error', array($this->get('translator')->trans('error.rule.delete_document')));
             return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
         }
 
@@ -169,19 +168,20 @@ class DefaultControllerCore extends Controller
             return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
         }
 
-        // Checking if the rule is linked to an other one (not deleted)
-        $ruleRelationshipError = $this->getDoctrine()
+        // Checking if the rule is linked to an other one 
+        $ruleRelationships = $this->getDoctrine()
             ->getManager()
             ->getRepository('RegleBundle:RuleRelationShip')
-            ->findOneBy(array(
-						'fieldId' => $id, 
-						'deleted' => 0
-						)
-            );
-        // Return to the view detail of the rule if a rule relate to this one
-        if (!empty($ruleRelationshipError)) {
-            $session->set('error', array($this->get('translator')->trans('error.rule.delete_relationship_exists') . $ruleRelationshipError->getRule()));
-            return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+            ->findBy(array('fieldId' => $id));
+			
+        // Return to the view detail of the rule if a rule relate to this one exists and is not deleted
+        if (!empty($ruleRelationships)) {
+			foreach ($ruleRelationships as $ruleRelationship) {
+				if(empty($ruleRelationship->getDeleted())) {
+					$session->set('error', array($this->get('translator')->trans('error.rule.delete_relationship_exists') . $ruleRelationship->getRule()));
+					return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				}
+			}
         }
 
         // Detecte si la session est le support ---------
@@ -1552,7 +1552,7 @@ class DefaultControllerCore extends Controller
                 'in' => $this->get('translator')->trans('filter.in'),
                 'notin' => $this->get('translator')->trans('filter.notin')
             );
-
+			
             // paramètres de la règle
             $rule_params = array_merge($rule_params_source, $rule_params_target);
 
@@ -1672,7 +1672,6 @@ class DefaultControllerCore extends Controller
                 'parentRelationships' => $allowParentRelationship,
                 'lst_parent_fields' => $lstParentFields,
                 'regleId' => $ruleKey
-
             );
 
             $result = $this->beforeRender($result);
@@ -1682,7 +1681,6 @@ class DefaultControllerCore extends Controller
             $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-
 
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 
