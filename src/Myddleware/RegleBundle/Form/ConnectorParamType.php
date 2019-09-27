@@ -40,7 +40,7 @@ class ConnectorParamType extends AbstractType{
         $name = $connectorParam->getName();
         $option['attr']['data-param'] = $name;
          
-        if ($name == 'wsdl') {
+        if ($name == 'wsdl' or $name == 'file') {
            // $option['id'] = 'param_' . $name;
             $option['attr']['readonly'] = 'readonly';
             $option['attr']['data-id'] = $id;

@@ -128,8 +128,8 @@ filter:
     different: est différent de
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
-    in: est compris dans le tableau suivant séparé par des ;
-    notin: n’est pas compris dans le tableau suivant séparé par des ;      
+    in: est compris dans le tableau suivant séparé par des points virgules
+    notin: n’est pas compris dans le tableau suivant séparé par des points virgules
             
 view_rule:
     action:
@@ -298,7 +298,7 @@ list_flux:
         date_modified: Date de modification
         rule: Règle
         status: Statut
-        global_status: Statut global
+        global_status: Statut global / Type
         id: Identifiant
         source_id: Id source
         target_id: Id cible
@@ -346,6 +346,10 @@ flux:
         error_checking: Vérification en erreur
         error_sending: Envoi en erreur
         Not_found: Non trouvée
+    type:
+        update: Update
+        create: Create
+        search: Search
  
 view_flux:
     empty: Pas de données
@@ -362,7 +366,7 @@ view_flux:
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
-        readrecord: Générer un nouveau transfer
+        readrecord: Lancer la même donnée 
     header:
         rule: Règle
         statut: Status
@@ -372,6 +376,7 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
+        dateref: Date de référence
     log:
         id: Id
         ref: Référence
@@ -480,6 +485,7 @@ solution:
         user: User ID        
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
+        file: Fichier
         host: Serveur Host
         dbname: Nom de la base de données
         database_name: Nom de la base de données
@@ -490,7 +496,9 @@ solution:
         directory: Répertoire avec les fichiers
         shop: Magasin
         redirect_uri: URL de redirection
-        applicationName: Nom de l'application	
+        applicationName: Nom de l'application
+        hashkey: Clé de hachage
+        authid: Id auth
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
@@ -528,16 +536,20 @@ error:
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
         edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
+        edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
-        delete_document_error_open: Impossible de supprimer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ces transferts pour pouvoir éditer cette règle.	
-        delete_document_close: Impossible de supprimer la règle car des données ont été envoyées via cette règle.
+        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.	
         delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: 
         update: Impossible d'éditer la règle. 
     account:
         language_change: Impossible de modifier le langage :
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
-         
+    connector:
+        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
+    document:
+        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware. 
+        
 title:
     account:
         view: Mon compte

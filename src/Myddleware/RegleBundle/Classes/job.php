@@ -170,6 +170,7 @@ class jobcore  {
 									ON Document.rule_id = RuleOrder.rule_id
 							WHERE 
 									global_status = 'Error'
+								AND deleted = 0 
 								AND attempt <= :attempt 
 							ORDER BY RuleOrder.order ASC, source_date_modified ASC	
 							LIMIT $limit";
@@ -233,10 +234,12 @@ class jobcore  {
 	
 	
 	// Permet d'exécuter des jobs manuellement depuis Myddleware
-	public function actionMassTransfer($event,$param) {
+	public function actionMassTransfer($event, $datatype, $param) {
 		if (in_array($event, array('rerun','cancel'))) { 
-			// Pour ces 2 actions, l'event est le premier paramètre et ce sont les ids des cocuments qui sont envoyés dans le $param
+			// Pour ces 2 actions, l'event est le premier paramètre, le type de donnée est le deuxième
+			// et ce sont les ids des documents ou règles qui sont envoyés dans le $param
 			$paramJob[] = $event;
+			$paramJob[] = $datatype;
 			$paramJob[] = implode(',',$param);
 			return $this->runBackgroundJob('massaction',$paramJob);
 		}
@@ -305,14 +308,9 @@ class jobcore  {
 	}
 
 	// Fonction permettant d'annuler massivement des documents
-	public function massAction($action,$idsDoc) {
-		if (empty($idsDoc)) {
-			$this->message .=  'No Ids in parameters of the job massAction.';		
-			return false;
-		}
-		
+	public function massAction($action, $dataType, $idsDoc, $forceAll, $fromStatus, $toStatus) {	
 		try {
-			// Formatage du tableau d'idoc
+			// Build IN parameter²
 			$idsDocArray = explode(',',$idsDoc);	
 			$queryIn = '(';
 			foreach ($idsDocArray as $idDoc) {
@@ -321,17 +319,42 @@ class jobcore  {
 			$queryIn = rtrim($queryIn,',');
 			$queryIn .= ')';
 			
-			// Création de la requête
+			// Buid WHERE section
+			// Filter on rule or docuement depending on the data type
+			$where = ' WHERE ';
+			if ($dataType == 'rule') {
+				$where .= " Rule.id IN $queryIn ";
+			} elseif ($dataType == 'document') {
+				$where .= " Document.id IN $queryIn ";
+			}
+			// No filter on status if the action is restore/changeStatus or if forceAll = 'Y'
+			if (
+					$forceAll != 'Y'
+				AND $action	!= 'restore'
+				AND $action	!= 'changeStatus'
+			) {
+				$where .= " AND Document.global_status IN ('Open','Error') ";
+			}
+			// Filter on relevant delete flag (select deleted = 1 only for restore action)
+			if ($action	== 'restore') {
+				$where .= " AND Document.deleted = 1 ";
+			} else {
+				$where .= " AND Document.deleted = 0 ";
+			}
+			// Filter on status for the changeStatus action
+			if ($action	== 'changeStatus') {
+				$where .= " AND Document.status = '$fromStatus' ";
+			}
+			
+			// Build the query
 			$sqlParams = "	SELECT 
 								Document.id,
 								Document.rule_id
 							FROM Document	
 								INNER JOIN Rule
-									ON Document.rule_id = Rule.id
-							WHERE
-									Document.global_status IN ('Open','Error')
-								AND Document.id IN $queryIn
-							ORDER BY Rule.id";
+									ON Document.rule_id = Rule.id"
+							.$where."
+							ORDER BY Rule.id";						
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$documents = $stmt->fetchAll();
@@ -346,7 +369,7 @@ class jobcore  {
 						$param['jobId'] = $this->id;						
 						$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					}
-					$errorActionDocument = $rule->actionDocument($document['id'],$action);
+					$errorActionDocument = $rule->actionDocument($document['id'],$action, $toStatus);
 					if (!empty($errorActionDocument)) {
 						$this->message .= print_r($errorActionDocument,true);
 					}
@@ -409,6 +432,15 @@ class jobcore  {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			return false;
 		}
+	}
+	
+	// Remove all data flagged deleted in the database
+	public function pruneDatabase() {
+		// Documents		
+		
+		// Rules
+		
+		// Connectors
 	}
 	
 	public function getRules() {
@@ -636,6 +668,7 @@ class jobcore  {
 						WHERE 
 								Document.rule_id = :ruleId
 							AND Document.global_status IN ('Close','Cancel')
+							AND Document.deleted = 0 
 							AND Document.date_modified < :limitDate	";							
 					$stmt = $this->connection->prepare($deleteSource);
 					$stmt->bindValue("ruleId", $rule['id']);
@@ -663,6 +696,7 @@ class jobcore  {
 								Log.rule_id = :ruleId
 							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
 							AND Document.global_status IN ('Close','Cancel')
+							AND Document.deleted = 0 
 							AND Document.date_modified < :limitDate	";						
 					$stmt = $this->connection->prepare($deleteLog);
 					$stmt->bindValue("ruleId", $rule['id']);

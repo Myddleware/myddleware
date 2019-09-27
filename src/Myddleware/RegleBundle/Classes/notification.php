@@ -75,7 +75,11 @@ class notificationcore  {
 				$textMail .= $this->tools->getTranslation(array('email_alert', 'introduction')).' '.$notificationParameter['alert_time_limit'].' '.$this->tools->getTranslation(array('email_alert', 'minute')).chr(10).chr(10);
 				$textMail .= $this->tools->getTranslation(array('email_alert', 'job_start')).' '.$job['begin'];
 				$textMail .= $this->tools->getTranslation(array('email_alert', 'job_id')).' '.$job['id'].chr(10).chr(10);
-				$textMail .= $this->tools->getTranslation(array('email_alert', 'recommandation')).chr(10).chr(10);
+				$textMail .= $this->tools->getTranslation(array('email_alert', 'recommandation')).chr(10).chr(10);				
+				// Add url if the parameter base_uri is defined in app\config\public
+				if (!empty($this->container->getParameter('base_uri'))) {
+					$textMail .= chr(10).$this->container->getParameter('base_uri').chr(10);
+				}
 				$textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
 				$message = \Swift_Message::newInstance()
 					->setSubject($this->tools->getTranslation(array('email_alert', 'subject')))
@@ -121,7 +125,8 @@ class notificationcore  {
 								INNER JOIN Rule
 									ON Log.rule_id = Rule.id
 								INNER JOIN Document
-									ON Document.id = Log.doc_id
+									 ON Document.id = Log.doc_id
+									AND Document.deleted = 0
 							WHERE
 									Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 								AND (
@@ -194,7 +199,8 @@ class notificationcore  {
 									INNER JOIN Rule
 										ON Log.rule_id = Rule.id
 									INNER JOIN Document
-										ON Document.id = Log.doc_id
+										 ON Document.id = Log.doc_id
+										AND Document.deleted = 0
 								WHERE
 										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
 									AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
@@ -217,8 +223,13 @@ class notificationcore  {
 				}
 			}
 			
+			// Add url if the parameter base_uri is defined in app\config\public
+			if (!empty($this->container->getParameter('base_uri'))) {
+				$textMail .= chr(10).$this->container->getParameter('base_uri').chr(10);
+			}
 			// Create text
 			$textMail .= chr(10).$this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
+					
 			$message = \Swift_Message::newInstance()
 				->setSubject($this->tools->getTranslation(array('email_notification', 'subject')))
  				->setFrom('no-reply@myddleware.com')

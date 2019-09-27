@@ -56,7 +56,7 @@
                   <tr>
                         <td class="title">{{ form_label(field.value) }}</td>
                         <td class="value">
-                            {% if field.vars.value.name !='wsdl' %}
+                            {% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
                                 {{ form_widget(field.value) }}
                             {% else %}
                                 <a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
