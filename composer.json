@@ -15,7 +15,7 @@
     "require": {
         "php": ">=7.1",
       "symfony/symfony": "3.4.31",
-        "doctrine/orm": "^2.5",
+        "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
 	"twig/twig": "^1.0",
