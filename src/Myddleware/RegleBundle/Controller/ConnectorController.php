@@ -341,6 +341,7 @@ class ConnectorController extends Controller
 					$connector->setDateModified(new \DateTime);
 					$connector->setCreatedBy( $this->getUser()->getId() );
 					$connector->setModifiedBy( $this->getUser()->getId() );
+					$connector->setDeleted(0);
 
 					$em->persist($connector);
 					$em->flush();
@@ -501,9 +502,9 @@ class ConnectorController extends Controller
 		$permission = $this->get('myddleware.permission');
 
 		if ($permission->isAdmin($this->getUser()->getId())) {
-			$qb->where('c.id =:id AND c.deleted')->setParameter('id',$id); 
+			$qb->where('c.id =:id AND c.deleted = 0')->setParameter('id',$id); 
 		} else {
-			$qb->where('c.id =:id and c.createdBy =:createdBy AND c.deleted')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+			$qb->where('c.id =:id and c.createdBy =:createdBy AND c.deleted = 0')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
 		}
 		// Detecte si la session est le support ---------			
 		// Infos du connecteur
