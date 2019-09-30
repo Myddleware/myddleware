@@ -64,6 +64,20 @@ $moduleFields = array (
 																																				'21' => 'Annulée'
 						)),		
 					),
+					
+					'suivi_commande' => array(			
+						'ref_client' => array('label' => 'Ref commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+						'valide' => array('label' => 'Statut commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array(
+																																				'3' => 'En préparation',
+																																				'4' => 'Expédiée',
+																																				'9' => 'Facturée',
+																																				'10' => 'Expédiée Facturation externe',
+																																				'21' => 'Annulée'
+						)),		
+						'bordereau' => array('label' => 'Bordereau', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'qte_cmd' => array('label' => 'Quantité commandée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'qte_exp' => array('label' => 'Quantité expédiée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					),
 				);
 
 $fieldsRelate = array();

@@ -1171,7 +1171,7 @@ class rulecore {
 					}
 					else {
 						$response[$documentId] = false;
-						$doc->setMessage('Type transfer '.$type.' unknown. ');
+						$response['error']= 'Type transfer '.$type.' unknown. ';
 					}
 				}
 				else {

@@ -607,6 +607,9 @@ class documentcore {
 			) {	
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
+				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return false;
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;

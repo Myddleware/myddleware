@@ -36,6 +36,10 @@ class medialogistiquecore extends solution {
 	
 	// Module list that allows to make parent relationships
 	protected $allowParentRelationship = array('gestion_commande');
+	
+	protected $idByModule = array(
+							'suivi_commande' => 'ref_client'
+						);
 
 	public function getFieldsLogin() {
 		return array(
@@ -61,20 +65,27 @@ class medialogistiquecore extends solution {
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {	
+// print_r($this->paramConnexion);
+// die();
 			// Call the order list to check the login parameters (OK even if there is no order)
-			$timestamp = date('U');
+			$timestamp = gmdate('U');
 			// Build login parameters
 			$parameters = array(
 						'id_client' => $this->paramConnexion['clientid'],
 						'id_auth' => $this->paramConnexion['authid'],
 						'expires' => $timestamp,
-						'auth' => hash('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande')
+						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
 			);
-// print_r($parameters);			
+// echo date('Y-m-d h:i:s').chr(10);			
+// print_r($parameters);
 			$result = $this->call($this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters));
 			// $result = $this->call($this->url.'gestion_commande/date/2019-08-22?'.http_build_query($parameters));
-// echo $this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters);			
+// echo $this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters);	
+// echo chr(10) .'result : '.chr(10);
+		
+// echo chr(10).date('Y-m-d h:i:s').chr(10);			
 // print_r($result);			
+// die();			
 			
 			// We have to get a result action equal to Get_commande because this is the action we have called
 			if (
@@ -98,6 +109,11 @@ class medialogistiquecore extends solution {
         $modules = array(
             'gestion_commande' => 'Commande'
         );
+		if ($type == 'source') {
+			$modules = array(
+				'suivi_commande' => 'Suivi commande'
+			);
+		}
         return $modules;
     } // get_modules()
 	
@@ -114,7 +130,7 @@ class medialogistiquecore extends solution {
 				$this->moduleFields = $moduleFields[$module];
 			} else {
 				throw new \Exception('Module '.$module.' unknown. Failed to get the module fields.');
-			}
+			}		
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -129,6 +145,12 @@ class medialogistiquecore extends solution {
 	 */
 	public function read($param) {
 		try {	
+print_r($param);
+			// Field id can change depending of the module
+			if(!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
+				$fieldId = $this->idByModule[$param['module']];
+			}
+			
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			// Remove Myddleware 's system fields
@@ -137,57 +159,72 @@ class medialogistiquecore extends solution {
 			// $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 			
 			$fields = $param['fields'];
-			$result['date_ref'] = $param['date_ref'];			
+			$result['date_ref'] = $param['date_ref'];	
+			// Change to format Y-m-d
+			$param['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
 			$result['count'] = 0;
-		/*	$filters_result = array();
-			// Build the query for ERPNext
-			if (!empty($param['query'])) { 
-				foreach ($param['query'] as $key => $value) {
-					// The id field is name in ERPNext
-					if ($key === 'id') {
-						$key = 'name';
-					}
-					$filters_result[$key] = $value;
+			$lastCall = false;
+			
+			// Call the order list with the reference date in parameter
+			$timestamp = gmdate('U');
+			// Build login parameters
+			$parameters = array(
+						'id_client' => $this->paramConnexion['clientid'],
+						'id_auth' => $this->paramConnexion['authid'],
+						'expires' => $timestamp,
+						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
+			);
+echo 'date ref : '.$param['date_ref'].chr(10);			
+			$yesterday = date("Y-m-d", strtotime( '-1 days' ) );
+// echo $yesterday.chr(10);		
+			while (!$lastCall) {
+				// If date ref = today or yesterday then we don't add the date in the URL
+				if (
+						$param['date_ref'] == gmdate('Y-m-d')
+					 OR	$param['date_ref'] == $yesterday
+				) {
+echo $this->url.'gestion_commande?'.http_build_query($parameters).chr(10);	
+					$resultQuery = $this->call($this->url.'gestion_commande?'.http_build_query($parameters));
+					$lastCall = true;
+					echo 'A'.chr(10);
+				} else {
+echo $this->url.'gestion_commande/date/'.$param['date_ref'].'?'.http_build_query($parameters).chr(10);						
+					$resultQuery = $this->call($this->url.'gestion_commande/date/'.$param['date_ref'].'?'.http_build_query($parameters));
+					echo 'B'.chr(10);
 				}
-				$filters = json_encode($filters_result);
-				$data = array('filters' => $filters, 'fields' => '["*"]');
-			} else {
-				$filters = '{"'.$dateRefField.'": [">", "' . $param['date_ref'] . '"]}';
-				$data = array('filters' => $filters, 'fields' => '["*"]');
-			}	
-		
-			// Send the query
-			$q = http_build_query($data);
-			$url = $this->paramConnexion['url'] . '/api/resource/' . rawurlencode($param['module']) . '?' . $q;		
-			$resultQuery = $this->call($url, 'GET', '');				
-		  
-			// If no result
-			if (empty($resultQuery)) {
-				$result['error'] = "Request error";
-			} else if (count($resultQuery->data) > 0) {
-				$resultQuery = $resultQuery->data;
-				foreach ($resultQuery as $key => $recordList) {
-					$record = null;
-					foreach ($fields as $field) {
-						if ($field == $dateRefField) {
-							$record['date_modified'] = $this->dateTimeToMyddleware($recordList->$field);
-							if ($recordList->$field > $result['date_ref']) {
-								$result['date_ref'] = $recordList->$field;
+print_r($resultQuery);
+				
+				// If no result
+				if (!empty($resultQuery->ok)) {
+					foreach ($resultQuery->data as $recordData) {
+						// Date modified equal current date_ref
+						$record['date_modified'] = $this->dateTimeToMyddleware($param['date_ref']);
+						foreach ($fields as $field) {
+							if ($field != $fieldId) {
+								$record[$field] = $recordList->$field;
 							}
-						} 
-						if ($field != 'id') {
-							$record[$field] = $recordList->$field;
 						}
+						$record['id'] = $recordData->$fieldId;
+						$result['values'][$recordData->$fieldId] = $record; // last record
+						$result['count']++;
 					}
-					$record['id'] = $recordList->name;
-					$result['values'][$recordList->name] = $record; // last record
 				}
-				$result['count'] = count($resultQuery);
-			}*/
+				
+				
+				// Add 1 day to date_ref if not last call
+				if (!$lastCall) {
+					$dateRef = DateTime::createFromFormat('Y-m-d', $param['date_ref']);
+					$dateRef->modify('+1 day');
+					$param['date_ref'] = $dateRef->format('Y-m-d');
+					$result['date_ref'] = $this->dateTimeToMyddleware($param['date_ref']);
+echo 'new date ref : '.$param['date_ref'].chr(10);
+				}
+			}
 		} catch (\Exception $e) {
 			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
-		}		 
-return null;		
+		}	
+print_r($result);		
+// return null;		
 		return $result;
 	}// end function read
 
@@ -196,12 +233,11 @@ return null;
 	public function create($param) {
 		$result = array();
 		try {
-// print_r($param);
 			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Order management only for now
 					if ($param['module']== 'gestion_commande') {
-						$this->createOrder($param, $idDoc);
+						$result = $this->createOrder($param, $idDoc);
 					}
 				} catch (\Exception $e) {
 					$result[$idDoc] = array(
@@ -209,16 +245,8 @@ return null;
 						'error' => $e->getMessage()
 					);
 				}
-				// Transfert status update
-				if (
-						!empty($subDocIdArray)
-					AND empty($result[$idDoc]['error'])
-				) {				
-					// foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
-						// $this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
-					// }
-				}
-				// $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+				
+				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);			
 			}
 		} catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
@@ -252,20 +280,39 @@ return null;
 			}
 			// Build the scv array in the right order
 			$csv = $this->buildCsv($order, $articles, $csvArray);
-			$timestamp = date('U');
+			$timestamp = gmdate('U');
 			// Build login parameters
 			$parameters = array(
 						'id_client' => $this->paramConnexion['clientid'],
 						'id_auth' => $this->paramConnexion['authid'],
 						'expires' => $timestamp,
-						'auth' => hash('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande') //,
+						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
 						// 'csv' => $csv
 			);
-print_r($parameters);			
-print_r(array('csv' => $csv));			
-			$result = $this->call($this->url.'gestion_commande?'.http_build_query($parameters), 'POST', array('csv' => $csv));
-print_r($result);			
-// echo $csv;							
+			
+			// Call MediaLogistique function
+			$resultCall = $this->call($this->url.'gestion_commande?'.http_build_query($parameters), 'POST', array('csv' => $csv));
+			
+			// Error management
+			if ($resultCall->ok == 1) {
+				$result[$idDoc] = array('id' => $resultCall->data[0]->ref_cmd, 'error' => '');
+			// Global error management
+			} elseif(!empty($resultCall->msg)) {
+				throw new \Exception($resultCall->msg);
+			// Order error management	
+			} elseif(!empty($resultCall->data[0]->msg)) {
+				throw new \Exception($resultCall->data[0]->msg);
+			} else {
+				throw new \Exception('No result from MVS. ');
+			}
+			
+			// If no exception, we update sub data transfer, main data transfer will be updated in the create function
+			if (!empty($subDocIdArray)) {				
+				foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+					$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+				}
+			}
+			return $result;				
 		}
 	}
 		
@@ -314,6 +361,18 @@ print_r($result);
 		return parent::getRuleMode($module,$type);
 	}
 	
+	// Convert Myddleware datetime format to MediaLogistique datetime format
+	protected function dateTimeFromMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('Y-m-d');
+	}// dateTimeFromMyddleware($dateTime)    
+	
+	// Convert MediaLogistique datetime format to Myddleware datetime format
+	protected function dateTimeToMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('Y-m-d H:i:s');
+	}// dateTimeToMyddleware($dateTime)	
+	
 	/**
 	 * Function call
 	 * @param $url
@@ -333,11 +392,14 @@ print_r($result);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
 		// common description bellow
-		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_setopt($ch, CURLOPT_SSLVERSION, 6);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 		$response = curl_exec($ch);
+// print_r($response);	
+ // $info = curl_getinfo($ch);	
+// print_r($info);	
 		curl_close($ch);
 	
 		return json_decode($response);
