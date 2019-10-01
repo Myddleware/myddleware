@@ -65,8 +65,6 @@ class medialogistiquecore extends solution {
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {	
-// print_r($this->paramConnexion);
-// die();
 			// Call the order list to check the login parameters (OK even if there is no order)
 			$timestamp = gmdate('U');
 			// Build login parameters
@@ -76,17 +74,8 @@ class medialogistiquecore extends solution {
 						'expires' => $timestamp,
 						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
 			);
-// echo date('Y-m-d h:i:s').chr(10);			
-// print_r($parameters);
 			$result = $this->call($this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters));
-			// $result = $this->call($this->url.'gestion_commande/date/2019-08-22?'.http_build_query($parameters));
-// echo $this->url.'gestion_commande/date/'.date('Y-m-d').'?'.http_build_query($parameters);	
-// echo chr(10) .'result : '.chr(10);
-		
-// echo chr(10).date('Y-m-d h:i:s').chr(10);			
-// print_r($result);			
-// die();			
-			
+
 			// We have to get a result action equal to Get_commande because this is the action we have called
 			if (
 					empty($result->action) 
@@ -130,7 +119,18 @@ class medialogistiquecore extends solution {
 				$this->moduleFields = $moduleFields[$module];
 			} else {
 				throw new \Exception('Module '.$module.' unknown. Failed to get the module fields.');
+			}	
+
+			// Field relate
+			if (!empty($fieldsRelate[$module])) {
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}	
+		
+			// Add relate field in the field mapping 
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}		
+			
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
@@ -145,7 +145,6 @@ class medialogistiquecore extends solution {
 	 */
 	public function read($param) {
 		try {	
-print_r($param);
 			// Field id can change depending of the module
 			if(!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
 				$fieldId = $this->idByModule[$param['module']];
@@ -173,26 +172,20 @@ print_r($param);
 						'id_auth' => $this->paramConnexion['authid'],
 						'expires' => $timestamp,
 						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
-			);
-echo 'date ref : '.$param['date_ref'].chr(10);			
+			);		
 			$yesterday = date("Y-m-d", strtotime( '-1 days' ) );
-// echo $yesterday.chr(10);		
 			while (!$lastCall) {
 				// If date ref = today or yesterday then we don't add the date in the URL
 				if (
 						$param['date_ref'] == gmdate('Y-m-d')
 					 OR	$param['date_ref'] == $yesterday
 				) {
-echo $this->url.'gestion_commande?'.http_build_query($parameters).chr(10);	
 					$resultQuery = $this->call($this->url.'gestion_commande?'.http_build_query($parameters));
 					$lastCall = true;
 					echo 'A'.chr(10);
 				} else {
-echo $this->url.'gestion_commande/date/'.$param['date_ref'].'?'.http_build_query($parameters).chr(10);						
 					$resultQuery = $this->call($this->url.'gestion_commande/date/'.$param['date_ref'].'?'.http_build_query($parameters));
-					echo 'B'.chr(10);
 				}
-print_r($resultQuery);
 				
 				// If no result
 				if (!empty($resultQuery->ok)) {
@@ -200,12 +193,15 @@ print_r($resultQuery);
 						// Date modified equal current date_ref
 						$record['date_modified'] = $this->dateTimeToMyddleware($param['date_ref']);
 						foreach ($fields as $field) {
-							if ($field != $fieldId) {
-								$record[$field] = $recordList->$field;
-							}
+							$record[$field] = $recordData->$field;
 						}
-						$record['id'] = $recordData->$fieldId;
-						$result['values'][$recordData->$fieldId] = $record; // last record
+						// In case of suivi_commande module, a commande can be read several times, so we concatenate the commande ref and its status (valide)
+						if ($param['module'] == 'suivi_commande') {
+							$record['id'] = $recordData->ref_client.'_'.$recordData->valide;
+						} else {
+							$record['id'] = $recordData->$fieldId;
+						}
+						$result['values'][$record['id']] = $record; // last record
 						$result['count']++;
 					}
 				}
@@ -217,14 +213,11 @@ print_r($resultQuery);
 					$dateRef->modify('+1 day');
 					$param['date_ref'] = $dateRef->format('Y-m-d');
 					$result['date_ref'] = $this->dateTimeToMyddleware($param['date_ref']);
-echo 'new date ref : '.$param['date_ref'].chr(10);
 				}
 			}
 		} catch (\Exception $e) {
 			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
-		}	
-print_r($result);		
-// return null;		
+		}			
 		return $result;
 	}// end function read
 
@@ -287,9 +280,7 @@ print_r($result);
 						'id_auth' => $this->paramConnexion['authid'],
 						'expires' => $timestamp,
 						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
-						// 'csv' => $csv
-			);
-			
+			);			
 			// Call MediaLogistique function
 			$resultCall = $this->call($this->url.'gestion_commande?'.http_build_query($parameters), 'POST', array('csv' => $csv));
 			
@@ -397,9 +388,7 @@ print_r($result);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 6);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 		$response = curl_exec($ch);
-// print_r($response);	
- // $info = curl_getinfo($ch);	
-// print_r($info);	
+		// $info = curl_getinfo($ch);	
 		curl_close($ch);
 	
 		return json_decode($response);

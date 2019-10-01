@@ -66,7 +66,6 @@ $moduleFields = array (
 					),
 					
 					'suivi_commande' => array(			
-						'ref_client' => array('label' => 'Ref commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 						'valide' => array('label' => 'Statut commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => array(
 																																				'3' => 'En préparation',
 																																				'4' => 'Expédiée',
@@ -80,7 +79,11 @@ $moduleFields = array (
 					),
 				);
 
-$fieldsRelate = array();
+$fieldsRelate = array(
+					'suivi_commande' => array(			
+						'ref_client' => array('label' => 'Ref commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+					),
+				);
 
 
 // Metadata override if needed
