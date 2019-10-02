@@ -182,7 +182,6 @@ class medialogistiquecore extends solution {
 				) {
 					$resultQuery = $this->call($this->url.'gestion_commande?'.http_build_query($parameters));
 					$lastCall = true;
-					echo 'A'.chr(10);
 				} else {
 					$resultQuery = $this->call($this->url.'gestion_commande/date/'.$param['date_ref'].'?'.http_build_query($parameters));
 				}
@@ -223,14 +222,16 @@ class medialogistiquecore extends solution {
 
 	
 	// Permet de créer des données
-	public function create($param) {
+	public function create($param) {			
 		$result = array();
 		try {
 			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Order management only for now
 					if ($param['module']== 'gestion_commande') {
-						$result = $this->createOrder($param, $idDoc);
+						$createOrder = $this->createOrder($param, $idDoc);
+						$result = array_merge($result,$createOrder);
+						$this->updateDocumentStatus($idDoc, $createOrder[$idDoc], $param);	
 					}
 				} catch (\Exception $e) {
 					$result[$idDoc] = array(
@@ -239,18 +240,18 @@ class medialogistiquecore extends solution {
 					);
 				}
 				
-				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);			
 			}
 		} catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-		}	
+		}			
 		return $result;
 	}
 	
-	protected function createOrder($param, $idDoc) {
+	protected function createOrder($param, $idDoc) {	
 		$csvArray = array();
 		$articles = array();
+		$result[$idDoc]= array();;
 		$subDocIdArray = array();
 		$csv = '';
 		$order = $param['data'][$idDoc];
@@ -280,29 +281,30 @@ class medialogistiquecore extends solution {
 						'id_auth' => $this->paramConnexion['authid'],
 						'expires' => $timestamp,
 						'auth' => hash_hmac('sha256',$this->paramConnexion['authid'].'_'.$timestamp.'_gestion_commande',$this->paramConnexion['hashkey'])
-			);			
+			);	
+		
 			// Call MediaLogistique function
-			$resultCall = $this->call($this->url.'gestion_commande?'.http_build_query($parameters), 'POST', array('csv' => $csv));
+			$resultCall = $this->call($this->url.'gestion_commande?'.http_build_query($parameters), 'POST', array('csv' => $csv));			
 			
 			// Error management
-			if ($resultCall->ok == 1) {
+			if ($resultCall->ok == 1 AND $resultCall->data[0]->msg == 'OK') {
 				$result[$idDoc] = array('id' => $resultCall->data[0]->ref_cmd, 'error' => '');
+				// If no exception, we update sub data transfer, main data transfer will be updated in the create function
+				if (!empty($subDocIdArray)) {				
+					foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
+						$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
+					}
+				}
 			// Global error management
 			} elseif(!empty($resultCall->msg)) {
-				throw new \Exception($resultCall->msg);
+				$result[$idDoc] = array('id' => -1, 'error' => $resultCall->msg);
 			// Order error management	
 			} elseif(!empty($resultCall->data[0]->msg)) {
-				throw new \Exception($resultCall->data[0]->msg);
+				$result[$idDoc] = array('id' => -1, 'error' => $resultCall->data[0]->msg);
 			} else {
-				throw new \Exception('No result from MVS. ');
+				$result[$idDoc] = array('id' => -1, 'error' => 'No result from MVS. ');
 			}
 			
-			// If no exception, we update sub data transfer, main data transfer will be updated in the create function
-			if (!empty($subDocIdArray)) {				
-				foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {				
-					$this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
-				}
-			}
 			return $result;				
 		}
 	}
@@ -319,7 +321,7 @@ class medialogistiquecore extends solution {
 		foreach ($articles as $article) {
 			// Add Carriage Return expect for the first line
 			if (!empty($csv)) {
-				$csv .= '\n';
+				$csv .= chr(10);
 			}
 			$csv .=  '"'.$order['code_interne'].'";"'.$order['compte_client'].'";"'.$order['ref_commande'].'";"'.$order['date_commande'].'";"'.$order['date_livraison_demandee'].'";';
 			$csv .=  (!empty($order['commentaire']) ? '"'.$order['commentaire'].'"' : '').';'; 								// Not requiered fields
