@@ -54,3 +54,8 @@
 # IDEs
 .idea/
 .vscode/
+
+# Deployment
+deploy_key
+deploy_key.pub
+uat.pem

@@ -1,0 +1,25 @@
+---
+- hosts: all
+  tasks:
+
+#  - name: Upload deploy key
+#    copy:
+#      src: ./deploy_key
+#      dest: ~/.ssh/deploy_key
+#      mode: 0400
+
+  - name: Repository setup and update
+    git:
+      repo: https://github.com/javanile/myddleware.git
+      dest: "{{ working_dir }}"
+      #key_file: ~/.ssh/deploy_key
+      #accept_hostkey: yes
+      version: master
+      force: yes
+
+  - name: Project setup and update
+    command: ./setup.sh
+    args: { chdir: "{{ working_dir }}" }
+
+#  - name: Delete Git Private Key
+#    file: { path: ~/.ssh/git_access_key, state: absent }
