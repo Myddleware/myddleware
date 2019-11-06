@@ -44,7 +44,9 @@ class pruneDatabaseCommand extends ContainerAwareCommand
 		$logger = $this->getContainer()->get('logger');
 		
 		$job = $this->getContainer()->get('myddleware_job.job');
-				
+		// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
+		$job->message = '';	
+		
 		if ($job->initJob('Prune database')) {
 			$job->pruneDatabase();
 		}
