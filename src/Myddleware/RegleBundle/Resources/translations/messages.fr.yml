@@ -319,6 +319,7 @@ list_flux:
         source_date_modified: Date de référence
         type: Type
         source_field: Champ lié
+        reference: Référence
         
 flux:
     gbl_status:
@@ -376,7 +377,9 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
-        dateref: Date de référence
+        dateref: Référence
+        date_created: Date de création
+        date_modified: Date de modification
     log:
         id: Id
         ref: Référence

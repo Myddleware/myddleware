@@ -312,12 +312,13 @@ list_flux:
         version: Version
         source_id: Source id
         target_id: Target id
-        date_created: Date of creation
-        date_modified: Date of modification
+        date_created: Creation date
+        date_modified: Modification date
         statut: Status
         source_date_modified: Date of reference
         type: Type
         source_field: Field linked
+        reference: Reference
 
 flux:
     gbl_status:
@@ -375,7 +376,9 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
-        dateref: Reference date
+        dateref: Reference        
+        date_created: Creation date
+        date_modified: Modification date
     log:
         id: Id
         ref: Reference

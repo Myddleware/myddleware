@@ -115,7 +115,7 @@
 				<th>{{'list_flux.tab.name'|trans}}</th>
 				<th>{{'list_flux.tab.source_id'|trans}}</th>
 				<th>{{'list_flux.tab.target_id'|trans}}</th>
-				<th>{{'list_flux.tab.date_created'|trans}}</th>
+				<th>{{'list_flux.tab.reference'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
 				<th>{{'list_flux.tab.type'|trans}}</th>
@@ -133,7 +133,7 @@
 				<td><a href="{{ path('regle_open',{'id' : flux.rule_id }) }}" title="">{{ flux.rule_name }}</a></td>
 		     	<td>{{ flux.source_id }}</td>     	
 		     	<td>{{ flux.target_id }}</td>     	
-		     	<td>{{ flux.date_created|date("d/m/Y H:i:s") }}</td>
+		     	<td>{{ flux.source_date_modified }}</td>
 				<td>{{ flux.date_modified|date("d/m/Y H:i:s") }}</td>
 		     	<td class="ctr">
 		     		<div class="gblstatus_{{ flux.global_status|lower }}">{{ flux.status }}
@@ -157,7 +157,7 @@
 				<th>{{'list_flux.tab.name'|trans}}</th>
 				<th>{{'list_flux.tab.source_id'|trans}}</th>
 				<th>{{'list_flux.tab.target_id'|trans}}</th>
-				<th>{{'list_flux.tab.date_created'|trans}}</th>
+				<th>{{'list_flux.tab.reference'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
 				<th>{{'list_flux.tab.type'|trans}}</th>
