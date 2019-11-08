@@ -128,7 +128,7 @@ class FluxControllerCore extends Controller
 			$rule = $this->getDoctrine()
                          ->getManager()
                          ->getRepository('RegleBundle:Rule')
-                         ->findAll();			
+                         ->findBy(array('deleted' => 0));		
 		}
 		else {
 			$list_fields_sql = 
