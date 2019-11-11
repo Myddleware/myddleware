@@ -128,8 +128,8 @@ filter:
     different: is different from
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
-    in: is included in the following table separated by;
-    notin: is not included in the following table separated by ;      
+    in: is included in the following table separated by semicolon
+    notin: is not included in the following table separated by semicolon      
 
 view_rule:
     action:
@@ -297,7 +297,7 @@ list_flux:
         date_modified: Date of modification
         rule: Rule
         status: Status
-        global_status: Global status
+        global_status: Global status / Type
         id: Id
         source_id: Source id
         target_id: Target id
@@ -312,12 +312,13 @@ list_flux:
         version: Version
         source_id: Source id
         target_id: Target id
-        date_created: Date of creation
-        date_modified: Date of modification
+        date_created: Creation date
+        date_modified: Modification date
         statut: Status
         source_date_modified: Date of reference
         type: Type
         source_field: Field linked
+        reference: Reference
 
 flux:
     gbl_status:
@@ -345,7 +346,11 @@ flux:
         error_checking: Checking error
         error_sending: Sending error
         not_found: Not found
-
+    type:
+        update: Update
+        create: Create
+        search: Search
+        
 view_flux:
     empty: No data
     empty_log: No log
@@ -361,7 +366,7 @@ view_flux:
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
-        readrecord: Generate new transfer
+        readrecord: Run the same record
     header:
         rule: Rule
         statut: Status
@@ -371,6 +376,9 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
+        dateref: Reference        
+        date_created: Creation date
+        date_modified: Modification date
     log:
         id: Id
         ref: Reference
@@ -479,6 +487,7 @@ solution:
         user: User ID
         sandbox: Sandbox (1 if yes, 0 if not)
         wsdl: File wsdl
+        file: File
         host: Host Server
         dbname: Database name
         database_name: Database name
@@ -489,7 +498,9 @@ solution:
         directory: Directory with files
         shop: Shop
         redirect_uri: Redirect URI
-        applicationName: Application name		
+        applicationName: Application name
+        hashkey: Hash key
+        id_auth: Auth ID
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -527,16 +538,20 @@ error:
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
         edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
+        edit_document_error_open_admin: There is at least one transfer open or in error in this rule. We advise you to manage these transfers before editing this rule.
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
-        delete_document_error_open: Failed to delete the rule because there is at least one transfer open or in error in this rule. Cancel these transfers to be able to delete this rule.
-        delete_document_close: Failed to delete the rule because data has been successfully sent via this rule.
+        delete_document: Failed to delete the rule because there is at least one data transfer not deleted on this rule. Remove these transfers to be able to delete this rule.
         delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
-        update: Failed to edit the rule.
+        update: Failed to edit the rule.  
     account:
         language_change: Failed to change the language :
     template:
         creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
-  
+    connector:
+        remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
+    document:
+        deleted_flag: This data transfer is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
+        
 title:
     account:
         view: My account
@@ -718,4 +733,3 @@ management_smtp:
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
-

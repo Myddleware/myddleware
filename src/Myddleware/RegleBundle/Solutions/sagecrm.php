@@ -84,7 +84,7 @@ class sagecrmcore extends solution {
 								'authentication' => SOAP_AUTHENTICATION_BASIC,
 								'exceptions' => TRUE
 							);
-				$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/wsdl/'.$this->paramConnexion['wsdl'];			
+				$this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/file/'.$this->paramConnexion['wsdl'];
 				$client = new \SoapClient($this->paramConnexion['wsdl'], $options);
 				$login_details  = array('username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']);
 				$response = $client->logon($login_details);

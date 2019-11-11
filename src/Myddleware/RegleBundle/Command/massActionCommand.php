@@ -39,8 +39,12 @@ class massActionCommand extends ContainerAwareCommand
         $this
             ->setName('myddleware:massaction')
             ->setDescription('Action massive sur les flux')
-            ->addArgument('action', InputArgument::REQUIRED, "Action") // id séparés par des ";"
-            ->addArgument('idsDoc', InputArgument::REQUIRED, "Ids de document") // id séparés par des ";"
+            ->addArgument('action', InputArgument::REQUIRED, "Action (rerun, cancel, remove, restore or changeStatus)")
+            ->addArgument('dataType', InputArgument::REQUIRED, "Data type (rule or doculent)") 
+            ->addArgument('ids', InputArgument::REQUIRED, "Rule or document ids") // id séparés par des ";"
+            ->addArgument('forceAll', InputArgument::OPTIONAL, "Set Y to process action on all documents (not only open and erro ones)") 
+            ->addArgument('fromStatus', InputArgument::OPTIONAL, "Get all document with this status(Only with changeStatus action)")
+            ->addArgument('toStatus', InputArgument::OPTIONAL, "Set this status (Only with changeStatus action)")
         ;
     }
 
@@ -49,18 +53,43 @@ class massActionCommand extends ContainerAwareCommand
 		$step = 1;
 		try {		
 			$logger = $this->getContainer()->get('logger');
-			
-			// Récupération des paramètres
-			$action = $input->getArgument('action');
-			$idsDoc = $input->getArgument('idsDoc');
 			// Récupération du Job
 			$job = $this->getContainer()->get('myddleware_job.job');
+			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
+			$job->message = '';	
 			
-			if ($job->initJob('Mass '.$action)) {
+			$action = $input->getArgument('action');
+			$dataType = $input->getArgument('dataType');
+			$ids = $input->getArgument('ids');			
+			$forceAll = $input->getArgument('forceAll');			
+			$fromStatus = $input->getArgument('fromStatus');			
+			$toStatus = $input->getArgument('toStatus');			
+			
+			if ($job->initJob('Mass '.$action.' on data type '.$dataType)) {
 				$output->writeln( $job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
-				
-				// Annulation en masse
-				$job->massAction($action,$idsDoc);
+			
+				// Récupération des paramètres
+				if (!in_array($action, array('rerun', 'cancel', 'remove', 'restore', 'changeStatus'))) {
+					throw new \Exception ('Action '.$action.' unknown. Please use action rerun, cancel or remove.');
+				}
+				if (!in_array($dataType, array('document', 'rule'))) {
+					throw new \Exception ('Data type '.$dataType.' unknown. Please use data type document or rule.');
+				}
+				if (empty($ids)) {
+					throw new \Exception ('No ids in the command parameters. Please add ids to run this action.');
+				}
+				if (
+						$action == 'changeStatus'
+					AND (
+							empty($fromStatus)
+						 OR empty($toStatus)
+					)
+				) {
+					throw new \Exception ('fromStatus and toStatus parameters are required for the changeStatus action.');
+				}
+
+				// Mass action
+				$job->massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus);
 			}
 			else {
 				$output->writeln( $job->id ); // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
