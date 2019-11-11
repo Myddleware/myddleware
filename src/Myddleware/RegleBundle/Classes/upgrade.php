@@ -303,6 +303,12 @@ class upgradecore  {
 				$this->message .= $process->getOutput().chr(10);				
 			}
 		} 
+		
+		// Refresh new parameters in file parameters.yml.dist
+		$this->newParameters['parameters'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
+		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml.dist'));	
+		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml.dist'));	
+		
 	}
 	
 	// Finish install
