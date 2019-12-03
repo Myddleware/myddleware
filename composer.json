@@ -39,7 +39,8 @@
         "friendsofsymfony/jsrouting-bundle": "^1.6",
         "api-platform/core": "2.2.10",
         "api-platform/api-pack": "^1.1",
-        "lexik/jwt-authentication-bundle": "^2.6"
+        "lexik/jwt-authentication-bundle": "^2.6",
+        "monolog/monolog":"^1.22"
     },
     "repositories": [
         {
