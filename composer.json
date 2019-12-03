@@ -14,7 +14,7 @@
   "prefer-stable": true,
     "require": {
         "php": ">=7.1 <7.3",
-      "symfony/symfony": "3.4.31",
+      "symfony/symfony": "3.4.35",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
