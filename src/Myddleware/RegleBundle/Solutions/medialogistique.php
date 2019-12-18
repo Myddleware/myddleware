@@ -228,8 +228,8 @@ class medialogistiquecore extends solution {
 			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Order management only for now
-					if ($param['module']== 'gestion_commande') {
-						$createOrder = $this->createOrder($param, $idDoc);
+					if ($param['module']== 'gestion_commande') {						
+						$createOrder = $this->createOrder($param, $idDoc);							
 						$result = array_merge($result,$createOrder);
 						$this->updateDocumentStatus($idDoc, $createOrder[$idDoc], $param);	
 					}
@@ -238,23 +238,25 @@ class medialogistiquecore extends solution {
 						'id' => '-1',
 						'error' => $e->getMessage()
 					);
+					$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);	
 				}
 				
 			}
 		} catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-		}			
+		}		
 		return $result;
 	}
 	
-	protected function createOrder($param, $idDoc) {	
+	protected function createOrder($param, $idDoc) {		
 		$csvArray = array();
 		$articles = array();
 		$result[$idDoc]= array();;
 		$subDocIdArray = array();
 		$csv = '';
 		$order = $param['data'][$idDoc];
+		$missingEan = false;
 		// Search for article line as we have to generate one line in the csv file for each article
 		if (!empty($order['gestion_commande'])){
 			foreach($order['gestion_commande'] as $subOrderObjectId => $subOrderObjectValue) {
@@ -266,12 +268,19 @@ class medialogistiquecore extends solution {
 				unset($subOrderObjectValue['source_date_modified']);
 				// In case of article object
 				if (isset($subOrderObjectValue['article_EAN'])) {
+					// Error if article without EAN code
+					if (empty($subOrderObjectValue['article_EAN'])) {
+						throw new \Exception('Article without EAN code.');
+					}
 					$articles[$subOrderObjectId] = $subOrderObjectValue;
 				} else {
 					$csvArray = array_merge($csvArray, $subOrderObjectValue);
-				}
-				
+				}			
 			}
+			if (empty($articles)) {
+				throw new \Exception('No article on the order.');
+			}
+			
 			// Build the scv array in the right order
 			$csv = $this->buildCsv($order, $articles, $csvArray);
 			$timestamp = gmdate('U');
