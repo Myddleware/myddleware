@@ -36,26 +36,38 @@ class vtigercrmcore extends solution
     protected $required_fields = [
                                     'default'    => [
                                                         'id',
-                                                        'modifiedtime'
+                                                        'modifiedtime',
+                                                        'createdtime'
                                                     ],
                                 ];
 
+
+    protected $FieldsDuplicate = [
+                                    'default' => []
+                                ];
+
     protected $exclude_module_list = [
-                                        'default'    => ['LineItem'],
+                                        'default'    => ['Users'],
                                         'target'     => [],
                                         'source'     => [],
                                     ];
 
     protected $exclude_field_list = [
                                         'default'    => [
-                                                            'id',
-                                                            'modifiedby',
-                                                            'modifiedtime',
-                                                            "createdtime"
+                                                            'default'    => [
+                                                                                'id'
+                                                                            ],
+                                                            'source'     => [
+                                                                                'id'
+                                                                            ],
+                                                            'target'     => [
+                                                                                'id',
+                                                                                'modifiedby',
+                                                                                'modifiedtime',
+                                                                                "createdtime"
+                                                                            ],
                                                         ],
                                     ];
-
-    protected $FieldsDuplicate = [];
 
     /** @var VtigerClient */
     protected $vtigerClient;
@@ -194,6 +206,7 @@ class vtigercrmcore extends solution
         }
 
         $escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
+        $escludeField = $escludeField[$type] ?? $escludeField['default'];
         $this->moduleFields = [];
         foreach ($fields as $field) {
             if (!in_array($field['name'], $escludeField)) {
@@ -212,6 +225,16 @@ class vtigercrmcore extends solution
                                                 'type' => 'varchar(127)', // ? Settare il type giusto?
                                                 'type_bdd' => 'varchar(127)'
                                             ];
+                    if ($field['type']["name"] == "picklist" || $field['type']["name"] == "multipicklist") {
+                        foreach ($field['type']["picklistValues"] as $option) {
+                            $this->moduleFields[$field['name']]["option"][$option["label"]] = $option["value"];
+                        }
+                    }
+                }
+                if ($field['mandatory'] && !array_key_exists($module, $this->FieldsDuplicate)) {
+                    if ($field['name'] != "assigned_user_id") {
+                        $this->FieldsDuplicate[$module][] = $field['name'];
+                    }
                 }
             }
         }
@@ -234,18 +257,20 @@ class vtigercrmcore extends solution
         if (empty($this->vtigerClient)) {
             return [
                 'error' => 'Error: no VtigerClient setup',
-                'done'  => false,
+                'done'  => -1,
             ];
         }
 
+        /*
         if (count($param['fields']) == 0) {
             return [
                 'error' => 'Error: no Param Given',
-                'done'  => false,
+                'done'  => -1,
             ];
         }
+        */
 
-        $queryParam = implode(',', $param['fields']) ?: '*';
+        $queryParam = implode(',', $param['fields'] ?? "") ?: '*';
         $where = '';
         if (!empty($param['query'])) {
             $where = 'WHERE ';
@@ -261,7 +286,7 @@ class vtigercrmcore extends solution
         if (empty($query) || (!empty($query) && !$query['success'])) {
             return [
                         'error' => 'Error: Request Failed!',
-                        'done'  => false,
+                        'done'  => -1,
                     ];
         }
 
@@ -278,6 +303,14 @@ class vtigercrmcore extends solution
         foreach ($fields as $fieldName => $value) {
             $result['values'][$fieldName] = $value;
         }
+
+        /*
+        if(in_array($param['rule']['mode'], ["0", "S"])) {
+            $result['values']['date_modified'] = $fields['modifiedtime'];
+        } else if ($param['rule']['mode'] == "C") {
+            $result['values']['date_modified'] = $fields['createdtime'];
+        }
+        */
 
         return $result;
     }
@@ -311,10 +344,11 @@ class vtigercrmcore extends solution
             $param['limit'] = 100;
         }
 
-        $queryParam = implode(',', $param['fields']) ?: '*';
+        $queryParam = implode(',', $param['fields'] ?? "") ?: '*';
         if ($queryParam != '*') {
             $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
             $queryParam = implode(',', $requiredField).','.$queryParam;
+            $queryParam = str_replace(["my_value,", "my_value"], "", $queryParam);
         }
         $queryParam = rtrim($queryParam, ',');
         $where = !empty($param['date_ref']) ? "WHERE modifiedtime > '$param[date_ref]'" : '';
@@ -341,7 +375,7 @@ class vtigercrmcore extends solution
 
             if (empty($query) || (!empty($query) && !$query['success'])) {
                 return [
-                    'error' => 'Error: Request Failed!',
+                            'error' => 'Error: Request Failed!',
                             'count' => 0,
                         ];
             }
@@ -351,8 +385,14 @@ class vtigercrmcore extends solution
             }
 
             foreach ($query['result'] as $value) {
-                $result['values'][$value['id']] = $value;
                 $result['date_ref'] = $value['modifiedtime'];
+
+                $result['values'][$value['id']] = $value;
+                if(in_array($param['rule']['mode'], ["0", "S"])) {
+                    $result['values'][$value['id']]["date_modified"] = $value['modifiedtime'];
+                } else if ($param['rule']['mode'] == "C") {
+                    $result['values'][$value['id']]["date_modified"] = $value['createdtime'];
+                }
             }
 
             $result['count'] += count($query['result']);
