@@ -177,10 +177,10 @@ class prestashopcore extends solution {
 			$authorized = array("customers" => "The e-shop's customers",
 								"customer_threads" => "Customer services threads",
 								"customer_messages" => "Customer services messages",
+								"order_histories" => "The Order histories",
 								"products" => "The products",
-								"order_histories" => "The Order histories"
-								);
-			
+								"stock_availables" => "Available quantities",
+								);		
 			return array_intersect_key($authorized, $modulesSource);
 		}
 	} // get_modules()

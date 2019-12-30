@@ -77,11 +77,19 @@ $moduleFields = array (
 						'qte_cmd' => array('label' => 'Quantité commandée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qte_exp' => array('label' => 'Quantité expédiée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
+					'gestion_article' => array(			
+						'ean' => array('label' => 'Code EAN', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),		
+						'stock' => array('label' => 'Quantité stock', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'reserve' => array('label' => 'Quantité réservée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					),
 				);
 
 $fieldsRelate = array(
 					'suivi_commande' => array(			
 						'ref_client' => array('label' => 'Ref commande', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
+					),
+					'gestion_article' => array(			
+						'ref_client' => array('label' => 'Ref article', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
 					),
 				);
 
