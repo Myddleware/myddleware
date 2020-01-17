@@ -1,7 +1,7 @@
 FROM php:7.1.32-apache
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install -qq --force-yes git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 && \
+    apt-get -y install -qq --force-yes git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 alien libaio1 && \
     docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install imap exif mysqli pdo pdo_mysql zip && \
     echo "memory_limit=-1" >> /usr/local/etc/php/conf.d/memory_limit.ini && \
@@ -28,6 +28,24 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     docker-php-ext-enable sqlsrv pdo_sqlsrv && \
     sed -i 's,^\(MinProtocol[ ]*=\).*,\1'TLSv1.0',g' /etc/ssl/openssl.cnf && \
     sed -i 's,^\(CipherString[ ]*=\).*,\1'DEFAULT@SECLEVEL=1',g' /etc/ssl/openssl.cnf
+
+RUN curl "https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-sqlplus-19.5.0.0.0-1.x86_64.rpm" -o "/mnt/oracle-instant-sqlplus.rpm" && \
+    curl "https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm" -o "/mnt/oracle-instant-basic.rpm" && \
+    curl "https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-devel-19.5.0.0.0-1.x86_64.rpm" -o "/mnt/oracle-instant-devel.rpm" && \
+    curl "https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-odbc-19.5.0.0.0-1.x86_64.rpm" -o "/mnt/oracle-instant-odbc.rpm" && \
+    curl "https://download.oracle.com/otn_software/linux/instantclient/195000/oracle-instantclient19.5-tools-19.5.0.0.0-1.x86_64.rpm" -o "/mnt/oracle-instant-tools.rpm" && \
+    alien -i /mnt/oracle-instant-sqlplus.rpm && \
+    alien -i /mnt/oracle-instant-basic.rpm && \
+    alien -i /mnt/oracle-instant-devel.rpm && \
+    alien -i /mnt/oracle-instant-odbc.rpm && \
+    alien -i /mnt/oracle-instant-tools.rpm && \
+    ln -s /usr/lib/oracle/19.5/client64/lib/libsqora.so.19.1 /usr/lib/libsqora.so && \
+    rm /mnt/* && \
+    export LD_LIBRARY_PATH=/usr/lib/oracle/19.5/client64/lib && \
+    export ORACLE_HOME=/usr/lib/oracle/19.5/client64 && \
+    export C_INCLUDE_PATH=/usr/include/oracle/19.5/client64 && \
+    docker-php-ext-install oci8 pdo_oci
+
 
 RUN curl -sS https://platform.sh/cli/installer | php && \
     ln -s /root/.platformsh/bin/platform /usr/local/bin/platform

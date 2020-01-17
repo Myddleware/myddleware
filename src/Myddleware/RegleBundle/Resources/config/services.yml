@@ -90,6 +90,9 @@ services:
      myddleware_rule.mysql:
         class: Myddleware\RegleBundle\Solutions\mysql
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.oracledb:
+        class: Myddleware\RegleBundle\Solutions\oracledb
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.microsoftsql:
         class: Myddleware\RegleBundle\Solutions\microsoftsql
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
