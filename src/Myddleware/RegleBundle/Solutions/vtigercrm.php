@@ -47,7 +47,7 @@ class vtigercrmcore extends solution
                                 ];
 
     protected $exclude_module_list = [
-                                        'default'    => ['Users'],
+                                        'default'    => ['Users', "Documents"],
                                         'target'     => [],
                                         'source'     => [],
                                     ];
@@ -69,7 +69,21 @@ class vtigercrmcore extends solution
                                                         ],
                                     ];
 
-    /** @var VtigerClient */
+
+    protected $inventoryModules = [
+                                    "Invoice",
+                                    "SalesOrder",
+                                    "Quotes",
+                                    "PurchaseOrder",
+                                    "GreenTimeControl",
+                                    "DDT",
+                                ];
+
+
+    /** @var array $moduleList */
+    protected $moduleList;
+
+    /** @var VtigerClient $vtigerClient */
     protected $vtigerClient;
 
     /**
@@ -174,10 +188,39 @@ class vtigercrmcore extends solution
         foreach ($modules['information'] as $moduleName => $moduleInfo) {
             if (!in_array($moduleName, $escludedModule)) {
                 $options[$moduleName] = $moduleInfo['label'];
+                $this->setModulePrefix($moduleName);
             }
         }
 
         return $options ?: false;
+    }
+
+    public function setModulePrefix($moduleName = null)
+    {
+        if (empty($moduleName)) {
+            $result = $this->vtigerClient->listTypes();
+
+            if (!$result['success'] || ($result['success'] && count($result['result']) == 0)) {
+                return false;
+            }
+
+            foreach ($result['result']["types"] as $moduleName) {
+                $describe = $this->vtigerClient->describe($moduleName);
+                if ($describe['success'] && count($describe['result']) != 0) {
+                    $this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
+                }
+            }
+        }
+        else {
+            $describe = $this->vtigerClient->describe($moduleName);
+            if ($describe['success'] && count($describe['result']) != 0) {
+                $this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
     }
 
     /**
@@ -214,7 +257,7 @@ class vtigercrmcore extends solution
                     $this->fieldsRelate[$field['name']] = array(
                                                 'label' => $field['label'],
                                                 'required' => $field['mandatory'],
-                                                'type' => 'varchar(127)',
+                                                'type' => 'varchar(127)', // ? Settare il type giusto?
                                                 'type_bdd' => 'varchar(127)',
                                                 'required_relationship' => 0
                                             );
@@ -227,7 +270,7 @@ class vtigercrmcore extends solution
                                             ];
                     if ($field['type']["name"] == "picklist" || $field['type']["name"] == "multipicklist") {
                         foreach ($field['type']["picklistValues"] as $option) {
-                            $this->moduleFields[$field['name']]["option"][$option["label"]] = $option["value"];
+                            $this->moduleFields[$field['name']]["option"][$option["value"]] = $option["label"];
                         }
                     }
                 }
@@ -261,14 +304,9 @@ class vtigercrmcore extends solution
             ];
         }
 
-        /*
-        if (count($param['fields']) == 0) {
-            return [
-                'error' => 'Error: no Param Given',
-                'done'  => -1,
-            ];
+        if (empty($this->moduleList)) {
+            $this->setModulePrefix();
         }
-        */
 
         $queryParam = implode(',', $param['fields'] ?? "") ?: '*';
         $where = '';
@@ -281,7 +319,44 @@ class vtigercrmcore extends solution
                 $where .= "$key = '$item'";
             }
         }
-        $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
+        if ($param["module"] == "LineItem") {
+            $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module] $where;");
+
+            $parentModules = [];
+            foreach ($query['result'] as $parent) {
+                $prefix = explode("x", $parent["parent_id"])[0];
+                if (!array_key_exists($prefix, $parentModules)) {
+                    $parentModules[$prefix] = $this->moduleList[$prefix];
+                }
+            }
+
+            $entity = [];
+            $maxtime = "";
+            foreach ($parentModules as $prefix => $moduleName) {
+                $query = $this->vtigerClient->query("SELECT id, createdtime, modifiedtime FROM $moduleName $where ORDER BY modifiedtime ASC LIMIT 0, 1;");
+                if (empty($query) || !$query['success']) {
+                    continue;
+                }
+
+                foreach ($query["result"] as $parentElement) {
+                    if (empty($maxtime) || $maxtime < $parentElement["modifiedtime"]) {
+                        $maxtime = $parentElement["modifiedtime"];
+                        $retrive = $this->vtigerClient->retrieve($parentElement["id"]);
+                        foreach ($retrive["result"]["LineItems"] as $index => $lineitem) {
+                            $lineitem["parent_id"] = $parentElement["id"];
+                            $lineitem["modifiedtime"] = $parentElement["modifiedtime"];
+                            $lineitem["createdtime"] = $parentElement["createdtime"];
+                            $entity[] = $lineitem;
+                        }
+                    }
+                }
+            }
+
+            $query = ["success" => true, "result" => $entity];
+        }
+        else {
+            $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
+        }
 
         if (empty($query) || (!empty($query) && !$query['success'])) {
             return [
@@ -330,6 +405,10 @@ class vtigercrmcore extends solution
                     ];
         }
 
+        if (empty($this->moduleList)) {
+            $this->setModulePrefix();
+        }
+
         if (count($param['fields']) == 0) {
             return [
                         'error' => 'Error: no Param Given',
@@ -363,6 +442,7 @@ class vtigercrmcore extends solution
         }
         
 
+        /** @var array $result */
         $result = [
             'count' => 0,
         ];
@@ -371,11 +451,47 @@ class vtigercrmcore extends solution
         do {
             $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
             // TODO: Considerare di implementare Sync API in VtigerClient
-            $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
+            if ($param["module"] == "LineItem") {
+                $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
+
+                $parentModules = [];
+                foreach ($query['result'] as $parent) {
+                    $prefix = explode("x", $parent["parent_id"])[0];
+                    if (!array_key_exists($prefix, $parentModules)) {
+                        $parentModules[$prefix] = $this->moduleList[$prefix];
+                    }
+                }
+
+                $entitys = [];
+                foreach ($parentModules as $prefix => $moduleName) {
+                    $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
+                    if (empty($query) || !$query['success']) {
+                        continue;
+                    }
+
+                    foreach ($query["result"] as $parentElement) {
+                        $retrive = $this->vtigerClient->retrieve($parentElement["id"]);
+                        foreach ($retrive["result"]["LineItems"] as $index => $lineitem) {
+                            if ($index == 0) {
+                                continue;
+                            }
+                            $lineitem["parent_id"] = $parentElement["id"];
+                            $lineitem["modifiedtime"] = $parentElement["modifiedtime"];
+                            $lineitem["createdtime"] = $parentElement["createdtime"];
+                            $entitys[] = $lineitem;
+                        }
+                    }
+                }
+
+                $query = ["success" => true, "result" => $entitys];
+            }
+            else {
+                $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
+            }
 
             if (empty($query) || (!empty($query) && !$query['success'])) {
                 return [
-                            'error' => 'Error: Request Failed!',
+                            'error' => 'Error: Request Failed! (' . ($query["error"]["message"] ?? "Error") . ')',
                             'count' => 0,
                         ];
             }
@@ -384,23 +500,28 @@ class vtigercrmcore extends solution
                 break;
             }
 
+            $countResult = 0;
             foreach ($query['result'] as $value) {
-                $result['date_ref'] = $value['modifiedtime'];
+                if (isset($result['values']) && array_key_exists($value['id'], $result['values'])) {
+                    continue;
+                }
 
+                $result['date_ref'] = $value['modifiedtime'];
                 $result['values'][$value['id']] = $value;
                 if(in_array($param['rule']['mode'], ["0", "S"])) {
                     $result['values'][$value['id']]["date_modified"] = $value['modifiedtime'];
                 } else if ($param['rule']['mode'] == "C") {
                     $result['values'][$value['id']]["date_modified"] = $value['createdtime'];
                 }
+                $result['count']++;
+                $countResult++;
             }
 
-            $result['count'] += count($query['result']);
             $param["offset"] += $nDataCall;
 
             $dataLeft -= $nDataCall;
 
-        } while ($dataLeft > 0 && count($query['result']) >= $nDataCall);
+        } while ($dataLeft > 0 && $countResult >= $nDataCall);
 
         return $result;
     }
@@ -419,8 +540,27 @@ class vtigercrmcore extends solution
 
         $result = [];
 
+
+        $lineItemFields = [];
+        if (in_array($param['module'], $this->inventoryModules, true)) {
+            $describe = $this->vtigerClient->describe("LineItem");
+
+            foreach ($describe["result"]["fields"] as $field) {
+                $lineItemFields[] = $field["name"];
+            }
+        }
+
         foreach ($param['data'] as $idDoc => $data) {
             unset($data['target_id']);
+
+            if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
+                foreach ($data as $inventorykey => $inventoryValue) {
+                    if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
+                        $data["LineItems"][0][$inventorykey] = $inventoryValue;
+                    }
+                }
+            }
+
             $resultCreate = $this->vtigerClient->create($param['module'], $data);
 
             if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
@@ -431,7 +571,7 @@ class vtigercrmcore extends solution
             } else {
                 $result[$idDoc] = [
                                     'id'    => '-1',
-                                    'error' => 'Errore',
+                                    'error' => $resultCreate["error"]["message"] ?? "Error",
                                 ];
             }
 
@@ -468,7 +608,7 @@ class vtigercrmcore extends solution
             } else {
                 $result[$idDoc] = [
                                     'id'    => '-1',
-                                    'error' => 'Errore',
+                                    'error' => $resultUpdate["error"]["message"] ?? "Error",
                                 ];
             }
 
