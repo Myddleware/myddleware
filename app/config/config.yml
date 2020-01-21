@@ -59,6 +59,10 @@ doctrine:
         password: %database_password%
         charset:  UTF8
         server_version: 5.6
+        options:
+            !php/const:PDO::MYSQL_ATTR_SSL_CA: '%ca_cert%'
+            !php/const:PDO::MYSQL_ATTR_SSL_KEY: '%private_key%'
+            !php/const:PDO::MYSQL_ATTR_SSL_CERT: '%public_cert%'
         # if using pdo_sqlite as your database driver, add the path in parameters.yml
         # e.g. database_path: %kernel.root_dir%/data/data.db3
         # path:     %database_path%
