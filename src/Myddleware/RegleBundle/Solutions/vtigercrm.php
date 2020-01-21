@@ -98,7 +98,7 @@ class vtigercrmcore extends solution
 
         try {
             $client = new VtigerClient($this->paramConnexion['url']);
-            $result = $client->login($this->paramConnexion['username'], $this->paramConnexion['accesskey']);
+            $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
 
             if (!$result['success']) {
                 throw new \Exception($result['error']['message']);
@@ -440,7 +440,6 @@ class vtigercrmcore extends solution
                 $where .= "$key = '$item'";
             }
         }
-        
 
         /** @var array $result */
         $result = [
@@ -501,24 +500,22 @@ class vtigercrmcore extends solution
             }
 
             $countResult = 0;
-            foreach ($query['result'] as $value) {
-                if (isset($result['values']) && array_key_exists($value['id'], $result['values'])) {
-                    continue;
+            $entitys = $query['result'];
+            foreach ($entitys as $value) {
+                if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
+                    $result['date_ref'] = $value['modifiedtime'];
+                    $result['values'][$value['id']] = $value;
+                    if(in_array($param['rule']['mode'], ["0", "S"])) {
+                        $result['values'][$value['id']]["date_modified"] = $value['modifiedtime'];
+                    } else if ($param['rule']['mode'] == "C") {
+                        $result['values'][$value['id']]["date_modified"] = $value['createdtime'];
+                    }
+                    $result['count']++;
+                    $countResult++;
                 }
-
-                $result['date_ref'] = $value['modifiedtime'];
-                $result['values'][$value['id']] = $value;
-                if(in_array($param['rule']['mode'], ["0", "S"])) {
-                    $result['values'][$value['id']]["date_modified"] = $value['modifiedtime'];
-                } else if ($param['rule']['mode'] == "C") {
-                    $result['values'][$value['id']]["date_modified"] = $value['createdtime'];
-                }
-                $result['count']++;
-                $countResult++;
             }
 
             $param["offset"] += $nDataCall;
-
             $dataLeft -= $nDataCall;
 
         } while ($dataLeft > 0 && $countResult >= $nDataCall);
@@ -538,8 +535,11 @@ class vtigercrmcore extends solution
             return ['error' => 'Error: no VtigerClient setup'];
         }
 
-        $result = [];
+        if (empty($this->moduleList)) {
+            $this->setModulePrefix();
+        }
 
+        $result = [];
 
         $lineItemFields = [];
         if (in_array($param['module'], $this->inventoryModules, true)) {
@@ -558,6 +558,9 @@ class vtigercrmcore extends solution
                     if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
                         $data["LineItems"][0][$inventorykey] = $inventoryValue;
                     }
+                }
+                if (!isset($data["LineItems"][0]["sequence_no"])) {
+                    $data["LineItems"][0]["sequence_no"] = 1;
                 }
             }
 
@@ -595,9 +598,27 @@ class vtigercrmcore extends solution
 
         $result = [];
 
+        $lineItemFields = [];
+        if (in_array($param['module'], $this->inventoryModules, true)) {
+            $describe = $this->vtigerClient->describe("LineItem");
+
+            foreach ($describe["result"]["fields"] as $field) {
+                $lineItemFields[] = $field["name"];
+            }
+        }
+
         foreach ($param['data'] as $idDoc => $data) {
             $data['id'] = $data['target_id'];
             unset($data['target_id']);
+
+            if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
+                foreach ($data as $inventorykey => $inventoryValue) {
+                    if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
+                        $data["LineItems"][0][$inventorykey] = $inventoryValue;
+                    }
+                }
+            }
+
             $resultUpdate = $this->vtigerClient->update($param['module'], $data);
 
             if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
