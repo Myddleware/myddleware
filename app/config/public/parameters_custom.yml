@@ -1,0 +1,16 @@
+# This file is imported in congig.yml
+# Add custom parameters here 
+
+
+# Here is an example to add SSL parameters for doctrine
+# parameters:
+    # database_ca_cert:
+    # database_private_key:
+    # database_public_cert:   
+    
+# doctrine:
+    # dbal:
+        # options:
+            # !php/const PDO::MYSQL_ATTR_SSL_CA:   %database_ca_cert%
+            # !php/const PDO::MYSQL_ATTR_SSL_KEY:  %database_private_key%
+            # !php/const PDO::MYSQL_ATTR_SSL_CERT: %database_public_cert%
