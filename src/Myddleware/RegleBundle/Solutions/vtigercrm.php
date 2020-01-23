@@ -446,7 +446,13 @@ class vtigercrmcore extends solution
             'count' => 0,
         ];
 
-        $dataLeft = $param["limit"];
+
+		$orderby = "ORDER BY modifiedtime ASC";;
+		if (in_array($param["module"], $this->inventoryModules, true)) {
+			$orderby = "";
+		}
+
+		$dataLeft = $param["limit"];
         do {
             $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
             // TODO: Considerare di implementare Sync API in VtigerClient
@@ -459,11 +465,11 @@ class vtigercrmcore extends solution
                     if (!array_key_exists($prefix, $parentModules)) {
                         $parentModules[$prefix] = $this->moduleList[$prefix];
                     }
-                }
+				}
 
                 $entitys = [];
                 foreach ($parentModules as $prefix => $moduleName) {
-                    $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
+                    $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderby LIMIT $param[offset], $nDataCall;");
                     if (empty($query) || !$query['success']) {
                         continue;
                     }
@@ -485,7 +491,7 @@ class vtigercrmcore extends solution
                 $query = ["success" => true, "result" => $entitys];
             }
             else {
-                $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime ASC LIMIT $param[offset], $nDataCall;");
+                $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;");
             }
 
             if (empty($query) || (!empty($query) && !$query['success'])) {
@@ -567,6 +573,15 @@ class vtigercrmcore extends solution
             $resultCreate = $this->vtigerClient->create($param['module'], $data);
 
             if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
+				if ($param['module'] == "LineItem") {
+					$parent = $this->vtigerClient->retrieve($resultCreate['result']["parent_id"]);
+					$parent = $parent["result"];
+					if (!isset($parent["invoicestatus"]) || empty($parent["invoicestatus"])) {
+						$parent["invoicestatus"] = "AutoCreated";
+					}
+					unset($parent["LineItems_FinalDetails"]);
+					$r = $this->vtigerClient->update($this->moduleList[explode("x", $parent["id"])[0]], $parent);
+				}
                 $result[$idDoc] = [
                                     'id'    => $resultCreate['result']['id'],
                                     'error' => false,
@@ -616,12 +631,24 @@ class vtigercrmcore extends solution
                     if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
                         $data["LineItems"][0][$inventorykey] = $inventoryValue;
                     }
+				}
+				if (!isset($data["LineItems"][0]["sequence_no"])) {
+                    $data["LineItems"][0]["sequence_no"] = 1;
                 }
             }
 
             $resultUpdate = $this->vtigerClient->update($param['module'], $data);
 
             if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
+				if ($param['module'] == "LineItem") {
+					$parent = $this->vtigerClient->retrieve($resultUpdate['result']["parent_id"]);
+					$parent = $parent["result"];
+					if (!isset($parent["invoicestatus"]) || empty($parent["invoicestatus"])) {
+						$parent["invoicestatus"] = "AutoCreated";
+					}
+					unset($parent["LineItems_FinalDetails"]);
+					$r = $this->vtigerClient->update($this->moduleList[explode("x", $parent["id"])[0]], $parent);
+				}
                 $result[$idDoc] = [
                                     'id'    => $resultUpdate['result']['id'],
                                     'error' => false,
