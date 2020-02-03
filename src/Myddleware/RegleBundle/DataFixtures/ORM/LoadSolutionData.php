@@ -44,6 +44,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'sagecrm',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'sapcrm',			'active' => 0,'source' => 1,'target' => 1),
 									array('name' => 'mysql',			'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'oracledb',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'sapecc',			'active' => 0,'source' => 1,'target' => 0),
 									array('name' => 'magento',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'moodle',			'active' => 1,'source' => 1,'target' => 1),

@@ -1,11 +1,10 @@
 version: '2'
 
 services:
-
   vtiger1:
     image: javanile/vtiger:7.1.0
     ports:
-      - 30081:80
+      - ${vtiger1_port}:80
     environment:
       - MYSQL_HOST=mysql1
       - MYSQL_DATABASE=vtiger
@@ -14,7 +13,8 @@ services:
       - mysql1
 
   mysql1:
-    image: mysql:5.5
+    image: mysql:5.7.28
+    command: --sql-mode=
     environment:
       - MYSQL_DATABASE=vtiger
       - MYSQL_ROOT_PASSWORD=secret
@@ -24,7 +24,7 @@ services:
   vtiger2:
     image: javanile/vtiger:7.1.0
     ports:
-      - 30082:80
+      - ${vtiger2_port}:80
     environment:
       - MYSQL_HOST=mysql2
       - MYSQL_DATABASE=vtiger
@@ -33,7 +33,8 @@ services:
       - mysql2
 
   mysql2:
-    image: mysql:5.5
+    image: mysql:5.7.28
+    command: --sql-mode=
     environment:
       - MYSQL_DATABASE=vtiger
       - MYSQL_ROOT_PASSWORD=secret

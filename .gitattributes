@@ -1,0 +1,10 @@
+* text=crlf
+* filter=tabspace
+*.sh text eol=lf
+.env text eol=lf
+crontab text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

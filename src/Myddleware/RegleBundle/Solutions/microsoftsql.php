@@ -37,16 +37,22 @@ class microsoftsqlcore extends database {
 
 	// Generate PDO object
 	protected function generatePdo() {
+		return new \PDO('sqlsrv:Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
+
+		// dblib is deprecate
+		/*
 		$this->set_driver();
 		if ($this->driver == 'sqlsrv') {
 			return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
 		} else {
 			return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
 		}
+		*/
 	}
 	
 	// We use sqlsrv for windows and dblib for linux
-	protected function set_driver() {
+	protected function set_driver()
+	{
 		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 			$this->driver = 'sqlsrv';
 		} else {

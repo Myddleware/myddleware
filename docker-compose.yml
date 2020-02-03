@@ -1,15 +1,15 @@
 version: '2'
 
 services:
-
   myddleware:
     build: .
     ports:
-      - 30080:80
+      - ${myddleware_port}:80
     volumes:
       - ./:/var/www/html
     links:
       - mysql
+      - phpmyadmin
 
   mysql:
     image: mysql:5.5
@@ -19,13 +19,14 @@ services:
     volumes:
       - mysql:/var/lib/mysql:rw
 
-  adminer:
-    image: javanile/adminer
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
     ports:
-      - 30088:8080
+      - ${phpmyadmin_port}:80
     environment:
-      - MYSQL_DATABASE=myddleware
-      - MYSQL_ROOT_PASSWORD=secret
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
     links:
       - mysql
 
