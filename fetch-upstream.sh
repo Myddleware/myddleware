@@ -2,7 +2,7 @@
 set -e
 
 git add .
-git commit -am "stash changes before fetch upstream"
+git commit -am "stash changes before fetch upstream" && true
 
 git checkout hotfix
 git pull https://github.com/Myddleware/myddleware.git hotfix
