@@ -109,18 +109,11 @@ class upgradecore  {
 			$output->writeln('<comment>Update database OK</comment>');
 			$this->message .= 'Update database OK'.chr(10);
 			
-			
 			// Change Myddleware version
 			$output->writeln('<comment>Finish install...</comment>');
 			$this->finishInstall();
 			$output->writeln('<comment>Finish install OK</comment>');
 			$this->message .= 'Finish install OK'.chr(10);
-			
-			// Change Myddleware version
-			$output->writeln('<comment>Update version...</comment>');
-			$this->changeVersion();
-			$output->writeln('<comment>Update version OK</comment>');
-			$this->message .= 'Update version OK'.chr(10);
 			
 			// Clear cache
 			$output->writeln('<comment>Clear Symfony cache...</comment>');
@@ -128,6 +121,12 @@ class upgradecore  {
 			$output->writeln('<comment>Clear Symfony cache OK</comment>');
 			$this->message .= 'Clear Symfony cache OK'.chr(10);
 			
+			// Change Myddleware version
+			$output->writeln('<comment>Update version...</comment>');
+			$this->changeVersion();
+			$output->writeln('<comment>Update version OK</comment>');
+			$this->message .= 'Update version OK'.chr(10);
+					
 			// Customize update process
 			$this->afterUpdate($output);
 			
@@ -304,6 +303,12 @@ class upgradecore  {
 				$this->message .= $process->getOutput().chr(10);				
 			}
 		} 
+		
+		// Refresh new parameters in file parameters.yml.dist
+		$this->newParameters['parameters'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/parameters.yml.dist'));	
+		$this->newParameters['parameters_public'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_public.yml.dist'));	
+		$this->newParameters['parameters_smtp'] = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->container->getParameter('kernel.root_dir').'/config/public/parameters_smtp.yml.dist'));	
+		
 	}
 	
 	// Finish install

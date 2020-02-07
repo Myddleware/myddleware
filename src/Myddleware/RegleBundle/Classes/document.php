@@ -122,6 +122,15 @@ class documentcore {
 		);		
 	}
 	
+	static function lstType() {				
+		return array(
+			'C' => 'flux.type.create',
+			'U' => 'flux.type.update',
+			'S' => 'flux.type.search'
+		);		
+	}
+
+	
     // Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection, $param) {
 		$this->connection = $dbalConnection;
@@ -478,7 +487,8 @@ class documentcore {
 									Document.rule_id = :rule_id 
 								AND Document.source_id = :source_id 
 								AND Document.date_created < :date_created  
-								AND global_status IN ('Error','Open')
+								AND Document.deleted = 0 
+								AND Document.global_status IN ('Error','Open')
 							LIMIT 1	
 							";								
 			$stmt = $this->connection->prepare($sqlParams);
@@ -518,6 +528,7 @@ class documentcore {
 											ON Rule.id = RuleRelationShip.rule_id 									
 									WHERE 
 											Document.rule_id = :rule_id 
+										AND Document.deleted = 0 
 										AND	Rule.deleted = 0";					
 			$stmt = $this->connection->prepare($sqlGetChildRules);
 			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
@@ -534,6 +545,7 @@ class documentcore {
 									WHERE 
 											Document.rule_id = :rule_id 
 										AND Document.source_id = :source_id 
+										AND Document.deleted = 0 
 										AND Document.date_created < :date_created  
 										AND (
 												global_status = 'Error'
@@ -595,6 +607,9 @@ class documentcore {
 			) {	
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
+				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return false;
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
@@ -638,9 +653,19 @@ class documentcore {
 					}	
 					
 
-					// Selection des documents antérieurs de la même règle avec le même id au statut différent de closed		
+					// Select previous document in the same rule with the same id and status different than closed
 					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']]);
-					if (empty($targetId['record_id'])) {
+					if (empty($targetId['record_id'])) {					
+						// If no target id found, we check if the parent has been filtered, in this case we filter the relate document too
+						$documentSearch = $this->searchRelateDocumentByStatus($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']], 'Filter');
+						if (!empty($documentSearch['id'])) {
+							$this->docIdRefError = $documentSearch['id'];
+							$this->typeError = 'W';
+							$this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
+							$this->updateStatus('Filter');
+							$this->connection->commit(); // -- COMMIT TRANSACTION	
+							return false;
+						} 
 						$error = true;
 						break;
 					}
@@ -1034,7 +1059,7 @@ class documentcore {
 				foreach ($this->ruleRelationships as $ruleRelationship) {			
 					// if field = Myddleware_element_id then we take the id record in the osurce application
 					if ($type == 'S') {
-						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : $data[$ruleRelationship['field_name_source']]);
+						$dataInsert[$ruleRelationship['field_name_source']] = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $data['id'] : (!empty($data[$ruleRelationship['field_name_source']]) ? $data[$ruleRelationship['field_name_source']] : ''));
 					} else {	
 						$dataInsert[$ruleRelationship['field_name_target']] = (!empty($data[$ruleRelationship['field_name_target']]) ? $data[$ruleRelationship['field_name_target']] : '');
 					}
@@ -1299,7 +1324,7 @@ class documentcore {
 	// Check if the document is a child
 	protected function getChildDocuments() {	
 		try {
-			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId";		
+			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId AND deleted = 0 ";		
 			$stmt = $this->connection->prepare($sqlGetChilds);
 			$stmt->bindValue(":docId", $this->id);
 			$stmt->execute();	    
@@ -1417,6 +1442,7 @@ class documentcore {
 								)
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
+								AND Document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";
 							
@@ -1437,6 +1463,7 @@ class documentcore {
 								)
 								AND	Document.target_id = :id
 								AND Document.id != :id_doc
+								AND Document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";	
 					
@@ -1607,6 +1634,10 @@ class documentcore {
 		$this->updateStatus('Cancel'); 
 	}
 	
+	public function changeDeleteFlag($deleteFlag) {
+		$this->updateDeleteFlag($deleteFlag);
+	}
+	
 	public function updateStatus($new_status) {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
@@ -1646,6 +1677,35 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .=  'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->logger->error( $this->message );
+			$this->createDocLog();
+		}
+	}
+	
+	public function updateDeleteFlag($deleted) {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+			$now = gmdate('Y-m-d H:i:s');
+			$query = "	UPDATE Document 
+								SET 
+									date_modified = :now,
+									deleted = :deleted
+								WHERE
+									id = :id
+								";
+			echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			$stmt = $this->connection->prepare($query);
+			$stmt->bindValue(":now", $now);
+			$stmt->bindValue(":deleted", $deleted);
+			$stmt->bindValue(":id", $this->id);
+			$stmt->execute();
+			$this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
+			$this->connection->commit(); // -- COMMIT TRANSACTION
+			$this->createDocLog();
+		} catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+			$this->message .=  'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 			$this->createDocLog();
@@ -1786,6 +1846,7 @@ class documentcore {
 								WHERE  
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id != '' 
+									AND Document.deleted = 0 
 									AND Document.target_id = :record_id 
 									AND (
 											Document.global_status = 'Close' 
@@ -1801,6 +1862,7 @@ class documentcore {
 								WHERE  
 										Document.rule_id = :ruleRelateId 
 									AND Document.source_id = :record_id 
+									AND Document.deleted = 0 
 									AND Document.target_id != '' 
 									AND (
 											Document.global_status = 'Close' 
@@ -1864,6 +1926,51 @@ class documentcore {
 			$this->typeError = 'E';
 			$this->logger->error( $this->message );
 		}	
+	}
+	
+	// Search relate document by status
+	protected function searchRelateDocumentByStatus($ruleRelationship,$record_id, $status) {
+		try {		
+			$direction = $this->getRelationshipDirection($ruleRelationship);		
+			// En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
+			// Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
+			if ($direction == '-1') {
+				$sqlParams = "	SELECT *								
+								FROM Document
+								WHERE  
+										Document.rule_id = :ruleRelateId 
+									AND Document.target_id = :record_id 
+									AND Document.status = :status 
+									AND Document.deleted = 0 
+								LIMIT 1";	
+			}
+			elseif ($direction == '1') {
+				$sqlParams = "	SELECT *
+								FROM Document 
+								WHERE  
+										Document.rule_id = :ruleRelateId 
+									AND Document.source_id = :record_id 
+									AND Document.status = :status 
+									AND Document.deleted = 0 
+								LIMIT 1";	
+			}
+			else {
+				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
+			}			
+			$stmt = $this->connection->prepare($sqlParams);
+			$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
+			$stmt->bindValue(":record_id", $record_id);
+			$stmt->bindValue(":status", $status);
+			$stmt->execute();	   				
+			$result = $stmt->fetch();
+			if (!empty($result['id'])) {
+				return $result;
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error( $this->message );
+		}	
+		return null;
 	}
 	
 	// Permet de renvoyer le statut du document

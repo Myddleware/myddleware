@@ -61,7 +61,7 @@
 						  <span class="glyphicon glyphicon-remove-circle"></span>  {{'view_flux.btn.cancel'|trans}}
 						</button>
 					</a>
-				
+
 				{# BTN #}
 				{% endif %}
 				
@@ -80,6 +80,9 @@
 						<th>{{'view_flux.header.type'|trans}}</th>
 						<th>{{'view_flux.header.attempt'|trans}}</th>		
 						<th>{{'view_flux.header.gblstatut'|trans}}</th>
+						<th>{{'view_flux.header.dateref'|trans}}</th>
+						<th>{{'view_flux.header.date_created'|trans}}</th>
+						<th>{{'view_flux.header.date_modified'|trans}}</th>
 						{% if doc.getParentId %}
 							<th>{{'view_flux.header.parent'|trans}}</th>
 						{% endif %}	
@@ -110,6 +113,9 @@
 				     		{% endif %}
 				     		</div>
 						</td>
+						<td class="ctr">{{ doc.getSourceDateModified|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">{{ doc.getDateCreated|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s") }}</td>
 						{% if doc.getParentId %}
 							<td><a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a></td>
 						{% endif %}

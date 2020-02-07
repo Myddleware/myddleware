@@ -52,10 +52,10 @@ class ConnectorController extends Controller
 	// CALLBACK POUR LES APIS
 	public function callBackAction() { // REV 1.1.1
 		try {	
-                        /* @var $sessionService SessionService */
-                        $sessionService = $this->get('myddleware_session.service');
+			/* @var $sessionService SessionService */
+			$sessionService = $this->get('myddleware_session.service');
                         
-                        // Nom de la solution
+			// Nom de la solution
 			if(!$sessionService->isSolutionNameExist()) {
 				return new Response('');
 			}
@@ -181,27 +181,24 @@ class ConnectorController extends Controller
 
 	// Contrôle si le fichier upload est valide puis le déplace
     public function uploadAction($solution) // REV 1.1.0
-    {
-			
+    {			
 		if( isset($solution) ) {
-			if(in_array(trim($solution), array('sagecrm','sapcrm','sap','zuora'))){
-				$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/wsdl/";
-				// Get canonicalized absolute pathname
-				$path = realpath($output_dir);
-				// If it exist, check if it's a directory
-				if($path === false || !is_dir($path)) {
-					try {
-						if(!mkdir($output_dir,755,true)) {
-							echo '0;'.'Directory '.$output_dir.' doesn\'t exist. Failed to create this directory. Please check directory Custom is readable by webuser. You can create manually the directory for the Sage wsdl too. ';
-							exit;	
-						}
-					}
-					catch (\Exception $e) {
-						echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+			$output_dir = __DIR__."/../Custom/Solutions/".trim($solution)."/file/";
+			// Get canonicalized absolute pathname
+			$path = realpath($output_dir);
+			// If it exist, check if it's a directory
+			if($path === false || !is_dir($path)) {
+				try {
+					if(!mkdir($output_dir,755,true)) {
+						echo '0;'.'Directory '.$output_dir.' doesn\'t exist. Failed to create this directory. Please check directory Custom is readable by webuser. You can create manually the directory for the Sage wsdl too. ';
 						exit;	
 					}
 				}
-			}		
+				catch (\Exception $e) {
+					echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+					exit;	
+				}
+			}	
 		}
 		/* @var $sessionService SessionService */
 		$sessionService = $this->get('myddleware_session.service');
@@ -344,6 +341,7 @@ class ConnectorController extends Controller
 					$connector->setDateModified(new \DateTime);
 					$connector->setCreatedBy( $this->getUser()->getId() );
 					$connector->setModifiedBy( $this->getUser()->getId() );
+					$connector->setDeleted(0);
 
 					$em->persist($connector);
 					$em->flush();
@@ -434,53 +432,60 @@ class ConnectorController extends Controller
 	}
 	
 	// SUPPRESSION DU CONNECTEUR
-	public function connectorDeleteAction($id) {
-
+	public function connectorDeleteAction(Request $request, $id) {		
+		$session = $request->getSession();
 		if(isset($id)) {
-			
-			// Detecte si la session est le support ---------
+			// Check permission
 			$permission =  $this->get('myddleware.permission');
-			
 			if( $permission->isAdmin($this->getUser()->getId()) ) {
 				$list_fields_sql = array('id' => $id);
 			}
 			else {
 				$list_fields_sql = 
 					array('id' => $id,
-					      'createdBy' => $this->getUser()->getId()
+						  'createdBy' => $this->getUser()->getId()
 				);
-			}
-			// Detecte si la session est le support ---------			
-						
-			// Récupère le connecteur en fonction de son id
+			}			
+			
+			// Get the connector using its id
 			$connector = $this->getDoctrine()
-                         ->getManager()
-                         ->getRepository('RegleBundle:Connector')
-                         ->findOneBy( $list_fields_sql );	
-						 
+						 ->getManager()
+						 ->getRepository('RegleBundle:Connector')
+						 ->findOneBy( $list_fields_sql );	
+					 
 			if($connector === null) {
 				return $this->redirect($this->generateUrl('regle_connector_list'));	
 			}			 
-
-		    // On récupére l'EntityManager
-		    $em = $this->getDoctrine()
-		               ->getManager();	
-					   		
-			$connector_params = $this->getDoctrine()
-                     ->getManager()
-                     ->getRepository('RegleBundle:ConnectorParam')
-                     ->findByConnector( $id );	
- 			
-			if($connector_params) {
-				foreach ( $connector_params as $connector_param ) {
-					$em->remove($connector_param);
-					$em->flush();
-				}				
-			}
-			
-			$em->remove($connector);
-			$em->flush();			
-			
+			try{
+				// Check if a rule uses this connector (source and target)
+				$rule = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:Rule')
+							  ->findOneBy(array(
+												'connectorTarget' => $connector,
+												'deleted' => 0
+										  ));
+				if (empty($rule)) {
+					$rule = $this->getDoctrine()
+							 ->getManager()
+							 ->getRepository('RegleBundle:Rule')
+							  ->findOneBy(array(
+												'connectorSource' => $connector,
+												'deleted' => 0
+										  ));
+				}	
+				// Error message in case a rule using this connector exists
+				if (!empty($rule)) {			
+					$session->set('error', array($this->get('translator')->trans('error.connector.remove_with_rule').' '.$rule->getName()));
+				} else {
+					// Flag the connector as deleted
+					$connector->setDeleted(1);
+					$this->getDoctrine()->getManager()->persist($connector);
+					$this->getDoctrine()->getManager()->flush();
+				}
+			} catch (\Doctrine\DBAL\DBALException $e) {
+				$session->set('error', array($e->getPrevious()->getMessage()));
+			} 
 			return $this->redirect($this->generateUrl('regle_connector_list'));	
 		}
 	}
@@ -497,9 +502,9 @@ class ConnectorController extends Controller
 		$permission = $this->get('myddleware.permission');
 
 		if ($permission->isAdmin($this->getUser()->getId())) {
-			$qb->where('c.id =:id')->setParameter('id',$id); 
+			$qb->where('c.id =:id AND c.deleted = 0')->setParameter('id',$id); 
 		} else {
-			$qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+			$qb->where('c.id =:id and c.createdBy =:createdBy AND c.deleted = 0')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
 		}
 		// Detecte si la session est le support ---------			
 		// Infos du connecteur
@@ -509,6 +514,18 @@ class ConnectorController extends Controller
 			throw $this->createNotFoundException("This connector doesn't exist");
 		}
               
+		if ($permission->isAdmin($this->getUser()->getId())) {
+			$qb->where('c.id =:id')->setParameter('id',$id); 
+		} else {
+			$qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
+		}
+		// Detecte si la session est le support ---------			
+		// Infos du connecteur
+		$connector = $qb->getQuery()->getOneOrNullResult();             
+	   
+		if (!$connector) {
+			throw $this->createNotFoundException("This connector doesn't exist");
+		}
               
 		// Create connector form
 		// $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
@@ -569,12 +586,15 @@ class ConnectorController extends Controller
 			$permission =  $this->get('myddleware.permission');
 			
 			if( $permission->isAdmin($this->getUser()->getId()) ) {
-				$list_fields_sql = array('solution' => (int)$id);
+				$list_fields_sql = array(	'solution' => (int)$id,
+											'deleted' => 0
+										);
 			}
 			else {
 				$list_fields_sql = 
-					array('solution' => (int)$id,
-					      'createdBy' => $this->getUser()->getId()
+					array(	'solution' => (int)$id,
+							'deleted' => 0,
+							'createdBy' => $this->getUser()->getId()
 				);
 			}
 			// Detecte si la session est le support ---------			
@@ -615,9 +635,9 @@ class ConnectorController extends Controller
 					   				   
 		$lst_solution = tools::composeListHtml($lstArray,$this->get('translator')->trans('create_rule.step1.list_empty'));
 
-                $sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
-                $sessionService->setParamConnectorAddType(strip_tags($type));
-                $sessionService->setConnectorAnimation(true);
+		$sessionService->setConnectorAddMessage($this->get('translator')->trans('create_rule.step1.connector'));
+		$sessionService->setParamConnectorAddType(strip_tags($type));
+		$sessionService->setConnectorAnimation(true);
                 
               			  
         return $this->render('RegleBundle:Connector:createout.html.twig',array(

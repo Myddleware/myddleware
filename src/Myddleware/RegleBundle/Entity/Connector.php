@@ -116,6 +116,14 @@ class Connector
     private $modifiedBy;
 
     /**
+     * @var boolean
+     *
+	 * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+	 * 
+     */
+    private $deleted; 
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -373,5 +381,26 @@ class Connector
         return $this->connectorParams = $connectorParams;
     }
 
-   
+   /**
+     * Set deleted
+     *
+     * @param integer $deleted
+     * @return Rule
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return integer 
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }   
 }

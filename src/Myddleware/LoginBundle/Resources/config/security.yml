@@ -7,6 +7,26 @@ security:
             id: fos_user.user_provider.username
 
     firewalls:
+        api_login:
+            pattern:  ^/api/v1_0/login
+            stateless: true
+            anonymous: true
+            json_login:
+                check_path: /api/v1_0/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        api:
+            pattern:   ^/api
+            stateless: true
+            lexik_jwt:
+                authorization_header: # check token in Authorization Header
+                    enabled: true
+                    prefix:  Bearer
+                throw_exceptions: true     # When an authentication failure occurs, return a 401 response immediately
+                create_entry_point: true      # When no authentication details are provided, create a default entry point that returns a 401 response
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
         dev:
             pattern: ^/(_(profiler|wdt))/
             security: false
@@ -16,7 +36,6 @@ security:
                 provider: fos_userbundle
 #                csrf_provider: security.csrf.token_manager
                 csrf_token_generator: security.csrf.token_manager
-
             remember_me:
                 secret:    %secret%
                 lifetime:  30000000
@@ -24,3 +43,4 @@ security:
                 domain:    ~  
             logout:        true
             anonymous:     true
+

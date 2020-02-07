@@ -33,6 +33,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
+use Myddleware\RegleBundle\Entity\RuleParamAudit as RuleParamAudit;
+
 
 use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // Tools
 use Myddleware\RegleBundle\Entity\RuleParam;
@@ -354,12 +356,31 @@ class rulecore {
 	
 	// Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible
 	protected function updateReferenceDate() {			
-		$date_ref = $this->dataSource['date_ref'];
-		$sqlDateReference = "UPDATE RuleParam SET value = :date_ref WHERE name = 'datereference' AND rule_id = :ruleId";
-		$stmt = $this->connection->prepare($sqlDateReference);
-		$stmt->bindValue(":ruleId", $this->ruleId);
-		$stmt->bindValue(":date_ref", $date_ref);
-		$stmt->execute();			
+		$param = $this->em->getRepository('RegleBundle:RuleParam')
+			->findOneBy(array(
+					'rule' => $this->ruleId,
+					'name' => 'datereference'
+				)
+			);
+		// Every rules should have the param datereference
+		if (empty($param)) {
+			throw new \Exception ('No reference date for the rule '.$this->ruleId.'.');	
+		} else {
+			// Save param modification in the audit table		
+			if ($param->getValue() != $this->dataSource['date_ref']) {
+				$paramAudit = new RuleParamAudit();
+				$paramAudit->setRuleParamId($param->getId());
+				$paramAudit->setDateModified(new \DateTime);
+				$paramAudit->setBefore($param->getValue());
+				$paramAudit->setAfter($this->dataSource['date_ref']);
+				$paramAudit->setJob($this->jobId);
+				$this->em->persist($paramAudit);					
+			}
+			// Update reference 
+			$param->setValue($this->dataSource['date_ref']);
+			$this->em->persist($param);					
+			$this->em->flush();
+		}				
 	}
 	
 	// Update/create rule parameter
@@ -658,13 +679,22 @@ class rulecore {
 		return $sendTarget;
 	}
 	
-	public function actionDocument($id_document,$event) {
+	public function actionDocument($id_document,$event, $param1 = null) {
 		switch ($event) { 
 			case 'rerun':
 				return $this->rerun($id_document);
 				break;
 			case 'cancel':
 				return $this->cancel($id_document);
+				break;
+			case 'remove':
+				return $this->changeDeleteFlag($id_document,true);
+				break;
+			case 'restore':
+				return $this->changeDeleteFlag($id_document,false);
+				break;
+			case 'changeStatus':
+				return $this->changeStatus($id_document,$param1);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
@@ -829,12 +859,41 @@ class rulecore {
 		// On affiche alors le message directement dans Myddleware
 		if (empty($this->jobId)) {
 			if (empty($message)) {
-				$session->set( 'success', array('Annulation du transfert effectuée avec succès.'));
+				$session->set( 'success', array('Data transfer has been successfully cancelled.'));
 			}
 			else {
 				$session->set( 'error', array($doc->getMessage()));
 			}
 		}
+	}
+	
+	// Remove a document 
+	protected function changeDeleteFlag($id_document,$deleteFlag) {	
+		$param['id_doc_myddleware'] = $id_document;
+		$param['jobId'] = $this->jobId;
+		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc->changeDeleteFlag($deleteFlag); 
+		$session = new Session();
+		$message = $doc->getMessage();
+		
+		// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
+		// On affiche alors le message directement dans Myddleware
+		if (empty($this->jobId)) {
+			if (empty($message)) {
+				$session->set( 'success', array('Data transfer has been successfully removed.'));
+			}
+			else {
+				$session->set( 'error', array($doc->getMessage()));
+			}
+		}
+	}
+	
+	// Remove a document 
+	protected function changeStatus($id_document,$toStatus) {	
+		$param['id_doc_myddleware'] = $id_document;
+		$param['jobId'] = $this->jobId;
+		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc->updateStatus($toStatus);
 	}
 	
 	protected function runMyddlewareJob($ruleSlugName) {
@@ -1112,7 +1171,7 @@ class rulecore {
 					}
 					else {
 						$response[$documentId] = false;
-						$doc->setMessage('Type transfer '.$type.' unknown. ');
+						$response['error']= 'Type transfer '.$type.' unknown. ';
 					}
 				}
 				else {
@@ -1197,6 +1256,7 @@ class rulecore {
 									WHERE 
 											rule_id = :ruleId
 										AND status = :status
+										AND Document.deleted = 0 
 									ORDER BY Document.source_date_modified ASC	
 									LIMIT $this->limit
 								";							
@@ -1212,7 +1272,8 @@ class rulecore {
 	
 	// Permet de récupérer les données d'un document
 	protected function getDocumentHeader($documentId) {
-		try {			
+		try {
+			// We allow to get date from a document flagged deleted
 			$query_document = "SELECT * FROM Document WHERE id = :documentId";
 			$stmt = $this->connection->prepare($query_document);
 			$stmt->bindValue(":documentId", $documentId);
@@ -1230,17 +1291,22 @@ class rulecore {
 	}
 	
 	protected function getSendDocuments($type,$documentId,$table = 'target',$parentDocId = '',$parentRuleId = '') {	
+		// Init $limit parameter
+		$limit = " LIMIT ".$this->limit;
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
 			$documentFilter = " Document.id = '$documentId'";
 		}
 		elseif (!empty($parentDocId)) {
-			$documentFilter = " Document.parent_id = '$parentDocId' AND Document.rule_id = '$parentRuleId' ";
+			$documentFilter = " Document.parent_id = '$parentDocId' AND Document.rule_id = '$parentRuleId' "; 
+			// No limit when it comes to child rule. A document could have more than $limit child documents
+			$limit = "";
 		}
 		// Sinon on récupère tous les documents élligible pour l'envoi
 		else {
 			$documentFilter = 	"	Document.rule_id = '$this->ruleId'
 								AND Document.status = 'Ready_to_send'
+								AND Document.deleted = 0 
 								AND Document.type = '$type' ";
 		}
 		// Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
@@ -1248,7 +1314,7 @@ class rulecore {
 				FROM Document
 				WHERE $documentFilter 
 				ORDER BY Document.source_date_modified ASC
-				LIMIT $this->limit";
+				$limit";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute();	    
 		$documents = $stmt->fetchAll();
