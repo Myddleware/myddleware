@@ -506,7 +506,8 @@ class solutioncore {
 		$sqlParams = "	SELECT *
 						FROM Document 
 							INNER JOIN Rule
-								ON Document.rule_id = Rule.id
+								 ON Document.rule_id = Rule.id
+								AND Document.deleted = 0
 						WHERE id = :id_doc";								
 		$stmt = $connection->prepare($sqlParams);
 		$stmt->bindValue(":id_doc", $idDocument);
@@ -518,7 +519,7 @@ class solutioncore {
 	// Permet de récupérer la source ID du document en paramètre
 	protected function getSourceId($idDoc) {
 		// Récupération du source_id
-		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc";
+		$sql = "SELECT `source_id` FROM `Document` WHERE `id` = :idDoc AND Document.deleted = 0";
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bindValue(":idDoc", $idDoc);
 		$stmt->execute();

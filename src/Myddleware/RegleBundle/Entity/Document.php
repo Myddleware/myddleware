@@ -37,6 +37,7 @@ use Doctrine\ORM\Mapping as ORM;
  *      @ORM\Index(name="global_status", columns={"global_status"}),
  *      @ORM\Index(name="source_id", columns={"source_id"}),
  *      @ORM\Index(name="target_id", columns={"target_id"}),
+ *      @ORM\Index(name="rule_id", columns={"rule_id"}),
  *      @ORM\Index(name="date_modified", columns={"date_modified"})
  * })
  */ 
@@ -160,6 +161,14 @@ class Document
      * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
      */
     private $parentId;	
+
+    /**
+     * @var boolean
+     *
+	 * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+	 * 
+     */
+    private $deleted; 
 
     /**
      * Set id
@@ -505,4 +514,28 @@ class Document
     {
         return $this->parentId;
     }
+
+   /**
+     * Set deleted
+     *
+     * @param integer $deleted
+     * @return Rule
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return integer 
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
+
 }
