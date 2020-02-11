@@ -31,7 +31,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class suitecrmcore  extends solution {
 
 	protected $limitCall = 100;
-	protected $urlSuffix = '/service/v4/rest.php';
+	protected $urlSuffix = '/service/v4_1/rest.php';
+	
+	// Enable to read deletion and to delete data
+	protected $readDeletion = true;	
 	
     protected $required_fields = array('default' => array('id','date_modified','date_entered'));
 	
@@ -409,6 +412,14 @@ class suitecrmcore  extends solution {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
+			
+			// Manage delete option to enable 
+			$deleted = false;
+			if (!empty($param['ruleParams']['deletion'])) {
+				$deleted = true;
+				$param['fields'][] = 'deleted';
+			}
+			
 			if (empty($param['offset'])) {
 				$param['offset'] = 0;
 			}
@@ -450,10 +461,9 @@ class suitecrmcore  extends solution {
 												'select_fields' => $param['fields'],
 												'link_name_to_fields_array' => $link_name_to_fields_array,
 												'max_results' => $this->limitCall,
-												'deleted' => 0,
+												'deleted' => $deleted,
 												'Favorites' => '',
-											);		
-										
+											);												
 				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
 				// Construction des données de sortie
 				if (isset($get_entry_list_result->result_count)) {
@@ -478,6 +488,10 @@ class suitecrmcore  extends solution {
 								$result['date_ref'] = $value->value;
 							}
 						}	
+						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						if (!empty($entry->name_value_list->deleted->value)) {
+							$record['myddleware_deletion'] = true;
+						}
 						
 						// S'il y a des relation custom, on ajoute la relation custom 
 						if (!empty($get_entry_list_result->relationship_list[$i]->link_list)) {
@@ -513,7 +527,7 @@ class suitecrmcore  extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
+		}								
 		return $result;	
 	}
 

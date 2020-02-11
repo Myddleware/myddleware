@@ -80,7 +80,11 @@ class solutioncore {
 	protected $allowParentRelationship = array();
 	
 	// Enable the read record button on the data transfer detail view for the source solution
-	protected $readRecord = true;		
+	protected $readRecord = true;	
+
+	// Disable to read deletion and to delete data
+	protected $readDeletion = false;	
+	protected $sendDeletion = false;	
 	
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
@@ -391,6 +395,16 @@ class solutioncore {
 	// Return if the read record button has to be display on the data transfert view
 	public function getReadRecord() {
 		return $this->readRecord;
+	}
+
+	// Return if the connector can read deletion
+	public function getReadDeletion() {
+		return $this->readDeletion;
+	}
+	
+	// Return if the connector can send deletion
+	public function getSendDeletion() {
+		return $this->sendDeletion;
 	}
 
 	// Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle

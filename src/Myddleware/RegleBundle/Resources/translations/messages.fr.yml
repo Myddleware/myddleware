@@ -351,6 +351,7 @@ flux:
         update: Update
         create: Create
         search: Search
+        delete: Delete
  
 view_flux:
     empty: Pas de données
