@@ -489,7 +489,10 @@ class suitecrmcore  extends solution {
 							}
 						}	
 						// Manage deletion by adding the flag Myddleware_deletion to the record						
-						if (!empty($entry->name_value_list->deleted->value)) {
+						if (
+								$deleted == true
+							AND empty($entry->name_value_list->deleted->value)
+						) {
 							$record['myddleware_deletion'] = true;
 						}
 						

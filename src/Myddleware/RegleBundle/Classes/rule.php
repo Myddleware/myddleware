@@ -663,11 +663,15 @@ class rulecore {
 	}
 	
 	public function sendDocuments() {	
-		// Création des données dans la cible
+		// creation into the target application
 		$sendTarget = $this->sendTarget('C');
-		// Modification des données dans la cible
+		// Update into the target application
 		if (empty($sendTarget['error'])) {
 			$sendTarget = $this->sendTarget('U');
+		}
+		// Deletion from the target application
+		if (empty($sendTarget['error'])) {
+			$sendTarget = $this->sendTarget('D');
 		}
 		// Logout target solution
 		if (!empty($this->solutionTarget)) {

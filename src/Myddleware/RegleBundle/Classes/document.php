@@ -882,9 +882,11 @@ class documentcore {
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
 			// Si le document est en type recherche, alors la cible est forcément égale à la source et il ne fait pas annuler le doc. 
 			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
+			// No check for deletion document 
 			if (	
 					$this->documentType != 'S' 
-				&&	!$this->isParent()
+				AND	$this->documentType != 'D' 
+				AND	!$this->isParent()
 			) {
 				$this->checkNoChange();
 			}		

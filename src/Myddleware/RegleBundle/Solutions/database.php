@@ -322,6 +322,14 @@ class databasecore extends solution {
 				$param['limit'] = 100;
 			}
 			
+			// Add the deletion field into the list field to be read if deletion is enabled on the rule
+			if (
+					!empty($param['ruleParams']['deletion'])
+				AND	!empty($param['ruleParams']['deletionField'])
+			) {
+				$param['fields'][] = $param['ruleParams']['deletionField'];
+			}
+			
 			// Add requiered fields
 			if(!isset($param['ruleParams']['fieldId'])) {
 				throw new \Exception('FieldId has to be specified for the read.');
@@ -405,6 +413,14 @@ class databasecore extends solution {
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
+						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						if (
+								$param['ruleParams']['deletion'] == true
+							AND $param['ruleParams']['deletionField'] === $key
+							AND !empty($value)
+						) {
+							$row['myddleware_deletion'] = true;
+						}
 					}
 					$result['values'][$row['id']] = $row;
 				}
@@ -412,7 +428,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}
+		}	
 		return $result;
 	} // read($param)
 	
@@ -656,7 +672,7 @@ class databasecore extends solution {
 					// Add all fieds to the deletion list fields to get the one which carries the deletion flag
 					$deletionParam = array(
 								'id' => 'deletionField',
-								'name' => 'deletionFieldId',
+								'name' => 'deletionField',
 								'type' => 'option',
 								'label' => 'Field with deletion flag',
 								'required'	=> false,
