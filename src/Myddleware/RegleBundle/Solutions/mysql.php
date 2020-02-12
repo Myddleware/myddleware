@@ -35,6 +35,7 @@ class mysqlcore extends database {
 	
 	// Enable to delete data
 	protected $sendDeletion = true;
+	protected $readDeletion = true;
 	
 	protected function generatePdo() {		    
 		return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);

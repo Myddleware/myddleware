@@ -1653,6 +1653,32 @@ class DefaultControllerCore extends Controller
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
             }
+			
+			// Add param to allow deletion (need source and target application ok to enable deletion)
+			if (
+					$solution_source->getReadDeletion() == true
+				AND	$solution_cible->getSendDeletion() == true
+			){
+				$deletion = array(
+								array(
+									'id' => 'deletion',
+									'name' => 'deletion',
+									'required' => false,
+									'type' => 'option',
+									'label' => $this->get('translator')->trans('create_rule.step3.deletion.label'),
+									'option' => array(0 => '', 1 => $this->get('translator')->trans('create_rule.step3.deletion.yes'))
+								)
+							);
+				$rule_params = array_merge($rule_params, $deletion);
+			} else {
+				// If the deletion is disable (database in source OK but target application non OK), we remove the deletion list field of database connector
+				$keyDeletionField = array_search('deletionField', array_column($rule_params, 'id'));
+				if (!empty($keyDeletionField)) {
+					unset($rule_params[$keyDeletionField]);
+				}
+			}
+		
+			
             //  rev 1.07 --------------------------
             $result = array(
                 'source' => $source['table'],

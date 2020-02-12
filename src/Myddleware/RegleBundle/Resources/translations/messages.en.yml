@@ -79,6 +79,9 @@ create_rule:
             create_modify: Create and update data
             create_only: Create data only
             search_only: Retrieving existing data only          
+        deletion:
+            label: Allow deletion 
+            yes: Yes (data can be deleted from the target application)       
         data_wait: Loading... Please wait
         title: Fields
         placeholder: Please drag your fields here

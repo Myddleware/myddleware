@@ -281,7 +281,7 @@ class documentcore {
 			// Insert source data			
 			return $this->insertDataTable($this->data,'S');		
 		} catch (\Exception $e) {
-			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
 			return false;
 		}		
@@ -796,6 +796,16 @@ class documentcore {
 				$searchFields = array('id' => $this->targetId);
 				$history = $this->getDocumentHistory($searchFields);
 	
+				// History is mandatory before a delete action
+				if (	
+						$this->documentType == 'D'
+					AND (
+							$history === -1
+						 OR	$history === false
+					)
+				) {
+					throw new \Exception('Failed to retrieve record in target system before deletion. Id target : '.$this->targetId.'. Check this record is not already deleted.');
+				}
 				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
@@ -978,7 +988,7 @@ class documentcore {
 	}
 	
 	// Récupération des données dans la cible et sauvegarde dans la table d'historique
-	protected function getDocumentHistory ($searchFields) {	
+	protected function getDocumentHistory($searchFields) {	
 		// Permet de renseigner le tableau rule avec les données d'entête
 		$rule = $this->getRule();
 		$read['module'] = $rule['module_target'];

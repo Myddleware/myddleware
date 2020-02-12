@@ -1092,6 +1092,10 @@ class rulecore {
 		}
 	}
 	
+	protected function beforeDelete($sendData) {
+		return $sendData;
+	}
+	
 	// Check if the rule is a child rule
 	public function isChild() {
 		try {					
@@ -1168,6 +1172,11 @@ class rulecore {
 						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
 						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
 						$response = $this->solutionTarget->update($send);
+					}
+					// Delete data from target application
+					elseif ($type == 'D') {			
+						$send['data'] = $this->beforeDelete($send['data']);;
+						$response = $this->solutionTarget->delete($send);
 					}
 					else {
 						$response[$documentId] = false;

@@ -353,14 +353,11 @@ class solutioncore {
             // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
         // )
 	public function update($data) {
-	
 	}
 	
 	
-	
-	// Permet de supprimer un enregistrement
-	public function delete($id) {
-	
+	// Delete a record
+	public function delete($data) {
 	}
 	
 	// Permet de renvoyer le mode de la règle en fonction du module target
@@ -573,6 +570,14 @@ class solutioncore {
 	// Check data before update 
 	// Add a throw exeption if error
 	protected function checkDataBeforeUpdate($param,$data) {
+		// Exception if the job has been stopped manually
+		$this->isJobActive($param);
+		return $data;
+	}
+	
+	// Check data before update 
+	// Add a throw exeption if error
+	protected function checkDataBeforeDelete($param,$data) {
 		// Exception if the job has been stopped manually
 		$this->isJobActive($param);
 		return $data;
