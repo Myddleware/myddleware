@@ -65,4 +65,4 @@ RUN touch /var/log/myddleware.log
 
 # RUN cron
 #CMD ["cron", "-f"]
-ENTRYPOINT cron && apache2-foreground
+
