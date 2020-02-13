@@ -1712,7 +1712,7 @@ class DefaultControllerCore extends Controller
 
             // ----------------
         } catch (\Exception $e) {
-            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping'));
+            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
             exit;
         }

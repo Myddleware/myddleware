@@ -27,9 +27,13 @@ namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Mautic\Auth\ApiAuth;
+
+use Mautic\MauticApi;
+use Mautic\Auth\ApiAuth;  
 
 class mauticcore  extends solution {
+
+	protected $auth;
 	
 	// Enable to read deletion and to delete data
 	protected $sendDeletion = true;	
@@ -53,54 +57,35 @@ class mauticcore  extends solution {
 						)
 		);
 	}
-	
+
 	
     public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {
-
-			require('lib/mautic/MauticApi.php');	
-			// ApiAuth->newAuth() will accept an array of Auth settings
+			// Add login/password
 			$settings = array(
-				'userName'   => 'admin',             // Create a new user       
-				'password'   => 'Recette?1'              // Make it a secure password
+				'userName'   => $this->paramConnexion['login'],
+				'password'   => $this->paramConnexion['password']
 			);
 
-			// Initiate the auth object specifying to use BasicAuth
+			// Ini api
 			$initAuth = new ApiAuth();
 			$auth = $initAuth->newAuth($settings, 'BasicAuth');
-
-throw new \Exception('Please check url'.print_r($auth));			
+			$api = new MauticApi();
 			
-			// Nothing else to do ... It's ready to use.
-// Just pass the auth object to the API context you are creating.
-			/* $login_paramaters = array( 
-			'user_auth' => array( 
-				'user_name' => $this->paramConnexion['login'], 
-				'password' => md5($this->paramConnexion['password']), 
-				'version' => '.01' 
-			), 
-			'application_name' => 'myddleware',
-			); 
-			// remove index.php in the url
-			$this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
-			// Add the suffix with rest parameters to the url
-			$this->paramConnexion['url'] .= $this->urlSuffix;
+			// Get the current user to check the connection parameters
+			$userApi = $api->newApi("users", $auth, $this->paramConnexion['url']);
+			$user = $userApi->getSelf();
 
-			$result = $this->call('login',$login_paramaters,$this->paramConnexion['url']); 
-			
-			if($result != false) {
-				if ( empty($result->id) ) {
-				   throw new \Exception($result->description);
-				}
-				else {
-					$this->session = $result->id;
-					$this->connexion_valide = true;
-				}				
-			}
-			else {
-				throw new \Exception('Please check url');
-			} */
+			// Managed API return. The API call is OK if the user id is found
+			if(!empty($user['id'])) {
+				$this->auth = $auth;
+				$this->connexion_valide = true;	
+			} elseif(!empty($user['error']['message'])) {
+				throw new \Exception('Failed to login to Mautic. Code '.$user['error']['code'].' : '.$user['error']['message']);
+			} else {
+				throw new \Exception('Failed to login to Mautic. No error message returned by the API.');
+			} 
 		} 
 		catch (\Exception $e) {
 			$error = $e->getMessage();
@@ -109,44 +94,43 @@ throw new \Exception('Please check url'.print_r($auth));
 		} 
     }
 	
+	// Get the modules available 
+	public function get_modules($type = 'source') {
+		return array('contact' => 'Contacts');
+	}
 	
-
-	//function to make cURL request	
-	protected function call($method, $parameters){
-		try {
-			ob_start();
-			$curl_request = curl_init();
-			curl_setopt($curl_request, CURLOPT_URL, $this->paramConnexion['url']);
-			curl_setopt($curl_request, CURLOPT_POST, 1);	
-			curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);	
-			curl_setopt($curl_request, CURLOPT_HEADER, 1);
-			curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
-		
-			$jsonEncodedData = json_encode($parameters);
-			$post = array(
-				"method" => $method,
-				"input_type" => "JSON",
-				"response_type" => "JSON",
-				"rest_data" => $jsonEncodedData
-			);
-		
-			curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
-			$result = curl_exec($curl_request);
-			curl_close($curl_request);
-			if(empty($result))	return false;
-			$result = explode("\r\n\r\n", $result, 2);
-			$response = json_decode($result[1]);
-			ob_end_flush();
-	
-			return $response;			
+	// Get the fields available 
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
+		try{
+			// Call Mautic to get the module fields
+			$api = new MauticApi();
+			$fieldApi = $api->newApi($module."Fields", $this->auth, $this->paramConnexion['url']);
+			$fieldlist = $fieldApi->getList();
+			// Transform fields to Myddleware format
+			if (!empty($fieldlist['fields'])) {
+				foreach ($fieldlist['fields'] as $field) {
+					$this->moduleFields[$field['alias']] = array(
+													'label' => $field['label'],
+													'type' => ($field['type'] == 'text' ? TextType::class : 'varchar(255)'),
+													'type_bdd' => ($field['type'] == 'text' ? $field['type'] : 'varchar(255)'),
+													'required' => (!empty($field['isRequired']) ? true : false),
+												);
+					// manage dropdown lists
+					if (!empty($field['properties']['list'])) {
+						$options = explode('|', $field['properties']['list']);
+						foreach ($options as $option) {
+							$this->moduleFields[$field['alias']]['option'][$option] = $option;
+						}
+					}
+				}
+			}	
+			return $this->moduleFields;
+		} catch (\Exception $e){
+			return false;
 		}
-		catch(\Exception $e) {
-			return false;	
-		}	
-    }	
-	
+	} // get_module_fields($module)	 
+
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 

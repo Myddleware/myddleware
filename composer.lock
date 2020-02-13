@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "144d4ba796e119dbb7a8ddc51cb98127",
-    "content-hash": "78dda216284b77df1c215b6fc6d71c8a",
+    "hash": "1df3efd7acd927b0e9ccff5e6d9818fe",
+    "content-hash": "ea7ffb11ae0925a7682d78cbbab05c4a",
     "packages": [
         {
             "name": "api-platform/api-pack",
@@ -2094,6 +2094,42 @@
                 "symfony"
             ],
             "time": "2019-11-22 14:22:26"
+        },
+        {
+            "name": "mautic/api-library",
+            "version": "2.15.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mautic/api-library.git",
+                "reference": "6ff1dfa1da912ca1fc78cbcab3a8c395a22d5e14"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mautic/api-library/zipball/6ff1dfa1da912ca1fc78cbcab3a8c395a22d5e14",
+                "reference": "6ff1dfa1da912ca1fc78cbcab3a8c395a22d5e14",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3.7",
+                "psr/log": "~1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8|~5.0",
+                "raveren/kint": "~0.9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mautic\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Mautic API Connector Library",
+            "time": "2018-12-19 14:55:48"
         },
         {
             "name": "monolog/monolog",
@@ -4906,6 +4942,7 @@
                 }
             ],
             "description": "This bundle generates code for you",
+            "abandoned": true,
             "time": "2017-12-07 15:36:41"
         },
         {
