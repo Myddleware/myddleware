@@ -63,8 +63,7 @@ class FluxControllerCore extends Controller
 		$permission =  $this->get('myddleware.permission');
 		if( $permission->isAdmin($this->getUser()->getId()) ) {
 			$list_fields_sql = 
-				array('id' => $id
-			);			
+				array('id' => $id);			
 		}
 		else {
 			$list_fields_sql = 
@@ -110,7 +109,15 @@ class FluxControllerCore extends Controller
 		}	
 		asort($lstGblStatus);		
 		//---
-	
+		
+		//--- Liste type translation
+		$lstTypeTwig = doc::lstType();
+		
+		foreach ($lstTypeTwig as $key => $value) {
+			$lstType[ $this->get('translator')->trans( $value ) ] = $key;
+		}		
+		//---
+		
 		$em = $this->getDoctrine()->getManager();
 		
 		// Detecte si la session est le support ---------
@@ -121,7 +128,7 @@ class FluxControllerCore extends Controller
 			$rule = $this->getDoctrine()
                          ->getManager()
                          ->getRepository('RegleBundle:Rule')
-                         ->findAll();			
+                         ->findBy(array('deleted' => 0));		
 		}
 		else {
 			$list_fields_sql = 
@@ -193,6 +200,12 @@ class FluxControllerCore extends Controller
 							       'choices'   => $lstGblStatus,
 								   'data'=> ($sessionService->isFluxFilterCGblStatusExist() ? $sessionService->getFluxFilterGlobalStatus() : false),
 							       'required'  => false
+						 ))	
+						 
+					->add('type', ChoiceType::class, array(
+							       'choices'   => $lstType,
+								   'data'=> ($sessionService->isFluxFilterTypeExist() ? $sessionService->getFluxFilterType() : false),
+							       'required'  => false
 						 ))						 
 						 
 					->add('click_filter', SubmitType::class, array(
@@ -226,7 +239,7 @@ class FluxControllerCore extends Controller
 		//---[ FORM ]-------------------------
 		if( $form->get('click_filter')->isClicked() ) {
 			$data = $request->get($form->getName());
-			$where = 'WHERE ';		
+			$where = 'WHERE Document.deleted = 0 AND ';		
 			
 			/* if(!empty( $data['date_create_start'] ) && is_string($data['date_create_start'])) {
 				$where .= "Document.date_created >= '".$data['date_create_start']."' ";
@@ -319,6 +332,16 @@ class FluxControllerCore extends Controller
 				$sessionService->removeFluxFilterGblStatus();
 			}
 			
+			if(!empty( $data['type'] )) {
+				$where .= (($conditions > 0) ? "AND " : "" );
+				$where .= "Document.type='".$data['type']."' ";
+				$conditions++;
+				$sessionService->setFluxFilterType($data['type']);
+			}
+			else {
+				$sessionService->removeFluxFilterGblStatus();
+			}
+			
 			if(!empty( $data['target_id'] )) {
 				$where .= (($conditions > 0) ? "AND " : "" );
 				$where .= "Document.target_id LIKE '".$data['target_id']."' ";
@@ -380,6 +403,7 @@ class FluxControllerCore extends Controller
 			AND $page == 1
 		) {
 			$where = " WHERE 0";
+			$user = "";
 		}
 		
 		// Add limit to the query
@@ -450,8 +474,9 @@ class FluxControllerCore extends Controller
 	}
 
 	// Info d'un flux
-	public function fluxInfoAction($id,$page) {		
+	public function fluxInfoAction(Request $request,$id,$page) {		
 		try {
+			$session = $request->getSession();
 			$em = $this->getDoctrine()->getManager();
 
 			// Detecte si la session est le support ---------
@@ -460,7 +485,11 @@ class FluxControllerCore extends Controller
 				
 			// Infos des flux
 			$doc = $em->getRepository('RegleBundle:Document')
-	                  ->findById($list_fields_sql);					  
+	                  ->findBy($list_fields_sql);
+					  
+			if($doc[0]->getDeleted()) {
+				$session->set('warning', array($this->get('translator')->trans('error.document.deleted_flag')));
+			}
 			if( !$permission->isAdmin($this->getUser()->getId()) ) {		  
 				if(
 						empty($doc[0])
@@ -588,7 +617,7 @@ class FluxControllerCore extends Controller
 
 			// HISTORY DOCUMENT
 			// Get the history documents (all document for the same source)
-			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule()));
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0));
 			// If only one record, the history is the current document, so we remove it => no parent
 			if (count($historyDocuments) == 1) {
 				$historyDocuments = array();
@@ -687,7 +716,7 @@ class FluxControllerCore extends Controller
 		try {
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
-				$job->actionMassTransfer('rerun',array($id));			
+				$job->actionMassTransfer('rerun','document',array($id));			
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
@@ -701,7 +730,7 @@ class FluxControllerCore extends Controller
 		try {
 			if(!empty($id)) {
 				$job = $this->get('myddleware_job.job');	
-				$job->actionMassTransfer('cancel',array($id));			
+				$job->actionMassTransfer('cancel','document',array($id));			
 			}
 			return $this->redirect( $this->generateURL('flux_info', array( 'id'=>$id )) );
 		}
@@ -744,7 +773,7 @@ class FluxControllerCore extends Controller
 	public function fluxMassCancelAction() {							
 		if(isset($_POST['ids']) && count($_POST['ids']) > 0) {
 			$job = $this->get('myddleware_job.job');	
-			$job->actionMassTransfer('cancel',$_POST['ids']);			
+			$job->actionMassTransfer('cancel','document',$_POST['ids']);			
 		}													
 		exit; 
 	}
@@ -753,7 +782,7 @@ class FluxControllerCore extends Controller
 
 		if(isset($_POST['ids']) && count($_POST['ids']) > 0) {
 			$job = $this->get('myddleware_job.job');	
-			$job->actionMassTransfer('rerun',$_POST['ids']);			
+			$job->actionMassTransfer('rerun','document',$_POST['ids']);			
 		}
 		
 		exit;

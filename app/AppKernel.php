@@ -19,14 +19,16 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new WhiteOctober\PagerfantaBundle\WhiteOctoberPagerfantaBundle(),
+            new FOS\JsRoutingBundle\FOSJsRoutingBundle(), // Expose routes on JS
+            new ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle(),
+            new Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle(),
             // User
             new FOS\UserBundle\FOSUserBundle(),
             // Myddleware
             new Myddleware\LoginBundle\LoginBundle(),
             new Myddleware\RegleBundle\RegleBundle(),   
-            new Myddleware\UserBundle\UserBundle(), 
-            new FOS\JsRoutingBundle\FOSJsRoutingBundle(), // Expose routes on JS
-			
+            new Myddleware\UserBundle\UserBundle(),
+            new Myddleware\ApiBundle\v1_0\MyddlewareApiBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

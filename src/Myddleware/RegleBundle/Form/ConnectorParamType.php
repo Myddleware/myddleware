@@ -31,44 +31,37 @@ class ConnectorParamType extends AbstractType{
         $builder->add('value',TextType::class,['error_bubbling' => true])->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
        
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
-        $connectorParam = $event->getData();
-        $form = $event->getForm();
-        $type = TextType::class;
-        $option['attr']['class'] = 'params';
-        
-        $id = $connectorParam->getId();
-        $name = $connectorParam->getName();
-        $option['attr']['data-param'] = $name;
-         
-        if ($name == 'wsdl') {
-           // $option['id'] = 'param_' . $name;
-            $option['attr']['readonly'] = 'readonly';
-            $option['attr']['data-id'] = $id;
-            $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
-        }
+			$connectorParam = $event->getData();
+			$form = $event->getForm();
+			$type = TextType::class;
+			$option['attr']['class'] = 'params';
+			
+			$id = $connectorParam->getId();
+			$name = $connectorParam->getName();
+			$option['attr']['data-param'] = $name;
+			 
+			if ($name == 'wsdl' or $name == 'file') {
+			   // $option['id'] = 'param_' . $name;
+				$option['attr']['readonly'] = 'readonly';
+				$option['attr']['data-id'] = $id;
+				$option['attr']['placeholder'] = 'create_connector.upload_placeholder';
+			}
 
-            foreach ($this->_solutionFieldsLogin as $f){
-            if($f['name'] == $connectorParam->getName()){
-               
-             
-                        
-               $type = $f['type'];
-               $option['label'] = 'solution.fields.'.$f['name'];
-               if($type == 'password'){
-                   $option['attr']['autocomplete'] = 'off'; 
-                   $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
-               }
-            }
-        }
-        $form->add('value', $type, $option);
-        if($connectorParam->getValue() == null){
-            $form->add('name', HiddenType::class, ['data' => $name]);
-        }
-      
-        
-    });
-               
-   
+			foreach ($this->_solutionFieldsLogin as $f){
+				if($f['name'] == $connectorParam->getName()){         
+				   $type = $f['type'];
+				   $option['label'] = 'solution.fields.'.$f['name'];
+				   if($type == 'Symfony\Component\Form\Extension\Core\Type\PasswordType'){
+					   $option['attr']['autocomplete'] = 'off'; 
+					   $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
+				   }
+				}
+			}	
+			$form->add('value', $type, $option);
+			if($connectorParam->getValue() == null){
+				$form->add('name', HiddenType::class, ['data' => $name]);
+			} 
+		});
     }
   
     

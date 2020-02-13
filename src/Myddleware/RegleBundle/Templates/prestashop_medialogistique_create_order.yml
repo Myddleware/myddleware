@@ -1,0 +1,97 @@
+name: prestashop_medialogistique_create_order
+description: 'Send order from Prestashop to Media Logistique'
+rules:
+    -
+        name: 'Order detail'
+        nameSlug: order_detail
+        sourceSolution: prestashop
+        targetSolution: medialogistique
+        sourceModule: order_details
+        targetModule: gestion_commande
+        fields:
+            - { target: article_EAN, source: product_ean13, formula: null }
+            - { target: prix_unit_TTC, source: product_price, formula: null }
+            - { target: quantite, source: product_quantity, formula: null }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Shipping address'
+        nameSlug: shipping_address
+        sourceSolution: prestashop
+        targetSolution: medialogistique
+        sourceModule: addresses
+        targetModule: gestion_commande
+        fields:
+            - { target: Livr_adresse1, source: address1, formula: null }
+            - { target: Livr_adresse2, source: address2, formula: null }
+            - { target: Livr_cp, source: postcode, formula: null }
+            - { target: Livr_nom, source: firstname;lastname, formula: '{firstname}." ".{lastname}' }
+            - { target: Livr_pays, source: id_country, formula: 'changeValue( {id_country},"(''1'':''DE'',''2'':''AT'',''3'':''BE'',''4'':''CA'',''5'':''CN'',''6'':''ES'',''7'':''FI'',''8'':''FR'',''9'':''GR'',''10'':''IT'',''11'':''JP'',''12'':''LU'',''13'':''NL'',''14'':''PL'',''15'':''PT'',''16'':''CZ'',''17'':''GB'',''18'':''SE'',''19'':''CH'',''20'':''DK'',''21'':''US'',''22'':''HK'',''23'':''NO'',''24'':''AU'',''25'':''SG'',''26'':''IE'',''27'':''NZ'',''28'':''KR'',''29'':''IL'',''30'':''ZA'',''31'':''NG'',''32'':''CI'',''33'':''TG'',''34'':''BO'',''35'':''MU'',''36'':''RO'',''37'':''SK'',''38'':''DZ'',''39'':''AS'',''40'':''AD'',''41'':''AO'',''42'':''AI'',''43'':''AG'',''44'':''AR'',''45'':''AM'',''46'':''AW'',''47'':''AZ'',''48'':''BS'',''49'':''BH'',''50'':''BD'',''51'':''BB'',''52'':''BY'',''53'':''BZ'',''54'':''BJ'',''55'':''BM'',''56'':''BT'',''57'':''BW'',''58'':''BR'',''59'':''BN'',''60'':''BF'',''61'':''MM'',''62'':''BI'',''63'':''KH'',''64'':''CM'',''65'':''CV'',''66'':''CF'',''67'':''TD'',''68'':''CL'',''69'':''CO'',''70'':''KM'',''71'':''CD'',''72'':''CG'',''73'':''CR'',''74'':''HR'',''75'':''CU'',''76'':''CY'',''77'':''DJ'',''78'':''DM'',''79'':''DO'',''80'':''TL'',''81'':''EC'',''82'':''EG'',''83'':''SV'',''84'':''GQ'',''85'':''ER'',''86'':''EE'',''87'':''ET'',''88'':''FK'',''89'':''FO'',''90'':''FJ'',''91'':''GA'',''92'':''GM'',''93'':''GE'',''94'':''GH'',''95'':''GD'',''96'':''GL'',''97'':''GI'',''98'':''GP'',''99'':''GU'',''100'':''GT'',''101'':''GG'',''102'':''GN'',''103'':''GW'',''104'':''GY'',''105'':''HT'',''106'':''HM'',''107'':''VA'',''108'':''HN'',''109'':''IS'',''110'':''IN'',''111'':''ID'',''112'':''IR'',''113'':''IQ'',''114'':''IM'',''115'':''JM'',''116'':''JE'',''117'':''JO'',''118'':''KZ'',''119'':''KE'',''120'':''KI'',''121'':''KP'',''122'':''KW'',''123'':''KG'',''124'':''LA'',''125'':''LV'',''126'':''LB'',''127'':''LS'',''128'':''LR'',''129'':''LY'',''130'':''LI'',''131'':''LT'',''132'':''MO'',''133'':''MK'',''134'':''MG'',''135'':''MW'',''136'':''MY'',''137'':''MV'',''138'':''ML'',''139'':''MT'',''140'':''MH'',''141'':''MQ'',''142'':''MR'',''143'':''HU'',''144'':''YT'',''145'':''MX'',''146'':''FM'',''147'':''MD'',''148'':''MC'',''149'':''MN'',''150'':''ME'',''151'':''MS'',''152'':''MA'',''153'':''MZ'',''154'':''NA'',''155'':''NR'',''156'':''NP'',''157'':''AN'',''158'':''NC'',''159'':''NI'',''160'':''NE'',''161'':''NU'',''162'':''NF'',''163'':''MP'',''164'':''OM'',''165'':''PK'',''166'':''PW'',''167'':''PS'',''168'':''PA'',''169'':''PG'',''170'':''PY'',''171'':''PE'',''172'':''PH'',''173'':''PN'',''174'':''PR'',''175'':''QA'',''176'':''RE'',''177'':''RU'',''178'':''RW'',''179'':''BL'',''180'':''KN'',''181'':''LC'',''182'':''MF'',''183'':''PM'',''184'':''VC'',''185'':''WS'',''186'':''SM'',''187'':''ST'',''188'':''SA'',''189'':''SN'',''190'':''RS'',''191'':''SC'',''192'':''SL'',''193'':''SI'',''194'':''SB'',''195'':''SO'',''196'':''GS'',''197'':''LK'',''198'':''SD'',''199'':''SR'',''200'':''SJ'',''201'':''SZ'',''202'':''SY'',''203'':''TW'',''204'':''TJ'',''205'':''TZ'',''206'':''TH'',''207'':''TK'',''208'':''TO'',''209'':''TT'',''210'':''TN'',''211'':''TR'',''212'':''TM'',''213'':''TC'',''214'':''TV'',''215'':''UG'',''216'':''UA'',''217'':''AE'',''218'':''UY'',''219'':''UZ'',''220'':''VU'',''221'':''VE'',''222'':''VN'',''223'':''VG'',''224'':''VI'',''225'':''WF'',''226'':''EH'',''227'':''YE'',''228'':''ZM'',''229'':''ZW'',''230'':''AL'',''231'':''AF'',''232'':''AQ'',''233'':''BA'',''234'':''BV'',''235'':''IO'',''236'':''BG'',''237'':''KY'',''238'':''CX'',''239'':''CC'',''240'':''CK'',''241'':''GF'',''242'':''PF'',''243'':''TF'',''244'':''AX'')")' }
+            - { target: Livr_ville, source: city, formula: null }
+            - { target: telephone, source: phone;phone_mobile, formula: '({phone} != "" ? {phone} : {phone_mobile})' }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Billing address'
+        nameSlug: billing_address
+        sourceSolution: prestashop
+        targetSolution: medialogistique
+        sourceModule: addresses
+        targetModule: gestion_commande
+        fields:
+            - { target: Fact_adresse1, source: address1, formula: null }
+            - { target: Fact_adresse2, source: address2, formula: null }
+            - { target: Fact_cp, source: postcode, formula: null }
+            - { target: Fact_nom, source: firstname;lastname, formula: '{firstname}." ".{lastname}' }
+            - { target: Fact_pays, source: id_country, formula: 'changeValue( {id_country},"(''1'':''DE'',''2'':''AT'',''3'':''BE'',''4'':''CA'',''5'':''CN'',''6'':''ES'',''7'':''FI'',''8'':''FR'',''9'':''GR'',''10'':''IT'',''11'':''JP'',''12'':''LU'',''13'':''NL'',''14'':''PL'',''15'':''PT'',''16'':''CZ'',''17'':''GB'',''18'':''SE'',''19'':''CH'',''20'':''DK'',''21'':''US'',''22'':''HK'',''23'':''NO'',''24'':''AU'',''25'':''SG'',''26'':''IE'',''27'':''NZ'',''28'':''KR'',''29'':''IL'',''30'':''ZA'',''31'':''NG'',''32'':''CI'',''33'':''TG'',''34'':''BO'',''35'':''MU'',''36'':''RO'',''37'':''SK'',''38'':''DZ'',''39'':''AS'',''40'':''AD'',''41'':''AO'',''42'':''AI'',''43'':''AG'',''44'':''AR'',''45'':''AM'',''46'':''AW'',''47'':''AZ'',''48'':''BS'',''49'':''BH'',''50'':''BD'',''51'':''BB'',''52'':''BY'',''53'':''BZ'',''54'':''BJ'',''55'':''BM'',''56'':''BT'',''57'':''BW'',''58'':''BR'',''59'':''BN'',''60'':''BF'',''61'':''MM'',''62'':''BI'',''63'':''KH'',''64'':''CM'',''65'':''CV'',''66'':''CF'',''67'':''TD'',''68'':''CL'',''69'':''CO'',''70'':''KM'',''71'':''CD'',''72'':''CG'',''73'':''CR'',''74'':''HR'',''75'':''CU'',''76'':''CY'',''77'':''DJ'',''78'':''DM'',''79'':''DO'',''80'':''TL'',''81'':''EC'',''82'':''EG'',''83'':''SV'',''84'':''GQ'',''85'':''ER'',''86'':''EE'',''87'':''ET'',''88'':''FK'',''89'':''FO'',''90'':''FJ'',''91'':''GA'',''92'':''GM'',''93'':''GE'',''94'':''GH'',''95'':''GD'',''96'':''GL'',''97'':''GI'',''98'':''GP'',''99'':''GU'',''100'':''GT'',''101'':''GG'',''102'':''GN'',''103'':''GW'',''104'':''GY'',''105'':''HT'',''106'':''HM'',''107'':''VA'',''108'':''HN'',''109'':''IS'',''110'':''IN'',''111'':''ID'',''112'':''IR'',''113'':''IQ'',''114'':''IM'',''115'':''JM'',''116'':''JE'',''117'':''JO'',''118'':''KZ'',''119'':''KE'',''120'':''KI'',''121'':''KP'',''122'':''KW'',''123'':''KG'',''124'':''LA'',''125'':''LV'',''126'':''LB'',''127'':''LS'',''128'':''LR'',''129'':''LY'',''130'':''LI'',''131'':''LT'',''132'':''MO'',''133'':''MK'',''134'':''MG'',''135'':''MW'',''136'':''MY'',''137'':''MV'',''138'':''ML'',''139'':''MT'',''140'':''MH'',''141'':''MQ'',''142'':''MR'',''143'':''HU'',''144'':''YT'',''145'':''MX'',''146'':''FM'',''147'':''MD'',''148'':''MC'',''149'':''MN'',''150'':''ME'',''151'':''MS'',''152'':''MA'',''153'':''MZ'',''154'':''NA'',''155'':''NR'',''156'':''NP'',''157'':''AN'',''158'':''NC'',''159'':''NI'',''160'':''NE'',''161'':''NU'',''162'':''NF'',''163'':''MP'',''164'':''OM'',''165'':''PK'',''166'':''PW'',''167'':''PS'',''168'':''PA'',''169'':''PG'',''170'':''PY'',''171'':''PE'',''172'':''PH'',''173'':''PN'',''174'':''PR'',''175'':''QA'',''176'':''RE'',''177'':''RU'',''178'':''RW'',''179'':''BL'',''180'':''KN'',''181'':''LC'',''182'':''MF'',''183'':''PM'',''184'':''VC'',''185'':''WS'',''186'':''SM'',''187'':''ST'',''188'':''SA'',''189'':''SN'',''190'':''RS'',''191'':''SC'',''192'':''SL'',''193'':''SI'',''194'':''SB'',''195'':''SO'',''196'':''GS'',''197'':''LK'',''198'':''SD'',''199'':''SR'',''200'':''SJ'',''201'':''SZ'',''202'':''SY'',''203'':''TW'',''204'':''TJ'',''205'':''TZ'',''206'':''TH'',''207'':''TK'',''208'':''TO'',''209'':''TT'',''210'':''TN'',''211'':''TR'',''212'':''TM'',''213'':''TC'',''214'':''TV'',''215'':''UG'',''216'':''UA'',''217'':''AE'',''218'':''UY'',''219'':''UZ'',''220'':''VU'',''221'':''VE'',''222'':''VN'',''223'':''VG'',''224'':''VI'',''225'':''WF'',''226'':''EH'',''227'':''YE'',''228'':''ZM'',''229'':''ZW'',''230'':''AL'',''231'':''AF'',''232'':''AQ'',''233'':''BA'',''234'':''BV'',''235'':''IO'',''236'':''BG'',''237'':''KY'',''238'':''CX'',''239'':''CC'',''240'':''CK'',''241'':''GF'',''242'':''PF'',''243'':''TF'',''244'':''AX'')")' }
+            - { target: Fact_ville, source: city, formula: null }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Customers
+        nameSlug: customers
+        sourceSolution: prestashop
+        targetSolution: medialogistique
+        sourceModule: customers
+        targetModule: gestion_commande
+        fields:
+            - { target: email, source: email, formula: null }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Orders
+        nameSlug: orders
+        sourceSolution: prestashop
+        targetSolution: medialogistique
+        sourceModule: orders
+        targetModule: gestion_commande
+        fields:
+            - { target: date_commande, source: date_add, formula: 'changeFormatDate( {date_add}, "Y-m-d H:i:s", "Y-m-d")' }
+            - { target: date_livraison_demandee, source: date_add, formula: 'changeFormatDate( {date_add}, "Y-m-d H:i:s", "Y-m-d")' }
+            - { target: ref_commande, source: reference, formula: null }
+            - { target: total_commande_TTC, source: total_paid_tax_incl, formula: null }
+            - { target: total_frais_port_TTC, source: total_shipping_tax_incl, formula: null }
+            - { target: code_interne, source: my_value, formula: '"CW1"' }
+            - { target: compte_client, source: my_value, formula: '"CLIENT"' }
+        relationships:
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: id_order, fieldId: order_detail, parent: true }
+            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: customers, parent: true }
+            - { fieldNameSource: id_address_delivery, fieldNameTarget: Myddleware_element_id, fieldId: shipping_address, parent: true }
+            - { fieldNameSource: id_address_invoice, fieldNameTarget: Myddleware_element_id, fieldId: billing_address, parent: true }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }

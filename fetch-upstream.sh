@@ -12,4 +12,8 @@ git checkout master
 git pull https://github.com/Myddleware/myddleware.git master
 git push
 
-git checkout stable
+git checkout contribute
+git pull https://github.com/Myddleware/myddleware.git master
+git push
+
+git checkout develop

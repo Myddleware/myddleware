@@ -52,7 +52,7 @@ class homecore {
 		try {	
 
 			if($is_support == false) {
-				$where = ' WHERE created_by='.$id;
+				$where = ' WHERE Rule.created_by='.$id;
 			}
 			else {
 				$where = '';
@@ -66,6 +66,7 @@ class homecore {
 						LEFT OUTER JOIN Document
 							ON  Rule.id = Document.rule_id
 							AND Document.global_status IN ('Open','Error')
+							AND Document.deleted = 0
 					$where 
 					GROUP BY Rule.name, Rule.id
 					HAVING cpt > 0
@@ -110,6 +111,7 @@ class homecore {
 						LEFT OUTER JOIN Document
 							ON  Rule.id = Document.rule_id
 							AND Document.global_status = 'Close'
+							AND Document.deleted = 0
 					WHERE
 							Rule.active = 1
 						AND Rule.deleted = 0
@@ -134,6 +136,7 @@ class homecore {
 						INNER JOIN Rule
 							ON  Rule.id = Document.rule_id
 							AND Document.global_status = 'Error'
+							AND Document.deleted = 0
 					WHERE
 							Rule.active = 1
 						AND Rule.deleted = 0";
@@ -148,9 +151,9 @@ class homecore {
 
 	public function countTypeDoc($isAdmin, $id) {
 		try {
-			$where = '';
+			$where = ' WHERE Document.deleted = 0 ';
 			if($isAdmin == false) {
-				$where = 'WHERE created_by='.$id;
+				$where .= ' AND created_by='.$id;
 			}			
 							
 		    $sql = "SELECT count(*) as nb, global_status
@@ -181,6 +184,7 @@ class homecore {
 					FROM Rule
 						INNER JOIN Document
 							ON Rule.id = Document.rule_id
+							AND Document.deleted = 0
 					WHERE
 						Document.global_status = 'Close'
 						$where
@@ -217,7 +221,7 @@ class homecore {
 			}	
 			
 			// Select the number of transfert per day
-		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, global_status, count(*) nb FROM Document WHERE date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where." GROUP BY date, global_status";		
+		    $sql = "SELECT DATE_FORMAT(date_modified, '%Y-%m-%d') date, global_status, count(*) nb FROM Document WHERE Document.deleted = 0 AND date_modified >= DATE_ADD(CURDATE(), INTERVAL -".$this->historicDays." DAY) ".$where." GROUP BY date, global_status";		
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();		
@@ -236,7 +240,7 @@ class homecore {
 		try {
 			$historic = array();
 			// Select last jobs
-		    $sql = "SELECT begin date, open, close, cancel, error FROM Job ORDER BY begin DESC LIMIT ".$this->nbHistoricJobs;		
+		    $sql = "SELECT begin date, open, close, cancel, error FROM Job LIMIT ".$this->nbHistoricJobs;		
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();			

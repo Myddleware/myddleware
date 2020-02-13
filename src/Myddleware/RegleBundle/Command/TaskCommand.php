@@ -51,7 +51,9 @@ class TaskCommand extends ContainerAwareCommand {
 			// alias de la règle en params
 			$rule = $input->getArgument('rule');
 			// Récupération du Job			
-			$job = $this->getContainer()->get('myddleware_job.job');		
+			$job = $this->getContainer()->get('myddleware_job.job');
+			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
+			$job->message = '';			
 			
 			if ($job->initJob('Synchro : '.$rule)) {
 				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
