@@ -35,6 +35,9 @@ class mauticcore  extends solution {
 
 	protected $auth;
 	
+	protected $plurialModuleName = array('contact' => 'contacts');
+	protected $required_fields = array('default' => array('id', 'dateModified', 'dateAdded'));
+	
 	// Enable to read deletion and to delete data
 	protected $sendDeletion = true;	
 	
@@ -107,6 +110,7 @@ class mauticcore  extends solution {
 			$api = new MauticApi();
 			$fieldApi = $api->newApi($module."Fields", $this->auth, $this->paramConnexion['url']);
 			$fieldlist = $fieldApi->getList();
+
 			// Transform fields to Myddleware format
 			if (!empty($fieldlist['fields'])) {
 				foreach ($fieldlist['fields'] as $field) {
@@ -131,6 +135,212 @@ class mauticcore  extends solution {
 		}
 	} // get_module_fields($module)	 
 
+	
+	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
+	public function read_last($param) {	
+		try {		
+			// Create API object depending on the module
+			$api = new MauticApi();
+			$moduleName = (!empty($this->plurialModuleName[$param['module']]) ? $this->plurialModuleName[$param['module']] : $param['module']);
+			$moduleApi = $api->newApi($moduleName , $this->auth, $this->paramConnexion['url']);
+			
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			
+			$result = array();
+			
+			// Build query to search data 
+			// if id in the query we use the corresponding API call
+			if (!empty($param['query']['id'])) {
+				$recordReturned = $moduleApi->get($param['query']['id']);
+				if (!empty($recordReturned[$param['module']])) {
+					$record = $recordReturned[$param['module']];
+				}
+			// Otherwise we use the search API  	
+			} elseif (!empty($param['query'])) {
+				foreach ($param['query'] as $key => $value) {
+					if (empty($searchFilter)) {
+						$searchFilter = $key.':'.$value;
+					} else {
+						$searchFilter .= ' AND '.$key.':'.$value;
+					}
+				}
+				// We use date_add because date_modified can be empty
+				$recordReturned = $moduleApi->getList($searchFilter, 0, 1, 'date_added', 'desc', false, true);
+				if (!empty($recordReturned[$moduleName][1])) {
+					$record = $recordReturned[$moduleName][1];
+				}
+			// No query, we get the last record (used for simulation in rule creation process)	
+			} else {
+				// We use date_add because date_modified can be empty
+				$recordReturned = $moduleApi->getList('', 0, 1, 'date_added', 'desc', false, true);
+				if (!empty($recordReturned[$moduleName][1])) {
+					$record = $recordReturned[$moduleName][1];
+				}
+			}
+			// Convert Mautic result to Myddleware format
+			if (!empty($record)) {
+				foreach ($param['fields'] as $field) {			
+					// Some fields are directly in the record
+					if (array_key_exists($field, $record)) {				
+						$result['values'][$field] = $record[$field]; 
+					// Other fields are in a sub tab
+					} elseif (array_key_exists($field,$record['fields']['all'])) {				
+						$result['values'][$field] = $record['fields']['all'][$field]; 
+					}
+				}
+				// Add requiered field for Myddleware
+				$result['values']['id'] = $record['id']; 
+				$refDate = (!empty($record['dateModified']) ? $record['dateModified'] : $record['dateAdded']);
+				$result['values']['date_modified'] = $this->dateTimeToMyddleware($refDate);; // modified
+			}
+			// If no result
+			if (empty($result)) {
+				$result['done'] = false;
+			} else {
+				if (!empty($result['values'])) {
+					$result['done'] = true;
+				}
+			}
+		} catch (\Exception $e) {
+			$result['error'] = 'Error : ' . $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+			$result['done'] = -1;
+		}	
+		return $result;
+	}
+	
+	public function create($param) {
+		return $this->createUpdate('create', $param);
+
+	}// end function create
+
+	public function update($param) {
+		return $this->createUpdate('update', $param);
+	}// end function create
+	
+	
+		// Permet de créer des données
+	public function createUpdate($action, $param) {
+		// Create API object depending on the module
+		$api = new MauticApi();
+		$moduleName = (!empty($this->plurialModuleName[$param['module']]) ? $this->plurialModuleName[$param['module']] : $param['module']);
+		$moduleApi = $api->newApi($moduleName , $this->auth, $this->paramConnexion['url']);
+	
+		// Transformation du tableau d'entrée pour être compatible webservice Sugar
+		foreach($param['data'] as $idDoc => $data) {
+			try {
+				// Manage target id for update action
+				$targetId = '';
+				if ($action == 'update') {
+					if (empty($data['target_id'])) {
+						throw new \Exception('Failed to update the record to Mautic. The target id is empty.');
+					}
+					$targetId = $data['target_id'];
+				}
+				// Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);
+				// update the record to Mautic
+				if ($action == 'update') {	
+					$record = $moduleApi->edit($targetId, $data, true); 
+				// create the record to Mautic
+				} else { 	
+					$record = $moduleApi->create($data);
+				}
+				// Manage return data from Mautic
+				if (!empty($record[$param['module']]['id'])) {
+					$result[$idDoc] = array(
+											'id' => $record[$param['module']]['id'],
+											'error' => false
+									); 
+				} elseif(!empty($record['error']['message'])) {
+					throw new \Exception('Failed to '.$action.' the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
+				} else {
+					throw new \Exception('Failed to '.$action.' the record to Mautic. No error message returned by the API.');
+				} 
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
+		return $result;
+	}
+	
+	// Function to delete a record
+	public function delete($param) {
+		try {	
+			// Create API object depending on the module
+			$api = new MauticApi();
+			$moduleName = (!empty($this->plurialModuleName[$param['module']]) ? $this->plurialModuleName[$param['module']] : $param['module']);
+			$moduleApi = $api->newApi($moduleName , $this->auth, $this->paramConnexion['url']);
+			
+			// For every document
+			foreach($param['data'] as $idDoc => $data) {
+				try {
+					// Check control before delete
+					$data = $this->checkDataBeforeDelete($param, $data);
+					if (empty($data['target_id'])) {
+						throw new \Exception('No target id found. Failed to delete the record.');
+					}
+					// remove record from Mautic
+					$record = $moduleApi->delete($data['target_id']);
+		
+					// Manage return data from Mautic
+					if (
+							!empty($record[$param['module']]) 
+						AND array_key_exists('id', $record[$param['module']])
+					) {
+						$result[$idDoc] = array(
+												'id' => $data['target_id'],
+												'error' => false
+										); 
+					} elseif(!empty($record['error']['message'])) {
+						throw new \Exception('Failed to delete the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
+					} else {
+						throw new \Exception('Failed to delete the record to Mautic. No error message returned by the API.');
+					} 								
+				}
+				catch (\Exception $e) {
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$result[$idDoc] = array(
+							'id' => '-1',
+							'error' => $error
+					);
+				}
+				// Status modification for the transfer
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
+		}
+		catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
+		}
+		return $result;
+	}
+	
+	protected function checkDataBeforeCreate($param, $data) {
+		// Remove target_id field as it is a Myddleware field		
+		if (array_key_exists('target_id', $data)) {
+			unset($data['target_id']);
+		}
+		return $data;
+	}
+	
+	// Function to convert datetime format from the current application to Myddleware date format
+	protected function dateTimeToMyddleware($dateTime) {
+		$date = new \DateTime($dateTime);
+		return $date->format('Y-m-d H:i:s');
+	}// dateTimeToMyddleware($dateTime)	
 }
 
 /* * * * * * * *  * * * * * *  * * * * * * 

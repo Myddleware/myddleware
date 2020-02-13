@@ -1086,8 +1086,8 @@ class documentcore {
 					} else {	
 						// Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
 						if (
-								!isset($data[$ruleField['target_field_name']])
-							 && $type == 'H'	
+								!array_key_exists($ruleField['target_field_name'], $data)
+							 AND $type == 'H'	
 						) { 				
 							continue;
 						}				

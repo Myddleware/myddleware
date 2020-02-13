@@ -581,7 +581,7 @@ class databasecore extends solution {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				try {
-					// Check control before update
+					// Check control before delete
 					$data = $this->checkDataBeforeDelete($param, $data);
 					if (empty($data['target_id'])) {
 						throw new \Exception('No target id found. Failed to delete the record.');

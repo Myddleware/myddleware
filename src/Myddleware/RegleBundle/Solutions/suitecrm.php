@@ -351,7 +351,7 @@ class suitecrmcore  extends solution {
 	}
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
+	public function read_last($param) {		
 		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
 		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 			$result['done'] = true;					
@@ -488,10 +488,10 @@ class suitecrmcore  extends solution {
 								$result['date_ref'] = $value->value;
 							}
 						}	
-						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						// Manage deletion by adding the flag Myddleware_deletion to the record							
 						if (
 								$deleted == true
-							AND empty($entry->name_value_list->deleted->value)
+							AND !empty($entry->name_value_list->deleted->value)
 						) {
 							$record['myddleware_deletion'] = true;
 						}
@@ -530,7 +530,7 @@ class suitecrmcore  extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}								
+		}
 		return $result;	
 	}
 
