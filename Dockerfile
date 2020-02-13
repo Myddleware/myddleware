@@ -63,6 +63,9 @@ RUN touch /var/log/myddleware.log
 # RUN : >> /var/log/cron.log
 # RUN chmod +x /app/myddleware-*.sh
 
-# RUN cron
-#CMD ["cron", "-f"]
-
+RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
+    { \
+        echo '#!/bin/bash'; \
+        echo 'cron'; \
+        echo 'apache2-foreground-inherit "$@"'; \
+    } > /usr/local/bin/apache2-foreground
