@@ -1,0 +1,17 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_driver: pdo_mysql
+    database_host: '%env(MYSQL_HOST)%'
+    database_port: 3306
+    database_name: '%env(MYSQL_DATABASE)%'
+    database_user: root
+    database_password: '%env(MYSQL_ROOT_PASSWORD)%'
+    secret: ThisTokenIsNotSoSecretChangeIt
+    myddleware_support: 0
+    param:
+        mode: front_office
+    extension_allowed:
+        - xml
+        - wsdl
+    myd_version: 2.5.1a
+    block_install: 0
