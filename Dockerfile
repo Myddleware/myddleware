@@ -1,4 +1,4 @@
-FROM php:7.1.32-apache
+FROM php:7.2.27-apache
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get -y install -qq --force-yes git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 alien libaio1 && \
