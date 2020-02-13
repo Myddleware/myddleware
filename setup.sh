@@ -12,5 +12,8 @@ rm app/config/public/parameters_smtp.yml
 ## Prepare files and directories
 docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 
+## Prepare database
+docker-compose run --rm myddleware ./prepare-database.sh
+
 ## Start all containers
 docker-compose up -d

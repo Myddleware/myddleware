@@ -11,10 +11,11 @@ services:
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=secret
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www/html:cached
       - ./app/config/parameters.yml.docker:/var/www/html/app/config/parameters.yml
       - ./app/config/public/parameters_smtp.yml.docker:/var/www/html/app/config/public/parameters_smtp.yml
       - ./app/config/public/parameters_public.yml.docker:/var/www/html/app/config/public/parameters_public.yml
+      - ./.temp/.composer:/root/.composer:cached
     links:
       - mysql
       - phpmyadmin
