@@ -368,6 +368,7 @@ view_flux:
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des transferts
     nbPostDocuments: Tranferts post
+    direct_link: Lien direct  
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 

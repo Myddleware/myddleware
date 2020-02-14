@@ -534,6 +534,23 @@ class suitecrmcore  extends solution {
 		return $result;	
 	}
 
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}	
+		
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+	}
+	
 
 	protected function readRelationship($param,$dataParent) {
 		if (empty($param['limit'])) {

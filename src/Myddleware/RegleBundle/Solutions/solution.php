@@ -559,6 +559,30 @@ class solutioncore {
 		return false;
 	}
 	
+	// Build the direct link to the record (used in data transfer view)
+	// Type : source or target
+	public function getDirectLink($rule, $document, $type){
+		return null;
+	}
+	
+	// Get a connector param decrypted
+	protected function getConnectorParam($connector, $paramName) {
+		// Get the connector params from the rule
+		$connectorParams = $connector->getConnectorParams();
+		if (!empty($connectorParams)) {
+			foreach($connectorParams as $connectorParam) {
+				// Get the param requested
+				if ($connectorParam->getName() == $paramName) {
+					// Instanciate object to decrypte data
+					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
+					return $encrypter->decrypt($connectorParam->getValue());							
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 	// Check data before create 
 	// Add a throw exeption if error
 	protected function checkDataBeforeCreate($param,$data) {

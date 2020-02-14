@@ -576,9 +576,15 @@ class FluxControllerCore extends Controller
 					
 			$name_solution_source = $rule->getConnectorSource()->getSolution()->getName();
 			$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
-			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );			
-		
+			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );
 			$list_btn = array_merge( $solution_target_btn, $solution_source_btn );		
+			
+			// Generate direct link to the record in the source and target applications
+			$sourceLink['direct_link'] = $solution_source->getDirectLink($rule,$doc[0],'source');
+			$sourceData = $sourceLink + $sourceData;
+			$targetLink['direct_link'] = $solution_target->getDirectLink($rule,$doc[0],'target');
+			$targetData = $targetLink + $targetData;
+			
 
 			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(

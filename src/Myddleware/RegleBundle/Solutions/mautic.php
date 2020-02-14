@@ -328,6 +328,24 @@ class mauticcore  extends solution {
 		return $result;
 	}
 	
+	
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}	
+		
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/s/'.$this->plurialModuleName[$module].'/view/'.$recordId;
+	}
+	
 	protected function checkDataBeforeCreate($param, $data) {
 		// Remove target_id field as it is a Myddleware field		
 		if (array_key_exists('target_id', $data)) {
