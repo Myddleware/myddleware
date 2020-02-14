@@ -1328,7 +1328,7 @@ class DefaultControllerCore extends Controller
                     $source['table'][$module['source']][$t] = $k['label'];
                 }
                 // Tri des champs sans tenir compte de la casse
-                asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
+                ksort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
             }
 
             // SOURCE ----- Récupère la liste des champs source

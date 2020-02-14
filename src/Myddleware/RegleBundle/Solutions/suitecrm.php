@@ -831,10 +831,6 @@ class suitecrmcore  extends solution {
 		return null;
 	}
 	
-	// Permet de supprimer un enregistrement
-	public function delete($id) {
-	
-	}
 		
 	//function to make cURL request	
 	protected function call($method, $parameters){
