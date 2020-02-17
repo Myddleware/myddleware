@@ -1656,8 +1656,8 @@ class DefaultControllerCore extends Controller
 			
 			// Add param to allow deletion (need source and target application ok to enable deletion)
 			if (
-					$solution_source->getReadDeletion() == true
-				AND	$solution_cible->getSendDeletion() == true
+					$solution_source->getReadDeletion($module['source']) == true
+				AND	$solution_cible->getSendDeletion($module['cible']) == true
 			){
 				$deletion = array(
 								array(

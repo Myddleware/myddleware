@@ -35,8 +35,14 @@ class mauticcore  extends solution {
 
 	protected $auth;
 	
-	protected $plurialModuleName = array('contact' => 'contacts');
-	protected $required_fields = array('default' => array('id', 'dateModified', 'dateAdded'));
+	protected $plurialModuleName = array(
+											'contact' => 'contacts',
+											'company' => 'companies'
+										);
+	protected $required_fields = array(
+										'default' => array('id', 'dateModified', 'dateAdded'),
+										'company' => array('id'),
+									);
 	
 	// Enable to read deletion and to delete data
 	protected $sendDeletion = true;	
@@ -99,36 +105,60 @@ class mauticcore  extends solution {
 	
 	// Get the modules available 
 	public function get_modules($type = 'source') {
-		return array('contact' => 'Contacts');
+		return array(
+						'contact' => 'Contacts',
+						'company' => 'Companies',
+						'companies__contact' => 'Add contact to company'
+					);
 	}
 	
 	// Get the fields available 
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
-			// Call Mautic to get the module fields
-			$api = new MauticApi();
-			$fieldApi = $api->newApi($module."Fields", $this->auth, $this->paramConnexion['url']);
-			$fieldlist = $fieldApi->getList();
-
+			if ($module == 'companies__contact') {
+				$fieldlist['fields'][] = array('alias' => 'contact', 'label' => 'Contact', 'type' => 'relate', 'isRequired' => true);
+				$fieldlist['fields'][] = array('alias' => 'company', 'label' => 'Company', 'type' => 'relate', 'isRequired' => true);
+			} else {
+				// Call Mautic to get the module fields
+				$api = new MauticApi();
+				$fieldApi = $api->newApi($module."Fields", $this->auth, $this->paramConnexion['url']);
+				$fieldlist = $fieldApi->getList();
+			}
+			
 			// Transform fields to Myddleware format
 			if (!empty($fieldlist['fields'])) {
 				foreach ($fieldlist['fields'] as $field) {
-					$this->moduleFields[$field['alias']] = array(
-													'label' => $field['label'],
-													'type' => ($field['type'] == 'text' ? TextType::class : 'varchar(255)'),
-													'type_bdd' => ($field['type'] == 'text' ? $field['type'] : 'varchar(255)'),
-													'required' => (!empty($field['isRequired']) ? true : false),
-												);
-					// manage dropdown lists
-					if (!empty($field['properties']['list'])) {
-						$options = explode('|', $field['properties']['list']);
-						foreach ($options as $option) {
-							$this->moduleFields[$field['alias']]['option'][$option] = $option;
+					if ($field['type'] == 'relate') {
+						$this->fieldsRelate[$field['alias']] = array(
+								'label' => $field['label'],
+								'type' => 'varchar(255)',
+								'type_bdd' => 'varchar(255)',
+								'required' => '',
+								'required_relationship' => (!empty($field['isRequired']) ? true : false)
+							);
+					} else {
+						$this->moduleFields[$field['alias']] = array(
+														'label' => $field['label'],
+														'type' => ($field['type'] == 'text' ? TextType::class : 'varchar(255)'),
+														'type_bdd' => ($field['type'] == 'text' ? $field['type'] : 'varchar(255)'),
+														'required' => (!empty($field['isRequired']) ? true : false),
+													);
+						// manage dropdown lists
+						if (!empty($field['properties']['list'])) {
+							$options = explode('|', $field['properties']['list']);
+							foreach ($options as $option) {
+								$this->moduleFields[$field['alias']]['option'][$option] = $option;
+							}
 						}
 					}
 				}
-			}	
+			}
+			
+			// Add relate field in the field mapping
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}				
 			return $this->moduleFields;
 		} catch (\Exception $e){
 			return false;
@@ -181,7 +211,7 @@ class mauticcore  extends solution {
 				}
 			}
 			// Convert Mautic result to Myddleware format
-			if (!empty($record)) {
+			if (!empty($record)) {			
 				foreach ($param['fields'] as $field) {			
 					// Some fields are directly in the record
 					if (array_key_exists($field, $record)) {				
@@ -193,8 +223,17 @@ class mauticcore  extends solution {
 				}
 				// Add requiered field for Myddleware
 				$result['values']['id'] = $record['id']; 
-				$refDate = (!empty($record['dateModified']) ? $record['dateModified'] : $record['dateAdded']);
-				$result['values']['date_modified'] = $this->dateTimeToMyddleware($refDate);; // modified
+				if (!empty($record['dateModified'])) {
+					$refDate = $record['dateModified'];
+					$result['values']['date_modified'] = $this->dateTimeToMyddleware($refDate); 
+				} elseif (!empty($record['dateAdded'])) {
+					$refDate = $record['dateAdded'];
+					$result['values']['date_modified'] = $this->dateTimeToMyddleware($refDate); 
+				// e.g. No date for company
+				} else {
+					$refDate = $record['id'];
+					$result['values']['date_modified'] = $refDate; 
+				}
 			}
 			// If no result
 			if (empty($result)) {
@@ -212,6 +251,10 @@ class mauticcore  extends solution {
 	}
 	
 	public function create($param) {
+		// Specific management for relationship creation between company and contact
+		if ($param['module'] == 'companies__contact') {
+			return $this->addConatctToCompany($param);
+		}
 		return $this->createUpdate('create', $param);
 
 	}// end function create
@@ -221,7 +264,7 @@ class mauticcore  extends solution {
 	}// end function create
 	
 	
-		// Permet de créer des données
+	// Create reconto to Mautic
 	public function createUpdate($action, $param) {
 		// Create API object depending on the module
 		$api = new MauticApi();
@@ -245,9 +288,9 @@ class mauticcore  extends solution {
 				if ($action == 'update') {	
 					$record = $moduleApi->edit($targetId, $data, true); 
 				// create the record to Mautic
-				} else { 	
+				} else { 
 					$record = $moduleApi->create($data);
-				}
+				}				
 				// Manage return data from Mautic
 				if (!empty($record[$param['module']]['id'])) {
 					$result[$idDoc] = array(
@@ -270,6 +313,50 @@ class mauticcore  extends solution {
 			// Modification du statut du flux
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		}
+		return $result;
+	}
+	
+	// Create reconto to Mautic
+	public function addConatctToCompany($param) {
+		// Create API object depending on the module
+		$api = new MauticApi();
+		// Module companies__contact use companies API
+		$moduleApi = $api->newApi('companies' , $this->auth, $this->paramConnexion['url']);
+	
+		// Transformation du tableau d'entrée pour être compatible webservice Sugar
+		foreach($param['data'] as $idDoc => $data) {
+			try {
+				// Check control before create
+				$data = $this->checkDataBeforeCreate($param, $data);
+				if (empty($data['company'])) {
+					throw new \Exception('Failed to add the contact to the company to Mautic because company is empty.');					
+				}
+				if (empty($data['contact'])) {
+					throw new \Exception('Failed to add the contact to the company to Mautic because contact is empty.');					
+				}
+				// Create relationship into Mautic
+				$record = $moduleApi->addContact($data['company'], $data['contact']);
+				
+				// Manage return data from Mautic
+				if (!empty($record['success'])) {
+					$result[$idDoc] = array(
+											'id' => $data['company'].'_'.$data['contact'],
+											'error' => false
+									); 
+				} else {
+					throw new \Exception('Failed to add the contact to the company to Mautic.');
+				} 
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}				
 		return $result;
 	}
 	
@@ -331,20 +418,34 @@ class mauticcore  extends solution {
 	
 	// Build the direct link to the record (used in data transfer view)
 	public function getDirectLink($rule, $document, $type){		
-		// Get url, module and record ID depending on the type
-		if ($type == 'source') {
-			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-			$module = $rule->getModuleSource();
-			$recordId = $document->getSource();
-		} else {
-			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-			$module = $rule->getModuleTarget();
-			$recordId = $document->gettarget();
-		}	
-		
-		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
-		return rtrim($url,'/').'/s/'.$this->plurialModuleName[$module].'/view/'.$recordId;
+		try {
+			// Get url, module and record ID depending on the type
+			if ($type == 'source') {
+				$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+				$module = $rule->getModuleSource();
+				$recordId = $document->getSource();
+			} else {
+				$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+				$module = $rule->getModuleTarget();
+				$recordId = $document->gettarget();
+			}	
+			
+			// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+			return rtrim($url,'/').'/s/'.$this->plurialModuleName[$module].'/view/'.$recordId;
+		} catch (\Exception $e) {
+			return null;
+		}
 	}
+		
+	// Return if the connector can send deletion
+	public function getSendDeletion($module) {
+		// Don't allow to remove relation company - contact. 
+		// This relationship will be remove when we will remove a contact or a company
+		if ($module == 'companies__contact') {
+			return false;
+		}
+		return parent::getSendDeletion($module);
+	}	
 	
 	protected function checkDataBeforeCreate($param, $data) {
 		// Remove target_id field as it is a Myddleware field		

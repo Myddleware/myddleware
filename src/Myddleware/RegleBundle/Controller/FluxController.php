@@ -581,10 +581,13 @@ class FluxControllerCore extends Controller
 			
 			// Generate direct link to the record in the source and target applications
 			$sourceLink['direct_link'] = $solution_source->getDirectLink($rule,$doc[0],'source');
-			$sourceData = $sourceLink + $sourceData;
+			if (!empty($sourceLink) AND !empty($sourceData)) {
+				$sourceData = $sourceLink + $sourceData;
+			}
 			$targetLink['direct_link'] = $solution_target->getDirectLink($rule,$doc[0],'target');
-			$targetData = $targetLink + $targetData;
-			
+			if (!empty($targetLink) AND !empty($targetData)) {
+				$targetData = $targetLink + $targetData;
+			}
 
 			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(

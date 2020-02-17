@@ -395,12 +395,12 @@ class solutioncore {
 	}
 
 	// Return if the connector can read deletion
-	public function getReadDeletion() {
+	public function getReadDeletion($module) {
 		return $this->readDeletion;
 	}
 	
 	// Return if the connector can send deletion
-	public function getSendDeletion() {
+	public function getSendDeletion($module) {
 		return $this->sendDeletion;
 	}
 
