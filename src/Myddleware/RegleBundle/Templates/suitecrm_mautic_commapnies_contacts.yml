@@ -1,0 +1,68 @@
+name: suitecrm_mautic_commapnies_contacts
+description: 'Send companies and contact from SuiteCRM to Mautic'
+rules:
+    -
+        name: 'Contacts to Mautic'
+        nameSlug: contacts_to_mautic
+        sourceSolution: suitecrm
+        targetSolution: mautic
+        sourceModule: Contacts
+        targetModule: contact
+        fields:
+            - { target: address1, source: primary_address_street, formula: null }
+            - { target: address2, source: primary_address_street_2, formula: null }
+            - { target: city, source: primary_address_city, formula: null }
+            - { target: email, source: email1, formula: null }
+            - { target: firstname, source: first_name, formula: null }
+            - { target: lastname, source: last_name, formula: null }
+            - { target: mobile, source: phone_mobile, formula: null }
+            - { target: phone, source: phone_work, formula: null }
+            - { target: state, source: primary_address_state, formula: null }
+            - { target: title, source: salutation, formula: '({salutation} == "Miss" ? "Miss" : ({salutation} == "Mr." ? "Mr" : ({salutation} == "Mrs." ? "Mrs" : "")))' }
+            - { target: zipcode, source: primary_address_postalcode, formula: null }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: deletion, value: '0' }
+    -
+        name: 'Account to Mautic'
+        nameSlug: account_to_mautic
+        sourceSolution: suitecrm
+        targetSolution: mautic
+        sourceModule: Accounts
+        targetModule: company
+        fields:
+            - { target: companyname, source: name, formula: null }
+            - { target: companyaddress1, source: billing_address_street, formula: null }
+            - { target: companyaddress2, source: billing_address_street_2, formula: null }
+            - { target: companycity, source: billing_address_city, formula: null }
+            - { target: companydescription, source: description, formula: null }
+            - { target: companyemail, source: email1, formula: null }
+            - { target: companyfax, source: phone_fax, formula: null }
+            - { target: companyphone, source: phone_office, formula: null }
+            - { target: companystate, source: billing_address_state, formula: null }
+            - { target: companywebsite, source: website, formula: null }
+            - { target: companyzipcode, source: billing_address_postalcode, formula: null }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: deletion, value: '0' }
+    -
+        name: 'Add contact to Company Mautic'
+        nameSlug: add_contact_to_company_mautic
+        sourceSolution: suitecrm
+        targetSolution: mautic
+        sourceModule: Contacts
+        targetModule: companies__contact
+        relationships:
+            - { fieldNameSource: account_id, fieldNameTarget: company, fieldId: account_to_mautic, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: contact, fieldId: contacts_to_mautic, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }

@@ -216,6 +216,19 @@ class DefaultControllerCore extends Controller
 
             // On récupére l'EntityManager
             $this->getInstanceBdd();
+			
+			// Remove the rule relationships 
+			$ruleRelationships = $this->getDoctrine()
+				->getManager()
+				->getRepository('RegleBundle:RuleRelationShip')
+				->findBy(array('rule' => $id));
+			
+			if (!empty($ruleRelationships)) {
+				foreach ($ruleRelationships as $ruleRelationship) {
+					$ruleRelationship->setDeleted(1);
+					$this->em->persist($ruleRelationship);
+				}
+			}
 
 			$rule->setDeleted(1);
 			$rule->setActive(0);
@@ -2346,7 +2359,7 @@ class DefaultControllerCore extends Controller
                     $template->setLang(mb_strtoupper($request->getLocale()));
                     $template->setIdUser($this->getUser()->getId());
                     // Rule creation with the template selected in parameter
-                    $convertTemplate = $template->convertTemplate($request->get('template'));
+                    $convertTemplate = $template->convertTemplate($request->get('name', null),$request->get('template'));
                     // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                     return new Response('template');
                 } else {
