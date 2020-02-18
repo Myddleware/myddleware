@@ -13,7 +13,7 @@
 
   "prefer-stable": true,
     "require": {
-        "php": ">=7.1 <7.3",
+        "php": ">=7.1",
       "symfony/symfony": "3.4.37",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
