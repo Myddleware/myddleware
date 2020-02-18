@@ -1469,31 +1469,26 @@ class DefaultControllerCore extends Controller
             }
 
             // -- Relation
-            // Liste des règles avec les mêmes connecteurs rev 1.07
-            //
-            $stmt = $this->connection->prepare('	
-					SELECT r.id, r.name, r.module_source
-					FROM Rule r
-					WHERE 
-						(
-								conn_id_source=:id_source 
-							AND conn_id_target=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-						)
-					OR (
-								conn_id_target=:id_source 
-							AND conn_id_source=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-					)
-					');
-            $stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId($ruleKey));
-            $stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId($ruleKey));
-            $stmt->bindValue('name', $sessionService->getParamRuleName($ruleKey));
-            $stmt->execute();
-
-            $ruleListRelation = $stmt->fetchAll();
+            // Rule list with the same connectors (both directions) to get the relate ones 
+			$ruleListRelation = $this->getDoctrine()->getManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
+							->select('r.id, r.name, r.moduleSource')
+							->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')	
+							->setParameter(1, (int)$sessionService->getParamRuleConnectorSourceId($ruleKey))
+							->setParameter(2, (int)$sessionService->getParamRuleConnectorCibleId($ruleKey))
+							->setParameter(3, $sessionService->getParamRuleName($ruleKey))
+							->getQuery()
+							->getResult();
 
             //Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
             $ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule($ruleKey), 'source');
