@@ -63,7 +63,7 @@ class DefaultControllerCore extends Controller
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId');
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion');
     
 	protected function getInstanceBdd()
     {
@@ -216,6 +216,19 @@ class DefaultControllerCore extends Controller
 
             // On récupére l'EntityManager
             $this->getInstanceBdd();
+			
+			// Remove the rule relationships 
+			$ruleRelationships = $this->getDoctrine()
+				->getManager()
+				->getRepository('RegleBundle:RuleRelationShip')
+				->findBy(array('rule' => $id));
+			
+			if (!empty($ruleRelationships)) {
+				foreach ($ruleRelationships as $ruleRelationship) {
+					$ruleRelationship->setDeleted(1);
+					$this->em->persist($ruleRelationship);
+				}
+			}
 
 			$rule->setDeleted(1);
 			$rule->setActive(0);
@@ -1328,7 +1341,7 @@ class DefaultControllerCore extends Controller
                     $source['table'][$module['source']][$t] = $k['label'];
                 }
                 // Tri des champs sans tenir compte de la casse
-                asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
+                ksort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
             }
 
             // SOURCE ----- Récupère la liste des champs source
@@ -1648,6 +1661,32 @@ class DefaultControllerCore extends Controller
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
             }
+			
+			// Add param to allow deletion (need source and target application ok to enable deletion)
+			if (
+					$solution_source->getReadDeletion($module['source']) == true
+				AND	$solution_cible->getSendDeletion($module['cible']) == true
+			){
+				$deletion = array(
+								array(
+									'id' => 'deletion',
+									'name' => 'deletion',
+									'required' => false,
+									'type' => 'option',
+									'label' => $this->get('translator')->trans('create_rule.step3.deletion.label'),
+									'option' => array(0 => '', 1 => $this->get('translator')->trans('create_rule.step3.deletion.yes'))
+								)
+							);
+				$rule_params = array_merge($rule_params, $deletion);
+			} else {
+				// If the deletion is disable (database in source OK but target application non OK), we remove the deletion list field of database connector
+				$keyDeletionField = array_search('deletionField', array_column($rule_params, 'id'));
+				if (!empty($keyDeletionField)) {
+					unset($rule_params[$keyDeletionField]);
+				}
+			}
+		
+			
             //  rev 1.07 --------------------------
             $result = array(
                 'source' => $source['table'],
@@ -2315,7 +2354,7 @@ class DefaultControllerCore extends Controller
                     $template->setLang(mb_strtoupper($request->getLocale()));
                     $template->setIdUser($this->getUser()->getId());
                     // Rule creation with the template selected in parameter
-                    $convertTemplate = $template->convertTemplate($request->get('template'));
+                    $convertTemplate = $template->convertTemplate($request->get('name', null),$request->get('template'));
                     // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                     return new Response('template');
                 } else {

@@ -4,6 +4,7 @@ namespace Myddleware\RegleBundle\Controller;
 
 use Myddleware\RegleBundle\Form\managementSMTPType;
 use Swift_SmtpTransport;
+use Swift_SendmailTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Yaml\Yaml;
@@ -136,18 +137,24 @@ class ManagementSMTPController extends Controller
         $encryption = $form->get('encryption')->getData();
         $password = $form->get('password')->getData();
         $user_email = $this->getUser()->getEmail();
-        // Create the Transport
-        $transport = new Swift_SmtpTransport($host, $port);
-		if (!empty($user)) {
-			$transport->setUsername($user);
-			$transport->setPassword($password);
+		if ($form->get('transport')->getData() == 'sendmail') {
+			// Create the Transport for sendmail
+			$transport = new Swift_SendmailTransport();
+		} else {
+			// Create the Transport for gmail and smtp
+			$transport = new Swift_SmtpTransport($host, $port);
+			if (!empty($user)) {
+				$transport->setUsername($user);
+				$transport->setPassword($password);
+			}
+			if (!empty($auth_mode)) {
+				$transport->setAuthMode($auth_mode);
+			}    
+			if (!empty($encryption)) {
+				$transport->setEncryption($encryption);
+			}    
 		}
-		if (!empty($auth_mode)) {
-			$transport->setAuthMode($auth_mode);
-        }    
-        if (!empty($encryption)) {
-			$transport->setEncryption($encryption);
-        }    
+		
         // Create the Mailer using your created Transport
         $mailer = new \Swift_Mailer($transport);
         $this->tools = new MyddlewareTools($this->get('logger'), $this->container, $this->get('database_connection'));
@@ -161,7 +168,7 @@ class ManagementSMTPController extends Controller
             $textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')) . chr(10) . $this->tools->getTranslation(array('email_notification', 'signature'));
             $message = \Swift_Message::newInstance($subject);
             $message
-                ->setFrom('no-reply@myddleware.com')
+                ->setFrom((!empty($this->container->getParameter('email_from')) ? $this->container->getParameter('email_from') : 'no-reply@myddleware.com'))
                 ->setBody($textMail);
             $message->setTo($user_email);
             $send = $mailer->send($message);

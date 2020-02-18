@@ -87,7 +87,14 @@ class RuleRelationShip
 	 * 
      */
     private $parent; 	
-
+	
+	/**
+     * @var boolean
+     *
+	 * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+	 * 
+     */
+    private $deleted; 
 
     /**
      * Get id
@@ -213,4 +220,28 @@ class RuleRelationShip
     {
         return $this->parent;
     }
+	
+	/**
+     * Set deleted
+     *
+     * @param integer $deleted
+     * @return Rule
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return integer 
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
+
 }

@@ -13,7 +13,7 @@
 
   "prefer-stable": true,
     "require": {
-        "php": ">=7.1 <7.3",
+        "php": ">=7.2",
       "symfony/symfony": "3.4.37",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
@@ -39,7 +39,8 @@
         "friendsofsymfony/jsrouting-bundle": "^1.6",
         "api-platform/core": "2.2.10",
         "api-platform/api-pack": "^1.1",
-        "lexik/jwt-authentication-bundle": "^2.6"
+        "lexik/jwt-authentication-bundle": "^2.6",
+        "mautic/api-library": "^2.15"
     },
     "repositories": [
         {

@@ -479,8 +479,7 @@ class jobcore  {
 			// Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
 			$sql = "SELECT
 						Rule.id,
-						GROUP_CONCAT(RuleRelationShip.field_id SEPARATOR ';') field_id,
-						IF(RuleRelationShip.field_id IS NULL, '1', '99') rule_order
+						GROUP_CONCAT(RuleRelationShip.field_id SEPARATOR ';') field_id
 					FROM Rule
 						LEFT OUTER JOIN RuleRelationShip
 							ON Rule.id = RuleRelationShip.rule_id
@@ -490,14 +489,21 @@ class jobcore  {
 			$stmt = $this->connection->prepare($sql);
 			$stmt->execute();	    
 			$rules = $stmt->fetchAll(); 	
+
 			if (!empty($rules)) {
 				// Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
 				$ruleKeyVakue = array();
-				foreach ($rules as $rule) {
-					$ruleKeyVakue[$rule['id']] = $rule['rule_order'];
+				foreach ($rules as $key => $rule) {
+					// Init order depending on the field_id value
+					if (empty($rule['field_id'])) {
+						$rules[$key]['rule_order'] = 1;
+					} else {
+						$rules[$key]['rule_order'] = 99;
+					}
+					$ruleKeyVakue[$rule['id']] = $rules[$key]['rule_order'];
 					$rulesRef[$rule['id']] = $rule;
-				}	
-				
+				}	                               
+	
 				// On calcule les priorité tant que l'on a encore des priorité 99
 				// On fait une condition sur le $i pour éviter une boucle infinie
 				$i = 0;

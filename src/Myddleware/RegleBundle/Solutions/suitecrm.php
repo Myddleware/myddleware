@@ -31,7 +31,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class suitecrmcore  extends solution {
 
 	protected $limitCall = 100;
-	protected $urlSuffix = '/service/v4/rest.php';
+	protected $urlSuffix = '/service/v4_1/rest.php';
+	
+	// Enable to read deletion and to delete data
+	protected $readDeletion = true;	
 	
     protected $required_fields = array('default' => array('id','date_modified','date_entered'));
 	
@@ -348,7 +351,7 @@ class suitecrmcore  extends solution {
 	}
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
+	public function read_last($param) {		
 		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
 		if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 			$result['done'] = true;					
@@ -409,6 +412,14 @@ class suitecrmcore  extends solution {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
+			
+			// Manage delete option to enable 
+			$deleted = false;
+			if (!empty($param['ruleParams']['deletion'])) {
+				$deleted = true;
+				$param['fields'][] = 'deleted';
+			}
+			
 			if (empty($param['offset'])) {
 				$param['offset'] = 0;
 			}
@@ -450,10 +461,9 @@ class suitecrmcore  extends solution {
 												'select_fields' => $param['fields'],
 												'link_name_to_fields_array' => $link_name_to_fields_array,
 												'max_results' => $this->limitCall,
-												'deleted' => 0,
+												'deleted' => $deleted,
 												'Favorites' => '',
-											);		
-										
+											);												
 				$get_entry_list_result = $this->call("get_entry_list", $get_entry_list_parameters);									
 				// Construction des données de sortie
 				if (isset($get_entry_list_result->result_count)) {
@@ -478,6 +488,13 @@ class suitecrmcore  extends solution {
 								$result['date_ref'] = $value->value;
 							}
 						}	
+						// Manage deletion by adding the flag Myddleware_deletion to the record							
+						if (
+								$deleted == true
+							AND !empty($entry->name_value_list->deleted->value)
+						) {
+							$record['myddleware_deletion'] = true;
+						}
 						
 						// S'il y a des relation custom, on ajoute la relation custom 
 						if (!empty($get_entry_list_result->relationship_list[$i]->link_list)) {
@@ -513,10 +530,27 @@ class suitecrmcore  extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
+		}
 		return $result;	
 	}
 
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}	
+		
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+	}
+	
 
 	protected function readRelationship($param,$dataParent) {
 		if (empty($param['limit'])) {
@@ -797,10 +831,6 @@ class suitecrmcore  extends solution {
 		return null;
 	}
 	
-	// Permet de supprimer un enregistrement
-	public function delete($id) {
-	
-	}
 		
 	//function to make cURL request	
 	protected function call($method, $parameters){
