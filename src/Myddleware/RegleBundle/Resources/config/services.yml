@@ -72,6 +72,9 @@ services:
      myddleware_rule.suitecrm:
          class: Myddleware\RegleBundle\Solutions\suitecrm
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.vtigercrm:
+         class: Myddleware\RegleBundle\Solutions\vtigercrm
+         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.bittle:
          class: Myddleware\RegleBundle\Solutions\bittle
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
@@ -86,6 +89,9 @@ services:
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.mysql:
         class: Myddleware\RegleBundle\Solutions\mysql
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.oracledb:
+        class: Myddleware\RegleBundle\Solutions\oracledb
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.microsoftsql:
         class: Myddleware\RegleBundle\Solutions\microsoftsql

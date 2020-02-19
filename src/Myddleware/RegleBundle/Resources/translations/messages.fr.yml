@@ -475,7 +475,9 @@ function:
 solution:
     fields:
         login: Utilisateur
+        username: Utilisateur
         password: Mot de passe
+        accesskey: Access key
         url: Url
         token: Jeton
         tokensecret: Secret jeton
