@@ -567,11 +567,11 @@ class SymfonyRequirements extends RequirementCollection
             } catch (ReflectionException $e) {
                 $contents = '';
             }
-            $this->addRecommendation(
+/*             $this->addRecommendation(
                 file_get_contents(__FILE__) === $contents,
                 'Requirements file should be up-to-date',
                 'Your requirements file is outdated. Run composer install and re-check your configuration.'
-            );
+            ); */
         }
 
         $this->addRecommendation(
