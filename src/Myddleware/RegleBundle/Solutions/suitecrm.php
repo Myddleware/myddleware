@@ -509,7 +509,11 @@ class suitecrmcore  extends solution {
                     $param['offset'] += $this->limitCall;
 				}
 				else {
-					$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
+					if (!empty($get_entry_list_result->number)) {
+						$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
+					} else {
+						$result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
+					}
 				}			
 			}
             // On continue si le nombre de résultat du dernier appel est égal à la limite
