@@ -35,6 +35,7 @@ class suitecrmcore  extends solution {
 	
 	// Enable to read deletion and to delete data
 	protected $readDeletion = true;	
+	protected $sendDeletion = true;	
 	
     protected $required_fields = array('default' => array('id','date_modified','date_entered'));
 	
@@ -771,6 +772,14 @@ class suitecrmcore  extends solution {
 		return $result;			
 	}
 	
+	// Function to delete a record
+	public function delete($param) {
+		// We set the flag deleted to 1 and we call the update function
+		foreach($param['data'] as $idDoc => $data) {
+			$param['data'][$idDoc]['deleted'] = 1;
+		}	
+		return $this->update($param);		
+	}
 		
 	// Build the query for read data to SuiteCRM
 	protected function generateQuery($param, $method){				
