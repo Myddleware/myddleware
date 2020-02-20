@@ -2087,6 +2087,7 @@ class DefaultControllerCore extends Controller
                         $oneRuleRelationShip->setFieldNameTarget($rel['target']);
                         $oneRuleRelationShip->setFieldId($rel['rule']);
                         $oneRuleRelationShip->setParent($rel['parent']);
+						$oneRuleRelationShip->setDeleted(0);
                         // We don't create the field target if the relatiobnship is a parent one
                         // We only use this field to search in the source application, not to send the data to the target application.
                         if (empty($rel['parent'])) {
