@@ -390,6 +390,7 @@ class templatecore {
 						// fieldId contains the nameSlug, we have to change it with the id of the relate rule 					
 						$relationshipObjecy->setFieldId($this->ruleNameSlugArray[$relationship['fieldId']]); 
 						$relationshipObjecy->setParent($relationship['parent']);
+						$relationshipObjecy->setDeleted(0);
 						$this->em->persist($relationshipObjecy);
 					}
 				}
