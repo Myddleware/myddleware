@@ -253,7 +253,7 @@ class templatecore {
 				// Rule creation
 				// General data
 				$ruleObject = new Rule();
-				$ruleObject->setName((string)$ruleName.' - '$rule['name']);
+				$ruleObject->setName((string)$ruleName.' - '.$rule['name']);
 				$ruleObject->setNameSlug((string)$ruleName.'_'.$rule['nameSlug']);
 				// It is possible that the templatte contains opposite rules, so we test it first. If solution are opposite, we set opposite connectors too
 				if ($rule['sourceSolution'] == $this->solutionSourceName) {
