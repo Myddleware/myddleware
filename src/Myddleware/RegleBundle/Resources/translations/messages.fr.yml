@@ -80,8 +80,8 @@ create_rule:
             create_only: Création de données seulement
             search_only: Récupération de données existantes seulement  
         deletion:
-            label: Activer la suppression 
-            yes: Oui (des données peuvent être supprimées dans l'application cible)       
+            label: Activer la suppression dans l'application cible
+            yes: Oui     
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
