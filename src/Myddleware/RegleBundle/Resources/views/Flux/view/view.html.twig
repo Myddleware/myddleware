@@ -132,11 +132,14 @@
     		<p class="ctr"><img src="{{ asset('bundles/regle/images/template/') }}source.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></p>
     		<p class="ctr">{{'view_flux.source'|trans}}</p>
 			<ul id="flux_source">
+			{% if source.direct_link is defined %}
+				<center><u><a href="{{ source.direct_link }}" target="_blank">{{'view_flux.direct_link'|trans}}</a></u></center><p>
+			{% endif %}	
 			<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getSource }}</span></li>
 	    	{% if source %}
 				{% for key, value  in source %}
-					{% if value != doc.getId  %}
-					 <li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
+					{% if value != doc.getId  and key != 'direct_link' %}
+						<li class="{{ key }}"><span class="field">{{ key }}</span><span>{{ value }}</span></li>
 					{% endif %}
 				{% endfor %}
 				<hr/>
@@ -151,11 +154,14 @@
 		<div class="zone">
     		<p class="ctr"><img src="{{ asset('bundles/regle/images/template/') }}target.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></p>
     		<p class="ctr">{{'view_flux.target'|trans}}</p>
+			{% if target.direct_link is defined %}
+				<center><u><a href="{{ target.direct_link }}" target="_blank">{{'view_flux.direct_link'|trans}}</a></u></center><p>
+			{% endif %}	
 			<ul id="flux_target" data-id="{{doc.getId}}" data-rule="{{ doc.getRule }}">
+			<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getTarget }}</span></li>
 	    	{% if target %}
-				<li><span class="field">{{'view_flux.id'|trans}} :</span><span>{{ doc.getTarget }}</span></li>
 				{% for key, value  in target %}
-					{% if value != doc.getId  %}
+					{% if value != doc.getId and key != 'direct_link' %}
 						<li class="{{ key }}"><span class="field">{{ key }}</span><span class="value">{{ value }}</span></li>
 					{% endif %}
 				{% endfor %}
@@ -205,8 +211,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
 					   {% for flux in post_documents %}
@@ -215,8 +222,9 @@
 							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a></td>		     				
 							<td class="ctr">{{ flux.source }}</td>     	
 							<td class="ctr">{{ flux.target }}</td>     	
-							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 							<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">{{ flux.type }}</td> 
 							<td class="ctr">
 								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
 								{% if flux.globalStatus|lower == 'close' %}
@@ -237,8 +245,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr>			
 					{% endif %}
@@ -275,8 +284,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
 					   {% for flux in history_documents %}
@@ -291,8 +301,9 @@
 							<td class="ctr"><a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a></td>							
 							<td class="ctr">{{ flux.source }}</td>     	
 							<td class="ctr">{{ flux.target }}</td>     	
-							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 							<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">{{ flux.type }}</td>   
 							<td class="ctr">
 								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
 								{% if flux.globalStatus|lower == 'close' %}
@@ -313,8 +324,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
 							<th>{{'list_flux.tab.target_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr>			
 					{% endif %}
@@ -351,8 +363,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_field'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
 					   {% for flux in parent_documents %}
@@ -361,8 +374,9 @@
 							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a></td>		     											
 							<td class="ctr">{{ flux.sourceField }}</td>     	
 							<td class="ctr">{{ flux.source }}</td>     	   	
-							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 							<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">{{ flux.type }}</td> 
 							<td class="ctr">
 								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
 								{% if flux.globalStatus|lower == 'close' %}
@@ -383,8 +397,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_field'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr>			
 					{% endif %}
@@ -421,8 +436,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_field'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+							{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr> 
 					   {% for flux in child_documents %}
@@ -431,8 +447,9 @@
 							<td class="ctr"><a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a></td>		     											
 							<td class="ctr">id</td>     	
 							<td class="ctr">{{ flux.source }}</td>     	   	
-							<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>
+							{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 							<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+							<td class="ctr">{{ flux.type }}</td>     	
 							<td class="ctr">
 								<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
 								{% if flux.globalStatus|lower == 'close' %}
@@ -453,8 +470,9 @@
 							<th>{{'list_flux.tab.name'|trans}}</th>
 							<th>{{'list_flux.tab.source_field'|trans}}</th>
 							<th>{{'list_flux.tab.source_id'|trans}}</th>
-							<th>{{'list_flux.tab.date_created'|trans}}</th>
+						{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #} 
 							<th>{{'list_flux.tab.date_modified'|trans}}</th>
+							<th>{{'list_flux.tab.type'|trans}}</th>
 							<th>{{'list_flux.tab.statut'|trans}}</th>
 						</tr>			
 					{% endif %}

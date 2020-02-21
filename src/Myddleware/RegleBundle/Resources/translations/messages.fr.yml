@@ -79,6 +79,9 @@ create_rule:
             create_modify: Création et modification de données
             create_only: Création de données seulement
             search_only: Récupération de données existantes seulement  
+        deletion:
+            label: Activer la suppression dans l'application cible
+            yes: Oui     
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
@@ -351,6 +354,7 @@ flux:
         update: Update
         create: Create
         search: Search
+        delete: Delete
  
 view_flux:
     empty: Pas de données
@@ -364,6 +368,7 @@ view_flux:
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des transferts
     nbPostDocuments: Tranferts post
+    direct_link: Lien direct  
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
@@ -470,7 +475,9 @@ function:
 solution:
     fields:
         login: Utilisateur
+        username: Utilisateur
         password: Mot de passe
+        accesskey: Access key
         url: Url
         token: Jeton
         tokensecret: Secret jeton

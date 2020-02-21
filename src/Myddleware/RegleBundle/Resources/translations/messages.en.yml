@@ -79,6 +79,9 @@ create_rule:
             create_modify: Create and update data
             create_only: Create data only
             search_only: Retrieving existing data only          
+        deletion:
+            label: Allow deletion from target application
+            yes: Yes
         data_wait: Loading... Please wait
         title: Fields
         placeholder: Please drag your fields here
@@ -207,7 +210,7 @@ list_rule:
         name: Name
         version: Version
         active: Activation
-        date_created: Date of creation
+        date_created: Creation date
         option: Options
     btn:
         delete: Delete
@@ -257,7 +260,7 @@ list_connector:
     create_first_connector: You can create your first connector
     th: 
         name: Name
-        date_created: Date of creation
+        date_created: Creation date
         option: Options
     btn:
         delete: Delete
@@ -293,7 +296,7 @@ list_flux:
         mass_reload_confirm: Reload the selected transfers?   
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
-        date_created: Date of creation
+        date_created: Creation date
         date_modified: Date of modification
         rule: Rule
         status: Status
@@ -350,6 +353,7 @@ flux:
         update: Update
         create: Create
         search: Search
+        delete: Delete
         
 view_flux:
     empty: No data
@@ -363,6 +367,7 @@ view_flux:
     nbParentDocuments: Parent transfers
     nbHistoryDocuments: History transfers
     nbPostDocuments: Post transfers    
+    direct_link: Direct link    
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
@@ -383,7 +388,7 @@ view_flux:
         id: Id
         ref: Reference
         job: Job
-        date_created: Date of creation
+        date_created: Creation date
         type: Type
         msg: Message
 
@@ -405,8 +410,8 @@ list_task:
 
 view_task:
     empty_log: No log  
-    task_stop: STOP TASK	
-    refresh: REFRESH	
+    task_stop: STOP TASK
+    refresh: REFRESH
     nblogs: Number of logs  
     header:
         id: Id
@@ -418,7 +423,7 @@ view_task:
         id: Id
         ref: Reference
         transfer: Transfer
-        date_created: Date of creation
+        date_created: Creation date
         type: Type
         msg: Message         
 
@@ -469,7 +474,9 @@ function:
 solution:
     fields:
         login: User
+        username: Username
         password: Password
+        accesskey: Access key
         url: Url
         token: Token
         tokensecret: Secret token

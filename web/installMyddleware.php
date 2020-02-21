@@ -96,8 +96,8 @@ $symfonyRequirements->addRecommendation(
 	'Change the permissions "<strong>config/public/parameters_smtp.yml</strong>" file so that the web server can write into it.'
 );
 // Check php version
-$symfonyRequirements->addRequirement( version_compare(phpversion(), '7.1', '>='), 'Wrong php version', 'Your php version is '.phpversion().'. Myddleware is compatible only with php version 7.1 and 7.2.');
-$symfonyRequirements->addRequirement( version_compare(phpversion(), '7.3', '<'), 'Wrong php version', 'Your php version is '.phpversion().'. Myddleware is compatible only with php version 7.1 and 7.2.');
+$symfonyRequirements->addRequirement( version_compare(phpversion(), '7.2', '>='), 'Wrong php version', 'Your php version is '.phpversion().'. Myddleware is compatible only with php version 7.1 and 7.2.');
+// $symfonyRequirements->addRequirement( version_compare(phpversion(), '7.3', '<'), 'Wrong php version', 'Your php version is '.phpversion().'. Myddleware is compatible only with php version 7.1 and 7.2.');
 
 $iniPath = $symfonyRequirements->getPhpIniConfigPath();
 
