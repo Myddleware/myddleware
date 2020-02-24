@@ -4,7 +4,7 @@
  # * @package Myddleware
  # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- # * @link http://www.myddleware.com	
+ # * @link http://www.myddleware.com
  
  # This file is part of Myddleware.
  
@@ -33,9 +33,9 @@ panel:
     list_error:
         nb: Nombre d'erreurs par règle
     list_job:
-        title: Détail des derniers jobs	
-        duration: seconde(s)	
-        nb : Transferts de données en erreur	
+        title: Détail des derniers jobs
+        duration: seconde(s)
+        nb : Transferts de données en erreur
     graph_histo:
         title: Historique des transferts
     graph_job_histo:
@@ -412,7 +412,7 @@ list_task:
 view_task:
     empty_log: Aucune log  
     task_stop: ARRET DE LA TACHE
-    refresh: RAFRAICHIR	
+    refresh: RAFRAICHIR
     nblogs: Nombre de logs  
     header:
         id: Identifiant
@@ -547,8 +547,8 @@ error:
         target_module_load_list: Erreur de chargement des modules cible
         edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
         edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
-        edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.		
-        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.	
+        edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
+        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.
         delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: 
         update: Impossible d'éditer la règle. 
     account:
