@@ -581,12 +581,20 @@ class FluxControllerCore extends Controller
 			
 			// Generate direct link to the record in the source and target applications
 			$sourceLink['direct_link'] = $solution_source->getDirectLink($rule,$doc[0],'source');
-			if (!empty($sourceLink['direct_link']) AND !empty($sourceData)) {
-				$sourceData = $sourceLink + $sourceData;
+			if (!empty($sourceLink['direct_link'])) {
+				if (!empty($sourceData)) {
+					$sourceData = $sourceLink + $sourceData;
+				} else {
+					$sourceData = $sourceLink;
+				}
 			}
 			$targetLink['direct_link'] = $solution_target->getDirectLink($rule,$doc[0],'target');
-			if (!empty($targetLink['direct_link']) AND !empty($targetData)) {
-				$targetData = $targetLink + $targetData;
+			if (!empty($targetLink['direct_link'])) {
+				if (!empty($targetData)) {
+					$targetData = $targetLink + $targetData;
+				} else {
+					$targetData = $targetLink;
+				}
 			}
 			
 			// Call the view
