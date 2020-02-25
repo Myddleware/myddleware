@@ -63,7 +63,7 @@ class DefaultControllerCore extends Controller
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion');
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
 	protected function getInstanceBdd()
     {
