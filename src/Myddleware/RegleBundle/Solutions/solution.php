@@ -174,7 +174,7 @@ class solutioncore {
 			$this->conn->rollBack(); // -- ROLLBACK TRANSACTION
 			$document->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$document->setTypeError('E');
-			$document->updateStatus('Error_sending : '.$e->getMessage());
+			$document->updateStatus('Error_sending');
 			$this->logger->error( 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$response[$idDoc] = false;
 		}				
