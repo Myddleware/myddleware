@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-##
+## Test
 git add .
 git commit -am "stash changes before fetch upstream"
 
