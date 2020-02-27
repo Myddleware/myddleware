@@ -1,0 +1,11 @@
+api_hello_world:
+    path:  /v1_0/hello-world
+    defaults: { _controller: MyddlewareApiBundle:Default:index }
+    requirements:
+        methods:  GET
+        
+api_generate_documents:
+    path:  /v1_0/generate_documents
+    defaults: { _controller: MyddlewareApiBundle:Default:generateDocuments }
+    requirements:
+        methods:  GET

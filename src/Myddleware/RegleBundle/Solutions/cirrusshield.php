@@ -34,7 +34,7 @@ class cirrusshieldcore  extends solution {
 	protected $token;
 	protected $update;
 	protected $organizationTimezoneOffset;
-	protected $limitCall = 100;
+	protected $limitCall = 1;
 	
 	protected $required_fields = array('default' => array('Id','CreationDate','ModificationDate'));
 	
@@ -385,8 +385,12 @@ class cirrusshieldcore  extends solution {
 				 // Check control before create
 				$data = $this->checkDataBeforeCreate($param, $data);
 				$xmlData .= '<'.$param['module'].'>';
-				// Save the idoc to manage result
-				$xmlData .= '<OrderId>'.$idDoc.'</OrderId>';
+				
+				// Save the idoc to manage result in case of mass upsert
+				if ($this->limitCall > 1) {
+					$xmlData .= '<OrderId>'.$idDoc.'</OrderId>';
+				}
+				
 				foreach ($data as $key => $value) {
 					// Field only used for the update and contains the ID of the record in the target solution			
 					if ($key=='target_id') {					
@@ -434,35 +438,39 @@ class cirrusshieldcore  extends solution {
 					}
 					
 					// Manage results
-					if (!empty($resultCall[$param['module']])) {
+					if (!empty($resultCall[$param['module']])) {					
 						foreach ($resultCall[$param['module']] as $record) {
 							// General error
 							if (!empty($record['Message'])) {
 								throw new \Exception($record['Message']);
+							}		
+							// We use orderId as id document only when we execute to mass upsert. In this case this field orderid has to be created in Cirrus
+							if (!empty($record['orderid'])) {
+								$idDoc = $record['orderid'];
 							}
-
+							
 							// Error managment for the record creation
 							if (!empty($record['Success'])) {
 								if ($record['Success'] == 'False') {
-									$result[$record['orderid']] = array(
+									$result[$idDoc] = array(
 																	'id' => '-1',
 																	'error' => $record['ErrorMessage']
 																);
 								} else {
-									$result[$record['orderid']] = array(
+									$result[$idDoc] = array(
 															'id' => $record['GUID'],
 															'error' => false
 														);
 								}
 							} else {
-								$result[$record['orderid']] = array(
+								$result[$idDoc] = array(
 																'id' => '-1',
 																'error' => 'No success flag returned by Cirrus Shield'
 															);
 
 							}
 							// Transfert status update
-							$this->updateDocumentStatus($record['orderid'],$result[$record['orderid']],$param);	
+							$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 						}
 					}
 				}
@@ -471,7 +479,7 @@ class cirrusshieldcore  extends solution {
 		catch (\Exception $e) {
 			$error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
 			$result['error'] = $error;
-		}	
+		}				
 		return $result;
 	}
 	

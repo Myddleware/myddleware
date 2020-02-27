@@ -39,6 +39,7 @@ use Myddleware\RegleBundle\Entity\Connector;
 use Myddleware\RegleBundle\Entity\ConnectorParam;
 use Myddleware\RegleBundle\Entity\Rule;
 use Myddleware\RegleBundle\Entity\RuleParam;
+use Myddleware\RegleBundle\Entity\RuleParamAudit;
 use Myddleware\RegleBundle\Entity\RuleFilter;
 use Myddleware\RegleBundle\Entity\RuleField;
 use Myddleware\RegleBundle\Entity\RuleRelationShip;
@@ -62,7 +63,7 @@ class DefaultControllerCore extends Controller
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId');
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
 	protected function getInstanceBdd()
     {
@@ -136,27 +137,28 @@ class DefaultControllerCore extends Controller
     {
         $session = $request->getSession();
 
-        // First, checking that the rule has document sent (close)
+        // First, checking that the rule has document not deleted
         $docClose = $this->getDoctrine()
             ->getManager()
             ->getRepository('RegleBundle:Document')
             ->findOneBy(array(
                     'rule' => $id,
-                    'globalStatus' => array('Close')
+					'deleted' => 0
                 )
             );
         // Return to the view detail for the rule if we found a document close
         if (!empty($docClose)) {
-            $session->set('error', array($this->get('translator')->trans('error.rule.delete_document_close')));
+            $session->set('error', array($this->get('translator')->trans('error.rule.delete_document')));
             return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
         }
 
-        // First, checking that the rule has no document open or in error
+        // Then, checking that the rule has no document open or in error
         $docErrorOpen = $this->getDoctrine()
             ->getManager()
             ->getRepository('RegleBundle:Document')
             ->findOneBy(array(
                     'rule' => $id,
+                    'deleted' => 0,
                     'globalStatus' => array('Open', 'Error')
                 )
             );
@@ -166,18 +168,21 @@ class DefaultControllerCore extends Controller
             return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
         }
 
-        // Checking if the rule is linked to an other one
-        $ruleRelationshipError = $this->getDoctrine()
+        // Checking if the rule is linked to an other one 
+        $ruleRelationships = $this->getDoctrine()
             ->getManager()
             ->getRepository('RegleBundle:RuleRelationShip')
-            ->findOneBy(array('fieldId' => $id)
-            );
-        // Return to the view detail of the rule if a rule relate to this one
-        if (!empty($ruleRelationshipError)) {
-            $session->set('error', array($this->get('translator')->trans('error.rule.delete_relationship_exists') . $ruleRelationshipError->getRule()));
-            return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+            ->findBy(array('fieldId' => $id));
+			
+        // Return to the view detail of the rule if a rule relate to this one exists and is not deleted
+        if (!empty($ruleRelationships)) {
+			foreach ($ruleRelationships as $ruleRelationship) {
+				if(empty($ruleRelationship->getDeleted())) {
+					$session->set('error', array($this->get('translator')->trans('error.rule.delete_relationship_exists') . $ruleRelationship->getRule()));
+					return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				}
+			}
         }
-
 
         // Detecte si la session est le support ---------
         $permission = $this->get('myddleware.permission');
@@ -209,76 +214,26 @@ class DefaultControllerCore extends Controller
                 return $this->redirect($this->generateUrl('regle_list'));
             }
 
-            $doc = $this->getDoctrine()
-                ->getManager()
-                ->getRepository('RegleBundle:Document')
-                ->findOneBy(array(
-                        'rule' => $id
-                    )
-                );
-
             // On récupére l'EntityManager
             $this->getInstanceBdd();
+			
+			// Remove the rule relationships 
+			$ruleRelationships = $this->getDoctrine()
+				->getManager()
+				->getRepository('RegleBundle:RuleRelationShip')
+				->findBy(array('rule' => $id));
+			
+			if (!empty($ruleRelationships)) {
+				foreach ($ruleRelationships as $ruleRelationship) {
+					$ruleRelationship->setDeleted(1);
+					$this->em->persist($ruleRelationship);
+				}
+			}
 
-            // si aucun document (flux) alors on supprime sinon on flag
-            if (is_null($doc)) {
-                // Rule fields
-                $rule_fields = $this->getDoctrine()
-                    ->getManager()
-                    ->getRepository('RegleBundle:RuleField')
-                    ->findByRule($id);
-                if ($rule_fields) {
-                    foreach ($rule_fields as $rule_field) {
-                        $this->em->remove($rule_field);
-                        $this->em->flush();
-                    }
-                }
-
-                // Rule relationships
-                $rule_relationships = $this->getDoctrine()
-                    ->getManager()
-                    ->getRepository('RegleBundle:RuleRelationShip')
-                    ->findByRule($id);
-                if ($rule_relationships) {
-                    foreach ($rule_relationships as $rule_relationship) {
-                        $this->em->remove($rule_relationship);
-                        $this->em->flush();
-                    }
-                }
-
-                // Rule params
-                $rule_params = $this->getDoctrine()
-                    ->getManager()
-                    ->getRepository('RegleBundle:RuleParam')
-                    ->findByRule($id);
-                if ($rule_params) {
-                    foreach ($rule_params as $rule_param) {
-                        $this->em->remove($rule_param);
-                        $this->em->flush();
-                    }
-                }
-
-                // Rule filters
-                $rule_filters = $this->getDoctrine()
-                    ->getManager()
-                    ->getRepository('RegleBundle:RuleFilter')
-                    ->findByRule($id);
-
-                if ($rule_filters) {
-                    foreach ($rule_filters as $rule_filter) {
-                        $this->em->remove($rule_filter);
-                        $this->em->flush();
-                    }
-                }
-                $this->em->remove($rule);
-                $this->em->flush();
-            } else { // flag
-
-                $rule->setDeleted(1);
-                $rule->setActive(0);
-                $this->em->persist($rule);
-                $this->em->flush();
-            }
+			$rule->setDeleted(1);
+			$rule->setActive(0);
+			$this->em->persist($rule);
+			$this->em->flush();
 
             return $this->redirect($this->generateUrl('regle_list'));
         }
@@ -298,7 +253,7 @@ class DefaultControllerCore extends Controller
         /* @var $sessionService SessionService */
         $sessionService = $this->get('myddleware_session.service');
 
-        $sessionService->setFluxFilterWhere("WHERE Document.rule_id = '" . $rule->getId() . "'");
+        $sessionService->setFluxFilterWhere("WHERE Document.deleted = 0 AND Document.rule_id = '" . $rule->getId() . "'");
         $sessionService->setFluxFilterRuleName($rule->getName());
 
         return $this->redirect($this->generateUrl('flux_list',  array('search' => 1)));
@@ -381,9 +336,19 @@ class DefaultControllerCore extends Controller
                         $param->setName($p['name']);
 						$param->setValue($p['value']);					
 					} else {
+						// Save param modification in the audit table
+						if ($p['value'] != $param->getValue()) {
+							$paramAudit = new RuleParamAudit();
+							$paramAudit->setRuleParamId($p['id']);
+							$paramAudit->setDateModified(new \DateTime);
+							$paramAudit->setBefore($param->getValue());
+							$paramAudit->setAfter($p['value']);
+							$paramAudit->setByUser($this->getUser()->getId());
+							$this->em->persist($paramAudit);					
+						}
 						$param->setValue($p['value']);
-                    }
-					$this->em->persist($param);
+                    }				
+					$this->em->persist($param);					
                     $this->em->flush();
                 }
             }
@@ -514,13 +479,18 @@ class DefaultControllerCore extends Controller
                 ->getRepository('RegleBundle:Document')
                 ->findOneBy(array(
                         'rule' => $id,
+						'deleted' => 0,
                         'globalStatus' => array('Open', 'Error')
                     )
                 );
             // Return to the view detail fo the rule if we found a document open or in error
             if (!empty($docErrorOpen)) {
-                $session->set('error', array($this->get('translator')->trans('error.rule.edit_document_error_open')));
-                return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				if ($this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
+					$session->set('warning', array($this->get('translator')->trans('error.rule.edit_document_error_open_admin')));
+				} else {
+					$session->set('error', array($this->get('translator')->trans('error.rule.edit_document_error_open')));
+					return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+				}
             }
 
             /* @var $sessionService SessionService */
@@ -1371,7 +1341,7 @@ class DefaultControllerCore extends Controller
                     $source['table'][$module['source']][$t] = $k['label'];
                 }
                 // Tri des champs sans tenir compte de la casse
-                asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
+                ksort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
             }
 
             // SOURCE ----- Récupère la liste des champs source
@@ -1499,31 +1469,26 @@ class DefaultControllerCore extends Controller
             }
 
             // -- Relation
-            // Liste des règles avec les mêmes connecteurs rev 1.07
-            //
-            $stmt = $this->connection->prepare('	
-					SELECT r.id, r.name, r.module_source
-					FROM Rule r
-					WHERE 
-						(
-								conn_id_source=:id_source 
-							AND conn_id_target=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-						)
-					OR (
-								conn_id_target=:id_source 
-							AND conn_id_source=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-					)
-					');
-            $stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId($ruleKey));
-            $stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId($ruleKey));
-            $stmt->bindValue('name', $sessionService->getParamRuleName($ruleKey));
-            $stmt->execute();
-
-            $ruleListRelation = $stmt->fetchAll();
+            // Rule list with the same connectors (both directions) to get the relate ones 
+			$ruleListRelation = $this->getDoctrine()->getManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
+							->select('r.id, r.name, r.moduleSource')
+							->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')	
+							->setParameter(1, (int)$sessionService->getParamRuleConnectorSourceId($ruleKey))
+							->setParameter(2, (int)$sessionService->getParamRuleConnectorCibleId($ruleKey))
+							->setParameter(3, $sessionService->getParamRuleName($ruleKey))
+							->getQuery()
+							->getResult();
 
             //Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
             $ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule($ruleKey), 'source');
@@ -1595,7 +1560,7 @@ class DefaultControllerCore extends Controller
                 'in' => $this->get('translator')->trans('filter.in'),
                 'notin' => $this->get('translator')->trans('filter.notin')
             );
-
+			
             // paramètres de la règle
             $rule_params = array_merge($rule_params_source, $rule_params_target);
 
@@ -1696,6 +1661,32 @@ class DefaultControllerCore extends Controller
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
             }
+			
+			// Add param to allow deletion (need source and target application ok to enable deletion)
+			if (
+					$solution_source->getReadDeletion($module['source']) == true
+				AND	$solution_cible->getSendDeletion($module['cible']) == true
+			){
+				$deletion = array(
+								array(
+									'id' => 'deletion',
+									'name' => 'deletion',
+									'required' => false,
+									'type' => 'option',
+									'label' => $this->get('translator')->trans('create_rule.step3.deletion.label'),
+									'option' => array(0 => '', 1 => $this->get('translator')->trans('create_rule.step3.deletion.yes'))
+								)
+							);
+				$rule_params = array_merge($rule_params, $deletion);
+			} else {
+				// If the deletion is disable (database in source OK but target application non OK), we remove the deletion list field of database connector
+				$keyDeletionField = array_search('deletionField', array_column($rule_params, 'id'));
+				if (!empty($keyDeletionField)) {
+					unset($rule_params[$keyDeletionField]);
+				}
+			}
+		
+			
             //  rev 1.07 --------------------------
             $result = array(
                 'source' => $source['table'],
@@ -1715,7 +1706,6 @@ class DefaultControllerCore extends Controller
                 'parentRelationships' => $allowParentRelationship,
                 'lst_parent_fields' => $lstParentFields,
                 'regleId' => $ruleKey
-
             );
 
             $result = $this->beforeRender($result);
@@ -1726,12 +1716,11 @@ class DefaultControllerCore extends Controller
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
 
-
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 
             // ----------------
         } catch (\Exception $e) {
-            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping'));
+            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
             exit;
         }
@@ -2098,6 +2087,7 @@ class DefaultControllerCore extends Controller
                         $oneRuleRelationShip->setFieldNameTarget($rel['target']);
                         $oneRuleRelationShip->setFieldId($rel['rule']);
                         $oneRuleRelationShip->setParent($rel['parent']);
+						$oneRuleRelationShip->setDeleted(0);
                         // We don't create the field target if the relatiobnship is a parent one
                         // We only use this field to search in the source application, not to send the data to the target application.
                         if (empty($rel['parent'])) {
@@ -2365,7 +2355,7 @@ class DefaultControllerCore extends Controller
                     $template->setLang(mb_strtoupper($request->getLocale()));
                     $template->setIdUser($this->getUser()->getId());
                     // Rule creation with the template selected in parameter
-                    $convertTemplate = $template->convertTemplate($request->get('template'));
+                    $convertTemplate = $template->convertTemplate($request->get('name', null),$request->get('template'));
                     // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                     return new Response('template');
                 } else {

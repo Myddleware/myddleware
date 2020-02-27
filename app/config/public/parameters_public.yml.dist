@@ -10,3 +10,5 @@ parameters:
     transfer:
         search_limit: 1000
     git_branch: master
+    base_uri:
+    email_from: no-reply@myddleware.com

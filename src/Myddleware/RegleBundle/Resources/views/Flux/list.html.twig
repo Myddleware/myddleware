@@ -56,12 +56,12 @@
 			{{ form_widget(form.date_create_end) }}
 		</fieldset> 	
 #}		
-		<fieldset class="border"><legend>{{'list_flux.filter.content'|trans}}</legend>
-			{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
-			{{ form_widget(form.source_content) }} 
-			{{ form_label(form.target_content, 'list_flux.filter.target_content'|trans) }}	
-			{{ form_widget(form.target_content) }}
-		</fieldset> 	
+		<fieldset class="border"><legend>{{'list_flux.filter.id'|trans}}</legend>
+ 			{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
+			{{ form_widget(form.source_id) }} 	
+ 			{{ form_label(form.target_id, 'list_flux.filter.target_id'|trans) }}	
+			{{ form_widget(form.target_id) }}
+		</fieldset>
 
 		<fieldset class="border"><legend>{{'list_flux.filter.date_modified'|trans}}</legend>
  			{{ form_label(form.date_modif_start, 'list_flux.start'|trans) }}
@@ -73,16 +73,16 @@
 		<fieldset class="border"><legend>{{'list_flux.filter.status'|trans}}</legend>
  			{{ form_label(form.status, 'list_flux.filter.status'|trans) }}
 			{{ form_widget(form.status) }} 	
- 			{{ form_label(form.gblstatus, 'list_flux.filter.global_status'|trans) }}	
-			{{ form_widget(form.gblstatus) }}
+ 			{{ form_label(form.gblstatus, 'list_flux.filter.global_status'|trans) }}		
+			{{ form_widget(form.gblstatus) }} {{ form_widget(form.type) }}
 		</fieldset>
 		
-		<fieldset class="border"><legend>{{'list_flux.filter.id'|trans}}</legend>
- 			{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
-			{{ form_widget(form.source_id) }} 	
- 			{{ form_label(form.target_id, 'list_flux.filter.target_id'|trans) }}	
-			{{ form_widget(form.target_id) }}
-		</fieldset>
+		<fieldset class="border"><legend>{{'list_flux.filter.content'|trans}}</legend>
+			{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
+			{{ form_widget(form.source_content) }} 
+			{{ form_label(form.target_content, 'list_flux.filter.target_content'|trans) }}	
+			{{ form_widget(form.target_content) }}
+		</fieldset> 	
 
 	
 		<div class="clr"></div>		
@@ -115,7 +115,7 @@
 				<th>{{'list_flux.tab.name'|trans}}</th>
 				<th>{{'list_flux.tab.source_id'|trans}}</th>
 				<th>{{'list_flux.tab.target_id'|trans}}</th>
-				<th>{{'list_flux.tab.date_created'|trans}}</th>
+				<th>{{'list_flux.tab.reference'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
 				<th>{{'list_flux.tab.type'|trans}}</th>
@@ -133,7 +133,7 @@
 				<td><a href="{{ path('regle_open',{'id' : flux.rule_id }) }}" title="">{{ flux.rule_name }}</a></td>
 		     	<td>{{ flux.source_id }}</td>     	
 		     	<td>{{ flux.target_id }}</td>     	
-		     	<td>{{ flux.date_created|date("d/m/Y H:i:s") }}</td>
+		     	<td>{{ flux.source_date_modified }}</td>
 				<td>{{ flux.date_modified|date("d/m/Y H:i:s") }}</td>
 		     	<td class="ctr">
 		     		<div class="gblstatus_{{ flux.global_status|lower }}">{{ flux.status }}
@@ -157,7 +157,7 @@
 				<th>{{'list_flux.tab.name'|trans}}</th>
 				<th>{{'list_flux.tab.source_id'|trans}}</th>
 				<th>{{'list_flux.tab.target_id'|trans}}</th>
-				<th>{{'list_flux.tab.date_created'|trans}}</th>
+				<th>{{'list_flux.tab.reference'|trans}}</th>
 				<th>{{'list_flux.tab.date_modified'|trans}}</th>
 				<th>{{'list_flux.tab.statut'|trans}}</th>
 				<th>{{'list_flux.tab.type'|trans}}</th>

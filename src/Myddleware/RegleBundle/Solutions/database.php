@@ -322,6 +322,14 @@ class databasecore extends solution {
 				$param['limit'] = 100;
 			}
 			
+			// Add the deletion field into the list field to be read if deletion is enabled on the rule
+			if (
+					!empty($param['ruleParams']['deletion'])
+				AND	!empty($param['ruleParams']['deletionField'])
+			) {
+				$param['fields'][] = $param['ruleParams']['deletionField'];
+			}
+			
 			// Add requiered fields
 			if(!isset($param['ruleParams']['fieldId'])) {
 				throw new \Exception('FieldId has to be specified for the read.');
@@ -405,6 +413,14 @@ class databasecore extends solution {
 						if(in_array($key, $param['fields'])) {
 							$row[$key] = $value;
 						}
+						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						if (
+								$param['ruleParams']['deletion'] == true
+							AND $param['ruleParams']['deletionField'] === $key
+							AND !empty($value)
+						) {
+							$row['myddleware_deletion'] = true;
+						}
 					}
 					$result['values'][$row['id']] = $row;
 				}
@@ -412,7 +428,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}
+		}	
 		return $result;
 	} // read($param)
 	
@@ -501,7 +517,7 @@ class databasecore extends solution {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				try {
-					// Check control before update
+					// Check control before delete
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Query init
 					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET "; 
@@ -516,6 +532,9 @@ class databasecore extends solution {
 							continue;
 						}								
 						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$this->escape($value)."',";
+					}
+					if(empty($idTarget)) {					
+						throw new \Exception('No target id found. Failed to update the record.');
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
@@ -534,6 +553,56 @@ class databasecore extends solution {
 											'id' => $idTarget,
 											'error' => ($q->rowCount() ? false : 'There is no error but 0 row has been updated.')
 									);									
+				}
+				catch (\Exception $e) {
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$result[$idDoc] = array(
+							'id' => '-1',
+							'error' => $error
+					);
+				}
+				// Status modification for the transfer
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
+		}
+		catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
+		}
+		return $result;
+	}
+	
+	// Function to delete a record
+	public function delete($param) {
+		try {		
+			// For every document
+			foreach($param['data'] as $idDoc => $data) {
+				try {
+					// Check control before delete
+					$data = $this->checkDataBeforeDelete($param, $data);
+					if (empty($data['target_id'])) {
+						throw new \Exception('No target id found. Failed to delete the record.');
+					}
+					// Query init
+					$sql = "DELETE FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." "; 
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$data['target_id']."'";	
+					// Query validation
+					$sql = $this->queryValidation($param, 'delete', $sql);					
+					// Execute the query					
+					$q = $this->pdo->prepare($sql);
+					$exec = $q->execute();
+					if(!$exec) {
+						$errorInfo = $this->pdo->errorInfo();						
+						throw new \Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
+					}
+					// Send the target ifd to Myddleware
+					$result[$idDoc] = array(
+											'id' => $data['target_id'],
+											'error' => ($q->rowCount() ? false : 'There is no error but the record was already deleted.')
+										);									
 				}
 				catch (\Exception $e) {
 					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -600,13 +669,24 @@ class databasecore extends solution {
 								'label' => 'Field Date Reference',
 								'required'	=> true
 							);
+					// Add all fieds to the deletion list fields to get the one which carries the deletion flag
+					$deletionParam = array(
+								'id' => 'deletionField',
+								'name' => 'deletionField',
+								'type' => 'option',
+								'label' => 'Field with deletion flag',
+								'required'	=> false,
+								'option' => array('' => '') // Add empty value
+							);
 					// Add all fieds to the list
 					foreach ($fieldsSource as $key => $value) {
 						$idParam['option'][$key] = $value['label'];
 						$dateParam['option'][$key] = $value['label'];
+						$deletionParam['option'][$key] = $value['label'];
 					}
 					$params[] = $idParam;
 					$params[] = $dateParam;
+					$params[] = $deletionParam;
 				} else {
 					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(

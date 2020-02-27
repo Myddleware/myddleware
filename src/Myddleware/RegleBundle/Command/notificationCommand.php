@@ -43,34 +43,36 @@ class notificationCommand extends ContainerAwareCommand
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-			// We don't create job for alert
-			$notification = $this->getContainer()->get('myddleware.notification');	
-			if ($input->getArgument('type') == 'alert') {
-				try {
-					$notification->sendAlert();	
-				}
-				catch(\Exception $e) {
-					$output->writeln( '<error>'.$e->getMessage().'</error>');
-				}	
+		// We don't create job for alert
+		$notification = $this->getContainer()->get('myddleware.notification');	
+		if ($input->getArgument('type') == 'alert') {
+			try {
+				$notification->sendAlert();	
 			}
-			// Standard notification
-			else {
-				try {
-					$logger = $this->getContainer()->get('logger');
-					$job = $this->getContainer()->get('myddleware_job.job');
-					if ($job->initJob('notification')) {
-						$notification->sendNotification();	
-					}
-				}
-				catch(\Exception $e) {
-					$job->message = $e->getMessage();
-					$output->writeln( '<error>'.$e->getMessage().'</error>');
-				}		
-				// Close job if it has been created
-				if($job->createdJob == true) {
-					$job->closeJob();
+			catch(\Exception $e) {
+				$output->writeln( '<error>'.$e->getMessage().'</error>');
+			}	
+		}
+		// Standard notification
+		else {
+			try {
+				$logger = $this->getContainer()->get('logger');
+				$job = $this->getContainer()->get('myddleware_job.job');
+				// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
+				$job->message = '';	
+				if ($job->initJob('notification')) {
+					$notification->sendNotification();	
 				}
 			}
+			catch(\Exception $e) {
+				$job->message = $e->getMessage();
+				$output->writeln( '<error>'.$e->getMessage().'</error>');
+			}		
+			// Close job if it has been created
+			if($job->createdJob == true) {
+				$job->closeJob();
+			}
+		}
 	}
 
 

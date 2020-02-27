@@ -1,3 +1,15 @@
+myddleware_api:
+    resource: "@MyddlewareApiBundle/Resources/config/routing.yml"
+    prefix:   /api
+
+api_platform:
+    resource: .
+    type: api_platform
+    prefix: /api
+
+api_login_check:
+    path: /api/v1_0/login_check
+
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
