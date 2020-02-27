@@ -495,7 +495,7 @@ class rulecore {
 				break;
 			}
 			if (empty($this->dataSource['values'])) {
-				return array('error' => 'All records read have the same reference date. Myddleware cannot garanty all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribut in job and rule class.');
+				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot garanty all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribut in job and rule class.');
 			}
 			return true;
 		}
@@ -663,11 +663,15 @@ class rulecore {
 	}
 	
 	public function sendDocuments() {	
-		// Création des données dans la cible
+		// creation into the target application
 		$sendTarget = $this->sendTarget('C');
-		// Modification des données dans la cible
+		// Update into the target application
 		if (empty($sendTarget['error'])) {
 			$sendTarget = $this->sendTarget('U');
+		}
+		// Deletion from the target application
+		if (empty($sendTarget['error'])) {
+			$sendTarget = $this->sendTarget('D');
 		}
 		// Logout target solution
 		if (!empty($this->solutionTarget)) {
@@ -1092,6 +1096,10 @@ class rulecore {
 		}
 	}
 	
+	protected function beforeDelete($sendData) {
+		return $sendData;
+	}
+	
 	// Check if the rule is a child rule
 	public function isChild() {
 		try {					
@@ -1168,6 +1176,11 @@ class rulecore {
 						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
 						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
 						$response = $this->solutionTarget->update($send);
+					}
+					// Delete data from target application
+					elseif ($type == 'D') {			
+						$send['data'] = $this->beforeDelete($send['data']);;
+						$response = $this->solutionTarget->delete($send);
 					}
 					else {
 						$response[$documentId] = false;

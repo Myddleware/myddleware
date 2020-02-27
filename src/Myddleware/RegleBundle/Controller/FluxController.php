@@ -503,65 +503,11 @@ class FluxControllerCore extends Controller
 			// Get rule object
 			$rule = $em->getRepository('RegleBundle:Rule')->findOneById($doc[0]->getRule());						   
 				
-			// Chargement des tables source, target, history
-			$source = $this->listeFluxTable($id,'S');	
-			$target = $this->listeFluxTable($id,'T');						
-			$history = $this->listeFluxTable($id,'H');
-
-			// Get rulefield object
-			$ruleFields	= $em->getRepository('RegleBundle:RuleField')->findByRule($doc[0]->getRule());
-			// Get each data for each rule fields
-			$targetData = array();
-			$historyData = array();
-			foreach($ruleFields as $ruleField) {
-				// There is no field in source when we use my_value, just a formula
-				if ($ruleField->getSource()!='my_value') {		
-					// We keep only the fields in the rule 
-					// It could be several fields in the source fields (in case of formula)
-					$sourceFields = explode(";",$ruleField->getSource());				
-					foreach ($sourceFields as $sourceField) {
-						// Fields can be absent in case the rule have changed since the data tranfer has been sent
-						if (isset($source[$sourceField])) {
-							$sourceData[$sourceField] = $source[$sourceField];
-						} else {
-							$sourceData[$sourceField] = '';
-						}
-					}
-				}
-				// Target and history
-				$targetField = $ruleField->getTarget();
-
-				if (isset($target[$targetField])) {			
-					$targetData[$targetField] = $target[$targetField];
-					if (
-							isset($history[$targetField])
-						 &&	!empty($history)
-					) {
-						$historyData[$targetField] = $history[$targetField];
-					}
-				} else {
-					$targetData[$targetField] = '';
-				}
-			}					
-			// Get RuleRelationShip object
-			$RuleRelationShips = $em->getRepository('RegleBundle:RuleRelationShip')->findByRule($doc[0]->getRule());
-			// Get each data for each rule relationship
-			foreach($RuleRelationShips as $RuleRelationShip) {		
-				$sourceField = $RuleRelationShip->getFieldNameSource();
-				if (isset($source[$sourceField])) {
-					$sourceData[$sourceField] = $source[$sourceField];
-				}
-				// Target and history
-				$targetField = $RuleRelationShip->getFieldNameTarget();
-				if (isset($target[$targetField])) {
-					$targetData[$targetField] = $target[$targetField];
-				}
-				// Only if history exists and if the field exist in history
-				if (!empty($history[$targetField])) {
-					$historyData[$targetField] = $history[$targetField];
-				}
-			}	
-
+			// Loading tables source, target, history
+			$sourceData = $this->listeFluxTable($id,'S');	
+			$targetData = $this->listeFluxTable($id,'T');						
+			$historyData = $this->listeFluxTable($id,'H');
+			
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
 	                   						  ->findBy(
@@ -630,10 +576,27 @@ class FluxControllerCore extends Controller
 					
 			$name_solution_source = $rule->getConnectorSource()->getSolution()->getName();
 			$solution_source = $this->get('myddleware_rule.'.$name_solution_source);
-			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );			
-		
+			$solution_source_btn = $solution_source->getDocumentButton( $doc[0]->getId() );
 			$list_btn = array_merge( $solution_target_btn, $solution_source_btn );		
-
+			
+			// Generate direct link to the record in the source and target applications
+			$sourceLink['direct_link'] = $solution_source->getDirectLink($rule,$doc[0],'source');
+			if (!empty($sourceLink['direct_link'])) {
+				if (!empty($sourceData)) {
+					$sourceData = $sourceLink + $sourceData;
+				} else {
+					$sourceData = $sourceLink;
+				}
+			}
+			$targetLink['direct_link'] = $solution_target->getDirectLink($rule,$doc[0],'target');
+			if (!empty($targetLink['direct_link'])) {
+				if (!empty($targetData)) {
+					$targetData = $targetLink + $targetData;
+				} else {
+					$targetData = $targetLink;
+				}
+			}
+			
 			// Call the view
 	        return $this->render('RegleBundle:Flux:view/view.html.twig',array(
 				'current_document' => $id,
