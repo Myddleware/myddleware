@@ -58,7 +58,7 @@ graph_type_transfer_histo:
 
 graph_type_job_histo:
     path:  /graph/type/job/histo
-    defaults: { _controller: RegleBundle:Default:graphJobHisto }  	
+    defaults: { _controller: RegleBundle:Default:graphJobHisto }  
 
 regle_template:
     path:  /list/template/

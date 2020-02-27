@@ -4,7 +4,7 @@
  # * @package Myddleware
  # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- # * @link http://www.myddleware.com	
+ # * @link http://www.myddleware.com
  
  # This file is part of Myddleware.
  
@@ -33,9 +33,9 @@ panel:
     list_error:
         nb: Nombre d'erreurs par règle
     list_job:
-        title: Détail des derniers jobs	
-        duration: seconde(s)	
-        nb : Transferts de données en erreur	
+        title: Détail des derniers jobs
+        duration: seconde(s)
+        nb : Transferts de données en erreur
     graph_histo:
         title: Historique des transferts
     graph_job_histo:
@@ -79,6 +79,9 @@ create_rule:
             create_modify: Création et modification de données
             create_only: Création de données seulement
             search_only: Récupération de données existantes seulement  
+        deletion:
+            label: Activer la suppression dans l'application cible
+            yes: Oui
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
@@ -351,6 +354,7 @@ flux:
         update: Update
         create: Create
         search: Search
+        delete: Delete
 
 view_flux:
     empty: Pas de données
@@ -364,6 +368,7 @@ view_flux:
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des transferts
     nbPostDocuments: Tranferts post
+    direct_link: Lien direct
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
@@ -407,7 +412,7 @@ list_task:
 view_task:
     empty_log: Aucune log  
     task_stop: ARRET DE LA TACHE
-    refresh: RAFRAICHIR	
+    refresh: RAFRAICHIR
     nblogs: Nombre de logs  
     header:
         id: Identifiant
@@ -470,9 +475,9 @@ function:
 solution:
     fields:
         login: Utilisateur
-        username: Nom d'utilisateur
+        username: Utilisateur
         password: Mot de passe
-        accesskey: Clé d'accès
+        accesskey: Access key
         url: Url
         token: Jeton
         tokensecret: Secret jeton

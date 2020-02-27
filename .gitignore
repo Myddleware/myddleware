@@ -19,6 +19,7 @@
 /app/config/parameters.yml
 /app/config/public/parameters_public.yml
 /app/config/public/parameters_smtp.yml
+/app/config/public/parameters_custom.yml
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*

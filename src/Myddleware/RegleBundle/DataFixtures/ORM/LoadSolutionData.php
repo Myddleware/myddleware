@@ -34,7 +34,7 @@ class LoadSolutionData implements FixtureInterface
     private $manager; 
 	protected $solutionData = array(
 									array('name' => 'sugarcrm',			'active' => 1,'source' => 1,'target' => 1),
-                                    array('name' => 'vtigercrm',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'vtigercrm',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),
@@ -60,6 +60,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'erpnext',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'myddlewareapi',	'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'medialogistique',	'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'mautic',			'active' => 1,'source' => 0,'target' => 1),
 							);
  
     public function load(ObjectManager $manager){
