@@ -186,6 +186,7 @@ class prestashopcore extends solution {
 								"order_histories" => "The Order histories",
 								"products" => "The products",
 								"stock_availables" => "Available quantities",
+								"products_categories" => "Association products - categories"
 								);		
 			return array_intersect_key($authorized, $modulesSource);
 		}
@@ -914,6 +915,11 @@ class prestashopcore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {
+		// If a sub record is created, it means that we will update the main module
+		if (!empty($this->module_relationship_many_to_many[$param['module']])) {
+			return $this->update($param);
+		}
+		
 		foreach($param['data'] as $idDoc => $data) {
 			// Check control before create
 			$data = $this->checkDataBeforeCreate($param, $data);
@@ -923,7 +929,7 @@ class prestashopcore extends solution {
 			}
 			try{ // try-catch Myddleware
 				try{ // try-catch PrestashopWebservice
-				    $fields = array();						
+				    $fields = array();
 					$opt = array(
 					    'resource' => $param['module'].'?schema=blank',
 					);
@@ -962,7 +968,7 @@ class prestashopcore extends solution {
 						$toSend->message = str_replace(chr(13), "\n", $toSend->message);
 						$toSend->message = str_replace(chr(10), "\n", $toSend->message);
 					}
-
+					
 					$opt = array(
 						'resource' => $param['module'],
 						'postXml' => $xml->asXML()
@@ -1014,66 +1020,84 @@ class prestashopcore extends solution {
 				try{ // try-catch PrestashopWebservice
 					// Check control before update
 					$data = $this->checkDataBeforeUpdate($param, $data);
-				    $fields = array();							
+				    $fields = array();	
+					$submodule = array();
+					$module = $param['module'];
+					$targetId = (int)$data['target_id'];
+					$targetIdResult = $data['target_id']; // Used for many to many module, the id is build with both ids
+					// Override $module and $targetId in case of many-to-many module
+					if (!empty($this->module_relationship_many_to_many[$param['module']])) {
+						$submodule = $this->module_relationship_many_to_many[$param['module']];
+						$module = $submodule['searchModule'];
+						$targetId = (int)$data[$submodule['relationships'][0]];
+						$targetIdResult = $data[$submodule['relationships'][0]].'_'.$data[$submodule['relationships'][1]];
+					}				
 					$opt = array(
-					    'resource' => $param['module'],
-					    'id' => (int) $data['target_id']
+					    'resource' => $module,
+					    'id' => $targetId
 					);
 					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('update1',$opt,$param);
 					// Call
 					$xml = $this->webService->get($opt);
-			
 					$toUpdate = $xml->children()->children();
-					$modele = $xml->children()->children();
-					foreach ($modele as $nodeKey => $node){
-						if(isset($data[$nodeKey])) {
-							// If we use an element with language, we update only the language selected
-							if (!empty($modele->$nodeKey->children())) {
-								$i = 0;
-								$languageFound = false;
-								foreach($modele->$nodeKey->children() as $node) {
-									if ($node->attributes() == $param['ruleParams']['language']) {
-										$toUpdate->$nodeKey->language[$i][0] = $data[$nodeKey];
-										$languageFound = true;
+
+					if (!empty($submodule)) {
+						$submoduleString = $submodule['subModule'];
+						// We add the child to the main module. Here is an example : $product->associations->categories->addChild('category')->addChild('id', $ps_category_id);
+						$toUpdate->associations->$submoduleString->addChild($submodule['subData'])->addChild('id', (int)$data[$submodule['relationships'][1]]);	
+					} else {	
+						$modele = $xml->children()->children();
+						foreach ($modele as $nodeKey => $node){
+							if(isset($data[$nodeKey])) {
+								// If we use an element with language, we update only the language selected
+								if (!empty($modele->$nodeKey->children())) {
+									$i = 0;
+									$languageFound = false;
+									foreach($modele->$nodeKey->children() as $node) {
+										if ($node->attributes() == $param['ruleParams']['language']) {
+											$toUpdate->$nodeKey->language[$i][0] = $data[$nodeKey];
+											$languageFound = true;
+										}
+										$i++;
 									}
-									$i++;
+									if (!$languageFound) {
+										throw new \Exception('Failed to find the language '.$param['ruleParams']['language'].' in the Prestashop XML');
+									}
 								}
-								if (!$languageFound) {
-									throw new \Exception('Failed to find the language '.$param['ruleParams']['language'].' in the Prestashop XML');
+								else {
+									$toUpdate->$nodeKey = $data[$nodeKey];
 								}
-							}
-							else {
-								$toUpdate->$nodeKey = $data[$nodeKey];
 							}
 						}
 					}
 			
 					// We remove non writtable fields
-					if (!empty($this->notWrittableFields[$param['module']])) {
-						foreach($this->notWrittableFields[$param['module']] as $notWrittableField) {
+					if (!empty($this->notWrittableFields[$module])) {
+						foreach($this->notWrittableFields[$module] as $notWrittableField) {
 							unset($xml->children()->children()->$notWrittableField);
 						}
 					}
-					
+				
 					if(isset($toSend->message)) {
 						$toUpdate->message = str_replace(chr(13).chr(10), "\n", $toUpdate->message);
 						$toUpdate->message = str_replace(chr(13), "\n", $toUpdate->message);
 						$toUpdate->message = str_replace(chr(10), "\n", $toUpdate->message);
 					}
-
+					
 					// Function to modify opt (used for custom needs)
 					$opt = $this->updateOptions('update2',$opt,$param);
 					
 					$opt = array(
-						'resource' => $param['module'],
+						'resource' => $module,
 						'putXml' => $xml->asXML(),
-						'id' => (int) $data['target_id']
+						'id' => $targetId
 					);
-					$new = $this->webService->edit($opt);		
+
+					$new = $this->webService->edit($opt);						
 					$result[$idDoc] = array(
-							'id' => $data['target_id'],
+							'id' => $targetIdResult,
 							'error' => false
 					);	
 				}
@@ -1083,7 +1107,7 @@ class prestashopcore extends solution {
 					$trace = $e->getTrace();
 					if ($trace[0]['args'][0] == 500) {
 						$result[$idDoc] = array(
-								'id' => $data['target_id'],
+								'id' => $targetIdResult,
 								'error' => false
 						);
 					}
@@ -1114,7 +1138,10 @@ class prestashopcore extends solution {
 	public function getRuleMode($module,$type) {
 		if(
 				$type == 'target'
-			&&	in_array($module, array('customer_messages'))
+			AND (
+					in_array($module, array('customer_messages'))
+				 OR array_key_exists($module, $this->module_relationship_many_to_many)
+			)
 		) { // Si le module est dans le tableau alors c'est uniquement de la création
 			return array(
 				'C' => 'create_only'
