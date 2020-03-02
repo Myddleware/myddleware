@@ -51,7 +51,7 @@ class prestashopcore extends solution {
 	protected $notWrittableFields = array('products' => array('manufacturer_name', 'quantity'));
 	
 	// Module dépendants du langage
-	protected $moduleWithLanguage = array('products');
+	protected $moduleWithLanguage = array('products','categories');
 	
 	// Module without reference date
 	protected $moduleWithoutReferenceDate = array('order_details','product_options','product_option_values','combinations','carriers','stock_availables');
@@ -67,6 +67,7 @@ class prestashopcore extends solution {
 														'groups_customers' => array('label' => 'Association groups - customers', 'fields' => array(), 'relationships' => array('customer_id','groups_id'), 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'),
 														'carts_products' => array('label' => 'Association carts - products', 'fields' => array('quantity'=>'Quantity','id_product_attribute'=>'id_product_attribute','id_address_delivery'=>'id_address_delivery'), 'relationships' => array('cart_id','id_product'), 'searchModule' => 'carts', 'subModule' => 'cart_rows', 'subData' => 'cart_row', 'subDataId' => 'id_product'),
 														'products_options_values' => array('label' => 'Association products options - values', 'fields' => array(), 'relationships' => array('product_option_id','product_option_values_id'), 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
+														'products_categories' => array('label' => 'Association products - categories', 'fields' => array(), 'relationships' => array('product_id','categories_id'), 'searchModule' => 'products', 'subModule' => 'categories', 'subData' => 'category'),
 														'products_combinations' => array('label' => 'Association products - combinations', 'fields' => array(), 'relationships' => array('product_id','combinations_id'), 'searchModule' => 'products', 'subModule' => 'combinations', 'subData' => 'combination'),
 														'combinations_product_options_values' => array('label' => 'Association combinations - product options values', 'fields' => array(), 'relationships' => array('combination_id','product_option_values_id'), 'searchModule' => 'combinations', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'),
 														'combinations_images' => array('label' => 'Association combinations - images', 'fields' => array(), 'relationships' => array('combination_id','images_id'), 'searchModule' => 'combinations', 'subModule' => 'images', 'subData' => 'image'),
@@ -84,7 +85,7 @@ class prestashopcore extends solution {
 	
 	protected $FieldsDuplicate = array(
 											'customers' => array('email'),
-											'products'	=> array('ean13', 'name')
+											'products'	=> array('ean13', 'name', 'reference')
 									);
 	
 	protected $threadStatus = array('open'=>'open','closed'=>'closed','pending1'=>'pending1','pending2'=>'pending2');
@@ -177,7 +178,9 @@ class prestashopcore extends solution {
 			}
 		} else {
 			$modulesSource = $this->get_modules("source");
-			$authorized = array("customers" => "The e-shop's customers",
+			$authorized = array(
+								"categories" => "The product categories",
+								"customers" => "The e-shop customers",
 								"customer_threads" => "Customer services threads",
 								"customer_messages" => "Customer services messages",
 								"order_histories" => "The Order histories",
@@ -766,7 +769,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}			
+		}
 		return $result;
 	} // read($param)
 	
@@ -905,7 +908,7 @@ class prestashopcore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}			
+		}
 		return $result;
 	}// readManyToMany($param)
 	
@@ -930,7 +933,6 @@ class prestashopcore extends solution {
 					// Call
 					$xml = $this->webService->get($opt);
 					$modele = $xml->children()->children();
-								
 					$toSend = $xml->children()->children();
 					foreach ($modele as $nodeKey => $node){
 						if(isset($data[$nodeKey])) {
@@ -1025,7 +1027,6 @@ class prestashopcore extends solution {
 			
 					$toUpdate = $xml->children()->children();
 					$modele = $xml->children()->children();
-					
 					foreach ($modele as $nodeKey => $node){
 						if(isset($data[$nodeKey])) {
 							// If we use an element with language, we update only the language selected
