@@ -82,7 +82,10 @@ class prestashopcore extends solution {
 									);
 	protected $exclude_field_list = array();
 	
-	protected $FieldsDuplicate = array('customers' => array('email'));
+	protected $FieldsDuplicate = array(
+											'customers' => array('email'),
+											'products'	=> array('ean13', 'name')
+									);
 	
 	protected $threadStatus = array('open'=>'open','closed'=>'closed','pending1'=>'pending1','pending2'=>'pending2');
 

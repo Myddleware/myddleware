@@ -865,6 +865,13 @@ class documentcore {
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
+					// Add message detail when we have found a record 
+					if(!empty($searchFields)) {
+						$this->message .= 'Found ';
+						foreach ($searchFields as $key => $value) {
+							$this->message .= $key.' = '. $value. ' ; ';
+						}
+					}
 					// If search document we close it. 
 					if ($this->documentType == 'S') {
 						$this->updateStatus('Found');
