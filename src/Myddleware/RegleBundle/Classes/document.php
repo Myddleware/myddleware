@@ -595,6 +595,13 @@ class documentcore {
 				AND !$this->isChild()
 			) {
 				if (empty($this->targetId)) {
+					// If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
+					if ($this->documentType == 'D') {
+						$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
+						$this->updateStatus('Cancel');
+						$this->connection->commit(); // -- COMMIT TRANSACTION
+						return false;
+					}
 					throw new \Exception('No target id found for a document with the type Update. ');
 				}
 				if(!$this->updateTargetId($this->targetId)) {
