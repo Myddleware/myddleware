@@ -166,7 +166,7 @@ class vtigercrmcore extends solution
      * @return array|bool
      */
     public function get_modules($type = 'source')
-    {
+    {		
 		try {
 			if (empty($this->vtigerClient)) {
 				return false;
@@ -201,7 +201,7 @@ class vtigercrmcore extends solution
     }
 
     public function setModulePrefix($moduleName = null)
-    {
+    {			
         if (empty($moduleName)) {
             $result = $this->vtigerClient->listTypes();
 
@@ -236,7 +236,7 @@ class vtigercrmcore extends solution
      * @return array|bool
      */
     public function get_module_fields($module, $type = 'source')
-    {
+    {	
 		parent::get_module_fields($module, $type);
 		try {
 			if (empty($this->vtigerClient)) {
@@ -307,7 +307,7 @@ class vtigercrmcore extends solution
      * @return array
      */
     public function read_last($param)
-    {
+    {			
 		try {
 			if (empty($this->vtigerClient)) {
 				return [
@@ -421,10 +421,6 @@ class vtigercrmcore extends solution
 						];
 			}
 
-			if (empty($this->moduleList)) {
-				$this->setModulePrefix();
-			}
-
 			if (count($param['fields']) == 0) {
 				return [
 							'error' => 'Error: no Param Given',
@@ -473,6 +469,10 @@ class vtigercrmcore extends solution
 				$nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
 				// TODO: Considerare di implementare Sync API in VtigerClient
 				if ($param["module"] == "LineItem") {
+					if (empty($this->moduleList)) {
+						$this->setModulePrefix();
+					}
+					
 					$query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
 
 					$parentModules = [];
@@ -509,7 +509,6 @@ class vtigercrmcore extends solution
 				else {
 					$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;");
 				}
-
 				if (empty($query) || (!empty($query) && !$query['success'])) {
 					return [
 								'error' => 'Error: Request Failed! (' . ($query["error"]["message"] ?? "Error") . ')',
@@ -560,10 +559,6 @@ class vtigercrmcore extends solution
 				return ['error' => 'Error: no VtigerClient setup'];
 			}
 
-			if (empty($this->moduleList)) {
-				$this->setModulePrefix();
-			}
-
 			$result = [];
 
 			$lineItemFields = [];
@@ -594,6 +589,9 @@ class vtigercrmcore extends solution
 
 					if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
 						if ($param['module'] == "LineItem") {
+							if (empty($this->moduleList)) {
+								$this->setModulePrefix();
+							}
 							$parent = $this->vtigerClient->retrieve($resultCreate['result']["parent_id"]);
 							$parent = $parent["result"];
 							if (!isset($parent["invoicestatus"]) || empty($parent["invoicestatus"])) {
@@ -668,6 +666,9 @@ class vtigercrmcore extends solution
 
 					if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
 						if ($param['module'] == "LineItem") {
+							if (empty($this->moduleList)) {
+								$this->setModulePrefix();
+							}							
 							$parent = $this->vtigerClient->retrieve($resultUpdate['result']["parent_id"]);
 							$parent = $parent["result"];
 							if (!isset($parent["invoicestatus"]) || empty($parent["invoicestatus"])) {
