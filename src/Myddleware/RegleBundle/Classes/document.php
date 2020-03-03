@@ -796,22 +796,23 @@ class documentcore {
 				$searchFields = array('id' => $this->targetId);
 				$history = $this->getDocumentHistory($searchFields);
 	
-				// History is mandatory before a delete action
+				// History is mandatory before a delete action, however if no record found, it means that the record has already been deleted
 				if (	
 						$this->documentType == 'D'
-					AND (
-							$history === -1
-						 OR	$history === false
-					)
+					AND	$history === false
 				) {
-					throw new \Exception('Failed to retrieve record in target system before deletion. Id target : '.$this->targetId.'. Check this record is not already deleted.');
+					$this->message .= 'This document type is D (delete) and no record have been found in the target application. It means that the record has already been deleted in the target application. This document is cancelled.';
+					$this->updateStatus('Cancel');
+					$this->connection->commit(); // -- COMMIT TRANSACTION	
+					return false;
 				}
-				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
+				
+				// From here, the history table has to be filled 
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
 				}
 				else {
-					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
+					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
