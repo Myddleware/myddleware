@@ -49,6 +49,7 @@ class jobcore  {
 	protected $start;
 	protected $paramJob;
 	protected $manual;
+	protected $api;
 	protected $env;
 	protected $nbDayClearJob = 7;
 
@@ -596,6 +597,11 @@ class jobcore  {
 		}
 	}
 	
+	// Set webserice flag
+	public function setApi($value) {
+		$this->api = $value;
+	}
+	
 	// Permet d'indiquer que le job est lancé manuellement
 	public function setConfigValue($name,$value) {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
@@ -753,7 +759,7 @@ class jobcore  {
 	
 	
  	// Récupération des données du job
-	protected function getLogData() {
+	public function getLogData() {
 		try {
 			// Récupération du nombre de document envoyé et en erreur pour ce job
 			$this->logData['Close'] = 0;
@@ -827,6 +833,7 @@ class jobcore  {
 					
 			// Indique si le job est lancé manuellement ou non
 			$this->logData['Manual'] = $this->manual;
+			$this->logData['Api'] = $this->api;
 			
 			// Récupération des erreurs
 			$this->logData['jobError'] = $this->message;
@@ -883,7 +890,7 @@ class jobcore  {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query_header = "INSERT INTO Job (id, begin, status, param, manual) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual')";
+			$query_header = "INSERT INTO Job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
 			$stmt = $this->connection->prepare($query_header);
 			$stmt->execute();
 			$this->connection->commit(); // -- COMMIT TRANSACTION

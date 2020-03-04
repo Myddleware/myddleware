@@ -407,6 +407,7 @@ list_task:
         open: Ouvert
         cancel: Annulé
         manual: Manuelle
+        api: Api
         error: Erreur
         
 view_task:

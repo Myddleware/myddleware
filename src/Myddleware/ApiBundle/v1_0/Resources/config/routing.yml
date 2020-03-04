@@ -9,3 +9,15 @@ api_generate_documents:
     defaults: { _controller: MyddlewareApiBundle:Default:generateDocuments }
     requirements:
         methods:  POST
+
+api_command:
+    path:  /v1_0/command
+    defaults: { _controller: MyddlewareApiBundle:Default:command }
+    requirements:
+        methods:  POST
+
+api_synchro:
+    path:  /v1_0/synchro
+    defaults: { _controller: MyddlewareApiBundle:Default:synchro }
+    requirements:
+        methods:  POST
