@@ -759,7 +759,7 @@ class jobcore  {
 	
 	
  	// Récupération des données du job
-	public function getLogData() {
+	public function getLogData($documentDetail = false) {
 		try {
 			// Récupération du nombre de document envoyé et en erreur pour ce job
 			$this->logData['Close'] = 0;
@@ -822,6 +822,20 @@ class jobcore  {
 				// Mise au format pour la liste multi de Sugar
 				$concatSolutions = '^'.implode("^,^", $concatSolutions).'^';
 				$this->logData['solutions'] = $concatSolutions;
+			}
+			
+			// Get the document detail if requested
+			if ($documentDetail == true) {
+				$sqlParamsDoc = "	SELECT DISTINCT Document.*
+								FROM Log
+									INNER JOIN Document
+										ON Log.doc_id = Document.id
+								WHERE
+									Log.job_id = :id";
+				$stmt = $this->connection->prepare($sqlParamsDoc);
+				$stmt->bindValue("id", $this->id);
+				$stmt->execute();	   				
+				$this->logData['documents'] = $stmt->fetchAll();
 			}
 			
 			// Récupération de la durée du job

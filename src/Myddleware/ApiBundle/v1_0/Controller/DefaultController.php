@@ -82,7 +82,7 @@ class DefaultController extends Controller
 			// Get the job statistics
 			$job = $this->container->get('myddleware_job.job');
 			$job->id = $return['jobId'];
-			$jobData = $job->getLogData();
+			$jobData = $job->getLogData(1);
 			if (!empty($jobData['jobError'])) {
 				throw new \Exception('Failed to get the job statistics. '.$jobData['jobError']);
 			}
