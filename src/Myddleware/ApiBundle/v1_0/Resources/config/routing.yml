@@ -1,23 +1,18 @@
-api_hello_world:
-    path:  /v1_0/hello-world
-    defaults: { _controller: MyddlewareApiBundle:Default:index }
-    requirements:
-        methods:  POST
-        
-api_generate_documents:
-    path:  /v1_0/generate_documents
-    defaults: { _controller: MyddlewareApiBundle:Default:generateDocuments }
-    requirements:
-        methods:  POST
-
-api_command:
-    path:  /v1_0/command
-    defaults: { _controller: MyddlewareApiBundle:Default:command }
-    requirements:
-        methods:  POST
-
 api_synchro:
     path:  /v1_0/synchro
     defaults: { _controller: MyddlewareApiBundle:Default:synchro }
     requirements:
         methods:  POST
+        
+api_read_record:
+    path:  /v1_0/read_record
+    defaults: { _controller: MyddlewareApiBundle:Default:readRecord }
+    requirements:
+        methods:  POST
+
+api_mass_action:
+    path:  /v1_0/mass_action
+    defaults: { _controller: MyddlewareApiBundle:Default:massAction }
+    requirements:
+        methods:  POST
+

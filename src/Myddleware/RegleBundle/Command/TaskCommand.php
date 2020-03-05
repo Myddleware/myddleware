@@ -59,7 +59,7 @@ class TaskCommand extends ContainerAwareCommand {
 			$job->setApi($api);					
 			
 			if ($job->initJob('Synchro : '.$rule)) {
-				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
+				$output->writeln( '1;'.$job->id );  // Not removed, user for manual job and webservices
 				
 				if (!empty($rule)) {			
 					if ($rule == 'ERROR') {

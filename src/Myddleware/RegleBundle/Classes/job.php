@@ -308,11 +308,11 @@ class jobcore  {
 		}
 	}
 
-	// Fonction permettant d'annuler massivement des documents
-	public function massAction($action, $dataType, $idsDoc, $forceAll, $fromStatus, $toStatus) {	
+	// Function to modify a group of documents
+	public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus) {	
 		try {
-			// Build IN parameter²
-			$idsDocArray = explode(',',$idsDoc);	
+			// Build IN parameter
+			$idsDocArray = explode(',',$ids);	
 			$queryIn = '(';
 			foreach ($idsDocArray as $idDoc) {
 				$queryIn .= "'".$idDoc."',";
@@ -377,7 +377,7 @@ class jobcore  {
 				}			
 			}	
 			else {
-				$this->message .=  'No Document Open or in Error in parameters of the job massAction.';		
+				$this->message .=  'No document found corresponding to the input parameters. No action done in the job massAction. ';		
 				return false;
 			}
 		} catch (\Exception $e) {
