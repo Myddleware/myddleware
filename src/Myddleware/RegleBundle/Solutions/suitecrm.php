@@ -794,11 +794,13 @@ class suitecrmcore  extends solution {
 					$query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
 				}
 				else {	
+				
 					// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
 					if($param['module'] == 'ProspectLists') {	
 						$query .= "prospect_lists.".$key." = '".$value."' ";
-					}
-					else {
+					} elseif($param['module'] == 'Employees') {	
+						$query .= "users.".$key." = '".$value."' ";
+					} else {
 						$query .= strtolower($param['module']).".".$key." = '".$value."' ";
 					}
 				}
@@ -809,11 +811,13 @@ class suitecrmcore  extends solution {
 			// Pour ProspectLists le nom de la table et le nom de l'objet sont différents
 			if($param['module'] == 'ProspectLists') {	
 				$query = "prospect_lists.". $DateRefField ." > '".$param['date_ref']."'";
-			}
+			} elseif ($param['module'] == 'Employees') {	
+				$query = "users.". $DateRefField ." > '".$param['date_ref']."'";
+			} 
 			else {
 				$query = strtolower($param['module']).".". $DateRefField ." > '".$param['date_ref']."'";
 			}
-		}		
+		}	
 		return $query;
 	}
 	
