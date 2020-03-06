@@ -281,7 +281,7 @@ view_connector:
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
-        link: http://community.myddleware.com/index.php/
+        link: http://community.myddleware.com/index.php/connector-guide/#
         
 list_flux:
     start: Début
@@ -407,6 +407,7 @@ list_task:
         open: Ouvert
         cancel: Annulé
         manual: Manuelle
+        api: Api
         error: Erreur
         
 view_task:

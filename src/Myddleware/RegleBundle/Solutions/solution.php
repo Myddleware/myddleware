@@ -84,7 +84,10 @@ class solutioncore {
 
 	// Disable to read deletion and to delete data
 	protected $readDeletion = false;	
-	protected $sendDeletion = false;	
+	protected $sendDeletion = false;
+
+	// Specify if the class is called by the API
+	protected $api;	
 	
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
@@ -132,6 +135,7 @@ class solutioncore {
 		$this->conn->beginTransaction();	
 		try {	
 			$param['id_doc_myddleware'] = $idDoc;
+			$param['api'] = $this->api;
 			$document = new documentMyddleware($this->logger, $this->container, $this->conn, $param);
 			//  Si on a un message on l'ajoute au document
 			if (!empty($value['error'])) {
@@ -371,6 +375,10 @@ class solutioncore {
 	}
 	
 	public function setMessageCreateRule($module) {
+	}
+	
+	public function setApi($api) {
+		$this->api = $api;
 	}
 	
 	// Permet d'ajouter des boutoon sur la page flux en fonction de la solution source ou targe

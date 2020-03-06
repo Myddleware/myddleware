@@ -65,6 +65,7 @@ class documentcore {
 	protected $docIdRefError;
 	protected $transformError = false;
 	protected $tools;
+	protected $api;	// Specify if the class is called by the API
 	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
@@ -146,6 +147,9 @@ class documentcore {
 		}
 		if (!empty($param['jobId'])) {
 			$this->jobId = $param['jobId'];
+		}
+		if (!empty($param['api'])) {
+			$this->api = $param['api'];
 		}
 		if (!empty($param['key'])) {
 			$this->key = $param['key'];
@@ -595,6 +599,13 @@ class documentcore {
 				AND !$this->isChild()
 			) {
 				if (empty($this->targetId)) {
+					// If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
+					if ($this->documentType == 'D') {
+						$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
+						$this->updateStatus('Cancel');
+						$this->connection->commit(); // -- COMMIT TRANSACTION
+						return false;
+					}
 					throw new \Exception('No target id found for a document with the type Update. ');
 				}
 				if(!$this->updateTargetId($this->targetId)) {
@@ -623,7 +634,7 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			// Reference document id is used to show which document is blocking the current document in Myddleware
-			$this->docIdRefError = $result['id'];
+			$this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
 			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
@@ -796,22 +807,23 @@ class documentcore {
 				$searchFields = array('id' => $this->targetId);
 				$history = $this->getDocumentHistory($searchFields);
 	
-				// History is mandatory before a delete action
+				// History is mandatory before a delete action, however if no record found, it means that the record has already been deleted
 				if (	
 						$this->documentType == 'D'
-					AND (
-							$history === -1
-						 OR	$history === false
-					)
+					AND	$history === false
 				) {
-					throw new \Exception('Failed to retrieve record in target system before deletion. Id target : '.$this->targetId.'. Check this record is not already deleted.');
+					$this->message .= 'This document type is D (delete) and no record have been found in the target application. It means that the record has already been deleted in the target application. This document is cancelled.';
+					$this->updateStatus('Cancel');
+					$this->connection->commit(); // -- COMMIT TRANSACTION	
+					return false;
 				}
-				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
+				
+				// From here, the history table has to be filled 
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
 				}
 				else {
-					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
+					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
 			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
@@ -865,6 +877,13 @@ class documentcore {
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
+					// Add message detail when we have found a record 
+					if(!empty($searchFields)) {
+						$this->message .= 'Found ';
+						foreach ($searchFields as $key => $value) {
+							$this->message .= $key.' = '. $value. ' ; ';
+						}
+					}
 					// If search document we close it. 
 					if ($this->documentType == 'S') {
 						$this->updateStatus('Found');
@@ -1713,7 +1732,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			if (!$this->api) {
+				echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			}
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
@@ -1747,7 +1768,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			if (!$this->api) {
+				echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			}
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
 			$stmt->bindValue(":deleted", $deleted);
