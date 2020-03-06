@@ -283,7 +283,10 @@ class DefaultController extends Controller
  			$logger = $this->container->get('logger');
 			$home = $this->container->get('myddleware.home');
 			
-			$return['errorList'] = $home->errorByRule(1, '');
+			$return['errorByRule'] = $home->errorByRule(1, '');
+			$return['countTypeDoc'] = $home->countTypeDoc(1, '');
+			$return['listJobDetail'] = $home->listJobDetail();
+			$return['countTransferHisto'] = $home->countTransferHisto(1, '');
 		}
 		catch(\Exception $e) {
 			$logger->error($e->getMessage());
