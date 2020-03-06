@@ -16,3 +16,15 @@ api_mass_action:
     requirements:
         methods:  POST
 
+api_rerun_error:
+    path:  /v1_0/rerun_error
+    defaults: { _controller: MyddlewareApiBundle:Default:rerunError }
+    requirements:
+        methods:  POST
+
+api_statistics:
+    path:  /v1_0/statistics
+    defaults: { _controller: MyddlewareApiBundle:Default:statistics }
+    requirements:
+        methods:  POST
+

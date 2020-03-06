@@ -65,6 +65,7 @@ class documentcore {
 	protected $docIdRefError;
 	protected $transformError = false;
 	protected $tools;
+	protected $api;	// Specify if the class is called by the API
 	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
@@ -146,6 +147,9 @@ class documentcore {
 		}
 		if (!empty($param['jobId'])) {
 			$this->jobId = $param['jobId'];
+		}
+		if (!empty($param['api'])) {
+			$this->api = $param['api'];
 		}
 		if (!empty($param['key'])) {
 			$this->key = $param['key'];
@@ -630,7 +634,7 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			// Reference document id is used to show which document is blocking the current document in Myddleware
-			$this->docIdRefError = $result['id'];
+			$this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
 			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
@@ -1728,7 +1732,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			if (!$this->api) {
+				echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			}
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
@@ -1762,7 +1768,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			if (!$this->api) {
+				echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			}
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
 			$stmt->bindValue(":deleted", $deleted);

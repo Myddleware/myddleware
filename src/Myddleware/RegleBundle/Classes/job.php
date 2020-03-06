@@ -49,7 +49,7 @@ class jobcore  {
 	protected $start;
 	protected $paramJob;
 	protected $manual;
-	protected $api;
+	protected $api; 	// Specify if the class is called by the API
 	protected $env;
 	protected $nbDayClearJob = 7;
 
@@ -99,6 +99,7 @@ class jobcore  {
 			$param['ruleId'] = $this->ruleId;
 			$param['jobId'] = $this->id;
 			$param['manual'] = $this->manual;		
+			$param['api'] = $this->api;
 			$this->rule = new rule($this->logger, $this->container, $this->connection, $param);
 			if ($this->rule->isChild()) {
 				throw new \Exception ('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
@@ -184,6 +185,7 @@ class jobcore  {
 				foreach ($documentsError as $documentError) {
 					$param['ruleId'] = $documentError['rule_id'];
 					$param['jobId'] = $this->id;					
+					$param['api'] = $this->api;
 					$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					$errorActionDocument = $rule->actionDocument($documentError['id'],'rerun');
 					if (!empty($errorActionDocument)) {
@@ -367,7 +369,8 @@ class jobcore  {
 					// Chargement d'une nouvelle règle que si nécessaire
 					if ($param['ruleId'] != $document['rule_id']) {
 						$param['ruleId'] = $document['rule_id'];
-						$param['jobId'] = $this->id;						
+						$param['jobId'] = $this->id;	
+						$param['api'] = $this->api;
 						$rule = new rule($this->logger, $this->container, $this->connection, $param);
 					}
 					$errorActionDocument = $rule->actionDocument($document['id'],$action, $toStatus);
@@ -406,7 +409,8 @@ class jobcore  {
 			}
 			// Instantiate the rule
 			$ruleParam['ruleId'] = $ruleId;
-			$ruleParam['jobId']  = $this->id;				
+			$ruleParam['jobId']  = $this->id;		
+			$ruleParam['api'] = $this->api;
 			$rule = new rule($this->logger, $this->container, $this->connection, $ruleParam);			
 			
 			// Try to read data for each values
