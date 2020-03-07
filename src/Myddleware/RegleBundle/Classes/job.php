@@ -49,7 +49,7 @@ class jobcore  {
 	protected $start;
 	protected $paramJob;
 	protected $manual;
-	protected $api; 	// Specify if the class is called by the API
+	protected $api = 0; 	// Specify if the class is called by the API
 	protected $env;
 	protected $nbDayClearJob = 7;
 
@@ -603,7 +603,8 @@ class jobcore  {
 	
 	// Set webserice flag
 	public function setApi($value) {
-		$this->api = $value;
+		// default value = 0
+		$this->api = (!empty($value) ? $value : 0);
 	}
 	
 	// Permet d'indiquer que le job est lancé manuellement
