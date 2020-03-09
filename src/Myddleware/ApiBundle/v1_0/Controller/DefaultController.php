@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Myddleware\RegleBundle\Classes\rule;
 
 class DefaultController extends Controller
 {
@@ -127,6 +128,85 @@ class DefaultController extends Controller
 			// Get the job statistics
 			$job = $this->container->get('myddleware_job.job');
 			$job->id = $return['jobId'];
+			$jobData = $job->getLogData(1);
+			if (!empty($jobData['jobError'])) {
+				throw new \Exception('Failed to get the job statistics. '.$jobData['jobError']);
+			}
+			$return['jobData'] = $jobData;
+		}
+		catch(\Exception $e) {
+			$logger->error($e->getMessage());
+			$return['error'] = $e->getMessage();
+		}
+		// Send the response
+		return new JsonResponse($return);
+    }
+	
+	
+	public function deleteRecordAction(Request $request)
+    {
+		try {
+			$logger = $this->container->get('logger');
+			$return = array();
+			$return['error'] = '';
+			
+			// Get input data
+			$data = $request->request->all();
+			
+			// Check parameter
+			if (empty($data['rule'])) {
+				throw new \Exception('Rule is missing. Please specify a ruleId parameter. ');
+			}
+			if (empty($data['recordId'])) {
+				throw new \Exception('recordId is missing. recordId is the id of the record you want to delete. ');
+			}
+
+			// Set the document values
+			foreach ($data as $key => $value) {
+				switch ($key) {
+					case 'recordId':
+						$docParam['values']['id'] = $value;
+						break;
+					case 'reference':
+						$docParam['values']['date_modified'] = $value;
+						break;
+					case 'rule':
+						continue;
+					default:
+					   $docParam['values'][$key] = $value;
+				}
+			}
+			$docParam['values']['myddleware_deletion'] = true; // Force deleted record type
+			
+			// Create job instance
+			$job = $this->container->get('myddleware_job.job');
+			$job->setApi(1);
+			$job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
+			
+			// Instantiate the rule
+			$ruleParam['ruleId'] = $data['rule'];
+			$ruleParam['jobId']  = $job->id;		
+			$ruleParam['api'] = 1;
+			$rule = new rule($this->container->get('logger'), $this->container, $this->container->get('database_connection'), $ruleParam);	
+
+			$document = $rule->generateDocuments($data['recordId'], false, $docParam);		
+			if (!empty($errorObj->error)) {
+				$job->message .=  'Error during data transfer creation (rule '.$data['rule'].')  : '.$errorObj->error.'. ';
+			} else {
+				$errors = $rule->actionDocument($document[0]->id,'rerun');
+				// Check errors
+				if (!empty($errors)) {									
+					$job->message .=  'Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ';
+				} 
+			}
+			
+			// Close job if it has been created
+			if($job->createdJob === true) {
+				$job->closeJob();
+			}
+			
+			// Get the job statistics
+			$return['jobId'] = $job->id;
 			$jobData = $job->getLogData(1);
 			if (!empty($jobData['jobError'])) {
 				throw new \Exception('Failed to get the job statistics. '.$jobData['jobError']);
