@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Myddleware\RegleBundle\Classes\rule;
 
-class DefaultController extends Controller
+class DefaultControllerCore extends Controller
 {
 
 	public function synchroAction(Request $request)
@@ -146,13 +146,16 @@ class DefaultController extends Controller
 	public function deleteRecordAction(Request $request)
     {
 		try {
+			$connection = $this->container->get('database_connection');
+			$connection->beginTransaction(); // -- BEGIN TRANSACTION
+			
 			$logger = $this->container->get('logger');
 			$return = array();
 			$return['error'] = '';
 			
 			// Get input data
 			$data = $request->request->all();
-			
+		
 			// Check parameter
 			if (empty($data['rule'])) {
 				throw new \Exception('Rule is missing. Please specify a ruleId parameter. ');
@@ -187,16 +190,22 @@ class DefaultController extends Controller
 			$ruleParam['ruleId'] = $data['rule'];
 			$ruleParam['jobId']  = $job->id;		
 			$ruleParam['api'] = 1;
-			$rule = new rule($this->container->get('logger'), $this->container, $this->container->get('database_connection'), $ruleParam);	
-
-			$document = $rule->generateDocuments($data['recordId'], false, $docParam);		
-			if (!empty($errorObj->error)) {
-				$job->message .=  'Error during data transfer creation (rule '.$data['rule'].')  : '.$errorObj->error.'. ';
+			$rule = new rule($this->container->get('logger'), $this->container, $connection, $ruleParam);	
+			
+			// $connection->beginTransaction(); // -- BEGIN TRANSACTION
+			$document = $rule->generateDocuments($data['recordId'], false, $docParam);				
+			// Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
+			if (!empty($document->error)) {
+				throw new \Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
 			} else {
+				// $connection->commit(); // -- COMMIT TRANSACTION
+				// $connection->beginTransaction(); // -- BEGIN TRANSACTION
 				$errors = $rule->actionDocument($document[0]->id,'rerun');
-				// Check errors
-				if (!empty($errors)) {									
+				// Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it. 
+				// We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
+				if (!empty($errors)) {		
 					$job->message .=  'Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ';
+					// $connection->beginTransaction(); // -- BEGIN TRANSACTION
 				} 
 			}
 			
@@ -204,18 +213,27 @@ class DefaultController extends Controller
 			if($job->createdJob === true) {
 				$job->closeJob();
 			}
+			$connection->commit(); // -- COMMIT TRANSACTION
 			
-			// Get the job statistics
-			$return['jobId'] = $job->id;
-			$jobData = $job->getLogData(1);
-			if (!empty($jobData['jobError'])) {
-				throw new \Exception('Failed to get the job statistics. '.$jobData['jobError']);
-			}
-			$return['jobData'] = $jobData;
 		}
 		catch(\Exception $e) {
+			$connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$logger->error($e->getMessage());
 			$return['error'] = $e->getMessage();
+		}
+		// Get the job statistics even if the job has failed
+		if (!empty($job->id)) {
+			try {
+				$return['jobId'] = $job->id;
+				$jobData = $job->getLogData(1);
+				if (!empty($jobData['jobError'])) {
+					$return['error'] .= $jobData['jobError'];
+				}
+				$return['jobData'] = $jobData;
+			}
+			catch(\Exception $e) {
+				$return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();;
+			}
 		}
 		// Send the response
 		return new JsonResponse($return);
@@ -375,4 +393,17 @@ class DefaultController extends Controller
 		// Send the response
 		return new JsonResponse($return);
     }
+}
+
+/* * * * * * * *  * * * * * *  * * * * * * 
+	If custom file exist then we use it to redefine the standard one
+ * * * * * *  * * * * * *  * * * * * * * */
+$file = __DIR__.'/../Custom/Controller/DefaultController.php';
+if(file_exists($file)){
+	require_once($file);
+}
+else {
+	class DefaultController extends DefaultControllerCore {
+		
+	}
 }

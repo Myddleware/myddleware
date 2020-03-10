@@ -361,7 +361,16 @@ class solutioncore {
 	
 	
 	// Delete a record
-	public function delete($data) {
+	public function delete($param) {
+		// Set an error by default
+		foreach($param['data'] as $idDoc => $data) {
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => 'Delete function not developped for this connector. Failed to delete this record in the target application. '
+			);
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
 	}
 	
 	// Permet de renvoyer le mode de la règle en fonction du module target
