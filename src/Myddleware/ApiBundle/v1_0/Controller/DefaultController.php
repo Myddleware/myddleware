@@ -192,38 +192,44 @@ class DefaultControllerCore extends Controller
 			$ruleParam['api'] = 1;
 			$rule = new rule($this->container->get('logger'), $this->container, $connection, $ruleParam);	
 			
-			// $connection->beginTransaction(); // -- BEGIN TRANSACTION
 			$document = $rule->generateDocuments($data['recordId'], false, $docParam);				
 			// Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
 			if (!empty($document->error)) {
 				throw new \Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
-			} else {
-				// $connection->commit(); // -- COMMIT TRANSACTION
-				// $connection->beginTransaction(); // -- BEGIN TRANSACTION
-				$errors = $rule->actionDocument($document[0]->id,'rerun');
-				// Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it. 
-				// We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
-				if (!empty($errors)) {		
-					$job->message .=  'Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ';
-					// $connection->beginTransaction(); // -- BEGIN TRANSACTION
-				} 
-			}
-			
-			// Close job if it has been created
-			if($job->createdJob === true) {
-				$job->closeJob();
-			}
+			} 
 			$connection->commit(); // -- COMMIT TRANSACTION
-			
 		}
 		catch(\Exception $e) {
 			$connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$logger->error($e->getMessage());
-			$return['error'] = $e->getMessage();
+			$return['error'] .= $e->getMessage();
+			// Stop the process if document hasn't been created
+			return new JsonResponse($return);		
 		}
-		// Get the job statistics even if the job has failed
-		if (!empty($job->id)) {
-			try {
+
+		// Send the document just created 
+		try {
+			// db transaction managed into the method actionDocument
+			$errors = $rule->actionDocument($document[0]->id,'rerun');
+			// Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it. 
+			// We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
+			if (!empty($errors)) {			
+				throw new \Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
+			} 
+		}
+		catch(\Exception $e) {		
+			$logger->error($e->getMessage());
+			$return['error'] .= $e->getMessage();
+		}		
+
+		// Close job if it has been created
+		try {		
+			$connection->beginTransaction(); // -- BEGIN TRANSACTION		
+			if($job->createdJob === true) {
+				$job->closeJob();
+			}
+			// Get the job statistics even if the job has failed
+			if (!empty($job->id)) {
 				$return['jobId'] = $job->id;
 				$jobData = $job->getLogData(1);
 				if (!empty($jobData['jobError'])) {
@@ -231,10 +237,13 @@ class DefaultControllerCore extends Controller
 				}
 				$return['jobData'] = $jobData;
 			}
-			catch(\Exception $e) {
-				$return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();;
-			}
+			$connection->commit(); // -- COMMIT TRANSACTION			
 		}
+		catch(\Exception $e) {			
+			$connection->rollBack(); // -- ROLLBACK TRANSACTION
+			$logger->error('Failed to get the job statistics. '.$e->getMessage());
+			$return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
+		}	
 		// Send the response
 		return new JsonResponse($return);
     }
