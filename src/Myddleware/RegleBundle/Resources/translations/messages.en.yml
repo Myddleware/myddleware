@@ -128,7 +128,7 @@ filter:
     gt: is greater than 
     lt: is less than
     equal: is equal to 
-    different: is different from
+    different: is not equal to 
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
     in: is included in the following table separated by semicolon

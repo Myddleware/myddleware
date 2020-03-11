@@ -128,7 +128,7 @@ filter:
     gt: est supérieur à
     lt: est inférieur à
     equal: est égale à
-    different: est différent de
+    different: n'est pas égal à 
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules

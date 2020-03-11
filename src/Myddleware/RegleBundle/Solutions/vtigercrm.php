@@ -442,16 +442,22 @@ class vtigercrmcore extends solution
 				$queryParam = str_replace(["my_value,", "my_value"], "", $queryParam);
 			}
 			$queryParam = rtrim($queryParam, ',');
-			$where = !empty($param['date_ref']) ? "WHERE modifiedtime > '$param[date_ref]'" : '';
+			
+			$where = !empty($param['date_ref']) ? "WHERE modifiedtime > '$param[date_ref]'" : '';		
 			if (!empty($param['query'])) {
-				$where = empty($where) ? 'WHERE ' : ' AND ';
+				$where .= empty($where) ? 'WHERE ' : ' AND ';		
 				foreach ($param['query'] as $key => $item) {
+					// if id we don't add other filter, we keep only id
+					if ($key == 'id') {
+						$where = " WHERE id = '$item' ";
+						break;
+					}
 					if (substr($where, -strlen("'")) === "'") {
 						$where .= ' AND ';
 					}
-					$where .= "$key = '$item'";
+					$where .= "$key = '$item'";			
 				}
-			}
+			}		
 
 			/** @var array $result */
 			$result = [
@@ -506,7 +512,7 @@ class vtigercrmcore extends solution
 
 					$query = ["success" => true, "result" => $entitys];
 				}
-				else {
+				else {					
 					$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;");
 				}
 				if (empty($query) || (!empty($query) && !$query['success'])) {
@@ -698,11 +704,24 @@ class vtigercrmcore extends solution
 		}	
 		return $result;
     }
-
-    // Permet de supprimer un enregistrement
-    public function delete($id)
-    {
-    }
+	
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}	
+		
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/index.php?module='.$module.'&view=Detail&record='.substr($recordId,2);
+	}
+	
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *

@@ -9,7 +9,13 @@ api_read_record:
     defaults: { _controller: MyddlewareApiBundle:Default:readRecord }
     requirements:
         methods:  POST
-
+        
+api_delete_record:
+    path:  /v1_0/delete_record
+    defaults: { _controller: MyddlewareApiBundle:Default:deleteRecord }
+    requirements:
+        methods:  POST
+        
 api_mass_action:
     path:  /v1_0/mass_action
     defaults: { _controller: MyddlewareApiBundle:Default:massAction }
