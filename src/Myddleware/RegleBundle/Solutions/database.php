@@ -415,7 +415,7 @@ class databasecore extends solution {
 						}
 						// Manage deletion by adding the flag Myddleware_deletion to the record						
 						if (
-								$param['ruleParams']['deletion'] == true
+								!empty($param['ruleParams']['deletion'])
 							AND $param['ruleParams']['deletionField'] === $key
 							AND !empty($value)
 						) {
