@@ -1292,7 +1292,7 @@ class DefaultControllerCore extends Controller
             $fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
 
             // Liste des relations TARGET
-            $relation = $solution_cible->get_module_fields_relate($module['cible']);
+            $relation = $solution_cible->get_module_fields_relate($module['cible'],'');
 
             $allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule($ruleKey));
 
@@ -1441,7 +1441,11 @@ class DefaultControllerCore extends Controller
 
 // -------------------	SOURCE					
             // Liste des relations SOURCE
-            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey));
+			// Add parameters to be able to read rules linked in function get_module_fields_relate (used for database connector for example)
+			$param['connectorSourceId'] = $sessionService->getParamRuleConnectorSourceId($ruleKey);
+			$param['connectorTargetId'] = $sessionService->getParamRuleConnectorCibleId($ruleKey);
+			$param['ruleName'] = $sessionService->getParamRuleName($ruleKey);
+            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey), $param);
             $lst_relation_source = array();
             $lst_relation_source_alpha = array();
             $choice_source = array();
@@ -1460,9 +1464,7 @@ class DefaultControllerCore extends Controller
                 foreach ($lst_relation_source_alpha as $key => $value) {
                     $choice_source[$key] = (!empty($value['label']) ? $value['label'] : $key);
                 }
-
             }
-
 
             if (!isset($source['table'])) {
                 $source['table'][$sessionService->getParamRuleSourceModule($ruleKey)] = array();
@@ -1518,7 +1520,7 @@ class DefaultControllerCore extends Controller
                     foreach ($ruleListRelation as $ruleRelation) {
                         // Get the relate fields from the source module of related rules
                         $rule_fields_source = $solution_source->get_module_fields($ruleRelation['module_source'], 'source');
-                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source']);
+                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source'],'');
                         if (!empty($sourceRelateFields)) {
                             foreach ($sourceRelateFields as $key => $sourceRelateField) {
                                 $lstParentFields[$key] = $sourceRelateField['label'];
