@@ -4,9 +4,10 @@
 
 # Here is an example to add SSL parameters for doctrine
 # parameters:
-    # database_ca_cert:
-    # database_private_key:
-    # database_public_cert:   
+    # database_ca_cert: 
+    # database_private_key: 
+    # database_public_cert: 
+    # database_verif_cert: 0
     
 # doctrine:
     # dbal:
@@ -14,3 +15,4 @@
             # !php/const PDO::MYSQL_ATTR_SSL_CA:   %database_ca_cert%
             # !php/const PDO::MYSQL_ATTR_SSL_KEY:  %database_private_key%
             # !php/const PDO::MYSQL_ATTR_SSL_CERT: %database_public_cert%
+            # !php/const PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: %database_verif_cert%

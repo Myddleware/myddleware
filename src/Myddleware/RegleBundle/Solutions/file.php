@@ -144,10 +144,9 @@ class filecore extends solution {
 				// Get the file with the way of this file
 				$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module,'1970-01-01 00:00:00');
 				$fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);	
-			
 				// Open the file		
 				$sftp = ssh2_sftp($this->connection);
-				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+				$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
 				// Close the file
 				fclose($stream);				
@@ -272,7 +271,7 @@ class filecore extends solution {
 			
 			// Open the file
 			$sftp = ssh2_sftp($this->connection);
-			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+			$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 			$header = $this->getFileHeader($stream,$param);
 		
 			$nbCountHeader = count($header);			
@@ -364,7 +363,7 @@ class filecore extends solution {
 			
 			// Open the file
 			$sftp = ssh2_sftp($this->connection);
-			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+			$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 			$header = $this->getFileHeader($stream,$param);
 
 			$nbCountHeader = count($header);
