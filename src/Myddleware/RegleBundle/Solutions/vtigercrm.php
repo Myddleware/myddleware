@@ -718,8 +718,13 @@ class vtigercrmcore extends solution
 			$recordId = $document->gettarget();
 		}	
 		
-		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
-		return rtrim($url,'/').'/index.php?module='.$module.'&view=Detail&record='.substr($recordId,2);
+		// Get the record id, id format <key>x<recordId>
+		$recordIdArray = explode('x',$recordId);
+		if (!empty($recordIdArray[1])) {
+			// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+			return rtrim($url,'/').'/index.php?module='.$module.'&view=Detail&record='.$recordIdArray[1];
+		} 
+		return null;
 	}
 	
 }
