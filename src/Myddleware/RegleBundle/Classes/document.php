@@ -826,41 +826,21 @@ class documentcore {
 					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
-			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
+			// Else if create or search document, if we have duplicate_fields, we search the data in target application
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);		
-				// Récupération des valeurs de la source pour chaque champ de recherche
+				// Get the field value from the document target data
+				$target = $this->getDocumentData('T');				
+				if (empty($target)) {
+					throw new \Exception('Failed to search duplicate data in the target system because there is no target data in this data transfer. This document is queued. ');
+				} 
+				// Prepare the search array with teh value for each duplicate field
 				foreach($duplicate_fields as $duplicate_field) {
-					foreach ($this->ruleFields as $ruleField) {
-						if($ruleField['target_field_name'] == $duplicate_field) {
-							$sourceDuplicateField = $ruleField;
-						}
-					}			
-					if (!empty($sourceDuplicateField)) {
-						// Get the value of the field (could be a formula)
-						$searchFieldValue = $this->getTransformValue($this->sourceData,$sourceDuplicateField);
-						// Add filed in duplicate search only if not empty
-						if (!empty($searchFieldValue)) {
-							$searchFields[$duplicate_field] = $searchFieldValue;
-						// If no value, we check if the field is a relationship
-						} elseif (!empty($this->ruleRelationships)) {	
-							foreach ($this->ruleRelationships as $ruleRelationship) {	
-								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
-									$sourceDuplicateFieldRelationship = $ruleRelationship;
-								}
-							}					
-							if (!empty($sourceDuplicateFieldRelationship)) {
-								$searchFieldValue = $this->getTransformValue($this->sourceData,$ruleRelationship);
-							}
-							if (!empty($searchFieldValue)) {
-								$searchFields[$duplicate_field] = $searchFieldValue;
-							}							
-						}
-					}
-				}					
+					$searchFields[$duplicate_field] = $target[$duplicate_field];
+				}				
 				if(!empty($searchFields)) {
 					$history = $this->getDocumentHistory($searchFields);
-				} 
+				} 			
 	
 				if ($history === -1) {
 					throw new \Exception('Failed to search duplicate data in the target system. This document is queued. ');
