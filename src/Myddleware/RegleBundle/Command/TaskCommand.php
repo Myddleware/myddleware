@@ -77,7 +77,10 @@ class TaskCommand extends ContainerAwareCommand {
 						}								
 						if (!empty($rules)) {
 							foreach ($rules as $key => $value) {								
-								echo $value.chr(10);
+								// Don't display rule id if the command is called from the api
+								if (empty($api)) {
+									echo $value.chr(10);
+								}
 								$output->writeln('Read data for rule : <question>'.$value.'</question>');
 								// Chargement des données de la règle
 								if ($job->setRule($value)) {		

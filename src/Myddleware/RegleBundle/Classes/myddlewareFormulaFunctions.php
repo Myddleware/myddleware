@@ -32,7 +32,7 @@ class myddlewareFormulaFunctionscore {
 	private $path = "Myddleware\RegleBundle\Classes\myddlewareFormulaFunctions::";
 
 	public function test() {
-		echo "test toto";
+		echo "test";
 	}
 	
 	public function getNamesFunctions(){
