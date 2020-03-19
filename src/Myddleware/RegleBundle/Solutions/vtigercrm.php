@@ -57,9 +57,7 @@ class vtigercrmcore extends solution
                                                             'default'    => [
                                                                                 'id'
                                                                             ],
-                                                            'source'     => [
-                                                                                'id'
-                                                                            ],
+                                                            'source'     => [],
                                                             'target'     => [
                                                                                 'id',
                                                                                 'modifiedby',
