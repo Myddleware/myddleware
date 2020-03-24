@@ -20,7 +20,7 @@
   "prefer-stable": true,
     "require": {
         "php": ">=7.2",
-        "symfony/symfony": "3.4.37",
+        "symfony/symfony": "3.4.38",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
@@ -47,7 +47,9 @@
         "api-platform/api-pack": "^1.1",
         "lexik/jwt-authentication-bundle": "^2.6",
         "mautic/api-library": "^2.15",
-        "javanile/vtiger-client": "^0.0.13"
+        "javanile/vtiger-client": "^0.0.13",
+        "facebook/graph-sdk" : "~5.0",
+        "facebook/php-ads-sdk": "2.8.*"
     },
     "repositories": [
         {
