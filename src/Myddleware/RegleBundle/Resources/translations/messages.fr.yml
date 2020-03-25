@@ -481,6 +481,7 @@ solution:
         accesskey: Access key
         url: Url
         token: Jeton
+        useraccesstoken: Token utilisateur
         tokensecret: Secret jeton
         consumerkey: Clé consommateur
         consumersecret: Secret consommateur 
