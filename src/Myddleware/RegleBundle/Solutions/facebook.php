@@ -28,11 +28,13 @@ namespace Myddleware\RegleBundle\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+
 class facebookcore  extends solution {
 	
 	protected $baseUrl = 'https://graph.facebook.com';
 	protected $apiVersion = 'v6.0';
 	protected $facebook;
+	protected $readLast = false;
 	
 	protected $required_fields = array('default' => array('id','created_time'));
 	
@@ -75,15 +77,7 @@ class facebookcore  extends solution {
 			$meId = $graphNode->getField('id'); 
 			if (empty($meId)) {
 				throw new \Exception('Failed to get the access token from Facebook');				
-			}
-// $result->getProperty( 'id' );			
-// print_r($response);	
-			
-
-// print_r($graphNode);	
-// print_r($meId);	
-// $result = $this->facebook->get( '/1122084861475672/leads' ); 	
-			
+			}			
 			$this->connexion_valide = true;
 			return null;
 		} catch(Facebook\Exceptions\FacebookResponseException $e) {
@@ -110,6 +104,7 @@ class facebookcore  extends solution {
 		}
 	}
 	
+	// 1122084861475672?fields=id,name,questions
 	// Get the fields available for the module in input
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
@@ -121,24 +116,6 @@ class facebookcore  extends solution {
 			require('lib/facebook/metadata.php');	
 			if (!empty($moduleFields[$module])) {
 				$this->moduleFields = $moduleFields[$module];
-			}
-			// If the field catagory ID exist we fill it by requesting Moodle
-			if (!empty($this->moduleFields['categoryid'])) {
-				try {
-					// Récupération de toutes les catégories existantes
-					$params = array();
-					$functionname = 'core_course_get_categories';
-					$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'. '?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-					$response = $this->moodleClient->post($serverurl, $params);
-					$xml = simplexml_load_string($response);
-					if (!empty($xml->MULTIPLE->SINGLE)) {
-						foreach($xml->MULTIPLE as $category) {
-							$this->moduleFields['categoryid']['option'][$category->SINGLE->KEY[0]->VALUE->__toString()] = $category->SINGLE->KEY[1]->VALUE->__toString();
-						}
-					}
-				} 
-				catch (\Exception $e) {
-				} 	
 			}
 			
 			// Field relate
@@ -158,6 +135,31 @@ class facebookcore  extends solution {
 	} // get_module_fields($module)	 
 	
 	
+
+	// Get only one data from the application 
+    public function read_last($param) {	
+		// Set the attribut readLast to true to stop the search when we found at leas one record
+		$this->readLast = true;
+		// date_ref far in the past to be sure to found at least one record
+		$param['date_ref'] = '1970-01-01 00:00:00';
+		$param['rule']['mode'] = '0';
+		// We re use read function for the read_last 
+		$read = $this->read($param);
+
+		// Format output values
+		if (!empty($read['error'])) {
+			$result['error'] = $read['error'];
+		} else {
+			if (!empty($read['values'])) {
+				$result['done'] = true;
+				// Get only one record
+				$result['values'] = current($read['values']);
+			} else {
+				$result['done'] = false;
+			}
+		}	
+		return $result; 
+    }// end function read_last	
 	
 	// Permet de lire les données
 	public function read($param) {		
@@ -165,101 +167,75 @@ class facebookcore  extends solution {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
+			$result['date_ref'] = $param['date_ref'];
 			
-			if (empty($param['offset'])) {
-				$param['offset'] = 0;
-			}
-			$currentCount = 0;		
-			$query = '';
-			if (empty($param['limit'])) {
-				$param['limit'] = 100;
-			}	
-			// On va chercher le nom du champ pour la date de référence: Création ou Modification
+			// Get the reference field
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
-			
-
-			// Ajout des champs obligatoires
+		
+			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
-			$param['fields'] = array_unique($param['fields']);			
-			// Construction de la requête pour SugarCRM
-			$query = $this->generateQuery($param, 'read');		
-			//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
-			$link_name_to_fields_array = array();
-			foreach ($param['fields'] as $field) {
-				if (substr($field,0,strlen($this->customRelationship)) == $this->customRelationship) {
-					$link_name_to_fields_array[] = array('name' => substr($field, strlen($this->customRelationship)), 'value' => array('id'));
-				}
+			
+			// Check the leadsAdsId is filled
+			if (empty($param['ruleParams']['LeadAdsId'])) {
+				throw new \Exception('Failed to read lead into Facebook because the leadsAdsId is empty.');
 			}
-			// On lit les données dans le CRM
-            do {
-				$result = $this->facebook->get( '/1122084861475672/leads' ); 
-																						
-				// Construction des données de sortie
-				if (!empty($result['data'])) {
-					// $currentCount = $get_entry_list_result->result_count;
-					// $result['count'] += $currentCount;
-					$record = array();
-					// $i = 0;
-					// for ($i = 0; $i < $currentCount; $i++) {
-					// For each records
-					foreach($result['data'] as $record) {				
-						// For each fields expected
-						foreach($param['fields'] as $field) {				
-							// We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-							if(isset($record[$field])) {
-								// If we are on the date ref field, we add the entry date_modified (put to lower case because ModificationDate in the where is modificationdate int the select
-								if ($field == $dateRefField) {
-									$row['date_modified'] = $record[$field];
-								}
-								$row[$field] = $record[$field];
-							}
+			
+			// Call to Facebook
+			$response = $this->facebook->get( '/'.$param['ruleParams']['LeadAdsId'].'/leads'); 
+			
+			// Browse all leads as it isn't possible to filter data by date
+			$recordsEdge = $response->getGraphEdge();
+			while ($recordsEdge != null) {
+				foreach ($recordsEdge as $recordNode) {			
+					$row = array();
+					// For each fields used in Myddleware rule
+					foreach($param['fields'] as $field) {				
+						// if reference date, we convert it to Myddleware date format
+						if($field == $dateRefField) {
+							$row[$field] =  $recordNode->getField($field)->format('Y-m-d H:i:s');				
+						// If field_data, we transform the complex struture to a json ($key => $value)
+						} elseif($field == 'field_data') {
+							$row[$field] = $this->formatToJson($recordNode->getField($field));
+						} else {
+							$row[$field] = $recordNode->getField($field);
 						}
-						if (
-								!empty($record[$dateRefField])
-							&&	$result['date_ref'] < $record[$dateRefField]
-						) {								
-							// Transform the date 
-							$dateRef = new \DateTime($record[$dateRefField]);
-							$result['date_ref'] = $dateRef->format('Y-m-d H:i:s');
-						}
+					}
+					// Saved the record only if the record reference date is greater than the rule reference date
+					if (
+							!empty($row[$dateRefField])
+						&&	$result['date_ref'] < $row[$dateRefField]
+					) {								
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
-						$row = array();
-					}	
-						
-						
-						
-					 // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
-                    $param['offset'] += $this->limitCall;
-				}
-				else {
-					if (!empty($get_entry_list_result->number)) {
-						$result['error'] = $get_entry_list_result->number.' : '. $get_entry_list_result->name.'. '. $get_entry_list_result->description;
-					} else {
-						$result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
+						$result['date_ref'] = $row[$dateRefField];
+						// If read last, we just read one record
+						if ($this->readLast) {
+							break(2);
+						}
 					}
-				}			
-			}
-            // On continue si le nombre de résultat du dernier appel est égal à la limite
-            while ($currentCount == $this->limitCall AND $result['count'] < $param['limit']-1); // -1 because a limit of 1000 = 1001 in the system				
-			// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
-			if (!empty($paramSave)) {
-				$resultRel = $this->readRelationship($paramSave,$result);
-				// Récupération des données sauf de la date de référence qui dépend des enregistrements parent
-				if(!empty($resultRel['count'])) {
-					$result['count'] = $resultRel['count'];
-					$result['values'] = $resultRel['values'];
-				}
-				// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé. 
-				else {
-					return null;
-				}
-			}	
-		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}
+				}	
+				// Read next page
+				$recordsEdge = $this->facebook->next($recordsEdge);
+			}			
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+			$result['error'] = 'Graph returned an error: ' . $e->getMessage();
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+			$result['error'] = 'Facebook SDK returned an error: ' . $e->getMessage();
+		} catch (\Exception $e) {
+			$result['error'] = $e->getMessage();
+		}		
 		return $result;	
+	}
+	
+	// Transform Facebook data structure to a json type key => value
+	protected function formatToJson($fbDataObject) {
+		if (!empty($fbDataObject)) {
+			foreach ($fbDataObject as $field) {
+				$data[$field->getField('name')] = $field->getField('values')->getField('0'); 			
+			}
+			return json_encode($data);
+		}
+		return null;
 	}
 	
 	public function getDateRefName($moduleSource, $RuleMode) {
@@ -276,10 +252,10 @@ class facebookcore  extends solution {
 				// Add param to store the fieldname corresponding to the record id
 				return array(
 							array(
-								'id' => 'LeadAdsFormId',
-								'name' => 'LeadAdsFormId',
+								'id' => 'LeadAdsId',
+								'name' => 'LeadAdsId',
 								'type' => 'text',
-								'label' => 'Lead ads form id',
+								'label' => 'Lead ads id (form, campaign or group)',
 								'required'	=> true
 							)
 						);
