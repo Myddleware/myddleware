@@ -30,6 +30,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Se
 use Doctrine\DBAL\Connection; // Connection database
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Filesystem;
@@ -1586,7 +1587,14 @@ class rulecore {
 								'30' => 'solution.params.30_day',
 								'60' => 'solution.params.60_day'
 							),
-			) 		
+			),
+			array(
+				'id' 		=> 'description',
+				'name' 		=> 'description',
+				'required'	=> true,
+				'type'		=> TextareaType::class,
+				'label' 	=> 'solution.params.description'
+			), 		
 		);
 	}
 

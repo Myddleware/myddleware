@@ -453,6 +453,7 @@ function:
             lower: Put all in lower-case characters  
             upper: Put all in upper-case characters 
             changeValue: changeValue($var, $arrayKeyToValue) / Replace the value of $var by the corresponding value on the $arrayKeyToValue. Example changeValue( {FIELD},"('A':'1','B':'2')")
+            getValueFromArray: getValueFromArray($key, $array) / Get the value corresponding value to the key in the $array
             substr: substr( string $string , int $start [, int $length ] ) /  Return part of a string
             striptags: striptags( string $str [, string $allowable_tags ] ) / Strip HTML and PHP tags from a string
             htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convert all HTML entities to their applicable characters
@@ -481,6 +482,7 @@ solution:
         url: Url
         token: Token
         tokensecret: Secret token
+        useraccesstoken: User access token
         consumerkey: Consumer key
         consumersecret: Consumer secret 
         apikey: Api key
@@ -516,6 +518,7 @@ solution:
         delete: Data deletion (period after document data will be deleted in Myddleware) 
         activate: activated
         desactivate: Deactivate
+        description: Description
         1_minute: 1 minute
         5_minute: 5 minutes
         15_minute: 15 minutes

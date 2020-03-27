@@ -1153,11 +1153,21 @@ class DefaultControllerCore extends Controller
                     )
                 );
             }
-
-            // Récupère données source
+		
+			// Add rule param if exist (the aren't exist in rule creation)
+			$ruleParams = array();
+			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+			if (!empty($ruleParamsResult)) {
+				foreach ($ruleParamsResult as $ruleParamsObj) {
+					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+				}
+			}
+			
+            // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
-                'fields' => $sourcesfields));
+                'fields' => $sourcesfields,
+				'ruleParams' => $ruleParams));
 
             if (isset($source['done'])) {
                 $before = array();
@@ -2323,8 +2333,8 @@ class DefaultControllerCore extends Controller
      ****************************************************** */
     // No more submodule in Myddleware. We return a response 0 for the js (animation.js
     public function listSubModulesAction()
-    {
-        return new Response(0);
+    {	
+	   return new Response(0);
     }
 
     // VALIDATION DE L ANIMATION

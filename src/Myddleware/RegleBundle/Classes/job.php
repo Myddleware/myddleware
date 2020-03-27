@@ -513,12 +513,15 @@ class jobcore  {
 				// On fait une condition sur le $i pour éviter une boucle infinie
 				$i = 0;
 				while ($i < 20 && array_search('99', $ruleKeyVakue)!==false) {
-					$i++;
+					$i++;					
 					// Boucles sur les régles
 					foreach ($rules as $rule) {
 						$order = 0;
 						// Si on est une règle sans ordre
-						if($rule['rule_order'] == '99') {
+						if (
+								!empty($rule['rule_order']) 
+							AND $rule['rule_order'] == '99'
+						) {
 							// Récupération des règles liées et recherche dans le tableau keyValue
 							$rulesLink = explode(";", $rule['field_id']);
 							foreach ($rulesLink as $ruleLink) {

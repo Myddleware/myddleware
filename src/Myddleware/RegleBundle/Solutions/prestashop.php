@@ -85,7 +85,8 @@ class prestashopcore extends solution {
 	
 	protected $FieldsDuplicate = array(
 											'customers' => array('email'),
-											'products'	=> array('ean13', 'name', 'reference')
+											'products'	=> array('ean13', 'name', 'reference'),
+											'stock_availables'	=> array('id_product')
 									);
 	
 	protected $threadStatus = array('open'=>'open','closed'=>'closed','pending1'=>'pending1','pending2'=>'pending2');
@@ -431,7 +432,7 @@ class prestashopcore extends solution {
 	
 	
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {
+	public function read_last($param) {	
 		try { // try-catch Myddleware
 			try{ // try-catch PrestashopWebservice
 				$result = array();
@@ -586,7 +587,7 @@ class prestashopcore extends solution {
 	} // read_last($param)	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function read($param) {		
 		try { // try-catch Myddleware
 			// traitement spécial pour module de relation Customers / Groupe
 			if(array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
