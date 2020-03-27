@@ -518,6 +518,7 @@ solution:
         delete: Data deletion (period after document data will be deleted in Myddleware) 
         activate: activated
         desactivate: Deactivate
+        description: Description
         1_minute: 1 minute
         5_minute: 5 minutes
         15_minute: 15 minutes

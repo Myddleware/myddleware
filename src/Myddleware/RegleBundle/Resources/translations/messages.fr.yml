@@ -519,6 +519,7 @@ solution:
         delete: Suppression de données (délais de suppression des données des documents dans Myddleware) 
         activate: Activé
         desactivate: Désactivé
+        description: Description
         1_minute: 1 minute
         5_minute: 5 minutes
         15_minute: 15 minutes
