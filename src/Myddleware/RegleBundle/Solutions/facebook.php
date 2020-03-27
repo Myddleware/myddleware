@@ -58,6 +58,7 @@ class facebookcore  extends solution {
 		);
 	}
 	
+	// Login to Facebook
 	public function login($paramConnexion) {
 		parent::login($paramConnexion);
 		try {
@@ -94,40 +95,68 @@ class facebookcore  extends solution {
 
 	// Get available modules
 	public function get_modules($type = 'source') {
-	    try {
-			return array(
-				'leads' => 'Leads from capture form'
-			);
+	    try {		
+			$modules = array();
+			// Get the account's pages
+			$responsePages = $this->facebook->get( 'me/accounts?fields=name,access_token&type=page' ); 
+			$bodyPages = $responsePages->getDecodedBody();
+			if (!empty($bodyPages['data'])) {
+				foreach ($bodyPages['data'] as $page) {
+					// Get the page's lead forms
+					$responseLeadForms = $this->facebook->get( $page['id'].'/leadgen_forms',$page['access_token']); 
+					$bodyForms = $responseLeadForms->getDecodedBody();
+					// Build the module list
+					if (!empty($bodyForms['data'])) {
+						foreach ($bodyForms['data'] as $form) {
+							$modules['leadform__'.$form['id']] = $page['name'].' - '.$form['name'];
+						}
+					}			
+				}
+			} 
+			return $modules;
 	    }
 		catch (\Exception $e) {
 			return false;
 		}
 	}
-	
-	// 1122084861475672?fields=id,name,questions
+
 	// Get the fields available for the module in input
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
 			$this->moduleFields = array();
 			$this->fieldsRelate = array();
+			$fields = array();
 			
-			// Use Moodle metadata
-			require('lib/facebook/metadata.php');	
-			if (!empty($moduleFields[$module])) {
-				$this->moduleFields = $moduleFields[$module];
+		 	// When the module is created with the module name and moduleId
+			$moduleArray = explode('__',$module);			
+			if (!empty($moduleArray[1])) {
+				$module = $moduleArray[0];
+				$moduleId = $moduleArray[1];
 			}
 			
-			// Field relate
-			if (!empty($fieldsRelate[$module])) {
-				$this->fieldsRelate = $fieldsRelate[$module]; 
-			}	
-		
-			// Add relate field in the field mapping 
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			// If lead form module, get the field list from questions call
+			if ($module == 'leadform') {
+				// Standard fields
+				$this->moduleFields['id'] = array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+				$this->moduleFields['created_time'] = array('label' => 'Created time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+				// Get fields depending on the form
+				$responseFields = $this->facebook->get( $moduleId.'?fields=questions' ); 
+				$bodyFields = $responseFields->getDecodedBody();
+				$fields = $bodyFields['questions'];
 			}
-			return $this->moduleFields;
+			
+			if (!empty($fields)) {
+				foreach($fields as $field) {
+					$this->moduleFields[$field['key']] = array('label' => $field['label'], 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0);
+					if (!empty($field['options'])) {
+						foreach($field['options'] as $option) {
+							$this->moduleFields[$field['key']]['option'][$option['key']] = $option['value'];
+						}
+					}
+				}
+			}
+			return $this->moduleFields; 
 		}
 		catch (\Exception $e){
 			return false;
@@ -138,12 +167,12 @@ class facebookcore  extends solution {
 
 	// Get only one data from the application 
     public function read_last($param) {	
-		// Set the attribut readLast to true to stop the search when we found at leas one record
+		// Set the attribut readLast to true to stop the search when we found at least one record
 		$this->readLast = true;
-		// date_ref far in the past to be sure to found at least one record
+		// Set date_ref far in the past to be sure to found at least one record
 		$param['date_ref'] = '1970-01-01 00:00:00';
 		$param['rule']['mode'] = '0';
-		// We re use read function for the read_last 
+		// We use the read function for the read_last 
 		$read = $this->read($param);
 
 		// Format output values
@@ -169,45 +198,71 @@ class facebookcore  extends solution {
 			$result['count'] = 0;
 			$result['date_ref'] = $param['date_ref'];
 			
+			// Explode the module name when the module is created with the module name and moduleId
+			$moduleArray = explode('__',$param['module']);			
+			if (!empty($moduleArray[1])) {
+				$param['module'] = $moduleArray[0];
+				$param['moduleId'] = $moduleArray[1];
+			}
+			
 			// Get the reference field
 			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
 		
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			
-			// Check the leadsAdsId is filled
-			if (empty($param['ruleParams']['LeadAdsId'])) {
-				throw new \Exception('Failed to read lead into Facebook because the leadsAdsId is empty.');
+			// Check the lead form id is filled when the module is leadform
+			if ($param['module'] == 'leadform') {
+				if (empty($param['moduleId'])) {
+					throw new \Exception('Failed to read lead form from Facebook because the lead form id is empty.');
+				}
+				// REad all leads as it isn't possible to filter data by date
+				$response = $this->facebook->get( '/'.$param['moduleId'].'/leads'); 
+			} else {
+				throw new \Exception('Module '.$param['module'].' unknown. Failed to read data from Facebook. ');	
 			}
 			
-			// Call to Facebook
-			$response = $this->facebook->get( '/'.$param['ruleParams']['LeadAdsId'].'/leads'); 
+			if (empty($response)) {
+				throw new \Exception('No response from Facebook. ');	
+			}
 			
-			// Browse all leads as it isn't possible to filter data by date
+			// Browse all records 
 			$recordsEdge = $response->getGraphEdge();
 			while ($recordsEdge != null) {
 				foreach ($recordsEdge as $recordNode) {			
 					$row = array();
+					$fieldData = array();
+					
+					// Get field values from the lead form
+					if ($param['module'] == 'leadform') {
+						$fieldData = $this->formatToArray($recordNode->getField('field_data'));
+					}
+
 					// For each fields used in Myddleware rule
 					foreach($param['fields'] as $field) {				
 						// if reference date, we convert it to Myddleware date format
 						if($field == $dateRefField) {
 							$row[$field] =  $recordNode->getField($field)->format('Y-m-d H:i:s');				
-						// If field_data, we transform the complex struture to a json ($key => $value)
-						} elseif($field == 'field_data') {
-							$row[$field] = $this->formatToJson($recordNode->getField($field));
+							$row['date_modified'] =  $recordNode->getField($field)->format('Y-m-d H:i:s');				
+						// If the field exists in the form (fieldData), we get the data from it
+						} elseif(
+								!empty($fieldData)
+							AND isset($fieldData[$field])
+						) {
+							$row[$field] = $fieldData[$field];
 						} else {
 							$row[$field] = $recordNode->getField($field);
 						}
 					}
-					// Saved the record only if the record reference date is greater than the rule reference date
+					// Saved the record only if the record reference date is greater than the rule reference date 
+					// (important when we can't filter by date in Facebook call)
 					if (
-							!empty($row[$dateRefField])
-						&&	$result['date_ref'] < $row[$dateRefField]
+							!empty($row['date_modified'])
+						&&	$result['date_ref'] < $row['date_modified']
 					) {								
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
-						$result['date_ref'] = $row[$dateRefField];
+						$result['date_ref'] = $row['date_modified'];
 						// If read last, we just read one record
 						if ($this->readLast) {
 							break(2);
@@ -223,17 +278,17 @@ class facebookcore  extends solution {
 			$result['error'] = 'Facebook SDK returned an error: ' . $e->getMessage();
 		} catch (\Exception $e) {
 			$result['error'] = $e->getMessage();
-		}		
+		}				
 		return $result;	
 	}
 	
 	// Transform Facebook data structure to a json type key => value
-	protected function formatToJson($fbDataObject) {
+	protected function formatToArray($fbDataObject) {
 		if (!empty($fbDataObject)) {
 			foreach ($fbDataObject as $field) {
 				$data[$field->getField('name')] = $field->getField('values')->getField('0'); 			
 			}
-			return json_encode($data);
+			return $data;
 		}
 		return null;
 	}
@@ -241,30 +296,6 @@ class facebookcore  extends solution {
 	public function getDateRefName($moduleSource, $RuleMode) {
 		// Only leads module for now
 		return "created_time";
-	}
-	
-	public function getFieldsParamUpd($type, $module) {	
-		try {
-			if (
-					$type == 'source'
-				AND $module == 'leads'	
-			){
-				// Add param to store the fieldname corresponding to the record id
-				return array(
-							array(
-								'id' => 'LeadAdsId',
-								'name' => 'LeadAdsId',
-								'type' => 'text',
-								'label' => 'Lead ads id (form, campaign or group)',
-								'required'	=> true
-							)
-						);
-			}
-			return array();
-		}
-		catch (\Exception $e){
-			return array();
-		}
 	}
 	
 }
