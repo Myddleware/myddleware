@@ -253,7 +253,7 @@ class moodlecore  extends solution {
 						if (
 								$field->attributes()->__toString() == $dateRefField
 						) {
-							$row['date_modified'] = $field->VALUE->__toString();
+							$row['date_modified'] = $this->dateTimeToMyddleware($field->VALUE->__toString());
 						}
 						// Get all the requested fields
 						if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {
@@ -269,7 +269,7 @@ class moodlecore  extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';;
-		}	
+		}		
 		return $result;
 	}
 

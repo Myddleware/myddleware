@@ -144,10 +144,9 @@ class filecore extends solution {
 				// Get the file with the way of this file
 				$file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module,'1970-01-01 00:00:00');
 				$fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);	
-			
 				// Open the file		
 				$sftp = ssh2_sftp($this->connection);
-				$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+				$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
 				// Close the file
 				fclose($stream);				
@@ -197,9 +196,59 @@ class filecore extends solution {
 	} // get_module_fields($module) 
 	
 	
-	// Redéfinition de la méthode pour ne plus renvoyer la relation Myddleware_element_id
-	public function get_module_fields_relate($module) {
-		return parent::get_module_fields_relate($module);	
+	// Get the fieldId from the other rules to add them into the source relationship list field 
+	public function get_module_fields_relate($module, $param) {	
+		// Get the rule list with the same connectors (both directions) to get the relate ones 
+		$ruleListRelation = $this->container->get('doctrine')->getEntityManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
+						->select('r.id')
+						->where('(
+											r.connectorSource= ?1 
+										AND r.connectorTarget= ?2
+										AND r.name != ?3
+										AND r.deleted = 0
+									)
+								OR (
+											r.connectorTarget= ?1
+										AND r.connectorSource= ?2
+										AND r.name != ?3
+										AND r.deleted = 0
+								)')	
+						->setParameter(1, (int)$param['connectorSourceId'])
+						->setParameter(2, (int)$param['connectorTargetId'])
+						->setParameter(3, $param['ruleName'])
+						->getQuery()
+						->getResult();
+		if (!empty($ruleListRelation)) {
+			// Prepare query to get the fieldId from the orther rules with the same connectors			
+			$sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
+			foreach($ruleListRelation as $ruleRelation) {
+				$sql .= "'$ruleRelation[id]',";
+			}
+			// Remove the last coma
+			$sql = substr($sql,0,-1);
+			$sql .= ")";	
+			$stmt = $this->conn->prepare($sql);
+			$stmt->execute();
+			$fields = $stmt->fetchAll();
+			if (!empty($fields)){
+				// Add relate fields to display them in the rule edit view (relationship tab, source list fields)
+				foreach ($fields as $field) {
+					if (
+							empty($this->fieldsRelate[$field['value']]) // Only if the field isn't already in the list
+						AND !empty($this->moduleFields[$field['value']]) // The field has to exist in the current module
+					) {
+						$this->fieldsRelate[$field['value']] = array(
+								'label' => $field['value'],
+								'type' => 'varchar(255)',
+								'type_bdd' => 'varchar(255)',
+								'required' => false,
+								'required_relationship' => 0
+						);
+					}
+				}
+			}
+		}	
+		return parent::get_module_fields_relate($module, $param);
 	}
 	
 	
@@ -222,7 +271,7 @@ class filecore extends solution {
 			
 			// Open the file
 			$sftp = ssh2_sftp($this->connection);
-			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+			$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 			$header = $this->getFileHeader($stream,$param);
 		
 			$nbCountHeader = count($header);			
@@ -314,7 +363,7 @@ class filecore extends solution {
 			
 			// Open the file
 			$sftp = ssh2_sftp($this->connection);
-			$stream = fopen("ssh2.sftp://$sftp$fileName", 'r');
+			$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 			$header = $this->getFileHeader($stream,$param);
 
 			$nbCountHeader = count($header);

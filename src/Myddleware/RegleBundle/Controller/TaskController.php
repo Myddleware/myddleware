@@ -106,8 +106,17 @@ class TaskController extends Controller
 		try {
 			$em = $this->getDoctrine()->getManager();
 			
-			// Stop task
+			// Get job detail 
+			$job = $this->container->get('myddleware_job.job');
+			$job->id = $id;
+			$jobData = $job->getLogData();
+			
+			// Stop task and update statistics
 			$taskStop = $em->getRepository('RegleBundle:Job')->findOneById($id);	
+			$taskStop->setOpen( $jobData['Open'] );
+			$taskStop->setClose( $jobData['Close'] );
+			$taskStop->setCancel( $jobData['Cancel'] );
+			$taskStop->setError( $jobData['Error'] );
 			$taskStop->setStatus( 'End' );
 			$taskStop->setEnd( new \DateTime );			
 			$em->persist($taskStop);

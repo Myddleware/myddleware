@@ -40,6 +40,7 @@ class readRecordCommand extends ContainerAwareCommand
             ->addArgument('ruleId', InputArgument::REQUIRED, "Rule used to read the records")
             ->addArgument('filterQuery', InputArgument::REQUIRED, "Filter used to read data in the source application, eg : id")
             ->addArgument('filterValues', InputArgument::REQUIRED, "Values corresponding to the fileter separated by comma, eg : 1256,4587")
+			->addArgument('api', InputArgument::OPTIONAL, "Call from API")
         ;
     }
 
@@ -50,9 +51,11 @@ class readRecordCommand extends ContainerAwareCommand
 			$ruleId = $input->getArgument('ruleId');
 			$filterQuery = $input->getArgument('filterQuery');
 			$filterValues = $input->getArgument('filterValues');
+			$api = $input->getArgument('api');
 
 			// Get the Job container
 			$job = $this->getContainer()->get('myddleware_job.job');
+			$job->setApi($api);		
 			
 			if ($job->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')')) {
 				$output->writeln( $job->id );  // This is requiered to display the log (link creation with job id) when the job is run manually

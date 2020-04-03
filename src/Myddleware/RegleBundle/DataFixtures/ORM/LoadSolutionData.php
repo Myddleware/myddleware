@@ -58,9 +58,9 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'sage50',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'hubspot',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'erpnext',			'active' => 1,'source' => 1,'target' => 1),
-									array('name' => 'myddlewareapi',	'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'medialogistique',	'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'mautic',			'active' => 1,'source' => 0,'target' => 1),
+									array('name' => 'facebook',				'active' => 1,'source' => 1,'target' => 0),
 							);
  
     public function load(ObjectManager $manager){
