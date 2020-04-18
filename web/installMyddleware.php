@@ -171,7 +171,7 @@ echo_style('green', 'php bin/symfony_requirements');
 echo '<BR>';
 echo '<BR>';
 
-function get_error_message(Requirement $requirement, $lineSize)
+function get_error_message($requirement, $lineSize)
 {
     if ($requirement->isFulfilled()) {
         return;
