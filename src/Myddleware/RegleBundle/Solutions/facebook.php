@@ -196,6 +196,9 @@ class facebookcore  extends solution {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
+			if (empty($param['limit'])) {
+				$param['limit'] = 100;
+			}
 			
 			// Explode the module name when the module is created with the module name and moduleId
 			$moduleArray = explode('__',$param['module']);			
@@ -271,21 +274,41 @@ class facebookcore  extends solution {
 							break(2);
 						}
 					} else {
-						// Records are read from the most recent to the oldest. 
+						// Data are read from the most recent to the oldest. 
 						// We stop the process once we reach a data withe a reference date < the rule reference date
 						break(2);
 					}
 				}	
 				// Read next page
 				$recordsEdge = $this->facebook->next($recordsEdge);
-			}			
+			}
+			// If the number of record read is greater than the limit,
+			// We read the result from the end to the beginning (oldest record first) and keep only the number of record expected
+			if (
+					!empty($result['values'])
+				AND	count($result['values']) > $param['limit']
+			) {
+				$reverseValues = array_reverse($result['values'], true);
+				$result['values'] = array();
+				foreach ($reverseValues as $key => $value) {
+					if (
+							!empty($result['values'])
+						AND	count($result['values']) >= $param['limit']
+					) {
+						break;
+					}
+					$result['values'][$key] = $value;
+					$result['date_ref'] = $value['date_modified'];
+				}
+				$result['count'] = count($result['values']);
+			}		
 		} catch(Facebook\Exceptions\FacebookResponseException $e) {
 			$result['error'] = 'Graph returned an error: ' . $e->getMessage();
 		} catch(Facebook\Exceptions\FacebookSDKException $e) {
 			$result['error'] = 'Facebook SDK returned an error: ' . $e->getMessage();
 		} catch (\Exception $e) {
 			$result['error'] = $e->getMessage();
-		}				
+		}		
 		return $result;	
 	}
 	
