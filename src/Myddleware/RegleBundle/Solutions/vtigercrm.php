@@ -42,9 +42,11 @@ class vtigercrmcore extends solution
                                 ];
 
 
-    protected $FieldsDuplicate = [
-                                    'default' => []
-                                ];
+	protected $FieldsDuplicate = array(	'Contacts' => array('email', 'lastname'),
+										'CompanyDetails' => array('organizationname'),
+										'Leads' => array('email', 'lastname'),
+										'default' => array('')
+									  );
 
     protected $exclude_module_list = [
                                         'default'    => ['Users', "Documents"],
@@ -257,7 +259,7 @@ class vtigercrmcore extends solution
 
 			$escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
 			$escludeField = $escludeField[$type] ?? $escludeField['default'];
-			$this->moduleFields = [];
+			$this->moduleFields = [];			
 			foreach ($fields as $field) {
 				if (!in_array($field['name'], $escludeField)) {
 					if ($field['type']["name"] == "reference" || $field['type']["name"] == "owner") {
@@ -279,11 +281,6 @@ class vtigercrmcore extends solution
 							foreach ($field['type']["picklistValues"] as $option) {
 								$this->moduleFields[$field['name']]["option"][$option["value"]] = $option["label"];
 							}
-						}
-					}
-					if ($field['mandatory'] && !array_key_exists($module, $this->FieldsDuplicate)) {
-						if ($field['name'] != "assigned_user_id") {
-							$this->FieldsDuplicate[$module][] = $field['name'];
 						}
 					}
 				}
