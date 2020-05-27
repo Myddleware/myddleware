@@ -42,7 +42,8 @@ class vtigercrmcore extends solution
                                 ];
 
 
-	protected $FieldsDuplicate = array(	'Contacts' => array('email', 'lastname'),
+	protected $FieldsDuplicate = array(	
+										'Contacts' => array('email', 'lastname'),
 										'CompanyDetails' => array('organizationname'),
 										'Leads' => array('email', 'lastname'),
 										'default' => array('')
