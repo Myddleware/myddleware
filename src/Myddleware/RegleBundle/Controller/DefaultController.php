@@ -1188,6 +1188,15 @@ class DefaultControllerCore extends Controller
 
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
+							// If error during transformation, we send back the error
+							if (
+									$r['after'][$name_fields_target] == null 
+								AND !empty($doc->getMessage())
+							) {
+								$r['after'][$name_fields_target] = $doc->getMessage();
+								// Refresh the document message
+								$doc->setMessage('');
+							}
 
 							$k['fields'] = array();
                             if (empty($k['champs'])) {
