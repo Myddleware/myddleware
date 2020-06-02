@@ -544,8 +544,13 @@ class erpnextcore extends solution
 			return substr($response, strpos($response,'Traceback'), strpos(substr($response,strpos($response,'Traceback')),'</pre>'));
 		}
 		curl_close($ch);
-	
-		return json_decode($response);
+		
+		$result = json_decode($response);
+		// If result not a json, we send the result as it has been return (used for 301 error for example)
+		if (empty($result)) {
+			$result = $response;
+		}
+		return $result;
 	}
 
 }
