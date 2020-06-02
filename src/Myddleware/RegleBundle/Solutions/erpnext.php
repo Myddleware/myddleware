@@ -405,7 +405,10 @@ class erpnextcore extends solution
 					foreach ($data as $key => $value) {
 						// We don't send Myddleware fields
 						if (in_array($key, array('target_id', 'Myddleware_element_id'))) {
-							if ($key == 'target_id') {
+							if (
+									$key == 'target_id'
+								AND !empty($value)	
+							) {
 								$url = $this->paramConnexion['url'] . "/api/resource/" . rawurlencode($param['module'])."/" .$value;
 							}
 							unset($data[$key]);
@@ -441,7 +444,6 @@ class erpnextcore extends solution
 							unset($data[$key]);
 						}
 					}
-					
 					// Send data to ERPNExt
 					$resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
 					if (!empty($resultQuery->data->name)) {
