@@ -13,7 +13,7 @@ This word list used to shortening description of all operations
 
 ## Branches Description
 
-- `stable` is the default OCI branch, it contains the version for production environment
+- `stable` is the default OCI branch, it contains the version for production environment and clients
 - `master` is the branch used to sync updates from master of UPSTREAM
 - `hotfix` is the branch used to sync updates from the hotfix of UPSTREAM
 - `devops` this branch MUST be used to manage the repository for development operations (eg. clean branches)
