@@ -54,6 +54,7 @@ RUN curl -sS https://platform.sh/cli/installer | php && \
 
 RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
 COPY crontab /etc/
+RUN chmod 600 /etc/crontab
 
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
