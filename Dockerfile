@@ -59,7 +59,7 @@ RUN chmod 600 /etc/crontab
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
         echo '#!/bin/bash'; \
-        echo 'printenv | sed "s/^\(.*\)$/export \1/g" | grep -E "^export MYSQL_|^export VT_" > /run/crond.env'; \
+        echo 'printenv | sed "s/^\(.*\)$/export \\1/g" | grep -E "^export MYSQL_" > /run/crond.env'; \
         echo 'rsyslogd'; \
         echo 'cron'; \
         echo 'apache2-foreground-inherit "$@"'; \
