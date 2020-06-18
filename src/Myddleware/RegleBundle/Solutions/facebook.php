@@ -191,12 +191,14 @@ class facebookcore  extends solution {
     }// end function read_last	
 	
 	// Permet de lire les données
-	public function read($param) {		
+	public function read($param) {	
 		try {
 			$result = array();
 			$result['error'] = '';
 			$result['count'] = 0;
-			$result['date_ref'] = $param['date_ref'];
+			if (empty($param['limit'])) {
+				$param['limit'] = 100;
+			}
 			
 			// Explode the module name when the module is created with the module name and moduleId
 			$moduleArray = explode('__',$param['module']);			
@@ -227,6 +229,7 @@ class facebookcore  extends solution {
 			}
 			
 			// Browse all records 
+			// Facebook returns first the most recent items, so we browse them until we reach the reference date
 			$recordsEdge = $response->getGraphEdge();
 			while ($recordsEdge != null) {
 				foreach ($recordsEdge as $recordNode) {			
@@ -253,32 +256,59 @@ class facebookcore  extends solution {
 						} else {
 							$row[$field] = $recordNode->getField($field);
 						}
-					}
+					}				
 					// Saved the record only if the record reference date is greater than the rule reference date 
 					// (important when we can't filter by date in Facebook call)
 					if (
 							!empty($row['date_modified'])
-						&&	$result['date_ref'] < $row['date_modified']
+						&&	$param['date_ref'] < $row['date_modified']
 					) {								
 						$result['values'][$row['id']] = $row;
 						$result['count']++;
-						$result['date_ref'] = $row['date_modified'];
+						// The most recent record will be the first read, so we save the reference date only for the first record
+						if (empty($result['date_ref'])) {
+							$result['date_ref'] = $row['date_modified'];
+						}
 						// If read last, we just read one record
 						if ($this->readLast) {
 							break(2);
 						}
+					} else {
+						// Data are read from the most recent to the oldest. 
+						// We stop the process once we reach a data withe a reference date < the rule reference date
+						break(2);
 					}
 				}	
 				// Read next page
 				$recordsEdge = $this->facebook->next($recordsEdge);
-			}			
+			}
+			// If the number of record read is greater than the limit,
+			// We read the result from the end to the beginning (oldest record first) and keep only the number of record expected
+			if (
+					!empty($result['values'])
+				AND	count($result['values']) > $param['limit']
+			) {
+				$reverseValues = array_reverse($result['values'], true);
+				$result['values'] = array();
+				foreach ($reverseValues as $key => $value) {
+					if (
+							!empty($result['values'])
+						AND	count($result['values']) >= $param['limit']
+					) {
+						break;
+					}
+					$result['values'][$key] = $value;
+					$result['date_ref'] = $value['date_modified'];
+				}
+				$result['count'] = count($result['values']);
+			}		
 		} catch(Facebook\Exceptions\FacebookResponseException $e) {
 			$result['error'] = 'Graph returned an error: ' . $e->getMessage();
 		} catch(Facebook\Exceptions\FacebookSDKException $e) {
 			$result['error'] = 'Facebook SDK returned an error: ' . $e->getMessage();
 		} catch (\Exception $e) {
 			$result['error'] = $e->getMessage();
-		}				
+		}		
 		return $result;	
 	}
 	

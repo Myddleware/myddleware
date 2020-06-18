@@ -1249,7 +1249,16 @@ class documentcore {
 				$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP
 				
 				// Exécute la règle si pas d'erreur de syntaxe
-				if($f = $formule->execFormule()) {
+				if(
+						$f = $formule->execFormule()
+				) {
+					// Try the formula first
+					try {
+						eval($f.';'); // exec
+					} catch (\ParseError $e) {
+						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
+					}
+					// Execute eval only if formula is valid
 					eval('$rFormula = '.$f.';'); // exec
 					if(isset($rFormula)) {
 						// affectation du résultat
@@ -1311,7 +1320,6 @@ class documentcore {
 			$this->transformError = true;
 			return null;
 		}
-
 	}
 	
 	// Fonction permettant de contrôle les données. 

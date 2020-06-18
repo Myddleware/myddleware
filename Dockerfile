@@ -69,3 +69,4 @@ RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inher
         echo 'cron'; \
         echo 'apache2-foreground-inherit "$@"'; \
     } > /usr/local/bin/apache2-foreground
+
