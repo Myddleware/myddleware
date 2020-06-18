@@ -25,6 +25,8 @@ services:
     environment:
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=secret
+      - max_allowed_packet=524288000
+      - wait_timeout=100
     volumes:
       - mysql:/var/lib/mysql:rw
 

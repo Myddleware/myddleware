@@ -49,23 +49,18 @@ RUN curl "https://download.oracle.com/otn_software/linux/instantclient/195000/or
     export C_INCLUDE_PATH=/usr/include/oracle/19.5/client64 && \
     docker-php-ext-install oci8 pdo_oci
 
-
 RUN curl -sS https://platform.sh/cli/installer | php && \
     ln -s /root/.platformsh/bin/platform /usr/local/bin/platform
 
-COPY crontab /etc/cron.d/crontab
-RUN chmod 0644 /etc/cron.d/crontab
-
-RUN crontab /etc/cron.d/crontab
-
-RUN touch /var/log/cron.log
-RUN touch /var/log/myddleware.log
-# RUN : >> /var/log/cron.log
-# RUN chmod +x /app/myddleware-*.sh
+RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
+COPY crontab /etc/
+RUN chmod 600 /etc/crontab
 
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
         echo '#!/bin/bash'; \
+        echo 'printenv | sed "s/^\(.*\)$/export \\1/g" | grep -E "^export MYSQL_" > /run/crond.env'; \
+        echo 'rsyslogd'; \
         echo 'cron'; \
         echo 'apache2-foreground-inherit "$@"'; \
     } > /usr/local/bin/apache2-foreground
