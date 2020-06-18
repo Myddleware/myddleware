@@ -131,6 +131,9 @@ class databasecore extends solution {
 			$idFields = $this->getIdFields($module,$type,$fields);			
 		
 			foreach ($fields as $field) {
+				// Convert field to be compatible with Myddleware. For example, error happens when there is space in the field name
+				$field[$this->fieldName] = rawurlencode($field[$this->fieldName]);
+				
 				$this->moduleFields[$field[$this->fieldName]] = array(
 						'label' => $field[$this->fieldLabel],
 						'type' => $field[$this->fieldType],
@@ -181,7 +184,7 @@ class databasecore extends solution {
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
-			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';			
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return false;
 		}
 	} // get_module_fields($module) 
@@ -190,6 +193,8 @@ class databasecore extends solution {
 	public function read_last($param) {		
 		$result = array();
 		$result['error'] = '';
+		// Decode field name (converted in method get_module_fields)
+		$param['fields'] = array_map('rawurldecode',$param['fields']);
 		try {
 			// Add requiered fields
 			if(!empty($param['ruleParams']['fieldId'])) {
@@ -313,6 +318,8 @@ class databasecore extends solution {
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function read($param) {
 		$result = array();
+		// Decode field name (converted in method get_module_fields)
+		$param['fields'] = array_map('rawurldecode',$param['fields']);
 		try {
 			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
 			if(empty($param['date_ref'])) {
@@ -320,6 +327,14 @@ class databasecore extends solution {
 			}
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
+			}
+			
+			// Add the deletion field into the list field to be read if deletion is enabled on the rule
+			if (
+					!empty($param['ruleParams']['deletion'])
+				AND	!empty($param['ruleParams']['deletionField'])
+			) {
+				$param['fields'][] = $param['ruleParams']['deletionField'];
 			}
 			
 			// Add requiered fields
@@ -403,7 +418,16 @@ class databasecore extends solution {
 							$result['date_ref'] = $value;
 						}
 						if(in_array($key, $param['fields'])) {
-							$row[$key] = $value;
+							// Encode the field to match with the fields retruned by method get_module_fields
+							$row[rawurlencode($key)] = $value;
+						}
+						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						if (
+								!empty($param['ruleParams']['deletion'])
+							AND $param['ruleParams']['deletionField'] === $key
+							AND !empty($value)
+						) {
+							$row['myddleware_deletion'] = true;
 						}
 					}
 					$result['values'][$row['id']] = $row;
@@ -412,7 +436,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}
+		}			
 		return $result;
 	} // read($param)
 	
@@ -441,7 +465,8 @@ class databasecore extends solution {
 						} elseif($key == $param['ruleParams']['targetFieldId']) {
 							$idTarget = $value;
 						}
-						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose.",";
+						// Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
+						$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.",";
 						$values .= "'".$this->escape($value)."',";
 					}
 					
@@ -501,7 +526,7 @@ class databasecore extends solution {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				try {
-					// Check control before update
+					// Check control before delete
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Query init
 					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET "; 
@@ -514,8 +539,12 @@ class databasecore extends solution {
 						// Myddleware_element_id is a Myddleware field, it doesn't exist in the target database	
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
-						}								
-						$sql .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose."='".$this->escape($value)."',";
+						}
+						// Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)						
+						$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."='".$this->escape($value)."',";
+					}
+					if(empty($idTarget)) {					
+						throw new \Exception('No target id found. Failed to update the record.');
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
@@ -534,6 +563,56 @@ class databasecore extends solution {
 											'id' => $idTarget,
 											'error' => ($q->rowCount() ? false : 'There is no error but 0 row has been updated.')
 									);									
+				}
+				catch (\Exception $e) {
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$result[$idDoc] = array(
+							'id' => '-1',
+							'error' => $error
+					);
+				}
+				// Status modification for the transfer
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+			}
+		}
+		catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
+		}
+		return $result;
+	}
+	
+	// Function to delete a record
+	public function delete($param) {
+		try {		
+			// For every document
+			foreach($param['data'] as $idDoc => $data) {
+				try {
+					// Check control before delete
+					$data = $this->checkDataBeforeDelete($param, $data);
+					if (empty($data['target_id'])) {
+						throw new \Exception('No target id found. Failed to delete the record.');
+					}
+					// Query init
+					$sql = "DELETE FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." "; 
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$data['target_id']."'";	
+					// Query validation
+					$sql = $this->queryValidation($param, 'delete', $sql);					
+					// Execute the query					
+					$q = $this->pdo->prepare($sql);
+					$exec = $q->execute();
+					if(!$exec) {
+						$errorInfo = $this->pdo->errorInfo();						
+						throw new \Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
+					}
+					// Send the target ifd to Myddleware
+					$result[$idDoc] = array(
+											'id' => $data['target_id'],
+											'error' => ($q->rowCount() ? false : 'There is no error but the record was already deleted.')
+										);									
 				}
 				catch (\Exception $e) {
 					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -576,6 +655,63 @@ class databasecore extends solution {
 	protected function get_query_select_header($param, $method) {
 		return "SELECT ";
 	}
+	
+	// Get the fieldId from the other rules to add them into the source relationship list field 
+	public function get_module_fields_relate($module, $param) {	
+		if (!empty($param)) {
+			// Get the rule list with the same connectors (both directions) to get the relate ones 
+			$ruleListRelation = $this->container->get('doctrine')->getEntityManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
+							->select('r.id')
+							->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')	
+							->setParameter(1, (int)$param['connectorSourceId'])
+							->setParameter(2, (int)$param['connectorTargetId'])
+							->setParameter(3, $param['ruleName'])
+							->getQuery()
+							->getResult();
+			if (!empty($ruleListRelation)) {
+				// Prepare query to get the fieldId from the orther rules with the same connectors			
+				$sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
+				foreach($ruleListRelation as $ruleRelation) {
+					$sql .= "'$ruleRelation[id]',";
+				}
+				// Remove the last coma
+				$sql = substr($sql,0,-1);
+				$sql .= ")";	
+				$stmt = $this->conn->prepare($sql);
+				$stmt->execute();
+				$fields = $stmt->fetchAll();
+				if (!empty($fields)){
+					// Add relate fields to display them in the rule edit view (relationship tab, source list fields)
+					foreach ($fields as $field) {
+						if (
+								empty($this->fieldsRelate[$field['value']]) // Only if the field isn't already in the list
+							AND !empty($this->moduleFields[$field['value']]) // The field has to exist in the current module
+						) {
+							$this->fieldsRelate[$field['value']] = array(
+									'label' => $field['value'],
+									'type' => 'varchar(255)',
+									'type_bdd' => 'varchar(255)',
+									'required' => false,
+									'required_relationship' => 0
+							);
+						}
+					}
+				}
+			}	
+		}
+		return parent::get_module_fields_relate($module, $param);
+	}
 
 	public function getFieldsParamUpd($type, $module) {	
 		try {
@@ -600,13 +736,24 @@ class databasecore extends solution {
 								'label' => 'Field Date Reference',
 								'required'	=> true
 							);
+					// Add all fieds to the deletion list fields to get the one which carries the deletion flag
+					$deletionParam = array(
+								'id' => 'deletionField',
+								'name' => 'deletionField',
+								'type' => 'option',
+								'label' => 'Field with deletion flag',
+								'required'	=> false,
+								'option' => array('' => '') // Add empty value
+							);
 					// Add all fieds to the list
 					foreach ($fieldsSource as $key => $value) {
 						$idParam['option'][$key] = $value['label'];
 						$dateParam['option'][$key] = $value['label'];
+						$deletionParam['option'][$key] = $value['label'];
 					}
 					$params[] = $idParam;
 					$params[] = $dateParam;
+					$params[] = $deletionParam;
 				} else {
 					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(

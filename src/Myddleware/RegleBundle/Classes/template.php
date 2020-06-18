@@ -231,7 +231,7 @@ class templatecore {
 	}
 
 	// Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template
-	public function convertTemplate($templateName) {
+	public function convertTemplate($ruleName,$templateName) {
 		$this->em->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION
 		try{
 			// Get the template array
@@ -253,8 +253,8 @@ class templatecore {
 				// Rule creation
 				// General data
 				$ruleObject = new Rule();
-				$ruleObject->setName((string)$rule['name']);
-				$ruleObject->setNameSlug((string)$rule['nameSlug']);
+				$ruleObject->setName((string)$ruleName.' - '.$rule['name']);
+				$ruleObject->setNameSlug((string)$ruleName.'_'.$rule['nameSlug']);
 				// It is possible that the templatte contains opposite rules, so we test it first. If solution are opposite, we set opposite connectors too
 				if ($rule['sourceSolution'] == $this->solutionSourceName) {
 					$ruleObject->setConnectorSource($this->connectorSource);
@@ -390,6 +390,7 @@ class templatecore {
 						// fieldId contains the nameSlug, we have to change it with the id of the relate rule 					
 						$relationshipObjecy->setFieldId($this->ruleNameSlugArray[$relationship['fieldId']]); 
 						$relationshipObjecy->setParent($relationship['parent']);
+						$relationshipObjecy->setDeleted(0);
 						$this->em->persist($relationshipObjecy);
 					}
 				}

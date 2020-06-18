@@ -52,7 +52,7 @@ class documentcore {
 	protected $parentId;
 	protected $sourceData;
 	protected $data;
-	protected $type_document;
+	protected $documentType;
 	protected $jobActive = true;
 	protected $attempt;
 	protected $userId;
@@ -65,6 +65,7 @@ class documentcore {
 	protected $docIdRefError;
 	protected $transformError = false;
 	protected $tools;
+	protected $api;	// Specify if the class is called by the API
 	protected $ruleDocuments;
 	protected $globalStatus = array(
 										'New' => 'Open',
@@ -78,7 +79,6 @@ class documentcore {
 										'Filter' => 'Cancel',
 										'No_send' => 'Cancel',
 										'Cancel' => 'Cancel',
-										'Create_KO' => 'Cancel',
 										'Filter_KO' => 'Error',
 										'Predecessor_KO' => 'Error',
 										'Relate_KO' => 'Error',
@@ -112,8 +112,7 @@ class documentcore {
 			'Filter' => 'flux.status.filter',
 			'No_send' => 'flux.status.no_send',
 			'Cancel' => 'flux.status.cancel',
-			'Filter_KO' => 'flux.status.filter_ko',			
-			'Create_KO' => 'flux.status.create_ko',			
+			'Filter_KO' => 'flux.status.filter_ko',					
 			'Predecessor_KO' => 'flux.status.predecessor_ko',
 			'Relate_KO' => 'flux.status.relate_ko',
 			'Error_transformed' => 'flux.status.error_transformed',
@@ -126,6 +125,7 @@ class documentcore {
 		return array(
 			'C' => 'flux.type.create',
 			'U' => 'flux.type.update',
+			'D' => 'flux.type.delete',
 			'S' => 'flux.type.search'
 		);		
 	}
@@ -147,6 +147,9 @@ class documentcore {
 		}
 		if (!empty($param['jobId'])) {
 			$this->jobId = $param['jobId'];
+		}
+		if (!empty($param['api'])) {
+			$this->api = $param['api'];
 		}
 		if (!empty($param['key'])) {
 			$this->key = $param['key'];
@@ -187,7 +190,11 @@ class documentcore {
 				$this->sourceId = $this->data['id'];
 				$this->userId = $param['rule']['created_by'];
 				$this->status = 'New';
-				$this->attempt = 0;
+				$this->attempt = 0;			
+				// Set the deletion type if myddleware deletion flag is true
+				if (!empty($this->data['myddleware_deletion'])) {
+					$this->documentType = 'D';
+				}
 			} 
 			// Ajout des paramètre de la règle
 			$this->setRuleParam();
@@ -232,7 +239,7 @@ class documentcore {
 				$this->targetId = $this->document_data['target_id'];
 				$this->ruleName = $this->document_data['name_slug'];
 				$this->ruleMode = $this->document_data['mode'];
-				$this->type_document = $this->document_data['type'];
+				$this->documentType = $this->document_data['type'];
 				$this->attempt = $this->document_data['attempt'];
 				
 				// Get source data and create data attribut
@@ -265,24 +272,21 @@ class documentcore {
 			if (!$this->jobActive) {
 				$this->message .= 'Job is not active. ';
 				return false;
-			}
-			
+			}		
 			// Création du header de la requête 
-			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, parent_id) VALUES";		
+			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id) VALUES";		
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
 			// Source_id could contain accent
-			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->parentId')";
+			$query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId')";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->execute();
 			$this->updateStatus('New');
 			// Insert source data			
 			return $this->insertDataTable($this->data,'S');		
 		} catch (\Exception $e) {
-			$this->message .= 'Failed to create document (id source : '.$this->id.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($this->message);
-			$this->typeError = 'E';
-			$this->updateStatus('Create_KO');
 			return false;
 		}		
 	}
@@ -571,23 +575,37 @@ class documentcore {
 			}	
 
 			// Get the target id and the type of the document
-			$this->type_document = $this->checkRecordExist($this->sourceId);	
-			// Override the document type in case of search type rule
-			if ($this->ruleMode == 'S') {
-				$this->type_document = 'S';
-			}				
-			// Update the type of the document
-			if (empty($this->type_document)) {
-				throw new \Exception('Failed to find a type for this document. ');
+			$type_document = $this->checkRecordExist($this->sourceId);			
+			// Don't change the document type if the type is deletion
+			if ($this->documentType <> 'D') {
+				$this->documentType = $type_document;
+				// Override the document type in case of search type rule
+				if ($this->ruleMode == 'S') {
+					$this->documentType = 'S';
+				}				
+				// Update the type of the document
+				if (empty($this->documentType)) {
+					throw new \Exception('Failed to find a type for this document. ');
+				}
+				$this->updateType($this->documentType);
 			}
-			$this->updateType($this->type_document);
 			
-			// Update the target ID if we founnd it
+			// Update the target ID if we found it (target Id is required for update and deletion)
 			if (
-					$this->type_document == 'U'
+					(
+						$this->documentType == 'U'
+					 OR $this->documentType == 'D'
+					)
 				AND !$this->isChild()
 			) {
 				if (empty($this->targetId)) {
+					// If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
+					if ($this->documentType == 'D') {
+						$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
+						$this->updateStatus('Cancel');
+						$this->connection->commit(); // -- COMMIT TRANSACTION
+						return false;
+					}
 					throw new \Exception('No target id found for a document with the type Update. ');
 				}
 				if(!$this->updateTargetId($this->targetId)) {
@@ -602,7 +620,7 @@ class documentcore {
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
-				AND $this->type_document == 'U'
+				AND $this->documentType == 'U'
 				AND !$this->isChild()
 			) {	
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
@@ -616,7 +634,7 @@ class documentcore {
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			// Reference document id is used to show which document is blocking the current document in Myddleware
-			$this->docIdRefError = $result['id'];
+			$this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
 			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
@@ -694,10 +712,10 @@ class documentcore {
 			// In this cas, new data has been created in Myddleware. So we check again if the mode of the document is still Create		
 			if (
 					$this->status == 'Relate_KO'
-				AND $this->type_document == 'C'
+				AND $this->documentType == 'C'
 			) {			
-				$this->type_document = $this->checkRecordExist($this->sourceId);					
-				if ($this->type_document == 'U') {
+				$this->documentType = $this->checkRecordExist($this->sourceId);					
+				if ($this->documentType == 'U') {
 					$this->updateTargetId($this->targetId);
 					$this->updateType('U');
 				}
@@ -732,7 +750,7 @@ class documentcore {
 				// If the type of this document is Update and the id of the target is missing, we try to get this ID
 				// Except if the rule is a child (no target id is required, it will be send with the parent rule)
 				if (
-						$this->type_document == 'U'
+						$this->documentType == 'U'
 					&& empty($this->targetId)
 					&& !$this->isChild()
 				) {
@@ -776,59 +794,53 @@ class documentcore {
 			// Check if the rule is a parent and run the child data.
 			$this->runChildRule();
 			
-			// Si le document est une modification de données alors on va chercher les données dans la cible avec l'ID
+			// If the document type is a modification or a deletion we get target data for the record using its ID
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
-					$this->type_document == 'U'
+					(
+						$this->documentType == 'U'
+					 OR $this->documentType == 'D'
+					)
 				 &&	!$this->isChild()
 			) {
 				// Récupération des données avec l'id de la cible
 				$searchFields = array('id' => $this->targetId);
 				$history = $this->getDocumentHistory($searchFields);
 	
-				// Ici la table d'historique doit obligatoirement avoir été mise à jour pour continuer
+				// History is mandatory before a delete action, however if no record found, it means that the record has already been deleted
+				if (	
+						$this->documentType == 'D'
+					AND	$history === false
+				) {
+					$this->message .= 'This document type is D (delete) and no record have been found in the target application. It means that the record has already been deleted in the target application. This document is cancelled.';
+					$this->updateStatus('Cancel');
+					$this->connection->commit(); // -- COMMIT TRANSACTION	
+					return false;
+				}
+				
+				// From here, the history table has to be filled 
 				if ($history !== -1) {
 					$this->updateStatus('Ready_to_send');
 				}
 				else {
-					throw new \Exception('Failed to retrieve record in target system before update. Id target : '.$this->targetId.'. Check this record is not deleted.');
+					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : '.$this->targetId.'. Check this record is not deleted.');
 				}
 			}
-			// Si on est en création et que la règle a un paramètre de recherche de doublon, on va chercher dans la cible
+			// Else if create or search document, if we have duplicate_fields, we search the data in target application
 			elseif (!empty($this->ruleParams['duplicate_fields'])) {
 				$duplicate_fields = explode(';',$this->ruleParams['duplicate_fields']);		
-				// Récupération des valeurs de la source pour chaque champ de recherche
+				// Get the field value from the document target data
+				$target = $this->getDocumentData('T');				
+				if (empty($target)) {
+					throw new \Exception('Failed to search duplicate data in the target system because there is no target data in this data transfer. This document is queued. ');
+				} 
+				// Prepare the search array with teh value for each duplicate field
 				foreach($duplicate_fields as $duplicate_field) {
-					foreach ($this->ruleFields as $ruleField) {
-						if($ruleField['target_field_name'] == $duplicate_field) {
-							$sourceDuplicateField = $ruleField;
-						}
-					}			
-					if (!empty($sourceDuplicateField)) {
-						// Get the value of the field (could be a formula)
-						$searchFieldValue = $this->getTransformValue($this->sourceData,$sourceDuplicateField);
-						// Add filed in duplicate search only if not empty
-						if (!empty($searchFieldValue)) {
-							$searchFields[$duplicate_field] = $searchFieldValue;
-						// If no value, we check if the field is a relationship
-						} elseif (!empty($this->ruleRelationships)) {	
-							foreach ($this->ruleRelationships as $ruleRelationship) {	
-								if($ruleRelationship['field_name_target'] == $duplicate_field) {	
-									$sourceDuplicateFieldRelationship = $ruleRelationship;
-								}
-							}					
-							if (!empty($sourceDuplicateFieldRelationship)) {
-								$searchFieldValue = $this->getTransformValue($this->sourceData,$ruleRelationship);
-							}
-							if (!empty($searchFieldValue)) {
-								$searchFields[$duplicate_field] = $searchFieldValue;
-							}							
-						}
-					}
-				}					
+					$searchFields[$duplicate_field] = $target[$duplicate_field];
+				}				
 				if(!empty($searchFields)) {
 					$history = $this->getDocumentHistory($searchFields);
-				} 
+				} 			
 	
 				if ($history === -1) {
 					throw new \Exception('Failed to search duplicate data in the target system. This document is queued. ');
@@ -836,7 +848,7 @@ class documentcore {
 				// Si la fonction renvoie false (pas de données trouvée dans la cible) ou true (données trouvée et correctement mise à jour)
 				elseif ($history === false) {
 					// If search document and don't found the record, we return an error
-					if ($this->type_document == 'S') {
+					if ($this->documentType == 'S') {
 						$this->typeError = 'E';
 						$this->updateStatus('Not_found');
 					} else {
@@ -845,8 +857,15 @@ class documentcore {
 				}
 				// renvoie l'id : Si une donnée est trouvée dans le système cible alors on modifie le document pour ajouter l'id target et modifier le type
 				else {
+					// Add message detail when we have found a record 
+					if(!empty($searchFields)) {
+						$this->message .= 'Found ';
+						foreach ($searchFields as $key => $value) {
+							$this->message .= $key.' = '. $value. ' ; ';
+						}
+					}
 					// If search document we close it. 
-					if ($this->type_document == 'S') {
+					if ($this->documentType == 'S') {
 						$this->updateStatus('Found');
 					} else {
 						$this->updateStatus('Ready_to_send');
@@ -862,9 +881,11 @@ class documentcore {
 			// S'il n'y a aucun changement entre la cible actuelle et les données qui seront envoyée alors on clos directement le document
 			// Si le document est en type recherche, alors la cible est forcément égale à la source et il ne fait pas annuler le doc. 
 			// We always send data if the rule is parent (the child data could be different even if the parent data didn't change)
+			// No check for deletion document 
 			if (	
-					$this->type_document != 'S' 
-				&&	!$this->isParent()
+					$this->documentType != 'S' 
+				AND	$this->documentType != 'D' 
+				AND	!$this->isParent()
 			) {
 				$this->checkNoChange();
 			}		
@@ -873,7 +894,7 @@ class documentcore {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
-			if ($this->type_document == 'S') {
+			if ($this->documentType == 'S') {
 				$this->updateStatus('Not_found');
 			} else {
 				$this->updateStatus('Error_checking');
@@ -968,11 +989,13 @@ class documentcore {
 	}
 	
 	// Récupération des données dans la cible et sauvegarde dans la table d'historique
-	protected function getDocumentHistory ($searchFields) {	
+	protected function getDocumentHistory($searchFields) {	
 		// Permet de renseigner le tableau rule avec les données d'entête
 		$rule = $this->getRule();
 		$read['module'] = $rule['module_target'];
-		$read['fields'] = $this->getTargetFields();	
+		// Get all fields for document type D (delete) to backup the whole record before delete it
+		($this->documentType == 'D' ? $all = true : $all = false);
+		$read['fields'] = $this->getTargetFields($all);	
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
@@ -1024,10 +1047,27 @@ class documentcore {
 	
 	// Insert source data in table documentData
 	protected function insertDataTable($data,$type) {
-		try {		
+		try {	
+			// We retrieve all the target fields (not just the rule flieds) before deleting data to the target solution to create a backup
+			if (
+					$this->documentType == 'D'
+				AND	$type == 'H'
+			) {
+				// Get all module fields
+				$targetFields = $this->getTargetFields(true);
+				// Format these target fields
+				if (!empty($targetFields)) {
+					foreach ($targetFields as $targetField) {
+						$fields[]= array('target_field_name' => $targetField);
+					}
+				}
+			} else {
+				$fields = $this->ruleFields;
+			}
+	
 			// We save only fields which belong to the rule
-			if (!empty($this->ruleFields)) {
-				foreach ($this->ruleFields as $ruleField) {
+			if (!empty($fields)) {
+				foreach ($fields as $ruleField) {
 					if ($type == 'S') {
 						// We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
 						if ($ruleField['source_field_name']=='my_value') {
@@ -1042,11 +1082,11 @@ class documentcore {
 							}
 							$dataInsert[$sourceField] = $data[$sourceField];
 						}
-					} else {
+					} else {	
 						// Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
 						if (
-								!isset($data[$ruleField['target_field_name']])
-							 && $type == 'H'	
+								!array_key_exists($ruleField['target_field_name'], $data)
+							 AND $type == 'H'	
 						) { 				
 							continue;
 						}				
@@ -1209,7 +1249,16 @@ class documentcore {
 				$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP
 				
 				// Exécute la règle si pas d'erreur de syntaxe
-				if($f = $formule->execFormule()) {
+				if(
+						$f = $formule->execFormule()
+				) {
+					// Try the formula first
+					try {
+						eval($f.';'); // exec
+					} catch (\ParseError $e) {
+						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
+					}
+					// Execute eval only if formula is valid
 					eval('$rFormula = '.$f.';'); // exec
 					if(isset($rFormula)) {
 						// affectation du résultat
@@ -1271,7 +1320,6 @@ class documentcore {
 			$this->transformError = true;
 			return null;
 		}
-
 	}
 	
 	// Fonction permettant de contrôle les données. 
@@ -1355,9 +1403,18 @@ class documentcore {
 	}
 	
 	// Permet de récupérer les champs de la cible
-	protected function getTargetFields() {
-		try {
-			if (!empty($this->ruleId)) {
+	protected function getTargetFields($all = false) {
+		try {		
+			// if all fields are requested
+			if ($all) {
+				$rule = $this->getRule();
+				$targetFields = $this->solutionTarget->get_module_fields($rule['module_target']);
+				if (!empty($targetFields)) {
+					foreach($targetFields as $fieldname => $value) {
+						$fields[] = $fieldname;
+					}
+				}			
+			} elseif (!empty($this->ruleId)) {
 				$rule = "SELECT * FROM RuleField WHERE rule_id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1384,13 +1441,16 @@ class documentcore {
 						}
 					}
 				}				
-				// We don't need the field Myddleware_element_id as it is the id of the current record
+			}
+			// We don't need the field Myddleware_element_id as it is the id of the current record
+			if (!empty($fields)) {
 				$key = array_search('Myddleware_element_id', $fields);
 				if ($key !== false) {
 					unset($fields[$key]);
 				}					
 				return $fields;
 			}
+			return null;
 		} catch (\Exception $e) {
 			$this->typeError = 'E';
 			$this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1660,7 +1720,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			if (!$this->api) {
+				echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+			}
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
@@ -1694,7 +1756,9 @@ class documentcore {
 								WHERE
 									id = :id
 								";
-			echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			if (!$this->api) {
+				echo (!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);	
+			}
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue(":now", $now);
 			$stmt->bindValue(":deleted", $deleted);

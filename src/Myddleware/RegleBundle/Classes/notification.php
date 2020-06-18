@@ -83,7 +83,7 @@ class notificationcore  {
 				$textMail .= $this->tools->getTranslation(array('email_notification', 'best_regards')).chr(10).$this->tools->getTranslation(array('email_notification', 'signature'));
 				$message = \Swift_Message::newInstance()
 					->setSubject($this->tools->getTranslation(array('email_alert', 'subject')))
-					->setFrom('no-reply@myddleware.com')
+					->setFrom((!empty($this->container->getParameter('email_from')) ? $this->container->getParameter('email_from') : 'no-reply@myddleware.com'))
 					->setBody($textMail)
 				;
 				// Send the message to all admins
@@ -232,7 +232,7 @@ class notificationcore  {
 					
 			$message = \Swift_Message::newInstance()
 				->setSubject($this->tools->getTranslation(array('email_notification', 'subject')))
- 				->setFrom('no-reply@myddleware.com')
+ 				->setFrom((!empty($this->container->getParameter('email_from')) ? $this->container->getParameter('email_from') : 'no-reply@myddleware.com'))
 				->setBody($textMail)
 			;
 			// Send the message to all admins

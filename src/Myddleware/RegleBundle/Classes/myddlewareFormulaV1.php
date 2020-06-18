@@ -154,7 +154,7 @@ class myddlewareFormulaV1core {
 		$pathFunctions = $this->functions->getPathFunctions();
 		
 		// array("pow","exp","abs","sin","cos","tan"); MATHS
-		$array = array('mb_strtolower','trim','ltrim','rtrim','mb_strtoupper','round','ceil','abs','mb_substr','str_replace','preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode','html_entity_decode','htmlentities','htmlspecialchars','strlen','urlencode');
+		$array = array('mb_strtolower','trim','ltrim','rtrim','mb_strtoupper','round','ceil','abs','mb_substr','str_replace','preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode','html_entity_decode','htmlentities','htmlspecialchars','strlen','urlencode','json_decode','json_encode'); 
 		$const = array('ENT_COMPAT','ENT_QUOTES','ENT_NOQUOTES','ENT_HTML401','ENT_XML1','ENT_XHTML','ENT_HTML5');
 
 		return array_merge($array, $const, $pathFunctions);

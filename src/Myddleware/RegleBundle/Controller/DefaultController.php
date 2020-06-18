@@ -63,7 +63,7 @@ class DefaultControllerCore extends Controller
     // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
     protected $connection;
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId');
+	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
 	protected function getInstanceBdd()
     {
@@ -216,6 +216,19 @@ class DefaultControllerCore extends Controller
 
             // On récupére l'EntityManager
             $this->getInstanceBdd();
+			
+			// Remove the rule relationships 
+			$ruleRelationships = $this->getDoctrine()
+				->getManager()
+				->getRepository('RegleBundle:RuleRelationShip')
+				->findBy(array('rule' => $id));
+			
+			if (!empty($ruleRelationships)) {
+				foreach ($ruleRelationships as $ruleRelationship) {
+					$ruleRelationship->setDeleted(1);
+					$this->em->persist($ruleRelationship);
+				}
+			}
 
 			$rule->setDeleted(1);
 			$rule->setActive(0);
@@ -1140,11 +1153,21 @@ class DefaultControllerCore extends Controller
                     )
                 );
             }
-
-            // Récupère données source
+		
+			// Add rule param if exist (the aren't exist in rule creation)
+			$ruleParams = array();
+			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+			if (!empty($ruleParamsResult)) {
+				foreach ($ruleParamsResult as $ruleParamsObj) {
+					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+				}
+			}
+			
+            // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
-                'fields' => $sourcesfields));
+                'fields' => $sourcesfields,
+				'ruleParams' => $ruleParams));
 
             if (isset($source['done'])) {
                 $before = array();
@@ -1165,6 +1188,15 @@ class DefaultControllerCore extends Controller
 
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
+							// If error during transformation, we send back the error
+							if (
+									$r['after'][$name_fields_target] == null 
+								AND !empty($doc->getMessage())
+							) {
+								$r['after'][$name_fields_target] = $doc->getMessage();
+								// Refresh the document message
+								$doc->setMessage('');
+							}
 
 							$k['fields'] = array();
                             if (empty($k['champs'])) {
@@ -1279,7 +1311,7 @@ class DefaultControllerCore extends Controller
             $fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
 
             // Liste des relations TARGET
-            $relation = $solution_cible->get_module_fields_relate($module['cible']);
+            $relation = $solution_cible->get_module_fields_relate($module['cible'],'');
 
             $allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule($ruleKey));
 
@@ -1328,7 +1360,7 @@ class DefaultControllerCore extends Controller
                     $source['table'][$module['source']][$t] = $k['label'];
                 }
                 // Tri des champs sans tenir compte de la casse
-                asort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
+                ksort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
             }
 
             // SOURCE ----- Récupère la liste des champs source
@@ -1428,7 +1460,11 @@ class DefaultControllerCore extends Controller
 
 // -------------------	SOURCE					
             // Liste des relations SOURCE
-            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey));
+			// Add parameters to be able to read rules linked in function get_module_fields_relate (used for database connector for example)
+			$param['connectorSourceId'] = $sessionService->getParamRuleConnectorSourceId($ruleKey);
+			$param['connectorTargetId'] = $sessionService->getParamRuleConnectorCibleId($ruleKey);
+			$param['ruleName'] = $sessionService->getParamRuleName($ruleKey);
+            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey), $param);
             $lst_relation_source = array();
             $lst_relation_source_alpha = array();
             $choice_source = array();
@@ -1447,40 +1483,33 @@ class DefaultControllerCore extends Controller
                 foreach ($lst_relation_source_alpha as $key => $value) {
                     $choice_source[$key] = (!empty($value['label']) ? $value['label'] : $key);
                 }
-
             }
-
 
             if (!isset($source['table'])) {
                 $source['table'][$sessionService->getParamRuleSourceModule($ruleKey)] = array();
             }
 
             // -- Relation
-            // Liste des règles avec les mêmes connecteurs rev 1.07
-            //
-            $stmt = $this->connection->prepare('	
-					SELECT r.id, r.name, r.module_source
-					FROM Rule r
-					WHERE 
-						(
-								conn_id_source=:id_source 
-							AND conn_id_target=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-						)
-					OR (
-								conn_id_target=:id_source 
-							AND conn_id_source=:id_target
-							AND r.name != :name
-							AND r.deleted = 0
-					)
-					');
-            $stmt->bindValue('id_source', (int)$sessionService->getParamRuleConnectorSourceId($ruleKey));
-            $stmt->bindValue('id_target', (int)$sessionService->getParamRuleConnectorCibleId($ruleKey));
-            $stmt->bindValue('name', $sessionService->getParamRuleName($ruleKey));
-            $stmt->execute();
-
-            $ruleListRelation = $stmt->fetchAll();
+            // Rule list with the same connectors (both directions) to get the relate ones 
+			$ruleListRelation = $this->getDoctrine()->getManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
+							->select('r.id, r.name, r.moduleSource')
+							->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')	
+							->setParameter(1, (int)$sessionService->getParamRuleConnectorSourceId($ruleKey))
+							->setParameter(2, (int)$sessionService->getParamRuleConnectorCibleId($ruleKey))
+							->setParameter(3, $sessionService->getParamRuleName($ruleKey))
+							->getQuery()
+							->getResult();
 
             //Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
             $ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($sessionService->getParamRuleSourceModule($ruleKey), 'source');
@@ -1510,7 +1539,7 @@ class DefaultControllerCore extends Controller
                     foreach ($ruleListRelation as $ruleRelation) {
                         // Get the relate fields from the source module of related rules
                         $rule_fields_source = $solution_source->get_module_fields($ruleRelation['module_source'], 'source');
-                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source']);
+                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source'],'');
                         if (!empty($sourceRelateFields)) {
                             foreach ($sourceRelateFields as $key => $sourceRelateField) {
                                 $lstParentFields[$key] = $sourceRelateField['label'];
@@ -1653,6 +1682,32 @@ class DefaultControllerCore extends Controller
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
             }
+			
+			// Add param to allow deletion (need source and target application ok to enable deletion)
+			if (
+					$solution_source->getReadDeletion($module['source']) == true
+				AND	$solution_cible->getSendDeletion($module['cible']) == true
+			){
+				$deletion = array(
+								array(
+									'id' => 'deletion',
+									'name' => 'deletion',
+									'required' => false,
+									'type' => 'option',
+									'label' => $this->get('translator')->trans('create_rule.step3.deletion.label'),
+									'option' => array(0 => '', 1 => $this->get('translator')->trans('create_rule.step3.deletion.yes'))
+								)
+							);
+				$rule_params = array_merge($rule_params, $deletion);
+			} else {
+				// If the deletion is disable (database in source OK but target application non OK), we remove the deletion list field of database connector
+				$keyDeletionField = array_search('deletionField', array_column($rule_params, 'id'));
+				if (!empty($keyDeletionField)) {
+					unset($rule_params[$keyDeletionField]);
+				}
+			}
+		
+			
             //  rev 1.07 --------------------------
             $result = array(
                 'source' => $source['table'],
@@ -1686,7 +1741,7 @@ class DefaultControllerCore extends Controller
 
             // ----------------
         } catch (\Exception $e) {
-            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping'));
+            $sessionService->setCreateRuleError($ruleKey, $this->get('translator')->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
             return $this->redirect($this->generateUrl('regle_stepone_animation'));
             exit;
         }
@@ -2053,6 +2108,7 @@ class DefaultControllerCore extends Controller
                         $oneRuleRelationShip->setFieldNameTarget($rel['target']);
                         $oneRuleRelationShip->setFieldId($rel['rule']);
                         $oneRuleRelationShip->setParent($rel['parent']);
+						$oneRuleRelationShip->setDeleted(0);
                         // We don't create the field target if the relatiobnship is a parent one
                         // We only use this field to search in the source application, not to send the data to the target application.
                         if (empty($rel['parent'])) {
@@ -2286,8 +2342,8 @@ class DefaultControllerCore extends Controller
      ****************************************************** */
     // No more submodule in Myddleware. We return a response 0 for the js (animation.js
     public function listSubModulesAction()
-    {
-        return new Response(0);
+    {	
+	   return new Response(0);
     }
 
     // VALIDATION DE L ANIMATION
@@ -2320,7 +2376,7 @@ class DefaultControllerCore extends Controller
                     $template->setLang(mb_strtoupper($request->getLocale()));
                     $template->setIdUser($this->getUser()->getId());
                     // Rule creation with the template selected in parameter
-                    $convertTemplate = $template->convertTemplate($request->get('template'));
+                    $convertTemplate = $template->convertTemplate($request->get('name', null),$request->get('template'));
                     // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                     return new Response('template');
                 } else {

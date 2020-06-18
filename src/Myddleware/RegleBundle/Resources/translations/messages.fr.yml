@@ -4,7 +4,7 @@
  # * @package Myddleware
  # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- # * @link http://www.myddleware.com	
+ # * @link http://www.myddleware.com
  
  # This file is part of Myddleware.
  
@@ -33,9 +33,9 @@ panel:
     list_error:
         nb: Nombre d'erreurs par règle
     list_job:
-        title: Détail des derniers jobs	
-        duration: seconde(s)	
-        nb : Transferts de données en erreur	
+        title: Détail des derniers jobs
+        duration: seconde(s)
+        nb : Transferts de données en erreur
     graph_histo:
         title: Historique des transferts
     graph_job_histo:
@@ -79,6 +79,9 @@ create_rule:
             create_modify: Création et modification de données
             create_only: Création de données seulement
             search_only: Récupération de données existantes seulement  
+        deletion:
+            label: Activer la suppression dans l'application cible
+            yes: Oui
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
@@ -125,7 +128,7 @@ filter:
     gt: est supérieur à
     lt: est inférieur à
     equal: est égale à
-    different: est différent de
+    different: n'est pas égal à 
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules
@@ -278,7 +281,7 @@ view_connector:
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
-        link: http://community.myddleware.com/index.php/
+        link: http://community.myddleware.com/index.php/connector-guide/#
         
 list_flux:
     start: Début
@@ -351,6 +354,7 @@ flux:
         update: Update
         create: Create
         search: Search
+        delete: Delete
 
 view_flux:
     empty: Pas de données
@@ -364,6 +368,7 @@ view_flux:
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des transferts
     nbPostDocuments: Tranferts post
+    direct_link: Lien direct
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
@@ -402,12 +407,13 @@ list_task:
         open: Ouvert
         cancel: Annulé
         manual: Manuelle
+        api: Api
         error: Erreur
         
 view_task:
     empty_log: Aucune log  
     task_stop: ARRET DE LA TACHE
-    refresh: RAFRAICHIR	
+    refresh: RAFRAICHIR
     nblogs: Nombre de logs  
     header:
         id: Identifiant
@@ -448,6 +454,7 @@ function:
             lower: Met tous les caractères en minuscules  
             upper: Met tous les caractères en majuscules 
             changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple changeValue( {FIELD},"('A':'1','B':'2')")
+            getValueFromArray: getValueFromArray($key, $array) / Récupère la valeur correspondant à key dans le tableau array
             substr: substr ( string $string , int $start [, int $length ] ) /  Retourne un segment de chaîne.
             striptags: striptags( string $str [, string $allowable_tags ] ) /  Supprime les balises HTML et PHP d'une chaîne
             htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convertit toutes les entités HTML en caractères normaux
@@ -470,11 +477,12 @@ function:
 solution:
     fields:
         login: Utilisateur
-        username: Nom d'utilisateur
+        username: Utilisateur
         password: Mot de passe
-        accesskey: Clé d'accès
+        accesskey: Access key
         url: Url
         token: Jeton
+        useraccesstoken: Token utilisateur
         tokensecret: Secret jeton
         consumerkey: Clé consommateur
         consumersecret: Secret consommateur 
@@ -511,6 +519,7 @@ solution:
         delete: Suppression de données (délais de suppression des données des documents dans Myddleware) 
         activate: Activé
         desactivate: Désactivé
+        description: Description
         1_minute: 1 minute
         5_minute: 5 minutes
         15_minute: 15 minutes

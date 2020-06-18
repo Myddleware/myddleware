@@ -41,7 +41,7 @@ class generateTemplateCommand extends ContainerAwareCommand
             ->setDescription('Génération de template')
             ->addArgument('nomTemplate', InputArgument::REQUIRED, "nom")
             ->addArgument('descriptionTemplate', InputArgument::REQUIRED, "nom")
-            ->addArgument('rulesId', InputArgument::REQUIRED, "nom")
+            ->addArgument('rulesId', InputArgument::REQUIRED, "nom") // Ids separated by ,
         ;
     }
 

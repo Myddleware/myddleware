@@ -40,11 +40,12 @@ class massActionCommand extends ContainerAwareCommand
             ->setName('myddleware:massaction')
             ->setDescription('Action massive sur les flux')
             ->addArgument('action', InputArgument::REQUIRED, "Action (rerun, cancel, remove, restore or changeStatus)")
-            ->addArgument('dataType', InputArgument::REQUIRED, "Data type (rule or doculent)") 
+            ->addArgument('dataType', InputArgument::REQUIRED, "Data type (rule or document)") 
             ->addArgument('ids', InputArgument::REQUIRED, "Rule or document ids") // id séparés par des ";"
-            ->addArgument('forceAll', InputArgument::OPTIONAL, "Set Y to process action on all documents (not only open and erro ones)") 
+            ->addArgument('forceAll', InputArgument::OPTIONAL, "Set Y to process action on all documents (not only open and error ones)") 
             ->addArgument('fromStatus', InputArgument::OPTIONAL, "Get all document with this status(Only with changeStatus action)")
             ->addArgument('toStatus', InputArgument::OPTIONAL, "Set this status (Only with changeStatus action)")
+			->addArgument('api', InputArgument::OPTIONAL, "Call from API")
         ;
     }
 
@@ -63,7 +64,11 @@ class massActionCommand extends ContainerAwareCommand
 			$ids = $input->getArgument('ids');			
 			$forceAll = $input->getArgument('forceAll');			
 			$fromStatus = $input->getArgument('fromStatus');			
-			$toStatus = $input->getArgument('toStatus');			
+			$toStatus = $input->getArgument('toStatus');
+			$api = $input->getArgument('api');	
+
+			// Set the API value
+			$job->setApi($api);				
 			
 			if ($job->initJob('Mass '.$action.' on data type '.$dataType)) {
 				$output->writeln( $job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel

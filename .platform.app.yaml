@@ -5,7 +5,7 @@
 name: myddleware
 
 # The type of the application to build.
-type: php:7.1
+type: php:7.3
 build:
     flavor: composer
 

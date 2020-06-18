@@ -80,7 +80,14 @@ class solutioncore {
 	protected $allowParentRelationship = array();
 	
 	// Enable the read record button on the data transfer detail view for the source solution
-	protected $readRecord = true;		
+	protected $readRecord = true;	
+
+	// Disable to read deletion and to delete data
+	protected $readDeletion = false;	
+	protected $sendDeletion = false;
+
+	// Specify if the class is called by the API
+	protected $api;	
 	
 	// Instanciation de la classe de génération de log Symfony
     public function __construct(Logger $logger, Container $container, Connection $dbalConnection) {
@@ -128,6 +135,7 @@ class solutioncore {
 		$this->conn->beginTransaction();	
 		try {	
 			$param['id_doc_myddleware'] = $idDoc;
+			$param['api'] = $this->api;
 			$document = new documentMyddleware($this->logger, $this->container, $this->conn, $param);
 			//  Si on a un message on l'ajoute au document
 			if (!empty($value['error'])) {
@@ -170,7 +178,7 @@ class solutioncore {
 			$this->conn->rollBack(); // -- ROLLBACK TRANSACTION
 			$document->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$document->setTypeError('E');
-			$document->updateStatus('Error_sending : '.$e->getMessage());
+			$document->updateStatus('Error_sending');
 			$this->logger->error( 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 			$response[$idDoc] = false;
 		}				
@@ -243,7 +251,7 @@ class solutioncore {
 	
 	
 	// Méthode permettant de renvoyer l'attribut fieldsRelate
-	public function get_module_fields_relate($module) {
+	public function get_module_fields_relate($module,$param) {
 		if(isset($module))
 			$this->addRequiredRelationship($module);
 		return $this->fieldsRelate;
@@ -349,14 +357,20 @@ class solutioncore {
             // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
         // )
 	public function update($data) {
-	
 	}
 	
 	
-	
-	// Permet de supprimer un enregistrement
-	public function delete($id) {
-	
+	// Delete a record
+	public function delete($param) {
+		// Set an error by default
+		foreach($param['data'] as $idDoc => $data) {
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => 'Delete function not developped for this connector. Failed to delete this record in the target application. '
+			);
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
 	}
 	
 	// Permet de renvoyer le mode de la règle en fonction du module target
@@ -370,6 +384,10 @@ class solutioncore {
 	}
 	
 	public function setMessageCreateRule($module) {
+	}
+	
+	public function setApi($api) {
+		$this->api = $api;
 	}
 	
 	// Permet d'ajouter des boutoon sur la page flux en fonction de la solution source ou targe
@@ -391,6 +409,16 @@ class solutioncore {
 	// Return if the read record button has to be display on the data transfert view
 	public function getReadRecord() {
 		return $this->readRecord;
+	}
+
+	// Return if the connector can read deletion
+	public function getReadDeletion($module) {
+		return $this->readDeletion;
+	}
+	
+	// Return if the connector can send deletion
+	public function getSendDeletion($module) {
+		return $this->sendDeletion;
 	}
 
 	// Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
@@ -548,6 +576,30 @@ class solutioncore {
 		return false;
 	}
 	
+	// Build the direct link to the record (used in data transfer view)
+	// Type : source or target
+	public function getDirectLink($rule, $document, $type){
+		return null;
+	}
+	
+	// Get a connector param decrypted
+	protected function getConnectorParam($connector, $paramName) {
+		// Get the connector params from the rule
+		$connectorParams = $connector->getConnectorParams();
+		if (!empty($connectorParams)) {
+			foreach($connectorParams as $connectorParam) {
+				// Get the param requested
+				if ($connectorParam->getName() == $paramName) {
+					// Instanciate object to decrypte data
+					$encrypter = new \Illuminate\Encryption\Encrypter(substr($this->container->getParameter('secret'),-16));
+					return $encrypter->decrypt($connectorParam->getValue());							
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 	// Check data before create 
 	// Add a throw exeption if error
 	protected function checkDataBeforeCreate($param,$data) {
@@ -559,6 +611,14 @@ class solutioncore {
 	// Check data before update 
 	// Add a throw exeption if error
 	protected function checkDataBeforeUpdate($param,$data) {
+		// Exception if the job has been stopped manually
+		$this->isJobActive($param);
+		return $data;
+	}
+	
+	// Check data before update 
+	// Add a throw exeption if error
+	protected function checkDataBeforeDelete($param,$data) {
 		// Exception if the job has been stopped manually
 		$this->isJobActive($param);
 		return $data;
