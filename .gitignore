@@ -56,9 +56,10 @@
 .idea/
 .vscode/
 
-# Deployment
+# Deployment & DevOps
 .temp/
 deploy_key
 deploy_key.pub
 uat.pem
 /*.retry
+/CLONE/
