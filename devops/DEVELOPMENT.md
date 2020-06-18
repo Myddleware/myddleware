@@ -35,7 +35,7 @@ docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 
 ## Installare il database
 ```bash
-docker-compose run --rm myddleware ./prepare-database.sh
+docker-compose exec myddleware bash prepare-database.sh
 ```
 
 ## Dati di accesso Myddleware
@@ -50,7 +50,7 @@ macos: find var/cache -type d -exec sudo chmod 0777 {} +
 
 ## Aggiornare le dipendenze
 ```bash
-sudo rm -fr var/cache/*
-sudo rm -rf vendor && composer update -v --ignore-platform-reqs --no-scripts
+sudo rm -fr var/cache/* vendor
+docker-compose run --rm composer install -v --ignore-platform-reqs --no-scripts
 docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 ```
