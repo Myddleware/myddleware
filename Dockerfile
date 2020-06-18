@@ -1,4 +1,4 @@
-FROM php:7.1.32-apache
+FROM php:7.2.27-apache
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get -y install -qq --force-yes git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 alien libaio1 && \
@@ -63,6 +63,10 @@ RUN touch /var/log/myddleware.log
 # RUN : >> /var/log/cron.log
 # RUN chmod +x /app/myddleware-*.sh
 
-# RUN cron
-#CMD ["cron", "-f"]
-ENTRYPOINT cron && apache2-foreground
+RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
+    { \
+        echo '#!/bin/bash'; \
+        echo 'cron'; \
+        echo 'apache2-foreground-inherit "$@"'; \
+    } > /usr/local/bin/apache2-foreground
+

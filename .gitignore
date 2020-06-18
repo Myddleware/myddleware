@@ -57,6 +57,8 @@
 .vscode/
 
 # Deployment
+.temp/
 deploy_key
 deploy_key.pub
 uat.pem
+/*.retry

@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    php:
+        executable: php
+    locale: en
+    pager: 20
+    migration:
+        mode: 0
+    notification:
+        alert_time_limit: 60
+    transfer:
+        search_limit: 1000
+    git_branch: master
+    base_uri: null

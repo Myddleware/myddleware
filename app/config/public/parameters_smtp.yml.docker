@@ -1,0 +1,9 @@
+# This file is auto-generated during the composer install
+parameters:
+    mailer_transport: sendmail
+    mailer_host: localhost
+    mailer_port: null
+    mailer_auth_mode: null
+    mailer_encryption: null
+    mailer_user: null
+    mailer_password: null
