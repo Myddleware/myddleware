@@ -56,6 +56,8 @@ RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* &
 COPY crontab /etc/
 RUN chmod 600 /etc/crontab
 
+RUN echo "display_errors=0" >> /usr/local/etc/php/conf.d/errors.ini
+
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
         echo '#!/bin/bash'; \

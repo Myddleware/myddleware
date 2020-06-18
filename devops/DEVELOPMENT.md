@@ -23,6 +23,11 @@ Vtiger2: admin/admin
 docker-compose run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 ```
 
+## Aggiornare le dipendence
+```bash
+docker-compose run --rm myddleware php -d memory_limit=-1 composer.phar update -vvv --ignore-platform-reqs --no-dev --no-scripts --with-dependencies
+```
+
 ## Preparazione dei file e cartelle
 ```bash
 docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
