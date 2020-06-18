@@ -18,3 +18,6 @@ git push
 git checkout contribute
 git merge origin/master --no-edit
 git push
+
+cd ..
+rm -fr CLONE
