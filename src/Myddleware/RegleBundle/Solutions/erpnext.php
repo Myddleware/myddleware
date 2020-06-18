@@ -132,7 +132,7 @@ class erpnextcore extends solution
 			$modules = $this->get_modules();			
 
 			// Get the list field for a module
-			$url = $this->paramConnexion['url'] . '/api/method/frappe.desk.form.load.getdoctype?doctype='.$module;
+			$url = $this->paramConnexion['url'] . '/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);;
 			$recordList = $this->call($url, 'GET', '');
 			// Format outpput data					
 			if (!empty($recordList->docs[0]->fields)) {

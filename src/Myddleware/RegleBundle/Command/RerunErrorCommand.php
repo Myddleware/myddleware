@@ -39,6 +39,7 @@ class RerunErrorCommand extends ContainerAwareCommand
             ->setDescription('Synchronisation des données')
             ->addArgument('limit', InputArgument::REQUIRED, "Nombre maximum de flux en erreur traité")
             ->addArgument('attempt', InputArgument::REQUIRED, "Nombre maximum de tentative")
+			->addArgument('api', InputArgument::OPTIONAL, "Call from API")
         ;
     }
 
@@ -48,12 +49,16 @@ class RerunErrorCommand extends ContainerAwareCommand
 			$logger = $this->getContainer()->get('logger');
 			$limit = $input->getArgument('limit');
 			$attempt = $input->getArgument('attempt');
+			$api = $input->getArgument('api');
+			
 			// Récupération du Job
 			$job = $this->getContainer()->get('myddleware_job.job');
+			$job->setApi($api);
+			
 			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
 			$job->message = '';	
-			
 			if ($job->initJob('Rerun error : limit '.$limit.', attempt '.$attempt)) {	
+				$output->writeln( $job->id );
 				// Premier paramètre : limite d'enregistrement traités
 				// Deuxième paramètre, limite d'erreur : si un flux a plus de tentative que le paramètre il n'est pas relancé
 				$job->runError( $limit , $attempt);	

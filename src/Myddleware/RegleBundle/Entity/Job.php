@@ -122,6 +122,14 @@ class Job
     private $manual;
 	
     /**
+     * @var boolean
+     *
+	 * @ORM\Column(name="api", type="boolean",  nullable=true, options={"default":0})
+	 * 
+     */
+    private $api;
+	
+    /**
      * @var integer
      *
 	 * @ORM\Column(name="error", type="integer", length=6,  nullable=true, options={"default":0})
@@ -362,6 +370,29 @@ class Job
     public function getManual()
     {
         return $this->manual;
+    }
+	
+	/**
+     * Set api
+     *
+     * @param integer $api
+     * @return Job
+     */
+    public function setApi($api)
+    {
+        $this->api = $api;
+    
+        return $this;
+    }
+
+    /**
+     * Get api
+     *
+     * @return integer 
+     */
+    public function getApi()
+    {
+        return $this->api;
     }
 
     /**
