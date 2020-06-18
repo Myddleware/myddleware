@@ -1153,11 +1153,21 @@ class DefaultControllerCore extends Controller
                     )
                 );
             }
-
-            // Récupère données source
+		
+			// Add rule param if exist (the aren't exist in rule creation)
+			$ruleParams = array();
+			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+			if (!empty($ruleParamsResult)) {
+				foreach ($ruleParamsResult as $ruleParamsObj) {
+					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+				}
+			}
+			
+            // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
-                'fields' => $sourcesfields));
+                'fields' => $sourcesfields,
+				'ruleParams' => $ruleParams));
 
             if (isset($source['done'])) {
                 $before = array();
@@ -1178,6 +1188,15 @@ class DefaultControllerCore extends Controller
 
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
+							// If error during transformation, we send back the error
+							if (
+									$r['after'][$name_fields_target] == null 
+								AND !empty($doc->getMessage())
+							) {
+								$r['after'][$name_fields_target] = $doc->getMessage();
+								// Refresh the document message
+								$doc->setMessage('');
+							}
 
 							$k['fields'] = array();
                             if (empty($k['champs'])) {
@@ -1292,7 +1311,7 @@ class DefaultControllerCore extends Controller
             $fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
 
             // Liste des relations TARGET
-            $relation = $solution_cible->get_module_fields_relate($module['cible']);
+            $relation = $solution_cible->get_module_fields_relate($module['cible'],'');
 
             $allowParentRelationship = $solution_cible->allowParentRelationship($sessionService->getParamRuleCibleModule($ruleKey));
 
@@ -1441,7 +1460,11 @@ class DefaultControllerCore extends Controller
 
 // -------------------	SOURCE					
             // Liste des relations SOURCE
-            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey));
+			// Add parameters to be able to read rules linked in function get_module_fields_relate (used for database connector for example)
+			$param['connectorSourceId'] = $sessionService->getParamRuleConnectorSourceId($ruleKey);
+			$param['connectorTargetId'] = $sessionService->getParamRuleConnectorCibleId($ruleKey);
+			$param['ruleName'] = $sessionService->getParamRuleName($ruleKey);
+            $relation_source = $solution_source->get_module_fields_relate($sessionService->getParamRuleSourceModule($ruleKey), $param);
             $lst_relation_source = array();
             $lst_relation_source_alpha = array();
             $choice_source = array();
@@ -1460,9 +1483,7 @@ class DefaultControllerCore extends Controller
                 foreach ($lst_relation_source_alpha as $key => $value) {
                     $choice_source[$key] = (!empty($value['label']) ? $value['label'] : $key);
                 }
-
             }
-
 
             if (!isset($source['table'])) {
                 $source['table'][$sessionService->getParamRuleSourceModule($ruleKey)] = array();
@@ -1518,7 +1539,7 @@ class DefaultControllerCore extends Controller
                     foreach ($ruleListRelation as $ruleRelation) {
                         // Get the relate fields from the source module of related rules
                         $rule_fields_source = $solution_source->get_module_fields($ruleRelation['module_source'], 'source');
-                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source']);
+                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source'],'');
                         if (!empty($sourceRelateFields)) {
                             foreach ($sourceRelateFields as $key => $sourceRelateField) {
                                 $lstParentFields[$key] = $sourceRelateField['label'];
@@ -2321,8 +2342,8 @@ class DefaultControllerCore extends Controller
      ****************************************************** */
     // No more submodule in Myddleware. We return a response 0 for the js (animation.js
     public function listSubModulesAction()
-    {
-        return new Response(0);
+    {	
+	   return new Response(0);
     }
 
     // VALIDATION DE L ANIMATION

@@ -144,7 +144,7 @@ class bittlecore extends solution {
 	
 	
 	// Redéfinition de la méthode pour ne plus renvoyer la relation Myddleware_element_id
-	public function get_module_fields_relate($module) {
+	public function get_module_fields_relate($module,$param) {
 		// Récupération de tous les champ référence de la règle liées (= module)	
 		$this->fieldsRelate = array();
 		$sql = "SELECT 	

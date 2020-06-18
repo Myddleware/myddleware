@@ -563,7 +563,7 @@ class FluxControllerCore extends Controller
 
 			// HISTORY DOCUMENT
 			// Get the history documents (all document for the same source)
-			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0));
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0), array('dateModified' => 'DESC'));
 			// If only one record, the history is the current document, so we remove it => no parent
 			if (count($historyDocuments) == 1) {
 				$historyDocuments = array();

@@ -19,11 +19,7 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface {
         $encrypter = new Encrypter(substr($this->_secret, -16));
         
         $string = $value->getValue();
-        if(strlen($string) > 200){
-            $value->setValue($encrypter->encrypt('XXXX'));  
-        }else{
-            $value->setValue($encrypter->encrypt($value->getValue()));  
-        }
+        $value->setValue($encrypter->encrypt($value->getValue()));  
         
         return $value;
     }

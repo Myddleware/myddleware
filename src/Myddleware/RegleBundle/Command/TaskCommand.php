@@ -38,6 +38,7 @@ class TaskCommand extends ContainerAwareCommand {
             ->setName('myddleware:synchro')
             ->setDescription('Synchronisation des données')
             ->addArgument('rule', InputArgument::REQUIRED, "Alias de la règle")
+			->addArgument('api', InputArgument::OPTIONAL, "Call from API")
         ;
     }
 
@@ -50,13 +51,15 @@ class TaskCommand extends ContainerAwareCommand {
 			// Source -------------------------------------------------
 			// alias de la règle en params
 			$rule = $input->getArgument('rule');
+			$api = $input->getArgument('api');
 			// Récupération du Job			
 			$job = $this->getContainer()->get('myddleware_job.job');
 			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
-			$job->message = '';			
+			$job->message = '';		
+			$job->setApi($api);					
 			
 			if ($job->initJob('Synchro : '.$rule)) {
-				$output->writeln( '1;'.$job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
+				$output->writeln( '1;'.$job->id );  // Not removed, user for manual job and webservices
 				
 				if (!empty($rule)) {			
 					if ($rule == 'ERROR') {
@@ -74,7 +77,10 @@ class TaskCommand extends ContainerAwareCommand {
 						}								
 						if (!empty($rules)) {
 							foreach ($rules as $key => $value) {								
-								echo $value.chr(10);
+								// Don't display rule id if the command is called from the api
+								if (empty($api)) {
+									echo $value.chr(10);
+								}
 								$output->writeln('Read data for rule : <question>'.$value.'</question>');
 								// Chargement des données de la règle
 								if ($job->setRule($value)) {		
