@@ -1,0 +1,43 @@
+name: hubspot_erpnext_customers_deals
+description: 'Send you HubSpot contats and Deals to your ERPNext customers and opportunities'
+rules:
+    -
+        name: 'Contacts to customers'
+        nameSlug: contacts_to_customers
+        sourceSolution: hubspot
+        targetSolution: erpnext
+        sourceModule: contacts
+        targetModule: Customer
+        fields:
+            - { target: customer_name, source: lastname;firstname, formula: '{firstname}." ".{lastname}' }
+            - { target: email_id, source: email, formula: null }
+            - { target: gender, source: gender, formula: null }
+            - { target: customer_type, source: my_value, formula: '"Individual"' }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Deals to opportunities'
+        nameSlug: deals_to_opportunities
+        sourceSolution: hubspot
+        targetSolution: erpnext
+        sourceModule: deals
+        targetModule: Opportunity
+        fields:
+            - { target: contact_date, source: createdate, formula: 'changeFormatDate( substr( {createdate},0,-3), "U", "Y-m-d H:i:s")' }
+            - { target: opportunity_amount, source: amount, formula: null }
+            - { target: transaction_date, source: closedate, formula: 'changeFormatDate( substr( {closedate},0,-3), "U", "Y-m-d H:i:s")' }
+            - { target: currency, source: my_value, formula: '"USD"' }
+            - { target: opportunity_from, source: my_value, formula: '"Customer"' }
+            - { target: sales_stage, source: my_value, formula: '"Qualification"' }
+            - { target: status, source: my_value, formula: '"Open"' }
+        relationships:
+            - { fieldNameSource: associations__associatedVids, fieldNameTarget: party_name, fieldId: contacts_to_customers, parent: false }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
