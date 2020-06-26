@@ -108,6 +108,9 @@ class hubspotcore extends solution {
         // Module to create relationship between deals and contacts/companies
         if ($type == 'target') {
             $modules['associate_deal'] = 'Associate deals with companies/contacts';
+        } elseif ($type == 'source') {
+            $modules['associate_deal_contact'] = 'Associate deals with contacts';
+            $modules['associate_deal_company'] = 'Associate deals with contacts';
         }
 		// Module only available in source
 		if ($type == 'source') {
@@ -242,6 +245,11 @@ class hubspotcore extends solution {
             } else {
                 $result = $this->call($this->url . 'properties/' . $this->version . '/' . $module . '/properties?hapikey=' . $this->paramConnexion['apikey']);
                 $result = $result['exec'];
+				// Add fields to manage deals relationships
+				if ($module === "deals") {
+					$result[] = array('name' => 'associations__associatedVids', 'label' => 'Contact Id', 'type' => 'varchar(36)');
+					$result[] = array('name' => 'associations__associatedCompanyIds', 'label' => 'Company Id', 'type' => 'varchar(36)');
+				}				
             }
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
@@ -301,6 +309,7 @@ class hubspotcore extends solution {
 		// date_ref far in the past to be sure to found at least one record
 		$param['date_ref'] = '1970-01-01 00:00:00';
 		$param['rule']['mode'] = '0';
+		$param['limit'] = 1;
 		// We re use read function for the read_last 
 		$read = $this->read($param);
 
@@ -396,7 +405,7 @@ class hubspotcore extends solution {
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
-            } else {			
+            } else {				
                 if (!empty($identifyProfiles)) {										
                     foreach ($identifyProfiles as $identifyProfile) {						
                         $records = null;
@@ -482,7 +491,7 @@ class hubspotcore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
-        }		
+        }				
 		return $result;
     }// end function read
 
@@ -971,7 +980,9 @@ class hubspotcore extends solution {
 			$result['date_ref'] = '1970-01-01 00:00:00';
 		// If there is still data to read, we set the offset in the result date ref
 		} else {
-			$result['date_ref'] = $offset;
+			if (!empty($offset)) {
+				$result['date_ref'] = $offset;
+			}
 			// We set again migrationMode = true because a rule could have a reference date less than 30 days in a past and reach the rule limit.
 			// In this case we use the offset as a reference not the date
 			$this->migrationMode = true;
