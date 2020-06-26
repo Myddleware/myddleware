@@ -23,6 +23,7 @@
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*
+!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
 
 # Managed by Composer
 /app/bootstrap.php.cache
@@ -56,9 +57,10 @@
 .idea/
 .vscode/
 
-# Deployment
+# Deployment & DevOps
 .temp/
 deploy_key
 deploy_key.pub
 uat.pem
 /*.retry
+/CLONE/
