@@ -23,6 +23,7 @@
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*
+!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
 
 # Managed by Composer
 /app/bootstrap.php.cache
