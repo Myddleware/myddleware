@@ -41,8 +41,8 @@ class erpnextcore extends solution
 
 	protected $required_fields = array('default' => array('name', 'creation', 'modified'));
 
-	protected $FieldsDuplicate = array(	'Contact' => array('Email', 'Name'),
-										'default' => array('Name')
+	protected $FieldsDuplicate = array(	'Contact' => array('last_name'),
+										'Company' => array('company_name')
 									);
 									
 	// Module list that allows to make parent relationships
@@ -140,13 +140,13 @@ class erpnextcore extends solution
 					if (empty($field->label)) {
 						continue;
 					}
-					if ($field->fieldtype == 'Link') {
+					if (in_array($field->fieldtype, array('Link','Dynamic Link'))) {
 						$this->fieldsRelate[$field->fieldname] = array(
 							'label' => $field->label,
 							'type' => 'varchar(255)',
 							'type_bdd' => 'varchar(255)',
 							'required' => '',
-							'required_relationship' => '',
+							'required_relationship' => '', 
 						);
 					// Add field to manage dymamic links
 					} elseif (
@@ -503,6 +503,24 @@ class erpnextcore extends solution
 		$date = new \DateTime($dateTime);
 		return $date->format('Y-m-d H:i:s.u');
 	}// dateTimeFromMyddleware($dateTime)    
+	
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}	
+		
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/desk#Form/'.rawurlencode($module).'/'.rawurlencode($recordId);
+	}
+	
 	
 	/**
 	 * Function call
