@@ -16,7 +16,7 @@ git pull https://github.com/Myddleware/myddleware.git master -X theirs --no-edit
 git push
 
 git checkout contribute
-git merge origin/master --no-edit
+git pull https://github.com/Myddleware/myddleware.git master -X theirs --no-edit
 git push
 
 cd ..
