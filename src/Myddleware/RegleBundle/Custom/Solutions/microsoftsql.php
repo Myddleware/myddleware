@@ -3,7 +3,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 //Custom class
-class mysql extends microsoftsqlcore {
+class microsoftsql extends microsoftsqlcore {
 
     // Redifine read function
     public function read($param) {
