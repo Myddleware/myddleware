@@ -58,6 +58,29 @@ RUN chmod 600 /etc/crontab
 
 RUN echo "display_errors=0" >> /usr/local/etc/php/conf.d/errors.ini
 
+## DBLIB
+RUN apt-get update && apt-get install -y \
+        freetds-bin \
+        freetds-dev \
+        freetds-common \
+        libct4 \
+        libsybdb5 \
+        tdsodbc \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libmcrypt-dev \
+        zlib1g-dev \
+        libicu-dev \
+        g++ \
+        libc-client-dev
+RUN docker-php-ext-configure pdo_dblib --with-libdir=/lib/x86_64-linux-gnu
+RUN docker-php-ext-configure intl
+RUN docker-php-ext-install pdo_dblib
+RUN docker-php-ext-install intl
+RUN docker-php-ext-install mbstring
+RUN docker-php-ext-enable intl mbstring pdo_dblib
+
+
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
         echo '#!/bin/bash'; \
