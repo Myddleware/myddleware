@@ -12,5 +12,7 @@ class microsoftsql extends microsoftsqlcore {
         $param['date_ref'] = $date->format('Y-m-d H:i:s.v');
         // Call standard read function
         $result = parent::read($param);
+
+        return $result;
     }
 }
