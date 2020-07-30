@@ -43,6 +43,7 @@ class filecore extends solution {
 	protected $lineNumber = 0;
 	
 	protected $required_fields =  array('default' => array('id','date_modified'));
+	protected $columnWidth = array();
 
 	private $driver;
 	private $host;
@@ -149,10 +150,10 @@ class filecore extends solution {
 				$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 				$headerString = $this->cleanHeader(trim(fgets($stream)));
 				// Close the file
-				fclose($stream);				
-				$header = str_getcsv($headerString, $this->getDelimiter(array('module'=>$module)), $this->getEnclosure(array('module'=>$module)), $this->getEscape(array('module'=>$module)));
-		
-				// Parcours des champs de la table sélectionnée
+				fclose($stream);
+
+				// Get the column names in the file
+				$header = $this->transformRow($headerString,array('module'=>$module));
 				$i=1;			
 				foreach ($header as $field) {
 					// In case the field name is empty
@@ -273,7 +274,6 @@ class filecore extends solution {
 			$sftp = ssh2_sftp($this->connection);
 			$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 			$header = $this->getFileHeader($stream,$param);
-		
 			$nbCountHeader = count($header);			
 			$allRuleField = $param['fields'];
 	
@@ -534,14 +534,14 @@ class filecore extends solution {
 	// Convert the first line of the file to an array with all fields
 	protected function getFileHeader($stream,$param) {
 		$headerString = $this->cleanHeader(trim(fgets($stream)));
-		// Spaces aren't accepted in a field name
-		$fields = str_getcsv(str_replace($this->removeChar, '', $headerString), $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
+		$fields = $this->transformRow($headerString,$param);
 		$i = 1;
 		foreach($fields as $field) {
 			if (empty($field)) {
 				$header[] = 'Column_'.$i;
 			} else {
-				$header[] = $field;
+				// Spaces aren't accepted in a field name
+				$header[] = str_replace($this->removeChar, '', $field);
 			}
 			$i++;
 		}	
@@ -594,7 +594,20 @@ class filecore extends solution {
 	
 	// Transformm the buffer to and array of fields
 	protected function transformRow($buffer,$param){
-		return str_getcsv($buffer, $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
+		// If the module contains file with a fix column width (if attribute $columnWidth is set up for your module)
+		// Then we manage row using the width of each column
+		if (!empty($this->columnWidth[$param['module']])) {
+			$start = 0;
+			// Cut the row using the width of each column
+			foreach($this->columnWidth[$param['module']] as $columnWidth) {
+				$result[] = substr($buffer,$start,$columnWidth); 
+				$start += $columnWidth;
+			}
+			return $result;
+		// Otherwise we manage row with separator	
+		} else {
+			return str_getcsv($buffer, $this->getDelimiter($param), $this->getEnclosure($param), $this->getEscape($param));
+		}
 	}
 	
 	// Get the delimiter
