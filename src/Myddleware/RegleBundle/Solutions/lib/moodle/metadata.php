@@ -251,6 +251,9 @@ $moduleFields = array (
 						'information' => array('label' => 'Information ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'aggregationstatus' => array('label' => 'Aggregation status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'aggregationweight' => array('label' => 'Aggregation weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'itemname' => array('label' => 'Item name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'course_fullname' => array('label' => 'Course fullname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'course_shortname' => array('label' => 'Course shortname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
 
 				);
@@ -318,7 +321,8 @@ $fieldsRelate = array (
 					),
 					
 					'get_user_grades' => array(
-						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
+						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
 					),
 				);
 
