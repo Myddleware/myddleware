@@ -39,7 +39,8 @@ class moodlecore  extends solution {
 										'default'						=> array('id'),
 										'get_users_completion' 			=> array('id','timemodified'),
 										'get_users_last_access' 		=> array('id','lastaccess'),
-										'get_course_completion_by_date' => array('id','timecompleted')
+										'get_course_completion_by_date' => array('id','timecompleted'),
+										'get_user_grades' 			=> array('id','timemodified')
 								);
 								
 	protected $FieldsDuplicate = array(	
@@ -104,7 +105,8 @@ class moodlecore  extends solution {
 					'get_enrolments_by_date'					=> 'Get enrolments',
 					'get_course_completion_by_date'				=> 'Get course completion',
 					'get_user_compentencies_by_date'			=> 'Get user compentency',
-					'get_competency_module_completion_by_date'	=> 'Get compentency module completion'
+					'get_competency_module_completion_by_date'	=> 'Get compentency module completion',
+					'get_user_grades'							=> 'Get user grades',
 				);	
 			}
 			else {
@@ -180,7 +182,7 @@ class moodlecore  extends solution {
     public function read_last($param) {	
 		// Query empty when the rule simulation is requested
 		if (empty($param['query'])) {
-			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redifine it)
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redefine it)
 			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch));
 		}
 		// Init rule mode 
