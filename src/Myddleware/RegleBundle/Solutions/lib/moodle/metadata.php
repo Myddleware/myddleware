@@ -225,9 +225,39 @@ $moduleFields = array (
 						'modulename' => array('label' => 'Module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'coursemodulename' => array('label' => 'Course module name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'ruleoutcome' => array('label' => 'Rule outcome', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-					)
+					),
+					
+					'get_user_grades' => array(
+						'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'timecreated' => array('label' => 'Time created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'timemodified' => array('label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'usermodified' => array('label' => 'User modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'itemid' => array('label' => 'Item ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'rawgrade' => array('label' => 'Raw grade', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'rawgrademax' => array('label' => 'Raw grade max', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'rawgrademin' => array('label' => 'Raw grade min', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'rawscaleid' => array('label' => 'Raw scale ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'finalgrade' => array('label' => 'Final grade', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'hidden' => array('label' => 'Hidden', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'locked' => array('label' => 'Locked', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'locktime' => array('label' => 'Lock time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'exported' => array('label' => 'Exported', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'overridden' => array('label' => 'Overridden', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'excluded' => array('label' => 'Excluded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'feedback' => array('label' => 'Feedback ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'feedbackformat' => array('label' => 'Feedback format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'information' => array('label' => 'Information ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'informationformat' => array('label' => 'Information format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'information' => array('label' => 'Information ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'aggregationstatus' => array('label' => 'Aggregation status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'aggregationweight' => array('label' => 'Aggregation weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'itemname' => array('label' => 'Item name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'course_fullname' => array('label' => 'Course fullname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'course_shortname' => array('label' => 'Course shortname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					),
+
 				);
-	
+
 
 $fieldsRelate = array (
 					'groups' => array(
@@ -288,7 +318,12 @@ $fieldsRelate = array (
 						'cmid' => array('label' => 'Course module ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						'competencyid' => array('label' => 'Competency ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
 						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0)
-					)
+					),
+					
+					'get_user_grades' => array(
+						'userid' => array('label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'courseid' => array('label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
+					),
 				);
 
 
