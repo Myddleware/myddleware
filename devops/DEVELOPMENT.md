@@ -39,7 +39,8 @@ docker-compose exec myddleware bash prepare-database.sh
 ```
 
 ## Dati di accesso Myddleware
-Myddleware: admin/admin
+- Visitare la pagina <http://localhost:30080> (in sviluppo) oppure <http://<indirizzo_macchina>:30080> nel caso di installazione su cliente
+- Myddleware: admin/admin
 
 ## Permessi di scrittura
 ```bash
