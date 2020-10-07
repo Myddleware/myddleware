@@ -25,9 +25,11 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Iadvize\ApiRestClient\Client;
 
 class iadvizecore extends solution {
 
+	// List of field required to connect to Iadvize
     public function getFieldsLogin(){
         return array(
             array(
@@ -37,8 +39,73 @@ class iadvizecore extends solution {
             )
         );
     }
+	
+	// Conect to Iadvize
+    public function login($paramConnexion) {
+        parent::login($paramConnexion);
+        try {
+            // Create client
+			$client = new Client();
+			$client->setAuthenticationKey($this->paramConnexion['apikey']);
 
+			// Get resource
+			$websites = $client->getResources('website',true);
+			if (!empty($websites[0]['id'])) {
+				$this->connexion_valide = true;
+			} else {
+				$message = $client->getLastResponse()->getMeta()->getMessage();
+				if (!empty($message)) {
+					throw new \Exception('Connexion to Advize failed : '.$message);
+				} else {
+					throw new \Exception('Connexion to Advize failed : Invalide API key');
+				}
+			}           
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $this->logger->error($error);
+            return array('error' => $error);
+        }
+    } // login($paramConnexion)*/
 
+	// Return the list of available modules
+	public function get_modules($type = 'source') {
+        if ($type == 'source') {
+			$modules = array(
+				'visitor' => 'visitor'
+			);
+		}
+        return $modules;
+    } // get_modules()
+
+	
+	// Get the fields available for the module in input
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
+		try{
+			$this->moduleFields = array();
+			$this->fieldsRelate = array();
+			
+			// Use Iadvize metadata
+			require('lib/iadvize/metadata.php');	
+			if (!empty($moduleFields[$module])) {
+				$this->moduleFields = $moduleFields[$module];
+			}
+			
+			// Field relate
+			if (!empty($fieldsRelate[$module])) {
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}	
+		
+			// Add relate field in the field mapping 
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+			return $this->moduleFields;
+		}
+		catch (\Exception $e){
+			return false;
+		}
+	} // get_module_fields($module)	 	
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
