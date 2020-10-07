@@ -41,5 +41,15 @@ services:
     links:
       - mysql
 
+  filebrowser:
+    image: filebrowser/filebrowser
+    ports:
+      - ${filebrowser_port}:30090
+    volumes:
+      - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
+      - ./var/logs:/srv/Logs
+      - ./var/databases/filebrowser.db:/database.db
+      - ./.filebrowser.json:/.filebrowser.json
+
 volumes:
   mysql:

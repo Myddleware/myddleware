@@ -64,3 +64,4 @@ deploy_key.pub
 uat.pem
 /*.retry
 /CLONE/
+/var/databases/filebrowser.db
