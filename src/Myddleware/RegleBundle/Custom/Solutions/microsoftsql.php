@@ -15,4 +15,6 @@ class microsoftsql extends microsoftsqlcore {
 
         return $result;
     }
+    
+    // Ciao
 }

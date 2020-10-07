@@ -4,6 +4,14 @@
 - Docker 18 o superiore 
 - Docker Compose 1.17 o superiore
 
+## Prepare project
+
+copy the following file if not exists
+
+```bash
+cp var/databases/filebrowser.db.empty var/databases/filebrowser.db
+```
+
 ## Avviare i containers
 ```bash
 docker-compose up -d
@@ -52,6 +60,6 @@ macos: find var/cache -type d -exec sudo chmod 0777 {} +
 ## Aggiornare le dipendenze
 ```bash
 sudo rm -fr var/cache/* vendor
-docker-compose run --rm composer install -v --ignore-platform-reqs --no-scripts
+docker-compose run --rm myddleware php composer.phar install -v --ignore-platform-reqs --no-scripts
 docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 ```
