@@ -29,6 +29,14 @@ use Iadvize\ApiRestClient\Client;
 
 class iadvizecore extends solution {
 
+	protected $client;
+
+	// Requiered fields for each modules
+	protected $required_fields = array(
+									'default' => array('id','created_at')
+								);
+		
+
 	// List of field required to connect to Iadvize
     public function getFieldsLogin(){
         return array(
@@ -45,15 +53,15 @@ class iadvizecore extends solution {
         parent::login($paramConnexion);
         try {
             // Create client
-			$client = new Client();
-			$client->setAuthenticationKey($this->paramConnexion['apikey']);
+			$this->client = new Client();
+			$this->client->setAuthenticationKey($this->paramConnexion['apikey']);
 
 			// Get resource
-			$websites = $client->getResources('website',true);
+			$websites = $this->client->getResources('website',true);
 			if (!empty($websites[0]['id'])) {
 				$this->connexion_valide = true;
 			} else {
-				$message = $client->getLastResponse()->getMeta()->getMessage();
+				$message = $this->client->getLastResponse()->getMeta()->getMessage();
 				if (!empty($message)) {
 					throw new \Exception('Connexion to Advize failed : '.$message);
 				} else {
@@ -71,7 +79,7 @@ class iadvizecore extends solution {
 	public function get_modules($type = 'source') {
         if ($type == 'source') {
 			$modules = array(
-				'visitor' => 'visitor'
+				'visitor' => 'Visitor'
 			);
 		}
         return $modules;
@@ -106,6 +114,89 @@ class iadvizecore extends solution {
 			return false;
 		}
 	} // get_module_fields($module)	 	
+	
+	
+	// We cant' read visitor using date, so we have to read it until we reach the reference date
+	protected function readVisitors($param) {
+		$page = 1;
+		do {
+			$lastRecord = array();
+			$result = array();
+			// Call Iadvize
+			$result = $this->client->getResources($param['module'],true,array(),$param['fields'],$page,10);
+			// If empty, whe check the last record of the result
+			if(!empty($result)) {
+				foreach($result as $record) {
+					// if the last records is greater than the reference date, we week all records
+					if ($lastRecord['created_at'] > $param['date_ref']) {
+						$records[$record['id']] = $record;
+					} else {
+						$stop = true;
+					}
+				}
+			}
+			$page++;
+		} while (!$stop);
+		
+		// We have to returns only the number of records corresponding to the limit 
+		// We start by the end of the array (record sorted by created_at ASC)
+		$offset = $param['limit'] * (-1);
+		return array_slice($records, $offset);
+	}
+	
+	
+	protected function readRecords($param) {
+		switch ($param['module']) {
+			case 'visitor':
+				return $this->readVisitors($param);
+				break;
+			case 1:
+				echo "i égal 1";
+				break;
+			case 2:
+				echo "i égal 2";
+				break;
+		}
+	}
+	  /**
+     * Function read data
+     * @param $param
+     * @return mixed
+     */
+    public function read($param) {
+        try {			
+// print_r($param);
+			$result = array();
+			$result['count'] = 0;
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+// print_r($param['fields']);			
+// return null;
+			// In case we search a specific record with an ID, we call the function getResource
+			if (!empty($param['query']['id'])) {
+				$records = $this->client->getResource($param['module'],$param['query']['id']);
+			// Search by other fields (duplicate fields)
+			} elseif (!empty($param['query'])) { // Iadvise used only in source so we don't have to develop this part
+				// $records = $this->client->getResources($param['module'],true,$param['query'],$param['fields'],1,10);
+			// Search By reference
+			} else {
+				$records = $this->readRecords($param);
+				// $records = $this->client->getResources($param['module'],true,array(),$param['fields'],1,10);
+			}
+print_r($records);			
+return null;		
+			
+			
+
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
+        }				
+		return $result;
+    }// end function read
+
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
