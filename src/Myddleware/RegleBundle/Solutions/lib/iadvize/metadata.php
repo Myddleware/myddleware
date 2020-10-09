@@ -39,12 +39,32 @@ $moduleFields = array (
 						'browser' => array('label' => 'Browser used by visitor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'created_at' => array('label' => 'Visitor creation date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					),
+					'conversation.json-unicode' => array(
+						'id' => array('label' => 'Conversation identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'channel' => array('label' => 'Conversation channel', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => array('chat'=>'Chat', 'call'=>'Call', 'video'=> 'Video')),
+						'history' => array('label' => 'Conversation history', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'operator_answer' => array('label' => 'Conversation answered by operator', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'operator_closed' => array('label' => 'Conversation closed by operator', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'waitinglist' => array('label' => 'Waiting list status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'page_type' => array('label' => 'Page type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'created_at' => array('label' => 'Conversation start time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'closed_at' => array('label' => 'Conversation end time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'tag_list' => array('label' => 'List of tag identifiers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+					),
 				);
 
 
 $fieldsRelate = array (
 					'visitor' => array(
 						'website_id' => array('label' => 'List of website identifiers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
+					),
+					'conversation.json-unicode' => array(
+						'visitor_uid' => array('label' => 'Visitor unique identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'website_id' => array('label' => 'Website identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'operator_id' => array('label' => 'Operator identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'skill_id' => array('label' => 'Skill identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'rule_id' => array('label' => 'Rule identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1),
+						'xmpp_id' => array('label' => 'XMPP related identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1)
 					),
 				);
 

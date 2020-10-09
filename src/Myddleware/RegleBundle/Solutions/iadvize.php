@@ -30,6 +30,8 @@ use Iadvize\ApiRestClient\Client;
 class iadvizecore extends solution {
 
 	protected $client;
+	protected $defaultLimit = 100;
+	protected $callLimit = 9;
 
 	// Requiered fields for each modules
 	protected $required_fields = array(
@@ -79,7 +81,8 @@ class iadvizecore extends solution {
 	public function get_modules($type = 'source') {
         if ($type == 'source') {
 			$modules = array(
-				'visitor' => 'Visitor'
+				'visitor' => 'Visitor',
+				'conversation.json-unicode' => 'Conversation'
 			);
 		}
         return $modules;
@@ -115,32 +118,88 @@ class iadvizecore extends solution {
 		}
 	} // get_module_fields($module)	 	
 	
-	
+	// Read visitors
 	// We cant' read visitor using date, so we have to read it until we reach the reference date
 	protected function readVisitors($param) {
 		$page = 1;
+		$stop = false;
 		do {
-			$lastRecord = array();
 			$result = array();
 			// Call Iadvize
-			$result = $this->client->getResources($param['module'],true,array(),$param['fields'],$page,10);
+			$result = $this->client->getResources($param['module'],true,array(),$param['fields'],$page,$this->callLimit);	
 			// If empty, whe check the last record of the result
 			if(!empty($result)) {
 				foreach($result as $record) {
 					// if the last records is greater than the reference date, we week all records
-					if ($lastRecord['created_at'] > $param['date_ref']) {
+					if ($record['created_at'] > $param['date_ref']) {
+						$record['date_modified'] = $record['created_at'];
 						$records[$record['id']] = $record;
 					} else {
 						$stop = true;
+						break;
 					}
 				}
+			} else {
+				$stop = true;
 			}
 			$page++;
 		} while (!$stop);
 		
+		if (empty($records)) {
+			return null;
+		}
 		// We have to returns only the number of records corresponding to the limit 
 		// We start by the end of the array (record sorted by created_at ASC)
-		$offset = $param['limit'] * (-1);
+		$offset = $param['limit'] * (-1);	
+		return array_slice($records, $offset);
+	}
+	
+	
+	// Read conversation
+	// It is possible to read conversation from a date but the reading interval can't exceed 3 months
+	protected function readConversation($param) {
+		$page = 1;
+		$stop = false;
+		$records = array();
+
+		// Add 1 second to date_ref to avoid to read again the last records (from vilter is a >= not a > )
+		$dateRefObj = new \DateTime($param['date_ref']);
+		$dateRefModified = date_modify($dateRefObj, '+1 seconde');
+		$dateRef = $dateRefModified->format('Y-m-d H:i:s');		
+		do {
+			$result = array();
+			// Call Iadvize conversation from date_ref 
+			$result = $this->client->getResources($param['module'],true,array('from'=>$dateRef),$param['fields'],$page,$this->callLimit);		
+			// If empty, whe check the last record of the result
+			if(!empty($result)) {
+				foreach($result as $record) {
+					// if the record has already been read, we stop reading
+					if (empty($records[$record['id']])) {
+						$record['date_modified'] = $record['created_at'];
+						$records[$record['id']] = $record;
+					} else {
+						$stop = true;
+						break;
+					}
+				}
+			} else {
+				$stop = true;
+			}
+			$page++;		
+		// A problem with this function is when we reach the end of the record list and call the next page, the same result is returned infinitely
+		// To avoid the infinite loop we test 
+			// - if the limit call is greater than the result number : it means that we have read all records
+			// - if a record has alredy been read, we stop to read as well. It happens when the last page contains exactly the same number of record than the limit call	
+		} while (
+				!$stop
+			AND count($result) == $this->callLimit
+		);
+		if (empty($records)) {
+			return null;
+		}
+		// We have to returns only the number of records corresponding to the limit 
+		// We start by the end of the array (record sorted by created_at ASC)
+		$offset = $param['limit'] * (-1);	
 		return array_slice($records, $offset);
 	}
 	
@@ -150,12 +209,11 @@ class iadvizecore extends solution {
 			case 'visitor':
 				return $this->readVisitors($param);
 				break;
-			case 1:
-				echo "i égal 1";
+			case 'conversation.json-unicode':
+				return $this->readConversation($param);
 				break;
-			case 2:
-				echo "i égal 2";
-				break;
+			default:
+				throw new \Exception('Module '.$param['module'].' unknown. ');
 		}
 	}
 	  /**
@@ -168,6 +226,12 @@ class iadvizecore extends solution {
 // print_r($param);
 			$result = array();
 			$result['count'] = 0;
+			$result['date_ref'] = $param['date_ref'];
+			
+			if (empty($param['limit'])) {
+				$param['limit'] = $this->defaultLimit;
+			}
+			
 			// Remove Myddleware 's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
@@ -186,7 +250,18 @@ class iadvizecore extends solution {
 				$records = $this->readRecords($param);
 				// $records = $this->client->getResources($param['module'],true,array(),$param['fields'],1,10);
 			}
-print_r($records);			
+			
+			if (!empty($records)) {
+				$result['values'] = $records;
+				$result['count'] = count($records);
+				$result['date_ref'] = current($records)['created_at'];
+				
+			}
+			
+			
+// PROBLEME QUAND ON LIT LES CONVERSATIONS : la dernière est relu lors de l'appel suivant			
+// print_r($records);			
+print_r($result);			
 return null;		
 			
 			
