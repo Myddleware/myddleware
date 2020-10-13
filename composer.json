@@ -50,7 +50,8 @@
         "javanile/vtiger-client": "^0.0.13",
         "facebook/graph-sdk" : "~5.0",
         "facebook/php-ads-sdk": "2.8.*",
-        "iadvize/apirestclient": "1.3.0"
+        "iadvize/apirestclient": "1.3.0",
+        "sugarcrm/rest-php-client": "1.4.5"
     },
     "repositories": [
         {

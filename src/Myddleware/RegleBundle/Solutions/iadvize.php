@@ -55,7 +55,7 @@ class iadvizecore extends solution {
         );
     }
 	
-	// Conect to Iadvize
+	// Connect to Iadvize
     public function login($paramConnexion) {
         parent::login($paramConnexion);
         try {
