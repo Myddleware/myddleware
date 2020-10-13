@@ -31,13 +31,18 @@ class iadvizecore extends solution {
 
 	protected $client;
 	protected $defaultLimit = 100;
-	protected $callLimit = 9;
+	protected $callLimit = 100;
+	protected $delaySearch = '-7 day';
 
 	// Requiered fields for each modules
 	protected $required_fields = array(
-									'default' => array('id','created_at')
+									'default' => array('id','created_at'),
+									'visitor' => array('unique_id','created_at')
 								);
-		
+	// Specify the field id for each module
+	protected $idByModule = array(
+								'visitor' => 'unique_id'
+							);
 
 	// List of field required to connect to Iadvize
     public function getFieldsLogin(){
@@ -118,6 +123,109 @@ class iadvizecore extends solution {
 		}
 	} // get_module_fields($module)	 	
 	
+   /**
+     * Get the last data in the application
+     * @param $param
+     * @return mixed
+     */
+    public function read_last($param) {	
+		// Set the attribut readLast to true to stop the search when we found at leas one record
+		$this->readLast = true;
+		// Query empty when the rule simulation is requested
+		if (empty($param['query'])) {
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redefine it)
+			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch));
+		}
+		$param['limit'] = 1;
+	
+		// We re use read function for the read_last 
+		$read = $this->read($param);	
+
+		// Format output values
+		if (!empty($read['error'])) {
+			$result['error'] = $read['error'];
+		} else {
+			if (!empty($read['values'])) {
+				$result['done'] = true;
+				// Get only one record
+				$result['values'] = current($read['values']);
+			} else {
+				$result['done'] = false;
+			}
+		}	
+		return $result; 
+    }// end function read_last
+
+	
+	  /**
+     * Function read data
+     * @param $param
+     * @return mixed
+     */
+    public function read($param) {
+        try {			
+			$result = array();
+			$result['count'] = 0;
+			$result['date_ref'] = $param['date_ref'];
+			
+			if (empty($param['limit'])) {
+				$param['limit'] = $this->defaultLimit;
+			}
+			
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+
+			// In case we search a specific record with an ID, we call the function getResource
+			if (!empty($param['query']['id'])) {	
+				// Specific call for visitors because we take the reference field unique_id (not id) 
+				if ($param['module'] == 'visitor') {
+					$visitors = $this->client->getResources($param['module'],true,array('unique_id' => $param['query']['id']),$param['fields'],1,1);
+					$record = current($visitors);			
+				} else {
+					$record = $this->client->getResource($param['module'],$param['query']['id']);
+				}
+				if (!empty($record)) {
+					$fieldId = (!empty($this->idByModule[$param['module']]) ? $this->idByModule[$param['module']] : 'id');
+					$record['id'] = $record[$fieldId];
+					$record['date_modified'] = $record['created_at'];
+					$records[$record[$fieldId]] = $record;		
+				}
+			// Search by other fields (duplicate fields)
+			} elseif (!empty($param['query'])) { // Iadvise used only in source so we don't have to develop this part
+				// $records = $this->client->getResources($param['module'],true,$param['query'],$param['fields'],1,10);
+			// Search By reference
+			} else {
+				$records = $this->readRecords($param);
+			}		
+
+			if (!empty($records)) {
+				$result['values'] = $records;
+				$result['count'] = count($records);
+				$result['date_ref'] = current($records)['created_at'];
+			}
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
+        }						
+		return $result;
+    }// end function read
+
+
+	protected function readRecords($param) {
+		switch ($param['module']) {
+			case 'visitor':
+				return $this->readVisitors($param);
+				break;
+			case 'conversation.json-unicode':
+				return $this->readConversation($param);
+				break;
+			default:
+				throw new \Exception('Module '.$param['module'].' unknown. ');
+		}
+	}
+	
 	// Read visitors
 	// We cant' read visitor using date, so we have to read it until we reach the reference date
 	protected function readVisitors($param) {
@@ -133,7 +241,8 @@ class iadvizecore extends solution {
 					// if the last records is greater than the reference date, we week all records
 					if ($record['created_at'] > $param['date_ref']) {
 						$record['date_modified'] = $record['created_at'];
-						$records[$record['id']] = $record;
+						$record['id'] = $record['unique_id'];
+						$records[$record['unique_id']] = $record;
 					} else {
 						$stop = true;
 						break;
@@ -151,7 +260,7 @@ class iadvizecore extends solution {
 		// We have to returns only the number of records corresponding to the limit 
 		// We start by the end of the array (record sorted by created_at ASC)
 		$offset = $param['limit'] * (-1);	
-		return array_slice($records, $offset);
+		return array_slice($records, $offset, null, true);
 	}
 	
 	
@@ -165,11 +274,11 @@ class iadvizecore extends solution {
 		// Add 1 second to date_ref to avoid to read again the last records (from vilter is a >= not a > )
 		$dateRefObj = new \DateTime($param['date_ref']);
 		$dateRefModified = date_modify($dateRefObj, '+1 seconde');
-		$dateRef = $dateRefModified->format('Y-m-d H:i:s');		
+		$dateRef = $dateRefModified->format('Y-m-d H:i:s');	
 		do {
 			$result = array();
 			// Call Iadvize conversation from date_ref 
-			$result = $this->client->getResources($param['module'],true,array('from'=>$dateRef),$param['fields'],$page,$this->callLimit);		
+			$result = $this->client->getResources($param['module'],true,array('from'=>$dateRef),$param['fields'],$page,$this->callLimit);			
 			// If empty, whe check the last record of the result
 			if(!empty($result)) {
 				foreach($result as $record) {
@@ -200,78 +309,9 @@ class iadvizecore extends solution {
 		// We have to returns only the number of records corresponding to the limit 
 		// We start by the end of the array (record sorted by created_at ASC)
 		$offset = $param['limit'] * (-1);	
-		return array_slice($records, $offset);
+		return array_slice($records, $offset, null, true);
 	}
 	
-	
-	protected function readRecords($param) {
-		switch ($param['module']) {
-			case 'visitor':
-				return $this->readVisitors($param);
-				break;
-			case 'conversation.json-unicode':
-				return $this->readConversation($param);
-				break;
-			default:
-				throw new \Exception('Module '.$param['module'].' unknown. ');
-		}
-	}
-	  /**
-     * Function read data
-     * @param $param
-     * @return mixed
-     */
-    public function read($param) {
-        try {			
-// print_r($param);
-			$result = array();
-			$result['count'] = 0;
-			$result['date_ref'] = $param['date_ref'];
-			
-			if (empty($param['limit'])) {
-				$param['limit'] = $this->defaultLimit;
-			}
-			
-			// Remove Myddleware 's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
-// print_r($param['fields']);			
-// return null;
-			// In case we search a specific record with an ID, we call the function getResource
-			if (!empty($param['query']['id'])) {
-				$records = $this->client->getResource($param['module'],$param['query']['id']);
-			// Search by other fields (duplicate fields)
-			} elseif (!empty($param['query'])) { // Iadvise used only in source so we don't have to develop this part
-				// $records = $this->client->getResources($param['module'],true,$param['query'],$param['fields'],1,10);
-			// Search By reference
-			} else {
-				$records = $this->readRecords($param);
-				// $records = $this->client->getResources($param['module'],true,array(),$param['fields'],1,10);
-			}
-			
-			if (!empty($records)) {
-				$result['values'] = $records;
-				$result['count'] = count($records);
-				$result['date_ref'] = current($records)['created_at'];
-				
-			}
-			
-			
-// PROBLEME QUAND ON LIT LES CONVERSATIONS : la dernière est relu lors de l'appel suivant			
-// print_r($records);			
-print_r($result);			
-return null;		
-			
-			
-
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
-        }				
-		return $result;
-    }// end function read
-
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
