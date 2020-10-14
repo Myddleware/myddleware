@@ -85,9 +85,13 @@ class sugarcrmcore extends solution {
 	// Get module list
 	public function get_modules($type = 'source') {
 	    try {
-			$modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=full_module_list');
+			$modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=full_module_list');		
 			if (!empty($modulesSugar->full_module_list)) {
 				foreach ($modulesSugar->full_module_list as $module => $label) {
+					// hash isn't a Sugar module
+					if ($module == '_hash') {
+						continue;
+					}
 					$modules[$module] = $label; 
 				}
 			}
@@ -97,6 +101,157 @@ class sugarcrmcore extends solution {
 			return false;
 		}
 	}
+	
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
+		try{
+			$this->moduleFields = array();
+			$this->fieldsRelate = array();
+			
+			// Call teh detail of all Sugar fields for the module 
+			$fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=modules&module_filter='.$module);
+
+			// Browse fields
+			if (!empty($fieldsSugar->modules->$module->fields)) {
+				foreach($fieldsSugar->modules->$module->fields as $field) {
+					if (empty($field->type)) {
+						continue;
+					}
+					
+					// Calculate the database type
+					if (!in_array($field->type,$this->type_valide)) { 
+						if(isset($this->exclude_field_list[$module])){
+							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
+								continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
+						}
+						$type_bdd = 'varchar(255)';
+					}
+					else {
+						$type_bdd = $field->type;
+					}
+					
+					// Add all field in moduleFields
+					$this->moduleFields[$field->name] = array(
+														'label' => (!empty($field->comment) ? $field->comment : $field->name),
+														'type' => $field->type,
+														'type_bdd' => $type_bdd,
+														'required' => (!empty($field->required) ? $field->required : 0) 
+													);
+
+					// Add option for enum fields
+					if (in_array($field->type,array('enum','multienum'))) {
+						$fieldsList = $this->customCall($this->paramConnexion['url'].'/rest/v10/'.$module.'/enum/'.$field->name);
+						if (!empty($fieldsList)) {
+							// Transform object to array
+							foreach($fieldsList as $key => $value) {
+								$this->moduleFields[$field->name]['option'][$key] = $value;
+							}
+						}
+					}
+
+					// Add relate fields
+					if (
+							substr($field->name,-3) == '_id' 
+						OR substr($field->name,-4) == '_ida'
+						OR substr($field->name,-4) == '_idb'
+						OR (
+								$field->type == 'id' 
+							AND $field->name != 'id'
+						)
+						OR $field->name	== 'created_by'
+					) {
+						$this->fieldsRelate[$field->name] = array(
+														'label' => (!empty($field->comment) ? $field->comment : $field->name),
+														'type' => 'varchar(36)',
+														'type_bdd' => 'varchar(36)',
+														'required' => (!empty($field->required) ? $field->required : 0),
+														'required_relationship' => 0
+													);
+					} 
+				}
+			}			
+			return $this->moduleFields;
+		}
+		catch (\Exception $e){	
+			return false;
+		}
+	} // get_module_fields($module)	 
+
+
+	  /**
+     * Function read data
+     * @param $param
+     * @return mixed
+     */
+    public function read($param) {
+        try {
+print_r($param);
+			$result = array();
+			$result['count'] = 0;
+			$result['date_ref'] = $param['date_ref'];
+			
+			if (empty($param['limit'])) {
+				$param['limit'] = $this->defaultLimit;
+			}
+			
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);	
+// https://support.sugarcrm.com/Documentation/Sugar_Developer/Sugar_Developer_Guide_9.2/Integration/Web_Services/REST_API/Endpoints/modulefilter_POST/			
+			// In case we search a specific record with an ID, we call the function getResource
+			if (!empty($param['query']['id'])) {
+				$this->sugarAPI->getRecord($param['module'],$param['query']['id'])->execute();
+			// Search by other fields (duplicate fields)
+			} elseif (!empty($param['query'])) { // Iadvise used only in source so we don't have to develop this part
+
+// foreach($ids as $id) {
+	// $searchIds[] = array('id' => array('$equals' => $id));
+// }
+// $filter[] = array('$or' => $searchIds);			
+			
+$filterArgs = array(
+    'max_num' => 100,
+    'offset' => 0,
+    'fields' => implode($param['fields'],',')
+);
+foreach($param['query'] as $key => $value) {
+	$filterArgs['filter'] = array($key => array($equals => $value));
+}
+$this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+			// Search By reference
+			} else {
+				$filterArgs = array(
+					'max_num' => 5,
+					'offset' => 0,
+					'filter' => array(
+									array(
+										"date_modified" => array(
+											'$gte'=>$param['date_ref'],
+										)
+									),
+					),
+					'fields' => implode($param['fields'],','),
+					'order_by' => 'date_modified'
+				);
+print_r($param);
+print_r($filterArgs);
+				$records = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+print_r($records);
+			}		
+			// if (!empty($records)) {
+				// $result['values'] = $records;
+				// $result['count'] = count($records);
+				// $result['date_ref'] = current($records)['created_at'];
+			// }
+return null;	
+	  } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
+        }						
+		return $result;
+    }// end function read
+
 	
 	// Used only for metadata (get_modules and )
 	protected function customCall($url, $parameters = null, $method = null){
