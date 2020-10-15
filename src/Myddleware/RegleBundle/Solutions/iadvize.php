@@ -129,7 +129,7 @@ class iadvizecore extends solution {
      * @return mixed
      */
     public function read_last($param) {	
-		// Set the attribut readLast to true to stop the search when we found at leas one record
+		// Set the attribut readLast to true to stop the search when we found at least one record
 		$this->readLast = true;
 		// Query empty when the rule simulation is requested
 		if (empty($param['query'])) {

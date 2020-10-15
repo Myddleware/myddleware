@@ -31,6 +31,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class sugarcrmcore extends solution { 
 
 	protected $sugarAPI;
+	protected $defaultLimit = 100;
+	protected $delaySearch = '-1 month';
+	
+	protected $required_fields = array('default' => array('id','date_modified'));
 
 	public function getFieldsLogin() {	
 		return array(
@@ -178,6 +182,38 @@ class sugarcrmcore extends solution {
 	} // get_module_fields($module)	 
 
 
+   /**
+     * Get the last data in the application
+     * @param $param
+     * @return mixed
+     */
+    public function read_last($param) {	
+
+		// Query empty when the rule simulation is requested
+		if (empty($param['query'])) {
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redefine it)
+			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch));
+		}
+		$param['limit'] = 1;
+	
+		// We re use read function for the read_last 
+		$read = $this->read($param);	
+
+		// Format output values
+		if (!empty($read['error'])) {
+			$result['error'] = $read['error'];
+		} else {
+			if (!empty($read['values'])) {
+				$result['done'] = true;
+				// Get only one record
+				$result['values'] = current($read['values']);
+			} else {
+				$result['done'] = false;
+			}
+		}	
+		return $result; 
+    }// end function read_last
+	
 	  /**
      * Function read data
      * @param $param
@@ -185,73 +221,107 @@ class sugarcrmcore extends solution {
      */
     public function read($param) {
         try {
-print_r($param);
 			$result = array();
 			$result['count'] = 0;
 			$result['date_ref'] = $param['date_ref'];
 			
+			// Set default limit
 			if (empty($param['limit'])) {
 				$param['limit'] = $this->defaultLimit;
 			}
-			
 			// Remove Myddleware 's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);	
-// https://support.sugarcrm.com/Documentation/Sugar_Developer/Sugar_Developer_Guide_9.2/Integration/Web_Services/REST_API/Endpoints/modulefilter_POST/			
-			// In case we search a specific record with an ID, we call the function getResource
-			if (!empty($param['query']['id'])) {
-				$this->sugarAPI->getRecord($param['module'],$param['query']['id'])->execute();
-			// Search by other fields (duplicate fields)
-			} elseif (!empty($param['query'])) { // Iadvise used only in source so we don't have to develop this part
-
-// foreach($ids as $id) {
-	// $searchIds[] = array('id' => array('$equals' => $id));
-// }
-// $filter[] = array('$or' => $searchIds);			
-			
-$filterArgs = array(
-    'max_num' => 100,
-    'offset' => 0,
-    'fields' => implode($param['fields'],',')
-);
-foreach($param['query'] as $key => $value) {
-	$filterArgs['filter'] = array($key => array($equals => $value));
-}
-$this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+		
+			// Init search parameters
+			$filterArgs = array(
+				'max_num' => $param['limit'],
+				'offset' => 0,
+				'fields' => implode($param['fields'],','),
+				'order_by' => 'date_modified'
+			);
+			// Init search filters
+			// Search by fields (id or duplicate fields)
+			if (!empty($param['query'])) { 
+				// Add every filter (AND operator by default)
+				foreach($param['query'] as $key => $value) {
+					$filterArgs['filter'][] = array($key => array('$equals' => $value));
+				}
 			// Search By reference
 			} else {
-				$filterArgs = array(
-					'max_num' => 5,
-					'offset' => 0,
-					'filter' => array(
-									array(
-										"date_modified" => array(
-											'$gte'=>$param['date_ref'],
-										)
-									),
-					),
-					'fields' => implode($param['fields'],','),
-					'order_by' => 'date_modified'
-				);
-print_r($param);
-print_r($filterArgs);
-				$records = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
-print_r($records);
-			}		
-			// if (!empty($records)) {
-				// $result['values'] = $records;
-				// $result['count'] = count($records);
-				// $result['date_ref'] = current($records)['created_at'];
-			// }
-return null;	
+				$filterArgs['filter'] = array(
+												array(
+													"date_modified" => array(
+														'$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
+													)
+												),
+										);			
+			}	
+			
+			// Get the records
+			$getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+			$response = $getRecords->getResponse();
+			// Format response if http return = 200
+			if ($response->getStatus()=='200'){
+				$body = $getRecords->getResponse()->getBody(false);
+				if (!empty($body->records)) {
+					$records = $body->records;
+				}
+			} else {
+				throw new \Exception(print_r($response->getBody(),true));
+			}
+
+			// Format records to result format
+			if (!empty($records)) {
+				foreach ($records as $record) {
+					foreach($param['fields'] as $field) {
+						$result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+					}
+					$result['values'][$record->id]['id'] = $record->id;
+					$result['values'][$record->id]['date_modified'] = $record->date_modified;
+				}
+				// We get the date_modified of the last records because SugarCRM webservice returns record sorted by date_modified
+				$result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
+				$result['count'] = count($records);
+			}	
 	  } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
         }						
 		return $result;
     }// end function read
 
+	// Convert date to Myddleware format 
+	// 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+	protected function dateTimeToMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// We save the UTC date in Myddleware
+		$dto->setTimezone(new \DateTimeZone('UTC'));
+		return $dto->format("Y-m-d H:i:s");
+	}// dateTimeToMyddleware($dateTime)	
+	
+	// Convert date to SugarCRM format
+	protected function dateTimeFromMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// Return date to UTC timezone
+		return $dto->format('Y-m-d\TH:i:s+00:00');
+	}// dateTimeToMyddleware($dateTime)    	
+
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}			
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/#'.$module.'/'.$recordId;
+	}
 	
 	// Used only for metadata (get_modules and )
 	protected function customCall($url, $parameters = null, $method = null){
@@ -284,11 +354,11 @@ return null;
 			
 		}
 		catch(Exception $e) {
-			throw new Exception($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}	
 		// Send exception catched into functions
 		if (!empty($response_obj->error_message)) {
-			 throw new Exception($response_obj->error_message);
+			 throw new \Exception($response_obj->error_message);
 		}
 		return $response_obj;			
     }	
