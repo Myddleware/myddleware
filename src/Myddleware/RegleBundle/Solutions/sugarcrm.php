@@ -35,6 +35,14 @@ class sugarcrmcore extends solution {
 	protected $delaySearch = '-1 month';
 	
 	protected $required_fields = array('default' => array('id','date_modified'));
+	
+	protected $FieldsDuplicate = array(	'Contacts' => array('email1', 'last_name'),
+										'Accounts' => array('email1', 'name'),
+										'Users' => array('email1', 'last_name'),
+										'Leads' => array('email1', 'last_name'),
+										'Prospects' => array('email1', 'name'),
+										'default' => array('name')
+									  );
 
 	public function getFieldsLogin() {	
 		return array(
@@ -220,7 +228,7 @@ class sugarcrmcore extends solution {
      * @return mixed
      */
     public function read($param) {
-        try {
+        try {			
 			$result = array();
 			$result['count'] = 0;
 			$result['date_ref'] = $param['date_ref'];
@@ -291,6 +299,71 @@ class sugarcrmcore extends solution {
 		return $result;
     }// end function read
 
+	/**
+	 * Function create data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function create($param) {
+		return $this->upsert('create', $param);
+
+	}// end function create
+
+	/**
+	 * Function update data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function update($param) {
+		return $this->upsert('update', $param);
+	}// end function create
+
+	public function upsert($method,$param) {
+		foreach($param['data'] as $idDoc => $data) {
+			try {
+				// Check control before create/update
+				$param['method'] = $method;
+				$data = $this->checkDataBeforeCreate($param, $data);
+				
+				if ($method == 'create') {
+					// Myddleware field empty when data transfer type is create
+					unset($data['target_id']);
+					$recordResult = $this->sugarAPI->createRecord($param['module'])->execute($data);
+				} else {			
+					// The record id is stored in $data['target_id']
+					$targetId = $data['target_id'];
+					unset($data['target_id']);
+					$recordResult = $this->sugarAPI->updateRecord($param['module'], $targetId)->execute($data);
+				}
+				
+				$response = $recordResult->getResponse();
+				if ($response->getStatus()=='200'){
+					$record = $response->getBody(false);
+					if (!empty($record->id)) {
+						$result[$idDoc] = array(
+												'id' => $record->id,
+												'error' => false
+										);
+					}
+					else  {
+						throw new \Exception('Error during '.print_r($response->getBody(),true));
+					}
+				}
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
+		return $result;
+	}// end function create
+	
+	
 	// Convert date to Myddleware format 
 	// 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
 	protected function dateTimeToMyddleware($dateTime) {
