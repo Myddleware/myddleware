@@ -76,7 +76,7 @@ class hubspotcore extends solution {
         );
     }
 
-    // Conect to Hubspot
+    // Connect to Hubspot
     public function login($paramConnexion) {
         parent::login($paramConnexion);
         try {

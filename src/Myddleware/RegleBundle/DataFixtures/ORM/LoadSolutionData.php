@@ -60,7 +60,8 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'erpnext',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'medialogistique',	'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'mautic',			'active' => 1,'source' => 0,'target' => 1),
-									array('name' => 'facebook',				'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'facebook',			'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'iadvize',			'active' => 1,'source' => 1,'target' => 0),
 							);
  
     public function load(ObjectManager $manager){

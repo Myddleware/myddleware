@@ -138,6 +138,9 @@ services:
      myddleware_rule.facebook:
         class: Myddleware\RegleBundle\Solutions\facebook
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.iadvize:
+        class: Myddleware\RegleBundle\Solutions\iadvize
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", 'rule']
