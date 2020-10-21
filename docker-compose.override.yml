@@ -42,6 +42,26 @@ services:
     volumes:
       - mysql2:/var/lib/mysql:rw
 
+  mssql:
+    image: javanile/mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Secret.1234!
+    volumes:
+      - mssql:/var/opt/mssql/data
+
+  phpmyadmin:
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+
+  adminer:
+    image: adminer
+    ports:
+      - ${adminer_port}:8080
+
 volumes:
   mysql1:
   mysql2:
+  mssql:
