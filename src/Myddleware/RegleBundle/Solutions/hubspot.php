@@ -46,7 +46,8 @@ class hubspotcore extends solution {
 									'contact' 		=> array('lastmodifieddate'),
 									'owners' 		=> array('updatedAt'),
 									'deals' 		=> array('updatedAt'),
-									'engagements' 	=> array('lastUpdated')
+									'engagements' 	=> array('lastUpdated'),
+									'products' 		=> array('objectId','properties__name__value','properties__price__value'),
 								);
 		
 	// Name of reference fields for each module
@@ -56,7 +57,8 @@ class hubspotcore extends solution {
 									'contact' 		=> 'lastmodifieddate',
 									'owners' 		=> 'updatedAt',
 									'deals' 		=> 'updatedAt',
-									'engagements' 	=> 'lastUpdated'
+									'engagements' 	=> 'lastUpdated',
+									'products' 		=> 'date_modified'
 								);
 								
 	protected $limitCall = array(
@@ -119,6 +121,7 @@ class hubspotcore extends solution {
 			$modules['engagement_email'] = 'Engagement Email';
 			$modules['engagement_meeting'] = 'Engagement Meeting';
 			$modules['engagement_note'] = 'Engagement Note';
+			$modules['products'] = 'Products';
 		}
         return $modules;
     } // get_modules()
@@ -140,7 +143,7 @@ class hubspotcore extends solution {
                 );
             } else if ($module === "owners") {
                 $result = array(
-                    array('name' => 'portal Id', 'label' => 'PortalId', 'type' => 'varchar(36)'),
+                    array('name' => 'portalId', 'label' => 'portal Id', 'type' => 'varchar(36)'),
                     array('name' => 'Type', 'label' => 'Type', 'type' => 'varchar(36)'),
                     array('name' => 'firstName', 'label' => 'Firstname', 'type' => 'varchar(255)'),
                     array('name' => 'lastName', 'label' => 'Lastname', 'type' => 'varchar(255)'),
@@ -168,6 +171,15 @@ class hubspotcore extends solution {
                     array('name' => 'displayOrder', 'label' => 'DisplayOrder', 'type' => 'varchar(255)'),
                     array('name' => 'label', 'label' => 'Label', 'type' => 'varchar(255)'),
                     array('name' => 'probability', 'label' => 'Probability', 'type' => 'varchar(255)'),
+                );
+            } elseif ($module === "products") {
+                $result = array(
+                    array('name' => 'objectId', 'label' => 'Id', 'type' => 'varchar(36)'),
+                    array('name' => 'objectType', 'label' => 'Object Type', 'type' => 'varchar(36)'),
+                    array('name' => 'portalId', 'label' => 'Portal Id', 'type' => 'varchar(1)'),
+                    array('name' => 'properties__price__value', 'label' => 'Price', 'type' => 'varchar(255)'),
+                    array('name' => 'properties__name__value', 'label' => 'Name', 'type' => 'varchar(255)'),
+                    array('name' => 'isDeleted', 'label' => 'Is deleted', 'type' => 'varchar(255)'),
                 );
             } elseif ($engagement) {
                 $result = array(
@@ -379,8 +391,6 @@ class hubspotcore extends solution {
 				 or	$module === "engagements"
 			) {
                 $identifyProfiles = $resultQuery['results'];
-            } else if ($module === "contact") {
-                $identifyProfiles = $resultQuery[$param['module']];
             } else if ($module === "deals" || $module === "owners") {
 				// if the module is deal_pipeline_stage, we have called the module deal_pipeline and we generate the stage module from ths call
 				// A pipeline can have several stages. We format the result to be compatible with the following code
@@ -401,7 +411,10 @@ class hubspotcore extends solution {
 				} else {
 					$identifyProfiles = $resultQuery[$param['module']];				
                 }
+            } else {
+                $identifyProfiles = $resultQuery[$param['module']];
             }
+		
             // If no result
             if (empty($resultQuery)) {
                 $result['error'] = "Request error";
@@ -432,8 +445,9 @@ class hubspotcore extends solution {
 								} elseif (
 									(	
 										$module === "owners"
-									 or $param['module'] === "deal_pipeline"	
-									 or $param['module'] === "deal_pipeline_stage"	
+									 OR $param['module'] === "deal_pipeline"	
+									 OR $param['module'] === "deal_pipeline_stage"	
+									 OR $param['module'] === "products"	
 									)
 									and isset($identifyProfile[$field])
 								) {
@@ -491,7 +505,7 @@ class hubspotcore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
-        }				
+        }			
 		return $result;
     }// end function read
 
@@ -664,6 +678,8 @@ class hubspotcore extends solution {
 			$result['url'] = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
 		} elseif ($module === "deals") {
 			$result['url'] = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];	
+		} elseif ($module === "products") {
+			$result['url'] = $this->url . "crm-objects/v1/objects/".$module."/paged?properties=name&properties=price&hapikey=" . $this->paramConnexion['apikey'];	
 		} else {		
 			// calculate the difference between date_ref and now
 			if (!is_numeric($param['date_ref'])) {
@@ -830,6 +846,9 @@ class hubspotcore extends solution {
 			case "engagements":
 				return "id";
 				break;
+			case "products":
+				return "objectId";
+				break;
 			default:
 			   return "id";
 		}
@@ -844,7 +863,7 @@ class hubspotcore extends solution {
      *
      */
     protected function getresultQuery($request, $url, $param) {		
-		// Module contact
+		// Module contact or Deal
         if (
 				$param['module'] == "contacts"
 			 OR	$param['module'] == "deals"
@@ -900,6 +919,7 @@ class hubspotcore extends solution {
         } elseif (
 					$param['module'] === "companies"
 				 or substr($param['module'],0,10) === "engagement"	
+				 or substr($param['module'],0,10) === "engagement"	
 		) {	
 			// The response key can be different depending the API call
 			if ($param['module'] === "companies") {
@@ -908,6 +928,8 @@ class hubspotcore extends solution {
 				} else {
 					$key = 'results';
 				}
+			} elseif ($param['module'] === "products") {
+				$key = 'objects';
 			} else {
 				$key = 'results';
 			}
@@ -1000,6 +1022,7 @@ class hubspotcore extends solution {
      *
      */
     protected function getresultQueryBydate($request, $param, $offset) {
+		
         $param['module'] === "deals" || $param['module'] === "companies" ? $modified = "hs_lastmodifieddate" : $modified = "lastmodifieddate";
         if ($param['module'] === "owners") {
             $modified = "updatedAt";
@@ -1069,6 +1092,24 @@ class hubspotcore extends solution {
 					}
                 }
             }
+        } elseif ($param['module'] === "products") {			
+            if (!empty($request['objects'])) {
+                foreach ($request['objects'] as $item) {
+                    // For product, we take the date on the latest version of the name or the price
+					if (
+						$item['properties']['price']['timestamp'] > $dateTimestamp
+					 OR $item['properties']['name']['timestamp'] > $dateTimestamp
+					) {
+						// We take the most recent date modified between name modified and price modified
+						$item['date_modified'] = ($item['properties']['price']['timestamp'] > $item['properties']['name']['timestamp'] ? $item['properties']['price']['timestamp'] : $item['properties']['name']['timestamp']);
+                        if (!$offset) {
+                            array_push($result['exec'][$module], $item);
+                        } else {
+                            array_push($result, $item);
+                        }
+                    }
+                }		
+            }
         } elseif ($param['module'] === "owners") {			
             if (!empty($request)) {
                 foreach ($request as $key => $item) {
@@ -1094,8 +1135,7 @@ class hubspotcore extends solution {
 					// The response key can be different : deals for deal/paged/ and result for recent/modified/
 					$request = (isset($request['deals']) ? $request['deals'] : $request['results']);
 				}
-
-                foreach ($request as $key => $item) {
+                foreach ($request as $key => $item) {					
                     if ($item['properties'][$modified]['value'] > $dateTimestamp) {
                         if (!$offset) {
                             array_push($result['exec'][$module], $item);
@@ -1162,7 +1202,9 @@ class hubspotcore extends solution {
 			 or $name === "engagement_meeting"
 		) {
             return "engagements";
-        }
+        } else {
+			return $name;
+		}
     }
 
     /**
