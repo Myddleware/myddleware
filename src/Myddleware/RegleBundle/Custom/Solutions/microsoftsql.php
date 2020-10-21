@@ -2,17 +2,24 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-//Custom class
-class microsoftsql extends microsoftsqlcore {
+class microsoftsql extends microsoftsqlcore
+{
+    /**
+     * Custom read function.
+     *
+     * @param $param
+     * @return array|void
+     */
+    public function read($param)
+    {
+        try {
+            // Redefine reference date format (add milliseconds)
+            $date = new \DateTime($param['date_ref']);
+            $param['date_ref'] = $date->format('Y-m-d H:i:s.v');
+        } catch (\Exception $e) {
+            // Ignore errors in formatting date
+        }
 
-    // Redifine read function
-    public function read($param) {
-        // Redefine reference date format (add milliseconds)
-        $date = new \DateTime($param['date_ref']);
-        $param['date_ref'] = $date->format('Y-m-d H:i:s.v');
-        // Call standard read function
-        $result = parent::read($param);
-
-        return $result;
+        return  parent::read($param);
     }
 }
