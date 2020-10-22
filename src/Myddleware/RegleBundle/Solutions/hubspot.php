@@ -47,7 +47,8 @@ class hubspotcore extends solution {
 									'owners' 		=> array('updatedAt'),
 									'deals' 		=> array('updatedAt'),
 									'engagements' 	=> array('lastUpdated'),
-									'products' 		=> array('objectId','properties__name__value','properties__price__value'),
+									'products' 		=> array('objectId'),
+									'line_items' 	=> array('objectId'),
 								);
 		
 	// Name of reference fields for each module
@@ -58,7 +59,8 @@ class hubspotcore extends solution {
 									'owners' 		=> 'updatedAt',
 									'deals' 		=> 'updatedAt',
 									'engagements' 	=> 'lastUpdated',
-									'products' 		=> 'date_modified'
+									'products' 		=> 'date_modified',
+									'line_items' 	=> 'date_modified'
 								);
 								
 	protected $limitCall = array(
@@ -67,6 +69,11 @@ class hubspotcore extends solution {
 									'contact' => 100, // 100 max
 									'engagements' => 100, // 100 max							
 								);	
+	
+	protected $objectModule = array(
+									'products' => array('properties' => array('name', 'price')),
+									'line_items' => array('properties' => array('name', 'price', 'quantity', 'hs_product_id')),
+									);
 					
     public function getFieldsLogin(){
         return array(
@@ -122,6 +129,7 @@ class hubspotcore extends solution {
 			$modules['engagement_meeting'] = 'Engagement Meeting';
 			$modules['engagement_note'] = 'Engagement Note';
 			$modules['products'] = 'Products';
+			$modules['line_items'] = 'Line items';
 		}
         return $modules;
     } // get_modules()
@@ -179,6 +187,17 @@ class hubspotcore extends solution {
                     array('name' => 'portalId', 'label' => 'Portal Id', 'type' => 'varchar(1)'),
                     array('name' => 'properties__price__value', 'label' => 'Price', 'type' => 'varchar(255)'),
                     array('name' => 'properties__name__value', 'label' => 'Name', 'type' => 'varchar(255)'),
+                    array('name' => 'isDeleted', 'label' => 'Is deleted', 'type' => 'varchar(255)'),
+                );
+            }elseif ($module === "line_items") {
+                $result = array(
+                    array('name' => 'objectId', 'label' => 'Id', 'type' => 'varchar(36)'),
+                    array('name' => 'objectType', 'label' => 'Object Type', 'type' => 'varchar(36)'),
+                    array('name' => 'portalId', 'label' => 'Portal Id', 'type' => 'varchar(1)'),
+                    array('name' => 'properties__name__value', 'label' => 'Name', 'type' => 'varchar(255)'),
+                    array('name' => 'properties__hs_product_id__value', 'label' => 'Product Id', 'type' => 'varchar(255)'),
+                    array('name' => 'properties__quantity__value', 'label' => 'Quantity', 'type' => 'varchar(255)'),
+                    array('name' => 'properties__price__value', 'label' => 'Price', 'type' => 'varchar(255)'),
                     array('name' => 'isDeleted', 'label' => 'Is deleted', 'type' => 'varchar(255)'),
                 );
             } elseif ($engagement) {
@@ -447,7 +466,7 @@ class hubspotcore extends solution {
 										$module === "owners"
 									 OR $param['module'] === "deal_pipeline"	
 									 OR $param['module'] === "deal_pipeline_stage"	
-									 OR $param['module'] === "products"	
+									 OR !empty($this->objectModule[$module]) // In case of object module, we return objectId
 									)
 									and isset($identifyProfile[$field])
 								) {
@@ -678,8 +697,13 @@ class hubspotcore extends solution {
 			$result['url'] = $this->url . $param['module'] . "/" . $version . "/" . $param['module'] . "?hapikey=" . $this->paramConnexion['apikey'];
 		} elseif ($module === "deals") {
 			$result['url'] = $this->url . $module . "/" . $version . "/pipelines" . "?hapikey=" . $this->paramConnexion['apikey'];	
-		} elseif ($module === "products") {
-			$result['url'] = $this->url . "crm-objects/v1/objects/".$module."/paged?properties=name&properties=price&hapikey=" . $this->paramConnexion['apikey'];	
+		} elseif (!empty($this->objectModule[$module])) {
+			// Build the query with the properties fields
+			$properties='';
+			foreach ($this->objectModule[$param['module']]['properties'] as $field) {
+				$properties .= '&properties='.$field;
+			}
+			$result['url'] = $this->url . "crm-objects/v1/objects/".$module."/paged?hapikey=".$this->paramConnexion['apikey'].$properties;	
 		} else {		
 			// calculate the difference between date_ref and now
 			if (!is_numeric($param['date_ref'])) {
@@ -821,6 +845,11 @@ class hubspotcore extends solution {
 	
 	//Get the id label depending of the module
 	protected function getIdField($param, $module) {
+		// In case of object module, we return objectId
+		if (!empty($this->objectModule[$module])) {
+			return "objectId";
+		}
+		// Specifics Ids for the other module
 		switch ($module) {
 			case "companies":
 				return "companyId";
@@ -843,13 +872,7 @@ class hubspotcore extends solution {
 					return 'id';
 				}
 				break;
-			case "engagements":
-				return "id";
-				break;
-			case "products":
-				return "objectId";
-				break;
-			default:
+			default: // engagement for example
 			   return "id";
 		}
 	}
@@ -928,7 +951,7 @@ class hubspotcore extends solution {
 				} else {
 					$key = 'results';
 				}
-			} elseif ($param['module'] === "products") {
+			} elseif (!empty($this->objectModule[$param['module']])) {
 				$key = 'objects';
 			} else {
 				$key = 'results';
@@ -1092,17 +1115,22 @@ class hubspotcore extends solution {
 					}
                 }
             }
-        } elseif ($param['module'] === "products") {			
+		// Module type object	
+        } elseif (!empty($this->objectModule[$param['module']])) {			
             if (!empty($request['objects'])) {
                 foreach ($request['objects'] as $item) {
+					// Get the last property modified
+					$lastChange = 0;
+					foreach ($this->objectModule[$param['module']]['properties'] as $field) {
+						if (!empty($item['properties'][$field]['timestamp'] > $lastChange)) {
+							$lastChange = $item['properties'][$field]['timestamp'];
+						}
+					}
                     // For product, we take the date on the latest version of the name or the price
-					if (
-						$item['properties']['price']['timestamp'] > $dateTimestamp
-					 OR $item['properties']['name']['timestamp'] > $dateTimestamp
-					) {
+					if ($lastChange >= $dateTimestamp) { // >= because we have added 1 second to the reference date in the previous call
 						// We take the most recent date modified between name modified and price modified
-						$item['date_modified'] = ($item['properties']['price']['timestamp'] > $item['properties']['name']['timestamp'] ? $item['properties']['price']['timestamp'] : $item['properties']['name']['timestamp']);
-                        if (!$offset) {
+						$item['date_modified'] = $lastChange;
+						if (!$offset) {
                             array_push($result['exec'][$module], $item);
                         } else {
                             array_push($result, $item);
