@@ -1,14 +1,22 @@
 preset: recommended
 
 enabled:
+  #- void_return
   - phpdoc_add_missing_param_annotation
-  #- void_return  # PHP 7 only
 
 disabled:
   - no_empty_phpdoc
 
-finder:
-  name:
-    - vtigercrm.php
+finder:  
+  exclude:    
+    - ".platform"
+    - "app"
+    - "bin"
+    - "devops"
+    - "src"
+    - "tests"
+    - "var"
+    - "web"
   path:
-    - src/Myddleware/RegleBundle/Solutions
+    - "src/Myddleware/RegleBundle/Solutions/vtigercrm.php"    
+    
