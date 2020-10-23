@@ -1,3 +1,5 @@
+[![StyleCI](https://github.styleci.io/repos/206180988/shield?branch=stable)](https://github.styleci.io/repos/206180988?branch=stable)
+
 Welcome to Myddleware community and thanks for joining us !
 
 Myddleware 2.1 is the customisable free open-source platform that facilitates data migration and synchonisation between applications.
