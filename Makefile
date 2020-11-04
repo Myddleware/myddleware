@@ -3,6 +3,9 @@
 init:
 	@cd var/databases && [ -f filebrowser.db ] || cp filebrowser.db.empty filebrowser.db
 
+ps:
+	@docker-compose ps
+
 up:
 	@docker-compose up -d
 
