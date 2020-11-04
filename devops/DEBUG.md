@@ -1,4 +1,4 @@
-# Debugging
+# Debug
 
 Questo documento ha lo scopo di supportare il consulenze/programmatore nel debuggare o individuare problemi di sincronizzazione
 di una istanza Myddleware. Il documento cerca di dare una strategia di ricerca dei problemi e non è un elenco completo 

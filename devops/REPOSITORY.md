@@ -1,6 +1,8 @@
 # Repository
 
-This document describes how manage Myddleware codebase, for sync this project from changes provided by UPSTREAM (https://github.com/Myddleware/myddleware) follow this page [SYNC_UPSTREAM](SYNC_UPSTREAM.md)
+This document describes how manage Myddleware codebase, 
+for sync this project from changes provided by UPSTREAM (https://github.com/Myddleware/myddleware) 
+follow this page [UPSTREAM.md](UPSTREAM.md)
 
 ## Glossary
 

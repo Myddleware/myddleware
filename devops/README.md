@@ -4,9 +4,22 @@ Myddleware ti permette di sincronizzare dati tra diverse piattaforme in modo sem
 
 Di seguito trovi dei manuali dedicati a specifiche sezioni della vita di questo software
 
-## Deployment 
+## Cosa devi fare? 
 
-Vuoi deployare Myddleware in un server linux dotato di Docker segui le instruzioni seguenti
+- Vuoi rilasciare/installare Myddleware in un server linux dotato di Docker, 
+  segui queste istruzioni: [DEPLOYMENT.md](DEPLOYMENT.md)
 
-- [DEPLOYMENT.md](DEPLOYMENT.md)
+- Vuoi aggiornare un istanza di Myddleware precedentemente installata,
+  segui queste istruzioni: [UPDATE.md](UPDATE.md)
 
+- Vuoi fare debug di un istanza Myddleware che sta riportando 
+  dei problemi di sincronizzazione, segui queste istruzioni: [DEBUG.md](DEBUG.md)
+
+- Vuoi aggiornare la repository di Myddleware con le gli ultimi rilasci 
+  della versione ufficiale, segui queste istruzioni: [UPSTREAM.md](UPSTREAM.md)
+  
+- Vuoi sviluppare nuove funzionalità su questa versione di Myddleware,
+  segui queste istruzioni: [DEVELOPMENT.md](DEVELOPMENT.md)
+
+- Vuoi rilasciare una nuova funzionalità nella versione ufficiale di Myddleware,
+  segui queste istruzioni: [CONTRIBUTE.md](CONTRIBUTE.md)
