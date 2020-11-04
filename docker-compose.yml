@@ -19,6 +19,7 @@ services:
     links:
       - mysql
       - phpmyadmin
+    restart: 'always'
 
   mysql:
     image: mysql:5.7.28
@@ -29,13 +30,7 @@ services:
       - wait_timeout=100
     volumes:
       - mysql:/var/lib/mysql:rw
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - ${phpmyadmin_port}:80
-    links:
-      - mysql
+    restart: 'always'
 
   filebrowser:
     image: filebrowser/filebrowser
@@ -46,6 +41,7 @@ services:
       - ./var/logs:/srv/Logs
       - ./var/databases/filebrowser.db:/database.db
       - ./.filebrowser.json:/.filebrowser.json
+    restart: 'always'
 
 volumes:
   mysql:

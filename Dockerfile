@@ -80,7 +80,6 @@ RUN docker-php-ext-install intl
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-enable intl mbstring pdo_dblib
 
-
 RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
     { \
         echo '#!/bin/bash'; \
@@ -89,4 +88,3 @@ RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inher
         echo 'cron'; \
         echo 'apache2-foreground-inherit "$@"'; \
     } > /usr/local/bin/apache2-foreground
-
