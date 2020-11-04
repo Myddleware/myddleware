@@ -18,7 +18,6 @@ services:
       - ./.temp/.composer:/root/.composer:cached
     links:
       - mysql
-      - phpmyadmin
     restart: 'always'
 
   mysql:

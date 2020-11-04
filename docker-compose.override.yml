@@ -2,6 +2,25 @@ version: '2'
 
 services:
 
+  myddleware:
+    environment:
+      - VT_CLIENT_LOG_FILE=/var/www/html/var/logs/vtigercrm.log
+      - MYSQL_DATABASE=myddleware
+      - MYSQL_ROOT_PASSWORD=secret
+    links:
+      - phpmyadmin
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin_port}:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+    links:
+      - mysql
+
   vtiger1:
     image: javanile/vtiger:7.1.0
     ports:
@@ -49,12 +68,6 @@ services:
       - SA_PASSWORD=Secret.1234!
     volumes:
       - mssql:/var/opt/mssql/data
-
-  phpmyadmin:
-    environment:
-      - PMA_HOST=mysql
-      - PMA_USER=root
-      - PMA_PASSWORD=secret
 
   adminer:
     image: adminer

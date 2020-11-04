@@ -15,7 +15,7 @@ Di seguito trovi dei manuali dedicati a specifiche sezioni della vita di questo 
 - Vuoi fare debug di un istanza Myddleware che sta riportando 
   dei problemi di sincronizzazione, segui queste istruzioni: [DEBUG.md](DEBUG.md)
 
-- Vuoi aggiornare la repository di Myddleware con le gli ultimi rilasci 
+- Vuoi aggiornare questa repository Myddleware con gli ultimi rilasci 
   della versione ufficiale, segui queste istruzioni: [UPSTREAM.md](UPSTREAM.md)
   
 - Vuoi sviluppare nuove funzionalità su questa versione di Myddleware,
