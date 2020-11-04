@@ -26,6 +26,11 @@ eseguite il comando,
 make install
 ```
 
+Adesso esguire il comando per la creazione dei dati nel database
+
+```bash
+make setup
+```
 
 
 

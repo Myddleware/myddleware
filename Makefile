@@ -33,6 +33,7 @@ require-vtiger-client:
 
 setup-files:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache var/logs
 
 setup-database: up sleep
 	@docker-compose -f docker-compose.yml exec myddleware bash prepare-database.sh
