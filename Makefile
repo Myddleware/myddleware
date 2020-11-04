@@ -6,5 +6,8 @@ down:
 debug: down
 	@docker-compose up -d
 
+prepare-demo:
+
+
 prod: down
 	@docker-compose -f docker-compose.yml up -d

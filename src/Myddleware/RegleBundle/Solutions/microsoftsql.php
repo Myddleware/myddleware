@@ -25,9 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class microsoftsqlcore extends database
+class microsoftsqlcorebase extends database
 {
-	
 	protected $driver;
 	protected $fieldName = 'COLUMN_NAME';
 	protected $fieldLabel = 'COLUMN_NAME';
@@ -101,12 +100,14 @@ $file = __DIR__.'/../Custom/Solutions/microsoftsql.php';
 $fileOpencrmitalia = __DIR__.'/../Custom/Solutions/microsoftsql.opencrmitalia.php';
 if (file_exists($file) && file_exists($fileOpencrmitalia)) {
     require_once $fileOpencrmitalia;
+    class microsoftsqlcore extends microsoftsqlopencrmitalia {}
     require_once $file;
 } else if (file_exists($fileOpencrmitalia)) {
     require_once $fileOpencrmitalia;
     class microsoftsql extends microsoftsqlopencrmitalia {}
 } else if (file_exists($file)) {
+    class microsoftsqlcore extends microsoftsqlcorebase {}
     require_once $file;
 } else {
-	class microsoftsql extends microsoftsqlcore {}
+	class microsoftsql extends microsoftsqlcorebase {}
 } 
