@@ -12,4 +12,4 @@ parameters:
         search_limit: 1000
     git_branch: master
     base_uri: null
-    email_from: bianco@javanile.org
+    email_from: no-reply@myddleware.com
