@@ -26,15 +26,13 @@ eseguite il comando,
 make install
 ```
 
-Adesso esguire il comando per la creazione dei dati nel database
+Adesso eseguire il comando per la creazione dei dati nel database
 
 ```bash
 make setup
 ```
 
+Adesso l'applicazione sara correttamente installata per accedere usate le seguenti istruzioni
 
-
-
-
-
-
+- Visitare la pagina <http://<indirizzo_macchina>:30080> 
+- Usate le seguenti credenziali: admin/admin
