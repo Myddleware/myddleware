@@ -6,7 +6,7 @@ init:
 clean:
 	@rm -fr .git/.idea >/dev/null 2>/dev/null || true
 	@mv .idea .git/.idea >/dev/null 2>/dev/null || true
-	@git clean -dfx -e \!.idea -e \!modules_local || true
+	@git clean -dfx >/dev/null 2>/dev/null || true
 	@mv .git/.idea .idea >/dev/null 2>/dev/null || true
 
 sleep:
@@ -16,13 +16,20 @@ ps:
 	@docker-compose ps
 
 up:
-	@docker-compose up -d
+	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 down:
 	@docker-compose down --remove-orphans
 
-install:
+install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
+
+update: up
+	@rm -fr var/cache/* vendor
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
+
+require-vtiger-client:
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.16 -vvvv --ignore-platform-reqs
 
 setup-files:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd
@@ -40,3 +47,7 @@ dev:
 
 prod: down
 	@docker-compose -f docker-compose.yml up -d
+
+reset: clean
+	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \
+		read AGREE && [ "$${AGREE}" = "YES" ] && docker-compose down -v --remove-orphans
