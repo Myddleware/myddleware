@@ -23,7 +23,7 @@
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*
-!/src/Myddleware/RegleBundle/Custom/Solutions/*.opencrmitalia.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/*.gitkeep.php
 
 # Managed by Composer
 /app/bootstrap.php.cache
