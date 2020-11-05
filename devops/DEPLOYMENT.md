@@ -26,6 +26,14 @@ eseguite il comando,
 make install
 ```
 
+Adesso bisogna modificare il file `.env` ed inserire i valori per permettere il backup su AWS S3 storage, valorizzare le seguenti chiavi
+
+```dotenv
+backup_target=
+aws_access_key_id=
+aws_secret_access_key=
+```
+
 Adesso eseguire il comando per la creazione dei dati nel database
 
 ```bash
