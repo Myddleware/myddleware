@@ -97,14 +97,14 @@ class microsoftsqlcorebase extends database
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__.'/../Custom/Solutions/microsoftsql.php';
-$fileOpencrmitalia = __DIR__.'/../Custom/Solutions/microsoftsql.opencrmitalia.php';
-if (file_exists($file) && file_exists($fileOpencrmitalia)) {
-    require_once $fileOpencrmitalia;
-    class microsoftsqlcore extends microsoftsqlopencrmitalia {}
+$gitkeep = __DIR__.'/../Custom/Solutions/microsoftsql.gitkeep.php';
+if (file_exists($file) && file_exists($gitkeep)) {
+    require_once $gitkeep;
+    class microsoftsqlcore extends microsoftsqlgitkeep {}
     require_once $file;
-} else if (file_exists($fileOpencrmitalia)) {
-    require_once $fileOpencrmitalia;
-    class microsoftsql extends microsoftsqlopencrmitalia {}
+} else if (file_exists($gitkeep)) {
+    require_once $gitkeep;
+    class microsoftsql extends microsoftsqlgitkeep {}
 } else if (file_exists($file)) {
     class microsoftsqlcore extends microsoftsqlcorebase {}
     require_once $file;
