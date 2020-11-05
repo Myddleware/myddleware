@@ -43,8 +43,8 @@ setup: setup-files setup-database
 debug: down
 	@docker-compose up -d
 
-dev:
-	echo "DEV"
+dev: down
+	@docker-compose up -d
 
 prod: down
 	@docker-compose -f docker-compose.yml up -d
@@ -52,3 +52,15 @@ prod: down
 reset: clean
 	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \
 		read AGREE && [ "$${AGREE}" = "YES" ] && docker-compose down -v --remove-orphans
+
+## -------
+## Testing
+## -------
+test-debug: reset install setup debug
+	@docker-compose ps
+
+test-dev: reset install setup dev
+	@docker-compose ps
+
+test-prod: reset install setup prod
+	@docker-compose ps
