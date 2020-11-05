@@ -16,7 +16,7 @@ sleep:
 ps:
 	@docker-compose ps
 
-up:
+up: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 down:
@@ -65,3 +65,6 @@ test-dev: reset install setup dev
 
 test-prod: reset install setup prod
 	@docker-compose ps
+
+test-backup: up
+	@docker-compose -f docker-compose.yml logs -f backup

@@ -33,7 +33,16 @@ services:
 
   backup:
     image: databack/mysql-backup
-
+    environment:
+      - DB_SERVER=mysql
+      - DB_USER=root
+      - DB_PASS=secret
+      - DB_NAMES=myddleware
+      - DB_DUMP_TARGET=${backup_target}
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=0032
+      - AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      - AWS_SECRET_ACCESS_KEY==${aws_secret_access_key}
 
   filebrowser:
     image: filebrowser/filebrowser
