@@ -1,9 +1,10 @@
 #!make
 
 init:
+	@[ -f .env ] || cp .env.example .env
 	@cd var/databases && [ -f filebrowser.db ] || cp filebrowser.db.empty filebrowser.db
 
-clean:
+clean: init
 	@rm -fr .git/.idea >/dev/null 2>/dev/null || true
 	@mv .idea .git/.idea >/dev/null 2>/dev/null || true
 	@git clean -dfx >/dev/null 2>/dev/null || true

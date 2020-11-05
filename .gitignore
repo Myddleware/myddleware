@@ -65,3 +65,6 @@ uat.pem
 /*.retry
 /CLONE/
 /var/databases/filebrowser.db
+
+# Secrets
+.env
