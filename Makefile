@@ -23,6 +23,9 @@ up: init
 down:
 	@docker-compose down --remove-orphans
 
+build:
+	@docker-compose build myddleware
+
 install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 
@@ -42,14 +45,20 @@ setup-database: up sleep
 
 setup: setup-files setup-database
 
+logs: debug
+	@docker-compose logs -f myddleware
+
 debug: down
-	@docker-compose up -d
+	@docker-compose up -d --force-recreate
 
 dev: down
 	@docker-compose up -d
 
 prod: down
 	@docker-compose -f docker-compose.yml up -d
+
+bash:
+	@docker-compose -f docker-compose.yml exec myddleware bash
 
 reset: clean
 	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \

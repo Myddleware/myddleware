@@ -1,4 +1,3 @@
-#!/bin/bash
 
 ## Clean-up project
 docker-compose down -v
