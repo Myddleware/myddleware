@@ -80,11 +80,7 @@ RUN docker-php-ext-install intl
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-enable intl mbstring pdo_dblib
 
-RUN cp /usr/local/bin/apache2-foreground /usr/local/bin/apache2-foreground-inherit; \
-    { \
-        echo '#!/bin/bash'; \
-        echo 'printenv | sed "s/^\(.*\)$/export \\1/g" | grep -E "^export MYSQL_" > /run/crond.env'; \
-        echo 'rsyslogd'; \
-        echo 'cron'; \
-        echo 'apache2-foreground-inherit "$@"'; \
-    } > /usr/local/bin/apache2-foreground
+COPY ./myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
+RUN chmod +x /usr/local/bin/myddleware-foreground.sh
+
+ENTRYPOINT ["myddleware-foreground.sh"]

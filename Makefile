@@ -1,6 +1,7 @@
 #!make
 
 init:
+	@[ -f hosts ] || touch hosts
 	@[ -f .env ] || cp .env.example .env
 	@cd var/databases && [ -f filebrowser.db ] || cp filebrowser.db.empty filebrowser.db
 

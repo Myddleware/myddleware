@@ -23,7 +23,7 @@
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*
-!/src/Myddleware/RegleBundle/Custom/Solutions/*.gitkeep.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
 
 # Managed by Composer
 /app/bootstrap.php.cache
@@ -68,3 +68,4 @@ uat.pem
 
 # Secrets
 .env
+hosts
