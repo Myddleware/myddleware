@@ -14,7 +14,7 @@ clean: init
 sleep:
 	@sleep 5
 
-ps:
+ps: init
 	@docker-compose ps
 
 up: init
@@ -44,6 +44,7 @@ setup-database: up sleep
 	@docker-compose -f docker-compose.yml exec myddleware bash prepare-database.sh
 
 setup: setup-files setup-database
+	@echo "Setup Myddleware files and database: OK!"
 
 logs: debug
 	@docker-compose logs -f myddleware

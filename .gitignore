@@ -23,7 +23,6 @@
 
 # Custom directory
 /src/Myddleware/RegleBundle/Custom/*
-!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
 
 # Managed by Composer
 /app/bootstrap.php.cache
@@ -69,3 +68,7 @@ uat.pem
 # Secrets
 .env
 hosts
+
+# OCI:START
+!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
+# OCI:END
