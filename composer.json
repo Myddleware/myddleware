@@ -47,7 +47,7 @@
         "api-platform/api-pack": "^1.1",
         "lexik/jwt-authentication-bundle": "^2.6",
         "mautic/api-library": "^2.15",
-        "javanile/vtiger-client": "0.0.16",
+        "javanile/vtiger-client": "0.0.18",
         "facebook/graph-sdk" : "~5.0",
         "facebook/php-ads-sdk": "2.8.*"
     },

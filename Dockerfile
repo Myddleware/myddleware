@@ -91,4 +91,4 @@ RUN apt-get update && apt-get upgrade -y && \
 ## Entrypoint
 COPY ./myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
 RUN chmod +x /usr/local/bin/myddleware-foreground.sh
-ENTRYPOINT ["myddleware-foreground.sh"]
+CMD ["myddleware-foreground.sh"]
