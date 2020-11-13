@@ -148,7 +148,7 @@ class filecore extends solution {
 				// Open the file		
 				$sftp = ssh2_sftp($this->connection);
 				$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
-				$headerString = $this->cleanHeader(trim(fgets($stream)));
+				$headerString = trim(fgets($stream));
 				// Close the file
 				fclose($stream);
 
@@ -167,6 +167,7 @@ class filecore extends solution {
 							'type_bdd' => 'varchar(255)',
 							'required' => false
 					);
+
 					// If the field contains the id indicator, we add it to the fieldsRelate list
 					$idFields = $this->getIdFields($module,$type);	
 					if (!empty($idFields)) {
@@ -533,7 +534,7 @@ class filecore extends solution {
 	
 	// Convert the first line of the file to an array with all fields
 	protected function getFileHeader($stream,$param) {
-		$headerString = $this->cleanHeader(trim(fgets($stream)));
+		$headerString = trim(fgets($stream));
 		$fields = $this->transformRow($headerString,$param);
 		$i = 1;
 		foreach($fields as $field) {
@@ -581,12 +582,6 @@ class filecore extends solution {
 	protected function generateId($param,$rowFile) {
 		return uniqid('', true);
 	}	
-
-	protected function cleanHeader($str) { 
-		$str = strtr($str, utf8_decode('ÁÀÂÄÃÅÇÉÈÊËÍÏÎÌÑÓÒÔÖÕÚÙÛÜÝ'), utf8_decode('AAAAAACEEEEEIIIINOOOOOUUUUY'));
-		$str = strtr($str, utf8_decode('áàâäãåçéèêëíìîïñóòôöõúùûüýÿ'), utf8_decode('aaaaaaceeeeiiiinooooouuuuyy'));
-		return $str;
-	} 
 	
 	protected function checkRow($rowFile,$param){
 		return true;
@@ -600,8 +595,8 @@ class filecore extends solution {
 			$start = 0;
 			// Cut the row using the width of each column
 			foreach($this->columnWidth[$param['module']] as $columnWidth) {
-				$result[] = substr($buffer,$start,$columnWidth); 
-				$start += $columnWidth;
+				$result[] = mb_substr($buffer,$start,$columnWidth); 
+				$start += $columnWidth;		
 			}
 			return $result;
 		// Otherwise we manage row with separator	
