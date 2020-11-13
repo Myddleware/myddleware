@@ -34,6 +34,8 @@ aws_access_key_id=
 aws_secret_access_key=
 ```
 
+> **AVVISO:** Se non vengono specificate queste chiavi non sarà eseguito il backup
+
 Adesso eseguire il comando per la creazione dei dati nel database
 
 ```bash
@@ -44,3 +46,12 @@ Adesso l'applicazione sara correttamente installata per accedere usate le seguen
 
 - Visitare la pagina <http://<indirizzo_macchina>:30080> 
 - Usate le seguenti credenziali: admin/admin
+
+> **AVVISO**: Potrebbe essere necessario aggiungere per la specifica installazione di myddleware delle regole di /etc/hosts
+> ad esempio per raggiungere CRM locali on dentro reti speciali, bastera scrivere le regole dentro il file `hosts` che trovate nella root del prpgetto
+
+Adesso bisogna mettere l'applicazione in modalità PRODUCTION
+
+```bash
+make prod
+```
