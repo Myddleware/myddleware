@@ -29,7 +29,7 @@ build:
 install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 
-update: build up
+update: init build up
 	@rm -fr var/cache/* vendor
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 
