@@ -10,7 +10,7 @@ cd /home/(myhost)/myddleware
 git pull
 ```
 
-Adesso potrebbere apparire dei conflitti o dei blocchi sui file dentro la seguente cartella
+Adesso potrebbero apparire dei conflitti o dei blocchi sui file dentro la seguente cartella
 
 ```
 ./src/Myddleware/RegleBundle/Custom/Solutions
@@ -38,6 +38,9 @@ Adesso bisogna installare le eventuali nuove librerie rilasciate quindi, va eseg
 make update
 make setup
 ```
+
+> **AVVISO:** In qualche caso potrebbero essere segnalati degli errori al database derivati dal tentativo
+> che l'applicazione fa di ricreare l'utente 'admin', ignorate questo errore la procedura si completerà ugualmente.
 
 Adesso si puo riportare l'ambiente nella modalità PRODUCTION con il seguente comando
 
