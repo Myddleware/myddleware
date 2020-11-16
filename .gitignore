@@ -68,6 +68,7 @@ uat.pem
 # Secrets
 .env
 hosts
+NOTES.md
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
