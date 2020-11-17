@@ -1216,17 +1216,17 @@ class documentcore {
 		try {		
 			//--
 			if (!empty($ruleField['formula'])) {
-				// -- -- -- Gestion des formules
+				// -- -- -- Formula management
 	
-				// préparation des variables	
+				// Build variables
 				$r = explode(';', $ruleField['source_field_name']);	
 				if(count($r) > 1) {
 					foreach ( $r as $listFields ) {
-						// On ne traite pas l'entrée my_value
+						// We skip my_value because it is a constante
 						if ($listFields != 'my_value') {
-							$fieldNameDyn = $listFields; // value : nom de la variable exemple name
-							if (isset($source[$listFields])) {
-								$$fieldNameDyn = $source[$listFields]; // variable dynamique name = $name	
+							$fieldNameDyn = $listFields; // value : variable name
+							if (array_key_exists($listFields, $source)) {
+								$$fieldNameDyn = (!empty($source[$listFields]) ? $source[$listFields] : ""); // Dynamic variable (e.g $name = name)	
 							}
 							else {
 								// Erreur
@@ -1236,10 +1236,10 @@ class documentcore {
 					}									
 				}
 				else {
-					// On ne traite pas l'entrée my_value
+					// We skip my_value because it is a constante
 					if ($ruleField['source_field_name'] != 'my_value') {
-						$fieldNameDyn = $ruleField['source_field_name']; // value : nom de la variable exemple name
-						$$fieldNameDyn = $source[$ruleField['source_field_name']]; // variable dynamique name = $name									
+						$fieldNameDyn = $ruleField['source_field_name']; // value : variable name
+						$$fieldNameDyn = $source[$ruleField['source_field_name']]; // Dynamic variable (e.g $name = name)									
 					}
 				}
 				// préparation des variables	 

@@ -20,7 +20,7 @@
   "prefer-stable": true,
     "require": {
         "php": ">=7.2",
-        "symfony/symfony": "3.4.38",
+        "symfony/symfony": "3.4.45",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
         "twig/extensions": "~1.0",
@@ -49,7 +49,9 @@
         "mautic/api-library": "^2.15",
         "javanile/vtiger-client": "0.0.18",
         "facebook/graph-sdk" : "~5.0",
-        "facebook/php-ads-sdk": "2.8.*"
+        "facebook/php-ads-sdk": "2.8.*",
+        "iadvize/apirestclient": "1.3.0",
+        "sugarcrm/rest-php-client": "1.4.5"
     },
     "repositories": [
         {

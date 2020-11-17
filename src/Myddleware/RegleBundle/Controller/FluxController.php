@@ -520,7 +520,11 @@ class FluxControllerCore extends Controller
 
 			// POST DOCUMENT
 			// Get the post documents (Document coming from a child rule)
-			$postDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('parentId'=> $id));
+			$postDocuments = $em->getRepository('RegleBundle:Document')->findBy(
+																					array('parentId'=> $id),
+																					array('dateCreated' => 'DESC'),	// order
+																					10								// limit
+																				);
 			// Get the rule name of every child doc
 			$postDocumentsRule = array();
 			foreach ($postDocuments as $postDocument) {
@@ -529,7 +533,11 @@ class FluxControllerCore extends Controller
 			
 			// PARENT RELATE DOCUMENT
 			// Document link to other document, the parent ones
-			$parentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_id'=> $doc[0]->getId()));
+			$parentRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(
+																									array('doc_id'=> $doc[0]->getId()),
+																									array('dateCreated' => 'DESC'),		// order
+																									10									// limit
+																								);
 			// Get the detail of documents related
 			$i = 0;
 			$parentDocuments = array();
@@ -546,7 +554,11 @@ class FluxControllerCore extends Controller
 			
 			// CHILD RELATE DOCUMENT
 			// Document link to other document, the child ones
-			$childRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(array('doc_rel_id'=> $doc[0]->getId()));
+			$childRelationships = $em->getRepository('RegleBundle:DocumentRelationship')->findBy(
+																									array('doc_rel_id'=> $doc[0]->getId()),
+																									array('dateCreated' => 'DESC'),			// order
+																									10										// limit																									
+																								);
 			// Get the detail of documents related
 			$i = 0;
 			$childDocuments = array();
@@ -563,7 +575,7 @@ class FluxControllerCore extends Controller
 
 			// HISTORY DOCUMENT
 			// Get the history documents (all document for the same source)
-			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0), array('dateModified' => 'DESC'));
+			$historyDocuments = $em->getRepository('RegleBundle:Document')->findBy(array('source'=> $doc[0]->getSource(), 'rule'=> $doc[0]->getRule(), 'deleted' => 0), array('dateModified' => 'DESC'),10);
 			// If only one record, the history is the current document, so we remove it => no parent
 			if (count($historyDocuments) == 1) {
 				$historyDocuments = array();
