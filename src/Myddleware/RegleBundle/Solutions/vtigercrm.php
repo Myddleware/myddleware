@@ -246,10 +246,11 @@ class vtigercrmcore extends solution
 	}
 
 	/**
-	 * Return the fields for a specific module without the specified ones
+	 * Return the fields for a specific module without the specified ones.
 	 *
 	 * @param string $module
 	 * @param string $type
+     *
 	 * @return array|bool
 	 */
 	public function get_module_fields($module, $type = 'source')
@@ -260,7 +261,7 @@ class vtigercrmcore extends solution
 				return false;
 			}
 
-            $describe = $this->vtigerClient->describe($module);
+            $describe = $this->vtigerClient->describe($module, $type == 'source' ? 1 : 0);
 
             if (!$describe['success'] || ($describe['success'] && count($describe['result']) == 0)) {
                 return false;
