@@ -1485,7 +1485,7 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 	if(params) {	
 		$.each(params, function( index, nameP ) {
 			$( '#'+nameP.name ).val( nameP.value );		
-			if( nameP.name + 'duplicate_fields' ) {
+			if( nameP.name === 'duplicate_fields' ) {
 				duplicate_fields = nameP.value.split(';');
 				$.each(duplicate_fields, function( index, d_fields ) {
 					$( "li:contains('" + d_fields + "')", '#fields_duplicate_target').click();	
