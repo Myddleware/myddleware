@@ -25,81 +25,428 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class sugarcrmcore  extends suitecrm { 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-	// Array with all many-to-many relationship (different than SuiteCRM)
-	protected $module_relationship_many_to_many = array(
-													'calls_contacts' => array('label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('call_id','contact_id')),
-													'calls_users' => array('label' => 'Relationship Call User', 'module_name' => 'Calls', 'link_field_name' => 'users', 'fields' => array(), 'relationships' => array('call_id','user_id')),
-													'calls_leads' => array('label' => 'Relationship Call Lead', 'module_name' => 'Calls', 'link_field_name' => 'leads', 'fields' => array(), 'relationships' => array('call_id','lead_id')),
-													'cases_bugs' => array('label' => 'Relationship Case Bug', 'module_name' => 'Cases', 'link_field_name' => 'bugs', 'fields' => array(), 'relationships' => array('case_id','bug_id')),
-													'contacts_bugs' => array('label' => 'Relationship Contact Bug', 'module_name' => 'Contacts', 'link_field_name' => 'bugs', 'fields' => array(), 'relationships' => array('contact_id','bug_id')),
-													'contacts_cases' => array('label' => 'Relationship Contact Case', 'module_name' => 'Contacts', 'link_field_name' => 'cases', 'fields' => array(), 'relationships' => array('contact_id','case_id')),
-													'meetings_contacts' => array('label' => 'Relationship Metting Contact', 'module_name' => 'Meetings', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('meeting_id','contact_id')),
-													'meetings_users' => array('label' => 'Relationship Meeting User', 'module_name' => 'Meetings', 'link_field_name' => 'users', 'fields' => array(), 'relationships' => array('meeting_id','user_id')),
-													'meetings_leads' => array('label' => 'Relationship Meeting Lead', 'module_name' => 'Meetings', 'link_field_name' => 'leads', 'fields' => array(), 'relationships' => array('meeting_id','lead_id')),
-													'opportunities_contacts' => array('label' => 'Relationship Opportunity Contact', 'module_name' => 'Opportunities', 'link_field_name' => 'contacts', 'fields' => array('contact_role'), 'relationships' => array('opportunity_id','contact_id')), // contact_role exist in opportunities vardef for module contact (entry rel_fields)
-													'prospect_list_campaigns' => array('label' => 'Relationship Prospect_list Campaign', 'module_name' => 'ProspectLists', 'link_field_name' => 'campaigns', 'fields' => array(), 'relationships' => array('prospect_list_id','campaign_id')),
-													'prospect_list_contacts' => array('label' => 'Relationship Prospect_list Contact', 'module_name' => 'ProspectLists', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('prospect_list_id','contact_id')),
-													'prospect_list_prospects' => array('label' => 'Relationship Prospect_list Prospect', 'module_name' => 'ProspectLists', 'link_field_name' => 'prospects', 'fields' => array(), 'relationships' => array('prospect_list_id','Prospect_id')),
-													'prospect_list_leads' => array('label' => 'Relationship Prospect_list Lead', 'module_name' => 'ProspectLists', 'link_field_name' => 'leads', 'fields' => array(), 'relationships' => array('prospect_list_id','lead_id')),
-													'prospect_list_users' => array('label' => 'Relationship Prospect_list User', 'module_name' => 'ProspectLists', 'link_field_name' => 'users', 'fields' => array(), 'relationships' => array('prospect_list_id','user_id')),
-													'prospect_list_accounts' => array('label' => 'Relationship Prospect_list Account', 'module_name' => 'ProspectLists', 'link_field_name' => 'accounts', 'fields' => array(), 'relationships' => array('prospect_list_id','account_id')),
-													'projects_bugs' => array('label' => 'Relationship Project Bug', 'module_name' => 'Projects', 'link_field_name' => 'bugs', 'fields' => array(), 'relationships' => array('project_id','bug_id')),
-													'projects_cases' => array('label' => 'Relationship Project Case', 'module_name' => 'Projects', 'link_field_name' => 'cases', 'fields' => array(), 'relationships' => array('project_id','case_id')),
-													'projects_accounts' => array('label' => 'Relationship Project Account', 'module_name' => 'Projects', 'link_field_name' => 'accounts', 'fields' => array(), 'relationships' => array('project_id','account_id')),
-													'projects_contacts' => array('label' => 'Relationship Project Contact', 'module_name' => 'Projects', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('project_id','contact_id')),
-													'projects_opportunities' => array('label' => 'Relationship Project Opportunity', 'module_name' => 'Projects', 'link_field_name' => 'opportunities', 'fields' => array(), 'relationships' => array('project_id','opportunity_id')),
-													'email_marketing_prospect_lists' => array('label' => 'Relationship Email_marketing Prospect_list', 'module_name' => 'EmailMarketing', 'link_field_name' => 'prospect_lists', 'fields' => array(), 'relationships' => array('email_marketing_id','prospect_list_id')),
-													'leads_documents' => array('label' => 'Relationship Lead Document', 'module_name' => 'Leads', 'link_field_name' => 'documents', 'fields' => array(), 'relationships' => array('lead_id','document_id')),
-													'documents_accounts' => array('label' => 'Relationship Document Account', 'module_name' => 'Documents', 'link_field_name' => 'accounts', 'fields' => array(), 'relationships' => array('document_id','account_id')),
-													'documents_contacts' => array('label' => 'Relationship Document Contact', 'module_name' => 'Documents', 'link_field_name' => 'contacts', 'fields' => array(), 'relationships' => array('document_id','contact_id')),
-													'documents_opportunities' => array('label' => 'Relationship Document Opportunity', 'module_name' => 'Documents', 'link_field_name' => 'opportunities', 'fields' => array(), 'relationships' => array('document_id','opportunity_id')),
-													'documents_cases' => array('label' => 'Relationship Document Case', 'module_name' => 'Documents', 'link_field_name' => 'cases', 'fields' => array(), 'relationships' => array('document_id','case_id')),
-													'documents_bugs' => array('label' => 'Relationship Document Bug', 'module_name' => 'Documents', 'link_field_name' => 'bugs', 'fields' => array(), 'relationships' => array('document_id','bug_id')),
-													'bundles_products' => array('label' => 'Relationship Bundle Product', 'module_name' => 'ProductBundles', 'link_field_name' => 'products', 'fields' => array(), 'relationships' => array('bundle_id','product_id')),
-													'quotes_bundles' => array('label' => 'Relationship Quote Bundle', 'module_name' => 'Quotes', 'link_field_name' => 'product_bundles', 'fields' => array(), 'relationships' => array('quote_id','bundle_id')),
-												);
+class sugarcrmcore extends solution { 
+
+	protected $sugarAPI;
+	protected $defaultLimit = 100;
+	protected $delaySearch = '-1 month';
 	
-	protected $adminModules = array(
-									'ProductTemplates' => 'Product templates',
-									'ProductCategories' => 'Product categories',
-									'ProductBundles' => 'Product bundles'
-								);
+	protected $required_fields = array('default' => array('id','date_modified'));
 	
-	public function get_modules($type = 'source') {		
-		$modules = parent::get_modules($type);
-		// Add admin module if SugarCRM is in target
-		if ($type == 'target') {
-			foreach ($this->adminModules as $key => $value) {
-				$modules[$key] = $value;
+	protected $FieldsDuplicate = array(	'Contacts' => array('email1', 'last_name'),
+										'Accounts' => array('email1', 'name'),
+										'Users' => array('email1', 'last_name'),
+										'Leads' => array('email1', 'last_name'),
+										'Prospects' => array('email1', 'name'),
+										'default' => array('name')
+									  );
+
+	public function getFieldsLogin() {	
+		return array(
+					array(
+							'name' => 'login',
+							'type' => TextType::class,
+							'label' => 'solution.fields.login'
+						),
+					array(
+							'name' => 'password',
+							'type' => PasswordType::class,
+							'label' => 'solution.fields.password'
+						),
+					array(
+							'name' => 'url',
+							'type' => TextType::class,
+							'label' => 'solution.fields.url'
+						)
+		);
+	}
+	
+	
+	// Connect to SugarCRM
+    public function login($paramConnexion) {
+        parent::login($paramConnexion);
+        try {;
+			$server = $this->paramConnexion['url'].'/rest/v10/';
+			$credentials = array(
+				'username' => $this->paramConnexion['login'],
+				'password' => $this->paramConnexion['password']
+			);
+			
+			// Log into Sugar
+			$this->sugarAPI = new \SugarAPI\SDK\SugarAPI($server,$credentials);
+			$this->sugarAPI->login();
+			
+			// Check the token
+			$token = $this->sugarAPI->getToken();	
+			if (!empty($token->access_token)) {
+				$this->connexion_valide = true;
+			} else {
+				 return array('error' => 'Failed to connect to Sugar, no error returned.');
 			}
-		}		
-		return $modules;										
+			
+		} catch(\SugarAPI\SDK\Exception\SDKException $e){
+			$error = $e->getMessage();
+            $this->logger->error($error);
+            return array('error' => $error);
+		}
 	}
 	
-	public function read_last($param) {
-		// No history for admin and many-to-many modules
-		if (
-				!empty($this->adminModules[$param['module']])
-			 OR !empty($this->module_relationship_many_to_many[$param['module']])
-		) {
+	// Get module list
+	public function get_modules($type = 'source') {
+	    try {
+			$modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=full_module_list');		
+			if (!empty($modulesSugar->full_module_list)) {
+				foreach ($modulesSugar->full_module_list as $module => $label) {
+					// hash isn't a Sugar module
+					if ($module == '_hash') {
+						continue;
+					}
+					$modules[$module] = $label; 
+				}
+			}
+			return $modules;  	
+	    }
+		catch (\Exception $e) {
 			return false;
-		} 
-		return parent::read_last($param);
+		}
 	}
+	
+	public function get_module_fields($module, $type = 'source') {
+		parent::get_module_fields($module, $type);
+		try{
+			$this->moduleFields = array();
+			$this->fieldsRelate = array();
+			
+			// Call teh detail of all Sugar fields for the module 
+			$fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=modules&module_filter='.$module);
+
+			// Browse fields
+			if (!empty($fieldsSugar->modules->$module->fields)) {
+				foreach($fieldsSugar->modules->$module->fields as $field) {
+					if (empty($field->type)) {
+						continue;
+					}
+					
+					// Calculate the database type
+					if (!in_array($field->type,$this->type_valide)) { 
+						if(isset($this->exclude_field_list[$module])){
+							if(in_array($field->name, $this->exclude_field_list[$module]) && $type == 'target')
+								continue; // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
+						}
+						$type_bdd = 'varchar(255)';
+					}
+					else {
+						$type_bdd = $field->type;
+					}
+					
+					// Add all field in moduleFields
+					$this->moduleFields[$field->name] = array(
+														'label' => (!empty($field->comment) ? $field->comment : $field->name),
+														'type' => $field->type,
+														'type_bdd' => $type_bdd,
+														'required' => (!empty($field->required) ? $field->required : 0) 
+													);
+
+					// Add option for enum fields
+					if (in_array($field->type,array('enum','multienum'))) {
+						$fieldsList = $this->customCall($this->paramConnexion['url'].'/rest/v10/'.$module.'/enum/'.$field->name);
+						if (!empty($fieldsList)) {
+							// Transform object to array
+							foreach($fieldsList as $key => $value) {
+								$this->moduleFields[$field->name]['option'][$key] = $value;
+							}
+						}
+					}
+
+					// Add relate fields
+					if (
+							substr($field->name,-3) == '_id' 
+						OR substr($field->name,-4) == '_ida'
+						OR substr($field->name,-4) == '_idb'
+						OR (
+								$field->type == 'id' 
+							AND $field->name != 'id'
+						)
+						OR $field->name	== 'created_by'
+					) {
+						$this->fieldsRelate[$field->name] = array(
+														'label' => (!empty($field->comment) ? $field->comment : $field->name),
+														'type' => 'varchar(36)',
+														'type_bdd' => 'varchar(36)',
+														'required' => (!empty($field->required) ? $field->required : 0),
+														'required_relationship' => 0
+													);
+					} 
+				}
+			}			
+			return $this->moduleFields;
+		}
+		catch (\Exception $e){	
+			return false;
+		}
+	} // get_module_fields($module)	 
+
+
+   /**
+     * Get the last data in the application
+     * @param $param
+     * @return mixed
+     */
+    public function read_last($param) {	
+
+		// Query empty when the rule simulation is requested
+		if (empty($param['query'])) {
+			// For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redefine it)
+			$param['date_ref'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch));
+		}
+		$param['limit'] = 1;
+	
+		// We re use read function for the read_last 
+		$read = $this->read($param);	
+
+		// Format output values
+		if (!empty($read['error'])) {
+			$result['error'] = $read['error'];
+		} else {
+			if (!empty($read['values'])) {
+				$result['done'] = true;
+				// Get only one record
+				$result['values'] = current($read['values']);
+			} else {
+				$result['done'] = false;
+			}
+		}	
+		return $result; 
+    }// end function read_last
+	
+	  /**
+     * Function read data
+     * @param $param
+     * @return mixed
+     */
+    public function read($param) {
+        try {			
+			$result = array();
+			$result['count'] = 0;
+			$result['date_ref'] = $param['date_ref'];
+			
+			// Set default limit
+			if (empty($param['limit'])) {
+				$param['limit'] = $this->defaultLimit;
+			}
+			// Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);	
+		
+			// Init search parameters
+			$filterArgs = array(
+				'max_num' => $param['limit'],
+				'offset' => 0,
+				'fields' => implode($param['fields'],','),
+				'order_by' => 'date_modified'
+			);
+			// Init search filters
+			// Search by fields (id or duplicate fields)
+			if (!empty($param['query'])) { 
+				// Add every filter (AND operator by default)
+				foreach($param['query'] as $key => $value) {
+					$filterArgs['filter'][] = array($key => array('$equals' => $value));
+				}
+			// Search By reference
+			} else {
+				$filterArgs['filter'] = array(
+												array(
+													"date_modified" => array(
+														'$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
+													)
+												),
+										);			
+			}	
+			
+			// Get the records
+			$getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+			$response = $getRecords->getResponse();
+			// Format response if http return = 200
+			if ($response->getStatus()=='200'){
+				$body = $getRecords->getResponse()->getBody(false);
+				if (!empty($body->records)) {
+					$records = $body->records;
+				}
+			} else {
+				throw new \Exception(print_r($response->getBody(),true));
+			}
+
+			// Format records to result format
+			if (!empty($records)) {
+				foreach ($records as $record) {
+					foreach($param['fields'] as $field) {
+						$result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+					}
+					$result['values'][$record->id]['id'] = $record->id;
+					$result['values'][$record->id]['date_modified'] = $record->date_modified;
+				}
+				// We get the date_modified of the last records because SugarCRM webservice returns record sorted by date_modified
+				$result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
+				$result['count'] = count($records);
+			}	
+	  } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine() . ' )';	
+        }						
+		return $result;
+    }// end function read
+
+	/**
+	 * Function create data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function create($param) {
+		return $this->upsert('create', $param);
+
+	}// end function create
+
+	/**
+	 * Function update data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function update($param) {
+		return $this->upsert('update', $param);
+	}// end function create
+
+	public function upsert($method,$param) {
+		foreach($param['data'] as $idDoc => $data) {
+			try {
+				// Check control before create/update
+				$param['method'] = $method;
+				$data = $this->checkDataBeforeCreate($param, $data);
+				
+				if ($method == 'create') {
+					// Myddleware field empty when data transfer type is create
+					unset($data['target_id']);
+					$recordResult = $this->sugarAPI->createRecord($param['module'])->execute($data);
+				} else {			
+					// The record id is stored in $data['target_id']
+					$targetId = $data['target_id'];
+					unset($data['target_id']);
+					$recordResult = $this->sugarAPI->updateRecord($param['module'], $targetId)->execute($data);
+				}
+				
+				$response = $recordResult->getResponse();
+				if ($response->getStatus()=='200'){
+					$record = $response->getBody(false);
+					if (!empty($record->id)) {
+						$result[$idDoc] = array(
+												'id' => $record->id,
+												'error' => false
+										);
+					}
+					else  {
+						throw new \Exception('Error during '.print_r($response->getBody(),true));
+					}
+				}
+			}
+			catch (\Exception $e) {
+				$error = $e->getMessage();
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}
+		return $result;
+	}// end function create
+	
+	
+	// Convert date to Myddleware format 
+	// 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+	protected function dateTimeToMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// We save the UTC date in Myddleware
+		$dto->setTimezone(new \DateTimeZone('UTC'));
+		return $dto->format("Y-m-d H:i:s");
+	}// dateTimeToMyddleware($dateTime)	
+	
+	// Convert date to SugarCRM format
+	protected function dateTimeFromMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// Return date to UTC timezone
+		return $dto->format('Y-m-d\TH:i:s+00:00');
+	}// dateTimeToMyddleware($dateTime)    	
+
+	// Build the direct link to the record (used in data transfer view)
+	public function getDirectLink($rule, $document, $type){		
+		// Get url, module and record ID depending on the type
+		if ($type == 'source') {
+			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+			$module = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+			$module = $rule->getModuleTarget();
+			$recordId = $document->gettarget();
+		}			
+		// Build the URL (delete if exists / to be sure to not have 2 / in a row) 
+		return rtrim($url,'/').'/#'.$module.'/'.$recordId;
+	}
+	
+	// Used only for metadata (get_modules and )
+	protected function customCall($url, $parameters = null, $method = null){
+		try {
+			$request = curl_init($url);
+			if (!empty($method)) {
+				curl_setopt($request, CURLOPT_CUSTOMREQUEST, $method);
+			}
+			curl_setopt($request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+			curl_setopt($request, CURLOPT_HEADER, false);
+			curl_setopt($request, CURLOPT_SSL_VERIFYPEER, 0);
+			curl_setopt($request, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($request, CURLOPT_FOLLOWLOCATION, 0);
+			
+			$token = $this->sugarAPI->getToken();	
+			curl_setopt($request, CURLOPT_HTTPHEADER, array(
+				"Content-Type: application/json",
+				"oauth-token: {$token->access_token}"
+			));
+			//convert arguments to json
+			if (!empty($parameters)) {
+				$json_arguments = json_encode($parameters);
+				curl_setopt($request, CURLOPT_POSTFIELDS, $json_arguments);
+			}
+			
+			//execute request
+			$response = curl_exec($request);
+			//decode response
+			$response_obj = json_decode($response);
+			
+		}
+		catch(Exception $e) {
+			throw new \Exception($e->getMessage());
+		}	
+		// Send exception catched into functions
+		if (!empty($response_obj->error_message)) {
+			 throw new \Exception($response_obj->error_message);
+		}
+		return $response_obj;			
+    }	
 }
 
-/* * * * * * * *  * * * * * *  * * * * * * 
-	si custom file exist alors on fait un include de la custom class
+/* * * * * * * *  * * * * * *  * * * * * *
+    Include custom file if exists : used to redefine Myddleware standard code
  * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sugarcrm.php';
-if(file_exists($file)){
-	require_once($file);
-}
-else {
-	//Sinon on met la classe suivante
-	class sugarcrm extends sugarcrmcore {
-		
-	}
+$file = __DIR__ . '/../Custom/Solutions/sugarcrm.php';
+if (file_exists($file)) {
+    require_once($file);
+} else {
+    // Otherwise, we use the current class (in this file)
+    class sugarcrm extends sugarcrmcore
+    {
+
+    }
 }

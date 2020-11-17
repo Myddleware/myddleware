@@ -240,7 +240,7 @@ class homecore {
 		try {
 			$historic = array();
 			// Select last jobs
-		    $sql = "SELECT begin date, open, close, cancel, error FROM Job LIMIT ".$this->nbHistoricJobs;		
+		    $sql = "SELECT begin date, open, close, cancel, error FROM Job ORDER BY begin DESC LIMIT ".$this->nbHistoricJobs;		
 		    $stmt = $this->connection->prepare($sql);
 		    $stmt->execute();	    
 			$result = $stmt->fetchAll();			
