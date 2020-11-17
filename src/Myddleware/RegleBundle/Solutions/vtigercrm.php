@@ -557,7 +557,7 @@ class vtigercrmcore extends solution
 					}
 					if (in_array($param['module'], $this->inventoryModules, true) && !$deletion) {
 						foreach ($entitys as &$entity) {
-							$ret = $this->vtigerClient->retrieve($entity['id']);
+							$ret = $this->vtigerClient->retrieve($entity['id'], 1);
 							if (empty($ret) || !$ret['success']) {
 								continue;
 							}
