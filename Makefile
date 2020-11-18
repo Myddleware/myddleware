@@ -53,6 +53,7 @@ debug: down
 	@docker-compose up -d --force-recreate
 
 dev: down
+	@docker-compose run --rm myddleware rm -fr var/logs/vtigercrm.log
 	@docker-compose up -d
 
 prod: down
