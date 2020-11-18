@@ -34,7 +34,7 @@ update: init build up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 
 require-vtiger-client:
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.20 -vvvv --ignore-platform-reqs
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.21 -vvvv --ignore-platform-reqs
 
 setup-files:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd

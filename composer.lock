@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "41539131ccf6f08e7aa821e21af30477",
+    "content-hash": "546012ae337fed0d324d2a2d3076a06a",
     "packages": [
         {
             "name": "api-platform/api-pack",
@@ -2451,16 +2451,16 @@
         },
         {
             "name": "javanile/vtiger-client",
-            "version": "0.0.20",
+            "version": "0.0.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/javanile/vtiger-client.git",
-                "reference": "bf6904d8571addcc8fa5e403c141bcf011545832"
+                "reference": "9da3945059c9ffb6158cb3fd8f8346abb7f53dfc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/javanile/vtiger-client/zipball/bf6904d8571addcc8fa5e403c141bcf011545832",
-                "reference": "bf6904d8571addcc8fa5e403c141bcf011545832",
+                "url": "https://api.github.com/repos/javanile/vtiger-client/zipball/9da3945059c9ffb6158cb3fd8f8346abb7f53dfc",
+                "reference": "9da3945059c9ffb6158cb3fd8f8346abb7f53dfc",
                 "shasum": ""
             },
             "require": {
@@ -2486,7 +2486,7 @@
                     "email": "bianco@javanile.org"
                 }
             ],
-            "time": "2020-11-17T22:41:23+00:00"
+            "time": "2020-11-18T00:43:40+00:00"
         },
         {
             "name": "jdorn/sql-formatter",

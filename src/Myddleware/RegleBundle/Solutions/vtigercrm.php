@@ -336,7 +336,13 @@ class vtigercrmcore extends solution
             }
 
 			$param['field'] = $this->cleanMyddlewareElementId($param['field'] ?? []);
-			$queryParam = implode(',', $param['fields'] ?? "") ?: '*';
+			$baseFields = [];
+			foreach ($param['fields'] as $field) {
+                if (!preg_match('/__/', $field)) {
+                    $baseFields[] = $field;
+                }
+            }
+            $queryParam = implode(',', $baseFields ?? "") ?: '*';
 			$where = '';
 			if (!empty($param['query'])) {
 				$where = [];
@@ -385,6 +391,11 @@ class vtigercrmcore extends solution
 				$query = ["success" => true, "result" => $entity];
 			} else {
 				$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
+				if (isset($query['result'][0]['id']) && $query['result'][0]['id']) {
+				    $retrieve = $this->vtigerClient->retrieve($query['result'][0]['id'], 1);
+				    if (isset($retrieve['result']) && is_array($retrieve));
+                    $query['result'][0] = array_merge($query['result'][0], $retrieve['result']);
+                }
 			}
 
 			if (empty($query) || (!empty($query) && !$query['success'])) {
@@ -523,7 +534,7 @@ class vtigercrmcore extends solution
 					$more = count($entitys) != 0;
 				} else {
 					$dateRef = !empty($param['date_ref']) ? strtotime($param['date_ref']) : 1;
-					$sync = $this->vtigerClient->sync($param['module'], $dateRef);
+					$sync = $this->vtigerClient->sync($param['module'], $dateRef, 'application', 1);
 					if (empty($sync) || !$sync['success']) {
 						return [
 							'error' => 'Error: Request Failed! (' . ($sync['error']['message'] ?? 'Error') . ')',
