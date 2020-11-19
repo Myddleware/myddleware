@@ -3661,7 +3661,7 @@ function verifFields(field_id,show) {
 
 	// Affiche les champs obligatoire pour éviter les doublons
 	$( '#fields_duplicate_target' ).on( "click", 'li', function(){	
-		
+		console.log('je suis la');
 		// si le champ est sélectionné
 		if(fields_exist($(this).text())) {
 			

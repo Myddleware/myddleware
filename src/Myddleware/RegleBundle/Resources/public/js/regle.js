@@ -1293,7 +1293,7 @@ function verifFields(field_id,show) {
 	function recup_fields_relate() {
 		var relate_fields = [];	
 		$( '#fields_duplicate_target li' ).each(function(){
-			if( $(this).attr('data-active') == 'true' ) {
+			if( $(this).attr('data-active') === 'true' ) {
 				relate_fields.push( $.trim( $(this).text() ) );
 			}
 		});
@@ -1304,7 +1304,7 @@ function verifFields(field_id,show) {
 	function duplicate_fields_error() {
 		error=0;
 		$( 'li','#fields_duplicate_target' ).each(function(){
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				error++;
 			}
 		});
@@ -1359,29 +1359,28 @@ function verifFields(field_id,show) {
 	}
 
 	// Affiche les champs obligatoire pour éviter les doublons
-	$( '#fields_duplicate_target' ).on( "click", 'li', function(){	
+	$( '#fields_duplicate_target li' ).click( function(event){	
 		
 		// si le champ est sélectionné
 		if(fields_exist($(this).text())) {
-			
-			if( $(this).attr('data-active') == 'false' ) {
+			if( $(this).attr('data-active') === 'false' ) {
 				$(this).attr('data-active','true');
 				$(this).addClass('active');
 			}
 			else {
 				$(this).attr('data-active','false');
-				$(this).removeClass('active');					
+				$(this).removeClass('active');			
 			}					
 		}
 		else {
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				$(this).removeClass('no_active');
 			}
 			else {
-				$(this).addClass('no_active');					
+				$(this).addClass('no_active');		
 			}									
 		}
-
+		
 		recup_fields_relate();
 	});
 
@@ -1485,11 +1484,11 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 	if(params) {	
 		$.each(params, function( index, nameP ) {
 			$( '#'+nameP.name ).val( nameP.value );		
-			if( nameP.name + 'duplicate_fields' ) {
+			if( nameP.name === 'duplicate_fields' ) {
 				duplicate_fields = nameP.value.split(';');
-				$.each(duplicate_fields, function( index, d_fields ) {
-					$( "li:contains('" + d_fields + "')", '#fields_duplicate_target').click();	
-				});				
+				 $.each(duplicate_fields, function( index, d_fields ) {
+					 $( "li:contains('" + d_fields + "')", '#fields_duplicate_target').click();
+				 });				
 			}
 		});	
 	}

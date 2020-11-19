@@ -674,6 +674,8 @@ class solutioncore {
 
 }
 
+
+
 /* * * * * * * *  * * * * * *  * * * * * * 
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */

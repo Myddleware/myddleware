@@ -70,7 +70,8 @@ create_rule:
         empty_fields_target: No field found in the target
         empty_simulate: 'There is no data in the source server or fields in the target solution'
         empty_field_simulate: Empty content
-        data: Test data
+        data: Test data (default)
+        data_manual: Test data manually
         infobulle: Double click to remove
         previous: Previous step
         next: Next step        

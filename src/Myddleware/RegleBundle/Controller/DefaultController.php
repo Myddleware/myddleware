@@ -1102,6 +1102,7 @@ class DefaultControllerCore extends Controller
 
     }
 
+
     // CREATION - STEP THREE - SIMULATION DES DONNEES
     public function ruleSimulationAction(Request $request)
     {
@@ -1120,7 +1121,6 @@ class DefaultControllerCore extends Controller
                 '' // Params flux
             );
 
-
             $solution_source_nom = $serviceSession->getParamRuleSourceSolution($ruleKey);
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
             $solution_source->login($serviceSession->getParamRuleSource($ruleKey));
@@ -1128,12 +1128,23 @@ class DefaultControllerCore extends Controller
             $tab_simulation = array();
             $sourcesfields = array();
 
+//var_dump($solution_source_nom);  //string(10) "prestashop"
+// var_dump($doc); do not try this at home xD
+ //var_dump($tab_simulation);  //vide
+ //var_dump($sourcesfields);         // vide 
+
             // récupération de tous les champs
             if (isset($target['fields']) && count($target['fields']) > 0) {
                 foreach ($target['fields'] as $f) {
                     if (isset($f)) {
                         foreach ($f as $name_fields_target => $k) {
-
+// echo '<pre>';
+// var_dump($f);
+// echo '</pre>';
+// echo $name_fields_target;
+// echo '<pre>';
+// var_dump($k);
+// echo '</pre>';
                             if (isset($k['champs'])) {
                                 $sourcesfields = array_merge($k['champs'], $sourcesfields);
                             } else {
@@ -1153,31 +1164,85 @@ class DefaultControllerCore extends Controller
                     )
                 );
             }
-		
+
 			// Add rule param if exist (the aren't exist in rule creation)
-			$ruleParams = array();
-			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+            $ruleParams = array();
+            $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
 			if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
-					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
-				}
-			}
-			
+
+                    $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+                    // var_dump($ruleParamsObj->getName());   
+                    // var_dump($ruleParamsResult);   
+                    // echo $ruleParamsObj;   
+                }     
+            }         
+//var_dump($ruleParams); // tableau vide
+//var_dump($ruleParamsResult);  // tableau vide
+   
+       
             // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                 'fields' => $sourcesfields,
-				'ruleParams' => $ruleParams));
+                'ruleParams' => $ruleParams
+            ));
+
+
+// $source= $solution_source->read(array(
+//     'date_ref' => '2020-11-11 00:00:00',
+//     'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+//     'fields' => $sourcesfields,
+//     'limit' => 5
+// ));           =>>> undefined index : rule
+ 
+// echo '<pre>';
+// var_dump($source);
+// echo '</pre>';
+// die();
+// die();
+// echo '<pre>';
+// var_dump(
+//     $solution_source->read_last(
+//         array(
+//         'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+//         'fields' => $sourcesfields,
+//         'ruleParams' => $ruleParams,
+//         )
+//     )
+// );
+// echo '</pre>';
+// read_last() => Solutions/database.php NON => solution.php puis la solution (ex : prestashop.php)
+//var_dump($solution_source);  DO NOT TRY THIS AT HOME              
+// echo '<pre>';
+// var_dump($source);  //tableau DEJA CONFIGURE
+// echo '</pre>';
+// echo '<pre>';
+// var_dump($source['values']);
+// echo '</pre>';
+// echo '<pre>';
+// var_dump($source);
+// echo '</pre>';
+
+
 
             if (isset($source['done'])) {
                 $before = array();
                 $after = array();
                 if ($source['done']) {
                     foreach ($target['fields'] as $f) {
+// echo '<pre>';
+// var_dump($f);  //nom des champs en source
+// echo '</pre>';
                         foreach ($f as $name_fields_target => $k) {
+
+// echo '<pre>';
+// var_dump($k);   //noms des champs en SOURCE 
+// echo '</pre>';
                             $r['after'] = array();
                             // Préparation pour transformation
                             $name = trim($name_fields_target);
+//var_dump($name);  //noms des champs en TARGET 
                             $target_fields = array(
                                 'target_field_name' => $name,
                                 'source_field_name' => ((isset($k['champs'])) ? implode(';', $k['champs']) : 'my_value'),
@@ -1216,7 +1281,6 @@ class DefaultControllerCore extends Controller
                                 'after' => $r['after'],
                                 'before' => $k['fields']
                             );
-
                         }
                     }
                     $after = array();
