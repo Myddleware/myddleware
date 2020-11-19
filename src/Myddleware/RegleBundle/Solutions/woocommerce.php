@@ -27,6 +27,8 @@ namespace Myddleware\RegleBundle\Solutions;
 // use Symfony\Component\HttpFoundation\Session\Session;
 // use \Datetime;
 
+use DateTime;
+use DateTimeZone;
 use Automattic\WooCommerce\Client;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -36,10 +38,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class woocommercecore extends solution {
 
 
-    protected $urlSuffix = '/wp-json/wc/v3/';
+    protected $apiUrlSuffix = '/wp-json/wc/v3/';
+    protected $url;
     protected $consumerKey;
     protected $consumerSecret;
-    // protected $woocommerce;
+    protected $woocommerce;
 
     //Log in parameters
     public function getFieldsLogin()
@@ -73,7 +76,7 @@ class woocommercecore extends solution {
 
             // }
 
-            $woocommerce = new Client(
+            $this->woocommerce = new Client(
                 $this->paramConnexion['url'],
                 $this->paramConnexion['consumerkey'],
                 $this->paramConnexion['consumersecret'],
@@ -83,7 +86,15 @@ class woocommercecore extends solution {
                 ]
                 );
 
-            $result = $this->call('login', $woocommerce);
+               if(isset($woocommerce)){
+               
+                // var_dump($this->woocommerce);
+               }
+               $this->connexion_valide = true;	
+            //  var_dump( $this->woocommerce->get('data'));
+
+            //  var_dump($woocommerce->get('products'));   
+            // $result = $this->call('login', $woocommerce);
 
                 // if(empty($woocommerce)){
                 //     throw new \Exception('Failed to connect to Woocommerce');
@@ -95,14 +106,16 @@ class woocommercecore extends solution {
             // $this->consumerKey = $this->paramConnexion['consumerkey'];
             // $this->consumerSecret = $this->paramConnexion['consumersecret'];
             // var_dump($this->paramConnexion);
-            if(isset($woocommerce)){
-                // print_r($woocommerce);
-                 $this->connexion_valide = true;	
-                // var_dump($woocommerce->get('products'));
+
+
+            // if(isset($woocommerce)){
+            //     // print_r($woocommerce);
+         
+            //     // var_dump($woocommerce->get('products'));
                 
-            }else{
-                throw new \Exception('ALLO?');
-            }
+            // }else{
+            //     throw new \Exception('ALLO?');
+            // }
             // return $this->woocommerce;
 
         } catch (\Exception $e) {
@@ -169,18 +182,7 @@ class woocommercecore extends solution {
 		// 	$this->logger->error($error);
 		// 	return array('error' => $error);
 		// }
-//	} // login($paramConnexion)*/
-
-
-
-//  $woocommerce = new Client(
-//     'http://localhost/myddleware/wordpress', 
-//     'ck_4d08598e65e7ad6a188fecaeb26d06ecdbdd30b4', 
-//     'cs_82858696bfa94993dc4e27cdf59d5cf2432f87c1',
-//     [
-//         'version' => 'wc/v3',
-//     ]
-// );
+//	} 
 
     public function get_modules($type = 'source'){
         return array(
@@ -231,76 +233,171 @@ class woocommercecore extends solution {
 
 
 
+// Return the filed reference
+public function getDateRefName($moduleSource, $ruleMode) {
+    if(in_array($ruleMode,array("0","S"))) {
+        return 'date_modified';
+    } elseif ($ruleMode == 'C'){
+        return 'date_created';
+    } else {
+        throw new \Exception ("Rule mode $ruleMode unknown.");
+    }
+    return null;
+}
 
-    	// Read one specific record
-	public function read($param) {
-		$result['count'] = 0;
+
+
+
+
+     	// Read one specific record
+        public function read($param) {
+     
 		try {
+
+            $result = [];
+            // $result['count'] = 0;
+            // $result['date_ref'] = $param['date_ref'];
+
+
 			// Get the reference date
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			// $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            // $this->url = $this->paramConnexion['url'];
+           $response = $this->woocommerce->get($param['module']);
+        //    var_dump(json_encode($response));
+        if(isset($response)){
+            // $result = $response;
+            foreach($response as $key => $value) {
+           
+                // $result['values'][$key] = json_encode($value);  
+                // var_dump(json_encode($value));
+                foreach($value as $fieldName => $fieldValue){
+                    // var_dump($fieldName.' '.$fieldValue);
+                    $result['values'][$fieldName] = $fieldValue;
+                    
+                }
+                //   var_dump($result['values']);
+            }
+        }
+         
+        //    if($response){
+        //         foreach($response as $key => $record){
+        //             foreach($param['fields'] as $field) {
+        //                 $result['values'][$record->id][$field]
+        //             }
+        //         }
+        //    }
+        //    var_dump($result);
+	// 		// Add requiered fields 
+	// 		$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+	// 		// Remove fields that doesn't belong to shop application
+	// 		$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
-			// Add requiered fields 
-			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
-			// Remove fields that doesn't belong to shop application
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+	    // // We build the url (get all data after the reference date)
+	 	// 	$urlApi = $this->url.$param['module'].'/filter/'.$dateRefField.'/superior/'.urlencode($param['date_ref']).'/orderby/date_created/asc'.$this->apiKey;
+        
+	// 		// Try to access to the shop
+	// 		$return = $this->call($urlApi, 'get', '');	
 			
-			// We build the url (get all data after the reference date)
-			$urlApi = $this->url.$param['module'].'/filter/'.$dateRefField.'/superior/'.urlencode($param['date_ref']).'/orderby/date_created/asc'.$this->apiKey;
-		
-			// Try to access to the shop
-			$return = $this->call($urlApi, 'get', '');	
-			
-			$code = $return->__get('code');
-			// If the call is a success
-			if ($code == '200') {		
-				$body = $return->__get('body');
-				if (!empty($body)) {
-					// For each record
-					foreach ($body as $id => $record) {
-						$row = array();
-						// For each fields					
-						foreach ($param['fields'] as $field) {
-							if ($field == $dateRefField) {
-								$row['date_modified'] = $record->$field;
-								// Save the latest reference date
-								if (	
-										empty($result['date_ref'])
-									 || $record->$field > $result['date_ref']
-								) {
-									$result['date_ref'] = $record->$field;
-								}
-							} else {
-								// Transform the field to an array in case it is a language fields
-								$filedArray = explode('__',$field);						
-								$nbLevel = count($filedArray);
-								if ($nbLevel == 3) { // Language field
-									// We search the language field in the body
-									if (
-											!empty($param['ruleParams']['language'])
-										 &&	!empty($record->$filedArray[0]->$param['ruleParams']['language']->$filedArray[2])
-									) {
-										$row[$field] = $record->$filedArray[0]->$param['ruleParams']['language']->$filedArray[2];
-									}
-								} else { // Other fields
-									$row[$field] = $record->$field;
-								}
-							}
-						}						
-						$result['values'][$id] = $row;
-						$result['count']++;
-					}
-				}
-			}
-			else {
-				// Get the error message
-				$body = $return->__get('body');
-				throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
-			}		
-		}
-		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
-		}		
+	// 		$code = $return->__get('code');
+	// 		// If the call is a success
+	// 		if ($code == '200') {		
+	// 			$body = $return->__get('body');
+	// 			if (!empty($body)) {
+	// 				// For each record
+	// 				foreach ($body as $id => $record) {
+	// 					$row = array();
+	// 					// For each fields					
+	// 					foreach ($param['fields'] as $field) {
+	// 						if ($field == $dateRefField) {
+	// 							$row['date_modified'] = $record->$field;
+	// 							// Save the latest reference date
+	// 							if (	
+	// 									empty($result['date_ref'])
+	// 								 || $record->$field > $result['date_ref']
+	// 							) {
+	// 								$result['date_ref'] = $record->$field;
+	// 							}
+	// 						} else {
+	// 							// Transform the field to an array in case it is a language fields
+	// 							$filedArray = explode('__',$field);						
+	// 							$nbLevel = count($filedArray);
+	// 							if ($nbLevel == 3) { // Language field
+	// 								// We search the language field in the body
+	// 								if (
+	// 										!empty($param['ruleParams']['language'])
+	// 									 &&	!empty($record->$filedArray[0]->$param['ruleParams']['language']->$filedArray[2])
+	// 								) {
+	// 									$row[$field] = $record->$filedArray[0]->$param['ruleParams']['language']->$filedArray[2];
+	// 								}
+	// 							} else { // Other fields
+	// 								$row[$field] = $record->$field;
+	// 							}
+	// 						}
+	// 					}						
+	// 					$result['values'][$id] = $row;
+	// 					$result['count']++;
+	// 				}
+	// 			}
+	// 		}
+	// 		else {
+	// 			// Get the error message
+	// 			$body = $return->__get('body');
+	// 			throw new \Exception('Code error '.$code.(!empty($body->errors->$code) ? ' : '.$body->errors->$code : ''));
+	// 		}		
+	 	} catch (\Exception $e) {
+	 	    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
+	 	}		
+	 	return $result;
+    }
+
+
+    public function read_last($param) {
+        $result = array();
+        try{
+           // '?orderby=modified'
+            // Only retrieve one result 
+        //    $lastRecordUrlSuffix = '?order=desc&per_page=1' ;
+
+           //get all instances of the module
+           $read = $this->read($param);
+        
+            
+           	// Format output values
+            if (!empty($read['error'])) {
+                $result['error'] = $read['error'];
+            } else {
+                if (!empty($read['values'])) {
+                    $result['done'] = true;
+                    // Get only one record
+                    $result['values'] = $read['values'];
+                } else {
+                    $result['done'] = false;
+                }
+            }
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$result['done'] = -1;		
+        }
 		return $result;
+	}
+
+
+    	// Convert date to Myddleware format 
+	// 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+	protected function dateTimeToMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// We save the UTC date in Myddleware
+		$dto->setTimezone(new \DateTimeZone('UTC'));
+		return $dto->format("Y-m-d H:i:s");
+	}// dateTimeToMyddleware($dateTime)	
+	
+	// Convert date to SugarCRM format
+	protected function dateTimeFromMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// Return date to UTC timezone
+		return $dto->format('Y-m-d\TH:i:s+00:00');
+	}// dateTimeToMyddleware($dateTime)    	
+
 
 
 }

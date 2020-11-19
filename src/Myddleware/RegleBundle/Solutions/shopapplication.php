@@ -735,12 +735,12 @@ class shopapplicationcore extends solution {
 	
 	// Return the filed reference
 	public function getDateRefName($moduleSource, $ruleMode) {
-		if(in_array($RuleMode,array("0","S"))) {
+		if(in_array($ruleMode,array("0","S"))) {
 			return 'date_modified';
 		} elseif ($ruleMode == 'C'){
 			return 'date_created';
 		} else {
-			throw new \Exception ("Rule mode $RuleMode unknown.");
+			throw new \Exception ("Rule mode $ruleMode unknown.");
 		}
 		return null;
 	}
