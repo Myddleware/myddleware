@@ -149,7 +149,6 @@ class filecore extends solution {
 				$sftp = ssh2_sftp($this->connection);
 				$stream = fopen("ssh2.sftp://".intval($sftp).$fileName, 'r');
 				$headerString = trim(fgets($stream));
-
 				// Close the file
 				fclose($stream);
 
@@ -585,7 +584,6 @@ class filecore extends solution {
 	protected function generateId($param,$rowFile) {
 		return uniqid('', true);
 	}	
-
 	
 	protected function checkRow($rowFile,$param){
 		return true;
@@ -603,8 +601,7 @@ class filecore extends solution {
 
 			foreach($this->columnWidth[$param['module']] as $columnWidth) {
 				$result[] = mb_substr($buffer,$start,$columnWidth); 
-				$start += $columnWidth;
-					
+				$start += $columnWidth;		
 			}
 			return $result;
 		// Otherwise we manage row with separator	
