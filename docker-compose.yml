@@ -18,7 +18,7 @@ services:
       - ./.temp/.composer:/root/.composer:cached
     links:
       - mysql
-      - phpmyadmin
+    restart: 'always'
 
   mysql:
     image: mysql:5.7.28
@@ -29,17 +29,21 @@ services:
       - wait_timeout=100
     volumes:
       - mysql:/var/lib/mysql:rw
+    restart: 'always'
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - ${phpmyadmin_port}:80
+  backup:
+    image: databack/mysql-backup
     environment:
-      - PMA_HOST=mysql
-      - PMA_USER=root
-      - PMA_PASSWORD=secret
-    links:
-      - mysql
+      - DB_SERVER=mysql
+      - DB_USER=root
+      - DB_PASS=secret
+      - DB_NAMES=myddleware
+      - DB_DUMP_TARGET=${backup_target}
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=2300
+      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
 
   filebrowser:
     image: filebrowser/filebrowser
@@ -50,6 +54,7 @@ services:
       - ./var/logs:/srv/Logs
       - ./var/databases/filebrowser.db:/database.db
       - ./.filebrowser.json:/.filebrowser.json
+    restart: 'always'
 
 volumes:
   mysql:

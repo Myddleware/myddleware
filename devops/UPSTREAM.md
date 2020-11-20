@@ -1,6 +1,8 @@
 # Sync Upstream
 
-this operation is for get updates from the UPSTREAM repository, follow this steps:
+> Before run this procedure read the file [REPOSITORY.md](REPOSITORY.md)
+
+This operation is for get updates from the UPSTREAM repository, follow this steps:
 
 1. Go to `devops` branch with the following command `git checkout devops` than run a `git pull`;
 2. Run the this script `./devops/scripts/update-from-upstream.sh` or use BASH interpreter with `bash devops/scripts/update-from-upstream.sh`

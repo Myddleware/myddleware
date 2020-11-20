@@ -25,8 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class microsoftsqlcore extends database {
-	
+class microsoftsqlcore extends database
+{
 	protected $driver;
 	protected $fieldName = 'COLUMN_NAME';
 	protected $fieldLabel = 'COLUMN_NAME';
@@ -97,12 +97,8 @@ class microsoftsqlcore extends database {
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__.'/../Custom/Solutions/microsoftsql.php';
-if(file_exists($file)){
-	require_once($file);
-}
-else {
-	//Sinon on met la classe suivante
-	class microsoftsql extends microsoftsqlcore {
-
-	}
+if (file_exists($file)) {
+    require_once $file;
+} else {
+	class microsoftsql extends microsoftsqlcore {}
 } 

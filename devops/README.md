@@ -1,26 +1,25 @@
-# DevOps
+# Benvenuto in Myddleware
 
-This document describes how manage Myddleware codebase, for sync this project from changes provided by UPSTREAM (https://github.com/Myddleware/myddleware) follow this page [SYNC_UPSTREAM](SYNC_UPSTREAM.md)
+Myddleware ti permette di sincronizzare dati tra diverse piattaforme in modo semplice
 
-## Glossary
+Di seguito trovi dei manuali dedicati a specifiche sezioni della vita di questo software
 
-This word list used to shortening description of all operations
+## Cosa devi fare? 
 
-- **OCI:** Refers to our team OpenCrmItalia
-- **UPSTREAM:** The main Myddleware repository you found it at <https://github.com/Myddleware/myddleware>
-- **PR:** Shortening for Pull-Request    
-- **PLEASE:** Follow instruction without any reply
+- Vuoi rilasciare/installare Myddleware in un server linux dotato di Docker, 
+  segui queste istruzioni: [DEPLOYMENT.md](DEPLOYMENT.md)
 
-## Branches Description
+- Vuoi aggiornare un istanza di Myddleware precedentemente installata,
+  segui queste istruzioni: [UPDATE.md](UPDATE.md)
 
-- `stable` is the default OCI branch, it contains the version for production environment and clients
-- `master` is the branch used to sync updates from master of UPSTREAM
-- `hotfix` is the branch used to sync updates from the hotfix of UPSTREAM
-- `devops` this branch MUST be used to manage the repository for development operations (eg. clean branches)
-- `contribute` this is the branch used from OCI for submit changes to UPSTREAM via PR
+- Vuoi fare debug di un istanza Myddleware che sta riportando 
+  dei problemi di sincronizzazione, segui queste istruzioni: [DEBUG.md](DEBUG.md)
 
-## NDT: Never do this
+- Vuoi aggiornare questa repository Myddleware con gli ultimi rilasci 
+  della versione ufficiale, segui queste istruzioni: [UPSTREAM.md](UPSTREAM.md)
+  
+- Vuoi sviluppare nuove funzionalità su questa versione di Myddleware,
+  segui queste istruzioni: [DEVELOPMENT.md](DEVELOPMENT.md)
 
-This is the list of NDT operation, never do this operation (PLEASE):
-
-- Never merge the `contribute` branch into `master` or any other branches, this is only for PR to UPSTREAM 
+- Vuoi rilasciare una nuova funzionalità nella versione ufficiale di Myddleware,
+  segui queste istruzioni: [CONTRIBUTE.md](CONTRIBUTE.md)
