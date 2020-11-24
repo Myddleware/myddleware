@@ -136,27 +136,52 @@ class woocommercecore extends solution {
             }
 
             //get all data, sorted by date_modified
-            $response = $this->woocommerce->get($param['module'], array('orderby' => 'modified'));
+            $response = $this->woocommerce->get($param['module'], array('orderby' => 'modified',
+                                                                        'per_page' => $this->defaultLimit                                                                      // 'order' => 'asc',
+                                                                        // 'after' => $this->dateTimeFromMyddleware($param['date_ref'])
+                                                                    ));
+  
+// var_dump($response);
+        //boucle pour trouver la date modified => sortir quand elle est atteinte + plus rien à lire
 
-            if(isset($response)){
+         $stop = false;
+         $count = 0;
+        do{
+            if(!empty($response)){
                 foreach($response as $record){
-                    foreach($param['fields'] as $field){
-                        $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
-                        $result['values'][$record->id]['date_modified'] = $record->date_modified;
-                    }
-                    $result['values'][$record->id]['id'] = $record->id;
-                }
-                    $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
-                    $result['count'] = count($response);
-            }	
+                      if($param['ruleParams']['datereference'] < $record->date_modified){
 
+                        foreach($param['fields'] as $field){
+                            $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+                        }
+                        $result['values'][$record->id]['date_modified'] = $record->date_modified;
+                        $result['values'][$record->id]['id'] = $record->id;
+                        $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
+                        $count++;
+                        $result['count'] = $count;
+                     } else{
+                        $stop = true;
+                     }
+                    
+             }
+                   
+                    // $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
+                    // $result['count'] = count($response);
+            }	
+          }while(!$stop);
 //TODO QUERY ID  (voir sugar)
 
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
         }		
-    // var_dump($result);
-        return $result;
+        
+        // var_dump($result);
+        // echo '     count : '.$result['count'];
+    //   var_dump($result['date_ref'].'         '.$result['count']);
+    //   var_dump($param);
+        // return null;
+          return $result;
+     
     }
 
 
@@ -201,7 +226,7 @@ class woocommercecore extends solution {
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// Return date to UTC timezone
-		return $dto->format('Y-m-d\TH:i:s+00:00');
+		return $dto->format('Y-m-d\TH:i:s');
 	}// dateTimeToMyddleware($dateTime)    	
 
 }
