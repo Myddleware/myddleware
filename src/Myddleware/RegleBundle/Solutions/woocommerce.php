@@ -129,7 +129,7 @@ class woocommercecore extends solution {
         try {
             $result = [];
             $result['count'] = 0;
-            $result['date_ref'] = $param['ruleParams']['datereference'];
+            // $result['date_ref'] = $param['ruleParams']['datereference'];
 
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
@@ -145,8 +145,8 @@ class woocommercecore extends solution {
                         $result['values'][$record->id]['date_modified'] = $record->date_modified;
                     }
                     $result['values'][$record->id]['id'] = $record->id;
-					
                 }
+                    $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
                     $result['count'] = count($response);
             }	
 
@@ -155,7 +155,7 @@ class woocommercecore extends solution {
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
         }		
-
+    // var_dump($result);
         return $result;
     }
 
