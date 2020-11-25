@@ -41,6 +41,7 @@ class woocommercecore extends solution {
     //TODO : à remplir avec Stéphane
     protected $FieldsDuplicate = array();
     protected $defaultLimit = 100;
+    protected $delaySearch = '-1 month';
 
     //Log in parameters
     public function getFieldsLogin()
@@ -129,57 +130,74 @@ class woocommercecore extends solution {
         try {
             $result = [];
             $result['count'] = 0;
-            // $result['date_ref'] = $param['ruleParams']['datereference'];
-
+            $result['date_ref'] = $param['ruleParams']['datereference'];
+            $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
 
+            // Remove Myddleware 's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+
             //get all data, sorted by date_modified
-            $response = $this->woocommerce->get($param['module'], array('orderby' => 'modified',
-                                                                        'per_page' => $this->defaultLimit                                                                      // 'order' => 'asc',
-                                                                        // 'after' => $this->dateTimeFromMyddleware($param['date_ref'])
-                                                                    ));
-  
-// var_dump($response);
-        //boucle pour trouver la date modified => sortir quand elle est atteinte + plus rien à lire
-
-         $stop = false;
-         $count = 0;
-        do{
-            if(!empty($response)){
-                foreach($response as $record){
-                      if($param['ruleParams']['datereference'] < $record->date_modified){
-
-                        foreach($param['fields'] as $field){
-                            $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+            $stop = false;
+            $count = 0;
+            $page = 1;
+            do {
+                //orderby isn't available for customers in the API filters
+                if($param['module'] === 'customers'){
+                    $response = $this->woocommerce->get($param['module'], array('per_page' => $this->defaultLimit,
+                                                                                'page' => $page));
+                } else {
+                    $response = $this->woocommerce->get($param['module'], array('orderby' => 'modified',
+                                                                                'per_page' => $this->defaultLimit,
+                                                                                'page' => $page));
+                }                                      
+                if(!empty($response)){
+                    foreach($response as $record){
+                        if($dateRefWooFormat < $record->date_modified){
+                            
+                            foreach($param['fields'] as $field){
+                                // If we have a 2 dimensional array we break it down  
+                                $fieldStructure = explode('__',$field);
+                                $fieldGroup = '';
+                                $fieldName = '';
+                                if (!empty($fieldStructure[1])) {
+                                    $fieldGroup = $fieldStructure[0];
+                                    $fieldName = $fieldStructure[1];
+                                    $result['values'][$record->id][$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
+                                } else {
+                                    $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+                            }
                         }
-                        $result['values'][$record->id]['date_modified'] = $record->date_modified;
-                        $result['values'][$record->id]['id'] = $record->id;
-                        $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
-                        $count++;
-                        $result['count'] = $count;
-                     } else{
-                        $stop = true;
-                     }
-                    
-             }
-                   
-                    // $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
-                    // $result['count'] = count($response);
-            }	
-          }while(!$stop);
+                            $result['values'][$record->id]['date_modified'] = $record->date_modified;
+                            $result['values'][$record->id]['id'] = $record->id;
+                            $count++;
+                        } else {
+                            $stop = true;
+                        }
+                    }   
+                }else{
+                    $stop = true; 
+                }
+                $page++;	
+            } while(!$stop);
 //TODO QUERY ID  (voir sugar)
 
+            //As the records sent from the API are ordered by date_modified, 
+            // we pass date_modified from the first record as the date_ref
+            if(!empty($result['values'])){
+                $latestModification = $result['values'][array_key_first($result['values'])]['date_modified'];
+                $result['date_ref'] = $this->dateTimeToMyddleware($latestModification);
+            }
+            $result['count'] = $count; 
+        
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
-        }		
-        
-        // var_dump($result);
-        // echo '     count : '.$result['count'];
-    //   var_dump($result['date_ref'].'         '.$result['count']);
-    //   var_dump($param);
-        // return null;
+        }	
           return $result;
      
     }
@@ -190,6 +208,10 @@ class woocommercecore extends solution {
     public function read_last($param) {
         $result = array();
         try{
+
+            //for simulation purposes, we create a new date_ref in the past
+                $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+         
            //get all instances of the module
            $read = $this->read($param);
 
@@ -214,20 +236,20 @@ class woocommercecore extends solution {
 	}
 
     // Convert date to Myddleware format 
-	// 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
 	protected function dateTimeToMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// We save the UTC date in Myddleware
 		$dto->setTimezone(new \DateTimeZone('UTC'));
 		return $dto->format("Y-m-d H:i:s");
-	}// dateTimeToMyddleware($dateTime)	
+	}
 	
-	// Convert date to SugarCRM format
+    //convert from Myddleware format to Woocommerce format
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// Return date to UTC timezone
 		return $dto->format('Y-m-d\TH:i:s');
-	}// dateTimeToMyddleware($dateTime)    	
+	}
 
 }
 
