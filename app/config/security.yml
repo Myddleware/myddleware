@@ -19,3 +19,14 @@ security:
 
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 #        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+    firewalls:
+        main:
+            anonymous: ~
+            # guard:
+                # authenticators:
+                    # - AppBundle\Security\LoginFormAuthenticator
+            logout:
+                path: /logout
+            switch_user: ~
+            logout_on_user_change: true
