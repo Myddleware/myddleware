@@ -42,6 +42,9 @@ class woocommercecore extends solution {
     protected $FieldsDuplicate = array();
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
+    protected $subModules = array(
+                                'line_items' => 'orders'
+                            );
 
     //Log in parameters
     public function getFieldsLogin()
@@ -98,7 +101,8 @@ class woocommercecore extends solution {
             // 'shipping' => 'Shipping',  shipping/zones
             // 'taxes' => 'Taxes',
             // 'webhooks' => 'Webhooks',
-            'shipping-methods' => 'Shipping Methods'
+            'shipping-methods' => 'Shipping Methods',
+            'line_items' => 'Line Items'
         );
     }
 
@@ -128,6 +132,8 @@ class woocommercecore extends solution {
     public function read($param) {
     //TODO: tester pair impair  
         try {
+
+            $module = $param['module'];
             $result = [];
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
@@ -135,29 +141,53 @@ class woocommercecore extends solution {
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
+// var_dump($this->subModules[$param['module']]);
+//  var_dump($param['module']);
+            //pour les sous-modules
+            if(!empty($this->subModules[$param['module']])){
+                $module = $this->subModules[$param['module']];
+            } 
 
+            //for submodules, we pass the parent module
+            // if(in_array($module, $this->subModules)){
+            //     // $module = $this->subModules[$param['module']];
+            //      $module = key($this->subModules);
+            // } else {
+            //     $module = $param['module'];
+            // }
+    
+// var_dump($this->subModules);
+// var_dump($param['module']);
+// var_dump($module);
             // Remove Myddleware 's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
 			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
             //get all data, sorted by date_modified
             $stop = false;
             $count = 0;
             $page = 1;
             do {
-                //orderby isn't available for customers in the API filters
-                if($param['module'] === 'customers'){
-                    $response = $this->woocommerce->get($param['module'], array('per_page' => $this->defaultLimit,
+                //orderby modified isn't available for customers in the API filters so we sort by creation date
+                if($module === 'customers'){
+                    $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
+                                                                                'order' => 'desc',
+                                                                                'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
                 } else {
-                    $response = $this->woocommerce->get($param['module'], array('orderby' => 'modified',
+                    $response = $this->woocommerce->get($module, array('orderby' => 'modified',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
                 }                                      
                 if(!empty($response)){
+// var_dump($response);
+            //  pour line items convertir la response 
+                $response = $this->convertResponse($param, $response);
+          
                     foreach($response as $record){
+
                         if($dateRefWooFormat < $record->date_modified){
                             
                             foreach($param['fields'] as $field){
@@ -198,8 +228,32 @@ class woocommercecore extends solution {
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
         }	
-          return $result;
+    
+            //  var_dump($result);
+        //   return null;
+        return $result;
      
+    }
+
+    //for specific modules (ex : line_items)
+    public function convertResponse($param, $response) {
+        //  var_dump($param);
+        if(array_key_exists($param['module'], $this->subModules)){
+            $subModule = $param['module'];
+            $newResponse = array();
+            if(!empty($response)){
+                foreach($response as $key => $record){      
+                     foreach($record->$subModule as $subRecord){
+                       
+                        $subRecord->date_modified = $record->date_modified;
+                        $newResponse[$subRecord->id] = $subRecord;
+                     }    
+                }
+            }
+                return $newResponse;
+        }
+        return $response;
+
     }
 
 
@@ -252,6 +306,10 @@ class woocommercecore extends solution {
 	}
 
 }
+
+
+
+
 
 // Include custom file if it exists : used to redefine Myddleware standard core
 $file = __DIR__. '/../Custom/Solutions/woocommerce.php';

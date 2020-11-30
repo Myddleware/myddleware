@@ -119,7 +119,12 @@ $moduleFields = array (
                             'grouped_products' => array( 'label' => 'Grouped_products', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'menu_order' => array( 'label' => 'Menu_order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'meta_data' => array( 'label' => 'Meta_data', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            '_links' => array( 'label' => '_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+                            '_links' => array( 'label' => '_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'attributes__id' => array( 'label' => 'Product attributes id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'attributes__name' => array( 'label' => 'Product attributes name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'attributes__slug' => array( 'label' => 'Product attributes slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'attributes__type' => array( 'label' => 'Product attributes type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'attributes__has_archives' => array( 'label' => 'Product attributes has archives', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
                         ),
                         'payment_gateways' => array(
                             'id' => array( 'label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -157,7 +162,15 @@ $moduleFields = array (
                             'billing__email'	=> array( 'label' => 'Billing : Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'billing__phone'	=> array( 'label' => 'Billing : Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'billing__state'	=> array( 'label' => 'Billing : State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            'shipping'	=> array( 'label' => 'Shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__first_name'	=> array( 'label' => 'Shipping : First Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__last_name'	=> array( 'label' => 'Shipping : Last Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__company'	=> array( 'label' => 'Shipping : Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__address_1'	=> array( 'label' => 'Shipping : Address 1', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__address_2'	=> array( 'label' => 'Shipping : Address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__city'	=> array( 'label' => 'Shipping : City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__state'	=> array( 'label' => 'Shipping : State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__postcode'	=> array( 'label' => 'Shipping : Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__country'	=> array( 'label' => 'Shipping : Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'is_paying_customer'	=> array( 'label' => 'Is Paying Customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'avatar_url'	=> array( 'label' => 'Avatar URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'meta_data'=> array( 'label' => 'Meta Data', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -183,7 +196,7 @@ $moduleFields = array (
                             'total'	=> array( 'label' => 'total', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'total_tax'	=> array( 'label' => 'total_tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'prices_include_tax'	=> array( 'label' => 'prices_include_tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            'customer_id'	=> array( 'label' => 'customer_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            // 'customer_id'	=> array( 'label' => 'customer_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'customer_ip_address'	=> array( 'label' => 'customer_ip_address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'customer_user_agent'	=> array( 'label' => 'customer_user_agent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'customer_note'	=> array( 'label' => 'customer_note', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -199,7 +212,15 @@ $moduleFields = array (
                             'billing__email'	=> array( 'label' => 'Billing email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'billing__phone'	=> array( 'label' => 'Billing phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'billing__state'	=> array( 'label' => 'Billing state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            'shipping'	=> array( 'label' => 'shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__first_name'	=> array( 'label' => 'Shipping : First Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__last_name'	=> array( 'label' => 'Shipping : Last Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__company'	=> array( 'label' => 'Shipping : Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__address_1'	=> array( 'label' => 'Shipping : Address 1', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__address_2'	=> array( 'label' => 'Shipping : Address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__city'	=> array( 'label' => 'Shipping : City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__state'	=> array( 'label' => 'Shipping : State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__postcode'	=> array( 'label' => 'Shipping : Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'shipping__country'	=> array( 'label' => 'Shipping : Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'payment_method'	=> array( 'label' => 'payment_method', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'payment_method_title'	=> array( 'label' => 'payment_method_title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'transaction_id'	=> array( 'label' => 'transaction_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -215,8 +236,23 @@ $moduleFields = array (
                             'fee_lines'	=> array( 'label' => 'fee_lines', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'coupon_lines'	=> array( 'label' => 'coupon_lines', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'refunds'	=> array( 'label' => 'refunds', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            'set_paid' => array( 'label' => 'set_paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'set_paid' => array( 'label' => 'Set paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            
+                        ),
+                        'line_items' => array(
+                            'id' =>array( 'label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'name' =>array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'quantity' =>array( 'label' => 'Quantity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+
                         )
                     );
 
-$fieldsRelate = array ();
+$fieldsRelate = array (
+    'line_items' => array(
+        'order_id' => array( 'label' => 'Order Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'product_id'=> array( 'label' => 'Product id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
+    'orders' => array(
+         'customer_id'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    )
+);
