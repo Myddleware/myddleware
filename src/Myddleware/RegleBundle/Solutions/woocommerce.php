@@ -38,14 +38,14 @@ class woocommercecore extends solution {
     protected $consumerKey;
     protected $consumerSecret;
     protected $woocommerce;
-    //TODO : à remplir avec Stéphane
-    protected $FieldsDuplicate = array();
+    // protected $FieldsDuplicate = array();
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
     protected $subModules = array(
-                                'line_items' => 'orders'
+                                'line_items' => array('parent_module' => 'orders',
+                                                      'parent_id' => 'order_id')
                             );
-
+                      
     //Log in parameters
     public function getFieldsLogin()
     {
@@ -129,10 +129,8 @@ class woocommercecore extends solution {
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
-    public function read($param) {
-    //TODO: tester pair impair  
+    public function read($param) { 
         try {
-
             $module = $param['module'];
             $result = [];
             $result['count'] = 0;
@@ -141,55 +139,43 @@ class woocommercecore extends solution {
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
-// var_dump($this->subModules[$param['module']]);
-//  var_dump($param['module']);
-            //pour les sous-modules
-            if(!empty($this->subModules[$param['module']])){
-                $module = $this->subModules[$param['module']];
-            } 
 
-            //for submodules, we pass the parent module
-            // if(in_array($module, $this->subModules)){
-            //     // $module = $this->subModules[$param['module']];
-            //      $module = key($this->subModules);
-            // } else {
-            //     $module = $param['module'];
-            // }
-    
-// var_dump($this->subModules);
-// var_dump($param['module']);
-// var_dump($module);
-            // Remove Myddleware 's system fields
+       
+             
+            //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
+            if(!empty($this->subModules[$param['module']])){
+                $module = $this->subModules[$param['module']]['parent_module'];
+            } 
+            // Remove Myddleware's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
-            //get all data, sorted by date_modified
+            
             $stop = false;
             $count = 0;
             $page = 1;
             do {
+                
                 //orderby modified isn't available for customers in the API filters so we sort by creation date
                 if($module === 'customers'){
                     $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
                                                                                 'order' => 'desc',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
+                //get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, array('orderby' => 'modified',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
-                }                                      
+                }                              
                 if(!empty($response)){
-// var_dump($response);
-            //  pour line items convertir la response 
+                //used for submodules (e.g. line_items)
+                // print_r($response);
                 $response = $this->convertResponse($param, $response);
-          
                     foreach($response as $record){
-
                         if($dateRefWooFormat < $record->date_modified){
-                            
                             foreach($param['fields'] as $field){
                                 // If we have a 2 dimensional array we break it down  
                                 $fieldStructure = explode('__',$field);
@@ -224,33 +210,33 @@ class woocommercecore extends solution {
                 $result['date_ref'] = $this->dateTimeToMyddleware($latestModification);
             }
             $result['count'] = $count; 
-        
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
         }	
     
-            //  var_dump($result);
-        //   return null;
+        // print_r($result);
+        // return null;
         return $result;
-     
     }
 
-    //for specific modules (ex : line_items)
+    //for specific modules (e.g. : line_items)
     public function convertResponse($param, $response) {
-        //  var_dump($param);
+        //adapter pour marcher avec le tableau plus haut
         if(array_key_exists($param['module'], $this->subModules)){
-            $subModule = $param['module'];
+            $subModule = $param['module'];   //line_items
             $newResponse = array();
             if(!empty($response)){
-                foreach($response as $key => $record){      
+                foreach($response as $key => $record){  
                      foreach($record->$subModule as $subRecord){
-                       
                         $subRecord->date_modified = $record->date_modified;
+                        //we add the ID of the parent field in the data (e.g. : for line_items, we add order_id)
+                        $parentFieldName = $this->subModules[$subModule]['parent_id'];
+                        $subRecord->$parentFieldName = $record->id;
                         $newResponse[$subRecord->id] = $subRecord;
                      }    
                 }
             }
-                return $newResponse;
+            return $newResponse;
         }
         return $response;
 
@@ -262,22 +248,18 @@ class woocommercecore extends solution {
     public function read_last($param) {
         $result = array();
         try{
-
             //for simulation purposes, we create a new date_ref in the past
-                $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-         
-           //get all instances of the module
-           $read = $this->read($param);
-
-        //ONLY RETRIEVE ONE RECORD 
+            $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+            //get all instances of the module
+            $read = $this->read($param);
+            //ONLY RETRIEVE ONE RECORD 
             if (!empty($read['error'])) {
                 $result['error'] = $read['error'];
             } else {
                 if (!empty($read['values'])) {
                     $result['done'] = true;
                     // Get only one record (the API sorts them by date by default, first one is therefore latest modified)
-                    $result['values'] = $read['values'][array_key_first($read['values'])];
-                    
+                    $result['values'] = $read['values'][array_key_first($read['values'])]; 
                 } else {
                     $result['done'] = false;
                 }
@@ -286,7 +268,7 @@ class woocommercecore extends solution {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;		
         }
-		return $result;
+        return $result;
 	}
 
     // Convert date to Myddleware format 
@@ -306,10 +288,6 @@ class woocommercecore extends solution {
 	}
 
 }
-
-
-
-
 
 // Include custom file if it exists : used to redefine Myddleware standard core
 $file = __DIR__. '/../Custom/Solutions/woocommerce.php';

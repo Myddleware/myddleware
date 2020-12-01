@@ -80,7 +80,11 @@ class vtigercrmcore extends solution
                                     "PurchaseOrder",
                                     "GreenTimeControl",
                                     "DDT",
-                                ];
+								];
+								
+
+	// Module list that allows to make parent relationships
+	protected $allowParentRelationship = array('Quotes');
 
 
     /** @var array $moduleList */
