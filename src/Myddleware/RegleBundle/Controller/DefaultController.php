@@ -1160,13 +1160,24 @@ class DefaultControllerCore extends Controller
 				foreach ($ruleParamsResult as $ruleParamsObj) {
                     $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
                 }     
-            }           
+            }       
+// echo '<pre>';
+// var_dump($ruleParamsResult);
+
             // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                 'fields' => $sourcesfields,
+                // 'query' => array('first_name' => 'Estelle'),
+                'query' => array('id' => 3),
                 'ruleParams' => $ruleParams
             ));
+
+// echo '<pre>';
+// var_dump($source);
+// var_dump($ruleParams);
+// die();
+
 
             if (isset($source['done'])) {
                 $before = array();
@@ -1234,7 +1245,8 @@ class DefaultControllerCore extends Controller
                     'before' => $before, // source
                     'after' => $after, // target
                     'data_source' => $source['done'],
-                    'params' => $serviceSession->getParamRule($ruleKey)
+                    'params' => $serviceSession->getParamRule($ruleKey),
+                  
                 )
             );
 
@@ -1726,14 +1738,21 @@ class DefaultControllerCore extends Controller
                 'lst_parent_fields' => $lstParentFields,
                 'regleId' => $ruleKey
             );
-
+// echo '<pre>';
+// var_dump($result);
+// die();
+    
             $result = $this->beforeRender($result);
 
+
+    
             // Formatage des listes déroulantes :
             $result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
+
+
 
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 

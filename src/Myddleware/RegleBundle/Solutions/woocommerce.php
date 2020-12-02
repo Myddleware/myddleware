@@ -130,7 +130,9 @@ class woocommercecore extends solution {
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
     public function read($param) { 
+        
         try {
+
             $module = $param['module'];
             $result = [];
             $result['count'] = 0;
@@ -140,8 +142,40 @@ class woocommercecore extends solution {
                 $param['limit'] = $this->defaultLimit;
             }
 
+
+
+            // Si le tableau de requête est présent alors construction de la requête
+		    if (!empty($param['query'])) {
+			$query= '';
+			foreach ($param['query'] as $key => $value) { 
+                echo $key.'  '.$value;
+                    if($key === 'id'){
+                        $query = strval($value);
+                    // echo strval($value);     //POURQUOI IL NE VEUT PAS CHANGER QUERY => SORT UNE ERREUR QUAND 
+                    //ON LUI ASSIGNE UNE VALEUR POURTANT LE STRVAL($VALUE) TOUT SEUL FONCTIONNE BIEN
+                    //PB A LINITIALISATION DE QUERY ?????
+                        // $query .= strval($value);
+                    // var_dump($query);
+                        // $query = $value;
+                        // echo $query;
+                        // $query .= $value;
+                        // echo 'query : '.$query;
+                    }
+                    // $query .= '+AND+';
+                
+				// } else {
+                //     // $query .= '+WHERE+';
+                    
+				// }
+				    // rawurlencode => change space in %20 for example
+				    // $query .= $param['module'].".".$key."+=+'".rawurlencode($value)."'+";
+			    }
+		    }
+// echo '<pre>';
+// var_dump($query);
+// var_dump($param);
+// echo '</pre>';
        
-             
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
@@ -152,28 +186,30 @@ class woocommercecore extends solution {
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
-            
             $stop = false;
             $count = 0;
             $page = 1;
+
             do {
-                
+
+
                 //orderby modified isn't available for customers in the API filters so we sort by creation date
                 if($module === 'customers'){
-                    $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
+                    $response = $this->woocommerce->get($module.$query, array('orderby' => 'registered_date',
                                                                                 'order' => 'desc',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
                 //get all data, sorted by date_modified
                 } else {
-                    $response = $this->woocommerce->get($module, array('orderby' => 'modified',
+                    $response = $this->woocommerce->get($module.$query, array('orderby' => 'modified',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
                 }                              
                 if(!empty($response)){
+
                 //used for submodules (e.g. line_items)
-                // print_r($response);
                 $response = $this->convertResponse($param, $response);
+
                     foreach($response as $record){
                         if($dateRefWooFormat < $record->date_modified){
                             foreach($param['fields'] as $field){
@@ -201,7 +237,6 @@ class woocommercecore extends solution {
                 }
                 $page++;	
             } while(!$stop);
-//TODO QUERY ID  (voir sugar)
 
             //As the records sent from the API are ordered by date_modified, 
             // we pass date_modified from the first record as the date_ref
@@ -209,19 +244,20 @@ class woocommercecore extends solution {
                 $latestModification = $result['values'][array_key_first($result['values'])]['date_modified'];
                 $result['date_ref'] = $this->dateTimeToMyddleware($latestModification);
             }
+
             $result['count'] = $count; 
+
         } catch (\Exception $e) {
+    
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
+    
         }	
     
-        // print_r($result);
-        // return null;
         return $result;
     }
 
     //for specific modules (e.g. : line_items)
     public function convertResponse($param, $response) {
-        //adapter pour marcher avec le tableau plus haut
         if(array_key_exists($param['module'], $this->subModules)){
             $subModule = $param['module'];   //line_items
             $newResponse = array();
@@ -239,10 +275,7 @@ class woocommercecore extends solution {
             return $newResponse;
         }
         return $response;
-
     }
-
-
 
     //Get last field (we read ALL then only retrieve one)
     public function read_last($param) {
@@ -252,7 +285,7 @@ class woocommercecore extends solution {
             $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
             //get all instances of the module
             $read = $this->read($param);
-            //ONLY RETRIEVE ONE RECORD 
+
             if (!empty($read['error'])) {
                 $result['error'] = $read['error'];
             } else {
