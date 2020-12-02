@@ -45,6 +45,7 @@ class vtigercrmcore extends solution
 	protected $FieldsDuplicate = array(	
 										'Contacts' => array('email', 'lastname'),
 										'CompanyDetails' => array('organizationname'),
+										'Accounts' => array('accountname'),
 										'Leads' => array('email', 'lastname'),
 										'default' => array('')
 									  );
@@ -82,6 +83,8 @@ class vtigercrmcore extends solution
                                     "DDT",
                                 ];
 
+	protected $allowParentRelationship = array('Quotes');
+	
 
     /** @var array $moduleList */
     protected $moduleList;
@@ -576,8 +579,21 @@ class vtigercrmcore extends solution
 
 			foreach ($param['data'] as $idDoc => $data) {
 				try {
-					unset($data['target_id']);
-
+					// Clean record by removing Myddleware fields (ex : target_id)
+					$data = $this->cleanRecord($param, $data);
+					
+					// In case of LineItem (sub array in the data array => an order can have seeral orderItems), 
+					// We transform the lineItem array into a LineItems array with the right format
+					if (!empty(	$data['LineItem'])) {
+						foreach($data['LineItem'] as $childRecord) {
+							// Clean subrecord by removing Myddleware fields (ex : target_id)
+							$childRecord = $this->cleanRecord($param, $childRecord);
+							$data['LineItems'][] = $childRecord;
+						}
+						// Add the product at the order level (work around because of an issue in Vtiger API)
+						$data['productid'] = $childRecord['productid'];
+					}	
+					
 					if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
 						foreach ($data as $inventorykey => $inventoryValue) {
 							if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
@@ -590,6 +606,7 @@ class vtigercrmcore extends solution
 					}
 
 					$resultCreate = $this->vtigerClient->create($param['module'], $data);
+
 
 					if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
 						if ($param['module'] == "LineItem") {
@@ -702,6 +719,17 @@ class vtigercrmcore extends solution
 		}	
 		return $result;
     }
+	
+	// Clean a record by removing all Myddleware fields
+	protected function cleanRecord($param, $data) {
+		$myddlewareFields = array('target_id', 'source_date_modified', 'id_doc_myddleware');
+		foreach ($myddlewareFields as $myddlewareField) {
+			if (isset($data[$myddlewareField])) {
+				unset($data[$myddlewareField]);
+			}
+		}
+		return $data;
+	}
 	
 	// Build the direct link to the record (used in data transfer view)
 	public function getDirectLink($rule, $document, $type){		
