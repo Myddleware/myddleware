@@ -1169,7 +1169,7 @@ class DefaultControllerCore extends Controller
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                 'fields' => $sourcesfields,
                 // 'query' => array('first_name' => 'Estelle'),
-                'query' => array('id' => 3),
+                'query' => array(),
                 'ruleParams' => $ruleParams
             ));
 

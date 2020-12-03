@@ -46,7 +46,7 @@ class woocommercecore extends solution {
                                                       'parent_id' => 'order_id')
                             );
                       
-    //Log in parameters
+    //Log in form parameters
     public function getFieldsLogin()
     {
         return array(
@@ -81,7 +81,7 @@ class woocommercecore extends solution {
                     'version' => 'wc/v3'
                 ]
                 );
-            if($this->woocommerce->get('data'))   {
+            if($this->woocommerce->get('data'))  {
                 $this->connexion_valide = true;	
             }    
         } catch (\Exception $e) {
@@ -142,40 +142,16 @@ class woocommercecore extends solution {
                 $param['limit'] = $this->defaultLimit;
             }
 
-
-
-            // Si le tableau de requête est présent alors construction de la requête
+            // adding query parameters into the request
 		    if (!empty($param['query'])) {
-			$query= '';
-			foreach ($param['query'] as $key => $value) { 
-                echo $key.'  '.$value;
+			    $query= '';
+                foreach ($param['query'] as $key => $value) { 
                     if($key === 'id'){
-                        $query = strval($value);
-                    // echo strval($value);     //POURQUOI IL NE VEUT PAS CHANGER QUERY => SORT UNE ERREUR QUAND 
-                    //ON LUI ASSIGNE UNE VALEUR POURTANT LE STRVAL($VALUE) TOUT SEUL FONCTIONNE BIEN
-                    //PB A LINITIALISATION DE QUERY ?????
-                        // $query .= strval($value);
-                    // var_dump($query);
-                        // $query = $value;
-                        // echo $query;
-                        // $query .= $value;
-                        // echo 'query : '.$query;
+                        $query = strval('/'.$value);
                     }
-                    // $query .= '+AND+';
-                
-				// } else {
-                //     // $query .= '+WHERE+';
-                    
-				// }
-				    // rawurlencode => change space in %20 for example
-				    // $query .= $param['module'].".".$key."+=+'".rawurlencode($value)."'+";
-			    }
-		    }
-// echo '<pre>';
-// var_dump($query);
-// var_dump($param);
-// echo '</pre>';
-       
+                }  
+		    }   
+  
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
@@ -191,27 +167,32 @@ class woocommercecore extends solution {
             $page = 1;
 
             do {
-
-
-                //orderby modified isn't available for customers in the API filters so we sort by creation date
-                if($module === 'customers'){
-                    $response = $this->woocommerce->get($module.$query, array('orderby' => 'registered_date',
-                                                                                'order' => 'desc',
-                                                                                'per_page' => $this->defaultLimit,
-                                                                                'page' => $page));
+                //for specific requests (e.g. readrecord with an id)
+                if(!empty($query)){
+                    $response = $this->woocommerce->get($module.$query, array('per_page' => $this->defaultLimit,
+                                                                              'page' => $page));   
+                    //when reading a specific record only we need to add a layer to the array                                                         
+                    $record = $response;
+                    $response = array();
+                    $response[]= $record;
+                } elseif($module === 'customers') {
+                     //orderby modified isn't available for customers in the API filters so we sort by creation date
+                    $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
+                                                                                    'order' => 'desc',
+                                                                                    'per_page' => $this->defaultLimit,
+                                                                                    'page' => $page));
                 //get all data, sorted by date_modified
                 } else {
-                    $response = $this->woocommerce->get($module.$query, array('orderby' => 'modified',
+                    $response = $this->woocommerce->get($module, array('orderby' => 'modified',
                                                                                 'per_page' => $this->defaultLimit,
                                                                                 'page' => $page));
-                }                              
+                }      
                 if(!empty($response)){
-
-                //used for submodules (e.g. line_items)
-                $response = $this->convertResponse($param, $response);
-
+                    //used for submodules (e.g. line_items)
+                    $response = $this->convertResponse($param, $response);
                     foreach($response as $record){
-                        if($dateRefWooFormat < $record->date_modified){
+                        //either we read all from a date_ref or we read based on a query (readrecord)
+                        if($dateRefWooFormat < $record->date_modified || (!empty($query))){
                             foreach($param['fields'] as $field){
                                 // If we have a 2 dimensional array we break it down  
                                 $fieldStructure = explode('__',$field);
@@ -223,36 +204,33 @@ class woocommercecore extends solution {
                                     $result['values'][$record->id][$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
                                 } else {
                                     $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+                                }
                             }
-                        }
                             $result['values'][$record->id]['date_modified'] = $record->date_modified;
                             $result['values'][$record->id]['id'] = $record->id;
                             $count++;
                         } else {
                             $stop = true;
-                        }
-                    }   
-                }else{
+                        }   
+                    } 
+                 } else {
                     $stop = true; 
+                }
+                if(!empty($query)){
+                    $stop = true;
                 }
                 $page++;	
             } while(!$stop);
-
             //As the records sent from the API are ordered by date_modified, 
             // we pass date_modified from the first record as the date_ref
             if(!empty($result['values'])){
                 $latestModification = $result['values'][array_key_first($result['values'])]['date_modified'];
                 $result['date_ref'] = $this->dateTimeToMyddleware($latestModification);
             }
-
             $result['count'] = $count; 
-
         } catch (\Exception $e) {
-    
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
-    
-        }	
-    
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
+        }
         return $result;
     }
 
@@ -263,15 +241,15 @@ class woocommercecore extends solution {
             $newResponse = array();
             if(!empty($response)){
                 foreach($response as $key => $record){  
-                     foreach($record->$subModule as $subRecord){
+                    foreach($record->$subModule as $subRecord){
                         $subRecord->date_modified = $record->date_modified;
                         //we add the ID of the parent field in the data (e.g. : for line_items, we add order_id)
                         $parentFieldName = $this->subModules[$subModule]['parent_id'];
                         $subRecord->$parentFieldName = $record->id;
                         $newResponse[$subRecord->id] = $subRecord;
-                     }    
+                    }    
                 }
-            }
+            }      
             return $newResponse;
         }
         return $response;
