@@ -1,0 +1,92 @@
+name: woocommerce_vtigercrm_customers_orders_products
+description: 'Send Woocommerce customers, orders & products into Vtiger'
+rules:
+    -
+        name: 'Woo to Vtiger : Products'
+        nameSlug: woo_to_vtiger_products
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: products
+        targetModule: Products
+        fields:
+            - { target: productname, source: name, formula: null }
+            - { target: description, source: description, formula: null }
+            - { target: sales_end_date, source: date_on_sale_to, formula: null }
+            - { target: sales_start_date, source: date_on_sale_from, formula: null }
+            - { target: unit_price, source: price, formula: null }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+            - { target: discontinued, source: my_value, formula: '1' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Woo to V : ACCOUNTS'
+        nameSlug: woo_to_v_accounts
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: customers
+        targetModule: Accounts
+        fields:
+            - { target: accountname, source: first_name;last_name, formula: '{first_name}.'' ''.{last_name}' }
+            - { target: bill_country, source: billing__country, formula: null }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: accountname }
+    -
+        name: 'Line Items woo to vtiger '
+        nameSlug: line_items_woo_to_vtiger
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: line_items
+        targetModule: LineItem
+        fields:
+            - { target: quantity, source: quantity, formula: null }
+            - { target: listprice, source: price, formula: null }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: productid, fieldId: woo_to_vtiger_products, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Woo to Vtiger : Orders&Quotes'
+        nameSlug: woo_to_vtiger_orders_quotes
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: orders
+        targetModule: Quotes
+        fields:
+            - { target: bill_street, source: billing__address_1, formula: null }
+            - { target: ship_street, source: shipping__address_1, formula: null }
+            - { target: bill_city, source: billing__city, formula: null }
+            - { target: bill_code, source: billing__postcode, formula: null }
+            - { target: bill_country, source: billing__country, formula: null }
+            - { target: bill_state, source: billing__state, formula: null }
+            - { target: currency_id, source: currency, formula: null }
+            - { target: pre_tax_total, source: total, formula: null }
+            - { target: ship_city, source: shipping__city, formula: null }
+            - { target: ship_code, source: shipping__postcode, formula: null }
+            - { target: ship_country, source: shipping__country, formula: null }
+            - { target: ship_state, source: shipping__state, formula: null }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+            - { target: quotestage, source: my_value, formula: '"Created"' }
+            - { target: subject, source: my_value, formula: '"This is a test subject"' }
+            - { target: hdnTaxType, source: my_value, formula: '"individual"' }
+        relationships:
+            - { fieldNameSource: customer_id, fieldNameTarget: account_id, fieldId: woo_to_v_accounts, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: Myddleware_element_id, fieldId: line_items_woo_to_vtiger, parent: true }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
