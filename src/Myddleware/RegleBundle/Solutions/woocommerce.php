@@ -108,7 +108,7 @@ class woocommercecore extends solution {
 
     public function get_module_fields($module, $type = 'source')
     {
-        require_once('lib/woocommerce/metadata.php');
+        require('lib/woocommerce/metadata.php');
         parent::get_module_fields($module, $type);
 
         try {
@@ -118,8 +118,11 @@ class woocommercecore extends solution {
             if (!empty($fieldsRelate[$module])) {
 				$this->fieldsRelate = $fieldsRelate[$module]; 
 			}	
-
-         return $this->moduleFields;
+			// Includ relate fields into moduleFields to display them in the field mapping tab
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+			return $this->moduleFields;
 
         } catch (\Exception $e) {		
 			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
@@ -130,13 +133,11 @@ class woocommercecore extends solution {
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
     public function read($param) { 
-        
         try {
-
             $module = $param['module'];
             $result = [];
             $result['count'] = 0;
-            $result['date_ref'] = $param['ruleParams']['datereference'];
+            $result['date_ref'] = $param['date_ref'];
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
@@ -287,7 +288,6 @@ class woocommercecore extends solution {
 	protected function dateTimeToMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// We save the UTC date in Myddleware
-		$dto->setTimezone(new \DateTimeZone('UTC'));
 		return $dto->format("Y-m-d H:i:s");
 	}
 	
