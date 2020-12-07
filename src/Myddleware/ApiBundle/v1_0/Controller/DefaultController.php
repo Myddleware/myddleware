@@ -174,7 +174,7 @@ class DefaultControllerCore extends Controller
 						$docParam['values']['date_modified'] = $value;
 						break;
 					case 'rule':
-						continue;
+						break;
 					default:
 					   $docParam['values'][$key] = $value;
 				}
