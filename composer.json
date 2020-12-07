@@ -19,7 +19,7 @@
   },
   "prefer-stable": true,
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.2 <7.4",
         "symfony/symfony": "3.4.45",
         "doctrine/orm": "^2.6.4",
         "doctrine/doctrine-bundle": "1.8.1",
