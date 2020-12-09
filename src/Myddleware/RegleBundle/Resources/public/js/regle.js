@@ -1329,7 +1329,7 @@ function verifFields(field_id,show) {
 			
 			params.push( {name: name, value: value} );
 		});
-console.log(params);
+// console.log(params);
 		return params;
 	}	
 

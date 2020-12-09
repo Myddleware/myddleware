@@ -24,29 +24,6 @@
 *********************************************************************************/
 use Automattic\WooCommerce\Client; 
 
-
-// $woocommerce = new Client(
-//     'http://localhost/myddleware/wordpress', 
-//     'ck_4d08598e65e7ad6a188fecaeb26d06ecdbdd30b4', 
-//     'cs_82858696bfa94993dc4e27cdf59d5cf2432f87c1',
-//     [
-//         'version' => 'wc/v3',
-//     ]
-// );
-
-
-// foreach($woocommerce->get('payment_gateways') as $key => $value){
-//     foreach($value as $clef => $ligne){
-//         echo '<br/>';
-//         print_r("'".$clef."' => array( 'label' => '".ucfirst($clef)."', 
-//         'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),");
-//     }
-   
-// }
-
-
-// print_r($woocommerce->get('products'));
-
 $moduleFields = array (
                         'products' => array(
                             'id' => array( 'label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
