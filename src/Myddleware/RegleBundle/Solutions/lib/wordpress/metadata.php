@@ -118,12 +118,19 @@ $moduleFields = array (
         'event_informations___price' => array( 'label' => 'Event info : price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___virtual' => array( 'label' => 'Event info : virtual', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___sku' => array( 'label' => 'Event info : sku', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'event_informations__mep_event_more_date' => array( 'label' => 'Event info : mep event more date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'event_informations__mep_event_more_date' => array( 'label' => 'Event info : mep event more date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__mep_list_thumbnail' => array( 'label' => 'Event info : mep list thumbnail', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__mep_event_cc_email_text' => array( 'label' => 'Event info : mep event cc email text', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__event_feature_image' => array( 'label' => 'Event info : event feature image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
+    'mep_event_more_date' => array(
+        'event_more_start_date' => array( 'label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'event_more_start_time' => array( 'label' => 'Start time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'event_more_end_date' => array( 'label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'event_more_end_time' => array( 'label' => 'End time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
+
     'mep_org' => array(
         'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'count' => array( 'label' => 'Count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -152,8 +159,3 @@ $moduleFields = array (
 
 );
 
-// $fieldsRelate = array (
-//     'event_informations' => array(
-//         'event_id' => array( 'label' => 'Event Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-//     ),
-// );

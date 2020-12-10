@@ -34,6 +34,7 @@ class wordpresscore extends solution {
     protected $apiSuffix = '/wp-json/wp/v2/';
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
+  
 
     public function getFieldsLogin(){
         return array(
@@ -101,6 +102,10 @@ class wordpresscore extends solution {
 				$this->fieldsRelate = $fieldsRelate[$module]; 
 			}	
 
+            if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+
             return $this->moduleFields;
 
         }catch(\Exception $e){
@@ -117,8 +122,8 @@ class wordpresscore extends solution {
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
           //il faudra rajouter le if < 
-            $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
-
+            $dateRefWPFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
+          
 
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
@@ -149,26 +154,34 @@ class wordpresscore extends solution {
                 $content = $response->toArray();
                 
               
-           
                 if(!empty($content)){
+                    
+                    // //used for creating a submodule 
+                    // $content = $this->convertModule($param, $content);
+
                     //used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content);
+                   
+
                     foreach($content as $record){
-                        foreach($param['fields'] as $field){        
+                        if($dateRefWPFormat < $record['modified']){
+                            foreach($param['fields'] as $field){        
                                 $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
+                              
+                            }
+                            if($module === 'users'){
+                                // the data sent without an API key is different than the one in documentation
+                                // need to find a way to generate WP Rest API key / token
+                                // $result['values'][$record['id']]['date_modified'] = $record['registered_date'];
+                                // $result['values'][$record['id']]['date_modified'] = new \Datetime();
+                                $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+                            }else{
+                                $result['values'][$record['id']]['date_modified'] = $record['modified'];
+                            }
+                            
+                            $result['values'][$record['id']]['id'] = $record['id'];
+                            $count++;
                         }
-                        if($module === 'users'){
-                            // the data sent without an API key is different than the one in documentation
-                            // need to find a way to generate WP Rest API key / token
-                            // $result['values'][$record['id']]['date_modified'] = $record['registered_date'];
-                            // $result['values'][$record['id']]['date_modified'] = new \Datetime();
-                            $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-                        }else{
-                            $result['values'][$record['id']]['date_modified'] = $record['modified'];
-                        }
-                        
-                        $result['values'][$record['id']]['id'] = $record['id'];
-                        $count++;
                     }
                 }
                 $page++;
@@ -181,6 +194,9 @@ class wordpresscore extends solution {
 
     //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
     public function convertResponse($param, $response) {
+        echo'<pre>';
+        var_dump($response);
+        echo '</pre>';
              $newResponse = array();
              if(!empty($response)){
                foreach($response as $key => $record){  
@@ -191,6 +207,16 @@ class wordpresscore extends solution {
                                 if(is_array($subFieldValue)){
                                     if(array_key_exists(0, $subFieldValue)){
                                         $newResponse[$key][$newSubFieldName] = $subFieldValue[0];  
+                                        if($newSubFieldName === 'event_informations__mep_event_more_date'){
+                                            $json = $subFieldValue[0];
+                                            $json = unserialize($json);
+                                            $moreDatesArray = $json;
+                                            foreach($moreDatesArray as $subSubRecordKey => $subSubRecord){
+                                                foreach($subSubRecord as $subSubFieldName => $subSubFieldValue){
+                                                    $newResponse[$key][$subSubFieldName] = $subSubFieldValue;
+                                                }
+                                            }
+                                        }
                                     }
                                 } else {
                                     $newResponse[$key][$newSubFieldName] = $subFieldValue; 
@@ -201,9 +227,31 @@ class wordpresscore extends solution {
                         }
                     }    
                 }  
+                echo'<pre>';
+                var_dump($newResponse);
+                echo '</pre>';
             return $newResponse;
         }
         return $response;
+    }
+
+    //for submodules (e.g. mep_event_more_date = event_informations__mep_event_more_date in mep_events)
+    public function convertModule($param, $response){
+        // if(array_key_exists($param['module'], $this->subModules)){
+        //     $subModule = $param['module'];
+        //     if($param['module'] === 'mep_event_more_date'){
+        //         $subModule = 'event_informations__mep_event_more_date';
+        //     }
+        //     $newResponse = array();
+        //     if(!empty($response)){
+        //         foreach($response as $key => $record){
+        //             var_dump($record);
+        //             foreach($record[$subModule] as $subRecord){
+        //                 var_dump($subRecord);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     public function read_last($param){

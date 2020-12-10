@@ -31,24 +31,26 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class wooeventmanagercore extends wordpress {
 
-    // protected $subModules = array(
-    //     'event_informations' => array('parent_module' => 'mep_events',
-    //                                   'parent_id' => 'mep_events_id')
-    // );
+    protected $subModules = array(
+                                    'mep_event_more_date' => array('parent_module' => 'mep_events',
+                                                                    'parent_id' => 'event_id')
+                                    );
 
     public function get_modules($type = 'source') {
-        return array(
-            'mep_events' =>	'Events',
-            'mep_cat' =>	'Categories',
-            'mep_org' =>	'Organizers',
-            // 'event_informations' => 'Event Informations',
-            // these modules are part of the PRO subscription to the Woocommerce Event Manager Plugin
-            // 'mep_event_speaker'	 => 'Event Speaker List',
-            // 'mep_event_attendee' =>	'Event Attendee List',
-            );
+        if($type === 'source'){
+            return array(
+                'mep_events' =>	'Events',
+                'mep_cat' =>	'Categories',
+                'mep_org' =>	'Organizers',
+                'mep_event_more_date' => 'Event More Date'
+                // these modules are part of the PRO subscription to the Woocommerce Event Manager Plugin
+                // 'mep_event_speaker'	 => 'Event Speaker List',
+                // 'mep_event_attendee' =>	'Event Attendee List',
+                );
+        }
     }
-    
 
+    
 }
 
 

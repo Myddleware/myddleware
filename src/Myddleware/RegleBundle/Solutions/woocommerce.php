@@ -119,6 +119,10 @@ class woocommercecore extends solution {
 				$this->fieldsRelate = $fieldsRelate[$module]; 
 			}	
 
+            if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+            }
+            
          return $this->moduleFields;
 
         } catch (\Exception $e) {		
