@@ -151,23 +151,12 @@ class wordpresscore extends solution {
               
            
                 if(!empty($content)){
-                    //used for submodules (e.g. line_items)
+                    //used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content);
                     foreach($content as $record){
                         foreach($param['fields'] as $field){        
-                            // If we have a 2 dimensional array we break it down  
-                            $fieldStructure = explode('__',$field);
-                            $fieldGroup = '';
-                            $fieldName = '';
-                            if (!empty($fieldStructure[1])) {
-                                $fieldGroup = $fieldStructure[0];
-                                $fieldName = $fieldStructure[1];
-                                $result['values'][$record['id']][$field] = (!empty($record[$fieldGroup][$fieldName]) ? $record[$fieldGroup][$fieldName] : '');
-                            } else {
                                 $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
-                            }
                         }
-
                         if($module === 'users'){
                             // the data sent without an API key is different than the one in documentation
                             // need to find a way to generate WP Rest API key / token
@@ -184,57 +173,34 @@ class wordpresscore extends solution {
                 }
                 $page++;
                 $result['count'] = $count;
-            
-        
-
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
         }
-var_dump($result);
         return $result;
     }
 
-    //for specific modules (e.g. : event_informations)
+    //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
     public function convertResponse($param, $response) {
-        if(array_key_exists($param['module'], $this->subModules)){
-            $subModule = $param['module'];   //event_informations
-            $newResponse = array();
-            if(!empty($response)){
-                foreach($response as $key => $record){  
-                    foreach($record[$subModule] as $subKey => $subRecord){
-                        $newResponse[$subKey]['id'] = $subKey;
-                        foreach($subRecord as $subValueKey => $subValue) {
-                           if(is_int($subValueKey) ){
-                            //  var_dump($newResponse[$subKey]);
-                              var_dump($subValue);
-                             array_push($newResponse[$subKey], $subValue);
-                            //  array_push($subValue, $newResponse[$subKey]);
-                            //    array_push($subRecord[$subValueKey], $newResponse[$subKey]);
-                            //    var_dump($newResponse[$subKey]);
-                           }
+             $newResponse = array();
+             if(!empty($response)){
+               foreach($response as $key => $record){  
+                    foreach($record as $fieldName => $fieldValue){        
+                        if(is_array($fieldValue) ){
+                            foreach($fieldValue as $subFieldKey => $subFieldValue){
+                                $newSubFieldName = $fieldName.'__'.$subFieldKey;
+                                if(is_array($subFieldValue)){
+                                    if(array_key_exists(0, $subFieldValue)){
+                                        $newResponse[$key][$newSubFieldName] = $subFieldValue[0];  
+                                    }
+                                } else {
+                                    $newResponse[$key][$newSubFieldName] = $subFieldValue; 
+                                }
+                            }
+                        } else{
+                            $newResponse[$key][$fieldName] = $fieldValue;
                         }
-
-                        // var_dump($newResponse);  
-                        // $newResponse[$subKey] = $subRecord[0];
-                    
-                         $subRecord['date_modified'] = $record['modified'];
-                    
-                     
-                        // //we add the ID of the parent field in the data (e.g. : for event_informations, we add mep_events_id)
-                         $parentFieldName = $this->subModules[$subModule]['parent_id'];
-                         $subRecord[$parentFieldName] = $record['id'];
-                        //  $newResponse[$subKey] = $subRecord;
-                    // var_dump($subRecord[0]);
-                    //  var_dump($subKey);
-                        //   var_dump($subKey, $subRecord);
-                        //   $newRecord[]
-                        // $newResponse[$subKey] = $subRecord;
-                        //  $newResponse[$subRecord][$subkey] = $subRecord;
                     }    
-                }
-               
-            }   
-         var_dump($newResponse);   
+                }  
             return $newResponse;
         }
         return $response;
@@ -246,8 +212,6 @@ var_dump($result);
             //for simulation purposes, we create a new date_ref in the past
             $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
             $read = $this->read($param);
-            //  var_dump($param);
-
             if(!empty($read['error'])){
                 $result['error'] = $read['error'];
             } else{
