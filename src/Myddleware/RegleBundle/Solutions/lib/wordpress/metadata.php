@@ -24,28 +24,120 @@ $moduleFields = array (
         'template' => array( 'label' => 'Template', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
+    'posts' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date' => array( 'label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date_gmt' => array( 'label' => 'Date GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'guid' => array( 'label' => 'Guid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'modified' => array( 'label' => 'Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'modified_gmt' => array( 'label' => 'Modified GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'status' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'type' => array( 'label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date' => array( 'label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'title' => array( 'label' => 'Title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),    
+        'content' => array( 'label' => 'Content', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'excerpt' => array( 'label' => 'Excerpt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'author' => array( 'label' => 'Author', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'featured_media' => array( 'label' => 'Featured media', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'comment_status' => array( 'label' => 'Comment status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'ping_status' => array( 'label' => 'Ping status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'template' => array( 'label' => 'Template', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'format' => array( 'label' => 'Format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'categories' => array( 'label' => 'Categories', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'tags' => array( 'label' => 'Tags', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        '_links' => array( 'label' => '_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
+    'categories' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'count' => array( 'label' => 'Count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'description' => array( 'label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'name' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'taxonomy' => array( 'label' => 'Taxonomy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'parent' => array( 'label' => 'Parent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
+ //TODO
+    'types'=>	array(
+
+    ),
+    'statuses'=> array(
+
+    ),
+    'settings' =>	array(
+
+    ),
+    'search' =>	array(
+
+    ),
+    'block-types'=>	array(
+
+    ),
+    'blocks' =>	array(
+
+    ),
+    'block-renderer' =>	array(
+
+    ),
+    'plugins' => array(
+
+    ), 
+    'media' => array(
+
+    ),
+    'taxonomies' => array(
+
+    ),
+    'tags' => array(
+
+    ),
+    'themes' => array(
+
+    ),
+    'comments' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'post' => array( 'label' => 'Post', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'parent' => array( 'label' => 'Parent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'author' => array( 'label' => 'Author', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'author_name' => array( 'label' => 'Author Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'author_url' => array( 'label' => 'Author URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date' => array( 'label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date_gmt' => array( 'label' => 'Date GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'content' => array( 'label' => 'Content', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'status' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'type' => array( 'label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'author_avatar_urls' => array( 'label' => 'Author Avatar URLs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
     'users' => array(
         'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'username' => array( 'label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'username' => array( 'label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'name' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'first_name' => array( 'label' => 'First Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'last_name' => array( 'label' => 'Last Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'email' => array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'first_name' => array( 'label' => 'First Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'last_name' => array( 'label' => 'Last Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'email' => array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'url' => array( 'label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'description' => array( 'label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'locale' => array( 'label' => 'Locale', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'nickname' => array( 'label' => 'Nickname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'locale' => array( 'label' => 'Locale', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'nickname' => array( 'label' => 'Nickname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'registered_date' => array( 'label' => 'Registered Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'roles' => array( 'label' => 'Roles', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'password' => array( 'label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'capabilities' => array( 'label' => 'Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'extra_capabilities' => array( 'label' => 'Extra Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'registered_date' => array( 'label' => 'Registered Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'roles' => array( 'label' => 'Roles', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'password' => array( 'label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'capabilities' => array( 'label' => 'Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        // 'extra_capabilities' => array( 'label' => 'Extra Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'avatar_urls' => array( 'label' => 'Avatar URLs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-
-
+        'woocommerce_meta' => array( 'label' => 'Woocommerce Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
 
 //these modules are part of the Woocommerce Event manager plugin and are used in the wooeventmanager connector
@@ -157,5 +249,12 @@ $moduleFields = array (
     ),
 
 
+);
+
+$fieldsRelate = array(
+    'mep_events' => array(
+        'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+    ),
 );
 

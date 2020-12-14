@@ -36,6 +36,9 @@ class wooeventmanagercore extends wordpress {
                                                                     'parent_id' => 'event_id')
                                     );
 
+    // Module without reference date
+	protected $moduleWithoutReferenceDate = array('mep_cat', 'mep_org');
+
     public function get_modules($type = 'source') {
         if($type === 'source'){
             return array(

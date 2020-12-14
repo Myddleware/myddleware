@@ -34,7 +34,9 @@ class wordpresscore extends solution {
     protected $apiSuffix = '/wp-json/wp/v2/';
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
-  
+    protected $delaySearch2 = '-1 week';
+  	// Module without reference date
+	protected $moduleWithoutReferenceDate = array('users');
 
     public function getFieldsLogin(){
         return array(
@@ -52,6 +54,7 @@ class wordpresscore extends solution {
         try  {
              
             $client = HttpClient::create();
+            //we test the connection to the API with a request on pages
             $response = $client->request('GET', $this->paramConnexion['url'].$this->apiSuffix.'pages');
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
@@ -154,16 +157,20 @@ class wordpresscore extends solution {
                 $content = $response->toArray();
                 
               
-                if(!empty($content)){
-                    
-                    // //used for creating a submodule 
-                    // $content = $this->convertModule($param, $content);
-
+                if(!empty($content)){             
                     //used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content);
                    
-
                     foreach($content as $record){
+                        //ATTENTION CETTE PARTIE DOIT ETRE CHANGEE CAR CEST UN TRAITEMENT FICTIF : on ne recoit aucune date dans users
+                       //de toute facon users ne renvoie qu'un seul record !! 
+                        if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
+                            $record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
+                        }
+
+
+                        // var_dump($record);
+
                         if($dateRefWPFormat < $record['modified']){
                             foreach($param['fields'] as $field){        
                                 $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
@@ -172,8 +179,6 @@ class wordpresscore extends solution {
                             if($module === 'users'){
                                 // the data sent without an API key is different than the one in documentation
                                 // need to find a way to generate WP Rest API key / token
-                                // $result['values'][$record['id']]['date_modified'] = $record['registered_date'];
-                                // $result['values'][$record['id']]['date_modified'] = new \Datetime();
                                 $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
                             }else{
                                 $result['values'][$record['id']]['date_modified'] = $record['modified'];
@@ -194,9 +199,6 @@ class wordpresscore extends solution {
 
     //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
     public function convertResponse($param, $response) {
-        echo'<pre>';
-        var_dump($response);
-        echo '</pre>';
              $newResponse = array();
              if(!empty($response)){
                foreach($response as $key => $record){  
@@ -227,31 +229,10 @@ class wordpresscore extends solution {
                         }
                     }    
                 }  
-                echo'<pre>';
-                var_dump($newResponse);
-                echo '</pre>';
+    
             return $newResponse;
         }
         return $response;
-    }
-
-    //for submodules (e.g. mep_event_more_date = event_informations__mep_event_more_date in mep_events)
-    public function convertModule($param, $response){
-        // if(array_key_exists($param['module'], $this->subModules)){
-        //     $subModule = $param['module'];
-        //     if($param['module'] === 'mep_event_more_date'){
-        //         $subModule = 'event_informations__mep_event_more_date';
-        //     }
-        //     $newResponse = array();
-        //     if(!empty($response)){
-        //         foreach($response as $key => $record){
-        //             var_dump($record);
-        //             foreach($record[$subModule] as $subRecord){
-        //                 var_dump($subRecord);
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     public function read_last($param){
@@ -295,7 +276,14 @@ class wordpresscore extends solution {
 		return $dto->format('Y-m-d\TH:i:s');
 	}
 
-
+    // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
+    public function referenceIsDate($module) {
+        // Le module users n'a pas de date de référence. On utilise donc l'ID comme référence
+        if(in_array($module, $this->moduleWithoutReferenceDate)){
+            return false;
+        }
+        return true;
+    }
 
 
 }
