@@ -1102,6 +1102,7 @@ class DefaultControllerCore extends Controller
 
     }
 
+
     // CREATION - STEP THREE - SIMULATION DES DONNEES
     public function ruleSimulationAction(Request $request)
     {
@@ -1120,7 +1121,6 @@ class DefaultControllerCore extends Controller
                 '' // Params flux
             );
 
-
             $solution_source_nom = $serviceSession->getParamRuleSourceSolution($ruleKey);
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
             $solution_source->login($serviceSession->getParamRuleSource($ruleKey));
@@ -1133,7 +1133,6 @@ class DefaultControllerCore extends Controller
                 foreach ($target['fields'] as $f) {
                     if (isset($f)) {
                         foreach ($f as $name_fields_target => $k) {
-
                             if (isset($k['champs'])) {
                                 $sourcesfields = array_merge($k['champs'], $sourcesfields);
                             } else {
@@ -1153,21 +1152,32 @@ class DefaultControllerCore extends Controller
                     )
                 );
             }
-		
+
 			// Add rule param if exist (the aren't exist in rule creation)
-			$ruleParams = array();
-			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+            $ruleParams = array();
+            $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
 			if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
-					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
-				}
-			}
-			
+                    $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+                }     
+            }       
+// echo '<pre>';
+// var_dump($ruleParamsResult);
+
             // Get source data
             $source = $solution_source->read_last(array(
                 'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                 'fields' => $sourcesfields,
-				'ruleParams' => $ruleParams));
+                // 'query' => array('first_name' => 'Estelle'),
+                'query' => array(),
+                'ruleParams' => $ruleParams
+            ));
+
+// echo '<pre>';
+// var_dump($source);
+// var_dump($ruleParams);
+// die();
+
 
             if (isset($source['done'])) {
                 $before = array();
@@ -1216,7 +1226,6 @@ class DefaultControllerCore extends Controller
                                 'after' => $r['after'],
                                 'before' => $k['fields']
                             );
-
                         }
                     }
                     $after = array();
@@ -1236,7 +1245,8 @@ class DefaultControllerCore extends Controller
                     'before' => $before, // source
                     'after' => $after, // target
                     'data_source' => $source['done'],
-                    'params' => $serviceSession->getParamRule($ruleKey)
+                    'params' => $serviceSession->getParamRule($ruleKey),
+                  
                 )
             );
 
@@ -1728,14 +1738,21 @@ class DefaultControllerCore extends Controller
                 'lst_parent_fields' => $lstParentFields,
                 'regleId' => $ruleKey
             );
-
+// echo '<pre>';
+// var_dump($result);
+// die();
+    
             $result = $this->beforeRender($result);
 
+
+    
             // Formatage des listes déroulantes :
             $result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
+
+
 
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 

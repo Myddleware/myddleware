@@ -118,11 +118,13 @@ class woocommercecore extends solution {
             if (!empty($fieldsRelate[$module])) {
 				$this->fieldsRelate = $fieldsRelate[$module]; 
 			}	
+
 			// Includ relate fields into moduleFields to display them in the field mapping tab
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}
 			return $this->moduleFields;
+
 
         } catch (\Exception $e) {		
 			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
@@ -138,6 +140,7 @@ class woocommercecore extends solution {
             $result = [];
             $result['count'] = 0;
             $result['date_ref'] = $param['date_ref'];
+
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;

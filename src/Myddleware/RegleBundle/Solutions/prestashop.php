@@ -467,7 +467,7 @@ class prestashopcore extends solution {
 				}
 				$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
 				$opt['display'] .= ']';
-				
+
 				// On trie que si la référence est une date
 				if ($this->referenceIsDate($param['module'])) {
 					$dateRefField = $this->getDateRefName($param['module'], '0');

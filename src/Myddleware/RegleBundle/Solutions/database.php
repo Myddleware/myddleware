@@ -311,7 +311,7 @@ class databasecore extends solution {
 		catch (\Exception $e) {
 			$result['done'] = -1;
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';					
-		}					
+		}	
 		return $result;
 	} // read_last($param)
 	
