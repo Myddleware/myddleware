@@ -19,41 +19,46 @@
   },
   "prefer-stable": true,
     "require": {
-        "php": ">=7.2",
-        "symfony/symfony": "3.4.45",
-        "doctrine/orm": "^2.6.4",
-        "doctrine/doctrine-bundle": "1.8.1",
-        "twig/extensions": "~1.0",
-        "twig/twig": "^1.0",
-        "symfony/assetic-bundle": "~2.3",
-        "symfony/swiftmailer-bundle": "^2.3",
+        "php": ">=7.3",
+        "symfony/symfony": "^4.4.16",
+        "doctrine/orm": "^2.7.4",
+        "doctrine/doctrine-bundle": "1.10.3",
         "symfony/monolog-bundle": "^3.1.2",
-        "symfony/expression-language": "~3.1",
-        "sensio/distribution-bundle": "^5.0",
+        "symfony/expression-language": "4.4.16",
+        "symfony/swiftmailer-bundle": "^3.5",
         "sensio/framework-extra-bundle": "^3.0.2",
-        "incenteev/composer-parameter-handler": "^2.0",
         "stof/doctrine-extensions-bundle": "1.3.0",
-        "friendsofsymfony/user-bundle": "~2.0.2",
+        "friendsofsymfony/user-bundle": "^2.1",
+        "twig/twig": "^2.0",
         "jquery/jquery": "2.1.3",
         "jquery/jquery_ui": "1.11.1",
         "twitter/bootstrap": "3.3.7",
         "leafo/lessphp": "0.4.0",
-        "phpsec/phpsec":"0.6.*",
-        "white-october/pagerfanta-bundle": "dev-master",
         "pagerfanta/pagerfanta": "^2.0.0",
         "illuminate/encryption": "5.3.*@dev",
-        "friendsofsymfony/jsrouting-bundle": "^1.6",
-        "api-platform/core": "2.2.10",
+        "friendsofsymfony/jsrouting-bundle": "^2.7.0",
+        "api-platform/core": "2.3.6",
         "api-platform/api-pack": "^1.1",
-        "lexik/jwt-authentication-bundle": "^2.6",
+        "lexik/jwt-authentication-bundle": "^2.10",
         "mautic/api-library": "^2.15",
         "javanile/vtiger-client": "^0.0.13",
         "facebook/graph-sdk" : "~5.0",
         "facebook/php-ads-sdk": "2.8.*",
-        "iadvize/apirestclient": "1.3.0",
+		"iadvize/apirestclient": "1.2.0",
         "sugarcrm/rest-php-client": "1.4.5",
-    "automattic/woocommerce": "^3.0"
+      	"automattic/woocommerce": "^3.0",
+        "symfony/webpack-encore-bundle": "^1.8",
+        "roave/better-reflection": "^4.3",
+		"laminas/laminas-code": "^3.4",
+		"babdev/pagerfanta-bundle": "^2.8",
+		"laminas/laminas-stdlib": "^3.3",
+		"swiftmailer/swiftmailer": "^6.2",
+		"symfony/flex": "^1.10",
+		"symfony/mailer": "5.1.8"
     },
+	"replace": {
+
+	},
     "repositories": [
         {
             "type": "package",
@@ -79,32 +84,19 @@
         }
     ],
     "require-dev": {
-      "sensio/generator-bundle": "^3.0",
       "doctrine/doctrine-fixtures-bundle": "^2.3",
-        "symfony/phpunit-bridge": "^3.0"
+        "symfony/phpunit-bridge": "^4.0"
 
     },
     "scripts": {
-        "post-root-package-install": [
-            "SymfonyStandard\\Composer::hookRootPackageInstall"
-        ],
+        "auto-scripts": {
+
+        },
         "post-install-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles"
+
         ],
         "post-update-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles"
+
         ]
     },
     "config": {
@@ -135,3 +127,4 @@
         }
     }
 }
+

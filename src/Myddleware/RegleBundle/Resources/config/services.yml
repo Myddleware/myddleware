@@ -24,7 +24,7 @@ services:
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware.document:  
          class: Myddleware\RegleBundle\Classes\document
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", %param%]
+         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", '%param%']
      myddleware.template:  
          class: Myddleware\RegleBundle\Classes\template
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
@@ -158,4 +158,3 @@ services:
         tags:
             - { name: form.type, alias: regle_user_profile }
   
-
