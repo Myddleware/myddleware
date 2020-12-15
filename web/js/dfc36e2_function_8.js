@@ -1,6 +1,6 @@
  $( document ).ready(function() {
  	
  	$('.switch').onoff();
- 	$(".fancybox").fancybox();
+	$(".fancybox").fancybox();
  	
 });  // jquery

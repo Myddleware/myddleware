@@ -154,11 +154,13 @@ class filecore extends solution {
 
 				// Get the column names in the file
 				$header = $this->transformRow($headerString,array('module'=>$module));
+
 				$i=1;			
 				foreach ($header as $field) {
 					// In case the field name is empty
 					if(empty($field)) {
 						$field = 'Column_'.$i;
+
 					}
 					// Spaces aren't accepted in a field name
 					$this->moduleFields[str_replace($this->removeChar, '', $field)] = array(
@@ -591,9 +593,12 @@ class filecore extends solution {
 	protected function transformRow($buffer,$param){
 		// If the module contains file with a fix column width (if attribute $columnWidth is set up for your module)
 		// Then we manage row using the width of each column
+
 		if (!empty($this->columnWidth[$param['module']])) {
 			$start = 0;
 			// Cut the row using the width of each column
+
+
 			foreach($this->columnWidth[$param['module']] as $columnWidth) {
 				$result[] = mb_substr($buffer,$start,$columnWidth); 
 				$start += $columnWidth;		
