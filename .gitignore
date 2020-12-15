@@ -64,6 +64,8 @@ uat.pem
 /*.retry
 /CLONE/
 /var/databases/filebrowser.db
+/var/openvpn/*
+!var/openvpn/.gitkeep
 
 # Secrets
 .env

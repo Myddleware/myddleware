@@ -56,5 +56,19 @@ services:
       - ./.filebrowser.json:/.filebrowser.json
     restart: 'always'
 
+  openvpn:
+    image: javanile/openvpn
+    tty: true
+    stdin_open: true
+    environment:
+      - EXTERNAL_ADDRESS=${external_address}
+    ports:
+      - ${openvpn_port:-1194}:${openvpn_port:-1194}/udp
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./var/openvpn:/etc/openvpn
+    restart: always
+
 volumes:
   mysql:
