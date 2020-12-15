@@ -63,7 +63,7 @@ services:
     environment:
       - EXTERNAL_ADDRESS=${external_address}
     ports:
-      - ${openvpn_port:-1194}:${openvpn_port:-1194}/udp
+      - ${openvpn_port}:${openvpn_port}/udp
     cap_add:
       - NET_ADMIN
     volumes:
