@@ -48,7 +48,7 @@ services:
   filebrowser:
     image: filebrowser/filebrowser
     ports:
-      - ${filebrowser_port}:30090
+      - "${filebrowser_port}:30090"
     volumes:
       - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
       - ./var/logs:/srv/Logs
@@ -63,7 +63,7 @@ services:
     environment:
       - EXTERNAL_ADDRESS=${external_address}
     ports:
-      - ${openvpn_port}:${openvpn_port}/udp
+      - "${openvpn_port}:${openvpn_port}/udp"
     cap_add:
       - NET_ADMIN
     volumes:
