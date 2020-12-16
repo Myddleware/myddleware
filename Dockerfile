@@ -86,7 +86,7 @@ RUN apt-get update && \
 
 ## Sysadmin tools
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install -qq --force-yes nano vim net-tools
+    apt-get -y install -qq --force-yes nano vim net-tools iputils-ping
 
 ## Entrypoint
 COPY ./myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
