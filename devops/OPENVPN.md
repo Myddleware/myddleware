@@ -58,7 +58,7 @@ vpn_client_forward=192.168.255.6:22
 dopo che vinene cambiata questa variabile bisogna lanciare il comando
 
 ```
-docker-compose up -d
+docker-compose -f docker-compose.yml up -d
 ```
 
 per rendere effettiva la modifica
