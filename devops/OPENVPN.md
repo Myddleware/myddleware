@@ -47,9 +47,9 @@ Consegnare il file appena creato e la chiava segreta dell'utente a chi opportuno
 
 ## Casi particolari
 
-Potrebbe essere necessario fore in modo che Myddleware possa raggiungere applicazioni server che si trovano
-in client che si sono connessi alla VPN per fare in modo bisogna scrivere una regola dentro la variabile `vpn_client_forward`
-Inserire qui l'ip virtuale assegnato al client seguito da ':' e la porta del servizio, esempio
+Potrebbe essere necessario fare in modo che Myddleware possa raggiungere applicazioni server che si trovano
+in client che si sono connessi alla VPN. Per fare ciò bisogna scrivere una regola dentro la variabile `vpn_client_forward` dentro il file `.env`
+Inserire qui l'IP virtuale assegnato al client seguito da ':' e la porta del servizio, ad esempio:
 
 ```
 vpn_client_forward=192.168.255.6:22
@@ -63,11 +63,7 @@ docker-compose -f docker-compose.yml up -d
 
 per rendere effettiva la modifica
 
-questa riga permettere a myddleware di accedere al servizio PDF presente sul server
+questa riga permettere a myddleware di accedere al servizio FTP presente sul server
 usando come HOST la parola `vpn` e come porta la `22`
 
 NOTA: Non usare gli IP virtuali all'interno di Myddleware
-
-## Problemi di DNS nel client
-
-
