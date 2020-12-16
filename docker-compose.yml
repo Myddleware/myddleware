@@ -56,12 +56,13 @@ services:
       - ./.filebrowser.json:/.filebrowser.json
     restart: 'always'
 
-  openvpn:
+  vpn:
     image: javanile/openvpn
     tty: true
     stdin_open: true
     environment:
       - EXTERNAL_ADDRESS=${external_address}
+      - CLIENT_FORWARD=${vpn_client_forward}
     ports:
       - "${openvpn_port}:${openvpn_port}/udp"
     cap_add:

@@ -19,7 +19,7 @@ docker-compose up -d
 Fare l'inizializzazione del Server OpenVPN con i seguenti comandi
 
 ```
-docker-compose run --rm openvpn set_passphrase
+docker-compose run --rm vpn set_passphrase
 ```
 
 Seguire la procedura inserendo la passphrase più opportuna tutte le volte che viene chiesta
@@ -29,7 +29,7 @@ istanze dei client VPN che dovranno connettersi, quindi prenderne e salvarla sul
 Adesso possiamo creare il primo client
 
 ```
-docker-compose exec openvpn add_client NOMECLIENT
+docker-compose exec vpn add_client NOMECLIENT
 ```
 
 con questo comando sarà creato un client verranno chiesti una chiave segrata per lo specifico client e
@@ -40,7 +40,34 @@ Adesso possiamo generare il file `.ovpn` da inviare alla Workstastion o Server r
 Usare il seguente comando
 
 ```
-docker-compose exec openvpn get_client NOMECLIENT > NOMECLIENT.ovpn
+docker-compose exec vpn get_client NOMECLIENT > NOMECLIENT.ovpn
 ```
 
 Consegnare il file appena creato e la chiava segreta dell'utente a chi opportuno.
+
+## Casi particolari
+
+Potrebbe essere necessario fore in modo che Myddleware possa raggiungere applicazioni server che si trovano
+in client che si sono connessi alla VPN per fare in modo bisogna scrivere una regola dentro la variabile `vpn_client_forward`
+Inserire qui l'ip virtuale assegnato al client seguito da ':' e la porta del servizio, esempio
+
+```
+vpn_client_forward=192.168.255.6:22
+```
+
+dopo che vinene cambiata questa variabile bisogna lanciare il comando
+
+```
+docker-compose up -d
+```
+
+per rendere effettiva la modifica
+
+questa riga permettere a myddleware di accedere al servizio PDF presente sul server
+usando come HOST la parola `vpn` e come porta la `22`
+
+NOTA: Non usare gli IP virtuali all'interno di Myddleware
+
+## Problemi di DNS nel client
+
+
