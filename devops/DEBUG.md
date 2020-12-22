@@ -15,3 +15,6 @@ make debug
 
 Da questo momento in poi saranno disponibili i seguenti strumenti
 
+## Accedere a Myddleware
+
+Visitare l'indirizzo seguente <http://IP_MACCHINA:30080> oppure <http://localhost:30080> nel caso si stia debuggando localmente
