@@ -63,6 +63,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'mautic',			'active' => 1,'source' => 0,'target' => 1),
 									array('name' => 'facebook',			'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'iadvize',			'active' => 1,'source' => 1,'target' => 0),
+									array('name' => 'woocommerce',		'active' => 1,'source' => 1,'target' => 1)
 							);
  
     public function load(ObjectManager $manager){
