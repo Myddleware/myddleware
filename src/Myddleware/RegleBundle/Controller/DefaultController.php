@@ -1538,8 +1538,8 @@ class DefaultControllerCore extends Controller
                     // We get all relate fields from every source module
                     foreach ($ruleListRelation as $ruleRelation) {
                         // Get the relate fields from the source module of related rules
-                        $rule_fields_source = $solution_source->get_module_fields($ruleRelation['module_source'], 'source');
-                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['module_source'],'');
+                        $rule_fields_source = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
+                        $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['moduleSource'],'');
                         if (!empty($sourceRelateFields)) {
                             foreach ($sourceRelateFields as $key => $sourceRelateField) {
                                 $lstParentFields[$key] = $sourceRelateField['label'];
