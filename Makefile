@@ -49,7 +49,7 @@ setup: setup-files setup-database
 logs: debug
 	@docker-compose logs -f myddleware
 
-debug: down
+debug: init down
 	@docker-compose up -d --force-recreate
 
 dev: down
