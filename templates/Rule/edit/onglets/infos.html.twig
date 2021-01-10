@@ -1,0 +1,156 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<div class="link-help-view">
+	<a href="#help-content-info"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
+</div>
+
+{# BTN #}
+
+<div class="block-btn-infos">
+	<a class="btn_action_loading" href="{{ path('regle_exec',{'id' : rule.GetId }) }}" title="">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-retweet"></span> {{'view_rule.action.exec_rule'|trans}}
+		</button>
+	</a>
+	<a href="{{ path('regle_edit',{'id' : rule.GetId }) }}" title="" onclick="return(confirm('{{'view_rule.action.confirm_edit_rule'|trans}}'));">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-edit"></span> {{'view_rule.action.edit_rule'|trans}}
+		</button>
+	</a>
+	<a href="{{ path('regle_displayflux',{'id' : rule.GetId }) }}" title="">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-sort"></span> {{'view_rule.action.displayflux'|trans}}
+		</button> 
+	</a>
+	<a href="{{ path('regle_delete',{'id' : rule.GetId }) }}" title="" onclick="return(confirm('{{'view_rule.action.confirm_delete_rule'|trans}}'));">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-remove"></span> {{'view_rule.action.delete_rule'|trans}}
+		</button> 
+	</a>
+</div>
+
+{# BTN #}
+
+<div align="center">
+	<div class="left tabinfo">
+		<table id="tab_rule">
+			<tr>
+				<th colspan="2">{{'view_rule.title.rule'|trans}}</th>
+			</tr>	
+			<tr>
+				<td class="title">{{'view_rule.infos.active'|trans}}</td>
+				<td class="value">
+					<div class="onoffswitch">
+					<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="activerule" {{ (rule.GetActive == true) ? 'checked="checked"' : '' }} />
+					    <label class="onoffswitch-label" for="activerule">
+						    <span class="onoffswitch-inner">
+						    <span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
+						    <span class="onoffswitch-inactive"><span class="onoffswitch-switch">OFF</span></span>
+						    </span>
+					    </label>
+					</div> 
+				</td>
+			</tr>				
+			<tr>
+				<td class="title">{{'view_rule.infos.id'|trans}}</span></td>
+				<td class="value">{{ rule.GetId }}</td>
+			</tr>
+			<tr>
+				<td class="title">{{'view_rule.infos.name'|trans}}</td>
+				<td class="value">{{ rule.GetName }}</td>
+			</tr>
+			<tr>
+				<td class="title">{{'view_rule.infos.datecreated'|trans}}</td>
+				<td class="value">{{ rule.GetDateCreated|date("d-m-Y H:i:s") }}</td>
+			</tr>
+			<tr>
+				<td class="title">{{'view_rule.infos.datemodified'|trans}}</td>
+				<td class="value">{{ rule.GetDateModified|date("d-m-Y H:i:s") }}</td>
+			</tr>
+			<tr>
+				<td class="title">{{'view_rule.infos.mode'|trans}}</td>
+				<td class="value"><span class="label label-default">{{ params_suite.mode }}</span></td>
+			</tr>
+			{% if params_suite.bidirectional is defined and params_suite.bidirectional is not empty %}	
+			<tr>
+				<td class="title">{{'view_rule.infos.bidirectional'|trans}}</td>
+				<td class="value"><a href="{{ path('regle_open',{'id' : params_suite.bidirectional }) }}">{{ params_suite.bidirectionalName }}</a></td>
+			</tr>	
+			{% endif %}
+			{% if duplicate_target is defined and duplicate_target is not empty %}	
+			<tr>
+				<td class="title">{{'view_rule.infos.duplicate_fields'|trans}}</td>
+				<td class="value"><a href="{{ path('regle_open',{'id' : duplicate_target }) }}">{{ duplicate_target }}</a></td>
+			</tr>	
+			{% endif %}	
+			{% if params_suite.customParams is defined and params_suite.customParams is not empty %}	
+				{% for r in params_suite.customParams %}
+					<tr>
+						<td class="title">{{ r.name }}</td>
+						<td class="value"><span class="label label-default">{{ r.value }}</span></td>
+					</tr>	
+				{% endfor %}
+			{% endif %}
+		</table>
+	</div>
+	<div class="left tabinfo">
+		<table id="tab_connector">
+			<tr>
+				<th colspan="4">{{'view_rule.title.connector'|trans}}</th>
+			</tr>	
+			<tr>
+				<td class="title_source_ctr" colspan="2">{{'view_rule.title.source'|trans}}</td>
+				<td class="title_target_ctr" colspan="2">{{'view_rule.title.target'|trans}}</td>
+			</tr>
+			<tr>
+				<td class="title_source">{{'view_rule.connector.title'|trans}}</td>
+				<td class="value"><a href="{{ path('connector_open',{'id' : connector.id_source }) }}">{{ connector.lbl_source }}</a></td>
+				<td class="title_target">{{'view_rule.connector.title'|trans}}</td>
+				<td class="value"><a href="{{ path('connector_open',{'id' : connector.id_target }) }}">{{ connector.lbl_target }}</a></td>		
+			</tr>
+			<tr>
+				<td class="title_source">{{'view_rule.connector.solution'|trans}}</td>
+				<td class="value">
+					<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{connector.solution_source }}.png" alt="{{connector.solution_source }}" /></p>
+					{{ connector.solution_source }}</td>
+				<td class="title_target">{{'view_rule.connector.solution'|trans}}</td>
+				<td class="value">
+					<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{connector.solution_target }}.png" alt="{{connector.solution_target }}" /></p>
+					{{ connector.solution_target }}</td>		
+			</tr>	
+			<tr>
+				<td class="title_source">{{'view_rule.connector.module'|trans}}</td>
+				<td class="value">{{ rule.getModuleSource }}</td>
+				<td class="title_target">{{'view_rule.connector.module'|trans}}</td>
+				<td class="value"> {{ rule.getModuleTarget }}</td>	 	
+			</tr>
+		</table>
+	</div>
+	<div class="clr"></div>
+</div>
+<div id="help-content-info" class="help-content">
+	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
+	<p>{{'help.viewrule.info'|trans|raw}}</p>
+</div>

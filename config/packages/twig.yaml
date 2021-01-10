@@ -1,0 +1,5 @@
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+    globals:
+        myd_version: "%myd_version%"

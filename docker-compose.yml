@@ -1,0 +1,48 @@
+version: "3.0"
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "${EXTERNAL_PORT:-8020}:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/Dockerfile
+    volumes:
+      - .:/var/www:cached
+    depends_on:
+      - database
+    env_file:
+      - .env
+
+  database:
+    build:
+      context: ./docker/db
+      dockerfile: Dockerfile.mysql
+    command: mysqld --sql_mode=""
+    volumes:
+      - ./fixtures:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    ports:
+      - "3320:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "${PHPMYADMIN_PORT:-8021}:80"
+    depends_on:
+      - database
+    environment:
+      - PMA_HOST=database
+      - PMA_PORT=3306
+
+volumes:
+  app_log:
+  nginx_log:

@@ -1,0 +1,168 @@
+ {#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Myddleware{% endblock %}</title>
+        <!-- Latest compiled and minified CSS -->     
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+  
+         {% block css %}{% endblock css %}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    </head>
+    <body>
+
+    <style type="text/css">
+        {% block cssin %}{% endblock cssin %}
+    </style>
+
+    <div id="myd_top"><nav>
+            <ul class="nav nav-pills right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                    {{ app.user.username }}
+                    <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                    	<li>
+                            <a href="{{ path('my_account') }}"><span class="glyphicon glyphicon-user"></span> {{'menu_user.account'|trans}}</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('management_smtp_index') }}"><span class="glyphicon glyphicon-envelope"></span> {{'menu_user.management_smtp'|trans}}</a>
+                        </li>
+                        <li>
+							<a href="{{ path('jobscheduler') }}"><span class="glyphicon glyphicon-time"></span> {{'menu_user.jobscheduler'|trans}}</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('logout') }}"><span class="glyphicon glyphicon-off"></span> {{'menu_user.logout'|trans}}</a>
+                        </li>                       
+                    </ul>
+                </li> 
+            </ul>                   
+        </nav></div>
+        <header>        
+            <div>
+                <div class="left"><span id="logo"></span></div>
+                <div class="right">
+                    <span id="cloud"></span>
+                  {#  
+                  <form id="search" class="navbar-form navbar-right" role="search">
+                    <div class="form-group">
+                      <input type="text" class="form-control" placeholder="Flux, Job, Règle...">
+                    </div>
+                    <button type="submit" class="btn-small-myd"><span class="glyphicon glyphicon-search"></span></button>
+                  </form> #}                       
+                    
+                    <menu>
+                        <ul class="nav nav-pills">
+                            <li><a href="{{ path('regle_panel') }}"><span class="glyphicon glyphicon-home"></span> {{'menu.index'|trans}}</a></li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                                {{'menu.rule.title'|trans}}
+                                <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="{{ path('regle_stepone_animation') }}"><span class="glyphicon glyphicon-edit"></span> {{'menu.rule.createv2'|trans}}</a>
+                                    </li>                                    
+                                    <li>
+                                        <a href="{{ path('regle_list') }}"><span class="glyphicon glyphicon-list"></span> {{'menu.rule.list'|trans}}</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                                {{'menu.connector.title'|trans}}
+                                <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="{{ path('regle_connector_create') }}"><span class="glyphicon glyphicon-edit"></span> {{'menu.connector.create'|trans}}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ path('regle_connector_list') }}"><span class="glyphicon glyphicon-list"></span> {{'menu.connector.list'|trans}}</a>
+                                    </li>
+                                </ul>
+                            </li>   
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                                {{'menu.flux.title'|trans}}
+                                <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="{{ path('flux_list', {'search': 0}) }}"><span class="glyphicon glyphicon-list"></span> {{'menu.flux.list'|trans}}</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                                {{'menu.job.title'|trans}}
+                                <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="{{ path('task_list') }}"><span class="glyphicon glyphicon-list"></span> {{'menu.flux.list'|trans}}</a>
+                                    </li>
+                                </ul>
+                            </li>                                                                               
+                            <li><a href="http://www.myddleware.com/pricing/support"  target="_blank">{{'menu.support'|trans}}</a></li>
+                        </ul>                   
+                    </menu>
+                    </div>                  
+                    <div clss="clr"></div>  
+            </div>
+        </header>
+        <div id="notification">
+            {# Notification #}
+           {% include "Layout/notification.html.twig" %}
+        </div>
+        <div id="myd_title"><span class="glyphicon glyphicon-chevron-right"></span> {% block titlesm %}{% endblock titlesm %}</div>
+        <section>    
+            {# Content #}
+            {% block body %}
+                {% block arianne %}Myddleware{% endblock %}
+            {% endblock %}  
+        </section>
+        <footer>
+            {# Footer #}
+            {% include 'footer.html.twig' %}
+        </footer>
+
+        {% block base_js %}
+            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+            {{ encore_entry_script_tags('app') }}
+        {% endblock base_js %}
+	    <!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+	                   
+        {% block js %}{% endblock js %}
+    </body>
+</html>

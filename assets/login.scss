@@ -1,0 +1,55 @@
+@import "css/regle.css";
+@import "css/lib/jquery/jquery-ui-timepicker-addon.css";
+@import "js/lib/jquery_fancybox/jquery.fancybox.css";
+@import "css/lib/jquery/jquery.qtip.min.css";
+@import "vendors/bootstrap/css/bootstrap.min.css";
+@import "vendors/jquery/css/redmond/jquery-ui-1.10.4.custom.min.css";
+@import "css/connector.css";
+@import "css/login.css";
+
+body.login {
+  background: url('./images/login/fd.jpg') repeat-y;
+  background-color: #9DC0E1;
+  overflow-y:hidden;
+}
+
+#myd_connexion .logo {
+  background: url('./images/login/logo.png') no-repeat;
+  background-size: 158px;
+}
+
+#myd_connexion .logo_platform {
+  background: url('./images/login/logo_platform.png') no-repeat;
+  background-size: 158px;
+}
+
+#myd_connexion .logo_empty {
+  background: url('./images/login/logo_empty.png') no-repeat;
+  background-size: 158px;
+}
+
+.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+  background: url('./images/login/btn.png');
+}
+
+#myd_connexion .load {
+  height: 16px;
+  width: 16px;
+  display: inline-block;
+}
+
+.btn-myd {
+  background-position: left top;
+}
+
+.btn-myd:hover {
+  background-position: left bottom;
+}
+
+.btn-mydinv {
+  background-position: left bottom;
+}
+
+.btn-mydinv:hover {
+  background-position: left top;
+}

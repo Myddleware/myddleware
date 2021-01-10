@@ -1,0 +1,84 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% extends 'base.html.twig' %}
+{% block title %}{{parent()}} | {{'title.rule.view'|trans}} {{rule.getName}}{% endblock %}
+{% block titlesm %}<a href="{{ path('regle_list') }}">{{'breadcrumb.rule_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.rule.view'|trans}} {{rule.getName}} {% endblock titlesm %}  
+{% block body %}
+    <div id="rule">
+		<div id="tabs">	
+		<ul>
+			{% include "Rule/edit/onglets/index.html.twig" %}
+		</ul>
+			<div id="infos">
+				 {# ------------- INFOS ------------- #}
+				 {% include "Rule/edit/onglets/infos.html.twig" %}
+				 {# ------------- /INFOS ------------- #}
+			</div>
+			<div id="mapping">
+				 {# ------------- MAPPING ------------- #}
+				 {% include "Rule/edit/onglets/mapping.html.twig" %}
+				 {# ------------- /MAPPING ------------- #}
+			</div>
+			<div id="relation">
+				 {# ------------- RELATIONS ------------- #}
+				 {% include "Rule/edit/onglets/relation.html.twig" %}
+				 {# ------------- /RELATIONS ------------- #}
+			</div>
+			<div id="filter">
+				 {# ------------- FILTER ------------- #}
+				 {% include "Rule/edit/onglets/filter.html.twig" %}
+				 {# ------------- /FILTER ------------- #}
+			</div>						
+			<div id="params">
+				 {# ------------- PARAMS ------------- #}
+				 {% include "Rule/edit/onglets/params.html.twig" %}
+				 {# ------------- /PARAMS ------------- #}
+			</div>
+		</div>
+    </div>
+
+    {# ------------- PARAMETRES JQUERY ------------- #}
+    <script type="text/javascript">   	
+	var path_img = "{{ asset('build/images/regle/') }}";
+	var path_fiche_update = "{{ path('regle_update',{'id' : rule.getId }) }}";
+	var path_fiche_update_params = "{{ path('path_fiche_params_update',{'id' : rule.getId }) }}";
+	var path_fiche_update_simulate = "{{ path('path_fiche_params_simulate',{'id' : rule.getId }) }}";
+	var onglets = {
+		active: 0
+	};
+	var path_rule_logs = "{{ path('regle_logs', {'id' : rule.getId }) }}";
+	var path_rule_exec = "{{ path('regle_exec',{'id' : rule.GetId }) }}";
+    </script>
+    {# ------------- PARAMETRES JQUERY ------------- #}
+{% endblock %}
+
+{% block cssin %}
+.myd_div_loading{
+	background: url("{{ asset('build/images/regle/loading') }}.gif") no-repeat center center;
+}
+.myd_div_loading_logo{
+	background: url("{{ asset('build/images/regle/logo/logo') }}.png") no-repeat center center;
+}
+{% endblock cssin %}

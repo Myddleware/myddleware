@@ -1,0 +1,778 @@
+# /*********************************************************************************
+ # * This file is part of Myddleware.
+
+ # * @package Myddleware
+ # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ # * @link http://www.myddleware.com
+ 
+ # This file is part of Myddleware.
+ 
+ # Myddleware is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation, either version 3 of the License, or
+ # (at your option) any later version.
+
+ # Myddleware is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ # GNU General Public License for more details.
+
+ # You should have received a copy of the GNU General Public License
+ # along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+# *********************************************************************************/
+
+panel:
+    solutions:
+        title: Connectez dès à présent ces différentes solutions
+        click: Cliquez pour savoir comment créer ce connecteur.
+    graph_tranfer_rule:
+        desc: Tranferts envoyés par règle
+    graph_error:
+        title: Nombre de transferts par statut
+    list_error:
+        nb: Nombre d'erreurs par règle
+    list_job:
+        title: Détail des derniers jobs
+        duration: seconde(s)
+        nb : Transferts de données en erreur
+    graph_histo:
+        title: Historique des transferts
+    graph_job_histo:
+        title: Historique des jobs
+create_rule:
+    tabs:
+        one: Connexion
+        two: Choix des modules
+        three: Champs
+        four: Simulation
+        five: Relations
+        six: Filtres
+        seven: Validation   
+    step1:
+        list_empty: Aucune solution
+        list_selected: Choix
+        valid: Valider les connexions
+        name: Nom de votre règle
+        choose_connector: Choisissez votre connecteur
+        choose_module: Choisissez votre module
+        btn_mapping: Passer au mapping des champs
+        btn_confirm: Confirmer cette règle
+        connector: Votre connecteur a bien été créé
+    step2:
+        title: Choix des modules
+        choice_module: Veuillez choisir un module  
+        valid: Envoyer
+    step3:
+        filter: Filtre
+        filter_choice: n’a pas de filtre
+        filter_fields: Rechercher un champ...
+        empty_fields_target: Aucun champ trouvé dans cible
+        empty_simulate: Attention il n'existe pas de donnée dans le serveur source ou de champs dans la solution cible
+        empty_field_simulate: Contenu vide
+        data: Tester les données
+        infobulle: Double clic pour effacer
+        previous: Etape précédente
+        next: Etape suivante
+        syncdata:
+            label: Type de synchronisation
+            create_modify: Création et modification de données
+            create_only: Création de données seulement
+            search_only: Récupération de données existantes seulement  
+        deletion:
+            label: Activer la suppression dans l'application cible
+            yes: Oui     
+        data_wait: Chargement en cours... Merci de patienter
+        title: Champs
+        placeholder: Veuillez faire glisser vos champs ici
+        info_fields: Liste des valeurs possibles
+        addfield:
+            custom: Ajouter un champ personnalisé        
+        alert: 
+            fields: Il existe des champs obligatoires qui sont actuellement vides. Il vous est possible de renseigner plusieurs champs source vers un champ cible.
+            fields_title: Champs obligatoires
+        formula: 
+            fields: Champs
+            function: Fonctions
+            create: Créer une formule
+            compose: Composer votre formule
+            confirm: Confirmer
+            delete: Effacer
+            close: Fermer 
+            error: Votre règle comporte une ou plusieurs erreurs de syntaxe
+        confirm:
+            success: Enregistrement avec succès
+            error: Une erreur est survenue 
+            valid: Valider   
+        relation:
+            empty: Aucune relation
+            select: Aucune règle
+            source: Source
+            target: Cible
+            rule: Règles
+            fields: Champs source
+            parent_detail_view: Parent
+            parent: "Relation parent : fusion de plusieurs transferts de données"
+            record_id: ID enregistrement
+            yes: Oui
+        params:
+            duplicate: Champs pour éviter les doublons
+            sync: Synchronisation bidirectionnelle
+        save_wait: Veuillez patienter... 
+
+filter:
+    content: contient
+    notcontent: ne contient pas
+    begin: commence par
+    end: se termine par
+    gt: est supérieur à
+    lt: est inférieur à
+    equal: est égale à
+    different: n'est pas égal à 
+    gteq: est supérieur ou égal à
+    lteq: est inférieur ou égal à
+    in: est compris dans le tableau suivant séparé par des points virgules
+    notin: n’est pas compris dans le tableau suivant séparé par des points virgules
+            
+view_rule:
+    action:
+        exec_all: Exéc. les règles actives
+        confirm_exec_all: Souhaitez-vous exécuter toutes les règles actives ?
+        exec_error: Relancer les erreurs
+        confirm_exec_error: Souhaitez-vous relancer tous les transferts en erreur ?
+        exec_rule: Exécuter la règle
+        edit_rule: Editer la règle
+        confirm_edit_rule: Souhaitez-vous modifier cette règle ?
+        delete_rule: Supprimer la règle
+        confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
+        displayflux: Voir les transferts
+        new_rule: Créer une règle
+    tabs:
+        info: Informations
+        mapping: Mapping des champs
+        relation: Relations
+        params: Paramètres 
+        filter: Filtres
+    title:
+        rule: Règle
+        connector: Connecteurs
+        source: Source
+        target: Cible
+    infos:
+        active: Activation de la synchronisation automatique
+        id: Identifiant
+        name: Nom
+        version: Version
+        datecreated: Date de création
+        datemodified: Date de modification
+        mode: Mode
+        bidirectional: Bidirectionnelle
+        duplicate_fields: Champs de dédoublonnage
+    connector:
+        title: Connecteur
+        solution: Solution
+        module: Module
+    mapping:
+        empty: Aucun champ
+        formula_empty: Aucune formule
+        formula: Formule
+        module_target: Module Cible
+        module_source: Module Source
+    relate:
+        empty: Aucune relation
+        solution_source: Source
+        solution_target: Cible
+        rule : Règles
+    filters:
+        empty: Aucun filtre
+
+    params:
+        save: Sauvegarder
+        simule: Simuler Transferts
+        result: Nombre de transferts estimé
+        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
+
+rule:
+    source: Source
+    target: Cible  
+    open: Ouvrir  
+    workon: Vous travaillez sur la règle
+    yoursource: Votre solution source
+    yourtarget: Votre solution cible
+    help: Que dois-je faire ?
+
+list_rule:
+    title: Liste des règles
+    total: Nombre de règles
+    empty: Vous n'avez pas encore de règle !
+    delete: Etes-vous sûr de vouloir supprimer cette règle ?
+    create_first_rule:  Vous pouvez créer votre première règle
+    th: 
+        name: Nom
+        version: Version
+        active: Activation
+        date_created: Date de création
+        option: Options
+    btn:
+        delete: Supprimer
+        edit: Editer
+        view: Voir la fiche
+
+animate:
+    rulename: Nom de votre règle 
+    wait: Veuillez patienter...
+    solution:
+        source: source
+        target: cible
+    carousel:
+        next: Suivant
+        previous: Précèdent
+    choice:
+        module: Choix des modules
+        template: Choix des modèles prédéfinis
+        name: Nom
+        description: Description 
+        empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
+    tutoriel:
+        link: "http://community.myddleware.com/index.php/tutorial/#rules"
+        textlink: "Besoin d'aide ? Lisez notre tutoriel."
+
+create_connector:    
+    title: Création d'un connecteur
+    save: Enregistrer la connexion
+    connexion: Nom de la connexion
+    test: Tester
+    valid: Cliquez-ici pour créer un autre connecteur
+    help: "Besoin d'aide ?"
+    source: Source
+    target: Cible  
+    upload_placeholder: Sélectionner votre fichier 
+    upload_btn: Transférer 
+    upload_error: Le fichier n'a pas pu être enregistré sur le serveur
+    upload_error_ext: L'extension n'est pas autorisée
+    upload_success: Le fichier a bien été transféré
+    upload_delete: Suppression du fichier
+    params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
+
+list_connector:
+    empty: Vous n'avez pas encore de connecteur !
+    delete: "Désirez-vous supprimer ce connecteur ?"
+    total: Nombre de connecteurs
+    create_first_connector:  Vous pouvez créer votre premier connecteur
+    th: 
+        name: Nom
+        date_created: Date de création
+        option: Options
+    btn:
+        delete: Supprimer
+        edit: Editer
+        view: Voir la fiche            
+
+view_connector:
+    btn:
+        save: Sauvegarder
+        delete: Supprimer
+        confirm_delete: Confirmez-vous la suppression de ce connecteur ?
+    info:
+        title: Paramètres de connexion
+        solution: solution
+    tabs: 
+        info: Informations
+        help: Aide
+        link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
+    help:
+        link: http://community.myddleware.com/index.php/connector-guide/#
+        
+list_flux:
+    start: Début
+    end: Fin
+    total: Nombre de transferts
+    empty: Aucun transfert trouvé
+    btn:
+        filter: Filtrer
+        filter_delete: Supprimer les filtres de recherche
+        cancel: Annuler les transferts
+        mass_cancel_confirm: Annuler les transferts sélectionnés ?
+        reload: Relancer les transferts
+        mass_reload_confirm: Relancer les transferts selectionnés ?
+    filter:
+        delete_confirm: Êtes-vous sûre de vouloir effacer les filtres de recherche ?
+        date_created: Date de création
+        date_modified: Date de modification
+        rule: Règle
+        status: Statut
+        global_status: Statut global / Type
+        id: Identifiant
+        source_id: Id source
+        target_id: Id cible
+        confirm: Filtrer
+        name: Nom
+        content: Contenu du transfer
+        source_content: Source
+        target_content: Target
+    tab:
+        id: Doc Id
+        name: Nom
+        version: Version
+        source_id: Id source
+        target_id: Id cible
+        date_created: Date de création
+        date_modified: Date de modification
+        statut: Status
+        source_date_modified: Date de référence
+        type: Type
+        source_field: Champ lié
+        reference: Référence
+        
+flux:
+    gbl_status:
+        open: Ouvert
+        close: Fermé
+        cancel: Annulé
+        error: Erreur
+    status:
+        new: Nouveau
+        predecessor_ok: Prédécesseur OK
+        relate_ok : Relation OK
+        transformed: Transformé
+        ready_to_send: Prêt à être envoyé
+        filter_ok: Filtre OK
+        send: Envoyé
+        found: Trouvé
+        filter: Filtre annulé
+        no_send: Non envoyé
+        cancel: Envoi annulé
+        filter_ko: Filtre en erreur
+        create_ko: Création en erreur
+        predecessor_ko: Prédécesseur en erreur
+        relate_ko: Relation en erreur
+        error_transformed: Transformation en erreur
+        error_checking: Vérification en erreur
+        error_sending: Envoi en erreur
+        Not_found: Non trouvée
+    type:
+        update: Update
+        create: Create
+        search: Search
+        delete: Delete
+ 
+view_flux:
+    empty: Pas de données
+    empty_log: Aucune log
+    target: Cible
+    source: Source
+    history: Historique
+    id: Identifiant
+    nblogs: Nombre de logs
+    nbChildDocuments: Tranferts fils
+    nbParentDocuments: Tranferts parents
+    nbHistoryDocuments: Historique des transferts
+    nbPostDocuments: Tranferts post
+    direct_link: Lien direct  
+    btn:
+        reload: Relancer le transfert
+        cancel: Annuler le transfert 
+        readrecord: Lancer la même donnée 
+    header:
+        rule: Règle
+        statut: Status
+        mode: Mode
+        type: Type
+        attempt: Tentative
+        gblstatut: Global Status
+        version: Version
+        parent: Parent
+        dateref: Référence
+        date_created: Date de création
+        date_modified: Date de modification
+    log:
+        id: Id
+        ref: Référence
+        job: Job
+        date_created: Date de création
+        type: Type
+        msg: Message
+
+list_task:
+    total: Total de tâches
+    empty: Aucune tâche
+    th:
+        id: Identifiant
+        status: Statut
+        param: Paramètre
+        begin: Date de début
+        end: Date de fin
+        message: Message
+        close: Fermé
+        open: Ouvert
+        cancel: Annulé
+        manual: Manuelle
+        api: Api
+        error: Erreur
+        
+view_task:
+    empty_log: Aucune log  
+    task_stop: ARRET DE LA TACHE
+    refresh: RAFRAICHIR
+    nblogs: Nombre de logs  
+    header:
+        id: Identifiant
+        status: Statut
+        begin: Date de début
+        end: Date de fin
+        message: Message   
+    log:
+        id: Id
+        ref: Référence
+        transfer: Transfert
+        date_created: Date de création
+        type: Type
+        msg: Message         
+
+view_account:
+    title: Mon compte
+    user_info: Mes informations
+    change_password : Changer mot de passe
+    profile_edit: Edition profile
+    support:
+        enabled: Support activé
+        disabled: Support désactivé
+    label:
+        language: Langue
+    popup:
+        locale: Changement de la langue en cours, merci de bien vouloir patienter. Vous allez être rediriger vers la page d'authentification.
+
+function:
+    all: Toutes
+    category:
+        mathematical: Maths
+        text: Texte
+        date: Date et heure  
+    description:
+        text: 
+            trim:  Supprime les espaces (ou d'autres caractères) en début et fin de chaîne 
+            lower: Met tous les caractères en minuscules  
+            upper: Met tous les caractères en majuscules 
+            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple changeValue( {FIELD},"('A':'1','B':'2')")
+            getValueFromArray: getValueFromArray($key, $array) / Récupère la valeur correspondant à key dans le tableau array
+            substr: substr ( string $string , int $start [, int $length ] ) /  Retourne un segment de chaîne.
+            striptags: striptags( string $str [, string $allowable_tags ] ) /  Supprime les balises HTML et PHP d'une chaîne
+            htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convertit toutes les entités HTML en caractères normaux
+            replace: replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] ) / Remplace toutes les occurrences dans une chaîne
+            utf8encode: utf8encode ( string $data ) / Convertit une chaîne ISO-8859-1 en UTF-8
+            utf8decode: utf8decode ( string $data ) / Convertit une chaîne UTF-8 en ISO-8859-1
+            htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit tous les caractères éligibles en entités HTML
+            htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit les caractères spéciaux en entités HTML
+            chr: chr ( int $bytevalue ) Générer une chaîne d'un octet à partir d'un nombre
+        mathematical:
+            round: Arrondit un nombre à virgule flottante
+            ceil: Arrondit au nombre supérieur
+            abs: Valeur absolue
+        date:
+            date: Formate une date/heure locale
+            microtime: Retourne le timestamp UNIX actuel avec les microsecondes
+            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le timezone de la date passée en premier paramètre
+            changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convertit la date passée en premier paramètre dans le format passé en deuxième paramètre
+
+solution:
+    fields:
+        login: Utilisateur
+        username: Utilisateur
+        password: Mot de passe
+        accesskey: Access key
+        url: Url
+        token: Jeton
+        useraccesstoken: Token utilisateur
+        tokensecret: Secret jeton
+        consumerkey: Clé consommateur
+        consumersecret: Secret consommateur 
+        apikey: Clé api
+        apiuser: Utilisateur api
+        apikeysecret: Clé api secret
+        mail_gotomeeting: Mail GotoMeeting 
+        accountid: Identifiant de compte
+        clientid: Client ID
+        clientsecret: Client secret
+        instance: Numéro d'instance (Entrez 0 si vous n'en avez pas)
+        company: Company ID
+        user: User ID        
+        sandbox: Sandbox (1 si oui, 0 sinon)
+        wsdl: Fichier wsdl
+        file: Fichier
+        host: Serveur Host
+        dbname: Nom de la base de données
+        database_name: Nom de la base de données
+        dbdriver: Driver (pilote) de la base de données
+        dbport: Port d'accès à la base de données
+        port: Port d'accès à la base de données
+        ftpport: Port (défaut 22)
+        directory: Répertoire avec les fichiers
+        shop: Magasin
+        redirect_uri: URL de redirection
+        applicationName: Nom de l'application
+        hashkey: Clé de hachage
+        authid: Id auth
+    params: 
+        dateref: Référence (Les données seront lues à partir de ce paramètre)
+        limit: Limite (Nombre de données lues maximum par appel)
+        active: Activation
+        delete: Suppression de données (délais de suppression des données des documents dans Myddleware) 
+        activate: Activé
+        desactivate: Désactivé
+        description: Description
+        1_minute: 1 minute
+        5_minute: 5 minutes
+        15_minute: 15 minutes
+        30_minute: 30 minutes
+        1_hour: 1 heure
+        2_hour: 2 heures
+        12_hour: 12 heures
+        0_day: Inférieure à 1 jour
+        1_day: 1 jour
+        7_day: 7 jours
+        14_day: 14 jours
+        30_day: 30 jours
+        60_day: 60 jours
+        
+error:
+    connexion: Connexion impossible
+    general: Erreur inattendue
+    rule:
+        valid: Règle non valide
+        order: Veuillez suivre l'ordre des étapes
+        mapping: Une erreur inattendue s'est produite au mapping des champs
+        source_module: Erreur de chargement du module source
+        source_module_all: Erreur du module source
+        source_module_connect: Erreur de connexion du module source
+        source_module_load_list: Erreur de chargement du module source
+        target_module: Erreur de chargement du module cible
+        target_module_connect: Erreur de connexion du module cible
+        target_module_all: Erreur du module cible
+        target_module_load_list: Erreur de chargement des modules cible
+        edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
+        edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
+        edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
+        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.
+        delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
+        update: Impossible d'éditer la règle. 
+    account:
+        language_change: "Impossible de modifier le langage :"
+    template:
+        creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
+    connector:
+        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
+    document:
+        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware. 
+        
+title:
+    account:
+        view: Mon compte
+    index:
+        panel: Tableau de bord
+    rule:
+        create_name: Création de la règle
+        create: Création d'une règle
+        edit: Edition de la règle
+        list: Liste des règles
+        view: Fiche de la règle
+    connector:
+        create: Création d'un connecteur
+        edit: Edition du connecteur
+        list: Liste des connecteurs
+    flux: 
+        list: Liste des transferts
+        view: Fiche du transfert
+    task:
+        list: Liste des tâches
+        view: Fiche de la tâche
+    credit:
+        view: Achats de crédits
+    support:
+        view: Achats d'interventions
+           
+menu:
+    index: Accueil
+    rule:
+        title: Règles
+        createv1: Création (v1)
+        createv2: Création
+        list: Liste
+    connector:
+        title: Connecteurs
+        create: Création
+        list: Liste
+    flux:
+        title: Transferts
+        list: Liste         
+    job:
+        title: Tâches
+        list: Liste
+    support: Support
+        
+breadcrumb:
+    rule_list: Liste des règles
+    transfert_list: Liste des transferts
+    task_list: Liste des tâches
+    connector_list: Liste des connecteurs
+                                
+menu_user:
+    account: Mon compte.
+    jobscheduler: Planificateur de tâche
+    management_smtp: Configuration smtp
+    logout: Déconnexion
+    
+help:
+    title: Aide
+    viewrule:
+        info: >
+                Dans cette page, vous trouvez les informations générales de votre règle. Ici vous pouvez activer la synchronisation automatique de votre règle en passant le bouton d'activation à ON.  
+                Si votre règle est activée, une tâche viendra exécuter votre règle toutes les 5 minutes. Cependant vous pouvez exécuter votre règle manuellement en cliquant sur "Exécuter la règle" même si la synchronisation automatique n'est pas activée.
+                Si vous souhaitez modifier plus de paramètres de votre règle, rendez-vous dans l'onglet paramètre de cette page.
+        mapping: >
+                Dans cette page vous trouvez l'ensemble des champs de vos applications source et cible utilisés dans votre règle. Vous y trouvez également les formules de transformation de données. 
+                Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">Voir la page sur les formules</a>.        
+        relate: >
+                Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">Voir la page sur les relations</a>
+        param: >
+                La date de référence indique quelles données vous allez lire dans votre système source. Seules les données ayant été créées ou modifiées après cette date seront lues et envoyées dans le système cible.
+                Donc si vous souhaitez migrer vos anciennes données, vous devez prendre une date dans le passé. Si vous souhaitez seulement transférer les nouvelles données alors laissez la date du jour.
+                Le nombre de jours pour la suppression des données indique le nombre de jours de stockage de vos données dans Myddleware. Même si vos données sont cryptées dans Myddleware, nous n'autorisons pas une sauvegarde de plus de 60 jours. Vous pouvez réduire ce nombre de jours, cependant sachez que nous ne pourrons pas faire de support sur des données supprimées.
+    rule:
+        fields: >
+                Ici vous pouvez choisir la correspondance entre les champs de vos 2 modules par un simple glisser-déposer. 
+                Par exemple, vous pouvez choisir de mettre le nom d'un contact Sugar dans le nom d'un compte Salesforce, 
+                pour cela il vous suffit de prendre le champ "name" de votre module source et de le mettre dans le champ "name" de votre solution cible. 
+                Pour supprimer un champ déjà placé, il vous suffit de double-cliquer dessus. 
+                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formulle, rendez-vous sur notre blog à l'adresse suivante : <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">Voir la page sur les formules</a>.  
+                Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.
+        simulate: >
+                Ici vous pouvez simuler le résultat des règles que vous avez mises en oeuvre dans l'étape précédente. 
+                En cliquant sur le bouton "Tester les données", Myddleware ira lire une donnée de votre application source pour vous indiquer comment elle serait envoyée dans votre application cible. 
+        relate: >
+                Cet onglet vous permet de définir les relations que vous souhaitez mettre en oeuvre dans votre interface. Vous pouvez ainsi lier plusieurs règles ensemble. 
+                Par exemple, il vous est possible de transférer la relation entre un contact et un compte pour qu'ils soient aussi liés dans la solution cible.
+                Plus d'informations sur les relations à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">Voir la page sur les relations</a>
+        filter: >
+                Cet onglet vous permet de filtrer les champs de votre application source à la lecture.
+                Par exemple, vous pouvez choisir de prendre tous les contacts dont le pays est égal à "France".
+                Plus d'informations sur les filtres à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#filter-your-data" target="_blank">Voir la page sur les filtres</a>
+        validate: >
+                Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle. 
+                Par exemple, pour une application CRM, vous pouvez dé-doublonner tous les contacts par leur mail. Ainsi Myddleware ira vérifier si l'enregistrement existe déjà dans votre solution cible avant de le créer. S'il n'existe pas, Myddleware le créera sinon il ne fera que le mettre à jour.
+                Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.                     
+
+session:
+    task:
+        msglink: Vous venez de lancer une nouvelle tâche. Vous pouvez vous rendre sur la page de cette tâche en cliquant sur ce lien
+        msginfo: Si vous souhaitez suivre l'évolution de cette tâche vous pouvez rafraichir votre page jusqu'à son passsage au statut 'end'.
+
+twitter:
+    tweets:
+        ref: > 
+             Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
+    favoris:
+        ref: >
+             Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
+
+messages:
+    rule:
+        failed_running_job: Erreur lors du lancement de la tâche. 
+        failed_get_task_id: Impossible de récupérer l'identifiant de la tâche. 
+        open_running_task: Vous pouvez ouvrir la tâche en cours en cliquant ici.
+        another_task_running: Impossible de créer la tâche car une autre tâche est en cours. Veuillez attendre la fin de son exécution ou vous pouvez l'arrêter.
+        failed_create_directory: Erreur lors de la création du repertoire temporaire.
+    template:
+        nb_rule: "Nombre de règle générées: "
+        help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
+
+email_notification:
+    subject: Notification Myddleware
+    hello: Bonjour, 
+    introduction: "Voici les statistiques concernant vos transferts de données avec la solution Myddleware:"
+    transfer_success: "- Nombre de tranferts envoyés avec succès: "
+    transfer_error: "- Nombre de tranferts en erreur: "
+    transfer_open: "- Nombre de tranferts ouverts: "
+    active_rule: "Vos règles actives dans Myddleware sont: "
+    no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
+    100_first_erros: "Voici les 100 premières erreurs: "
+    best_regards: Bien cordialement, 
+    signature: L'équipe Myddleware
+email_alert:
+    subject: Alerte Myddleware
+    body: |
+        Bonjour,
+        <p>Une tâche en cours a dépassé la limite que vous avez autorisée : %min% minutes<br/>
+        La tâche a commencé à %begin%.<br/>
+        ID de la tâche : %id%<br/>
+        Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".<br/>
+        %base_uri%</p>
+
+        Bien cordialement,
+jobscheduler:
+    command: Comamande
+    date_created: Date création
+    active: Active
+    list: Liste
+    title: Jobscheduler
+    period: Période
+    job_order: Ordre job
+    date_modified: Date modifié
+    create_by : crée par
+    modified_by : modifié par
+    paramName1 : Paramètre 1
+    paramValue1 : Paramètre valeur 1
+    paramName2 : Paramètre 2
+    paramValue2 : Paramètre valeur 2
+    total : Total
+    actions: Action
+    update: Mise à jour
+    new: Creation
+    cancel: Annuler
+    action:
+        new_jobscheduler : Nouvelle commande
+    view:
+        show : Vue detaillé 
+    description:
+        top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="http://community.myddleware.com/index.php/administration-guide/?lang=fr#taches-planifiees" target=_blank>Plus d'information ici.</a> 
+        bottom : > 
+                 Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:jobScheduler --env=background <BR>
+                 Par exemple sous linux, ajouter cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
+                   */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
+management_smtp:
+    submit : Enregistrer configuration SMTP
+    cancel: Annuler
+    title : Configuration SMTP
+    description : "Vous pouvez configurez l'envoi des email ici. Vous trouverez de la documentation ici : <a href='https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html' target=_blank>https://symfony.com/doc/2.8/reference/configuration/swiftmailer.html</a>"
+    sendtestmail: Envoi test
+
+management_smtp_sendmail:
+    subject: Myddleware - Test de configuration email
+    textMail: Ce message de test a été envoyé par Myddleware. 
+
+login:
+    title: Connexion
+    index: Accueil
+    user: Identifiant
+    pwd: Mot de passe
+    connexion: Se Connecter
+    error_session: Erreur de session
+    text_up_right: Pour en savoir plus sur myddleware
+    text_bottom_right: Vous serez redirigé vers notre site explicatif
+    platform:
+        line1: Merci d'utiliser le cloud d'hébergement et de déploiement continu Platform.sh
+        line2: Pour votre première connexion, utilisez les identifiants admin/admin
+        line3: Veuillez modifier votre mot de passe dans la rubrique "Mon compte"
+    btn:
+        here: Cliquez ici
+        create: Créer un compte
+        pwd_forgot: Mot de passe oublié ?
+
+form:
+    group_name: 'Nom du groupe'
+    username: 'Nom d''utilisateur'
+    email: 'Adresse e-mail'
+    current_password: 'Mot de passe actuel'
+    password: 'Mot de passe'
+    password_confirmation: 'Répéter le mot de passe'
+    new_password: 'Nouveau mot de passe'
+    new_password_confirmation: 'Répéter le nouveau mot de passe'
