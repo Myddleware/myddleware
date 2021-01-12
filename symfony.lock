@@ -1,0 +1,144 @@
+{
+    "beberlei/doctrineextensions": {
+        "version": "v1.3.0"
+    },
+    "composer/semver": {
+        "version": "3.2.4"
+    },
+    "composer/xdebug-handler": {
+        "version": "1.4.5"
+    },
+    "doctrine/data-fixtures": {
+        "version": "1.4.4"
+    },
+    "doctrine/doctrine-fixtures-bundle": {
+        "version": "3.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "e5b542d4ef47d8a003c91beb35650c76907f7e53"
+        },
+        "files": [
+            "src/DataFixtures/AppFixtures.php"
+        ]
+    },
+    "egulias/email-validator": {
+        "version": "2.1.25"
+    },
+    "felixfbecker/advanced-json-rpc": {
+        "version": "v3.1.1"
+    },
+    "friendsofphp/php-cs-fixer": {
+        "version": "2.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "2.2",
+            "ref": "cc05ab6abf6894bddb9bbd6a252459010ebe040b"
+        },
+        "files": [
+            ".php_cs.dist"
+        ]
+    },
+    "microsoft/tolerant-php-parser": {
+        "version": "v0.0.23"
+    },
+    "netresearch/jsonmapper": {
+        "version": "v2.1.0"
+    },
+    "nikic/php-parser": {
+        "version": "v4.10.4"
+    },
+    "phan/phan": {
+        "version": "4.0.1"
+    },
+    "php": {
+        "version": "7.3"
+    },
+    "php-cs-fixer/diff": {
+        "version": "v1.3.1"
+    },
+    "phpstan/phpstan": {
+        "version": "0.12.64"
+    },
+    "phpstan/phpstan-doctrine": {
+        "version": "0.12.26"
+    },
+    "phpstan/phpstan-symfony": {
+        "version": "0.12.12"
+    },
+    "sabre/event": {
+        "version": "5.1.2"
+    },
+    "sensio/framework-extra-bundle": {
+        "version": "5.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "5.2",
+            "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
+        },
+        "files": [
+            "config/packages/sensio_framework_extra.yaml"
+        ]
+    },
+    "symfony/flex": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "c0eeb50665f0f77226616b6038a9b06c03752d8e"
+        },
+        "files": [
+            ".env"
+        ]
+    },
+    "symfony/maker-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
+    },
+    "symfony/polyfill-iconv": {
+        "version": "v1.20.0"
+    },
+    "symfony/polyfill-php70": {
+        "version": "v1.20.0"
+    },
+    "symfony/requirements-checker": {
+        "version": "2.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "2.0",
+            "ref": "02c6e4b9b117c39e8a23eab7f3840ef6e62293b9"
+        }
+    },
+    "symfony/webpack-encore-bundle": {
+        "version": "1.6",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.6",
+            "ref": "f362ed8e8aa99a8cb216e6bdb2ac833dfb7643dd"
+        },
+        "files": [
+            "assets/app.js",
+            "assets/bootstrap.js",
+            "assets/controllers.json",
+            "assets/controllers/hello_controller.js",
+            "assets/styles/app.css",
+            "config/packages/assets.yaml",
+            "config/packages/prod/webpack_encore.yaml",
+            "config/packages/test/webpack_encore.yaml",
+            "config/packages/webpack_encore.yaml",
+            "package.json",
+            "webpack.config.js"
+        ]
+    }
+}

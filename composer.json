@@ -5,35 +5,36 @@
   "description": "The \"Symfony Standard Edition\" distribution",
   "autoload": {
     "psr-4": {
-      "": "src/"
-    },
-    "classmap": [
-      "app/AppKernel.php",
-      "app/AppCache.php"
-    ]
+      "App\\": "src/"
+    }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "tests/"
+      "App\\Tests\\": "tests/"
     }
   },
   "prefer-stable": true,
     "require": {
         "php": ">=7.2 <7.4",
-        "symfony/symfony": "3.4.45",
+        "symfony/symfony": "4.4.18",
+        "symfony/yaml": "4.4.*",
+        "symfony/form": "4.4.*",
+        "symfony/console": "4.4.*",
+        "symfony/debug-bundle": "4.4.*",
+        "symfony/dotenv": "4.4.*",
+        "symfony/flex": "^1.1",
+        "symfony/form": "4.4.*",
+        "symfony/framework-bundle": "4.4.*",
+        "symfony/templating": "4.4.*",
+        "symfony/twig-bundle": "4.4.*",
         "doctrine/orm": "^2.6.4",
-        "doctrine/doctrine-bundle": "1.8.1",
+        "doctrine/doctrine-bundle": "1.12.*",
         "twig/extensions": "~1.0",
-        "twig/twig": "^1.0",
-        "symfony/assetic-bundle": "~2.3",
-        "symfony/swiftmailer-bundle": "^2.3",
+        "symfony/swiftmailer-bundle": "^3.2",
         "symfony/monolog-bundle": "^3.1.2",
-        "symfony/expression-language": "~3.1",
-        "sensio/distribution-bundle": "^5.0",
-        "sensio/framework-extra-bundle": "^3.0.2",
+        "symfony/expression-language": "~4.4",
         "incenteev/composer-parameter-handler": "^2.0",
         "stof/doctrine-extensions-bundle": "1.3.0",
-        "friendsofsymfony/user-bundle": "~2.0.2",
         "jquery/jquery": "2.1.3",
         "jquery/jquery_ui": "1.11.1",
         "twitter/bootstrap": "3.3.7",
@@ -42,7 +43,7 @@
         "white-october/pagerfanta-bundle": "dev-master",
         "pagerfanta/pagerfanta": "^2.0.0",
         "illuminate/encryption": "5.3.*@dev",
-        "friendsofsymfony/jsrouting-bundle": "^1.6",
+        "friendsofsymfony/jsrouting-bundle": "^2.3",
         "api-platform/core": "2.2.10",
         "api-platform/api-pack": "^1.1",
         "lexik/jwt-authentication-bundle": "^2.6",
@@ -52,7 +53,12 @@
         "facebook/php-ads-sdk": "2.8.*",
         "iadvize/apirestclient": "1.3.0",
         "sugarcrm/rest-php-client": "1.4.5",
-		"automattic/woocommerce": "^3.0"
+		"automattic/woocommerce": "^3.0",
+        "ext-json": "*",
+    "sensio/framework-extra-bundle": "^5.6",
+    "symfony/webpack-encore-bundle": "^1.8",
+    "beberlei/doctrineextensions": "^1.3",
+    "symfony/requirements-checker": "^2.0"
     },
     "repositories": [
         {
@@ -79,10 +85,14 @@
         }
     ],
     "require-dev": {
-      "sensio/generator-bundle": "^3.0",
-      "doctrine/doctrine-fixtures-bundle": "^2.3",
-        "symfony/phpunit-bridge": "^3.0"
-
+      "symfony/phpunit-bridge": "^3.0",
+    "doctrine/doctrine-fixtures-bundle": "^3.4",
+    "symfony/maker-bundle": "^1.26",
+    "friendsofphp/php-cs-fixer": "^2.17",
+    "phan/phan": "^4.0",
+    "phpstan/phpstan": "^0.12.64",
+    "phpstan/phpstan-doctrine": "^0.12.26",
+    "phpstan/phpstan-symfony": "^0.12.12"
     },
     "scripts": {
         "post-root-package-install": [
@@ -105,7 +115,10 @@
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles"
-        ]
+        ],
+    "auto-scripts": {
+      "requirements-checker": "script"
+    }
     },
     "config": {
 
@@ -119,19 +132,23 @@
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
         "incenteev-parameters": [{
-                "file": "app/config/parameters.yml"
+                "file": "config/packages/parameters.yml"
             },
             {
-                "file": "app/config/public/parameters_smtp.yml",
-                "dist-file": "app/config/public/parameters_smtp.yml.dist"
+                "file": "config/packages/public/parameters_smtp.yml",
+                "dist-file": "config/packages/public/parameters_smtp.yml.dist"
             },
             {
-                "file": "app/config/public/parameters_public.yml",
-                "dist-file": "app/config/public/parameters_public.yml.dist"
+                "file": "config/packages/public/parameters_public.yml",
+                "dist-file": "config/packages/public/parameters_public.yml.dist"
             }
         ],
         "branch-alias": {
             "dev-master": "3.2-dev"
+        },
+        "symfony": {
+          "allow-contrib": false,
+          "require": "4.4.*"
         }
     }
 }

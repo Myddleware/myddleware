@@ -1,0 +1,222 @@
+body {
+    background: url('./../images/template/fd.jpg') repeat-y;
+    background-color: #9DC0E1;
+}
+
+#logo {
+    background: url('./../images/template/logo.png') no-repeat;
+    background-size: 158px;
+    height: 113px;
+    width: 160px;
+    display: inline-block;
+    margin-top: 50px;
+}
+
+
+menu .caret, #myd_top .caret {
+    background: url('./../images/template/arrow-menu.png') no-repeat;
+    height: 13px;
+    width: 14px;
+    border: none;
+}
+
+#cloud {
+    background: url('./../images/template/cloud.png') no-repeat;
+    height: 129px;
+    width: 397px;
+    display: inline-block;
+    border: none;
+}
+
+#fd-title-small {
+    background: url('./../images/template/fd-title-small.png') no-repeat;
+    height: 71px;
+    width: 179px;
+    display: inline-block;
+    border: none;
+    margin: 20px 20px 20px -13px;
+    padding-top: 15px;
+    color: white;
+    text-align: center;
+    line-height: 1em;
+}
+
+#fd-title-large {
+    background: url('./../images/template/fd-title-large.png') no-repeat;
+    height: 71px;
+    width: 600px;
+    padding: 15px 0 0 16px;
+    display: inline-block;
+    border: none;
+    margin: 20px 20px 20px -13px;
+    color: white;
+    text-align: left;
+    line-height: 1em;
+}
+
+#fd-title-large p {
+    margin: 0 0 2px !important;
+}
+
+#fd-title {
+    background: url('./../images/template/fd-title.png') no-repeat;
+    height: 71px;
+    width: 293px;
+    display: inline-block;
+    border: none;
+    margin: 20px 20px 20px -13px;
+    padding-top: 15px;
+    color: white;
+    font-size: 0.9em;
+    line-height: 0.6em;
+    padding-left: 8px;
+    text-align: left;
+}
+
+/* boutons */
+
+.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+    color: #404042;
+    font-weight: bold;
+    background: url('./../images/template/btn.png') no-repeat;
+    height: 31px;
+    min-width: 196px;
+    border: none;
+    display:inline-block;
+    line-height: 2em;
+    text-align: center;
+}
+
+.btn-small-myd, .btn-small-mydinv, .btn-small-mydinv:hover, .btn-small-myd:hover {
+    color: #404042;
+    font-weight: bold;
+    background: url('./../images/template/btn-small.png') no-repeat;
+    height: 31px;
+    width: 50px;
+    border: none;
+    display:inline-block;
+}
+
+.btn-middle-myd, .btn-myddle-mydinv, .btn-middle-mydinv:hover, .btn-middle-myd:hover {
+    color: #404042;
+    font-weight: bold;
+    background: url('./../images/template/btn-middle.png') no-repeat;
+    height: 31px;
+    width: 100px;
+    border: none;
+    display:inline-block;
+}
+
+.btn-large-myd, .btn-large-mydinv, .btn-large-mydinv:hover, .btn-large-myd:hover {
+    color: #404042;
+    font-weight: bold;
+    background: url('./../images/template/btn-large.png') no-repeat;
+    height: 31px;
+    width: 340px;
+    border: none;
+    display:inline-block;
+}
+
+.btn-myd, .btn-small-myd, .btn-middle-myd, .btn-large-myd  {
+    background-position: left top;
+}
+
+.btn-myd:hover, .btn-small-myd:hover, .btn-middle-myd:hover, .btn-large-myd:hover {
+    background-position: left bottom;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.btn-mydinv, .btn-small-mydinv, .btn-middle-mydinv, .btn-large-mydinv {
+    background-position: left bottom;
+}
+
+.btn-mydinv:hover, .btn-small-mydinv:hover, .btn-middle-mydinv:hover, .btn-large-mydinv:hover {
+    background-position: left top;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.myd_div_loading{
+    background: url('./../images/loading.gif') no-repeat center center;
+}
+
+.myd_div_loading_logo{
+    background: url('./../images/logo/logo.png') no-repeat center center;
+}
+
+
+#animation .loader-source {
+    background: url('./../images/loader-source.gif');
+    background-repeat:no-repeat;
+}
+
+#animation .loader-cible {
+    background: url('./../images/loader-cible.gif');
+    background-repeat:no-repeat;
+}
+
+#animation-myddleware-back-1 > .animation-myddleware-logo {
+    background: url('./../images/logo/text.png');
+}
+
+#animation-myddleware-back-2 > .animation-myddleware-logo {
+    background: url('./../images/logo/up.png');
+}
+
+#animation-myddleware-back-3 > .animation-myddleware-logo {
+    background: url('./../images/logo/down.png') right top;
+}
+
+#animation .arcleft-c  {
+    background: url('./../images/template/left-arc-color.png') no-repeat right;
+    height: 165px;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+#animation .arcleft-g  {
+    background: url('./../images/template/left-arc-gray.png') no-repeat right;
+    height: 165px;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+#animation .arcright-c  {
+    background: url('./../images/template/right-arc-color.png') no-repeat left;
+    height: 165px;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+#animation .arcright-g  {
+    background: url('./../images/template/right-arc-gray.png') no-repeat left;
+    height: 165px;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+#animation .animation-myddleware-logo {
+    background-size: 105px 105px;
+    background-repeat: no-repeat;
+}
+
+#animation .animation-content-left-toggle-btn, #animation .animation-content-right-toggle-btn {
+    background: #CACACA;
+    background-image: url('./../images/data.png');
+    background-size: 15px 22px;
+    background-position: 10px 5px;
+    background-repeat: no-repeat;
+}

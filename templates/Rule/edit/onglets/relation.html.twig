@@ -1,0 +1,70 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+<div class="link-help-view">
+	<a href="#help-content-relate"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
+</div>
+
+<div align="center"> 
+{% if relate %}
+<table id="relate">
+	<tr>
+		<th><img src="{{ asset('build/images/template/') }}source.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></th>
+		<th colspan="3"></th>
+		<th><img src="{{ asset('build/images/template/') }}target.png" alt="{{'view_rule.relate.solution_target'|trans}}" /></th>
+	</tr>	
+	<tr>
+		<td class="title">{{'view_rule.relate.solution_source'|trans}}</td>
+		<td class="title" colspan="3">{{'view_rule.relate.rule'|trans}}</td>
+		<td class="title">{{'view_rule.relate.solution_target'|trans}}</td>
+		{% if parentRelationships %}
+			<td class="title" colspan="3">{{'create_rule.step3.relation.parent_detail_view'|trans}}</td>
+		{% endif %}	
+	</tr>
+	{% for r in relate %}
+	<tr>
+		<td>{{ r.getFieldNameSource }}</td>
+		<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
+		<td><a href="{{ path('regle_open',{'id' : r.getFieldId }) }}" title="{{ r.getName }}">{{ r.getName }} <span class="glyphicon glyphicon-share"></span></a></td>
+		<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
+		<td>{{ r.getFieldNameTarget }}</td>
+		{% if parentRelationships %}
+			<td>
+				{% if r.getParent %}
+					{{'create_rule.step3.relation.yes'|trans}}
+				{% endif %}	
+			</td>
+		{% endif %}
+	</tr>
+	{% endfor %}
+</table>
+{% else %}
+	<p>{{'view_rule.relate.empty'|trans}}</p>
+{% endif %}
+</div>
+
+<div id="help-content-relate" class="help-content">
+	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
+	<p>{{'help.viewrule.relate'|trans|raw}}</p>
+</div>

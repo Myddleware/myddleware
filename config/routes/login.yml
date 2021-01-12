@@ -1,0 +1,19 @@
+#LoginBundleDefault:
+#    path:  /
+#    defaults: { _controller: LoginBundle:Default:index }
+#
+#LoginBundleUser:
+#    path:  /login
+#    defaults: { _controller: LoginBundle:Default:index }
+#
+#prestashop_account:
+#    path:  /prestashop/account
+#    defaults: { _controller: LoginBundle:Default:accountPrestashop }
+#
+#login_protect:
+#    path:  /login/control
+#    defaults: { _controller: LoginBundle:Default:verifAccount }
+#
+#connector_callback:
+#    path:  /callback/
+#    defaults: { _controller: RegleBundle:Connector:callBack }
