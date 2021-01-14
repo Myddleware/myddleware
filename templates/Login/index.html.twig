@@ -31,8 +31,7 @@
 		<div class="white">
 
 			<p class="ctr"><span class="logo"></span></p>
-			  <form id="mydlogin" method="post" class="form-inline" role="form">
-
+			  <form id="mydlogin" method="post" class="form-inline" role="form" action="{{ path('login') }}">
 			  {% if attempt < 6 %}
 			  <div class="form-group">
 				<p>
@@ -47,15 +46,15 @@
 				{% else %}
 					<div id="_error" style="display:none;" class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-remove-circle"> {{ 'login.error_session'|trans }}</div>
 				{% endif %}
-				<button id="control" class="btn-myd">{{ 'login.connexion'|trans }}</button>
+				<button class="btn-myd">{{ 'login.connexion'|trans }}</button>
 				<button style="display:none;" id="_submit" name="_submit" class="btn-myd"></button>
-				<p><a class="fancybox" data-fancybox-type="iframe" href="{#{{ path('fos_user_resetting_request') }}#}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
+				<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
 			  </div>
 			  {% else %}
 					<div class="alert alert-danger" role="alert">
 						<span class="glyphicon glyphicon-remove-circle"> Please wait :  {{ remaining.minute }}min {{ remaining.second }}s </span>
 					</div>
-					<p><a class="fancybox" data-fancybox-type="iframe" href="{#{{ path('fos_user_resetting_request') }}#}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
+					<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
 			  {% endif %}
 			</form>
 		</div>

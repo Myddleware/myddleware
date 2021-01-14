@@ -25,6 +25,7 @@
 
 namespace App\Manager;
 
+use App\Entity\User;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
@@ -37,6 +38,7 @@ use Swift_Mailer;
 use Swift_Message;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 $file = __DIR__.'/../Custom/Manager/NotificationManager.php';
 if (file_exists($file)) {
@@ -86,6 +88,14 @@ if (file_exists($file)) {
          * @var RuleRepository
          */
         private $ruleRepository;
+        /**
+         * @var mixed|string
+         */
+        private $fromEmail;
+        /**
+         * @var Environment
+         */
+        private $twig;
 
         public function __construct(
             LoggerInterface $logger,
@@ -97,7 +107,8 @@ if (file_exists($file)) {
             RuleRepository $ruleRepository,
             Swift_Mailer $mailer,
             ToolsManager $tools,
-            ParameterBagInterface $params
+            ParameterBagInterface $params,
+            Environment $twig
         ) {
             $this->logger = $logger;
             $this->connection = $connection;
@@ -109,7 +120,9 @@ if (file_exists($file)) {
             $this->mailer = $mailer;
             $this->tools = $tools;
             $this->params = $params;
+            $this->twig = $twig;
             $this->setEmailAddresses();
+            $this->fromEmail = $this->params->get('email_from') ?? 'no-reply@myddleware.com';
         }
 
         // Send alert if a job is running too long
@@ -136,10 +149,9 @@ if (file_exists($file)) {
                         'base_uri' => $this->params->get('base_uri') ?? '',
                     ]);
 
-                    $fromEmail = $this->params->get('email_from') ?? 'no-reply@myddleware.com';
                     $message =
                         (new Swift_Message($this->translator->trans('email_alert.subject')))
-                        ->setFrom($fromEmail)
+                        ->setFrom($this->fromEmail)
                         ->setBody($textMail);
                     // Send the message to all admins
                     foreach ($this->emailAddresses as $emailAddress) {
@@ -254,6 +266,20 @@ if (file_exists($file)) {
             $users = $this->userRepository->findEmailsToNotification();
             foreach ($users as $user) {
                 $this->emailAddresses[] = $user['email'];
+            }
+        }
+
+        public function resetPassword(User $user)
+        {
+            $message = (new Swift_Message('Initialisation du mot de passe'))
+                ->setFrom($this->fromEmail)
+                ->setTo($user->getEmail())
+                ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
+
+            $send = $this->mailer->send($message);
+            if (!$send) {
+                $this->logger->error('Failed to send email');
+                throw new Exception('Failed to send email');
             }
         }
     }
