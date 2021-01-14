@@ -3,9 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\Type\ProfileFormType;
+use App\Form\Type\ResetPasswordType;
+use App\Form\Type\UserForgotPasswordType;
+use App\Manager\NotificationManager;
 use App\Repository\UserRepository;
+use App\Service\SecurityService;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,19 +36,40 @@ class SecurityController extends AbstractController
      * @var EncoderFactoryInterface
      */
     private $encoder;
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var NotificationManager
+     */
+    private $notificationManager;
+    /**
+     * @var SecurityService
+     */
+    private $securityService;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
         EncoderFactoryInterface $encoder,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        NotificationManager $notificationManager,
+        SecurityService $securityService
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
+        $this->entityManager = $entityManager;
+        $this->notificationManager = $notificationManager;
+        $this->securityService = $securityService;
     }
 
     /**
      * @Route("/", name="login")
+     * @Route("/login")
+     * @param AuthenticationUtils $authenticationUtils
+     * @return Response
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -161,53 +189,58 @@ class SecurityController extends AbstractController
      * Reset user password.
      *
      * @param mixed $token
+
+     * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
      */
     public function resetAction(Request $request, $token)
     {
-        /** @var $formFactory \FOS\UserBundle\Form\Factory\FactoryInterface */
-        $formFactory = $this->get('fos_user.resetting.form.factory');
-        /** @var $userManager \FOS\UserBundle\Model\UserManagerInterface */
-        $userManager = $this->get('fos_user.user_manager');
-        /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
-        $dispatcher = $this->get('event_dispatcher');
+        if (!$token) {
+            $form = $this->createForm(UserForgotPasswordType::class);
+            $form->handleRequest($request);
+            if ($form->isSubmitted()) {
+                $username = $form->get('username')->getData();
+                /** @var null|User $user */
+                $user = $this->userRepository->findOneBy(['username' => $username]);
+                if (!$user) {
+                    $form->get('username')->addError(new FormError('Aucune utilisateur avec ce username n\'a été trouvée.'));
+                }
+                if ($form->isValid()) {
+                    $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+                    $this->entityManager->flush();
 
-        $user = $userManager->findUserByConfirmationToken($token);
-
-        if (null === $user) {
-            return $this->redirect($this->generateUrl('regle_panel')); // Rev 1.1.1
-            //throw new NotFoundHttpException(sprintf('The user with "confirmation token" does not exist for value "%s"', $token));
-        }
-
-        $event = new GetResponseUserEvent($user, $request);
-        $dispatcher->dispatch(FOSUserEvents::RESETTING_RESET_INITIALIZE, $event);
-
-        if (null !== $event->getResponse()) {
-            return $event->getResponse();
-        }
-
-        $form = $formFactory->createForm();
-        $form->setData($user);
-
-        $form->handleRequest($request);
-
-        if ($form->isValid()) {
-            $event = new FormEvent($form, $request);
-            $dispatcher->dispatch(FOSUserEvents::RESETTING_RESET_SUCCESS, $event);
-
-            $userManager->updateUser($user);
-
-            if (null === $response = $event->getResponse()) {
-                $url = $this->generateUrl('fos_user_profile_show');
-                $response = new RedirectResponse($url);
+                    try {
+                        $this->notificationManager->resetPassword($user);
+                        return new Response('Un email à été envoyer sur '.$user->getEmail(). 'avec un lien de réinitialisation du mot de passe.');
+                    } catch (Exception $e) {
+                        return new Response('Impossible d\'envoyer un email.');
+                    }
+                }
             }
 
-            $dispatcher->dispatch(FOSUserEvents::RESETTING_RESET_COMPLETED, new FilterUserResponseEvent($user, $request, $response));
-
-            //return $response;
-            return $this->redirect($this->generateUrl('regle_panel')); // Rev 1.1.1
+            return $this->render('Login/reset_request.html.twig', [
+                'form' => $form->createView(),
+            ]);
         }
 
-        return $this->render('FOSUserBundle:Resetting:reset.html.twig', [
+        /** @var null|User $user */
+        $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
+        if (null === $user) {
+            return $this->redirectToRoute('regle_panel');
+        }
+
+        $form = $this->createForm(ResetPasswordType::class, $user);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $form->get('plainPassword')->getData();
+            $salt = $user->getSalt();
+            $this->securityService->hashPassword($password, $salt);
+            $user->setPassword($password);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('regle_panel');
+        }
+
+        return $this->render('Login/reset.html.twig', [
             'token' => $token,
             'form' => $form->createView(),
         ]);

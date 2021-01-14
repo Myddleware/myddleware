@@ -48,3 +48,7 @@ services:
   App\manager\SolutionManager:
     public: false
     autowire: true
+
+  App\DataFixtures\:
+    resource: '../src/DataFixtures'
+    tags: ['doctrine.fixture.orm']

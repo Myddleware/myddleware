@@ -68,7 +68,8 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
             'csrf_token' => $request->request->get('_csrf_token'),
         ];
 
-        $request->getSession()->set(
+        $session = $request->getSession();
+        $session->set(
             Security::LAST_USERNAME,
             $credentials['username']
         );

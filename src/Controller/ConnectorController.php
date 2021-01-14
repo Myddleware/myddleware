@@ -32,6 +32,7 @@ use App\Form\ConnectorType;
 use App\Manager\permission;
 use App\Manager\SolutionManager;
 use App\Manager\tools;
+use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -326,7 +327,7 @@ class ConnectorController extends AbstractController
             }
         }
 
-        $lst_solution = tools::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
         $this->sessionService->setConnectorAnimation(false);
         $this->sessionService->setConnectorAddMessage('list');
 
