@@ -16,13 +16,22 @@ class ConnectorParamType extends AbstractType
 {
     private $_secret;
     private $_solutionFieldsLogin;
+    /**
+     * @var ConnectorParamsValueTransformer
+     */
+    private $connectorParamsValueTransformer;
+
+    public function __construct(ConnectorParamsValueTransformer $connectorParamsValueTransformer)
+    {
+        $this->connectorParamsValueTransformer = $connectorParamsValueTransformer;
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $this->_secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
         $this->_solutionFieldsLogin = isset($options['attr']['fieldsLogin']) ? $options['attr']['fieldsLogin'] : null;
 
-        $builder->add('value', TextType::class, ['error_bubbling' => true])->addModelTransformer(new ConnectorParamsValueTransformer($this->_secret));
+        $builder->add('value', TextType::class, ['error_bubbling' => true])->addModelTransformer($this->connectorParamsValueTransformer);
 
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
             $connectorParam = $event->getData();
@@ -35,7 +44,6 @@ class ConnectorParamType extends AbstractType
             $option['attr']['data-param'] = $name;
 
             if ('wsdl' == $name or 'file' == $name) {
-                // $option['id'] = 'param_' . $name;
                 $option['attr']['readonly'] = 'readonly';
                 $option['attr']['data-id'] = $id;
                 $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
@@ -62,8 +70,6 @@ class ConnectorParamType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ConnectorParam::class,
-            //            'secret' => null,
-            //            'fieldsLogin' => null
         ]);
     }
 }

@@ -163,7 +163,7 @@
 
 /*  fields mapping */
 
-#source { float:left; width: 250px; margin-right: 2em; overflow:hidden; }
+#source { float:left; margin-right: 2em; overflow:hidden; }
 
 #source, #cible {
 	float:left;
