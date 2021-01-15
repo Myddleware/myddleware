@@ -1,15 +1,9 @@
-# Cache and logs (Symfony2)
-/app/cache/*
-/app/logs/*
-!app/cache/.gitkeep
-!app/logs/.gitkeep
-
 # Email spool folder
 /app/spool/*
 
 # Cache, session files and logs (Symfony3)
 /var/cache/*
-/var/logs/*
+/var/log/*
 /var/sessions/*
 !var/cache/.gitkeep
 !var/logs/.gitkeep
@@ -66,3 +60,4 @@ yarn-error.log
 /.php_cs
 /.php_cs.cache
 ###< friendsofphp/php-cs-fixer ###
+
