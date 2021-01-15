@@ -20,7 +20,6 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface
         // Generate object to encrypt data
         $encrypter = new Encrypter(substr($this->_secret, -16));
 
-        $string = $value->getValue();
         $value->setValue($encrypter->encrypt($value->getValue()));
 
         return $value;

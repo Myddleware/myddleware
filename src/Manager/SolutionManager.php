@@ -28,6 +28,7 @@ namespace App\Manager;
 use App\Solutions\bittle;
 use App\Solutions\cirrusshield;
 use App\Solutions\dolist;
+use App\Solutions\erpnext;
 use App\Solutions\eventbrite;
 use App\Solutions\facebook;
 use App\Solutions\file;
@@ -70,6 +71,7 @@ class SolutionManager
 
     public function __construct(
         woocommerce $woocommerce,
+        erpnext $erpnext,
         iadvize $iadvize,
         facebook $facebook,
         medialogistique $medialogistique,
@@ -102,6 +104,7 @@ class SolutionManager
     ) {
         $this->classes = [
             'woocommerce' => $woocommerce,
+            'erpnext' => $erpnext,
             'iadvize' => $iadvize,
             'facebook' => $facebook,
             'medialogistique' => $medialogistique,
