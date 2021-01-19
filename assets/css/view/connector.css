@@ -2,8 +2,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -63,4 +63,26 @@
 #connector #tab_connector td.value input {
 	width:100%;
 	padding:8px;
+}
+
+
+/* Updates after SF4 upgrade */
+
+/* Inputs */
+.liste_solution, input {
+	box-shadow: 5px 2px 2px #c3c3c3;
+	border: 1px solid #c3c3c3;
+}
+
+
+/* Title 'Creating a connector' */
+#tabs ul.ui-tabs-nav {
+	display: flex;
+	justify-content: center;
+
+}
+
+#tabs ul.ui-widget-header li {
+	min-width: 100%;
+	border: none;
 }
