@@ -448,3 +448,10 @@ h2 { margin-top: 50px;}
 #animation .sub_module_selected:hover {
 	cursor: pointer;
 }
+
+
+/* Update SF4 */
+
+select {
+    border: solid 1px #c3c3c3;
+}

@@ -1124,8 +1124,8 @@ if (file_exists($file)) {
                         $rules[$key]['rule_order'] = 99;
                     }
                     $ruleKeyValue[$rule['id']] = $rules[$key]['rule_order'];
-                    $rulesRef[$rule['id']] = $rule;
-                    $rulesObject[$rule['id']] = $rule['rule'];
+                    $rulesRef[$rule['id']] = $rule; 
+                    $rulesObject[$rule['id']] = $rule;            
                 }
 
                 // On calcule les priorité tant que l'on a encore des priorité 99
@@ -1162,12 +1162,15 @@ if (file_exists($file)) {
                 }
 
                 // On vide la table RuleOrder
-                $this->ruleOrderRepository->deleteAll();
+                $this->ruleOrderRepository->deleteAll();  
+      
                 foreach ($ruleKeyValue as $key => $value) {
                     $newRuleOrder = new RuleOrder();
+                    $ruleToSort = $this->ruleRepository->find($key);
                     $newRuleOrder
-                        ->setRule($rulesObject[$key])
+                        ->setRule($ruleToSort)
                         ->setOrder($value);
+// var_dump($newRuleOrder);
                     $this->entityManager->persist($newRuleOrder);
                 }
                 $this->entityManager->flush();

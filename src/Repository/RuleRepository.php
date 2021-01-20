@@ -210,10 +210,12 @@ class RuleRepository extends ServiceEntityRepository
 
     public function getRuleToOrder()
     {
-        return $this->createQueryBuilder('r')
-            ->select('r as rule, r.id, GROUP_CONCAT(relationship.fieldId SEPARATOR \';\') as field_id')
-            ->join('r.relationsShip', 'relationship')
-            ->where('e.deleted = 0')
+
+        return $this->createQueryBuilder('rule')
+            ->select('rule.id, GROUP_CONCAT(relationship.fieldId SEPARATOR \';\')')
+            ->join('rule.relationsShip', 'relationship')
+            ->where('rule.deleted = 0')
+            ->groupBy('rule.id')
             ->getQuery()
             ->getResult();
     }

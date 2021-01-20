@@ -140,7 +140,7 @@ class woocommercecore extends solution
             $module = $param['module'];
             $result = [];
             $result['count'] = 0;
-            $result['date_ref'] = $param['date_ref'];
+            $result['date_ref'] = $param['ruleParams']['datereference'];
             $dateRefWooFormat = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
             if (empty($param['limit'])) {
                 $param['limit'] = $this->defaultLimit;
@@ -268,6 +268,7 @@ class woocommercecore extends solution
     {
         $result = [];
         try {
+
             //for simulation purposes, we create a new date_ref in the past
             $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
             //get all instances of the module

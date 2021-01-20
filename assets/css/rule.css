@@ -385,7 +385,7 @@
 }
 
 #fieldsfilter select {
-	border: 0px;
+	border: solid 1px #c3c3c3;
 }
 
 #fieldsfilter input {

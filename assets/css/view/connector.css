@@ -82,7 +82,9 @@
 
 }
 
-#tabs ul.ui-widget-header li {
-	min-width: 100%;
-	border: none;
-}
+/* Attention si activé, perturbe l'affichage des onglets sur la création de règles,
+mais on a quand meme besoin de trouver une solution pour la création de connecteur  */
+/* #tabs ul.ui-widget-header li {
+	/* min-width: 100%; */
+	/* border: none; */
+/* } */
