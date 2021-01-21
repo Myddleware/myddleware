@@ -55,6 +55,8 @@ use App\Solutions\sugarcrm;
 use App\Solutions\suitecrm;
 use App\Solutions\vtigercrm;
 use App\Solutions\woocommerce;
+use App\Solutions\wooeventmanager;
+use App\Solutions\wordpress;
 use App\Solutions\zuora;
 use Exception;
 
@@ -70,7 +72,9 @@ class SolutionManager
     private $classes = [];
 
     public function __construct(
+        wordpress $wordpress,
         woocommerce $woocommerce,
+        wooeventmanager $wooeventmanager,
         erpnext $erpnext,
         iadvize $iadvize,
         facebook $facebook,
@@ -103,6 +107,8 @@ class SolutionManager
         salesforce $salesforce
     ) {
         $this->classes = [
+            'wordpress' => $wordpress,
+            'wooeventmanager' => $wooeventmanager,
             'woocommerce' => $woocommerce,
             'erpnext' => $erpnext,
             'iadvize' => $iadvize,
