@@ -657,6 +657,8 @@ if (file_exists($file)) {
                 $this->sessionService->setParamRuleSourceSolution($key, $rule->getConnectorSource()->getSolution()->getName());
 
                 foreach ($connectorParamsSource as $connector) {
+                    //A DEBUGGER : je pense qu'il faut supprimer la boucle foreach et vérifier dans session service
+                    // à quoi fait référence getValue() ????????
                     $this->sessionService->setParamRuleSourceConnector($key, $connector->getName(), $connector->getValue());
                 }
                 // Connector source -------------------

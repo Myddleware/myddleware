@@ -174,6 +174,7 @@ if (file_exists($file)) {
         // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
         public function createDocuments(Rule $rule, Job $job)
         {
+           
             $createDocuments = $this->rule->createDocuments($rule, $job);
             if (!empty($createDocuments['error'])) {
                 $this->message .= print_r($createDocuments['error'], true);
@@ -513,7 +514,6 @@ if (file_exists($file)) {
 
             try {
                 $solutions = $this->ruleRepository->getSolutionsByJob($job);
-                var_dump($solutions);
                 $logData['solutions'] = '';
                 if (!empty($solutions)) {
                     foreach ($solutions as $solution) {
@@ -554,7 +554,7 @@ if (file_exists($file)) {
         protected function updateJob(Job $job, array $logData)
         {
             try {
-                var_dump($logData);
+        
                 $now = new DateTime('now', new DateTimeZone('GMT'));
                 if(!empty($logData['jobError'])){
                     $message = $logData['jobError'];

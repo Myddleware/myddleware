@@ -147,6 +147,7 @@ class TaskController extends AbstractController
             $taskStop->setEnd(new \DateTime());
             $em->persist($taskStop);
 
+            //TODO 
             // Add log to indicate this action
             $log = new Log();
             $log->setDateCreated(new \DateTime());

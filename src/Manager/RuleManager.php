@@ -290,9 +290,7 @@ if (file_exists($file)) {
                                 // If the run isn't validated, we set back the previous reference date
                                 // so Myddleware won't continue to read next data during the next run
                                 $dataSource['date_ref'] = $read['date_ref'];
-
                                 $readSource = $validateReadDataSource;
-                                goto continue_reading;
                             }
                         }
                         // Logout (source solution)
@@ -311,7 +309,6 @@ if (file_exists($file)) {
                     }
                 }
 
-                continue_reading:
                 if (empty($readSource['error'])) {
                     $readSource['error'] = '';
                 }

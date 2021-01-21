@@ -2,8 +2,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -22,14 +22,15 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-$( document ).ready(function() {
+$(function() {
+	console.log('test');
 	if($('#task_status','#task').attr('name') != "End"){
 		// Sauvegarde du connecteur
-		$('#task_refresh','#task').click(function(){	
+		$('#task_refresh','#task').on('click', function(){	
 			location.reload();	 
 		});
 		
-		$('#task_stop','#task').click(function(){	
+		$('#task_stop','#task').on('click', function(){	
 			$.ajax({
 				type: "POST",
 				url: path_task_stop,					

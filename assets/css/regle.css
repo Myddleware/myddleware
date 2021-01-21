@@ -50,7 +50,7 @@
 
 
 .clr {
-	both:clear;
+	both: clear;
 }
 
 .left {
@@ -224,8 +224,35 @@ input[type="text"] {
 
 /* Update SF4 */
 
-/* bouton Valider  */
+/* Validate button  */
 #validation {
 	display: block!important;
 	box-shadow: none;
+}
+
+/* Page View Rule with 2 tables (source & target) */
+.edit-rule-overview{
+	display: flex;
+	justify-content: space-between;
+	margin-top: 3vh;
+}
+
+td {
+	text-align: left!important;
+}
+
+td a {
+	color: #337ab7!important;
+}
+
+.title_source_ctr, .title_target_ctr {
+	font-weight: bold;
+}
+
+.title_source, .title_source_ctr {
+	color: #0F66A9;	
+}
+
+.title_target, .title_target_ctr {
+	color: #C6BD20;
 }
