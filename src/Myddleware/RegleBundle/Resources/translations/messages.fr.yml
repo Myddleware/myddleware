@@ -71,6 +71,7 @@ create_rule:
         empty_simulate: Attention il n'existe pas de donnée dans le serveur source ou de champs dans la solution cible
         empty_field_simulate: Contenu vide
         data: Tester les données
+        data_manual: Tester les données manuellement
         infobulle: Double clic pour effacer
         previous: Etape précédente
         next: Etape suivante
