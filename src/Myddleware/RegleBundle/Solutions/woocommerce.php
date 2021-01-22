@@ -116,18 +116,17 @@ class woocommercecore extends solution {
                 $this->moduleFields = $moduleFields[$module];
             }
             if (!empty($fieldsRelate[$module])) {
-				$this->fieldsRelate = $fieldsRelate[$module]; 
-			}	
-			// Includ relate fields into moduleFields to display them in the field mapping tab
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-			return $this->moduleFields;
-
-        } catch (\Exception $e) {		
-			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
-			return false;
-		}	
+				        $this->fieldsRelate = $fieldsRelate[$module]; 
+			      }	
+            // Includ relate fields into moduleFields to display them in the field mapping tab
+            if (!empty($this->fieldsRelate)) {
+                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+            }
+            return $this->moduleFields;
+          } catch (\Exception $e) {		
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
+            return false;
+		    }	
     }
 
     // Read all fields, ordered by date_modified
@@ -157,11 +156,11 @@ class woocommercecore extends solution {
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
             } 
-            // Remove Myddleware's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+             // Remove Myddleware's system fields
+            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
-			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module);
+            // Add required fields
+            $param['fields'] = $this->addRequiredField($param['fields'],$module);
 
             $stop = false;
             $count = 0;
