@@ -81,10 +81,13 @@ class vtigercrmcore extends solution
                                     "PurchaseOrder",
                                     "GreenTimeControl",
                                     "DDT",
-                                ];
+								];
+								
 
+
+
+	// Module list that allows to make parent relationships
 	protected $allowParentRelationship = array('Quotes');
-	
 
     /** @var array $moduleList */
     protected $moduleList;
@@ -606,7 +609,7 @@ class vtigercrmcore extends solution
 						$data['productid'] = $childRecord['productid'];
 						unset($data['LineItem']);
 					}	
-				
+
 					if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
 						foreach ($data as $inventorykey => $inventoryValue) {
 							if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
