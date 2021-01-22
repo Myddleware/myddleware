@@ -31,7 +31,6 @@ use App\Entity\Solution;
 use App\Form\ConnectorType;
 use App\Manager\permission;
 use App\Manager\SolutionManager;
-use App\Manager\tools;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
@@ -656,13 +655,11 @@ class ConnectorController extends AbstractController
                     ];
             }
             $listConnector = $this->entityManager->getRepository(Connector::class)->findBy($list_fields_sql);
-
             $lstArray = [];
             foreach ($listConnector as $c) {
                 $lstArray[$c->getId()] = ucfirst($c->getName());
             }
-            $lst = tools::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
-
+            $lst = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
             return new Response($lst);
         }
 
@@ -689,7 +686,7 @@ class ConnectorController extends AbstractController
             }
         }
 
-        $lst_solution = tools::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
 
         $this->sessionService->setConnectorAddMessage($this->translator->trans('create_rule.step1.connector'));
         $this->sessionService->setParamConnectorAddType(strip_tags($type));

@@ -49,7 +49,6 @@ use App\Manager\RuleManager;
 use App\Manager\SolutionManager;
 use App\Manager\template;
 use App\Manager\TemplateManager;
-use App\Manager\tools;
 use App\Manager\ToolsManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
@@ -658,6 +657,8 @@ if (file_exists($file)) {
                 $this->sessionService->setParamRuleSourceSolution($key, $rule->getConnectorSource()->getSolution()->getName());
 
                 foreach ($connectorParamsSource as $connector) {
+                    //A DEBUGGER : je pense qu'il faut supprimer la boucle foreach et vérifier dans session service
+                    // à quoi fait référence getValue() ????????
                     $this->sessionService->setParamRuleSourceConnector($key, $connector->getName(), $connector->getValue());
                 }
                 // Connector source -------------------
@@ -1117,7 +1118,7 @@ if (file_exists($file)) {
                     exit;
                 }
 
-                $liste_modules_source = tools::composeListHtml($solution_source->get_modules('source'), $this->translator->trans('create_rule.step2.choice_module'));
+                $liste_modules_source = ToolsManager::composeListHtml($solution_source->get_modules('source'), $this->translator->trans('create_rule.step2.choice_module'));
                 if (!$liste_modules_source) {
                     $myddlewareSession['error']['create_rule'] = $this->translator->trans('error.rule.source_module_load_list');
                     $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
@@ -1155,7 +1156,7 @@ if (file_exists($file)) {
                     exit;
                 }
 
-                $liste_modules_cible = tools::composeListHtml($solution_cible->get_modules('target'), $this->translator->trans('create_rule.step2.choice_module'));
+                $liste_modules_cible = ToolsManager::composeListHtml($solution_cible->get_modules('target'), $this->translator->trans('create_rule.step2.choice_module'));
 
                 if (!$liste_modules_cible) {
                     $myddlewareSession['error']['create_rule'] = $this->translator->trans('error.rule.target_module_load_list');
@@ -1299,6 +1300,7 @@ if (file_exists($file)) {
                         // Préparation pour tableau template
                         foreach ($tab_simulation as $key => $value) {
                             foreach ($value as $k => $v) {
+
                                 if ('before' == $k) {
                                     $before[] = $v;
                                 } else {
@@ -1684,7 +1686,7 @@ if (file_exists($file)) {
                 if (isset($formule_list['source'])) {
                     foreach ($formule_list['source'] as $field => $fields_tab) {
                         $html_list_source .= '<optgroup label="'.$field.'">';
-                        $html_list_source .= tools::composeListHtml($fields_tab['option']);
+                        $html_list_source .= ToolsManager::composeListHtml($fields_tab['option']);
                         $html_list_source .= '</optgroup>';
                     }
                 }
@@ -1712,7 +1714,7 @@ if (file_exists($file)) {
                 if (isset($formule_list['target'])) {
                     foreach ($formule_list['target'] as $field => $fields_tab) {
                         $html_list_target .= '<optgroup label="'.$field.'">';
-                        $html_list_target .= tools::composeListHtml($fields_tab['option']);
+                        $html_list_target .= ToolsManager::composeListHtml($fields_tab['option']);
                         $html_list_target .= '</optgroup>';
                     }
                 }
@@ -1748,7 +1750,7 @@ if (file_exists($file)) {
                 $bidirectional_params['module']['source'] = $module['source'];
                 $bidirectional_params['module']['cible'] = $module['cible'];
 
-                $bidirectional = RuleClass::getBidirectionalRules($this->connection, $bidirectional_params);
+                $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params);
                 if ($bidirectional) {
                     $rule_params = array_merge($rule_params, $bidirectional);
                 }
@@ -1801,10 +1803,10 @@ if (file_exists($file)) {
                 $result = $this->beforeRender($result);
 
                 // Formatage des listes déroulantes :
-                $result['lst_relation_source'] = tools::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
-                $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
+                $result['lst_relation_source'] = ToolsManager::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
+                $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
+                $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
+                $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -1944,7 +1946,7 @@ if (file_exists($file)) {
                     ->getRepository(Connector::class)
                     ->findOneById($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
 
-                $param = RuleClass::getFieldsParamDefault();
+                $param = RuleManager::getFieldsParamDefault();
 
                 // Get the id of the rule if we edit a rule
                 // Generate Rule object (create a new one or instanciate the existing one
@@ -1958,8 +1960,8 @@ if (file_exists($file)) {
                     $oneRule->setConnectorTarget($connector_target);
                     $oneRule->setDateCreated(new \DateTime());
                     $oneRule->setDateModified(new \DateTime());
-                    $oneRule->setCreatedBy($this->getUser()->getId());
-                    $oneRule->setModifiedBy($this->getUser()->getId());
+                    $oneRule->setCreatedBy($this->getUser());
+                    $oneRule->setModifiedBy($this->getUser());
                     $oneRule->setModuleSource($this->sessionService->getParamRuleSourceModule($ruleKey));
                     $oneRule->setModuleTarget($this->sessionService->getParamRuleCibleModule($ruleKey));
                     $oneRule->setDeleted(0);
@@ -2166,7 +2168,7 @@ if (file_exists($file)) {
                         ) {
                             // Creation dans la table RelationShips
                             $oneRuleRelationShip = new RuleRelationShip();
-                            $oneRuleRelationShip->setRule($oneRule->getId());
+                            $oneRuleRelationShip->setRule($oneRule);
                             $oneRuleRelationShip->setFieldNameSource($rel['source']);
                             $oneRuleRelationShip->setFieldNameTarget($rel['target']);
                             $oneRuleRelationShip->setFieldId($rel['rule']);
@@ -2217,7 +2219,7 @@ if (file_exists($file)) {
                 );
                 // Save the rule audit
                 $oneRuleAudit = new RuleAudit();
-                $oneRuleAudit->setRule($oneRule->getId());
+                $oneRuleAudit->setRule($oneRule);
                 $oneRuleAudit->setDateCreated(new \DateTime());
                 $oneRuleAudit->setData($ruledata);
                 $this->entityManager->persist($oneRuleAudit);
@@ -2614,7 +2616,7 @@ if (file_exists($file)) {
 
                 $t = (('source' == $type) ? 'source' : 'target');
 
-                $liste_modules = tools::composeListHtml($solution->get_modules($t), $this->translator->trans('create_rule.step1.choose_module'));
+                $liste_modules = ToolsManager::composeListHtml($solution->get_modules($t), $this->translator->trans('create_rule.step1.choose_module'));
 
                 return new Response($liste_modules);
             } catch (Exception $e) {
@@ -2638,8 +2640,8 @@ if (file_exists($file)) {
                 }
             }
 
-            $lst_solution = tools::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
-
+            $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+         
             return $lst_solution;
         }
 

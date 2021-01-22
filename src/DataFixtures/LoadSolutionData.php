@@ -54,7 +54,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'microsoftsql',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'ringcentral',		'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'cirrusshield',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'zuora',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'zuora',			    'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'sage50',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'hubspot',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'erpnext',			'active' => 1, 'source' => 1, 'target' => 1],
@@ -63,6 +63,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'facebook',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'iadvize',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'wooeventmanager',	'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'wordpress',		    'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)

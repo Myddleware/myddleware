@@ -125,11 +125,15 @@ class SynchroCommand extends Command
                 if ('ALL' == $rule) {
                     $rules = $ruleRepository->findAllRulesByOrder();
                 } else {
-                    $rules = $ruleRepository->findBy(['nameSlug' => $rule]);
+                    $rules = $ruleRepository->findBy(['id' => $rule]);
                 }
-
+// var_dump($rules);
+// var_dump($rule);
                 if (!empty($rules)) {
                     foreach ($rules as $key => $rule) {
+                        // echo 'allo';
+                        // var_dump($key);
+                        // var_dump($rule->getNameSlug());
                         $value = $rule->getNameSlug();
                         // Don't display rule id if the command is called from the api
                         if (!$api) {

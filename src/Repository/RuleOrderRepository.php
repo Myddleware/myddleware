@@ -50,7 +50,7 @@ class RuleOrderRepository extends ServiceEntityRepository
     public function deleteAll()
     {
         return $this->createQueryBuilder('r')
-            ->delete('r')
+            ->delete()
             ->getQuery()
             ->execute();
     }

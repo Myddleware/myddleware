@@ -25,30 +25,31 @@
 
 namespace App\Manager;
 
-use App\Entity\Document;
+use Exception;
 use App\Entity\Job;
 use App\Entity\Rule;
+use App\Entity\Document;
 use App\Entity\RuleOrder;
 use App\Entity\RuleParam;
-use App\Entity\RuleParamAudit as RuleParamAudit;
-use App\Repository\DocumentRepository;
-use App\Repository\RuleOrderRepository;
-use App\Repository\RuleRelationShipRepository;
+use Psr\Log\LoggerInterface;
 use App\Repository\RuleRepository;
 use Doctrine\DBAL\Driver\Connection;
+use App\Repository\DocumentRepository;
+use App\Repository\RuleOrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use App\Repository\RuleRelationShipRepository;
+use Symfony\Component\Routing\RouterInterface;
+use App\Entity\RuleParamAudit as RuleParamAudit;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // Tools
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // Tools
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 $file = __DIR__.'/../Custom/Manager/RuleManager.php';
 if (file_exists($file)) {
@@ -289,9 +290,7 @@ if (file_exists($file)) {
                                 // If the run isn't validated, we set back the previous reference date
                                 // so Myddleware won't continue to read next data during the next run
                                 $dataSource['date_ref'] = $read['date_ref'];
-
                                 $readSource = $validateReadDataSource;
-                                goto continue_reading;
                             }
                         }
                         // Logout (source solution)
@@ -310,7 +309,6 @@ if (file_exists($file)) {
                     }
                 }
 
-                continue_reading:
                 if (empty($readSource['error'])) {
                     $readSource['error'] = '';
                 }
@@ -739,12 +737,11 @@ if (file_exists($file)) {
                 // create temp file
                 $guid = uniqid();
 
-                // récupération de l'exécutable PHP, par défaut c'est php
-                $php = $this->params->get('php');
-                if (empty($php['executable'])) {
-                    $php['executable'] = 'php';
-                }
-
+                //get ..\bin\php\php.exe file
+                $phpBinaryFinder = new PhpExecutableFinder();
+                $phpBinaryPath = $phpBinaryFinder->find();
+                $php = $phpBinaryPath;
+    
                 $fileTmp = $this->cacheDir.'/myddleware/job/'.$guid.'.txt';
                 $fs = new Filesystem();
                 try {
@@ -753,7 +750,7 @@ if (file_exists($file)) {
                     throw new Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
                 }
 
-                exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->env.' > '.$fileTmp.' &', $output);
                 $cpt = 0;
                 // Boucle tant que le fichier n'existe pas
                 while (!file_exists($fileTmp)) {
@@ -1124,8 +1121,8 @@ if (file_exists($file)) {
                         $rules[$key]['rule_order'] = 99;
                     }
                     $ruleKeyValue[$rule['id']] = $rules[$key]['rule_order'];
-                    $rulesRef[$rule['id']] = $rule;
-                    $rulesObject[$rule['id']] = $rule['rule'];
+                    $rulesRef[$rule['id']] = $rule; 
+                    $rulesObject[$rule['id']] = $rule;            
                 }
 
                 // On calcule les priorité tant que l'on a encore des priorité 99
@@ -1162,15 +1159,23 @@ if (file_exists($file)) {
                 }
 
                 // On vide la table RuleOrder
-                $this->ruleOrderRepository->deleteAll();
+                $this->ruleOrderRepository->deleteAll();  
+      
                 foreach ($ruleKeyValue as $key => $value) {
-                    $newRuleOrder = new RuleOrder();
-                    $newRuleOrder
-                        ->setRule($rulesObject[$key])
-                        ->setOrder($value);
-                    $this->entityManager->persist($newRuleOrder);
+                   //For now, we need to use SQL request because the keyword 'order' is a reserved SQL word
+                   // and when using Doctrine persist/flush, it creates an error as it doesn't use `order`
+                    $ruleToSort = $this->ruleRepository->find($key);
+                    $ruleId = $ruleToSort->getId();
+                    $sqlInsert = "INSERT INTO `ruleorder` (`rule_id`, `order`) VALUES ( '$ruleId', '$value');";
+                    $sqlInsert = $this->connection->prepare($sqlInsert);
+                    $sqlInsert->execute();
+                    // $newRuleOrder = new RuleOrder();
+                    // $newRuleOrder
+                    //     ->setRule($ruleToSort)
+                    //     ->setOrder($value);
+                    // $this->entityManager->persist($newRuleOrder);
                 }
-                $this->entityManager->flush();
+                // $this->entityManager->flush();
             }
 
             return ['success' => true];

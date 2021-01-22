@@ -174,6 +174,7 @@ if (file_exists($file)) {
         // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
         public function createDocuments(Rule $rule, Job $job)
         {
+           
             $createDocuments = $this->rule->createDocuments($rule, $job);
             if (!empty($createDocuments['error'])) {
                 $this->message .= print_r($createDocuments['error'], true);
@@ -200,6 +201,7 @@ if (file_exists($file)) {
             $this->id = uniqid('', true);
             $this->start = microtime(true);
             $job = $this->jobRepository->findOneBy(['status' => 'Start']);
+        
             if ($job) {
                 return ['success' => false, 'message' => $this->translator->trans('messages.rule.another_task_running').';'.$job['id']];
             }
@@ -208,7 +210,8 @@ if (file_exists($file)) {
             $job->setStatus('Start')
                 ->setParam('Synchro : '.$rule)
                 ->setManual($this->manual)
-                ->setApi(true === $api);
+                ->setApi(true === $api)
+                ->setId($this->id);
 
             try {
                 $this->entityManager->persist($job);
@@ -497,13 +500,13 @@ if (file_exists($file)) {
             $data = $this->logRepository->getLogsReportForDocumentsSent($job);
             if (!empty($data)) {
                 foreach ($data as $row) {
-                    if ('Close' == $row['global_status']) {
+                    if ('Close' == $row['globalStatus']) {
                         $logData['Close'] = $row['nb'];
-                    } elseif ('Error' == $row['global_status']) {
+                    } elseif ('Error' == $row['globalStatus']) {
                         $logData['Error'] = $row['nb'];
-                    } elseif ('Cancel' == $row['global_status']) {
+                    } elseif ('Cancel' == $row['globalStatus']) {
                         $logData['Cancel'] = $row['nb'];
-                    } elseif ('Open' == $row['global_status']) {
+                    } elseif ('Open' == $row['globalStatus']) {
                         $logData['Open'] = $row['nb'];
                     }
                 }
@@ -551,8 +554,14 @@ if (file_exists($file)) {
         protected function updateJob(Job $job, array $logData)
         {
             try {
+        
                 $now = new DateTime('now', new DateTimeZone('GMT'));
-                $message = $logData['jobError'];
+                if(!empty($logData['jobError'])){
+                    $message = $logData['jobError'];
+                }else{
+                    $message = '';
+                }
+            
                 if (!empty($message)) {
                     $message = htmlspecialchars($message);
                 }

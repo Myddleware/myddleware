@@ -71,8 +71,8 @@ class LogRepository extends ServiceEntityRepository
     public function getLogsReportForDocumentsSent(Job $job)
     {
         return $this->createQueryBuilder('l')
-            ->select('COUNT(DISTINCT d) as nb')
-            ->addSelect('d.globalStatus')
+            ->select('COUNT(DISTINCT document) as nb')
+            ->addSelect('document.globalStatus')
             ->join('l.document', 'document')
             ->andWhere('l.job = :job')
             ->setParameter('job', $job)

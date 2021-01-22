@@ -21,7 +21,9 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
+
+namespace App\Solutions\lib\mailchimp;
 
 // List of fields for each modules
 $moduleFields = [
