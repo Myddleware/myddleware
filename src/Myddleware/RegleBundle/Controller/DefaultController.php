@@ -1155,7 +1155,7 @@ class DefaultControllerCore extends Controller
         $serviceSession = $this->get('myddleware_session.service');
 
         $ruleKey = $serviceSession->getParamRuleLastKey();
-        
+
         if ($request->getMethod() == 'POST' && $serviceSession->isParamRuleExist($ruleKey)) {
 
             // retourne un tableau prêt à l'emploi

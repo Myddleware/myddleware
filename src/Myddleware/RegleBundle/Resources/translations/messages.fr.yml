@@ -296,7 +296,7 @@ list_flux:
         mass_cancel_confirm: Annuler les transferts sélectionnés ?
         reload: Relancer les transferts
         mass_reload_confirm: Relancer les transferts selectionnés ?
-        delete: Supprimer les transferts
+        delete: Supprimer transferts
         mass_delete_confirm: Supprimer les transferts sélectionnés ?
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
