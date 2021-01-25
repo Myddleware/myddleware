@@ -316,23 +316,48 @@ class DefaultControllerCore extends Controller
         }
     }
 
-
-    //Estelle
-    public function deleteRuleTransfersAction($id){
+    public function cancelRuleTransfersAction($id){
         try {
-            echo 'trying to delete transfers from rule '.$id;
-            var_dump($id);
-            $test = 'allo';
+            //cancelDocumentJob
+            $rule = $this->container->get('myddleware_rule.rule');
+            $rule->setRule($id);
+            dump($rule);
+           
+            $result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+
+      dump($result);  //false
+    
         } catch(\Exception $e){
             return $e->getMessage();
         }
-        // RegleBundle:Rule:edit/fiche.html.twig
-        // return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
-        // return new Response;
-        return $this->render('RegleBundle:Rule:edit/cancelledtransfers.html.twig', array(
-            'id' => $id,
-            'test' => $test
-        ));
+        return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+    
+    }
+
+
+    public function deleteRuleTransfersAction($id){
+        try {
+               // deleteDocumentJob
+               $rule = $this->container->get('myddleware_rule.rule');
+               $rule->setRule($id);
+               dump($rule);
+              
+               $result = $rule->actionRule('runMyddlewareJob', 'deleteDocumentJob');
+   
+         dump($result);  //false
+       
+        //     //cancelDocumentJob
+        //     // deleteDocumentJob
+        //     $rule = $this->container->get('myddleware_rule.rule');
+        //     $result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+
+        // dump($result);  //false
+        // return null;
+        } catch(\Exception $e){
+            return $e->getMessage();
+        }
+         return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+    
     }
 
 
@@ -1130,7 +1155,7 @@ class DefaultControllerCore extends Controller
         $serviceSession = $this->get('myddleware_session.service');
 
         $ruleKey = $serviceSession->getParamRuleLastKey();
-
+        
         if ($request->getMethod() == 'POST' && $serviceSession->isParamRuleExist($ruleKey)) {
 
             // retourne un tableau prêt à l'emploi
@@ -1139,7 +1164,6 @@ class DefaultControllerCore extends Controller
                 $request->request->get('formules'), // Formula
                 '' // Params flux
             );
-
 
             $solution_source_nom = $serviceSession->getParamRuleSourceSolution($ruleKey);
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
@@ -1177,7 +1201,8 @@ class DefaultControllerCore extends Controller
 			// Add rule param if exist (the aren't exist in rule creation)
 			$ruleParams = array();
 			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
-			if (!empty($ruleParamsResult)) {
+            var_dump($ruleParamsResult);
+            if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
 					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
