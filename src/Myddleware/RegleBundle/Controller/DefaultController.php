@@ -316,6 +316,26 @@ class DefaultControllerCore extends Controller
         }
     }
 
+
+    //Estelle
+    public function deleteRuleTransfersAction($id){
+        try {
+            echo 'trying to delete transfers from rule '.$id;
+            var_dump($id);
+            $test = 'allo';
+        } catch(\Exception $e){
+            return $e->getMessage();
+        }
+        // RegleBundle:Rule:edit/fiche.html.twig
+        // return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+        // return new Response;
+        return $this->render('RegleBundle:Rule:edit/cancelledtransfers.html.twig', array(
+            'id' => $id,
+            'test' => $test
+        ));
+    }
+
+
     // MODIFIE LES PARAMETRES D UNE REGLE
     public function ruleUpdParamsAction($id) {
         try {
@@ -2691,6 +2711,8 @@ class DefaultControllerCore extends Controller
             return $encrypter->decrypt($tab_params);
         }
     }
+
+
 
 }
 

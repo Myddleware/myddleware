@@ -727,6 +727,7 @@ class rulecore {
 			case 'ERROR':
 				return $this->runMyddlewareJob("ERROR");
 				break;
+				// rajouter synchro etc en param de runMyddleWareJob()
 			case 'runMyddlewareJob':
 				return $this->runMyddlewareJob($this->rule['name_slug']);
 				break;
@@ -917,7 +918,8 @@ class rulecore {
 		$doc->updateStatus($toStatus);
 	}
 	
-	protected function runMyddlewareJob($ruleSlugName) {
+	//ESTELLE : ajouter un paramètre pour l'event
+	protected function runMyddlewareJob($ruleSlugName, $event=null) {
 		try{
 			$session = new Session();	
 
@@ -938,6 +940,8 @@ class rulecore {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
 			
+			// mettre un IF ou un CASE en fonction de l'event pour différencier les taches (différentes commandes terminal)
+
 			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas

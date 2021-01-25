@@ -297,7 +297,7 @@ list_flux:
         reload: Relancer les transferts
         mass_reload_confirm: Relancer les transferts selectionnés ?
     filter:
-        delete_confirm: Êtes-vous sûre de vouloir effacer les filtres de recherche ?
+        delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
         date_modified: Date de modification
         rule: Règle

@@ -1710,3 +1710,4 @@ function saveInputFlux(div,link) {
 		}			
 	});
 }
+
