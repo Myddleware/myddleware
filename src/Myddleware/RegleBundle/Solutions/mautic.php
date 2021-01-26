@@ -195,7 +195,6 @@ class mauticcore  extends solution {
 			}				
 			return $this->moduleFields;
 		} catch (\Exception $e){
-			dump($e->getMessage());
 			return false;
 		}
 	} // get_module_fields($module)	 
