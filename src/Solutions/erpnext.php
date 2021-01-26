@@ -513,7 +513,7 @@ class erpnextcore extends solution
     public function getDateRefName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'modified';
         // Creation mode only
         } elseif ('C' == $ruleMode) {
