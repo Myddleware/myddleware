@@ -30,7 +30,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ManagementSMTPController extends AbstractController
 {
-    const PATH = './../app/config/public/parameters_smtp.yml';
+    const PATH = './../config/packages/public/parameters_smtp.yml';
     protected $tools;
     /**
      * @var LoggerInterface
