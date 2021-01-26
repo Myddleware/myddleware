@@ -318,14 +318,9 @@ class DefaultControllerCore extends Controller
 
     public function cancelRuleTransfersAction($id){
         try {
-            //cancelDocumentJob
             $rule = $this->container->get('myddleware_rule.rule');
             $rule->setRule($id);
-            dump($rule);
-           
             $result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
-
-      dump($result);  //false
     
         } catch(\Exception $e){
             return $e->getMessage();
@@ -337,22 +332,9 @@ class DefaultControllerCore extends Controller
 
     public function deleteRuleTransfersAction($id){
         try {
-               // deleteDocumentJob
                $rule = $this->container->get('myddleware_rule.rule');
                $rule->setRule($id);
-               dump($rule);
-              
                $result = $rule->actionRule('runMyddlewareJob', 'deleteDocumentJob');
-   
-         dump($result);  //false
-       
-        //     //cancelDocumentJob
-        //     // deleteDocumentJob
-        //     $rule = $this->container->get('myddleware_rule.rule');
-        //     $result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
-
-        // dump($result);  //false
-        // return null;
         } catch(\Exception $e){
             return $e->getMessage();
         }
@@ -1201,7 +1183,6 @@ class DefaultControllerCore extends Controller
 			// Add rule param if exist (the aren't exist in rule creation)
 			$ruleParams = array();
 			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
-            var_dump($ruleParamsResult);
             if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
 					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
