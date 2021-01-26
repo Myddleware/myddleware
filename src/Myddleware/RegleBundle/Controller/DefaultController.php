@@ -871,8 +871,7 @@ class DefaultControllerCore extends Controller
                         $em = $this->getDoctrine()->getManager();
                         $solution = $em->getRepository('RegleBundle:Solution')
                             ->findOneByName($classe);
-
-
+                            
                         $connector = new Connector();
                         $connector->setSolution($solution);
 
@@ -1182,10 +1181,10 @@ class DefaultControllerCore extends Controller
 		
 			// Add rule param if exist (the aren't exist in rule creation)
 			$ruleParams = array();
-			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
+			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey); 
             if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
-					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+                    $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
 			}
 			
