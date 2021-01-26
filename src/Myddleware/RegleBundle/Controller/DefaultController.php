@@ -74,6 +74,10 @@ class DefaultControllerCore extends Controller
             $this->connection = $this->get('database_connection');
         }
     }
+	
+	protected function getStandardRuleParam() {
+		return $this->standardRuleParam;
+	}
 
     /* ******************************************************
      * RULE
@@ -1995,7 +1999,7 @@ class DefaultControllerCore extends Controller
                         if ($ruleParam->getName() == 'datereference') {
                             $date_reference = $ruleParam->getValue();
                         }
-						if (in_array($ruleParam->getName(), $this->standardRuleParam)) {
+						if (in_array($ruleParam->getName(), $this->getStandardRuleParam())) {
 							$this->em->remove($ruleParam);
 							$this->em->flush();
 						}
