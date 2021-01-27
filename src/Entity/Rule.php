@@ -824,7 +824,7 @@ class Rule
         return $this->logs;
     }
 
-    public function addLog(Logs $log): self
+    public function addLog(Log $log): self
     {
         if (!$this->logs->contains($log)) {
             $this->logs[] = $log;
@@ -834,7 +834,7 @@ class Rule
         return $this;
     }
 
-    public function removeLog(Logs $log): self
+    public function removeLog(Log $log): self
     {
         if ($this->logs->removeElement($log)) {
             // set the owning side to null (unless already changed)
