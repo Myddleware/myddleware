@@ -25,24 +25,48 @@
 <div class="link-help right">
 	<a href="#help-content-simulation"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
 </div>
-<div align="center" id="simulation-params">
-	<form method="post" action="{{ path('regle_simulation')}}">
-		<label for="select-record-id">Select a specific record id to run simulation :</label>
-		<input type="text" id="select-record-id" name="select-record-id" value="{{ simulationQueryField }}">
-		<div id="validation_manual_simulation" class="btn-mydinv">          
-			<span class="glyphicon glyphicon-refresh"></span>
-				{{ 'create_rule.step3.data_manual'|trans }}
+<div align="center" id="simulation-params" class="container">
+	<div class="row">
+		<div class="col">
+			<form method="post" action="{{ path('regle_simulation')}}" id="validation-form">
+				<div class="form-group">
+					<div class="row align-items-center manual-simulation">
+						<div class="col manual-input">
+							<label for="select-record-id">Choose a specific record id to run simulation :</label>
+						</div>	
+						<div class="col manual-input">
+							<input type="text" id="select-record-id" name="select-record-id" value="{{ simulationQueryField }}" aria-describedby="selectRecordIDHelp" class="form-control" placeholder="example: 5">
+							<small id="selectRecordIDHelp" class="form-text text-muted">If you'd rather run a standard simulation, click on the default 'Test rule' button</small>
+						</div>
+						<div class="col">
+							<div class="simulation-button">
+								<button   id="validation_manual_simulation"  class="btn btn-success mb-2">	
+									 <span class="glyphicon glyphicon-refresh"></span>
+									{{ 'create_rule.step3.data_manual'|trans }}
+								</button>   
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group simulation-buttons">
+					<div class="row">
+						<div class="col">
+							<div  class="simulation-button">
+								<button type="submit" class="btn btn-success mb-2" id="validation_simulation">	
+									<span class="glyphicon glyphicon-refresh"></span>
+										{{ 'create_rule.step3.data'|trans }}
+								</button>   
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
 		</div>
-	</form>
-	<div id="validation_simulation" class="btn-mydinv">
-		<span class="glyphicon glyphicon-refresh"></span>
-		{{ 'create_rule.step3.data'|trans }}
 	</div>
-	
+</div>
 	<div class="clr"></div>
 	<div id="simulation_tab"></div>
-		
-</div>
 <div class="clr"></div>
 <div id="help-content-simulation" class="help-content">
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>

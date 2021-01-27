@@ -66,7 +66,7 @@ class DefaultControllerCore extends Controller
 	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
     // To allow sending a specific record ID to rule simulation
-    protected $simulationQueryField = 1;
+    protected $simulationQueryField;
 
 
 
@@ -1196,10 +1196,13 @@ class DefaultControllerCore extends Controller
                     $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
             }
-            
+ //URGENT TO DO : WHY IS THERE A REDIRECTION TOWARD INVALIDRECORD.HTML.TWIG DESPITE NOT INSERTING A QUERY ????           
                 // Get result from AJAX request in regle.js 
                 $form = $request->request->all();
-                $this->simulationQueryField = $form['query'];
+                if(isset($form['query'])){
+                    $this->simulationQueryField = $form['query'];
+                }
+     
                 // Avoid sending query on specific record ID if the user didn't actually input something
                 if( empty($this->simulationQueryField) ){
                     // Get source data
@@ -1209,7 +1212,6 @@ class DefaultControllerCore extends Controller
                         'ruleParams' => $ruleParams
                     )); 
                 } else {
-          
                         // Get source data with query on specific record ID
                         $source = $solution_source->read_last(array(
                             'module' => $serviceSession->getParamRuleSourceModule($ruleKey),

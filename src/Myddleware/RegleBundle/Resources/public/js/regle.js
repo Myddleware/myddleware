@@ -1039,11 +1039,12 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 
 
 // For rule simulation, users can send a specific record ID to test the data with, instead of the default read_last
-	$( "#validation_manual_simulation" ).on( "click", function(){
+	$( "#validation_manual_simulation" ).on( "click", function(e){
 		// Prevent running simulation if the input is empty / invalid
 			if(select_record_id.value === false  || select_record_id.value === null || select_record_id.value === undefined || select_record_id.value === '' ){		
-				$('#validation_manual_simulation')
+				$('#validation-form')
 				.after('<div><span style="color : red;">Please insert a valid record ID if you want to run a manual simulation.</span></div>');
+				e.preventDefault();
 			}else{
 				
 			if( require() ){	
