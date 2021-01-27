@@ -355,23 +355,23 @@ class databasecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
 			// Query building
-			$requestSQL = $this->get_query_select_header($param, 'read');	
+			$query['select'] = $this->get_query_select_header($param, 'read');	
 			// Build field list
 			foreach ($param['fields'] as $field){
 				// myddleware_generated isn't a real field in the database
 				if ($field != 'myddleware_generated') {
-					$requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // 
+					$query['select'] .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // 
 				}
 			}
 			// Remove the last coma
-			$requestSQL = rtrim($requestSQL,' '); 
-			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
+			$query['select'] = rtrim($query['select'],' '); 
+			$query['select'] = rtrim($query['select'],',').' '; 
+			$query['from'] = "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
 			// if a specific query is requested we don't use date_ref
 			if (!empty($param['query'])) {
 				$nbFilter = count($param['query']);
-				$requestSQL .= " WHERE ";
+				$query['where'] = " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
 					// Manage query with id, to be replaced by the ref Id fieldname
 					if ($queryKey == 'id') {
@@ -380,18 +380,22 @@ class databasecore extends solution {
 						}
 						$queryKey = $param['ruleParams']['fieldId'];
 					}
-					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
+					$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
 					$nbFilter--;
 					if ($nbFilter > 0){
-						$requestSQL .= " AND ";	
+						$query['where'] .= " AND ";	
 					}
 				}
 			} else {
-				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
+				$query['where'] = " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
 			
-			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
-			$requestSQL .= $this->get_query_select_limit_offset($param, 'read'); // Add query limit
+			$query['order'] = " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+			$query['limit'] = $this->get_query_select_limit_offset($param, 'read'); // Add query limit
+			
+			// Build query
+			$requestSQL = $this->buildQuery($param, $query);
+	
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
@@ -446,7 +450,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}			
+		}		
 		return $result;
 	} // read($param)
 	
@@ -659,6 +663,11 @@ class databasecore extends solution {
 	// Function to check, modify or validate the query
 	protected function queryValidation($param, $functionName, $requestSQL) {
 		return $requestSQL;
+	}
+	
+	// Function to buid the SELECT query
+	protected function buildQuery($param, $query) {
+		return $query['select'].$query['from'].$query['where'].$query['order'].$query['limit'];
 	}
 	
 	// Get the header of the select query in the read last function

@@ -3337,6 +3337,49 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			});					
 		} 
 	});
+
+
+// For rule simulation, users can send a specific record ID to test the data with, instead of the default read_last
+	// Simulation sur une donnée spécifique choisie par l'utilisateur
+	$( "#validation_manual_simulation" ).on( "click", function(){
+
+		if(select_record_id.value){
+			console.log(select_record_id.value);
+		}else{
+			$('#validation_manual_simulation')
+				.after('<div><span style="color : red;">Please insert a valid record ID if you want to run a manual simulation.</span></div>');
+		}
+		if( require() ){	
+			
+			$.ajax({
+				type: "POST",
+				url: path_simulation,
+				data:{
+					champs : recup_champs(),
+					formules : recup_formule(),
+					params : recup_params(),
+					relations : recup_relation()
+				},
+				beforeSend:	function() {
+					$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );	
+												
+				},	    					
+				success: function(data){
+					
+					if(data == 0) {
+						$('#simulation_tab').html('error');	
+					}
+					else {
+						$('#simulation_tab').html(data);
+						// console.log(data);	
+					}
+					}
+			});	
+		} 
+	});
+
+
+
 // ---- SIMULATION DE DONNEES ------------------------------------------------------------
 
 // ---- AJOUT CHAMP CIBLE  ---------------------------------------------------------------
@@ -3594,7 +3637,7 @@ function verifFields(field_id,show) {
 	function recup_fields_relate() {
 		var relate_fields = [];	
 		$( '#fields_duplicate_target li' ).each(function(){
-			if( $(this).attr('data-active') == 'true' ) {
+			if( $(this).attr('data-active') === 'true' ) {
 				relate_fields.push( $.trim( $(this).text() ) );
 			}
 		});
@@ -3605,7 +3648,7 @@ function verifFields(field_id,show) {
 	function duplicate_fields_error() {
 		error=0;
 		$( 'li','#fields_duplicate_target' ).each(function(){
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				error++;
 			}
 		});
@@ -3660,29 +3703,28 @@ function verifFields(field_id,show) {
 	}
 
 	// Affiche les champs obligatoire pour éviter les doublons
-	$( '#fields_duplicate_target' ).on( "click", 'li', function(){	
+	$( '#fields_duplicate_target li' ).click( function(event){	
 		
 		// si le champ est sélectionné
 		if(fields_exist($(this).text())) {
-			
-			if( $(this).attr('data-active') == 'false' ) {
+			if( $(this).attr('data-active') === 'false' ) {
 				$(this).attr('data-active','true');
 				$(this).addClass('active');
 			}
 			else {
 				$(this).attr('data-active','false');
-				$(this).removeClass('active');					
+				$(this).removeClass('active');			
 			}					
 		}
 		else {
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				$(this).removeClass('no_active');
 			}
 			else {
-				$(this).addClass('no_active');					
+				$(this).addClass('no_active');		
 			}									
 		}
-
+		
 		recup_fields_relate();
 	});
 
@@ -3786,11 +3828,11 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 	if(params) {	
 		$.each(params, function( index, nameP ) {
 			$( '#'+nameP.name ).val( nameP.value );		
-			if( nameP.name + 'duplicate_fields' ) {
+			if( nameP.name === 'duplicate_fields' ) {
 				duplicate_fields = nameP.value.split(';');
-				$.each(duplicate_fields, function( index, d_fields ) {
-					$( "li:contains('" + d_fields + "')", '#fields_duplicate_target').click();	
-				});				
+				 $.each(duplicate_fields, function( index, d_fields ) {
+					 $( "li:contains('" + d_fields + "')", '#fields_duplicate_target').click();
+				 });				
 			}
 		});	
 	}
@@ -3969,3 +4011,4 @@ function saveInputFlux(div,link) {
 		}			
 	});
 }
+
