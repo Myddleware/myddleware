@@ -65,6 +65,11 @@ class DefaultControllerCore extends Controller
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
 	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
+    // To allow sending a specific record ID to rule simulation
+    protected $simulationQueryField = 1;
+
+
+
 	protected function getInstanceBdd()
     {
         if (empty($this->em)) {
@@ -1186,13 +1191,34 @@ class DefaultControllerCore extends Controller
 				foreach ($ruleParamsResult as $ruleParamsObj) {
                     $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
-			}
-			
-            // Get source data
-            $source = $solution_source->read_last(array(
-                'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
-                'fields' => $sourcesfields,
-				'ruleParams' => $ruleParams));
+            }
+            
+                // Get result from AJAX request in regle.js 
+                $form = $request->request->all();
+                $this->simulationQueryField = $form['query'];
+                // Avoid sending query on specific record ID if the user didn't actually input something
+                if( empty($this->simulationQueryField) ){
+                    // Get source data
+                    $source = $solution_source->read_last(array(
+                        'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+                        'fields' => $sourcesfields,
+                        'ruleParams' => $ruleParams
+                    )); 
+                } else {
+          
+                        // Get source data with query on specific record ID
+                        $source = $solution_source->read_last(array(
+                            'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+                            'fields' => $sourcesfields,
+                            'ruleParams' => $ruleParams,
+                            'query' => array('id' => $this->simulationQueryField)
+                        )); 
+
+                        // In case of wrong record ID input from user 
+                        if(!empty($source['error'])){
+                            return $this->render('RegleBundle:Rule:create/onglets/invalidrecord.html.twig');
+                        }   
+                }
 
             if (isset($source['done'])) {
                 $before = array();
@@ -1257,14 +1283,16 @@ class DefaultControllerCore extends Controller
                     }
                 }
             }
+
             return $this->render('RegleBundle:Rule:create/onglets/simulation_tab.html.twig', array(
                     'before' => $before, // source
                     'after' => $after, // target
                     'data_source' => $source['done'],
-                    'params' => $serviceSession->getParamRule($ruleKey)
+                    'params' => $serviceSession->getParamRule($ruleKey),
+                    'simulationQueryField' => $this->simulationQueryField,        
                 )
             );
-
+            
         } else {
             throw $this->createNotFoundException('Error');
         }
@@ -1751,7 +1779,8 @@ class DefaultControllerCore extends Controller
                 'fieldMappingAddListType' => $fieldMappingAdd,
                 'parentRelationships' => $allowParentRelationship,
                 'lst_parent_fields' => $lstParentFields,
-                'regleId' => $ruleKey
+                'regleId' => $ruleKey,
+                'simulationQueryField' => $this->simulationQueryField
             );
 
             $result = $this->beforeRender($result);

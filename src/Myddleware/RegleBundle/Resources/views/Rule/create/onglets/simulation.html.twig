@@ -26,82 +26,14 @@
 	<a href="#help-content-simulation"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
 </div>
 <div align="center" id="simulation-params">
-	
-	{# <div id="manual-data-selection"> #}
-		{# <label for="manual-select">Select test data manually</label>
-		<select name="manual-select" id="manual-select"> #}
-			{# <option value="">Estelle</option> #}
-			{# {% for record in records %}
-				<option value="">{{record.id}}</option>
-			{% endfor %} #}
-			{# {% for test in estelle %}
-				<option value="{{estelle}}">{{ estelle }}</option>
-			{% endfor %} #}
-		{# {% if regleId %}
-			<option value="">{{ regleId }}</option>
-		{% else %}
-		<option value="">Impossible de récupérer les valeurs</option>
-		{% endif %} #}
-		{# {% if params %}
-			{% for param in params %}
-				<option value="">{{param}}</option>
-			{% endfor %}
-		{% else %}
-			<option value="">Impossible de récupérer les valeurs</option>
-		{% endif %} #}
-	{# 
-		</select> #}
-		{# {% if datereference %} #}
-			{# <p>{{ datereference }}</p> #}
- 		{# <p>datereference existe</p> 
-		{% endif %} #}
-		{# {% if regleId %}
-			<p> {{ regleId}} regleId existe </p>
-		{% endif %}
-		{% if params %}
-			<pre>
-   				{{ dump(params) }}
-			</pre>
-			<p>params existe</p>
-			{#  <p>{{params}}</p> #}
-			{# {% for param in params %}
-				<p>{{param}}</p>
-			{% endfor %} #}
-		{# {% else %}
-			<p>Impossible de récupérer les valeurs</p>
-		{% endif %}
-		{% if rule_params %} #}
-			{# <pre>
-   				{{ dump(rule_params) }}
-			</pre> #}
-		{# {% endif %} #} 
-		{# {% if before %}
-			<p> before n'existe pas</p>
-		{% endif %} #}
-		{# {% if data_source %}
-		<p>data source n'existe pas</p>
-		{% endif %} #}
-		{# {% if rule %}
-		<p>rule n'existe pas</p>
-		{% endif %} #}
-		{# {% if fields %}
-		<p>fields ,'existe pas</p>
-		{% endif %} #}
-		{# {% if solution_source %}
-		<p> solution source n'existe pas</p>
-		{% endif %} #}
-		{# {% if cible %}
-		<p>cible existe</p>
-		{% endif %} #}
-		{# <label for="select-record-id">Select a specific record id to run simulation :</label>
-		<input type="text" id="select-record-id" name="select-record-id"> #}
-
-		{# <div id="validation_manual_simulation" class="btn-mydinv">          
+	<form method="post" action="{{ path('regle_simulation')}}">
+		<label for="select-record-id">Select a specific record id to run simulation :</label>
+		<input type="text" id="select-record-id" name="select-record-id" value="{{ simulationQueryField }}">
+		<div id="validation_manual_simulation" class="btn-mydinv">          
 			<span class="glyphicon glyphicon-refresh"></span>
 				{{ 'create_rule.step3.data_manual'|trans }}
-		</div> #}
-	{# </div> #}
-
+		</div>
+	</form>
 	<div id="validation_simulation" class="btn-mydinv">
 		<span class="glyphicon glyphicon-refresh"></span>
 		{{ 'create_rule.step3.data'|trans }}

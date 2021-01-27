@@ -1039,42 +1039,41 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 
 
 // For rule simulation, users can send a specific record ID to test the data with, instead of the default read_last
-	// Simulation sur une donnée spécifique choisie par l'utilisateur
 	$( "#validation_manual_simulation" ).on( "click", function(){
-
-		if(select_record_id.value){
-			console.log(select_record_id.value);
-		}else{
-			$('#validation_manual_simulation')
+		// Prevent running simulation if the input is empty / invalid
+			if(select_record_id.value === false  || select_record_id.value === null || select_record_id.value === undefined || select_record_id.value === '' ){		
+				$('#validation_manual_simulation')
 				.after('<div><span style="color : red;">Please insert a valid record ID if you want to run a manual simulation.</span></div>');
+			}else{
+				
+			if( require() ){	
+				
+				$.ajax({
+					type: "POST",
+					url: path_simulation,
+					data:{
+						champs : recup_champs(),
+						formules : recup_formule(),
+						params : recup_params(),
+						relations : recup_relation(),
+						query: select_record_id.value
+					},
+					beforeSend:	function() {
+						$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );	
+													
+					},	    					
+					success: function(data){
+						if(data == 0) {
+							$('#simulation_tab').html('error');	
+						}
+						else {
+							$('#simulation_tab').html(data);
+						}
+						}
+				});	
+			}
+		
 		}
-		if( require() ){	
-			
-			$.ajax({
-				type: "POST",
-				url: path_simulation,
-				data:{
-					champs : recup_champs(),
-					formules : recup_formule(),
-					params : recup_params(),
-					relations : recup_relation()
-				},
-				beforeSend:	function() {
-					$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );	
-												
-				},	    					
-				success: function(data){
-					
-					if(data == 0) {
-						$('#simulation_tab').html('error');	
-					}
-					else {
-						$('#simulation_tab').html(data);
-						// console.log(data);	
-					}
-					}
-			});	
-		} 
 	});
 
 
