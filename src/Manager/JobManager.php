@@ -365,13 +365,13 @@ class jobcore  {
 			$params = implode(' ',$param);
 			
 			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->container->getParameter('php');
+			$php = $this->params->get('php');
 			if (empty($php['executable'])) {
 				$php['executable'] = 'php';
 			}
 				
 			//Create your own folder in the cache directory
-			$fileTmp = $this->container->getParameter('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
+			$fileTmp = $this->params->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {
 				$fs->mkdir(dirname($fileTmp));
@@ -688,7 +688,7 @@ class jobcore  {
 				}
 				// Ecriture du fichier
 				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
-				file_put_contents($this->container->getParameter('kernel.root_dir').'/../src/Myddleware/RegleBundle/Templates/'.$nomTemplate.'.yml', $yaml);
+				file_put_contents($this->params->get('kernel.root_dir').'/../src/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
 		} catch (\Exception $e) {
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

@@ -54,6 +54,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class rulecore
 {
 	protected $connection;
+	protected $container;
 	protected $logger;
 	protected $ruleId;
 	protected $rule;
@@ -131,7 +132,7 @@ class rulecore
 		SessionInterface $session,
 		SolutionManager $solutionManager,
 		ToolsManager $tools,
-		DocumentManager $document,
+		// DocumentManager $document,
 		ParameterBagInterface $params
 	) {
 		$this->logger = $logger;
@@ -145,7 +146,7 @@ class rulecore
 		$this->router = $router;
 		$this->session = $session;
 		$this->solutionManager = $solutionManager;
-		$this->document = $document;
+		// $this->document = $document;
 		$this->params = $params;
 		$this->cacheDir = $kernel->getCacheDir();
 		$this->env = $kernel->getEnvironment();
@@ -259,7 +260,8 @@ class rulecore
 					if (!empty($param['parent_id'])) {
 						$doc['parentId'] = $param['parent_id'];		
 					}
-					$document = new document($this->logger, $this->container, $this->connection, $doc);
+					$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+					$document->setParam($doc);
 					$createDocument = $document->createDocument();		
 					if (!$createDocument) {
 						throw new \Exception ('Failed to create document : '.$document->getMessage());
@@ -327,7 +329,8 @@ class rulecore
 				$c = (($this->solutionSource->connexion_valide) ? true : false );				
 			}
 			else {
-				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);	
+				// $this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);	
+				$this->solutionTarget = $this->solutionManager->get($r['name']);	
 				$this->solutionTarget->setApi($this->api);
 				$loginResult = $this->solutionTarget->login($params);			
 				$c = (($this->solutionTarget->connexion_valide) ? true : false );			
@@ -413,10 +416,13 @@ class rulecore
 							$i++;
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
-							$param['api'] = $this->api;							
-							$createDocument = $this->document->createDocument();
+							$param['api'] = $this->api;		
+							// Set the param values
+							$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+							$document->setParam($param);
+							$createDocument = $document->createDocument();
 							if (!$createDocument) {
-								$readSource['error'] .= $this->document->getMessage();
+								$readSource['error'] .= $document->getMessage();
 							}
 						}			
 					}
@@ -620,8 +626,9 @@ class rulecore
 			foreach ($documents as $document) { 
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
+				$param['api'] = $this->api;				
+				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$doc->setParam($param);
 				$response[$document['id']] = $doc->filterDocument($this->ruleFilters);
 			}			
 		}
@@ -645,7 +652,8 @@ class rulecore
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
 				$param['ruleRelationships'] = $this->ruleRelationships;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
+				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$doc->setParam($param);
 				$response[$document['id']] = $doc->ckeckPredecessorDocument();
 			}			
 		}
@@ -667,7 +675,7 @@ class rulecore
 			$param['jobId'] = $this->jobId;			
 			$param['ruleRelationships'] = $this->ruleRelationships;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->container->getParameter('migration');
+			$migrationParameters = $this->params->get('migration');
 			if (!empty($migrationParameters['mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
@@ -685,7 +693,8 @@ class rulecore
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
 				$param['ruleRelationships'] = $this->ruleRelationships;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
+				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$doc->setParam($param);
 				$response[$document['id']] = $doc->ckeckParentDocument();
 			}			
 		}			
@@ -711,7 +720,7 @@ class rulecore
 			$param['api'] = $this->api;
 			$param['key'] = $this->key;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->container->getParameter('migration');
+			$migrationParameters = $this->params->get('migration');
 			if (!empty($migrationParameters['mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
@@ -726,7 +735,8 @@ class rulecore
 			// Transformation de tous les docuements sélectionnés
 			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
+				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$doc->setParam($param);
 				$response[$document['id']] = $doc->transformDocument();
 			}	
 		}	
@@ -762,7 +772,8 @@ class rulecore
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
 				$param['key'] = $this->key;
-				$doc = new document($this->logger, $this->container, $this->connection, $param);
+				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$doc->setParam($param);
 				$response[$document['id']] = $doc->getTargetDataDocument();
 				$response['doc_status'] = $doc->getStatus();
 			}			
@@ -964,7 +975,8 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$doc->setParam($param);
 		$doc->documentCancel(); 
 		$session = new Session();
 		$message = $doc->getMessage();
@@ -986,7 +998,8 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$doc->setParam($param);
 		$doc->changeDeleteFlag($deleteFlag); 
 		$session = new Session();
 		$message = $doc->getMessage();
@@ -1008,7 +1021,8 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$doc->setParam($param);
 		$doc->updateStatus($toStatus);
 	}
 	
@@ -1020,12 +1034,12 @@ class rulecore
 			$guid = uniqid();
 			
 			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->container->getParameter('php');
+			$php = $this->params->get('php');
 			if (empty($php['executable'])) {
 				$php['executable'] = 'php';
 			}
 			
-			$fileTmp = $this->container->getParameter('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
+			$fileTmp = $this->params->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {
 				$fs->mkdir(dirname($fileTmp));
@@ -1095,11 +1109,12 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;	
-		$doc = new document($this->logger, $this->container, $this->connection, $param);
-		$status = $doc->getStatus();
+		$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$document->setParam($param);	
+		$status = $document->getStatus();
 		// Si la règle n'est pas chargée alors on l'initialise.
 		if (empty($this->ruleId)) {
-			$this->ruleId = $doc->getRuleId();
+			$this->ruleId = $document->getRuleId();
 			$this->setRule($this->ruleId);
 			$this->setRuleRelationships();
 			$this->setRuleParam();
@@ -1371,10 +1386,11 @@ class rulecore
 					$param['id_doc_myddleware'] = $key;
 					$param['jobId'] = $this->jobId;
 					$param['api'] = $this->api;
-					$doc = new document($this->logger, $this->container, $this->connection, $param);
-					$doc->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
-					$doc->setTypeError('W');
-					$doc->updateStatus('Transformed');
+					$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+					$document->setParam($param);	
+					$document->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
+					$document->setTypeError('W');
+					$document->updateStatus('Transformed');
 					// Suppression du document dans l'envoi
 					unset($transformedData[$key]);
 				}
@@ -1461,10 +1477,10 @@ class rulecore
 			// If the rule is a parent, we have to get the data of all rules child		
 			$childRules = $this->getChildRules();		
 			if (!empty($childRules)) {
-				foreach($childRules as $childRule) {
-					$ruleChildParam['ruleId'] = $childRule['field_id'];
-					$ruleChildParam['jobId'] = $this->jobId;				
-					$childRuleObj = new rule($this->logger, $this->container, $this->connection, $ruleChildParam);					
+				foreach($childRules as $childRule) {				
+					$childRuleObj = new RuleManager($this->logger, $this->container, $this->connection);	
+					$childRuleObj->setRule($childRule['field_id']);
+					$childRuleObj->setJobId($this->jobId);
 					// Recursive call to get all data from all child in status ready to send generated by the method Document=>runChildRule
 					// Child document has the type 'U'									
 					$dataChild = $childRuleObj->getSendDocuments('U','',$table,$document['id_doc_myddleware'], $childRule['field_id']);

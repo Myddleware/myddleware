@@ -122,90 +122,20 @@ class documentcore
 		LoggerInterface $logger,
 		Connection $dbalConnection,
 		EntityManagerInterface $entityManager,
-		DocumentRepository $documentRepository,
-		RuleRelationShipRepository $ruleRelationshipsRepository,
-		ParameterBagInterface $params,
-		ToolsManager $tools,
-		FormulaManager $formule
+		DocumentRepository $documentRepository = null,
+		RuleRelationShipRepository $ruleRelationshipsRepository = null,
+		ParameterBagInterface $params = null,
+		ToolsManager $tools = null,
+		FormulaManager $formule = null
 	) {
 		$this->connection = $dbalConnection;
 		$this->logger = $logger;
 		$this->entityManager = $entityManager;
 		$this->documentRepository = $documentRepository;
 		$this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
-		$param = $params->get('param');
+		// $param = $params->get('param');
 		$this->tools = $tools;
 		$this->formule = $formule;
-			
-		// Chargement des solution si elles sont présentent dans les paramètres de construction
-		if (!empty($param['solutionTarget'])) {
-			$this->solutionTarget = $param['solutionTarget'];
-		}
-		if (!empty($param['solutionSource'])) {
-			$this->solutionSource = $param['solutionSource'];
-		}
-		if (!empty($param['jobId'])) {
-			$this->jobId = $param['jobId'];
-		}
-		if (!empty($param['api'])) {
-			$this->api = $param['api'];
-		}
-		if (!empty($param['key'])) {
-			$this->key = $param['key'];
-		}
-		if (!empty($param['parentId'])) {
-			$this->parentId = $param['parentId'];
-		}
-		if (!empty($param['ruleDocuments'])) {
-			$this->ruleDocuments = $param['ruleDocuments'];
-		}	
-
-		// Stop the processus if the job has been manually stopped
-		if ($this->getJobStatus() != 'Start') {
-			$this->jobActive = false;
-		}		
-
-		// If mode isn't front ofice => only when the user click on "Simulation" during the rule creation
-		if(
-				empty($param['mode']) 
-			 || (
-					!empty($param['mode'])
-				&& $param['mode'] != 'front_office'
-			)
-		) {
-			// Init attribut of the class Document
-			if (!empty($param['id_doc_myddleware'])) {	
-				// Instanciate attribut sourceData
-				$this->setDocument($param['id_doc_myddleware']);
-			}
-			else {
-				$this->id = uniqid('', true);
-				$this->dateCreated = gmdate('Y-m-d H:i:s');
-				$this->ruleName = $param['rule']['name_slug'];
-				$this->ruleMode = $param['rule']['mode'];
-				$this->ruleId = $param['rule']['id'];
-				$this->ruleFields = $param['ruleFields'];
-				$this->data = $param['data'];
-				$this->sourceId = $this->data['id'];
-				$this->userId = $param['rule']['created_by'];
-				$this->status = 'New';
-				$this->attempt = 0;			
-				// Set the deletion type if myddleware deletion flag is true
-				if (!empty($this->data['myddleware_deletion'])) {
-					$this->documentType = 'D';
-				}
-			} 
-			// Ajout des paramètre de la règle
-			$this->setRuleParam();
-		}
-		// Mise à jour des tableaux s'ils existent.
-		if (!empty($param['ruleFields'])) {
-			$this->ruleFields = $param['ruleFields'];
-		}
-		if (!empty($param['ruleRelationships'])) {
-			$this->ruleRelationships = $param['ruleRelationships'];
-		}
-		// $this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);	
 	}
 	
 	
@@ -287,7 +217,8 @@ class documentcore
 				$this->data = $this->sourceData;
 				// Get document header 				
  			 	$documentEntity = $this->entityManager
-	                          ->getRepository('RegleBundle:Document')
+	                          // ->getRepository('RegleBundle:Document')
+							  ->getRepository(Document::class)
 	                          ->findOneById( $id_doc );	
 				$this->data['id'] = $documentEntity->getSource();	
 				$this->data['source_date_modified'] = $documentEntity->getSourceDateModified()->format('Y-m-d H:i:s');				
@@ -304,13 +235,84 @@ class documentcore
 		}			
 	}
 	
+	public function setParam($param) {
+		// Chargement des solution si elles sont présentent dans les paramètres de construction
+		if (!empty($param['solutionTarget'])) {
+			$this->solutionTarget = $param['solutionTarget'];
+		}
+		if (!empty($param['solutionSource'])) {
+			$this->solutionSource = $param['solutionSource'];
+		}
+		if (!empty($param['jobId'])) {
+			$this->jobId = $param['jobId'];
+		}
+		if (!empty($param['api'])) {
+			$this->api = $param['api'];
+		}
+		if (!empty($param['key'])) {
+			$this->key = $param['key'];
+		}
+		if (!empty($param['parentId'])) {
+			$this->parentId = $param['parentId'];
+		}
+		if (!empty($param['ruleDocuments'])) {
+			$this->ruleDocuments = $param['ruleDocuments'];
+		}	
+
+		// Stop the processus if the job has been manually stopped
+		if ($this->getJobStatus() != 'Start') {
+			$this->jobActive = false;
+		}		
+
+		// If mode isn't front ofice => only when the user click on "Simulation" during the rule creation
+		if(
+				empty($param['mode']) 
+			 || (
+					!empty($param['mode'])
+				&& $param['mode'] != 'front_office'
+			)
+		) {
+			// Init attribut of the class Document
+			if (!empty($param['id_doc_myddleware'])) {	
+				// Instanciate attribut sourceData
+				$this->setDocument($param['id_doc_myddleware']);
+			}
+			else {
+				$this->id = uniqid('', true);
+				$this->dateCreated = gmdate('Y-m-d H:i:s');
+				$this->ruleName = $param['rule']['name_slug'];
+				$this->ruleMode = $param['rule']['mode'];
+				$this->ruleId = $param['rule']['id'];
+				$this->ruleFields = $param['ruleFields'];
+				$this->data = $param['data'];
+				$this->sourceId = $this->data['id'];
+				$this->userId = $param['rule']['created_by'];
+				$this->status = 'New';
+				$this->attempt = 0;			
+				// Set the deletion type if myddleware deletion flag is true
+				if (!empty($this->data['myddleware_deletion'])) {
+					$this->documentType = 'D';
+				}
+			} 
+			// Ajout des paramètre de la règle
+			$this->setRuleParam();
+		}
+		// Mise à jour des tableaux s'ils existent.
+		if (!empty($param['ruleFields'])) {
+			$this->ruleFields = $param['ruleFields'];
+		}
+		if (!empty($param['ruleRelationships'])) {
+			$this->ruleRelationships = $param['ruleRelationships'];
+		}
+	}
+	
 	public function createDocument() {	
 		// On ne fait pas de beginTransaction ici car on veut pouvoir tracer ce qui a été fait ou non. Si le créate n'est pas du tout fait alors les données sont perdues
 		// L'enregistrement même partiel d'un document nous permet de tracer l'erreur.
 		try {		
 			// Return false if job has been manually stopped
 			if (!$this->jobActive) {
-				$this->message .= 'Job is not active. ';
+				$this->message .= 'Job is not active. ';					
 				return false;
 			}			
 			// Création du header de la requête 
@@ -335,7 +337,7 @@ class documentcore
 	public function filterDocument($ruleFilters) {
 		// Return false if job has been manually stopped			
 		if (!$this->jobActive) {
-			$this->message .= 'Job is not active. ';
+			$this->message .= 'Job is not active. ';					
 			return false;
 		}
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -374,7 +376,7 @@ class documentcore
 		$stmt = $this->connection->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $this->jobId);
 		$stmt->execute();	    
-		$job = $stmt->fetch(); // 1 row
+		$job = $stmt->fetch(); // 1 row				
 		if (!empty($job['status'])) {
 			return $job['status'];
 		}
@@ -515,7 +517,7 @@ class documentcore
 	public function ckeckPredecessorDocument() {
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
-			$this->message .= 'Job is not active. ';
+			$this->message .= 'Job is not active. ';					
 			return false;
 		}
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -686,7 +688,7 @@ class documentcore
 	// Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
 	public function ckeckParentDocument() {
 		// Return false if job has been manually stopped
-		if (!$this->jobActive) {
+		if (!$this->jobActive) {					
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
@@ -779,7 +781,7 @@ class documentcore
 	public function transformDocument() {	
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
-			$this->message .= 'Job is not active. ';
+			$this->message .= 'Job is not active. ';				
 			return false;
 		}	
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -824,7 +826,7 @@ class documentcore
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument() {	
 		// Return false if job has been manually stopped
-		if (!$this->jobActive) {
+		if (!$this->jobActive) {				
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
@@ -1066,7 +1068,8 @@ class documentcore
 	protected function getDocumentData($type) {
 		try {	
 			$documentDataEntity = $this->entityManager
-							->getRepository('RegleBundle:DocumentData')
+							// ->getRepository('RegleBundle:DocumentData')
+							->getRepository(DocumentData::class)
 							->findOneBy( array(
 										'doc_id' => $this->id,
 										'type' => $type
@@ -1146,7 +1149,8 @@ class documentcore
 				}
 			}		
 			$documentEntity = $this->entityManager
-	                          ->getRepository('RegleBundle:Document')
+	                          // ->getRepository('RegleBundle:Document')
+							  ->getRepository(Document::class)
 	                          ->findOneById( $this->id );	
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);

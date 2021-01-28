@@ -157,7 +157,7 @@ if (file_exists($file)) {
         public function fluxListAction(Request $request, $page, $search = 1)
         {
             //--- Liste status traduction
-            $lstStatusTwig = DocumentManager::lstStatus;
+            $lstStatusTwig = DocumentManager::lstStatus();
             foreach ($lstStatusTwig as $key => $value) {
                 $lstStatus[$this->translator->trans($value)] = $key;
             }
@@ -165,7 +165,7 @@ if (file_exists($file)) {
             //---
 
             //--- Liste Global status traduction
-            $lstGblStatusTwig = DocumentManager::lstGblStatus;
+            $lstGblStatusTwig = DocumentManager::lstGblStatus();
 
             foreach ($lstGblStatusTwig as $key => $value) {
                 $lstGblStatus[$this->translator->trans($value)] = $key;
@@ -174,7 +174,7 @@ if (file_exists($file)) {
             //---
 
             //--- Liste type translation
-            $lstTypeTwig = DocumentManager::lstType;
+            $lstTypeTwig = DocumentManager::lstType();
 
             foreach ($lstTypeTwig as $key => $value) {
                 $lstType[$this->translator->trans($value)] = $key;
