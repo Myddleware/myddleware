@@ -25,10 +25,11 @@
 
 namespace App\Solutions;
 
-use App\Manager\document as documentMyddleware;
+use App\Manager\DocumentManager;
 use Doctrine\DBAL\Driver\Connection;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 // document Myddleware
 
@@ -57,9 +58,6 @@ class solutioncore
 
     // Classe permettant d'enregistrer les log Symfony
     protected $logger;
-
-    // Classe permettant la connexion à la base données
-    protected $conn;
 
     // Classe permettant la connexion à la base données
     protected $container;
@@ -98,16 +96,22 @@ class solutioncore
     /**
      * @var ParameterBagInterface
      */
-    private $params;
+    private $parameterBagInterface;
+	/**
+	 * @var EntityManagerInterface
+	 */
+	private $entityManager;
 
     public function __construct(
         LoggerInterface $logger,
         Connection $connection,
-        ParameterBagInterface $params
+        ParameterBagInterface $parameterBagInterface,
+		EntityManagerInterface $entityManager
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
-        $this->params = $params;
+        $this->entityManager = $entityManager;
+        $this->parameterBagInterface = $parameterBagInterface;
     }
 
     // Fonction permettant de se loguer à la solution
@@ -118,7 +122,7 @@ class solutioncore
     public function login($paramConnexion)
     {
         // Instanciate object to decrypte data
-        $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->params->get('secret'), -16));
+        $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
         // Decrypt connexion parameters
         foreach ($paramConnexion as $key => $value) {
             if (is_string($value)) {
@@ -145,20 +149,21 @@ class solutioncore
     // Permet de se connecter à la base de données
     protected function getConn()
     {
-        return $this->conn;
+        return $this->connection;
     }
 
     // Permet de mettre à jour le statut d'un document après création ou modification dans la cible
     protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
     {
-        $this->conn->beginTransaction();
-        try {
+        $this->connection->beginTransaction();
+        try {			
             $param['id_doc_myddleware'] = $idDoc;
-            $param['api'] = $this->api;
-            $document = new documentMyddleware($this->logger, $this->container, $this->conn, $param);
+            $param['api'] = $this->api;				
+			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);				
+			$documentManager->setParam($param);	
             //  Si on a un message on l'ajoute au document
             if (!empty($value['error'])) {
-                $document->setMessage($value['error']);
+                $documentManager->setMessage($value['error']);
             }
             // Mise à jour de la table document avec l'id target comme id de document
             // Si la création a fonctionné
@@ -170,11 +175,11 @@ class solutioncore
                 }
                 // In cas of a child document, it is possible to have $value['id'] empty, we just set an error because the document can't be sent again (parent document successfully sent)
                 if (!empty($value['id'])) {
-                    $document->updateTargetId($value['id']);
+                    $documentManager->updateTargetId($value['id']);
                 } else {
-                    $document->setMessage('No target ID found in return of the parent document creation. ');
+                    $documentManager->setMessage('No target ID found in return of the parent document creation. ');
                 }
-                $document->updateStatus($status);
+                $documentManager->updateStatus($status);
                 $response[$idDoc] = true;
             } else {
                 if (empty($forceStatus)) {
@@ -182,17 +187,19 @@ class solutioncore
                 } else {
                     $status = $forceStatus;
                 }
-                $document->setMessage('Failed to send document. ');
-                $document->setTypeError('E');
-                $document->updateStatus($status);
+			
+                $documentManager->setMessage('Failed to send document. ');
+                $documentManager->setTypeError('E');
+                $documentManager->updateStatus($status);
                 $response[$idDoc] = false;
             }
-            $this->conn->commit(); // -- COMMIT TRANSACTION
+            $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
-            $this->conn->rollBack(); // -- ROLLBACK TRANSACTION
-            $document->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $document->setTypeError('E');
-            $document->updateStatus('Error_sending');
+			echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $documentManager->setTypeError('E');
+            $documentManager->updateStatus('Error_sending');
             $this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $response[$idDoc] = false;
         }
@@ -597,7 +604,7 @@ class solutioncore
     {
         // Récupération du source_id
         $sql = 'SELECT `source_id` FROM `Document` WHERE `id` = :idDoc AND Document.deleted = 0';
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':idDoc', $idDoc);
         $stmt->execute();
         $sourceId = $stmt->fetch();
@@ -645,7 +652,7 @@ class solutioncore
                 // Get the param requested
                 if ($connectorParam->getName() == $paramName) {
                     // Instanciate object to decrypte data
-                    $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->params->get('secret'), -16));
+                    $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
 
                     return $encrypter->decrypt($connectorParam->getValue());
                 }
@@ -687,7 +694,7 @@ class solutioncore
     protected function isJobActive($param)
     {
         $sqlJobDetail = 'SELECT * FROM Job WHERE id = :jobId';
-        $stmt = $this->conn->prepare($sqlJobDetail);
+        $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $param['jobId']);
         $stmt->execute();
         $job = $stmt->fetch(); // 1 row
@@ -708,7 +715,7 @@ class solutioncore
 					INNER JOIN Solution 
 						ON Solution.id  = Connector.sol_id
 				WHERE Connector.id = :connId';
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
         $stmt->execute();
         $r = $stmt->fetch();
@@ -717,7 +724,7 @@ class solutioncore
         $sql = 'SELECT id, conn_id, name, value
 				FROM ConnectorParam 
 				WHERE conn_id = :connId';
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
         $stmt->execute();
         $tab_params = $stmt->fetchAll();

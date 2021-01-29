@@ -31,6 +31,7 @@ use App\Entity\Rule;
 use App\Entity\Document;
 use App\Entity\RuleOrder;
 use App\Entity\RuleParam;
+use App\Entity\DocumentData;
 use Psr\Log\LoggerInterface;
 use App\Repository\RuleRepository;
 use Doctrine\DBAL\Driver\Connection;
@@ -80,8 +81,7 @@ class rulecore
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $params;
-	private $cacheDir;
+	private $parameterBagInterface;
 	/**
 	 * @var document
 	 */
@@ -123,17 +123,17 @@ class rulecore
 		LoggerInterface $logger,
 		Connection $connection,
 		EntityManagerInterface $entityManager,
-		RuleRepository $ruleRepository,
-		RuleRelationShipRepository $ruleRelationShipRepository,
-		RuleOrderRepository $ruleOrderRepository,
-		DocumentRepository $documentRepository,
-		RouterInterface $router,
-		KernelInterface $kernel,
-		SessionInterface $session,
-		SolutionManager $solutionManager,
-		ToolsManager $tools,
+		ParameterBagInterface $parameterBagInterface,
+		RuleRepository $ruleRepository = null,
+		RuleRelationShipRepository $ruleRelationShipRepository = null,
+		RuleOrderRepository $ruleOrderRepository = null,
+		DocumentRepository $documentRepository = null,
+		RouterInterface $router = null,
+		KernelInterface $kernel = null,
+		SessionInterface $session = null,
+		SolutionManager $solutionManager = null,
+		ToolsManager $tools = null
 		// DocumentManager $document,
-		ParameterBagInterface $params
 	) {
 		$this->logger = $logger;
 		$this->connection = $connection;
@@ -146,24 +146,8 @@ class rulecore
 		$this->router = $router;
 		$this->session = $session;
 		$this->solutionManager = $solutionManager;
-		// $this->document = $document;
-		$this->params = $params;
-		$this->cacheDir = $kernel->getCacheDir();
-		$this->env = $kernel->getEnvironment();
-				
-		// if (!empty($param['ruleId'])) {
-			// $this->ruleId = $param['ruleId'];
-			// $this->setRule($this->ruleId);
-		// }		
-		// if (!empty($param['jobId'])) {
-			// $this->jobId = $param['jobId'];
-		// }	
-		// if (!empty($param['manual'])) {
-			// $this->manual = $param['manual'];
-		// }	
-		// if (!empty($param['api'])) {
-			// $this->api = $param['api'];
-		// }	
+		$this->parameterBagInterface = $parameterBagInterface;
+		$this->env = $this->parameterBagInterface->get('kernel.environment');			
 
 		$this->setRuleParam();
 		$this->setLimit();
@@ -402,7 +386,7 @@ class rulecore
 					$i = 0;
 					if($this->dataSource['values']) {
 						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
-						$migrationParameters = $this->params->get('migration');
+						$migrationParameters = $this->parameterBagInterface->get('migration');
 						if (!empty($migrationParameters['mode'])) {
 							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
 						}				
@@ -675,7 +659,7 @@ class rulecore
 			$param['jobId'] = $this->jobId;			
 			$param['ruleRelationships'] = $this->ruleRelationships;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->params->get('migration');
+			$migrationParameters = $this->parameterBagInterface->get('migration');
 			if (!empty($migrationParameters['mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
@@ -720,7 +704,7 @@ class rulecore
 			$param['api'] = $this->api;
 			$param['key'] = $this->key;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->params->get('migration');
+			$migrationParameters = $this->parameterBagInterface->get('migration');
 			if (!empty($migrationParameters['mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
@@ -759,7 +743,7 @@ class rulecore
 			$documents = $this->selectDocuments('Transformed');
 		}
 		
-		if(!empty($documents)) {
+		if(!empty($documents)) {				
 			// Connexion à la solution cible pour rechercher les données
 			$this->connexionSolution('target');
 			
@@ -1034,12 +1018,12 @@ class rulecore
 			$guid = uniqid();
 			
 			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->params->get('php');
+			$php = $this->parameterBagInterface->get('php');
 			if (empty($php['executable'])) {
 				$php['executable'] = 'php';
 			}
 			
-			$fileTmp = $this->params->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
+			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {
 				$fs->mkdir(dirname($fileTmp));
@@ -1202,7 +1186,7 @@ class rulecore
 			) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';			
 			}
-			else {
+			else {			
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);				
 			}
 		}		
@@ -1296,8 +1280,8 @@ class rulecore
 					return $response;
 				}
 				
-				// Connexion à la cible
-				$connect = $this->connexionSolution('target');				
+				// Connexion à la cible					
+				$connect = $this->connexionSolution('target');					
 				if ($connect === true) {
 					// Création des données dans la cible
 					if ($type == 'C') {
@@ -1307,12 +1291,12 @@ class rulecore
 						$response = $this->solutionTarget->create($send);
 					}
 					// Modification des données dans la cible
-					elseif ($type == 'U') {			
+					elseif ($type == 'U') {						
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
 						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
-						$response = $this->solutionTarget->update($send);
+						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);		
+						$response = $this->solutionTarget->update($send);						
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {			
@@ -1335,7 +1319,7 @@ class rulecore
 				echo $response['error'];
 			}
 			$this->logger->error( $response['error'] );
-		}	
+		}				
 		return $response;
 	}
 	
@@ -1500,6 +1484,8 @@ class rulecore
 			$data = $this->getDocumentData($document['id_doc_myddleware'], 'T');
 			if (!empty($data)) {
 				$return[$document['id_doc_myddleware']] = array_merge($document,$data);
+			} else {
+				$return['error'] = 'No data found in teh document';
 			}
 		}
 
@@ -1630,21 +1616,19 @@ class rulecore
 	
 	// Permet de charger les données du système source pour ce document
 	protected function getDocumentData($documentId, $type) {
-		try {	
+		try {				
 			$documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
 									->findOneBy( array(
 										'doc_id' => $documentId,
 										'type' => $type
 										)
-								);
-			// Generate data array
+								);			
+			// Generate data array				
 			if (!empty($documentDataEntity)) {
 				return json_decode($documentDataEntity->getData(),true);
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$this->typeError = 'E';
-			$this->logger->error( $this->message );
+			$this->logger->error( 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );			
 		}		
 		return false;
 	}

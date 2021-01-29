@@ -58,7 +58,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class jobcore  {
 		
-	public $id;
+	protected $id;
 	public $message = '';
 	public $createdJob = false;
 	
@@ -67,7 +67,7 @@ class jobcore  {
 	protected $logger;
 	protected $tools;
 	
-	protected $rule;
+	protected $ruleManager;
 	protected $ruleId;
 	protected $logData;
 	protected $start;
@@ -80,11 +80,7 @@ class jobcore  {
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $params;
-	/**
-	 * @var string
-	 */
-	private $cacheDir;
+	private $parameterBagInterface;
 	/**
 	 * @var RouterInterface
 	 */
@@ -134,7 +130,7 @@ class jobcore  {
 		LoggerInterface $logger,
 		DriverConnection $dbalConnection,
 		KernelInterface $kernel,
-		ParameterBagInterface $params,
+		ParameterBagInterface $parameterBagInterface,
 		TranslatorInterface $translator,
 		EntityManagerInterface $entityManager,
 		JobRepository $jobRepository,
@@ -144,13 +140,13 @@ class jobcore  {
 		RouterInterface $router,
 		SessionInterface $session,
 		ToolsManager $tools,
-		RuleManager $rule,
+		RuleManager $ruleManager,
 		TemplateManager $template,
 		UpgradeManager $upgrade
 	) {
 		$this->logger = $logger; // gestion des logs symfony monolog
 		$this->connection = $dbalConnection;
-		$this->params = $params;
+		$this->parameterBagInterface = $parameterBagInterface;
 		$this->translator = $translator;
 		$this->entityManager = $entityManager;
 		$this->ruleRepository = $ruleRepository;
@@ -158,16 +154,27 @@ class jobcore  {
 		$this->router = $router;
 		$this->session = $session;
 		$this->tools = $tools;
-		$this->rule = $rule;
+		$this->ruleManager = $ruleManager;
 		$this->upgrade = $upgrade;
 		$this->template = $template;
-		$this->cacheDir = $kernel->getCacheDir();
 		$this->projectDir = $kernel->getProjectDir();
 		$this->jobRepository = $jobRepository;
 		$this->documentRepository = $documentRepository;
 		
-		$this->env = $params->get('kernel.environment');
+		$this->env = $parameterBagInterface->get('kernel.environment');
 		$this->setManual();
+	}
+	
+	public function getId() {
+		return $this->id;
+	}
+		
+	public function getMessage() {
+		return $this->message;
+	}
+		
+	public function setMessage($message) {
+		$this->message = $message;
 	}
 		
 	// Set the rule data in the current inctance of the rule
@@ -200,12 +207,12 @@ class jobcore  {
 			
 			$this->ruleId = $rule['id'];		
 			// We instance the rule
-			$this->rule->setRule($this->ruleId);
-			$this->rule->setJobId($this->id);
-			$this->rule->setManual($this->manual);
-			$this->rule->setApi($this->api);
+			$this->ruleManager->setRule($this->ruleId);
+			$this->ruleManager->setJobId($this->id);
+			$this->ruleManager->setManual($this->manual);
+			$this->ruleManager->setApi($this->api);
 			
-			if ($this->rule->isChild()) {
+			if ($this->ruleManager->isChild()) {
 				throw new \Exception ('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
 			}
 			return true;
@@ -218,7 +225,7 @@ class jobcore  {
 
 	// Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
 	public function createDocuments() {		
-		$createDocuments = $this->rule->createDocuments();	
+		$createDocuments = $this->ruleManager->createDocuments();	
 		if (!empty($createDocuments['error'])) {
 			$this->message .= print_r($createDocuments['error'],true);
 		}
@@ -232,22 +239,22 @@ class jobcore  {
 	
 	// Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
 	public function ckeckPredecessorDocuments() {
-		$this->rule->ckeckPredecessorDocuments();
+		$this->ruleManager->ckeckPredecessorDocuments();
 	}
 	
 	// Permet de filtrer les documents en fonction des filtres de la règle
 	public function filterDocuments() {
-		$this->rule->filterDocuments();
+		$this->ruleManager->filterDocuments();
 	}
 	
 	// Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
 	public function ckeckParentDocuments() {
-		$this->rule->ckeckParentDocuments();
+		$this->ruleManager->ckeckParentDocuments();
 	}
 	
 	// Permet de trasformer les documents
 	public function transformDocuments() {
-		$this->rule->transformDocuments();
+		$this->ruleManager->transformDocuments();
 	}
 	
 	// Permet de récupérer les données de la cible avant modification des données
@@ -255,12 +262,12 @@ class jobcore  {
 	//     - Le document est un document de modification
 	//     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
 	public function getTargetDataDocuments() {
-		$this->rule->getTargetDataDocuments();
+		$this->ruleManager->getTargetDataDocuments();
 	}
 
 	// Ecriture dans le système source et mise à jour de la table document
 	public function sendDocuments() {
-		$sendDocuments = $this->rule->sendDocuments();	
+		$sendDocuments = $this->ruleManager->sendDocuments();	
 		if (!empty($sendDocuments['error'])) {
 			$this->message .= $sendDocuments['error'];
 		}
@@ -365,13 +372,13 @@ class jobcore  {
 			$params = implode(' ',$param);
 			
 			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->params->get('php');
+			$php = $this->parameterBagInterface->get('php');
 			if (empty($php['executable'])) {
 				$php['executable'] = 'php';
 			}
 				
 			//Create your own folder in the cache directory
-			$fileTmp = $this->params->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
+			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {
 				$fs->mkdir(dirname($fileTmp));
@@ -416,11 +423,14 @@ class jobcore  {
 
 	// Function to modify a group of documents
 	public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus) {	
-		try {
+		try {		
+			if (empty($ids)) {
+				throw new Exception('No ids in the input parameter of the function massAction.');
+			}
 			// Build IN parameter
-			$idsDocArray = explode(',',$ids);	
+			// $idsDocArray = explode(',',$ids);	
 			$queryIn = '(';
-			foreach ($idsDocArray as $idDoc) {
+			foreach ($ids as $idDoc) {
 				$queryIn .= "'".$idDoc."',";
 			}
 			$queryIn = rtrim($queryIn,',');
@@ -461,23 +471,23 @@ class jobcore  {
 								INNER JOIN Rule
 									ON Document.rule_id = Rule.id"
 							.$where."
-							ORDER BY Rule.id";						
+							ORDER BY Rule.id";	
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
-			$documents = $stmt->fetchAll();
+			$documents = $stmt->fetchAll();								
 
 			if(!empty($documents)) {
 				// include_once 'rule.php';	
 				$param['ruleId'] = '';
 				foreach ($documents as $document) {
-					// Chargement d'une nouvelle règle que si nécessaire
+					// If new rule, we create a new instance of RuleManager
 					if ($param['ruleId'] != $document['rule_id']) {
-						$param['ruleId'] = $document['rule_id'];
-						$param['jobId'] = $this->id;	
-						$param['api'] = $this->api;
-						$rule = new rule($this->logger, $this->container, $this->connection, $param);
+						// $rule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface);
+						$this->ruleManager->setApi($this->api);
+						$this->ruleManager->setJobId($this->id);
+						$this->ruleManager->setRule($document['rule_id']);
 					}
-					$errorActionDocument = $rule->actionDocument($document['id'],$action, $toStatus);
+					$errorActionDocument = $this->ruleManager->actionDocument($document['id'],$action, $toStatus);
 					if (!empty($errorActionDocument)) {
 						$this->message .= print_r($errorActionDocument,true);
 					}
@@ -488,6 +498,7 @@ class jobcore  {
 				return false;
 			}
 		} catch (\Exception $e) {
+			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
@@ -688,7 +699,7 @@ class jobcore  {
 				}
 				// Ecriture du fichier
 				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
-				file_put_contents($this->params->get('kernel.root_dir').'/../src/Templates/'.$nomTemplate.'.yml', $yaml);
+				file_put_contents($this->parameterBagInterface->get('kernel.root_dir').'/../src/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
 		} catch (\Exception $e) {
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

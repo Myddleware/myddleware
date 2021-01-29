@@ -103,13 +103,13 @@ class SynchroCommand extends Command
 			$rule = $input->getArgument('rule');
 			$api = $input->getArgument('api');
 			// Récupération du Job			
-			$job = $this->jobManager;
+			// $job = $this->jobManager;
 			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
 			$this->jobManager->message = '';		
 			$this->jobManager->setApi($api);					
 			
 			if ($this->jobManager->initJob('Synchro : '.$rule)) {
-				$output->writeln( '1;'.$this->jobManager->id );  // Not removed, user for manual job and webservices
+				$output->writeln( '1;'.$this->jobManager->getId() );  // Not removed, user for manual job and webservices
 				
 				if (!empty($rule)) {			
 					if ($rule == 'ERROR') {

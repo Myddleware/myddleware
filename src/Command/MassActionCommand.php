@@ -81,7 +81,7 @@ class MassActionCommand extends Command
     {
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
-        $ids = $input->getArgument('ids');
+        $ids = $input->getArgument('ids');	
         $forceAll = $input->getArgument('forceAll');
         $fromStatus = $input->getArgument('fromStatus');
         $toStatus = $input->getArgument('toStatus');
@@ -101,7 +101,7 @@ class MassActionCommand extends Command
 
         /** @var Job $job */
         $job = $data['job'];
-        $output->writeln($job->getId());  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
+        $output->writeln($this->jobManager->getId());  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
 
         // Récupération des paramètres
         if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus'])) {
@@ -113,8 +113,7 @@ class MassActionCommand extends Command
         if (empty($ids)) {
             throw new Exception('No ids in the command parameters. Please add ids to run this action.');
         }
-        $ids = explode(',', $ids);
-
+        $ids = explode(',', $ids);	
         if (
             'changeStatus' == $action
             and (
@@ -127,26 +126,28 @@ class MassActionCommand extends Command
 
         // Mass action
         $response = $this->jobManager->massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus);
-        if (!empty($response['message'])) {
+        if (!empty($this->jobManager->getMessage())) {
             if ($response['success']) {
-                $output->writeln('<info>'.$response['message'].'</info>');
+                $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
                 $this->logger->info($response['message']);
             } else {
-                $output->writeln('<error>'.$response['message'].'</error>');
+                $output->writeln('<error>'.$this->jobManager->getMessage().'</error>');
                 $this->logger->error($response['message']);
             }
         }
-
+		
+		// Clear job message to avoid duplicate messages
+		$this->jobManager->setMessage('');
         // Close job if it has been created
         $responseCloseJob = $this->jobManager->closeJob($job);
 
-        if (!empty($responseCloseJob['message'])) {
+        if (!empty($this->jobManager->getMessage())) {
             if ($responseCloseJob['success']) {
-                $output->writeln('<info>'.$responseCloseJob['message'].'</info>');
-                $this->logger->info($responseCloseJob['message']);
+                $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
+                $this->logger->info($this->jobManager->getMessage());
             } else {
-                $output->writeln('<error>'.$responseCloseJob['message'].'</error>');
-                $this->logger->error($responseCloseJob['message']);
+                $output->writeln('<error>'.$this->jobManager->getMessage().'</error>');
+                $this->logger->error($this->jobManager->getMessage());
             }
         }
 
