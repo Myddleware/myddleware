@@ -235,3 +235,13 @@ input[type="text"] {
 .manual-input {
 	max-width: 15vw;
 }
+
+.btn-success {
+	background-color: #CCC31C!important;
+	border-color: #CCC31C!important;
+}
+
+.btn-success:hover {
+	background-color: #D6CF49!important;
+	border-color: #D6CF49!important;
+}

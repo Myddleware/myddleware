@@ -28,14 +28,14 @@
 <div align="center" id="simulation-params" class="container">
 	<div class="row">
 		<div class="col">
-				<div>
+				<div id="manual-simulation-container">
 					<div class="row align-items-center manual-simulation">
 						<div class="col manual-input">
-							<label for="select-record-id">Choose a specific record id to run simulation :</label>
+							<label for="select-record-id">{{'create_rule.step3.manual_data_simulation_choose_id'|trans }} :</label>
 						</div>	
 						<div class="col manual-input">
 							<input type="text" id="select-record-id" name="select-record-id" value="{{ simulationQueryField }}" aria-describedby="selectRecordIDHelp" class="form-control" placeholder="example: 5">
-							<small id="selectRecordIDHelp" class="form-text text-muted">If you'd rather run a standard simulation, click on the default 'Test rule' button</small>
+							<small id="selectRecordIDHelp" class="form-text text-muted">{{ 'create_rule.step3.manual_data_simulation_help_text'|trans}}</small>
 						</div>
 						<div class="col">
 							<div class="simulation-button">
