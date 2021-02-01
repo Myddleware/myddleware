@@ -489,10 +489,19 @@ if (file_exists($file)) {
                                 'name' => $p['name'],
                             ]
                             );
+							
                         // In a few case, the parameter could not exist, in this case we create it
                         if (empty($param)) {
+							// Create rule entity 
+							$rule = $this->getDoctrine()
+											->getManager()
+											->getRepository(Rule::class)
+											->findOneBy([
+												'id' => $id,
+											]
+											);
                             $param = new RuleParam();
-                            $param->setRule($id);
+                            $param->setRule($rule);
                             $param->setName($p['name']);
                             $param->setValue($p['value']);
                         } else {

@@ -322,8 +322,8 @@ class jobcore  {
 		$job = $stmt->fetch(); // 1 row		
 		// Error if one job is still running
 		if (!empty($job)) {
-			// $this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
-			// return false;
+			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
+			return false;
 		}
 		// Create Job
 		$insertJob = $this->insertJob();
