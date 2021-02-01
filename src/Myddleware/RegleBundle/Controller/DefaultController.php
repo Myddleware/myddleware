@@ -1167,7 +1167,6 @@ class DefaultControllerCore extends Controller
                 foreach ($target['fields'] as $f) {
                     if (isset($f)) {
                         foreach ($f as $name_fields_target => $k) {
-
                             if (isset($k['champs'])) {
                                 $sourcesfields = array_merge($k['champs'], $sourcesfields);
                             } else {
@@ -1196,7 +1195,7 @@ class DefaultControllerCore extends Controller
                     $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
             }
- //URGENT TO DO : WHY IS THERE A REDIRECTION TOWARD INVALIDRECORD.HTML.TWIG DESPITE NOT INSERTING A QUERY ????           
+          
                 // Get result from AJAX request in regle.js 
                 $form = $request->request->all();
                 if(isset($form['query'])){
@@ -1204,7 +1203,7 @@ class DefaultControllerCore extends Controller
                 }
      
                 // Avoid sending query on specific record ID if the user didn't actually input something
-                if( empty($this->simulationQueryField) ){
+                if(empty($this->simulationQueryField)){
                     // Get source data
                     $source = $solution_source->read_last(array(
                         'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
@@ -1229,7 +1228,7 @@ class DefaultControllerCore extends Controller
             if (isset($source['done'])) {
                 $before = array();
                 $after = array();
-                if ($source['done']) {
+                if ($source['done']) {             
                     foreach ($target['fields'] as $f) {
                         foreach ($f as $name_fields_target => $k) {
                             $r['after'] = array();
@@ -1245,17 +1244,17 @@ class DefaultControllerCore extends Controller
 
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
-							// If error during transformation, we send back the error
-							if (
-									$r['after'][$name_fields_target] == null 
-								AND !empty($doc->getMessage())
-							) {
-								$r['after'][$name_fields_target] = $doc->getMessage();
-								// Refresh the document message
-								$doc->setMessage('');
-							}
+                            // If error during transformation, we send back the error
+                            if (
+                                    $r['after'][$name_fields_target] == null 
+                                AND !empty($doc->getMessage())
+                            ) {
+                                $r['after'][$name_fields_target] = $doc->getMessage();
+                                // Refresh the document message
+                                $doc->setMessage('');
+                            }
 
-							$k['fields'] = array();
+                            $k['fields'] = array();
                             if (empty($k['champs'])) {
                                 $k['fields']['Formula'] = ((isset($k['formule'][0]) ? $k['formule'][0] : ''));
                             } else {
@@ -2633,7 +2632,6 @@ class DefaultControllerCore extends Controller
     // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
     private function createListeParamsRule($fields, $formula, $params)
     {
-
         $phrase_placeholder = $this->get('translator')->trans('rule.step3.placeholder');
         $tab = array();
 
@@ -2671,7 +2669,6 @@ class DefaultControllerCore extends Controller
                 $tab['params'][$p['name']] = $p['value'];
             }
         }
-
         return $tab;
     }
 
