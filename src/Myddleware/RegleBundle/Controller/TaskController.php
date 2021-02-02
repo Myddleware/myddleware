@@ -24,15 +24,16 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\Controller;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Response;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Pagerfanta\Adapter\ArrayAdapter;
+use Exception;
 use Pagerfanta\Pagerfanta;
-use Pagerfanta\Exception\NotValidCurrentPageException;
-
+use Pagerfanta\Adapter\ArrayAdapter;
 use Myddleware\RegleBundle\Entity\Log;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
+
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class TaskController extends Controller
 {
@@ -76,7 +77,7 @@ class TaskController extends Controller
 	
 			// Infos de la tâche
 			$task = $em->getRepository('RegleBundle:Job')
-	                  ->findOneById($id);	
+					  ->find($id);
 
 			$compact = $this->nav_pagination(array(
 				'adapter_em_repository' => $em->getRepository('RegleBundle:Log')
