@@ -10,7 +10,7 @@ Di seguito trovi dei manuali dedicati a specifiche sezioni della vita di questo 
   segui queste istruzioni: [DEPLOYMENT.md](DEPLOYMENT.md)
 
 - Vuoi abilitare un VPN dedicata a Myddleware nella tua istanza,
-  segui queste istruzioni: [OPENVPN.md](OPENVPN.md)
+  segui queste istruzioni: [VPN.md](VPN.md)
 
 - Vuoi aggiornare un istanza di Myddleware precedentemente installata,
   segui queste istruzioni: [UPDATE.md](UPDATE.md)

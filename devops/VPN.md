@@ -1,4 +1,10 @@
-# Abilitare l'utilizzo di OpenVPN per accedere a myddleware
+# Abilitare l'utilizzo di VPN (OpenVPN) per accedere a myddleware
+
+Il primo passo è sempre quello di passare in modalità `debug` con il seguente comando
+
+```
+make debug
+```
 
 Prima bisogna valorizzare le seguenti variabili nel file `.env`
 
@@ -13,13 +19,13 @@ openvpn_port=...
 Adesso, seguire i seguenti comandi 
 
 ```
-docker-compose up -d
+docker-compose -f docker-compose.yml up -d --force-recreate vpn
 ```
 
 Fare l'inizializzazione del Server OpenVPN con i seguenti comandi
 
 ```
-docker-compose run --rm vpn set_passphrase
+docker-compose -f docker-compose.yml run --rm vpn set_passphrase
 ```
 
 Seguire la procedura inserendo la passphrase più opportuna tutte le volte che viene chiesta
@@ -29,7 +35,7 @@ istanze dei client VPN che dovranno connettersi, quindi prenderne e salvarla sul
 Adesso possiamo creare il primo client
 
 ```
-docker-compose exec vpn add_client NOMECLIENT
+docker-compose -f docker-compose.yml exec vpn add_client NOMECLIENT
 ```
 
 con questo comando sarà creato un client verranno chiesti una chiave segrata per lo specifico client e
@@ -40,7 +46,7 @@ Adesso possiamo generare il file `.ovpn` da inviare alla Workstastion o Server r
 Usare il seguente comando
 
 ```
-docker-compose exec vpn get_client NOMECLIENT > NOMECLIENT.ovpn
+docker-compose -f docker-compose.yml exec vpn get_client NOMECLIENT > NOMECLIENT.ovpn
 ```
 
 Consegnare il file appena creato e la chiava segreta dell'utente a chi opportuno.

@@ -71,6 +71,7 @@ uat.pem
 .env
 hosts
 NOTES.md
+*.ovpn
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php

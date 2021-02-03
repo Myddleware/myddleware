@@ -51,8 +51,8 @@ setup: setup-files setup-database
 logs: debug
 	@docker-compose logs -f myddleware
 
-debug: down
-	@docker-compose up -d --force-recreate
+debug: init
+	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 dev: down
 	@docker-compose run --rm myddleware rm -fr var/logs/vtigercrm.log

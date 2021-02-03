@@ -11,15 +11,9 @@ services:
       - phpmyadmin
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - ${phpmyadmin_port}:80
     environment:
-      - PMA_HOST=mysql
       - PMA_USER=root
       - PMA_PASSWORD=secret
-    links:
-      - mysql
 
   vtiger1:
     image: javanile/vtiger:7.1.0

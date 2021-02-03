@@ -31,6 +31,15 @@ services:
       - mysql:/var/lib/mysql:rw
     restart: 'always'
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin_port}:80
+    environment:
+      - PMA_HOST=mysql
+    links:
+      - mysql
+
   backup:
     image: databack/mysql-backup
     environment:
