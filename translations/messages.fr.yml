@@ -190,7 +190,7 @@ view_rule:
         save: Sauvegarder
         simule: Simuler Transferts
         result: Nombre de transferts estimé
-        details: Représente le nombre de tansferts qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
+        details: Représente le nombre de transferts qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
 
 rule:
     source: Source
