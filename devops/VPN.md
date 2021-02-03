@@ -19,6 +19,7 @@ openvpn_port=...
 Adesso, seguire i seguenti comandi 
 
 ```
+docker pull javanile/openvpn
 docker-compose -f docker-compose.yml up -d --force-recreate vpn
 ```
 
