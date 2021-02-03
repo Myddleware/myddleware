@@ -256,6 +256,10 @@ class jobcore  {
 		try{
 			// Création d'un fichier temporaire
 			$guid = uniqid();
+			// If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
+			if ($param[0] == 'cancel') {
+				$param[] = 'Y';
+			}
 			
 			// Formatage des paramètres
 			$params = implode(' ',$param);
@@ -287,7 +291,8 @@ class jobcore  {
 			
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');
-			$idJob = fread($file, 23);
+			// Massaction returns "1;" + the job ID
+			$idJob = substr(fread($file, 25), -23); 
 			fclose($file);
 			while (empty($idJob)) {
 				if($cpt >= 29) {
