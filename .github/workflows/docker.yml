@@ -19,5 +19,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: opencrmitalia-official/myddleware
+          repository: opencrmitalia-official/myddleware:latest
           tag_with_ref: true
