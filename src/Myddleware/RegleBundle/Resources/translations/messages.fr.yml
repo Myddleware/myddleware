@@ -109,7 +109,7 @@ create_rule:
             error: Une erreur est survenue 
             valid: Valider   
         relation:
-            empty: Aucune relation
+            empty: Aucune relation 
             select: Aucune règle
             source: Source
             target: Cible

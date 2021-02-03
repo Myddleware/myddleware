@@ -1795,7 +1795,6 @@ class DefaultControllerCore extends Controller
             $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 
             // ----------------
@@ -1947,8 +1946,8 @@ class DefaultControllerCore extends Controller
             // On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
             $this->em->flush();
             $sessionService->setRuleId($ruleKey, $oneRule->getId());
-            $nameRule = $oneRule->getNameSlug();
 
+            $nameRule = $oneRule->getNameSlug();
             // BEFORE SAVE rev 1.08 ----------------------
             $relationshipsBeforeSave = $request->request->get('relations');
             $before_save = RuleClass::beforeSave($this->container,
@@ -2037,6 +2036,7 @@ class DefaultControllerCore extends Controller
                 }
             } // Create mode
             else {
+             
                 if ($sessionService->isParamRuleSourceDateReference($ruleKey) && $sessionService->getParamRuleSourceDateReference($ruleKey)) {
                     $date_reference = date('Y-m-d 00:00:00');
                 } else {

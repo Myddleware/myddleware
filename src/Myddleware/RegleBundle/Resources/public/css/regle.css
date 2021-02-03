@@ -221,7 +221,7 @@ input[type="text"] {
 	overflow: auto;
 }
 
-
+/*  Manual rule simulation buttons and input */
 
 .manual-simulation, .simulation-buttons {
 	margin-top: 3vh;

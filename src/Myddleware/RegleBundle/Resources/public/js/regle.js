@@ -230,7 +230,7 @@ $( document ).ready(function() {
 		});
 		loading.attr('class', 'myd_div_loading');
 		
-		var p = $('<p>Please wait. This can take few minutes.</p>');
+		var p = $('<p>Please wait. This can take a few minutes.</p>');
 		p.css({
 			"position": "absolute",
 			"top": $(window).height()/2 - 100,
