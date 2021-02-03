@@ -4,9 +4,9 @@ all:
       working_dir: /home/ubuntu/myddleware
       ansible_host: myddleware-uat.opencrmitalia.com
       ansible_user: ubuntu
-      ansible_ssh_private_key_file: ./uat.pem
+      ansible_ssh_private_key_file: ~/.ssh/opencrmitalia/myddleware-uat
     prod:
       working_dir: /home/ubuntu/myddleware
-      ansible_host: myddleware-uat.opencrmitalia.com
+      ansible_host: 54.36.117.132
       ansible_user: ubuntu
-      ansible_ssh_private_key_file: ./uat.pem
+      ansible_ssh_private_key_file: ~/.ssh/opencrmitalia/ovh

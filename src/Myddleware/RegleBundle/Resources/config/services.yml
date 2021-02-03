@@ -75,6 +75,9 @@ services:
      myddleware_rule.vtigercrm:
          class: Myddleware\RegleBundle\Solutions\vtigercrm
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.opencrmitalia:
+         class: Myddleware\RegleBundle\Solutions\opencrmitalia
+         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.bittle:
          class: Myddleware\RegleBundle\Solutions\bittle
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]

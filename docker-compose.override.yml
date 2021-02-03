@@ -2,6 +2,25 @@ version: '2'
 
 services:
 
+  myddleware:
+    environment:
+      - VT_CLIENT_LOG_FILE=/var/www/html/var/logs/vtigercrm.log
+      - MYSQL_DATABASE=myddleware
+      - MYSQL_ROOT_PASSWORD=secret
+    links:
+      - phpmyadmin
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin_port}:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+    links:
+      - mysql
+
   vtiger1:
     image: javanile/vtiger:7.1.0
     ports:
@@ -21,6 +40,17 @@ services:
       - MYSQL_ROOT_PASSWORD=secret
     volumes:
       - mysql1:/var/lib/mysql:rw
+
+  phpmyadmin1:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin1_port}:80
+    environment:
+      - PMA_HOST=mysql1
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+    links:
+      - mysql1
 
   vtiger2:
     image: javanile/vtiger:7.1.0
@@ -42,6 +72,31 @@ services:
     volumes:
       - mysql2:/var/lib/mysql:rw
 
+  phpmyadmin2:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin2_port}:80
+    environment:
+      - PMA_HOST=mysql2
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+    links:
+      - mysql2
+
+  mssql:
+    image: javanile/mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Secret.1234!
+    volumes:
+      - mssql:/var/opt/mssql/data
+
+  adminer:
+    image: adminer
+    ports:
+      - ${adminer_port}:8080
+
 volumes:
   mysql1:
   mysql2:
+  mssql:
