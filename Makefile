@@ -28,10 +28,12 @@ build:
 
 install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
+	@echo "Install done."
 
 update: init build up
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/* vendor
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
+	@echo "Update done."
 
 require-vtiger-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.21 -vvvv --ignore-platform-reqs
@@ -49,8 +51,8 @@ setup: setup-files setup-database
 logs: debug
 	@docker-compose logs -f myddleware
 
-debug: init down
-	@docker-compose up -d --force-recreate
+debug: init
+	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 dev: down
 	@docker-compose run --rm myddleware rm -fr var/logs/vtigercrm.log

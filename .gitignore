@@ -64,11 +64,14 @@ uat.pem
 /*.retry
 /CLONE/
 /var/databases/filebrowser.db
+/var/openvpn/*
+!var/openvpn/.gitkeep
 
 # Secrets
 .env
 hosts
 NOTES.md
+*.ovpn
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php

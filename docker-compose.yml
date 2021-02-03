@@ -31,6 +31,15 @@ services:
       - mysql:/var/lib/mysql:rw
     restart: 'always'
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - ${phpmyadmin_port}:80
+    environment:
+      - PMA_HOST=mysql
+    links:
+      - mysql
+
   backup:
     image: databack/mysql-backup
     environment:
@@ -48,13 +57,28 @@ services:
   filebrowser:
     image: filebrowser/filebrowser
     ports:
-      - ${filebrowser_port}:30090
+      - "${filebrowser_port}:30090"
     volumes:
       - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
       - ./var/logs:/srv/Logs
       - ./var/databases/filebrowser.db:/database.db
       - ./.filebrowser.json:/.filebrowser.json
     restart: 'always'
+
+  vpn:
+    image: javanile/openvpn
+    tty: true
+    stdin_open: true
+    environment:
+      - EXTERNAL_ADDRESS=${external_address}
+      - CLIENT_FORWARD=${vpn_client_forward}
+    ports:
+      - "${openvpn_port}:${openvpn_port}/udp"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./var/openvpn:/etc/openvpn
+    restart: always
 
 volumes:
   mysql:
