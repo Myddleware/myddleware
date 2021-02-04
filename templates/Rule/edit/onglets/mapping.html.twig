@@ -31,33 +31,30 @@
 	<p>{{'view_rule.mapping.module_source'|trans}} : {{ rule.getModuleSource }}<p>
 </div>
 <div class="clr"></div>
+<div class="mapping-container">
+			{% if fields %}
+				{% for c, f in fields %}
+					<div class="card">
+						<div class="card-body">
+							{#<span class="glyphicon glyphicon-star">{{ f.getTarget }}</span>#}
+							<h4  class="card-title">{{ f.getTarget }}</h4>
+							<p class="card-text">
+									<p class="mapped-fields card-text">{{ f.getSource }} </p>
+									{% if f.getFormula %}
+										<p class="mapped-formula card-text">{{'view_rule.mapping.formula'|trans}} : {{ f.getFormula }} </p>
+									{% else %}
+										<p class="mapped-formula card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
+									{% endif %}
+							</p> 
+						</div> 
+					</div>
+				{% endfor %}
+					<div class="clr"></div>
 
-{% if fields %}
-	{% for c, f in fields %}
-		<div class="mapping gray">
-			<div data-title="gray" class="title"> 
-				{#<span class="glyphicon glyphicon-star">{{ f.getTarget }}</span>#}
-				{{ f.getTarget }}
-			</div>
-			<div class="fields">	
-				<div>
-					<p class="field">{{ f.getSource }} </p>
-
-					{% if f.getFormula %}
-						<p class="formula">{{'view_rule.mapping.formula'|trans}} : {{ f.getFormula }} </p>
-					{% else %}
-						<p class="formula">{{'view_rule.mapping.formula_empty'|trans}}</p>
-					{% endif %}
-				</div>
-			</div> 
-		</div> 
-	{% endfor %}
-		<div class="clr"></div>
-
-{% else %}
-	<div>{{'view_rule.mapping.empty'|trans}}</div>
-{% endif %}
-
+			{% else %}
+				<div>{{'view_rule.mapping.empty'|trans}}</div>
+			{% endif %}
+</div>
 <div id="help-content-mapping" class="help-content">
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
 	<p>{{'help.viewrule.mapping'|trans|raw}}</p>

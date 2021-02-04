@@ -290,3 +290,36 @@ td a {
 	max-width: 250px;
 	margin-bottom: 5px;
 }
+
+/* Page View rule : mapping tab */
+.mapping-container {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding: 50px;
+}
+
+.card {
+	border: solid 1px #c3c3c3;
+	min-width: 20vw;
+	max-width: 20vw;
+	text-align: center;
+	margin-bottom: 10px;
+	box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
+}
+
+.card-title {
+	background-color: #CCC31C;
+	min-height: 30px;
+	margin: 10px;
+	line-height: 30px;
+	font-weight: bold;
+}
+
+.mapped-fields{
+	color: #CCC31C;
+}
+
+.mapped-formula {
+	color: #0F66A9;
+}

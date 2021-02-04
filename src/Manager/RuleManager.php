@@ -816,7 +816,6 @@ class rulecore
 			case 'ERROR':
 				return $this->runMyddlewareJob("ERROR");
 				break;
-				// rajouter synchro etc en param de runMyddleWareJob()
 			case 'runMyddlewareJob':
 				return $this->runMyddlewareJob($this->rule['name_slug'], $jobName);
 				break;
@@ -1017,11 +1016,17 @@ class rulecore
 			// create temp file
 			$guid = uniqid();
 			
-			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->parameterBagInterface->get('php');
-			if (empty($php['executable'])) {
-				$php['executable'] = 'php';
-			}
+			// // récupération de l'exécutable PHP, par défaut c'est php
+			// $php = $this->parameterBagInterface->get('php');
+			// if (empty($php['executable'])) {
+			// 	$php['executable'] = 'php';
+			// }
+
+
+			 //get ..\bin\php\php.exe file
+			 $phpBinaryFinder = new PhpExecutableFinder();
+			 $phpBinaryPath = $phpBinaryFinder->find();
+			 $php = $phpBinaryPath;
 			
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
@@ -1030,15 +1035,18 @@ class rulecore
 			} catch (IOException $e) {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
-			
+			 //get ..\bin\php\php.exe file
+			 $phpBinaryFinder = new PhpExecutableFinder();
+			 $phpBinaryPath = $phpBinaryFinder->find();
+			 $php = $phpBinaryPath;
 			//if user clicked on cancel all transfers of a rule
 			if($event === 'cancelDocumentJob'){
-				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:massaction cancel rule '.$this->ruleId.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:massaction cancel rule '.$this->ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
 			//if user clicked on delete all transfers from a rule
 			} elseif ($event === 'deleteDocumentJob') {
-				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:massaction remove rule '.$this->ruleId.' Y --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:massaction remove rule '.$this->ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
 			} else {
-				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$this->ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
 			}
 
 			$cpt = 0;
@@ -1070,13 +1078,14 @@ class rulecore
 			$result = explode(';',$firstLine);
 			// Renvoie du message en session
 			if ($result[0]) {
-				$session->set('info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>trim($result[1]))).'" target="blank_">'.$this->tools->getTranslation(array('messages', 'rule', 'open_running_task')).'</a>.'));
+				$session->set('info', array('<a href="'.$this->router->generate('task_view', array('id'=>trim($result[1]))).'" target="blank_">'.$this->tools->getTranslation(array('messages', 'rule', 'open_running_task')).'</a>.'));
 			}
 			else {
-				$session->set('error', array($result[1].(!empty($result[2]) ? '<a href="'.$this->container->get('router')->generate('task_view', array('id'=>trim($result[2]))).'" target="blank_">'.$this->tools->getTranslation(array('messages', 'rule', 'open_running_task')).'</a>' : '')));
+				$session->set('error', array($result[1].(!empty($result[2]) ? '<a href="'.$this->router->generate('task_view', array('id'=>trim($result[2]))).'" target="blank_">'.$this->tools->getTranslation(array('messages', 'rule', 'open_running_task')).'</a>' : '')));
 			}
 			return $result[0];
 		} catch (\Exception $e) {
+		
 			$session = new Session();
 			$session->set( 'error', array($e->getMessage())); 
 			return false;
