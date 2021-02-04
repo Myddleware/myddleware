@@ -328,6 +328,6 @@ td a {
 
 /* Page View Rule List  */
 
-.solution_block {
+.solution_block, .CRUD-icons, .creation-date {
 	text-align: center!important;
 }
