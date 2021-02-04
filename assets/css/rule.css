@@ -500,3 +500,11 @@
 #rule_mapping .rule_arrow_left:hover, #rule_mapping .rule_arrow_right:hover {
 	cursor: pointer;
 }
+
+/* Update SF4 */
+
+/* Connector list page */
+
+.connector-table-list{
+	margin-bottom: 50px;
+}

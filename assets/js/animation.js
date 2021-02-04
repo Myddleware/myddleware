@@ -22,8 +22,11 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-$(document).ready(function() {
+$(function() {
 	
+	$('.rule-create-submit').hide();
+
+
 	// Initialisation des progressBar (à leurs positions initiales)
     progressBar(0, $('#animation-Bar1'), 0);
     progressBar(0, $('#animation-Bar2'), 0);
@@ -52,7 +55,7 @@ $(document).ready(function() {
     $(".animation-content-left-toggle-btn").one('click', content_left_toggle);
     $(".animation-content-right-toggle-btn").one('click', content_right_toggle);  
     
-    $('#btn_validation').click(function(){
+    $('#btn_validation').on('click', function(){
     	animValidation();
     });    
     
@@ -72,12 +75,12 @@ $(document).ready(function() {
 	 addModule('cible');
 	 
 	 // Contrôle le nom de la règle
-	 $( '#rulename' ).keyup(function() {
+	 $( '#rulename' ).on('keyup', function() {
 	 	controleRuleName($(this).val());
 	 });
 	 	  
 	 // Traitement bouton choix
-	 $('button','#choice').click(function(){
+	 $('button','#choice').on('click', function(){
 	 	
 	 	choice = $(this).attr('id');
 	 	
@@ -87,14 +90,15 @@ $(document).ready(function() {
 	 		$('#btn_template').attr('class','btn btn-default');
 	 		
 	 		$('#module').fadeIn(1000);	
-	 		$('#template').fadeOut(1000);	
+			$('#template').fadeOut(1000);	 
+			$('.rule-create-submit').show();
 	 		$('#btn_validation').html(trans_btn_mapping);
 	 	}
 	 	else if(choice == 'btn_template') {
 	 		
 	 		$(this).attr('class','btn btn-primary');
 	 		$('#btn_module').attr('class','btn btn-default');	 		
-	 		
+			$('.rule-create-submit').hide();
 	 		$('#template').fadeIn(1000);	
 	 		$('#module').fadeOut(1000);	
 	 		$('#submodules').fadeOut(1000);	
@@ -257,11 +261,11 @@ function gray() {
 	listenSolution();
     
 	// Fade image 
-	$('.grayout').mouseout(function(){
+	$('.grayout').on('mouseout', function(){
 		//$(this).parent().find('img:first').stop().animate({opacity:1}, 1000);
 		$(this).stop().animate({opacity:0}, 1000);
 	})
-	$('.grayout').mouseover(function(){
+	$('.grayout').on('mouseover', function(){
 		$(this).parent().find('img:first').stop().animate({opacity:1}, 1000);
 	});    
     	

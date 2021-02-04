@@ -69,8 +69,8 @@
 /* Updates after SF4 upgrade */
 
 /* Inputs */
-.liste_solution, input {
-	box-shadow: 5px 2px 2px #c3c3c3;
+.liste_solution, input, select {
+	box-shadow: 2px 2px 2px rgba(0,0,0,0.1);
 	border: 1px solid #c3c3c3;
 }
 
@@ -82,9 +82,3 @@
 
 }
 
-/* Attention si activé, perturbe l'affichage des onglets sur la création de règles,
-mais on a quand meme besoin de trouver une solution pour la création de connecteur  */
-/* #tabs ul.ui-widget-header li {
-	/* min-width: 100%; */
-	/* border: none; */
-/* } */
