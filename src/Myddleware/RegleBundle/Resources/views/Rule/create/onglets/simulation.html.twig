@@ -25,14 +25,46 @@
 <div class="link-help right">
 	<a href="#help-content-simulation"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
 </div>
-<div align="center">
-	<div id="validation_simulation" class="btn-mydinv">
-		<span class="glyphicon glyphicon-refresh"></span>
-		{{ 'create_rule.step3.data'|trans }}
+<div align="center" id="simulation-params" class="container">
+	<div class="row">
+		<div class="col">
+				<div id="manual-simulation-container">
+					<div class="row align-items-center manual-simulation">
+						<div class="col manual-input">
+							<label for="select-record-id">{{'create_rule.step3.manual_data_simulation_choose_id'|trans }} :</label>
+						</div>	
+						<div class="col manual-input">
+							<input type="text" id="select-record-id" name="select-record-id" value="{{ simulationQueryField }}" aria-describedby="selectRecordIDHelp" class="form-control" placeholder="example: 5">
+							<small id="selectRecordIDHelp" class="form-text text-muted">{{ 'create_rule.step3.manual_data_simulation_help_text'|trans}}</small>
+						</div>
+						<div class="col">
+							<div class="simulation-button">
+								<button   id="validation_manual_simulation"  class="btn btn-success mb-2">	
+									 <span class="glyphicon glyphicon-refresh"></span>
+									{{ 'create_rule.step3.data_manual'|trans }}
+								</button>   
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="simulation-buttons">
+					<div class="row">
+						<div class="col">
+							<div  class="simulation-button">
+								<button class="btn btn-success mb-2" id="validation_simulation">	
+									<span class="glyphicon glyphicon-refresh"></span>
+										{{ 'create_rule.step3.data'|trans }}
+								</button>   
+								
+							</div>
+						</div>
+					</div>
+				</div>
+		</div>
 	</div>
+</div>
 	<div class="clr"></div>
 	<div id="simulation_tab"></div>
-</div>
 <div class="clr"></div>
 <div id="help-content-simulation" class="help-content">
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
@@ -42,4 +74,8 @@
 {# ------------- PARAMETRES JQUERY ------------- #}
 <script type="text/javascript">
     var path_simulation = "{{ path('regle_simulation') }}";
+	var select_record_id = document.getElementById('select-record-id');
+	var validation_manual_simulation = document.getElementById('validation_manual_simulation');
+
+	
 </script>

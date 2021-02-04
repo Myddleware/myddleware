@@ -71,8 +71,7 @@ class massActionCommand extends ContainerAwareCommand
 			$job->setApi($api);				
 			
 			if ($job->initJob('Mass '.$action.' on data type '.$dataType)) {
-				$output->writeln( $job->id );  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
-			
+				$output->writeln( '1;'.$job->id );  // Do not remove, used for manual job and webservices (display logs)
 				// Récupération des paramètres
 				if (!in_array($action, array('rerun', 'cancel', 'remove', 'restore', 'changeStatus'))) {
 					throw new \Exception ('Action '.$action.' unknown. Please use action rerun, cancel or remove.');

@@ -21,7 +21,6 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
-
 {% if data_source %}
 	<div class="left middle">
 		<div align="center">
@@ -32,8 +31,7 @@
 			<ul id="simulate_list">
 				{% for i,data in before %}
 				<li>
-
-					{% for field,value in data %}						
+					{% for field,value in data %}					
 						<span class="glyphicon glyphicon-tag"></span> {{ field }}
 						{% if value is empty %}
 						<span class="value">( {{ 'create_rule.step3.empty_field_simulate'|trans }} )</span>

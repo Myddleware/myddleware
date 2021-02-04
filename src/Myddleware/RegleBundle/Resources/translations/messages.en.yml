@@ -70,7 +70,11 @@ create_rule:
         empty_fields_target: No field found in the target
         empty_simulate: 'There is no data in the source server or fields in the target solution'
         empty_field_simulate: Empty content
-        data: Test data
+        data: Simple simulation
+        data_manual: Manual simulation
+        manual_data_simulation_choose_id: Choose a specific record id to run simulation
+        manual_data_simulation_help_text: If you'd rather run a standard simulation, click on the default 'Test rule' button
+        manual_data_simulation_no_id: Please insert a valid record ID if you want to run a manual simulation
         infobulle: Double click to remove
         previous: Previous step
         next: Next step        
@@ -294,6 +298,8 @@ list_flux:
         mass_cancel_confirm: Cancel the selected transfers?
         reload: Reload transfers
         mass_reload_confirm: Reload the selected transfers?   
+        delete: Delete transfers
+        mass_delete_confirm: Delete the selected transfers?
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date

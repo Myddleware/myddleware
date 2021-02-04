@@ -70,7 +70,11 @@ create_rule:
         empty_fields_target: Aucun champ trouvé dans cible
         empty_simulate: Attention il n'existe pas de donnée dans le serveur source ou de champs dans la solution cible
         empty_field_simulate: Contenu vide
-        data: Tester les données
+        data: Simulation simple
+        data_manual: Simulation manuelle
+        manual_data_simulation_choose_id: Indiquez l'identifiant d'une entrée spécifique pour la simulation
+        manual_data_simulation_help_text: Si vous préférez lancer une simulation simple, cliquez sur 'Simulation simple'
+        manual_data_simulation_no_id: Veuillez insérer un identifiant valide ou cliquer sur 'Simulation simple'
         infobulle: Double clic pour effacer
         previous: Etape précédente
         next: Etape suivante
@@ -105,7 +109,7 @@ create_rule:
             error: Une erreur est survenue 
             valid: Valider   
         relation:
-            empty: Aucune relation
+            empty: Aucune relation 
             select: Aucune règle
             source: Source
             target: Cible
@@ -295,8 +299,10 @@ list_flux:
         mass_cancel_confirm: Annuler les transferts sélectionnés ?
         reload: Relancer les transferts
         mass_reload_confirm: Relancer les transferts selectionnés ?
+        delete: Supprimer transferts
+        mass_delete_confirm: Supprimer les transferts sélectionnés ?
     filter:
-        delete_confirm: Êtes-vous sûre de vouloir effacer les filtres de recherche ?
+        delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
         date_modified: Date de modification
         rule: Règle
