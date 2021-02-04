@@ -112,6 +112,7 @@
 .solution_block {	
 	width: 200px;
 	height: 64px auto;
+	text-align: center!important;
 }
 
 .listepager .off td {
@@ -322,4 +323,11 @@ td a {
 
 .mapped-formula {
 	color: #0F66A9;
+}
+
+
+/* Page View Rule List  */
+
+.solution_block {
+	text-align: center!important;
 }

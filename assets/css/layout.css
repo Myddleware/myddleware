@@ -269,3 +269,19 @@ footer {
 	margin: 10px 0px;
 	float:right;
 }
+
+/* Update SF4 */
+
+/* Page Create connector */
+
+.create-connector-tab {
+	min-width: 100%!important;
+	max-width: 100%!important;
+	width: 100%;
+	text-align: center;
+	align-items: center;
+}
+
+.create-connector-tab a {
+	width: 100%;
+}
