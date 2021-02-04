@@ -23,7 +23,6 @@
 *********************************************************************************/
 
 $(function() {
-	console.log('test');
 	if($('#task_status','#task').attr('name') != "End"){
 		// Sauvegarde du connecteur
 		$('#task_refresh','#task').on('click', function(){	

@@ -2338,7 +2338,6 @@ if (file_exists($file)) {
                     $countTypeDoc[] = [$value['global_status'], (int) $value['nb']];
                 }
             }
-
             return $this->json($countTypeDoc);
         }
 
@@ -2357,7 +2356,6 @@ if (file_exists($file)) {
                     $countTransferRule[] = [$value['name'], (int) $value['nb']];
                 }
             }
-
             return $this->json($countTransferRule);
         }
 

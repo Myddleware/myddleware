@@ -22,15 +22,15 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(drawChart);
+google.charts.load("visualization", "1", {packages:["corechart"]});
+google.charts.setOnLoadCallback(drawChart);
 function drawChart() {
 	if ($('#pie_chart_error_doc').length) {
 		$.ajax({
 			type: "POST",
 			url: Routing.generate('graph_type_error_doc'),
 			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(JSON.parse(dataServ));
+				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
 				};
@@ -46,7 +46,8 @@ function drawChart() {
 			type: "POST",
 			url: Routing.generate('graph_type_transfer_rule'),
 			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(JSON.parse(dataServ));
+				
+				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
 				};
@@ -61,7 +62,8 @@ function drawChart() {
 			type: "POST",
 			url: Routing.generate('graph_type_transfer_histo'),
 			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(JSON.parse(dataServ));
+				
+				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
 					isStacked: true,
@@ -78,7 +80,8 @@ function drawChart() {
 			type: "POST",
 			url: Routing.generate('graph_type_job_histo'),
 			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(JSON.parse(dataServ));
+				
+				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
 					isStacked: true,
@@ -92,7 +95,7 @@ function drawChart() {
 }    
 //--------------
 
-$( document ).ready(function() {
+$(function()  {
 	if($('#listing-solutions','#panel').length != 0) {
 		$('#listing-solutions','#panel').scrollbox({
 			direction: 'h',
