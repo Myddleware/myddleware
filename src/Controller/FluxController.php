@@ -587,6 +587,9 @@ if (file_exists($file)) {
                 ]
                 );
             } catch (Exception $e) {
+                // var_dump($e->getMessage());
+                var_dump($e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine());
+                die();
                 return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
                 exit;
             }
