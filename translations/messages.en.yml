@@ -27,17 +27,17 @@ panel:
         title: Start by connecting these applications
         click: Click to see how to create this connector.
     graph_tranfer_rule:
-        desc: Transfer sent by rule
+        desc: document sent by rule
     graph_error:
-        title: Number of transfers by statut
+        title: Number of documents by status
     list_error:
         nb: Number of errors by rule
     list_job:
         title: Last jobs details
         duration: second(s)
-        nb : Data transfers with error
+        nb : Documents with error
     graph_histo:
-        title: Transfer historic
+        title: document historic
     graph_job_histo:
         title: Job historic
 create_rule:
@@ -112,7 +112,7 @@ create_rule:
             rule: Rules
             fields: Fields source
             parent_detail_view: Parent
-            parent: Parent relationship to merge several data transfers
+            parent: Parent relationship to merge several data documents
             record_id: Record ID
             yes: Yes
         params:
@@ -139,13 +139,13 @@ view_rule:
         exec_all: Execute all active rules
         confirm_exec_all: Do you want to execute all active rules?
         exec_error: Rerun all errors
-        confirm_exec_error: Do you want to rerun all transfers in error?
+        confirm_exec_error: Do you want to rerun all documents in error?
         exec_rule: Run the rule
         edit_rule: Edit the rule
         confirm_edit_rule: Do you want to change this rule?
         delete_rule: Delete the rule
         confirm_delete_rule: Do you want to delete this rule?
-        displayflux: Display the transfers
+        displayflux: Display the documents
         new_rule: Create a new rule
     tabs:
         info: Information
@@ -187,9 +187,9 @@ view_rule:
         empty: No filter
     params:
         save: Save
-        simule: Simulate Transfers
-        result: Estimated transfers
-        details: " Represents the number of transfers that will be created for the next lunch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
+        simule: Simulate documents
+        result: Estimated documents
+        details: " Represents the number of documents that will be created for the next lunch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
 
 rule:
     source: Source
@@ -285,15 +285,15 @@ view_connector:
 list_flux:
     start: Start
     end: End
-    total: Number of transfers
-    empty: No transfer found
+    total: Number of documents
+    empty: No document found
     btn:
         filter: Filter
         filter_delete: Delete the research filters
-        cancel: Cancel transfers
-        mass_cancel_confirm: Cancel the selected transfers?
-        reload: Reload transfers
-        mass_reload_confirm: Reload the selected transfers?   
+        cancel: Cancel documents
+        mass_cancel_confirm: Cancel the selected documents?
+        reload: Reload documents
+        mass_reload_confirm: Reload the selected documents?   
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date
@@ -306,7 +306,7 @@ list_flux:
         target_id: Target id
         confirm: Filter
         name: Name
-        content: Transfer content
+        content: document content
         source_content: Source
         target_content: Target
     tab:
@@ -363,14 +363,14 @@ view_flux:
     history: History
     id: Id
     nblogs: Number of logs
-    nbChildDocuments: Child transfers
-    nbParentDocuments: Parent transfers
-    nbHistoryDocuments: History transfers
-    nbPostDocuments: Post transfers    
+    nbChildDocuments: Child documents
+    nbParentDocuments: Parent documents
+    nbHistoryDocuments: History documents
+    nbPostDocuments: Post documents    
     direct_link: Direct link    
     btn:
-        reload: Reload the transfer
-        cancel: Cancel the transfer 
+        reload: Reload the document
+        cancel: Cancel the document 
         readrecord: Run the same record
     header:
         rule: Rule
@@ -423,7 +423,7 @@ view_task:
     log:
         id: Id
         ref: Reference
-        transfer: Transfer
+        transfer: document
         date_created: Creation date
         type: Type
         msg: Message         
@@ -548,10 +548,10 @@ error:
         target_module_connect: Target module connection error
         target_module_all: Target module error
         target_module_load_list: Target modules loading error
-        edit_document_error_open: Failed to edit the rule because there is at least one transfer open or in error in this rule. Close or cancel these transfers to be able to edit this rule.
-        edit_document_error_open_admin: There is at least one transfer open or in error in this rule. We advise you to manage these transfers before editing this rule.
+        edit_document_error_open: Failed to edit the rule because there is at least one document open or in error in this rule. Close or cancel these documents to be able to edit this rule.
+        edit_document_error_open_admin: There is at least one document open or in error in this rule. We advise you to manage these documents before editing this rule.
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
-        delete_document: Failed to delete the rule because there is at least one data transfer not deleted on this rule. Remove these transfers to be able to delete this rule.
+        delete_document: Failed to delete the rule because there is at least one document not deleted on this rule. Remove these documents to be able to delete this rule.
         delete_relationship_exists: "Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  "
         update: Failed to edit the rule.  
     account:
@@ -561,7 +561,7 @@ error:
     connector:
         remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
     document:
-        deleted_flag: This data transfer is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
+        deleted_flag: This document is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
         
 title:
     account:
@@ -579,8 +579,8 @@ title:
         edit: Editing the connector
         list: Connectors list
     flux: 
-        list: Transfers list
-        view: Transfer form
+        list: documents list
+        view: document form
     task:
         list: Tasks list
         view: The task form
@@ -601,7 +601,7 @@ menu:
         create: Creation
         list: List
     flux:
-        title: Transfers
+        title: Documents
         list: List         
     job:
         title: Tasks
@@ -610,7 +610,7 @@ menu:
 
 breadcrumb:
     rule_list: Rules list
-    transfert_list: Transfers list
+    transfert_list: Documents list
     task_list: Tasks list
     connector_list: Connectors list
 
@@ -686,10 +686,10 @@ messages:
 email_notification:
     subject: Myddleware notification
     hello: Hi, 
-    introduction: "Here the statistics about your data transfer with Myddleware: "
-    transfer_success: "- Data tranfers successfully sent: "
-    transfer_error: "- Data tranfers in error: "
-    transfer_open: "- Data tranfers open:"
+    introduction: "Here the statistics about your data transfers with Myddleware: "
+    transfer_success: "- Documents successfully sent: "
+    transfer_error: "- Documents in error: "
+    transfer_open: "- Documents still open:"
     active_rule: "Active rules: "
     no_active_rule: No active rule in Myddleware.
     100_first_erros: "Here the 100 first errors: "

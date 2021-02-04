@@ -27,17 +27,17 @@ panel:
         title: Connectez dès à présent ces différentes solutions
         click: Cliquez pour savoir comment créer ce connecteur.
     graph_tranfer_rule:
-        desc: Tranferts envoyés par règle
+        desc: Documents envoyés par règle
     graph_error:
-        title: Nombre de transferts par statut
+        title: Nombre de documents par statut
     list_error:
         nb: Nombre d'erreurs par règle
     list_job:
         title: Détail des derniers jobs
         duration: seconde(s)
-        nb : Transferts de données en erreur
+        nb : Documents en erreur
     graph_histo:
-        title: Historique des transferts
+        title: Historique des documents
     graph_job_histo:
         title: Historique des jobs
 create_rule:
@@ -112,7 +112,7 @@ create_rule:
             rule: Règles
             fields: Champs source
             parent_detail_view: Parent
-            parent: "Relation parent : fusion de plusieurs transferts de données"
+            parent: "Relation parent : fusion de plusieurs documents"
             record_id: ID enregistrement
             yes: Oui
         params:
@@ -139,13 +139,13 @@ view_rule:
         exec_all: Exéc. les règles actives
         confirm_exec_all: Souhaitez-vous exécuter toutes les règles actives ?
         exec_error: Relancer les erreurs
-        confirm_exec_error: Souhaitez-vous relancer tous les transferts en erreur ?
+        confirm_exec_error: Souhaitez-vous relancer tous les documents en erreur ?
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
-        displayflux: Voir les transferts
+        displayflux: Voir les documents
         new_rule: Créer une règle
     tabs:
         info: Informations
@@ -188,9 +188,9 @@ view_rule:
 
     params:
         save: Sauvegarder
-        simule: Simuler Transferts
-        result: Nombre de transferts estimé
-        details: Représente le nombre de transferts qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
+        simule: Simuler documents
+        result: Nombre de documents estimé
+        details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
 
 rule:
     source: Source
@@ -286,15 +286,15 @@ view_connector:
 list_flux:
     start: Début
     end: Fin
-    total: Nombre de transferts
-    empty: Aucun transfert trouvé
+    total: Nombre de documents
+    empty: Aucun document trouvé
     btn:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
-        cancel: Annuler les transferts
-        mass_cancel_confirm: Annuler les transferts sélectionnés ?
-        reload: Relancer les transferts
-        mass_reload_confirm: Relancer les transferts selectionnés ?
+        cancel: Annuler les documents
+        mass_cancel_confirm: Annuler les documents sélectionnés ?
+        reload: Relancer les documents
+        mass_reload_confirm: Relancer les documents selectionnés ?
     filter:
         delete_confirm: Êtes-vous sûre de vouloir effacer les filtres de recherche ?
         date_created: Date de création
@@ -307,7 +307,7 @@ list_flux:
         target_id: Id cible
         confirm: Filtrer
         name: Nom
-        content: Contenu du transfer
+        content: Contenu du document
         source_content: Source
         target_content: Target
     tab:
@@ -366,12 +366,12 @@ view_flux:
     nblogs: Nombre de logs
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
-    nbHistoryDocuments: Historique des transferts
+    nbHistoryDocuments: Historique des documents
     nbPostDocuments: Tranferts post
     direct_link: Lien direct  
     btn:
-        reload: Relancer le transfert
-        cancel: Annuler le transfert 
+        reload: Relancer le document
+        cancel: Annuler le document 
         readrecord: Lancer la même donnée 
     header:
         rule: Règle
@@ -424,7 +424,7 @@ view_task:
     log:
         id: Id
         ref: Référence
-        transfer: Transfert
+        transfer: Document
         date_created: Date de création
         type: Type
         msg: Message         
@@ -516,7 +516,7 @@ solution:
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
         active: Activation
-        delete: Suppression de données (délais de suppression des données des documents dans Myddleware) 
+        delete: Suppression de données (délais de suppression des documents dans Myddleware) 
         activate: Activé
         desactivate: Désactivé
         description: Description
@@ -549,10 +549,10 @@ error:
         target_module_connect: Erreur de connexion du module cible
         target_module_all: Erreur du module cible
         target_module_load_list: Erreur de chargement des modules cible
-        edit_document_error_open: Impossible d'éditer la règle car au moins un transfert est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces transferts pour pouvoir éditer cette règle.
-        edit_document_error_open_admin: Au moins un transfert est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces transferts avant d'éditer la règle.
+        edit_document_error_open: Impossible d'éditer la règle car au moins un document est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces documents pour pouvoir éditer cette règle.
+        edit_document_error_open_admin: Au moins un document est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces documents avant d'éditer la règle.
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
-        delete_document: Impossible de supprimer la règle car au moins un transfert de données existe sur cette règle. Veuillez supprimer ces transferts pour pouvoir supprimer cette règle.
+        delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
         delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
         update: Impossible d'éditer la règle. 
     account:
@@ -580,8 +580,8 @@ title:
         edit: Edition du connecteur
         list: Liste des connecteurs
     flux: 
-        list: Liste des transferts
-        view: Fiche du transfert
+        list: Liste des documents
+        view: Fiche du document
     task:
         list: Liste des tâches
         view: Fiche de la tâche
@@ -602,7 +602,7 @@ menu:
         create: Création
         list: Liste
     flux:
-        title: Transferts
+        title: Documents
         list: Liste         
     job:
         title: Tâches
@@ -611,7 +611,7 @@ menu:
         
 breadcrumb:
     rule_list: Liste des règles
-    transfert_list: Liste des transferts
+    transfert_list: Liste des documents
     task_list: Liste des tâches
     connector_list: Liste des connecteurs
                                 
@@ -688,10 +688,10 @@ messages:
 email_notification:
     subject: Notification Myddleware
     hello: Bonjour, 
-    introduction: "Voici les statistiques concernant vos transferts de données avec la solution Myddleware:"
-    transfer_success: "- Nombre de tranferts envoyés avec succès: "
-    transfer_error: "- Nombre de tranferts en erreur: "
-    transfer_open: "- Nombre de tranferts ouverts: "
+    introduction: "Voici les statistiques concernant vos documents avec la solution Myddleware:"
+    transfer_success: "- Nombre de documents envoyés avec succès: "
+    transfer_error: "- Nombre de documents en erreur: "
+    transfer_open: "- Nombre de documents ouverts: "
     active_rule: "Vos règles actives dans Myddleware sont: "
     no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
     100_first_erros: "Voici les 100 premières erreurs: "
