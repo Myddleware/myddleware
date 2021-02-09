@@ -27,6 +27,7 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Javanile\VtigerClient\VtigerClient;
+use phpDocumentor\Reflection\Utils;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -372,6 +373,7 @@ class vtigercrmcore extends solution
         $excludeFields = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
         $excludeFields = $excludeFields[$type] ?? $excludeFields['default'];
         $requiredFields = $this->force_required_module_fields[$module] ?? [];
+
         foreach ($describe['result']['fields'] as $field) {
             if (in_array($field['name'], $excludeFields)) {
                 continue;
@@ -432,67 +434,19 @@ class vtigercrmcore extends solution
         }
 
         try {
-
             if (empty($this->moduleList)) {
                 $this->setAllModulesPrefix();
             }
 
-			$param['field'] = $this->cleanMyddlewareElementId($param['field'] ?? []);
-			$baseFields = [];
-			foreach ($param['fields'] as $field) {
-                if (!preg_match('/__/', $field)) {
-                    $baseFields[] = $field;
-                }
-            }
-            $queryParam = implode(',', $baseFields ?? "") ?: '*';
-			$where = '';
-			if (!empty($param['query'])) {
-				$where = [];
-				foreach ($param['query'] as $key => $item) {
-					$where[] = "$key = '$item'";
-				}
-				$where = "WHERE " . implode(" AND ", $where);
-			}
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields'] ?? []);
+            $baseFields = $this->cleanVtigerRelatedRecordFields($param['fields']);
+
+			$queryParam = implode(',', $baseFields ?? "") ?: '*';
+            $where = $this->getVtigerWhereCondition($param);
 
 			if ($param["module"] == "LineItem") {
-				$query = $this->vtigerClient->query("SELECT parent_id FROM $param[module] $where;");
-
-				$parentModules = [];
-				foreach ($query['result'] as $parent) {
-					if (empty($parent["parent_id"])) {
-						continue;
-					}
-					$prefix = explode("x", $parent["parent_id"])[0];
-					if (!array_key_exists($prefix, $parentModules)) {
-						$parentModules[$prefix] = $this->moduleList[$prefix];
-					}
-				}
-
-                $entity = [];
-                $maxtime = '';
-                foreach ($parentModules as $prefix => $moduleName) {
-                    $query = $this->vtigerClient->query("SELECT id, createdtime, modifiedtime FROM $moduleName $where ORDER BY modifiedtime ASC LIMIT 0, 1;");
-                    if (empty($query) || !$query['success']) {
-                        continue;
-                    }
-
-                    foreach ($query['result'] as $parentElement) {
-                        if (empty($maxtime) || $maxtime < $parentElement['modifiedtime']) {
-                            $maxtime = $parentElement['modifiedtime'];
-                            $retrive = $this->vtigerClient->retrieve($parentElement['id']);
-                            foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
-                                $lineitem['parent_id'] = $parentElement['id'];
-                                $lineitem['modifiedtime'] = $parentElement['modifiedtime'];
-                                $lineitem['createdtime'] = $parentElement['createdtime'];
-                                $entity[] = $lineitem;
-                            }
-                        }
-                    }
-                }
-
-				$query = ["success" => true, "result" => $entity];
-			}
-			else {
+                $query = $this->readVtigerLineItemQuery();
+			} else {
 				// If we search a specific record
 				if (!empty($param['query']['id'])) {
 					$query = $this->vtigerClient->retrieve($param['query']['id']);
@@ -525,20 +479,80 @@ class vtigercrmcore extends solution
             foreach ($fields as $fieldName => $value) {
                 $result['values'][$fieldName] = $value;
             }
-
-			/*
-			if(in_array($param['rule']['mode'], ["0", "S"])) {
-				$result['values']['date_modified'] = $fields['modifiedtime'];
-			} else if ($param['rule']['mode'] == "C") {
-				$result['values']['date_modified'] = $fields['createdtime'];
-			}
-			*/
 		} catch (\Exception $e) {
 			$result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
 			$result['done'] = -1;
 		}
+
 		return $result;
 	}
+
+    /**
+     * @param $param
+     * @param $where
+     */
+    protected function readVtigerLineItemQuery($param, $where)
+    {
+        $module = $param['module'];
+        $query = $this->getVtigerClient()->query("SELECT parent_id FROM {$module} {$where};");
+
+        $parentModules = [];
+        foreach ($query['result'] as $parent) {
+            if (empty($parent["parent_id"])) {
+                continue;
+            }
+            $prefix = explode("x", $parent["parent_id"])[0];
+            if (!array_key_exists($prefix, $parentModules)) {
+                $parentModules[$prefix] = $this->moduleList[$prefix];
+            }
+        }
+
+        $entity = [];
+        $maxTime = '';
+        foreach ($parentModules as $prefix => $moduleName) {
+            $query = $this->getVtigerClient()->query("SELECT id, createdtime, modifiedtime FROM {$moduleName} {$where} ORDER BY modifiedtime ASC LIMIT 0, 1;");
+            if (empty($$query['success']) || empty($query['result'])) {
+                continue;
+            }
+            foreach ($query['result'] as $parentElement) {
+                if ($maxTime && $maxTime >= $parentElement['modifiedtime']) {
+                    continue;
+                }
+                $retrive = $this->vtigerClient->retrieve($parentElement['id']);
+                if (empty($retrive['result']['LineItems'])) {
+                    continue;
+                }
+                $maxTime = $parentElement['modifiedtime'];
+                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
+                    $lineItem['parent_id'] = $parentElement['id'];
+                    $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
+                    $lineItem['createdtime'] = $parentElement['createdtime'];
+                    $entity[] = $lineItem;
+                }
+            }
+        }
+
+        return ["success" => true, "result" => $entity];
+    }
+
+    /**
+     * @param $param
+     *
+     * @return string
+     */
+    protected function getVtigerWhereCondition($param)
+    {
+        $where = '';
+        if (!empty($param['query'])) {
+            $where = [];
+            foreach ($param['query'] as $key => $item) {
+                $where[] = "$key = '$item'";
+            }
+            $where = "WHERE " . implode(" AND ", $where);
+        }
+
+        return $where;
+    }
 
 	/**
 	 * Read
@@ -1258,6 +1272,23 @@ class vtigercrmcore extends solution
     protected function isVtigerInventoryModule($module)
     {
         return in_array($module, $this->inventoryModules, true);
+    }
+
+    /**
+     * @param $fieldsList
+     *
+     * @return array
+     */
+    protected function cleanVtigerRelatedRecordFields($fieldsList)
+    {
+        $baseFields = [];
+        foreach ($fieldsList as $field) {
+            if (!preg_match('/__/', $field)) {
+                $baseFields[] = $field;
+            }
+        }
+
+        return $baseFields;
     }
 }
 
