@@ -54,12 +54,15 @@ logs: debug
 debug: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
-dev: down
+dev: init down
 	@docker-compose run --rm myddleware rm -fr var/logs/vtigercrm.log
 	@docker-compose up -d
 
-prod: down
+prod: init
 	@docker-compose -f docker-compose.yml up -d
+
+start: prod
+	@echo "Myddleware is ready."
 
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash

@@ -3,9 +3,9 @@ version: '2'
 services:
 
   myddleware:
-    build: .
+    image: opencrmitalia/myddleware
     ports:
-      - ${myddleware_port}:80
+      - ${myddleware_port:-30080}:80
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=myddleware
@@ -18,7 +18,7 @@ services:
       - ./.temp/.composer:/root/.composer:cached
     links:
       - mysql
-    restart: 'always'
+    restart: always
 
   mysql:
     image: mysql:5.7.28
@@ -28,17 +28,18 @@ services:
       - max_allowed_packet=524288000
       - wait_timeout=100
     volumes:
-      - mysql:/var/lib/mysql:rw
-    restart: 'always'
+      - ./var/mysql:/var/lib/mysql:rw
+    restart: always
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     ports:
-      - ${phpmyadmin_port}:80
+      - ${phpmyadmin_port:-30088}:80
     environment:
       - PMA_HOST=mysql
     links:
       - mysql
+    restart: always
 
   backup:
     image: databack/mysql-backup
@@ -53,17 +54,18 @@ services:
       - AWS_DEFAULT_REGION=eu-west-1
       - AWS_ACCESS_KEY_ID=${aws_access_key_id}
       - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+    restart: always
 
   filebrowser:
     image: filebrowser/filebrowser
     ports:
-      - "${filebrowser_port}:30090"
+      - ${filebrowser_port:-30090}:30090
     volumes:
       - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
       - ./var/logs:/srv/Logs
       - ./var/databases/filebrowser.db:/database.db
       - ./.filebrowser.json:/.filebrowser.json
-    restart: 'always'
+    restart: always
 
   vpn:
     image: javanile/openvpn
@@ -73,12 +75,9 @@ services:
       - EXTERNAL_ADDRESS=${external_address}
       - CLIENT_FORWARD=${vpn_client_forward}
     ports:
-      - "${openvpn_port}:${openvpn_port}/udp"
+      - ${openvpn_port:-1194}:${openvpn_port:-1194}/udp
     cap_add:
       - NET_ADMIN
     volumes:
       - ./var/openvpn:/etc/openvpn
     restart: always
-
-volumes:
-  mysql:

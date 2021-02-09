@@ -3,10 +3,11 @@ version: '2'
 services:
 
   myddleware:
+    build: .
     environment:
-      - VT_CLIENT_LOG_FILE=/var/www/html/var/logs/vtigercrm.log
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=secret
+      - VT_CLIENT_LOG_FILE=/var/www/html/var/logs/vtigercrm.log
     links:
       - phpmyadmin
 
@@ -18,7 +19,7 @@ services:
   vtiger1:
     image: javanile/vtiger:7.1.0
     ports:
-      - ${vtiger1_port}:80
+      - ${vtiger1_port:-30081}:80
     environment:
       - MYSQL_HOST=mysql1
       - MYSQL_DATABASE=vtiger
@@ -38,7 +39,7 @@ services:
   phpmyadmin1:
     image: phpmyadmin/phpmyadmin
     ports:
-      - ${phpmyadmin1_port}:80
+      - ${phpmyadmin1_port:-30091}:80
     environment:
       - PMA_HOST=mysql1
       - PMA_USER=root
@@ -49,7 +50,7 @@ services:
   vtiger2:
     image: javanile/vtiger:7.1.0
     ports:
-      - ${vtiger2_port}:80
+      - ${vtiger2_port:-30082}:80
     environment:
       - MYSQL_HOST=mysql2
       - MYSQL_DATABASE=vtiger
@@ -69,7 +70,7 @@ services:
   phpmyadmin2:
     image: phpmyadmin/phpmyadmin
     ports:
-      - ${phpmyadmin2_port}:80
+      - ${phpmyadmin2_port:-30092}:80
     environment:
       - PMA_HOST=mysql2
       - PMA_USER=root
@@ -88,7 +89,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - ${adminer_port}:8080
+      - ${adminer_port:-30099}:8080
 
 volumes:
   mysql1:

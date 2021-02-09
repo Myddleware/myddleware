@@ -66,6 +66,8 @@ uat.pem
 /var/databases/filebrowser.db
 /var/openvpn/*
 !var/openvpn/.gitkeep
+/var/mysql/*
+!var/mysql/.gitkeep
 
 # Secrets
 .env
