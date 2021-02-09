@@ -48,9 +48,9 @@ Adesso l'applicazione sara correttamente installata per accedere usate le seguen
 - Usate le seguenti credenziali: admin/admin
 
 > **AVVISO**: Potrebbe essere necessario aggiungere per la specifica installazione di myddleware delle regole di /etc/hosts
-> ad esempio per raggiungere CRM locali on dentro reti speciali, bastera scrivere le regole dentro il file `hosts` che trovate nella root del prpgetto
+> ad esempio per raggiungere CRM locali on dentro reti speciali, basterà scrivere le regole dentro il file `hosts` che trovate nella root del prpgetto
 
-Adesso bisogna mettere l'applicazione in modalità PRODUCTION
+Adesso bisogna mettere la applicazione in modalità PRODUCTION
 
 ```bash
 make prod

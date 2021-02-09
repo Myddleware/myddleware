@@ -63,7 +63,8 @@ deploy_key.pub
 uat.pem
 /*.retry
 /CLONE/
-/var/databases/filebrowser.db
+/var/databases/*
+!var/databases/.gitkeep
 /var/openvpn/*
 !var/openvpn/.gitkeep
 /var/mysql/*
@@ -76,5 +77,9 @@ NOTES.md
 *.ovpn
 
 # OCI:START
+!/src/Myddleware/RegleBundle/Custom/Solutions/mautic.php
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/mysql.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/vtigercrm.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
 # OCI:END
