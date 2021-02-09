@@ -1005,14 +1005,14 @@ class vtigercrmcore extends solution
 
             $resultUpdate = $this->getVtigerClient()->update($param['module'], $data);
 
-            if (empty($resultUpdate['success']) && !empty($resultUpdate['result'])) {
-                $result[$idDoc] = [
-                    'id' => $resultUpdate['result']['id'],
-                    'error' => false,
-                ];
-            } else {
+            if (empty($resultUpdate['success']) || empty($resultUpdate['result']['id'])) {
                 throw new \Exception($resultUpdate["error"]["message"] ?? "Error");
             }
+
+            $result[$idDoc] = [
+                'id' => $resultUpdate['result']['id'],
+                'error' => false,
+            ];
         } catch (\Exception $e) {
             $result[$idDoc] = [
                 'id' => '-1',
