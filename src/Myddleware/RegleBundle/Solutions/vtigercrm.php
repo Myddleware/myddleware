@@ -82,8 +82,7 @@ class vtigercrmcore extends solution
 			],
 		],
 	];
-
-
+	
     protected $inventoryModules = [
         "Invoice",
         "SalesOrder",
@@ -92,10 +91,7 @@ class vtigercrmcore extends solution
         "GreenTimeControl",
         "DDT",
     ];
-
-
-
-
+    
 	// Module list that allows to make parent relationships
 	protected $allowParentRelationship = array('Quotes');
 
@@ -105,39 +101,56 @@ class vtigercrmcore extends solution
 	/** @var VtigerClient $vtigerClient */
 	protected $vtigerClient;
 
+    /**
+     * @return VtigerClient
+     * @throws \Exception
+     */
+    protected function createVtigerClient()
+    {
+        $client = new VtigerClient($this->paramConnexion['url']);
+        $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
+        if (empty($result['success'])) {
+            throw new \Exception($result['error']['message']);
+        }
 
+        return $client;
+    }
 
-	public function getVtigerClient()
+    /**
+     * @param $vtigerClient
+     * @return VtigerClient
+     */
+    protected function setVtigerClient($vtigerClient)
+    {
+        $this->vtigerClient = $vtigerClient;
+        $this->session = $vtigerClient->getSessionName();
+        $this->connexion_valide = true;
+    }
+
+    /**
+     * @return VtigerClient
+     */
+	protected function getVtigerClient()
 	{
 		return $this->vtigerClient;
 	}
 
-	/**
-	 * Make the login
-	 *
-	 * @param array $paramConnexion
-	 * @return void|array
-	 */
+    /**
+     * Make the login
+     *
+     * @param $paramConnexion
+     * @return void|array
+     */
 	public function login($paramConnexion)
 	{
 		parent::login($paramConnexion);
 
 		try {
-			$client = new VtigerClient($this->paramConnexion['url']);
-			$result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
-
-			if (!$result['success']) {
-				throw new \Exception($result['error']['message']);
-			}
-
-			$this->session = $client->getSessionName();
-			$this->connexion_valide = true;
-			$this->vtigerClient = $client;
+            $vtigerClient = $this->createVtigerClient();
+            $this->setVtigerClient($vtigerClient);
 		} catch (\Exception $e) {
-			$error = $e->getMessage();
-			$this->logger->error($error);
-
-			return ['error' => $error];
+			$this->logger->error($e->getMessage());
+			return ['error' => $e->getMessage()];
 		}
 	}
 
@@ -148,10 +161,11 @@ class vtigercrmcore extends solution
 	 */
 	public function logout()
 	{
-		// Vtiger Logout doesn't work
+        // TODO: Vtiger Logout doesn't work.
 		/*
-        if (empty($this->vtigerClient))
-            return false;
+        if (empty($this->vtigerClient)) {
+		    return false;
+		}
 
         return $this->vtigerClient->logout();
         */
@@ -193,42 +207,50 @@ class vtigercrmcore extends solution
 	 */
 	public function get_modules($type = 'source')
 	{
+        if (empty($this->vtigerClient)) {
+            return false;
+        }
+
 		try {
-			if (empty($this->vtigerClient)) {
-				return false;
-			}
-
-            $result = $this->vtigerClient->listTypes();
-
-            if (!$result['success'] || ($result['success'] && count($result['result']) == 0)) {
-                return false;
-            }
-
-            $modules = $result['result'] ?? null;
-
-            if (empty($modules)) {
-                return false;
-            }
-
-            $escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
-            $options = [];
-            foreach ($modules['information'] as $moduleName => $moduleInfo) {
-                if (!in_array($moduleName, $escludedModule)) {
-                    $options[$moduleName] = $moduleInfo['label'];
-                    $this->setModulePrefix($moduleName);
-                }
-            }
-
-			return $options ?: false;
+			return $this->getVtigerModules($type) ?: false;
 		} catch (\Exception $e) {
-			$error = $e->getMessage();
-			return $error;
+            return $e->getMessage();
 		}
 	}
 
-	public function setModulePrefix($moduleName = null)
+    /**
+     * @param string $type
+     * @return false
+     */
+	protected function getVtigerModules($type = 'source')
+    {
+        $result = $this->getVtigerClient()->listTypes();
+        if (empty($result['success']) || empty($result['result']) || count($result['result']) == 0) {
+            return false;
+        }
+
+        $currentModules = [];
+        $excludedModules = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
+        foreach ($result['result']['information'] as $moduleName => $moduleInfo) {
+            if (in_array($moduleName, $excludedModules)) {
+                continue;
+            }
+            $currentModules[$moduleName] = $moduleInfo['label'];
+            $this->setModulePrefix($moduleName);
+        }
+
+        return $currentModules ?: false;
+    }
+
+
+
+    /**
+     * @param null $moduleName
+     * @return bool
+     */
+	public function setAllModulesPrefix()
 	{
-		if (empty($moduleName)) {
+
 			$result = $this->vtigerClient->listTypes();
 
 			if (!$result['success'] || ($result['success'] && count($result['result']) == 0)) {
@@ -241,16 +263,23 @@ class vtigercrmcore extends solution
 					$this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
 				}
 			}
-		} else {
-			$describe = $this->vtigerClient->describe($moduleName);
-			if ($describe['success'] && count($describe['result']) != 0) {
-				$this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
-				return true;
-			} else {
-				return false;
-			}
-		}
+
 	}
+
+    /**
+     * @param null $moduleName
+     * @return bool
+     */
+    public function setModulePrefix($moduleName)
+    {
+            $describe = $this->vtigerClient->describe($moduleName);
+            if ($describe['success'] && count($describe['result']) != 0) {
+                $this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
+                return true;
+            } else {
+                return false;
+            }
+    }
 
 	/**
 	 * Return the fields for a specific module without the specified ones.
@@ -339,7 +368,7 @@ class vtigercrmcore extends solution
 			}
 
             if (empty($this->moduleList)) {
-                $this->setModulePrefix();
+                $this->setAllModulesPrefix();
             }
 
 			$param['field'] = $this->cleanMyddlewareElementId($param['field'] ?? []);
@@ -508,7 +537,7 @@ class vtigercrmcore extends solution
 
 				if ($param['module'] == 'LineItem') {
 					if (empty($this->moduleList)) {
-						$this->setModulePrefix();
+						$this->setAllModulesPrefix();
 					}
 
 					$query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
