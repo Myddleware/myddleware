@@ -286,6 +286,7 @@ class vtigercrmcore extends solution
 
         $currentModules = [];
         $excludedModules = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
+
         foreach ($result['result']['information'] as $moduleName => $moduleInfo) {
             if (in_array($moduleName, $excludedModules)) {
                 continue;
@@ -330,7 +331,7 @@ class vtigercrmcore extends solution
             return;
         }
 
-        $this->moduleList[$describe["result"]['idPrefix']] = $moduleName;
+        $this->moduleList[$describe['result']['idPrefix']] = $moduleName;
     }
 
     /**
