@@ -438,45 +438,32 @@ class vtigercrmcore extends solution
                 $this->setAllModulesPrefix();
             }
 
+            $module = $param["module"];
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields'] ?? []);
             $baseFields = $this->cleanVtigerRelatedRecordFields($param['fields']);
 
 			$queryParam = implode(',', $baseFields ?? "") ?: '*';
             $where = $this->getVtigerWhereCondition($param);
 
-			if ($param["module"] == "LineItem") {
+			if ($module == "LineItem") {
                 $query = $this->readVtigerLineItemQuery();
-			} else {
-				// If we search a specific record
-				if (!empty($param['query']['id'])) {
-					$query = $this->vtigerClient->retrieve($param['query']['id']);
-					// Add a dimension to the result to have the same format than the other call below
-					if (!empty($query)) {
-						$query['result'][0] = $query['result'];
-					}
-				} else {
-					$query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
-				}
+			} elseif (empty($param['query']['id'])) {
+                $query = $this->vtigerClient->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
+            } else {
+				$query = $this->vtigerClient->retrieve($param['query']['id']);
+                $query['result'][0] = $query['result'];
 			}
 
-			if (empty($query) || (!empty($query) && !$query['success'])) {
-				return [
-					'error' => 'Error: Request Failed!',
-					'done'  => -1,
-				];
+			if (empty($query['success'])) {
+				return $this->errorVtigerRequestFailed(['done' => -1]);
 			}
 
-			if (count($query['result']) == 0) {
-				return [
-					'error' => 'No Data Retrived',
-					'done'  => false,
-				];
+			if (empty($query['result'][0])) {
+				return $this->errorVtigerNoDataRetrieved(['done' => false]);
 			}
 
-            $fields = $query['result'][0];
             $result = ['done' => true];
-
-            foreach ($fields as $fieldName => $value) {
+            foreach ($query['result'][0] as $fieldName => $value) {
                 $result['values'][$fieldName] = $value;
             }
 		} catch (\Exception $e) {
@@ -1260,6 +1247,28 @@ class vtigercrmcore extends solution
 	protected function errorMissingVtigerClient($extend = [])
     {
         return array_merge(['error' => 'Error: no VtigerClient setup'], $extend);
+    }
+
+    /**
+     * Return default error for missing vtiger client.
+     *
+     * @param array $extend
+     * @return array
+     */
+    protected function errorVtigerNoDataRetrieved($extend = [])
+    {
+        return array_merge(['error' => 'Error: No Data Retrieved'], $extend);
+    }
+
+    /**
+     * Return default error for missing vtiger client.
+     *
+     * @param array $extend
+     * @return array
+     */
+    protected function errorVtigerRequestFailed($extend = [])
+    {
+        return array_merge(['error' => 'Error: Request Failed!'], $extend);
     }
 
     /**
