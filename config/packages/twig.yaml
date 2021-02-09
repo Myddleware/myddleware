@@ -3,3 +3,4 @@ twig:
     strict_variables: "%kernel.debug%"
     globals:
         myd_version: "%myd_version%"
+        locales: '%fallbacks%'

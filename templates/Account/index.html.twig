@@ -25,6 +25,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 {% extends 'base.html.twig' %}
 {% block titlesm %}{{ 'title.account.view'|trans }}{% endblock titlesm %}
 {% block body %}
+
     <div id="user_account">
         <div class="row">
             <h2>{{ 'view_account.user_info'|trans }}</h2>
@@ -32,12 +33,20 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                 <li class="user_info_li">
                     <label>{{ 'view_account.label.language'|trans }}</label>
                     <div class="btn-group" role="group" aria-label="...">
-                        <button id="btn-locale-en" type="button"
-                                class="btn {{ locale=='en' ? 'btn-primary disabled' : 'btn-default' }}">English
+                        <button class="btn btn-light btn-lg">
+                            <a href="#"
+                                 data-locale="{{ locales|languages['default'] }}">
+                                 {{  locales|languages['default']|trans }}
+                            </a>
                         </button>
-                        <button id="btn-locale-fr" type="button"
-                                class="btn {{ locale=='fr' ? 'btn-primary disabled' : 'btn-default' }}">Français
-                        </button>
+                      {% for locale in locales|languages['other']  %}
+                            <button class="btn btn-primary btn-lg">
+                            <a href="{{ path('account_locale', {'locale': locale}) }}"
+                               data-locale="{{ locale }}" style="color:#fff;">
+                                {{ locale|trans }}
+                            </a>
+                            </button>
+                        {% endfor %}
                     </div>
                 </li>
             </ul>

@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Solutions\lib\wordpress;
-
 $moduleFields = array (
     'pages' => array(
         'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),

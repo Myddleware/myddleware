@@ -24,21 +24,23 @@
 
 namespace App\Controller;
 
-use App\Form\Type\PasswordFormType;
-use App\Form\Type\ProfileFormType;
-use App\Manager\ToolsManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Manager\ToolsManager;
+use App\Form\Type\ProfileFormType;
+use App\Form\Type\PasswordFormType;
+use Symfony\Component\Process\Process;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * Class AccountController.
@@ -96,39 +98,14 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @Route("/account/locale/", name="account_locale", options={"expose"=true})
+     * @Route("/account/locale/{locale}", name="account_locale", options={"expose"=true})
      */
-    public function changeLocaleAction(Request $request): Response
+    public function changeLocaleAction(string $locale, Request $request)
     {
-        try {
-            $session = $request->getSession();
-            $locale = $request->request->get('locale');
+        $request->getSession()->set('_locale', $locale);
 
-            if (!$locale) {
-                return new Response('Something missing (parameter)');
-            }
+        return $this->redirect($request->headers->get('referer'));
 
-            $defaultLocale = $this->params->get('locale');
-            if ('fr' == $locale) {
-                if ('fr' != $defaultLocale) { // Si la langue est déjà en Français ne rien faire, logique
-                    $this->toolsManager->changeMyddlewareParameter(['locale'], 'fr');
-                }
-            } else {
-                if ('en' != $defaultLocale) { // Si la langue est déjà en Anglais ne rien faire, logique
-                    $this->toolsManager->changeMyddlewareParameter(['locale'], 'en');
-                }
-            }
-            // Clear the cache to change the language
-            $process = new Process('php '.$this->kernel->getRootDir().'/console cache:clear --env='.$this->env);
-            $process->run();
-            if (!$process->isSuccessful()) {
-                throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
-            }
-        } catch (Exception $e) {
-            $session->set('error', [$this->translator->trans('error.account.language_change').$e->getMessage()]);
-        }
-
-        return new Response('Success');
     }
 
     /**

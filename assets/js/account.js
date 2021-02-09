@@ -22,52 +22,6 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-$( document ).ready(function() {
-    
-    var path_locale = Routing.generate('account_locale');
-	
-	positionningPopup('#myd_change_locale','#user_account');
-	
-    /******
-     *	BOUTONS CHANGEMENT DE LANGUE 
-     */
-	
-	$('#btn-locale-en','#user_account').click(function() {
-		if(!$("#btn-locale-en").is(".disabled")) {
-			$.ajax({
-				type: "POST",
-				url: path_locale,
-				data:{
-					locale : "en"
-				},
-				beforeSend: function(){
-					$('#myd_change_locale','#user_account').fadeIn();
-				},
-				success: function(){
-					document.location.reload(true)
-				}
-			});
-		}	    	
-    });
-    
-	$('#btn-locale-fr','#user_account').click(function() {
-		if(!$("#btn-locale-fr").is(".disabled")) {
-			$.ajax({
-				type: "POST",
-				url: path_locale,
-				data:{
-					locale : "fr"
-				},
-				beforeSend: function(){
-					$('#myd_change_locale','#user_account').fadeIn();
-				},
-				success: function(){
-					document.location.reload(true)
-				}
-			});
-		}	
-    });
-});
 
 // Positionne les différentes Popup au centre de la page en prenant en compte le scroll
 function positionningPopup(id, idcontainer) {

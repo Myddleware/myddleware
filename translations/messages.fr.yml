@@ -433,14 +433,14 @@ view_account:
     title: Mon compte
     user_info: Mes informations
     change_password : Changer mot de passe
-    profile_edit: Edition profile
+    profile_edit: Editer mon profil
     support:
         enabled: Support activé
         disabled: Support désactivé
     label:
         language: Langue
     popup:
-        locale: Changement de la langue en cours, merci de bien vouloir patienter. Vous allez être rediriger vers la page d'authentification.
+        locale: Changement de la langue en cours, merci de bien vouloir patienter. Vous allez être redirigé(e) vers la page d'authentification.
 
 function:
     all: Toutes
@@ -776,3 +776,6 @@ form:
     password_confirmation: 'Répéter le mot de passe'
     new_password: 'Nouveau mot de passe'
     new_password_confirmation: 'Répéter le nouveau mot de passe'
+
+fr: 'Français'
+en: 'Anglais'

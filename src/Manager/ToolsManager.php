@@ -133,7 +133,7 @@ if (file_exists($file)) {
         // Change Myddleware parameters
         public function changeMyddlewareParameter($nameArray, $value)
         {
-            $myddlewareParameters = Yaml::parse(file_get_contents($this->projectDir.'/config/public/parameters_public.yml'));
+            $myddlewareParameters = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_public.yml'));
             // Search the translation
             if (!empty($myddlewareParameters)) {
                 $nbLevel = sizeof($nameArray);
@@ -150,7 +150,7 @@ if (file_exists($file)) {
                 }
             }
             $new_yaml = Yaml::dump($myddlewareParameters, 4);
-            file_put_contents($this->projectDir.'/config/public/parameters_public.yml', $new_yaml);
+            file_put_contents($this->projectDir.'/config/packages/public/parameters_public.yml', $new_yaml);
         }
     }
 }

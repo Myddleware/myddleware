@@ -430,9 +430,9 @@ view_task:
 
 view_account:
     title: My account
-    user_info: Your informations
+    user_info: My information
     change_password : Change password
-    profile_edit: Edition profile
+    profile_edit: Edit my profile
     support:
         enabled: Support enabled 
         disabled: Support disabled
@@ -771,3 +771,7 @@ form:
     password_confirmation: 'Repeat password'
     new_password: 'New password'
     new_password_confirmation: 'Repeat new password'
+
+fr: 'French'
+en: 'English'
+

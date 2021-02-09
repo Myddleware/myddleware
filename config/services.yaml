@@ -6,6 +6,7 @@
 parameters:
   locale: 'fr'
   env: '%env(APP_ENV)%'
+  fallbacks: ['%locale%', 'en']
 
 services:
   # default configuration for services in *this* file
@@ -20,7 +21,7 @@ services:
   # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/*'
-    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib}'
 
   # controllers are imported separately to make sure services can be injected
   # as action arguments even if you don't extend any base controller class
