@@ -1,0 +1,5 @@
+App\Form\Type\ResetPasswordType:
+    properties:
+        oldPassword:
+            - Symfony\Component\Security\Core\Validator\Constraints\UserPassword:
+                message: 'Wrong value for your current password'

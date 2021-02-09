@@ -4,3 +4,4 @@ twig:
     globals:
         myd_version: "%myd_version%"
         locales: '%fallbacks%'
+    form_theme: ['bootstrap_4_layout.html.twig']    

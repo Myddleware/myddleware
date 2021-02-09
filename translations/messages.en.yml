@@ -774,4 +774,14 @@ form:
 
 fr: 'French'
 en: 'English'
+flash: 
+    password:
+        reset:
+            success: 'Your password has been succesfully reset'
 
+profile:
+    type:
+        password:
+            invalid_message: 'Invalid password'
+            first_options: 'First option'
+            second_options: 'Second option'

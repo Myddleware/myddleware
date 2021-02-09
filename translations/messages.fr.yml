@@ -779,3 +779,15 @@ form:
 
 fr: 'Français'
 en: 'Anglais'
+
+flash: 
+    password:
+        reset:
+            success: 'Your password has been succesfully reset'
+
+profile:
+    type:
+        password:
+            invalid_message: 'Mot de passe invalide'
+            first_options: 'Premiere option'
+            second_options: 'Seconde option'

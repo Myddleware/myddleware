@@ -27,9 +27,14 @@ namespace App\Controller;
 use Exception;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
+use App\Form\Model\ResetPassword;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\PasswordFormType;
+use App\Form\Type\ResetPasswordType;
+use App\Service\UserManagerInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Process\Process;
+use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +45,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
@@ -80,13 +86,19 @@ class AccountController extends AbstractController
      */
     private $env;
 
+     /**
+     * @var AlertBootstrapInterface 
+     */
+    private $alert;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
         ParameterBagInterface $params,
         TranslatorInterface $translator,
-        ToolsManager $toolsManager
+        ToolsManager $toolsManager,
+        AlertBootstrapInterface $alert
     ) {
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -95,6 +107,7 @@ class AccountController extends AbstractController
         $this->params = $params;
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
+        $this->alert = $alert;
     }
 
     /**
@@ -115,24 +128,63 @@ class AccountController extends AbstractController
      *
      * @Route("/account", name="my_account")
      */
-    public function myAccountAction(Request $request): Response
+    public function myAccountAction(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
     {
         $user = $this->getUser();
+        $em = $this->entityManager;
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-
             return $this->redirectToRoute('my_account'); // fos_user_profile_show
         }
 
-        $formPassword = $this->createForm(PasswordFormType::class, $user);
+
+        $resetPasswordModel = new ResetPassword();
+        $formPassword = $this->createForm(ResetPasswordType::class, $resetPasswordModel);
         $formPassword->handleRequest($request);
+        var_dump($user);
         if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-            $this->entityManager->flush();
+            $oldPassword = $request->request->get('oldPassword');
+           
+            $password = $formPassword->get('password')->getData();
 
-            return $this->redirectToRoute('my_account'); // fos_user_profile_show
+            if ($encoder->isPasswordValid($user, $oldPassword)) {
+                // $user->setPassword($userManager->encodePassword($user, $password));
+                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($newEncodedPassword);
+            }
+
+      
+            $em->persist($user);
+            $em->flush();
+            $this->alert->success('flash.profile.password.success');
+            return $this->redirectToRoute('my_account');
         }
+
+
+
+        // $formPassword = $this->createForm(ResetPasswordType::class);
+        // $formPassword->handleRequest($request);
+        // if ($formPassword->isSubmitted() && $formPassword->isValid()) {
+        //     // $passwordEncoder = $this->get('security.password_encoder');
+        // //   $oldPassword = $request->request->get('etiquettebundle_user')['oldPassword'];     
+        //     $oldPassword = $request->request->get('oldPassword');    
+        //     var_dump($oldPassword); 
+        //     if ($encoder->isPasswordValid($user, $oldPassword)) {
+        //         $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+        //         $user->setPassword($newEncodedPassword);
+        //         $em->persist($user);
+        //         $em->flush();
+        //         var_dump($user);
+        //         // $this->addFlash('notice', 'Votre mot de passe a bien été changé !');
+        //         $this->alert->success('flash.password.reset.success');
+        //         // return $this->redirectToRoute('my_account');
+        //     } else {
+        //         $formPassword->addError(new FormError('Ancien mot de passe incorrect'));
+        //     }
+        //     // return $this->redirectToRoute('my_account'); // fos_user_profile_show
+        // }
 
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),

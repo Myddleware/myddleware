@@ -70,15 +70,16 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                             {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
                         </div>
                     </div>
-                    <button type="submit" class="btn-myd">Enregistrer</button>
+                    <button type="submit" class="btn-myd">{{ 'view_connector.btn.save'|trans }}</button>
                     {{ form_end(form) }}
                 </li>
             </ul>
         </div>
-        <div id="myd_change_locale" class="user_account_popup" style="display: none">
-            <div class="user_account_popup_content">
-                <p>{{ 'view_account.popup.locale'|trans }}</p>
-                <img src="{{ asset('build/images/locale-loader.gif') }}" alt="loader" />
+        <div class="row">
+            <div class="col form-group">
+               <h2>Reset password</h2>
+                {{form_start(formPassword)}} 
+                {{ form_end(formPassword)}}
             </div>
         </div>
     </div>
