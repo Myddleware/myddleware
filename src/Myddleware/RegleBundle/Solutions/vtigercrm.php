@@ -32,8 +32,18 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
+    /**
+     * Limit number of element per API call.
+     *
+     * @var int
+     */
 	protected $limitPerCall = 100;
 
+    /**
+     * Required fields
+     *
+     * @var string[][]
+     */
 	protected $required_fields = [
 		'default'    => [
 			'id',
@@ -42,6 +52,11 @@ class vtigercrmcore extends solution
 		],
 	];
 
+    /**
+     * Per-module required fields.
+     *
+     * @var array
+     */
 	protected $force_required_module_fields = [
 		'default'    => [],
 		'LineItem'   => [
@@ -54,6 +69,11 @@ class vtigercrmcore extends solution
 		],
 	];
 
+    /**
+     * Control duplicate fields.
+     *
+     * @var array
+     */
 	protected $FieldsDuplicate = [
 		'Contacts' => ['email', 'lastname'],
 		'CompanyDetails' => ['organizationname'],
@@ -62,12 +82,22 @@ class vtigercrmcore extends solution
 		'default' => []
 	];
 
+    /**
+     * Excluded modules.
+     *
+     * @var array
+     */
 	protected $exclude_module_list = [
 		'default'    => ['Users', "Documents"],
 		'target'     => [],
 		'source'     => [],
 	];
 
+    /**
+     * Excluded fields.
+     *
+     * @var array[]
+     */
 	protected $exclude_field_list = [
 		'default'    => [
 			'default'    => [
@@ -82,7 +112,12 @@ class vtigercrmcore extends solution
 			],
 		],
 	];
-	
+
+    /**
+     * Inventory modules
+     *
+     * @var string[]
+     */
     protected $inventoryModules = [
         "Invoice",
         "SalesOrder",
@@ -92,13 +127,25 @@ class vtigercrmcore extends solution
         "DDT",
     ];
     
-	// Module list that allows to make parent relationships
+	/**
+     * Module list that allows to make parent relationships
+     *
+     * @var string[]
+     */
 	protected $allowParentRelationship = array('Quotes');
 
-	/** @var array $moduleList */
+	/**
+     * Current module list.
+     *
+     * @var array $moduleList
+     */
 	protected $moduleList;
 
-	/** @var VtigerClient $vtigerClient */
+	/**
+     * Current vtiger client.
+     *
+     * @var VtigerClient $vtigerClient
+     */
 	protected $vtigerClient;
 
     /**
@@ -109,6 +156,7 @@ class vtigercrmcore extends solution
     {
         $client = new VtigerClient($this->paramConnexion['url']);
         $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
+
         if (empty($result['success'])) {
             throw new \Exception($result['error']['message']);
         }
@@ -146,8 +194,8 @@ class vtigercrmcore extends solution
 		parent::login($paramConnexion);
 
 		try {
-            $vtigerClient = $this->createVtigerClient();
-            $this->setVtigerClient($vtigerClient);
+            $client = $this->createVtigerClient();
+            $this->setVtigerClient($client);
 		} catch (\Exception $e) {
 			$this->logger->error($e->getMessage());
 			return ['error' => $e->getMessage()];
@@ -242,43 +290,40 @@ class vtigercrmcore extends solution
         return $currentModules ?: false;
     }
 
-
-
     /**
-     * @param null $moduleName
-     * @return bool
+     * Populate $moduleList with current module prefix.
+     *
+     * @return void
      */
 	public function setAllModulesPrefix()
 	{
+        $result = $this->vtigerClient->listTypes();
+        if (empty($result['success']) || empty($result['result']) || count($result['result']) == 0) {
+            return;
+        }
 
-			$result = $this->vtigerClient->listTypes();
-
-			if (!$result['success'] || ($result['success'] && count($result['result']) == 0)) {
-				return false;
-			}
-
-			foreach ($result['result']["types"] as $moduleName) {
-				$describe = $this->vtigerClient->describe($moduleName);
-				if ($describe['success'] && count($describe['result']) != 0) {
-					$this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
-				}
-			}
-
+        $this->moduleList = [];
+        foreach ($result['result']['types'] as $moduleName) {
+            $describe = $this->vtigerClient->describe($moduleName);
+            if ($describe['success'] && count($describe['result']) > 0) {
+                $this->moduleList[$describe['result']['idPrefix']] = $moduleName;
+            }
+        }
 	}
 
     /**
      * @param null $moduleName
      * @return bool
      */
-    public function setModulePrefix($moduleName)
+    protected function setModulePrefix($moduleName)
     {
-            $describe = $this->vtigerClient->describe($moduleName);
-            if ($describe['success'] && count($describe['result']) != 0) {
-                $this->moduleList[$describe["result"]["idPrefix"]] = $moduleName;
-                return true;
-            } else {
-                return false;
-            }
+        $describe = $this->vtigerClient->describe($moduleName);
+
+        if (empty($describe['success']) || empty($describe['result']['idPrefix'])) {
+            return;
+        }
+
+        $this->moduleList[$describe["result"]['idPrefix']] = $moduleName;
     }
 
 	/**
@@ -292,64 +337,87 @@ class vtigercrmcore extends solution
 	public function get_module_fields($module, $type = 'source')
 	{
 		parent::get_module_fields($module, $type);
-		try {
-			if (empty($this->vtigerClient)) {
-				return false;
-			}
 
-            $describe = $this->vtigerClient->describe($module, $type == 'source' ? 1 : 0);
+        if (empty($this->vtigerClient)) {
+            return false;
+        }
 
-            if (!$describe['success'] || ($describe['success'] && count($describe['result']) == 0)) {
+        try {
+            if (!$this->populateModuleFieldsFromVtigerModule($module, $type)) {
                 return false;
             }
-
-            $fields = $describe['result']['fields'] ?? null;
-
-            if (empty($fields)) {
-                return false;
-            }
-
-			$excludeFields = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
-			$excludeFields = $excludeFields[$type] ?? $excludeFields['default'];
-			$requiredFields = $this->force_required_module_fields[$module] ?? [];
-			$this->moduleFields = [];
-			foreach ($fields as $field) {
-				if (!in_array($field['name'], $excludeFields)) {
-					$mandatory = $field['mandatory'] || in_array($field['name'], $requiredFields, true);
-					if ($field['type']["name"] == "reference" || $field['type']["name"] == "owner") {
-						$this->fieldsRelate[$field['name']] = array(
-							'label' => $field['label'],
-							'required' => $mandatory,
-							'type' => 'varchar(127)', // ? Set right type?
-							'type_bdd' => 'varchar(127)',
-							'required_relationship' => 0
-						);
-					} else {
-						$this->moduleFields[$field['name']] = [
-							'label'    => $field['label'],
-							'required' => $mandatory,
-							'type' => 'varchar(127)', // ? Set right type?
-							'type_bdd' => 'varchar(127)'
-						];
-						if ($field['type']["name"] == "picklist" || $field['type']["name"] == "multipicklist") {
-							foreach ($field['type']["picklistValues"] as $option) {
-								$this->moduleFields[$field['name']]["option"][$option["value"]] = $option["label"];
-							}
-						}
-					}
-				}
-			}
-
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
-			return $this->moduleFields ?: false;
+            return $this->moduleFields ?: false;
 		} catch (\Exception $e) {
 			$this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
 			return false;
 		}
 	}
+
+    /**
+     * Fill the local attribute moduleFields
+     *
+     * @param $module
+     * @param string $type
+     * @return array|bool[]
+     */
+    protected function populateModuleFieldsFromVtigerModule($module, $type = 'source')
+    {
+        $describe = $this->vtigerClient->describe($module, $type == 'source' ? 1 : 0);
+        if (empty($describe['success']) || empty($describe['result']['fields'])) {
+            return false;
+        }
+
+        $this->moduleFields = [];
+        $this->fieldsRelate = [];
+        $excludeFields = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
+        $excludeFields = $excludeFields[$type] ?? $excludeFields['default'];
+        $requiredFields = $this->force_required_module_fields[$module] ?? [];
+        foreach ($describe['result']['fields'] as $field) {
+            if (in_array($field['name'], $excludeFields)) {
+                continue;
+            }
+
+            $mandatory = $field['mandatory'] || in_array($field['name'], $requiredFields, true);
+            $this->addVtigerFieldToModuleFields($field, $mandatory);
+        }
+
+        if (!empty($this->fieldsRelate)) {
+            $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+        }
+
+        return $this->moduleFields;
+    }
+
+    /**
+     * Add field to $moduleFields.
+     *
+     * @param $field
+     * @param $mandatory
+     */
+    protected function addVtigerFieldToModuleFields($field, $mandatory)
+    {
+        if ($field['type']["name"] == "reference" || $field['type']["name"] == "owner") {
+            $this->fieldsRelate[$field['name']] = array(
+                'label' => $field['label'],
+                'required' => $mandatory,
+                'type' => 'varchar(127)', // ? Set right type?
+                'type_bdd' => 'varchar(127)',
+                'required_relationship' => 0
+            );
+        } else {
+            $this->moduleFields[$field['name']] = [
+                'label'    => $field['label'],
+                'required' => $mandatory,
+                'type' => 'varchar(127)', // ? Set right type?
+                'type_bdd' => 'varchar(127)'
+            ];
+            if ($field['type']["name"] == "picklist" || $field['type']["name"] == "multipicklist") {
+                foreach ($field['type']["picklistValues"] as $option) {
+                    $this->moduleFields[$field['name']]["option"][$option["value"]] = $option["label"];
+                }
+            }
+        }
+    }
 
 	/**
 	 * Read Last
@@ -359,13 +427,11 @@ class vtigercrmcore extends solution
 	 */
 	public function read_last($param)
 	{
-		try {
-			if (empty($this->vtigerClient)) {
-				return [
-					'error' => 'Error: no VtigerClient setup',
-					'done'  => -1,
-				];
-			}
+        if (empty($this->vtigerClient)) {
+            return $this->errorMissingVtigerClient(['done' => -1]);
+        }
+
+        try {
 
             if (empty($this->moduleList)) {
                 $this->setAllModulesPrefix();
@@ -482,37 +548,36 @@ class vtigercrmcore extends solution
 	 */
 	public function read($param)
 	{
-		try {
-			if (empty($this->vtigerClient)) {
-				return [
-					'error' => 'Error: no VtigerClient setup',
-					'done'  => false,
-				];
-			}
+        if (empty($this->vtigerClient)) {
+            return $this->errorMissingVtigerClient(['done'  => false]);
+        }
 
-			if (count($param['fields']) == 0) {
-				return [
-					'error' => 'Error: no Param Given',
-					'done'  => false,
-				];
-			}
-
-			if (empty($param['offset'])) {
-				$param['offset'] = 0;
-			}
-			if (empty($param['limit'])) {
-				$param['limit'] = $this->limitPerCall;
-			}
-
-			$deletion = false;
-			if (isset($param['ruleParams']['deletion']) && !empty($param['ruleParams']['deletion'])) {
-				$deletion = true;
-			}
-
-            /** @var array $result */
-            $result = [
-                'count' => 0,
+        if (count($param['fields']) == 0) {
+            return [
+                'error' => 'Error: no Param Given',
+                'done'  => false,
             ];
+        }
+
+        if (empty($param['offset'])) {
+            $param['offset'] = 0;
+        }
+
+        if (empty($param['limit'])) {
+            $param['limit'] = $this->limitPerCall;
+        }
+
+        $deletion = false;
+        if (isset($param['ruleParams']['deletion']) && !empty($param['ruleParams']['deletion'])) {
+            $deletion = true;
+        }
+
+        /** @var array $result */
+        $result = [
+            'count' => 0,
+        ];
+
+		try {
 
 			if ($param['module'] == 'LineItem' && $deletion) {
 				return $result;
@@ -670,157 +735,207 @@ class vtigercrmcore extends solution
 	 */
 	public function create($param)
 	{
+        if (empty($this->vtigerClient)) {
+            return $this->errorMissingVtigerClient();
+        }
+
+        $result = [];
+
 		try {
-			$subDocIdArray = array();
-			if (empty($this->vtigerClient)) {
-				throw new \Exception('Error: no VtigerClient setup');
-			}
-
-            $result = [];
-
 			if ($param['module'] != 'LineItem') {
-				$lineItemFields = [];
-				if (in_array($param['module'], $this->inventoryModules, true)) {
-					$describe = $this->vtigerClient->describe("LineItem");
-
-				foreach ($describe["result"]["fields"] as $field) {
-					$lineItemFields[] = $field["name"];
-				}
-			}
-
-			foreach ($param['data'] as $idDoc => $data) {
-				try {
-					// Clean record by removing Myddleware fields (ex : target_id)
-					$data = $this->cleanRecord($param, $data);
-
-					// In case of LineItem (sub array in the data array => an order can have seeral orderItems),
-					// We transform the lineItem array into a LineItems array with the right format
-					if (!empty(	$data['LineItem'])) {
-						foreach($data['LineItem'] as $subIdDoc => $childRecord) {
-							// Save the subIdoc to change the sub data transfer status
-							$subDocIdArray[$subIdDoc] = array('id' => uniqid('', true));
-							// Clean subrecord by removing Myddleware fields (ex : target_id)
-							$childRecord = $this->cleanRecord($param, $childRecord);
-							$data['LineItems'][] = $childRecord;
-						}
-						// Add the product at the order level (work around because of an issue in Vtiger API)
-						$data['productid'] = $childRecord['productid'];
-						unset($data['LineItem']);
-					}
-
-					if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
-						foreach ($data as $inventorykey => $inventoryValue) {
-							if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
-								$data["LineItems"][0][$inventorykey] = $inventoryValue;
-							}
-						}
-						if (!isset($data["LineItems"][0]["sequence_no"])) {
-							$data["LineItems"][0]["sequence_no"] = 1;
-						}
-                        $data["hdnTaxType"] = (($data["hdnTaxType"] ?? "") ?: "group");
-					}
-
-						$resultCreate = $this->vtigerClient->create($param['module'], $data);
-
-						if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
-							$result[$idDoc] = [
-								'id'    => $resultCreate['result']['id'],
-								'error' => false,
-							];
-						} else {
-							throw new \Exception($resultCreate["error"]["message"] ?? "Error");
-						}
-					} catch (\Exception $e) {
-						$result[$idDoc] = array(
-							'id' => '-1',
-							'error' => $e->getMessage()
-						);
-					}
-
-                    // Transfert status update
-                    if (!empty($subDocIdArray) AND empty($result[$idDoc]['error'])) {
-                        foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {
-                            $this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
-                        }
-                    }
-
-					$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-				}
+			    $this->createVtigerStandardRecords($param, $result);
 			} else {
-				$parents = [];
-				foreach ($param['data'] as $idDoc => $data) {
-					if (!in_array($data['parent_id'], array_keys($parents))) {
-						$ret = $this->vtigerClient->retrieve($data['parent_id']);
-						if (!empty($ret) && $ret['success']) {
-							$parents[$data['parent_id']] = $ret['result'];
-						}
-					}
-				}
-				foreach ($parents as &$parent) {
-					while (!empty($parent['LineItems'])) {
-						$this->vtigerClient->delete($parent['LineItems'][0]['id']);
-						$ret = $this->vtigerClient->retrieve($parent['id']);
-						if (!empty($ret) && $ret['success']) {
-							$parent['LineItems'] = $ret['result']['LineItems'];
-						}
-					}
-				}
-				unset($parent);
-
-				foreach ($parents as $parent) {
-					$lineitems = [];
-					foreach ($param['data'] as $idDoc => $data) {
-						if ($data['parent_id'] == $parent['id']) {
-							unset($data['target_id']);
-							unset($data['parent_id']);
-							$lineitems[$idDoc] = $data;
-						}
-					}
-					$resultUpdate = null;
-					if (!empty($lineitems)) {
-						if (!isset($parent["invoicestatus"]) || empty($parent["invoicestatus"])) {
-							$parent["invoicestatus"] = "AutoCreated";
-						}
-						unset($parent["LineItems_FinalDetails"]);
-						$parent['LineItems'] = [];
-						foreach ($lineitems as $lineItem) {
-							$parent['LineItems'][] = $lineItem;
-						}
-
-						$resultUpdate = $this->vtigerClient->update($parent["id"], $parent);
-						if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
-							$retrive = $this->vtigerClient->retrieve($resultUpdate['result']['id']);
-							if (!empty($ret) && $ret['success']) {
-								foreach ($lineitems as $idDoc => $lineitem) {
-									foreach ($retrive['result']['LineItems'] as $retriveLineItem) {
-										if ($retriveLineItem['sequence_no'] == $lineitem['sequence_no']) {
-											$result[$idDoc] = [
-												'id'    => $retriveLineItem['id'],
-												'error' => false,
-											];
-											$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-										}
-									}
-								}
-							}
-						} else {
-							foreach ($lineitems as $idDoc => $lineItem) {
-								$result[$idDoc] = [
-									'id' => '-1',
-									'error' => $resultUpdate["error"]["message"]
-								];
-								$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-							}
-						}
-					}
-				}
+			    $this->createVtigerLineItemRecords($param, $result);
 			}
 		} catch (\Exception $e) {
-			$error = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
-			$result['error'] = $error;
+			$result['error'] = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
 		}
+
 		return $result;
 	}
+
+    /**
+     * @param $param
+     * @param $result
+     */
+    protected function createVtigerStandardRecords($param, &$result)
+    {
+        $subDocIdArray = [];
+
+        foreach ($param['data'] as $idDoc => $data) {
+            try {
+                $data = $this->cleanRecord($param, $data);
+                $data = $this->sanitizeVtigerLineItemData($param, $data, $subDocIdArray);
+                $data = $this->sanitizeVtigerInventoryRecord($param, $data);
+
+                $resultCreate = $this->vtigerClient->create($param['module'], $data);
+                if (empty($resultCreate['success']) || empty($resultCreate['result']['id'])) {
+                    throw new \Exception($resultCreate["error"]["message"] ?? "Error");
+                }
+
+                $result[$idDoc] = [
+                    'id' => $resultCreate['result']['id'],
+                    'error' => false,
+                ];
+            } catch (\Exception $e) {
+                $result[$idDoc] = array(
+                    'id' => '-1',
+                    'error' => $e->getMessage()
+                );
+            }
+
+            $this->updateSubDocumentsStatus($idDoc, $param, $result, $subDocIdArray);
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+        }
+    }
+
+    /**
+     * Update status for document collected over $subDocIdArray.
+     *
+     * @param $idDoc
+     * @param $param
+     * @param $result
+     * @param $subDocIdArray
+     */
+    protected function updateSubDocumentsStatus($idDoc, $param, $result, $subDocIdArray)
+    {
+        if (empty($result[$idDoc]['error']) && count($subDocIdArray) > 0) {
+            foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {
+                $this->updateDocumentStatus($idSubDoc, $valueSubDoc, $param);
+            }
+        }
+    }
+
+    /**
+     * @param $param
+     * @param $result
+     */
+	protected function createVtigerLineItemRecords($param, &$result)
+    {
+        $parents = $this->getAllDataParents($param);
+        $parents = $this->deleteAllLineItemsOnParents($parents);
+
+        foreach ($parents as $parent) {
+            $lineItems = $this->mapDataLineItemsByParent($param, $parent);
+            if (empty($lineItems)) {
+                continue;
+            }
+
+            $this->createVtigerLineItemsRecordsByParent($param, $lineItems, $parent, $result);
+        }
+    }
+
+    /**
+     * @param $param
+     * @param $lineItems
+     * @param $parent
+     * @param $result
+     */
+    protected function createVtigerLineItemsRecordsByParent($param, $lineItems, $parent, &$result)
+    {
+        if (empty($parent["invoicestatus"])) {
+            $parent["invoicestatus"] = "AutoCreated";
+        }
+        unset($parent["LineItems_FinalDetails"]);
+        $parent['LineItems'] = [];
+        foreach ($lineItems as $lineItem) {
+            $parent['LineItems'][] = $lineItem;
+        }
+
+        $resultUpdate = $this->getVtigerClient()->update($parent["id"], $parent);
+
+        if (empty($resultUpdate['success']) || empty($resultUpdate['result']['id'])) {
+            foreach ($lineItems as $idDoc => $lineItem) {
+                $result[$idDoc] = [
+                    'id' => '-1',
+                    'error' => $resultUpdate["error"]["message"]
+                ];
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+            }
+
+            return;
+        }
+
+        $retrive = $this->vtigerClient->retrieve($resultUpdate['result']['id']);
+        if (empty($retrive['success']) || empty($retrive['result']['LineItems'])) {
+            return;
+        }
+
+        foreach ($lineItems as $idDoc => $lineItem) {
+            foreach ($retrive['result']['LineItems'] as $retriveLineItem) {
+                if ($retriveLineItem['sequence_no'] != $lineItem['sequence_no']) {
+                    continue;
+                }
+                $result[$idDoc] = [
+                    'id'    => $retriveLineItem['id'],
+                    'error' => false,
+                ];
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+            }
+        }
+    }
+
+    /**
+     * @param $param
+     * @return array
+     */
+    protected function getAllDataParentsFromParam($param)
+    {
+        $parents = [];
+        foreach ($param['data'] as $idDoc => $data) {
+            if (!in_array($data['parent_id'], array_keys($parents))) {
+                $parent = $this->getVtigerClient()->retrieve($data['parent_id']);
+                if (isset($parent['success']) && isset($parent['result'])) {
+                    $parents[$data['parent_id']] = $parent['result'];
+                }
+            }
+        }
+
+        return $parents;
+    }
+
+    /**
+     *
+     * @param $param
+     * @param $parent
+     *
+     * @return array
+     */
+    protected function mapDataLineItemsByParent($param, $parent)
+    {
+        $lineItems = [];
+        foreach ($param['data'] as $idDoc => $data) {
+            if ($data['parent_id'] == $parent['id']) {
+                unset($data['target_id']);
+                unset($data['parent_id']);
+                $lineItems[$idDoc] = $data;
+            }
+        }
+
+        return $lineItems;
+    }
+
+    /**
+     * @param $parents
+     *
+     * @return mixed
+     */
+    protected function deleteAllLineItemsOnParents($parents)
+    {
+        foreach ($parents as &$parent) {
+            while (!empty($parent['LineItems'])) {
+                $this->vtigerClient->delete($parent['LineItems'][0]['id']);
+                $response = $this->vtigerClient->retrieve($parent['id']);
+                if (!empty($response) && $response['success']) {
+                    $parent['LineItems'] = $response['result']['LineItems'];
+                }
+            }
+        }
+
+        unset($parent);
+
+        return $parents;
+    }
 
 	/**
 	 * Update existing record in target
@@ -830,153 +945,238 @@ class vtigercrmcore extends solution
 	 */
 	public function update($param)
 	{
-		try {
-			$subDocIdArray = array();
-			if (empty($this->vtigerClient)) {
-				throw new \Exception('Error: no VtigerClient setup');
-			}
+        if (empty($this->vtigerClient)) {
+            return $this->errorMissingVtigerClient();
+        }
 
-            $result = [];
+        $result = [];
+        $subDocIdArray = [];
 
-            $lineItemFields = [];
-            if (in_array($param['module'], $this->inventoryModules, true)) {
-                $describe = $this->vtigerClient->describe('LineItem');
-
-                foreach ($describe['result']['fields'] as $field) {
-                    $lineItemFields[] = $field['name'];
-                }
-            }
-
+        try {
 			foreach ($param['data'] as $idDoc => $data) {
-				try {
-					$data['id'] = $data['target_id'];
-					// Clean record by removing Myddleware fields (ex : target_id)
-					$data = $this->cleanRecord($param, $data);
-
-					// In case of LineItem (sub array in the data array => an order can have seeral orderItems),
-					// We transform the lineItem array into a LineItems array with the right format
-					if (!empty(	$data['LineItem'])) {
-						foreach($data['LineItem'] as $subIdDoc => $childRecord) {
-							// Save the subIdoc to change the sub data transfer status
-							$subDocIdArray[$subIdDoc] = array('id' => uniqid('', true));
-							// Clean subrecord by removing Myddleware fields (ex : target_id)
-							$childRecord = $this->cleanRecord($param, $childRecord);
-							$data['LineItems'][] = $childRecord;
-						}
-						// Add the product at the order level (work around because of an issue in Vtiger API)
-						$data['productid'] = $childRecord['productid'];
-						unset($data['LineItem']);
-					}
-
-					if (!empty($lineItemFields) && in_array($param['module'], $this->inventoryModules, true)) {
-						foreach ($data as $inventorykey => $inventoryValue) {
-							if (in_array($inventorykey, $lineItemFields, true) && $inventorykey != "id") {
-								$data["LineItems"][0][$inventorykey] = $inventoryValue;
-							}
-						}
-						if (!isset($data["LineItems"][0]["sequence_no"])) {
-							$data["LineItems"][0]["sequence_no"] = 1;
-						}
-						$data["hdnTaxType"] = (($data["hdnTaxType"] ?? "") ?: "group");
-					}
-
-                    $resultUpdate = $this->vtigerClient->update($param['module'], $data);
-
-					if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
-						$result[$idDoc] = [
-							'id'    => $resultUpdate['result']['id'],
-							'error' => false,
-						];
-					} else {
-						throw new \Exception($resultUpdate["error"]["message"] ?? "Error");
-					}
-				} catch (\Exception $e) {
-					$result[$idDoc] = [
-						'id' => '-1',
-						'error' => $e->getMessage()
-					];
-				}
-                // Transfert status update
-                if (
-                    !empty($subDocIdArray)
-                    AND empty($result[$idDoc]['error'])
-                ) {
-                    foreach($subDocIdArray as $idSubDoc => $valueSubDoc) {
-                        $this->updateDocumentStatus($idSubDoc,$valueSubDoc,$param);
-                    }
-                }
+				$this->updateElementOnVtiger($idDoc, $data, $param, $result, $subDocIdArray);
+				$this->updateSubDocumentsStatus($idDoc, $param, $result, $subDocIdArray);
 				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
 		} catch (\Exception $e) {
-			$error = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
-			$result['error'] = $error;
+			$result['error'] = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
 		}
+
 		return $result;
 	}
 
+    /**
+     * Get lineitem fields for specific module.
+     *
+     * @param $module
+     *
+     * @return array
+     */
+	protected function getVtigerLineItemFields($module)
+    {
+        $lineItemFields = [];
+
+        if (in_array($module, $this->inventoryModules, true)) {
+            $describe = $this->getVtigerClient()->describe('LineItem');
+
+            foreach ($describe['result']['fields'] as $field) {
+                $lineItemFields[] = $field['name'];
+            }
+        }
+
+        return $lineItemFields;
+    }
+
+    /**
+     * Update element on Vtiger.
+     *
+     * @param $idDoc
+     * @param $data
+     * @param $param
+     * @param $result
+     * @param $subDocIdArray
+     *
+     * @return void
+     */
+    protected function updateElementOnVtiger($idDoc, $data, $param, &$result, &$subDocIdArray)
+    {
+        $data['id'] = $data['target_id'];
+
+        try {
+            $data = $this->cleanRecord($param, $data);
+            $data = $this->sanitizeVtigerLineItemData($param, $data, $subDocIdArray);
+            $data = $this->sanitizeVtigerInventoryRecord($param, $data);
+
+            $resultUpdate = $this->getVtigerClient()->update($param['module'], $data);
+
+            if (empty($resultUpdate['success']) && !empty($resultUpdate['result'])) {
+                $result[$idDoc] = [
+                    'id'    => $resultUpdate['result']['id'],
+                    'error' => false,
+                ];
+            } else {
+                throw new \Exception($resultUpdate["error"]["message"] ?? "Error");
+            }
+        } catch (\Exception $e) {
+            $result[$idDoc] = [
+                'id' => '-1',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     *
+     *
+     * @param $param
+     * @param $data
+     * @param $subDocIdArray
+     *
+     * @return mixed
+     */
+    protected function sanitizeVtigerLineItemData($param, $data, &$subDocIdArray)
+    {
+        if (empty($data['LineItem'])) {
+            return $data;
+        }
+
+        foreach($data['LineItem'] as $subIdDoc => $childRecord) {
+            if (empty($data['productid']) && isset($childRecord['productid'])) {
+                $data['productid'] = $childRecord['productid'];
+            }
+            $subDocIdArray[$subIdDoc] = array('id' => uniqid('', true));
+            $childRecord = $this->cleanRecord($param, $childRecord);
+            $data['LineItems'][] = $childRecord;
+        }
+
+        unset($data['LineItem']);
+
+        return $data;
+    }
+
+    /**
+     * Sanitize record for vtiger update.
+     *
+     * @param $param
+     * @param $data
+     *
+     * @return array
+     */
+    protected function sanitizeVtigerInventoryRecord($param, $data)
+    {
+        $lineItemFields = $this->getVtigerLineItemFields($param['module']);
+
+        if (empty($lineItemFields)) {
+            return $data;
+        }
+
+        if ($this->isVtigerInventoryModule($param['module'])) {
+            foreach ($data as $inventoryKey => $inventoryValue) {
+                if (in_array($inventoryKey, $lineItemFields, true) && $inventoryKey != "id") {
+                    $data["LineItems"][0][$inventoryKey] = $inventoryValue;
+                }
+            }
+            if (!isset($data["LineItems"][0]["sequence_no"])) {
+                $data["LineItems"][0]["sequence_no"] = 1;
+            }
+
+            $data["hdnTaxType"] = (($data["hdnTaxType"] ?? "") ?: "group");
+        }
+
+        return $data;
+    }
+
 	/**
-	 * Delete existing record in target
+	 * Delete existing record in target.
 	 *
 	 * @param array $param
 	 * @return array
 	 */
 	public function delete($param)
 	{
-		try {
-			if (empty($this->vtigerClient)) {
-				throw new \Exception('Error: no VtigerClient setup');
-			}
+        if (empty($this->vtigerClient)) {
+            return $this->errorMissingVtigerClient();
+        }
 
-			$result = [];
+        $result = [];
 
+        try {
 			if ($param['module'] == 'LineItem') {
 				$result = $this->update($param);
 			} else {
 				foreach ($param['data'] as $idDoc => $data) {
-					try {
-						$id = $data['target_id'];
-
-						$resultDelete = $this->vtigerClient->delete($id);
-
-						if (
-							!empty($resultDelete) &&
-							(!(isset($resultDelete['success']) && !$resultDelete['success']) &&
-								(isset($resultDelete['status']) && $resultDelete['status'] == 'successful'))
-						) {
-							$result[$idDoc] = [
-								'id'    => $id,
-								'error' => false,
-							];
-						} else {
-							throw new \Exception($resultDelete["error"]["message"] ?? "Error");
-						}
-					} catch (\Exception $e) {
-						$result[$idDoc] = array(
-							'id' => '-1',
-							'error' => $e->getMessage()
-						);
-					}
+					$this->deleteElementOnVtiger($idDoc, $data, $result);
 					$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 				}
 			}
 		} catch (\Exception $e) {
-			$error = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
-			$result['error'] = $error;
+            $result['error'] = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
 		}
+
 		return $result;
     }
 
-	// Clean a record by removing all Myddleware fields
-	protected function cleanRecord($param, $data) {
-		$myddlewareFields = array('target_id', 'source_date_modified', 'id_doc_myddleware','Myddleware_element_id');
+    /**
+     * @param $idDoc
+     * @param $data
+     * @param $result
+     */
+    protected function deleteElementOnVtiger($idDoc, $data, &$result)
+    {
+        $id = $data['target_id'];
+
+        try {
+            $resultDelete = $this->vtigerClient->delete($id);
+
+            if (
+                !empty($resultDelete) &&
+                (!(isset($resultDelete['success']) && !$resultDelete['success']) &&
+                    (isset($resultDelete['status']) && $resultDelete['status'] == 'successful'))
+            ) {
+                $result[$idDoc] = [
+                    'id'    => $id,
+                    'error' => false,
+                ];
+            } else {
+                throw new \Exception($resultDelete["error"]["message"] ?? "Error");
+            }
+        } catch (\Exception $e) {
+            $result[$idDoc] = array(
+                'id' => '-1',
+                'error' => $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Clean a record by removing all Myddleware fields.
+     *
+     * @param $param
+     * @param $data
+     *
+     * @return mixed
+     */
+	protected function cleanRecord($param, $data)
+    {
+		$myddlewareFields = array('target_id', 'source_date_modified', 'id_doc_myddleware', 'Myddleware_element_id');
+
 		foreach ($myddlewareFields as $myddlewareField) {
 			if (array_key_exists($myddlewareField, $data)) {
 				unset($data[$myddlewareField]);
 			}
 		}
+
 		return $data;
 	}
 
+    /**
+     * Get current RuleMode based on $module and $type.
+     *
+     * @param $module
+     * @param $type
+     *
+     * @return string[]
+     */
 	public function getRuleMode($module, $type)
 	{
 		if ($module == 'LineItem' && $type == 'target') {
@@ -989,6 +1189,16 @@ class vtigercrmcore extends solution
 		];
 	}
 
+    /**
+     * Get correct DateRef field based on RuleMode.
+     *
+     * @param $moduleSource
+     * @param $RuleMode
+     *
+     * @return string
+     *
+     * @throws \Exception
+     */
 	public function getDateRefName($moduleSource, $RuleMode)
 	{
 		if (in_array($RuleMode, ['0', 'S'])) {
@@ -1000,31 +1210,55 @@ class vtigercrmcore extends solution
 		}
 	}
 
-	// Build the direct link to the record (used in data transfer view)
+    /**
+     * Build the direct link to the record (used in data transfer view).
+     *
+     * @param $rule
+     * @param $document
+     * @param $type
+     *
+     * @return string|void
+     */
 	public function getDirectLink($rule, $document, $type)
 	{
-		// Get url, module and record ID depending on the type
-		if ($type == 'source') {
-			$url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-			$module = $rule->getModuleSource();
-			$recordId = $document->getSource();
-		} else {
-			$url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-			$module = $rule->getModuleTarget();
-			$recordId = $document->gettarget();
-		}
+        $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+        $module = $rule->getModuleSource();
+        $recordId = $document->getSource();
 
-		// Get the record id, id format <key>x<recordId>
 		$recordIdArray = explode('x', $recordId);
 		if (substr($url, 0, strlen("http")) !== "http") {
 			$url = 'http://' . $url;
 		}
-		if (!empty($recordIdArray[1])) {
-			// Build the URL (delete if exists / to be sure to not have 2 / in a row)
-			return rtrim($url, '/') . '/index.php?module=' . $module . '&view=Detail&record=' . $recordIdArray[1];
+
+		if (empty($recordIdArray[1])) {
+            return;
 		}
-		return null;
+
+        return rtrim($url, '/') . '/index.php?module=' . $module . '&view=Detail&record=' . $recordIdArray[1];
 	}
+
+    /**
+     * Return default error for missing vtiger client.
+     *
+     * @param array $extend
+     * @return array
+     */
+	protected function errorMissingVtigerClient($extend = [])
+    {
+        return array_merge(['error' => 'Error: no VtigerClient setup'], $extend);
+    }
+
+    /**
+     * Return true if $module is a vtiger inventory module.
+     *
+     * @param $module
+     *
+     * @return bool
+     */
+    protected function isVtigerInventoryModule($module)
+    {
+        return in_array($module, $this->inventoryModules, true);
+    }
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
