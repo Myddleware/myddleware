@@ -64,7 +64,7 @@ dev: init down
 	@docker-compose up -d
 
 prod: init
-	@docker-compose -f docker-compose.yml up -d
+	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 start: prod
 	@echo "Myddleware is ready."
