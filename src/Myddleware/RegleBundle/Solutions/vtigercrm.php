@@ -446,7 +446,7 @@ class vtigercrmcore extends solution
             $where = $this->getVtigerWhereCondition($param);
 
 			if ($module == "LineItem") {
-                $query = $this->readVtigerLineItemQuery();
+                $query = $this->readLastVtigerLineItemQuery($param, $where);
 			} elseif (empty($param['query']['id'])) {
                 $query = $this->vtigerClient->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
             } else {
@@ -478,7 +478,7 @@ class vtigercrmcore extends solution
      * @param $param
      * @param $where
      */
-    protected function readVtigerLineItemQuery($param, $where)
+    protected function readLastVtigerLineItemQuery($param, $where)
     {
         $module = $param['module'];
         $query = $this->getVtigerClient()->query("SELECT parent_id FROM {$module} {$where};");
@@ -505,7 +505,7 @@ class vtigercrmcore extends solution
                 if ($maxTime && $maxTime >= $parentElement['modifiedtime']) {
                     continue;
                 }
-                $retrive = $this->vtigerClient->retrieve($parentElement['id']);
+                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
                 if (empty($retrive['result']['LineItems'])) {
                     continue;
                 }
@@ -554,10 +554,7 @@ class vtigercrmcore extends solution
         }
 
         if (count($param['fields']) == 0) {
-            return [
-                'error' => 'Error: no Param Given',
-                'done'  => false,
-            ];
+            return $this->errorVtigerMissingParam(['done' => false]);
         }
 
         if (empty($param['offset'])) {
@@ -568,165 +565,160 @@ class vtigercrmcore extends solution
             $param['limit'] = $this->limitPerCall;
         }
 
-        $deletion = false;
-        if (isset($param['ruleParams']['deletion']) && !empty($param['ruleParams']['deletion'])) {
-            $deletion = true;
-        }
-
-        /** @var array $result */
         $result = [
             'count' => 0,
         ];
 
-		try {
+        try {
+            $queryParam = $this->getVtigerReadQueryParam($param);
+            $where = $this->getVtigerReadWhereCondition($param);
 
-			if ($param['module'] == 'LineItem' && $deletion) {
-				return $result;
-			} elseif ($param['module'] == 'LineItem') {
-				$whereStr = !empty($param['date_ref']) ? "WHERE modifiedtime > '$param[date_ref]'" : '';
-				if (!empty($param['query'])) {
-					$whereStr = [];
-					if (!array_key_exists('id', $param['query'])) {
-						foreach ($param['query'] as $key => $item) {
-							$whereStr[] = "$key = '$item'";
-						}
-						$whereStr = (empty($whereStr) ? 'WHERE ' : ' AND ') . implode(" AND ", $whereStr);
-					} else {
-						$whereStr = (empty($whereStr) ? 'WHERE ' : ' AND ') . "id = '" . $param['query']['id'] . "'";
-					}
-				}
-			}
+            $orderBy = 'ORDER BY modifiedtime ASC';
+            if ($this->isVtigerInventoryModule($param['module'])) {
+                $orderBy = '';
+            }
 
-			do {
-				$more = true;
-				$entitys = [];
+            $dataLeft = $param['limit'];
 
-				if ($param['module'] == 'LineItem') {
-					if (empty($this->moduleList)) {
-						$this->setAllModulesPrefix();
-					}
+            do {
+                $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
 
-					$query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
+                if ($param['module'] == 'LineItem') {
+                    $query = $this->readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall);
+                } else {
+                    $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;");
+                }
 
-					$parentModules = [];
-					foreach ($query['result'] as $parent) {
-						if (empty($parent["parent_id"])) {
-							continue;
-						}
-						$prefix = explode("x", $parent["parent_id"])[0];
-						if (!array_key_exists($prefix, $parentModules)) {
-							$parentModules[$prefix] = $this->moduleList[$prefix];
-						}
-					}
+                if (empty($query['success'])) {
+                    return [
+                        'error' => 'Error: Request Failed! ('.($query['error']['message'] ?? 'Error').')',
+                        'count' => 0,
+                    ];
+                }
 
-					$lineitems = [];
-					foreach ($parentModules as $prefix => $moduleName) {
-						$query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $whereStr LIMIT $param[offset], " . $this->limitPerCall . ";");
-						if (empty($query) || !$query['success']) {
-							continue;
-						}
+                if (empty($query['result'])) {
+                    break;
+                }
 
-						foreach ($query["result"] as $parentElement) {
-							$retrive = $this->vtigerClient->retrieve($parentElement["id"]);
-							foreach ($retrive["result"]["LineItems"] as $lineitem) {
-								$lineitem["parent_id"] = $parentElement["id"];
-								$lineitem["modifiedtime"] = $parentElement["modifiedtime"];
-								$lineitem["createdtime"] = $parentElement["createdtime"];
-								$lineitems[] = $lineitem;
-							}
-						}
-					}
+                $countResult = 0;
+                $entitys = $query['result'];
+                foreach ($entitys as $value) {
+                    if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
+                        $result['date_ref'] = $value['modifiedtime'];
+                        $result['values'][$value['id']] = $value;
+                        if (in_array($param['rule']['mode'], ['0', 'S'])) {
+                            $result['values'][$value['id']]['date_modified'] = $value['modifiedtime'];
+                        } elseif ($param['rule']['mode'] == 'C') {
+                            $result['values'][$value['id']]['date_modified'] = $value['createdtime'];
+                        }
+                        $result['count']++;
+                        $countResult++;
+                    }
+                }
 
-					$entitys = $lineitems;
-					$more = count($entitys) != 0;
-				} else {
-					$dateRef = !empty($param['date_ref']) ? strtotime($param['date_ref']) : 1;
-					$sync = $this->vtigerClient->sync($param['module'], $dateRef, 'application', 1);
-					if (empty($sync) || !$sync['success']) {
-						return [
-							'error' => 'Error: Request Failed! (' . ($sync['error']['message'] ?? 'Error') . ')',
-							'count' => 0,
-						];
-					}
+                $param['offset'] += $nDataCall;
+                $dataLeft -= $nDataCall;
+            } while ($dataLeft > 0 && $countResult >= $nDataCall);
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
+        }
 
-					if (!empty($param['query']) && !$deletion) {
-						// $iterable = !$deletion ? $sync['result']['updated'] : $sync['result']['deleted'];
-						$iterable = $sync['result']['updated'];
-						foreach ($iterable as $item) {
-							if (!array_key_exists('id', $param['query'])) {
-								$all = true;
-								foreach ($param['query'] as $key => $item) {
-									if ($item[$key] != $item) {
-										$all = false;
-										break;
-									}
-								}
-								if ($all) {
-									$entitys[] = $item;
-								}
-							} else {
-								if ($item['id'] == $param['query']['id']) {
-									$entitys[] = $item;
-								}
-							}
-						}
-					} else {
-						$entitys = !$deletion ? $sync['result']['updated'] : $sync['result']['deleted'];
-					}
-					if (in_array($param['module'], $this->inventoryModules, true) && !$deletion) {
-						foreach ($entitys as &$entity) {
-							$ret = $this->vtigerClient->retrieve($entity['id'], 1);
-							if (empty($ret) || !$ret['success']) {
-								continue;
-							}
-							$entity = array_merge($ret['result']['LineItems'][0], $entity);
-						}
-						unset($entity);
-					}
-					$more = $sync['result']['more'];
-					$lastModifiedTime = $sync['result']['lastModifiedTime'];
-				}
-
-				if (!$deletion) {
-					foreach ($entitys as $value) {
-						if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
-							$result['values'][$value['id']] = $value;
-							$result['date_ref'] = $value['modifiedtime'];
-							$result['values'][$value['id']]['date_modified'] = $value[$this->getDateRefName($param['module'], $param['rule']['mode'])];
-
-							$result['count']++;
-
-							if ($result['count'] >= $param['limit']) {
-								$more = false;
-								break;
-							}
-						}
-					}
-				} else {
-					foreach ($entitys as $value) {
-						if (!isset($result['values']) || !array_key_exists($value, $result['values'])) {
-							$result['values'][$value] = ['id' => $value, 'myddleware_deletion' => true];
-							$result['date_ref'] = $lastModifiedTime;
-							$result['values'][$value]['date_modified'] = $lastModifiedTime;
-
-
-							$result['count']++;
-
-							if ($result['count'] >= $param['limit']) {
-								$more = false;
-								break;
-							}
-						}
-					}
-				}
-				$param['offset'] += count($entitys);
-			} while ($more);
-		} catch (\Exception $e) {
-			$result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
-		}
-
-		return $result;
+        return $result;
 	}
+
+    /**
+     * @param $param
+     * @param $where
+     * @param $orderBy
+     * @param $nDataCall
+     *
+     * @return array
+     */
+	protected function readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall)
+    {
+        if (empty($this->moduleList)) {
+            $this->setModulePrefix();
+        }
+
+        $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
+
+        $parentModules = [];
+        foreach ($query['result'] as $parent) {
+            $prefix = explode('x', $parent['parent_id'])[0];
+            if (!array_key_exists($prefix, $parentModules)) {
+                $parentModules[$prefix] = $this->moduleList[$prefix];
+            }
+        }
+
+        $entities = [];
+        foreach ($parentModules as $prefix => $moduleName) {
+            $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
+            if (empty($query) || !$query['success']) {
+                continue;
+            }
+
+            foreach ($query['result'] as $parentElement) {
+                $retrive = $this->vtigerClient->retrieve($parentElement['id']);
+                foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
+                    if ($index == 0) {
+                        continue;
+                    }
+                    $lineitem['parent_id'] = $parentElement['id'];
+                    $lineitem['modifiedtime'] = $parentElement['modifiedtime'];
+                    $lineitem['createdtime'] = $parentElement['createdtime'];
+                    $entities[] = $lineitem;
+                }
+            }
+        }
+
+        return ['success' => true, 'result' => $entities];
+    }
+
+    /**
+     * @param $param
+     *
+     * @return string
+     */
+    protected function getVtigerReadQueryParam($param)
+    {
+        $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
+        if ($queryParam != '*') {
+            $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
+            $queryParam = implode(',', $requiredField).','.$queryParam;
+            $queryParam = str_replace(['my_value,', 'my_value'], '', $queryParam);
+        }
+        $queryParam = rtrim($queryParam, ',');
+
+        return $queryParam;
+    }
+
+    /**
+     *
+     * @param $param
+     *
+     * @return string
+     */
+    protected function getVtigerReadWhereCondition($param)
+    {
+        $dateRefValue = isset($param['date_ref']) && $param['date_ref'] ? $param['date_ref'] : null;
+        $where = $dateRefValue ? "WHERE modifiedtime > '{$dateRefValue}'" : '';
+
+        if (isset($param['query']) && $param['query']) {
+            $where .= empty($where) ? 'WHERE ' : ' AND ';
+            foreach ($param['query'] as $key => $item) {
+                if ($key == 'id') {
+                    $where = " WHERE id = '$item' ";
+                    break;
+                }
+                if (substr($where, -strlen("'")) === "'") {
+                    $where .= ' AND ';
+                }
+                $where .= "$key = '$item'";
+            }
+        }
+
+        return $where;
+    }
 
 	/**
 	 * Create new record in target
@@ -1269,6 +1261,17 @@ class vtigercrmcore extends solution
     protected function errorVtigerRequestFailed($extend = [])
     {
         return array_merge(['error' => 'Error: Request Failed!'], $extend);
+    }
+
+    /**
+     * Return default error for missing vtiger client.
+     *
+     * @param array $extend
+     * @return array
+     */
+    protected function errorVtigerMissingParam($extend = [])
+    {
+        return array_merge(['error' => 'Error: no Param Given'], $extend);
     }
 
     /**
