@@ -26,7 +26,6 @@
 namespace Myddleware\RegleBundle\Solutions;
 
 use Javanile\VtigerClient\VtigerClient;
-use phpDocumentor\Reflection\Utils;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -184,6 +183,14 @@ class vtigercrmcore extends solution
     }
 
     /**
+     * @return VtigerClient
+     */
+    protected function notVtigerClient()
+    {
+        return empty($this->vtigerClient);
+    }
+
+    /**
      * Make the login
      *
      * @param $paramConnexion
@@ -211,11 +218,11 @@ class vtigercrmcore extends solution
     {
         // TODO: Vtiger Logout doesn't work.
         /*
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return false;
         }
 
-        return $this->vtigerClient->logout();
+        return $this->getVtigerClient()->logout();
         */
 
         return true;
@@ -248,14 +255,14 @@ class vtigercrmcore extends solution
     }
 
     /**
-     * Return of the modules without the specified ones
+     * Return of the modules without the specified ones.
      *
      * @param string $type
      * @return array|bool
      */
     public function get_modules($type = 'source')
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return false;
         }
 
@@ -297,14 +304,14 @@ class vtigercrmcore extends solution
      */
     public function setAllModulesPrefix()
     {
-        $result = $this->vtigerClient->listTypes();
+        $result = $this->getVtigerClient()->listTypes();
         if (empty($result['success']) || empty($result['result']) || count($result['result']) == 0) {
             return;
         }
 
         $this->moduleList = [];
         foreach ($result['result']['types'] as $moduleName) {
-            $describe = $this->vtigerClient->describe($moduleName);
+            $describe = $this->getVtigerClient()->describe($moduleName);
             if ($describe['success'] && count($describe['result']) > 0) {
                 $this->moduleList[$describe['result']['idPrefix']] = $moduleName;
             }
@@ -317,7 +324,7 @@ class vtigercrmcore extends solution
      */
     protected function setModulePrefix($moduleName)
     {
-        $describe = $this->vtigerClient->describe($moduleName);
+        $describe = $this->getVtigerClient()->describe($moduleName);
 
         if (empty($describe['success']) || empty($describe['result']['idPrefix'])) {
             return;
@@ -338,7 +345,7 @@ class vtigercrmcore extends solution
     {
         parent::get_module_fields($module, $type);
 
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return false;
         }
 
@@ -362,7 +369,7 @@ class vtigercrmcore extends solution
      */
     protected function populateModuleFieldsFromVtigerModule($module, $type = 'source')
     {
-        $describe = $this->vtigerClient->describe($module, $type == 'source' ? 1 : 0);
+        $describe = $this->getVtigerClient()->describe($module, $type == 'source' ? 1 : 0);
         if (empty($describe['success']) || empty($describe['result']['fields'])) {
             return false;
         }
@@ -428,7 +435,7 @@ class vtigercrmcore extends solution
      */
     public function read_last($param)
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return $this->errorMissingVtigerClient(['done' => -1]);
         }
 
@@ -447,9 +454,9 @@ class vtigercrmcore extends solution
             if ($module == "LineItem") {
                 $query = $this->readLastVtigerLineItemQuery($param, $where);
             } elseif (empty($param['query']['id'])) {
-                $query = $this->vtigerClient->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
+                $query = $this->getVtigerClient()->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
             } else {
-                $query = $this->vtigerClient->retrieve($param['query']['id']);
+                $query = $this->getVtigerClient()->retrieve($param['query']['id']);
                 $query['result'][0] = $query['result'];
             }
 
@@ -548,7 +555,7 @@ class vtigercrmcore extends solution
      */
     public function read($param)
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return $this->errorMissingVtigerClient(['done' => false]);
         }
 
@@ -585,7 +592,7 @@ class vtigercrmcore extends solution
                 if ($param['module'] == 'LineItem') {
                     $query = $this->readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall);
                 } else {
-                    $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;");
+                    $query = $this->getVtigerClient()->query("SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;");
                 }
 
                 if (empty($query['success'])) {
@@ -638,7 +645,7 @@ class vtigercrmcore extends solution
             $this->setModulePrefix();
         }
 
-        $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
+        $query = $this->getVtigerClient()->query("SELECT parent_id FROM $param[module];");
 
         $parentModules = [];
         foreach ($query['result'] as $parent) {
@@ -650,13 +657,13 @@ class vtigercrmcore extends solution
 
         $entities = [];
         foreach ($parentModules as $prefix => $moduleName) {
-            $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
+            $query = $this->getVtigerClient()->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
             if (empty($query) || !$query['success']) {
                 continue;
             }
 
             foreach ($query['result'] as $parentElement) {
-                $retrive = $this->vtigerClient->retrieve($parentElement['id']);
+                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
                 foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
                     if ($index == 0) {
                         continue;
@@ -726,7 +733,7 @@ class vtigercrmcore extends solution
      */
     public function create($param)
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return $this->errorMissingVtigerClient();
         }
 
@@ -759,7 +766,7 @@ class vtigercrmcore extends solution
                 $data = $this->sanitizeVtigerLineItemData($param, $data, $subDocIdArray);
                 $data = $this->sanitizeVtigerInventoryRecord($param, $data);
 
-                $resultCreate = $this->vtigerClient->create($param['module'], $data);
+                $resultCreate = $this->getVtigerClient()->create($param['module'], $data);
                 if (empty($resultCreate['success']) || empty($resultCreate['result']['id'])) {
                     throw new \Exception($resultCreate["error"]["message"] ?? "Error");
                 }
@@ -847,7 +854,7 @@ class vtigercrmcore extends solution
             return;
         }
 
-        $retrive = $this->vtigerClient->retrieve($resultUpdate['result']['id']);
+        $retrive = $this->getVtigerClient()->retrieve($resultUpdate['result']['id']);
         if (empty($retrive['success']) || empty($retrive['result']['LineItems'])) {
             return;
         }
@@ -915,8 +922,8 @@ class vtigercrmcore extends solution
     {
         foreach ($parents as &$parent) {
             while (!empty($parent['LineItems'])) {
-                $this->vtigerClient->delete($parent['LineItems'][0]['id']);
-                $response = $this->vtigerClient->retrieve($parent['id']);
+                $this->getVtigerClient()->delete($parent['LineItems'][0]['id']);
+                $response = $this->getVtigerClient()->retrieve($parent['id']);
                 if (!empty($response) && $response['success']) {
                     $parent['LineItems'] = $response['result']['LineItems'];
                 }
@@ -936,7 +943,7 @@ class vtigercrmcore extends solution
      */
     public function update($param)
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return $this->errorMissingVtigerClient();
         }
 
@@ -1085,7 +1092,7 @@ class vtigercrmcore extends solution
      */
     public function delete($param)
     {
-        if (empty($this->vtigerClient)) {
+        if ($this->notVtigerClient()) {
             return $this->errorMissingVtigerClient();
         }
 
@@ -1117,7 +1124,7 @@ class vtigercrmcore extends solution
         $id = $data['target_id'];
 
         try {
-            $resultDelete = $this->vtigerClient->delete($id);
+            $resultDelete = $this->getVtigerClient()->delete($id);
 
             if (
                 !empty($resultDelete) &&
