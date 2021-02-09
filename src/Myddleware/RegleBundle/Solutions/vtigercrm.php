@@ -600,8 +600,7 @@ class vtigercrmcore extends solution
                 }
 
                 $countResult = 0;
-                $entitys = $query['result'];
-                foreach ($entitys as $value) {
+                foreach ($query['result'] as $value) {
                     if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
