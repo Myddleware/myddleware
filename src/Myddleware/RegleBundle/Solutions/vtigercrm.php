@@ -351,10 +351,7 @@ class vtigercrmcore extends solution
         }
 
         try {
-            if (!$this->populateModuleFieldsFromVtigerModule($module, $type)) {
-                return false;
-            }
-            return $this->moduleFields ?: false;
+            return $this->populateModuleFieldsFromVtigerModule($module, $type) ?: false;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
             return false;
@@ -390,7 +387,7 @@ class vtigercrmcore extends solution
             $this->addVtigerFieldToModuleFields($field, $mandatory);
         }
 
-        if (!empty($this->fieldsRelate)) {
+        if (count($this->fieldsRelate) > 0) {
             $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
         }
 
@@ -450,7 +447,7 @@ class vtigercrmcore extends solution
             $baseFields = $this->cleanVtigerRelatedRecordFields($param['fields']);
 
             $queryParam = implode(',', $baseFields ?? "") ?: '*';
-            $where = $this->getVtigerWhereCondition($param);
+            $where = $this->getReadLastVtigerWhereCondition($param);
 
             if ($module == "LineItem") {
                 $query = $this->readLastVtigerLineItemQuery($param, $where);
@@ -534,7 +531,7 @@ class vtigercrmcore extends solution
      *
      * @return string
      */
-    protected function getVtigerWhereCondition($param)
+    protected function getReadLastVtigerWhereCondition($param)
     {
         $where = '';
         if (!empty($param['query'])) {
@@ -665,14 +662,14 @@ class vtigercrmcore extends solution
 
             foreach ($query['result'] as $parentElement) {
                 $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
-                foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
+                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
                     if ($index == 0) {
                         continue;
                     }
-                    $lineitem['parent_id'] = $parentElement['id'];
-                    $lineitem['modifiedtime'] = $parentElement['modifiedtime'];
-                    $lineitem['createdtime'] = $parentElement['createdtime'];
-                    $entities[] = $lineitem;
+                    $lineItem['parent_id'] = $parentElement['id'];
+                    $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
+                    $lineItem['createdtime'] = $parentElement['createdtime'];
+                    $entities[] = $lineItem;
                 }
             }
         }
@@ -811,7 +808,7 @@ class vtigercrmcore extends solution
      */
     protected function createVtigerLineItemRecords($param, &$result)
     {
-        $parents = $this->getAllDataParents($param);
+        $parents = $this->getAllDataParentsFromParam($param);
         $parents = $this->deleteAllLineItemsOnParents($parents);
 
         foreach ($parents as $parent) {
