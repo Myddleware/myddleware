@@ -25,7 +25,6 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 {% extends 'base.html.twig' %}
 {% block titlesm %}{{ 'title.account.view'|trans }}{% endblock titlesm %}
 {% block body %}
-
     <div id="user_account">
         <div class="row">
             <h2>{{ 'view_account.user_info'|trans }}</h2>
@@ -77,9 +76,10 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div class="row">
             <div class="col form-group">
-               <h2>Reset password</h2>
-                {{form_start(formPassword)}} 
-                {{ form_end(formPassword)}}
+               <h2> {{'password_reset.title'|trans}}</h2>
+               <a href="{{ path('my_account_reset_password')}}">
+                    <button type="button" class="btn btn-primary"> {{'password_reset.button'|trans}}</button>
+               </a>
             </div>
         </div>
     </div>

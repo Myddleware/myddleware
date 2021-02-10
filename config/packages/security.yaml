@@ -1,7 +1,7 @@
 #app/config/security.yaml
 security:
     encoders:
-        App\Entity\User: auto
+        App\Entity\User: sha512
 
     providers:
         username_provider:

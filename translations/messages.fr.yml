@@ -785,9 +785,16 @@ flash:
         reset:
             success: 'Your password has been succesfully reset'
 
-profile:
-    type:
-        password:
-            invalid_message: 'Mot de passe invalide'
-            first_options: 'Premiere option'
-            second_options: 'Seconde option'
+password_reset:
+    title: Modifier mon mot de passe
+    invalid_message: Mot de passe invalide
+    first_options: Nouveau mot de passe
+    second_options: Répéter nouveau mot de passe
+    identical: Les 2 mots de passe doivent être identiques
+    success: Votre mot de passe a bien été changé !
+    failure: Impossible de modifier votre mot de passe
+    incorrect_password: Ancien mot de passe incorrect
+    button: Je veux changer de mot de passe
+    old_password: Mot de passe actuel
+    back_to_account: Retour à la page Mon Compte
+    submit: Enregistrer

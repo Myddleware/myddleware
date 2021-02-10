@@ -42,7 +42,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -130,71 +131,62 @@ class AccountController extends AbstractController
      */
     public function myAccountAction(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
     {
+
         $user = $this->getUser();
         $em = $this->entityManager;
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            return $this->redirectToRoute('my_account'); // fos_user_profile_show
+            return $this->redirectToRoute('my_account'); 
         }
-
-
-        $resetPasswordModel = new ResetPassword();
-        $formPassword = $this->createForm(ResetPasswordType::class, $user);
-        $formPassword->handleRequest($request);
-        var_dump($user);
-        var_dump($user->getPlainPassword());
-        echo 'allo';    
-        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-            // $oldPassword = $request->request->get('plainPassword');
-            $oldPassword = $formPassword->get('plainPassword')->getData();
-    var_dump($oldPassword);
-    echo 'allo2';       
-            $password = $formPassword->get('password')->getData();
-
-            if ($encoder->isPasswordValid($user, $oldPassword)) {
-                // $user->setPassword($userManager->encodePassword($user, $password));
-                $newEncodedPassword = $encoder->encodePassword($user, $password);
-                $user->setPassword($newEncodedPassword);
-                var_dump($user->getPlainPassword()); 
-            }
-
-      
-            $em->persist($user);
-            $em->flush();
-            $this->alert->success('flash.profile.password.success');
-            return $this->redirectToRoute('my_account');
-        }
-
-
-
-        // $formPassword = $this->createForm(ResetPasswordType::class);
-        // $formPassword->handleRequest($request);
-        // if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-        //     // $passwordEncoder = $this->get('security.password_encoder');
-        // //   $oldPassword = $request->request->get('etiquettebundle_user')['oldPassword'];     
-        //     $oldPassword = $request->request->get('oldPassword');    
-        //     var_dump($oldPassword); 
-        //     if ($encoder->isPasswordValid($user, $oldPassword)) {
-        //         $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
-        //         $user->setPassword($newEncodedPassword);
-        //         $em->persist($user);
-        //         $em->flush();
-        //         var_dump($user);
-        //         // $this->addFlash('notice', 'Votre mot de passe a bien été changé !');
-        //         $this->alert->success('flash.password.reset.success');
-        //         // return $this->redirectToRoute('my_account');
-        //     } else {
-        //         $formPassword->addError(new FormError('Ancien mot de passe incorrect'));
-        //     }
-        //     // return $this->redirectToRoute('my_account'); // fos_user_profile_show
-        // }
 
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
-            'form' => $form->createView(), // change profil
-            'formPassword' => $formPassword->createView(), // change password
+            'form' => $form->createView(), // change profile form
+           
         ]);
     }
+
+    /**
+     * @return null|RedirectResponse|Response
+     *
+     * @Route("/account/reset-password", name="my_account_reset_password")
+     */
+    public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
+    {
+    	$em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+    	$form = $this->createForm(ResetPasswordType::class, $user);
+    	$form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+            // first we test whether the old password input is correct
+            if ($encoder->isPasswordValid($user, $oldPassword)) {
+                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($newEncodedPassword);
+                $em->persist($user);
+                $em->flush();
+                $success = $translator->trans('password_reset.success');
+                $this->addFlash('success', $success);
+                return $this->redirectToRoute('my_account');
+            } else {
+                $failure = $translator->trans('password_reset.incorrect_password');
+                $this->addFlash('error', $failure);
+            }
+        }
+    	return $this->render('account/resetPassword.html.twig', array(
+    		'form' => $form->createView(),
+    	));
+
+    }
+
+
+
+
+
+
+
+
+
 }

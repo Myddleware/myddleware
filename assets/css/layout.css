@@ -285,3 +285,21 @@ footer {
 .create-connector-tab a {
 	width: 100%;
 }
+
+/* Page reset password (rule/account/reset-password) */
+#reset-password-container {
+	max-width: 500px;
+
+}
+
+/* wrap form within a card  */
+#reset-password-col {
+	margin-top: 50px;
+	margin-bottom: 50px;
+	padding: 50px;
+	border: solid 1px rgba(0,0,0, 0.1);
+	box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
+}
+
+
+

@@ -779,9 +779,16 @@ flash:
         reset:
             success: 'Your password has been succesfully reset'
 
-profile:
-    type:
-        password:
-            invalid_message: 'Invalid password'
-            first_options: 'First option'
-            second_options: 'Second option'
+password_reset:
+    title: Change my password
+    invalid_message: 'Invalid password'
+    first_options: New password
+    second_options: Repeat new password
+    identical: Both passwords must be the same
+    success: Your password has been successfully changed !
+    failure: Unable to save your new password
+    incorrect_password: Wrong value for your old password
+    button: I want to change my password
+    old_password: Current password
+    back_to_account: Go back to My Account
+    submit: Submit
