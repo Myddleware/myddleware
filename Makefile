@@ -60,7 +60,7 @@ debug: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 dev: init
-	@docker-compose run --rm myddleware rm -fr var/logs/vtigercrm.log
+	@docker-compose run --rm myddleware bash -c "cd var/logs; rm -f vtigercrm.log; touch vtigercrm.log; chmod 777 vtigercrm.log"
 	@docker-compose up -d
 
 prod: init
