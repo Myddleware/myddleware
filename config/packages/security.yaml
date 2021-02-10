@@ -1,4 +1,4 @@
-#app/config/security.yml
+#app/config/security.yaml
 security:
     encoders:
         App\Entity\User: auto

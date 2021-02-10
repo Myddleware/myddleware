@@ -491,6 +491,18 @@
             "webpack.config.js"
         ]
     },
+    "symfonycasts/reset-password-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
+        },
+        "files": [
+            "./config/packages/reset_password.yaml"
+        ]
+    },
     "twig/extensions": {
         "version": "1.0",
         "recipe": {
@@ -507,7 +519,7 @@
         "version": "v2.14.1"
     },
     "twitter/bootstrap": {
-        "version": "v3.3.7"
+        "version": "v4.6.0"
     },
     "webmozart/assert": {
         "version": "1.9.1"

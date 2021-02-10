@@ -59,16 +59,17 @@
     "beberlei/doctrineextensions": "^1.3",
     "symfony/requirements-checker": "^2.0",
     "symfony/stopwatch": "4.4.*",
-    "symfony/web-profiler-bundle": "4.4.*"
+    "symfony/web-profiler-bundle": "4.4.*",
+    "symfonycasts/reset-password-bundle": "^1.3"
     },
     "repositories": [
         {
             "type": "package",
             "package": {
                 "name": "jquery/jquery",
-                "version": "2.1.3",
+                "version": "3.5.1",
                 "dist": {
-                    "url": "https://code.jquery.com/jquery-2.1.3.min.js",
+                    "url": "https://code.jquery.com/jquery-3.5.1.min.js",
                     "type": "file"
                 }
             }

@@ -141,18 +141,23 @@ class AccountController extends AbstractController
 
 
         $resetPasswordModel = new ResetPassword();
-        $formPassword = $this->createForm(ResetPasswordType::class, $resetPasswordModel);
+        $formPassword = $this->createForm(ResetPasswordType::class, $user);
         $formPassword->handleRequest($request);
         var_dump($user);
+        var_dump($user->getPlainPassword());
+        echo 'allo';    
         if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-            $oldPassword = $request->request->get('oldPassword');
-           
+            // $oldPassword = $request->request->get('plainPassword');
+            $oldPassword = $formPassword->get('plainPassword')->getData();
+    var_dump($oldPassword);
+    echo 'allo2';       
             $password = $formPassword->get('password')->getData();
 
             if ($encoder->isPasswordValid($user, $oldPassword)) {
                 // $user->setPassword($userManager->encodePassword($user, $password));
-                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+                $newEncodedPassword = $encoder->encodePassword($user, $password);
                 $user->setPassword($newEncodedPassword);
+                var_dump($user->getPlainPassword()); 
             }
 
       

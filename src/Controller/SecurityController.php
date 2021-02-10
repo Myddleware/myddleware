@@ -210,7 +210,7 @@ class SecurityController extends AbstractController
 
                     try {
                         $this->notificationManager->resetPassword($user);
-                        return new Response('Un email à été envoyer sur '.$user->getEmail(). 'avec un lien de réinitialisation du mot de passe.');
+                        return new Response('Un email a été envoyé sur '.$user->getEmail(). ' avec un lien de réinitialisation du mot de passe.');
                     } catch (Exception $e) {
                         return new Response('Impossible d\'envoyer un email.');
                     }
