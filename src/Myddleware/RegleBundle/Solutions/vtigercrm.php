@@ -656,7 +656,7 @@ class vtigercrmcore extends solution
         $entities = [];
         foreach ($parentModules as $prefix => $moduleName) {
             $query = $this->getVtigerClient()->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
-            if (empty($query) || !$query['success']) {
+            if (empty($query['success'])) {
                 continue;
             }
 
@@ -879,12 +879,14 @@ class vtigercrmcore extends solution
     {
         $parents = [];
         foreach ($param['data'] as $idDoc => $data) {
-            if (!in_array($data['parent_id'], array_keys($parents))) {
-                $parent = $this->getVtigerClient()->retrieve($data['parent_id']);
-                if (isset($parent['success']) && isset($parent['result'])) {
-                    $parents[$data['parent_id']] = $parent['result'];
-                }
+            if (in_array($data['parent_id'], array_keys($parents))) {
+                continue;
             }
+            $parent = $this->getVtigerClient()->retrieve($data['parent_id']);
+            if (empty($parent['success']) || empty($parent['result'])) {
+                continue;
+            }
+            $parents[$data['parent_id']] = $parent['result'];
         }
 
         return $parents;
@@ -919,12 +921,13 @@ class vtigercrmcore extends solution
     protected function deleteAllLineItemsOnParents($parents)
     {
         foreach ($parents as &$parent) {
-            while (!empty($parent['LineItems'])) {
+            while (count($parent['LineItems']) > 0) {
                 $this->getVtigerClient()->delete($parent['LineItems'][0]['id']);
                 $response = $this->getVtigerClient()->retrieve($parent['id']);
-                if (!empty($response) && $response['success']) {
-                    $parent['LineItems'] = $response['result']['LineItems'];
+                if (empty($response['success'])) {
+                    continue;
                 }
+                $parent['LineItems'] = $response['result']['LineItems'];
             }
         }
 
@@ -1116,6 +1119,7 @@ class vtigercrmcore extends solution
      * @param $idDoc
      * @param $data
      * @param $result
+     * @throws \Exception
      */
     protected function deleteElementOnVtiger($idDoc, $data, &$result)
     {
@@ -1124,18 +1128,14 @@ class vtigercrmcore extends solution
         try {
             $resultDelete = $this->getVtigerClient()->delete($id);
 
-            if (
-                !empty($resultDelete) &&
-                (!(isset($resultDelete['success']) && !$resultDelete['success']) &&
-                    (isset($resultDelete['status']) && $resultDelete['status'] == 'successful'))
-            ) {
-                $result[$idDoc] = [
-                    'id' => $id,
-                    'error' => false,
-                ];
-            } else {
+            if (empty($resultDelete['success']) || empty($resultDelete['status']) || $resultDelete['status'] != 'successful') {
                 throw new \Exception($resultDelete["error"]["message"] ?? "Error");
             }
+
+            $result[$idDoc] = [
+                'id' => $id,
+                'error' => false,
+            ];
         } catch (\Exception $e) {
             $result[$idDoc] = array(
                 'id' => '-1',
