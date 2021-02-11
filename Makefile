@@ -70,8 +70,12 @@ prod: init
 start: prod
 	@echo ">>> Myddleware is ready."
 
-restart: init
+recreate: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans --force-recreate
+
+restart: recreate
+	@echo ">>> Myddleware is ready."
+
 
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
