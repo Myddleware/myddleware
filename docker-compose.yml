@@ -3,7 +3,8 @@ version: '2'
 services:
 
   myddleware:
-    image: opencrmitalia/myddleware
+    #image: opencrmitalia/myddleware
+    build: .
     ports:
       - ${myddleware_port:-30080}:80
     environment:
