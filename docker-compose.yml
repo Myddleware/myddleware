@@ -74,6 +74,7 @@ services:
     tty: true
     stdin_open: true
     environment:
+      - OVPN_PORT=${openvpn_port:-1194}
       - EXTERNAL_ADDRESS=${external_address}
       - CLIENT_FORWARD=${vpn_client_forward}
     ports:
