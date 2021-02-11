@@ -78,7 +78,7 @@ services:
       - EXTERNAL_ADDRESS=${external_address}
       - CLIENT_FORWARD=${vpn_client_forward}
     ports:
-      - ${openvpn_port:-1194}:${openvpn_port:-1194}/udp
+      - ${openvpn_port:-1194}:1194/udp
     cap_add:
       - NET_ADMIN
     volumes:
