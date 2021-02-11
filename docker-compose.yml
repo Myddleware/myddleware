@@ -64,6 +64,7 @@ services:
     volumes:
       - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
       - ./var/logs:/srv/Logs
+      - ./var/vpn:/srv/VPN
       - ./var/databases/filebrowser.db:/database.db
       - ./.filebrowser.json:/.filebrowser.json
     restart: always

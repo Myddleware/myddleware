@@ -68,7 +68,7 @@ prod: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
 start: prod
-	@echo "Myddleware is ready."
+	@echo ">>> Myddleware is ready."
 
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
