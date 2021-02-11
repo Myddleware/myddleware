@@ -71,13 +71,12 @@ class ManagementSMTPController extends AbstractController
             $form = $this->createCreateForm();
             $form->handleRequest($request);
 
-            if ($form->get('submit_test')->isClicked()) {
+            if ($form->get('submit_test') === $form->getClickedButton()) {
                 $this->testMailConfiguration($form);
             }
 
-            if ($form->isValid()) {
+            if ($form->isValid() && $form->isSubmitted()) {
                 $this->setData($form);
-
                 return $this->redirect($this->generateUrl('management_smtp_index'));
             }
         } catch (ParseException $exception) {
@@ -184,11 +183,12 @@ class ManagementSMTPController extends AbstractController
         try {
             // Check that we have at least one email address
             if (empty($user_email)) {
-                throw new Exception('No email address found to send notification. You should have at leas one admin user with an email address.');
+                throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
             }
             $textMail = $this->translator->trans('management_smtp_sendmail.textMail').chr(10);
             $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification0signature');
-            $message = Swift_Message::newInstance($subject);
+            // $message = Swift_Message::newInstance($subject);
+            $message = (new \Swift_Message($subject));
             $message
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
                 ->setBody($textMail);
@@ -199,6 +199,8 @@ class ManagementSMTPController extends AbstractController
                 throw new Exception('Failed to send email : '.$textMail.' to '.$user_email);
             }
         } catch (Exception $e) {
+            dump($e);
+            dump($message);
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $session = new Session();
             $session->set('error', [$error]);

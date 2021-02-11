@@ -65,7 +65,8 @@
 
         <div>
             {{ form_widget( form.submit) }}
-            <button><a id="link_button" href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
+            <button type="button" class="btn btn-danger">
+                <a id="link_button" href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
             </button>
         </div>
         {{ form_end(form) }}
