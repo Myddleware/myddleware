@@ -31,6 +31,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
+	// Enable to delete data 
+	protected $sendDeletion = true;	
+	
     protected $limitPerCall = 100;
 
     protected $required_fields = [
@@ -770,6 +773,16 @@ class vtigercrmcore extends solution
 		}	
 		return $result;
     }
+	
+		// Function to delete a record
+	public function delete($param) {
+print_r($param);
+		// We set the flag deleted to 1 and we call the update function
+		foreach($param['data'] as $idDoc => $data) {
+			// $param['data'][$idDoc]['deleted'] = 1;
+		}	
+	}
+		
 	
 	// Clean a record by removing all Myddleware fields
 	protected function cleanRecord($param, $data) {
