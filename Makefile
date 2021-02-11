@@ -70,6 +70,9 @@ prod: init
 start: prod
 	@echo ">>> Myddleware is ready."
 
+restart: init
+	@docker-compose -f docker-compose.yml up -d --remove-orphans --force-recreate
+
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
 
@@ -80,10 +83,10 @@ reset: clean
 ## -------
 ## Testing
 ## -------
-test-debug: reset install setup debug
+test-dev: reset install setup dev
 	@docker-compose ps
 
-test-dev: reset install setup dev
+test-debug: reset install setup debug
 	@docker-compose ps
 
 test-prod: reset install setup prod
