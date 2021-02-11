@@ -575,9 +575,12 @@ if (file_exists($file)) {
                 $solution_source_nom = $rule->getConnectorSource()->getSolution()->getName();
 
                 // Connector source -------------------
-                $connectorParamsSource = $rule->getConnectorSource();
+                // TODO : it's working but not yet displaying in twig template 
+                $connectorParamsSource = $this->getDoctrine()
+                                                ->getManager()
+                                                ->getRepository(ConnectorParam::class)
+                                                ->findBy(['connector' => $rule->getConnectorSource()]);
                 $connectorSource['solution'] = $rule->getConnectorSource()->getSolution()->getName();
-
                 foreach ($connectorParamsSource as $connector) {
                     $connectorSource[$connector->getName()] = $connector->getValue();
                 }
@@ -839,8 +842,8 @@ if (file_exists($file)) {
             }
 
             // Infos connecteurs & solutions
-            $connector = $this->entityManager->getRepository(Rule::class)
-                ->infosConnectorByRule($rule->getId());
+            $ruleRepo = $this->entityManager->getRepository(Rule::class);
+            $connector = $ruleRepo->infosConnectorByRule($rule->getId());
 
             // Changement de référence pour certaines solutions
             $autorization_source = $connector[0]['solution_source'];
@@ -933,8 +936,7 @@ if (file_exists($file)) {
                         $classe = strtolower($request->request->get('solution'));
 
                         $parent = $request->request->get('parent');
-                        $solution = $this->entityManager->getRepository(Solution::class)->findOneByName($classe);
-
+                        $solution = $this->entityManager->getRepository(Solution::class)->findOneBy(['name'=> $classe]);
                         $connector = new Connector();
                         $connector->setSolution($solution);
 
@@ -1017,7 +1019,7 @@ if (file_exists($file)) {
                         $connector_params = $this->getDoctrine()
                             ->getManager()
                             ->getRepository(ConnectorParam::class)
-                            ->findByConnector($connector);
+                            ->findBy(['connector' => $connector]);
 
                         if ($connector_params) {
                             foreach ($connector_params as $key) {
@@ -1031,7 +1033,7 @@ if (file_exists($file)) {
                         $this->sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
                         //$myddlewareSession['obj'][$request->request->get('parent')] = $connector_params;
 
-                        $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($request->request->get('parent'))));
+                        $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($ruleKey, $request->request->get('parent'))));
                         $this->sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
 
                         $r = $solution->connexion_valide;
@@ -1243,7 +1245,7 @@ if (file_exists($file)) {
 
                 // Add rule param if exist (the aren't exist in rule creation)
                 $ruleParams = [];
-                $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository(RuleParam::class)->findByRule($ruleKey);
+                $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
                 if (!empty($ruleParamsResult)) {
                     foreach ($ruleParamsResult as $ruleParamsObj) {
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
@@ -1512,7 +1514,7 @@ if (file_exists($file)) {
                     $ruleFields = $this->getDoctrine()
                         ->getManager()
                         ->getRepository(RuleField::class)
-                        ->findByRule($this->sessionService->getParamRuleLastId($ruleKey));
+                        ->findBy(['rule' => $this->sessionService->getParamRuleLastId($ruleKey)]);
 
                     $tmp = [];
                     foreach ($ruleFields as $fields) {
@@ -1577,7 +1579,8 @@ if (file_exists($file)) {
 
                 // -- Relation
                 // Rule list with the same connectors (both directions) to get the relate ones
-                $ruleListRelation = $this->getDoctrine()->getManager()->getRepository(Rule::class)->createQueryBuilder('r')
+                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
 												r.connectorSource= ?1 
@@ -2604,10 +2607,10 @@ if (file_exists($file)) {
 
                 $this->getInstanceBdd();
                 $connector = $this->entityManager->getRepository(Connector::class)
-                    ->findById($id_connector); // infos connector
+                    ->find($id_connector); // infos connector
 
                 $connectorParams = $this->entityManager->getRepository(ConnectorParam::class)
-                    ->findByConnector($id_connector);    // infos params connector
+                    ->findBy(['connector' => $id_connector]);    // infos params connector
 
                 foreach ($connectorParams as $p) {
                     $this->sessionService->setParamRuleParentName($key, $type, $p->getName(), $p->getValue()); // params connector
@@ -2640,7 +2643,8 @@ if (file_exists($file)) {
         private function liste_connectorAction($type)
         {
             $this->getInstanceBdd();
-            $solution = $this->entityManager->getRepository(Connector::class)->findAllConnectorByUser($this->getUser()->getId(), $type); // type = source ou target
+            $solutionRepo = $this->entityManager->getRepository(Connector::class);
+            $solution = $solutionRepo->findAllConnectorByUser($this->getUser()->getId(), $type); // type = source ou target
             $lstArray = [];
             if ($solution) {
                 foreach ($solution as $s) {
