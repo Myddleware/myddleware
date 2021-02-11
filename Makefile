@@ -84,18 +84,6 @@ reset: clean
 	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \
 		read AGREE && [ "$${AGREE}" = "YES" ] && docker-compose down -v --remove-orphans
 
-## ---
-## VPN
-## ---
-passphrase:
-	@docker-compose -f docker-compose.yml run --rm vpn set_passphrase
-
-client:
-	@echo "Inserisci un nome per il client: " && \
-		read CLIENTNAME && \
-		docker-compose -f docker-compose.yml exec vpn add_client $${CLIENTNAME} && \
-		docker-compose -f docker-compose.yml exec vpn get_client $${CLIENTNAME} > var/vpn/$${CLIENTNAME}.ovpn
-
 ## -------
 ## Testing
 ## -------
