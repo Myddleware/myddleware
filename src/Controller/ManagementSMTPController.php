@@ -187,7 +187,6 @@ class ManagementSMTPController extends AbstractController
             }
             $textMail = $this->translator->trans('management_smtp_sendmail.textMail').chr(10);
             $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification0signature');
-            // $message = Swift_Message::newInstance($subject);
             $message = (new \Swift_Message($subject));
             $message
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
@@ -199,8 +198,6 @@ class ManagementSMTPController extends AbstractController
                 throw new Exception('Failed to send email : '.$textMail.' to '.$user_email);
             }
         } catch (Exception $e) {
-            dump($e);
-            dump($message);
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $session = new Session();
             $session->set('error', [$error]);
