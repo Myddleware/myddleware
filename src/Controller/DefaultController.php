@@ -122,7 +122,7 @@ if (file_exists($file)) {
         /**
          * @var JobManager
          */
-        private $job;
+        private $jobManager;
         /**
          * @var LoggerInterface
          */
@@ -172,7 +172,7 @@ if (file_exists($file)) {
             AuthorizationCheckerInterface $authorizationChecker,
             HomeManager $home,
             ToolsManager $tools,
-            JobManager $job,
+            JobManager $jobManager,
             TemplateManager $template,
             ParameterBagInterface $params
         ) {
@@ -191,7 +191,7 @@ if (file_exists($file)) {
             $this->authorizationChecker = $authorizationChecker;
             $this->home = $home;
             $this->tools = $tools;
-            $this->job = $job;
+            $this->jobManager = $jobManager;
             $this->template = $template;
             $this->params = $params;
             $this->locale = $params->get('locale');
@@ -418,7 +418,7 @@ if (file_exists($file)) {
                 $rule = $this->getDoctrine()
                     ->getManager()
                     ->getRepository(Rule::class)
-                    ->findOneById($id);
+                    ->find($id);
 
                 if ($rule->getActive()) {
                     $r = 0;
@@ -1012,7 +1012,7 @@ if (file_exists($file)) {
                         $connector = $this->getDoctrine()
                             ->getManager()
                             ->getRepository(Connector::class)
-                            ->findOneById($params[1]);
+                            ->find($params[1]);
 
                         $connector_params = $this->getDoctrine()
                             ->getManager()
@@ -1948,12 +1948,12 @@ if (file_exists($file)) {
                 $connector_source = $this->getDoctrine()
                     ->getManager()
                     ->getRepository(Connector::class)
-                    ->findOneById($this->sessionService->getParamRuleConnectorSourceId($ruleKey));
+                    ->find($this->sessionService->getParamRuleConnectorSourceId($ruleKey));
 
                 $connector_target = $this->getDoctrine()
                     ->getManager()
                     ->getRepository(Connector::class)
-                    ->findOneById($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
+                    ->find($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
 
                 $param = RuleManager::getFieldsParamDefault();
 
@@ -1985,8 +1985,8 @@ if (file_exists($file)) {
 
                 // BEFORE SAVE rev 1.08 ----------------------
                 $relationshipsBeforeSave = $request->request->get('relations');
-                $before_save = $this->ruleManager->beforeSave(
-                    ['ruleName' => $nameRule,
+                $before_save = $this->ruleManager->beforeSave($this->solutionManager,
+                    [   'ruleName' => $nameRule,
                         'RuleId' => $oneRule->getId(),
                         'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
                         'content' => $tab_new_rule,
@@ -2212,7 +2212,7 @@ if (file_exists($file)) {
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
-                $this->ruleManager->orderRules();
+                $this->jobManager->orderRules();
 
                 // --------------------------------------------------------------------------------------------------
                 // Create rule history in order to follow all modifications
@@ -2247,25 +2247,26 @@ if (file_exists($file)) {
                 // Détection règle root ou child rev 1.08 ----------------------
                 // On réactualise les paramètres
                 $tab_new_rule['content']['params'] = $p;
-                $this->ruleManager->afterSave([
-                    'ruleId' => $oneRule->getId(),
-                    'ruleName' => $nameRule,
-                    'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
-                    'datereference' => $date_reference,
-                    'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
-                    'content' => $tab_new_rule,
-                    'relationships' => $relationshipsBeforeSave,
-                    'module' => [
-                        'source' => [
-                            'solution' => $this->sessionService->getParamRuleSourceSolution($ruleKey),
-                            'name' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-                        ],
-                        'target' => [
-                            'solution' => $this->sessionService->getParamRuleCibleSolution($ruleKey),
-                            'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
-                        ],
-                    ],
-                ]
+                $this->ruleManager->afterSave($this->solutionManager,
+                                                [
+                                                    'ruleId' => $oneRule->getId(),
+                                                    'ruleName' => $nameRule,
+                                                    'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
+                                                    'datereference' => $date_reference,
+                                                    'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
+                                                    'content' => $tab_new_rule,
+                                                    'relationships' => $relationshipsBeforeSave,
+                                                    'module' => [
+                                                        'source' => [
+                                                            'solution' => $this->sessionService->getParamRuleSourceSolution($ruleKey),
+                                                            'name' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+                                                        ],
+                                                        'target' => [
+                                                            'solution' => $this->sessionService->getParamRuleCibleSolution($ruleKey),
+                                                            'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
+                                                        ],
+                                                    ],
+                                                ]
                 );
                 if ($this->sessionService->isParamRuleExist($ruleKey)) {
                     $this->sessionService->removeParamRule($ruleKey);

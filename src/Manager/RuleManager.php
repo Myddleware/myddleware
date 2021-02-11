@@ -329,23 +329,6 @@ class rulecore
 			return false;
 		}	
 	}
-
-	// Logout to the application
-	protected function logoutSolution($type) {
-		try {	
-			if ($type == 'source') {
-				$this->solutionSource = $this->container->get('myddleware_rule.'.$r['name']);		
-				return $this->solutionSource->logout($params);							
-			}
-			else {
-				$this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);		
-				return $this->solutionTarget->logout($params);				
-			}
-		} catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
-			return false;
-		}	
-	}
 	
 
 	// Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
@@ -836,13 +819,13 @@ class rulecore
 		// [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) ) 
 		// [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) ) 
 	// La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
-	public static function beforeSave($containeur,$data) {
+	public static function beforeSave($solutionManager,$data) {
 		// Contrôle sur la solution source
-		$solutionSource = $containeur->get('myddleware_rule.'.$data['module']['source']['solution']);
+		$solutionSource = $solutionManager->get($data['module']['source']['solution']);
 		$check = $solutionSource->beforeRuleSave($data,'source');
 		// Si OK contôle sur la solution cible
 		if ($check['done']) {
-			$solutionTarget = $containeur->get('myddleware_rule.'.$data['module']['target']['solution']);
+			$solutionTarget = $solutionManager->get($data['module']['target']['solution']);
 			$check = $solutionTarget->beforeRuleSave($data,'target');
 		}
 		return $check;
@@ -850,12 +833,12 @@ class rulecore
 	
 	// Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
 	// Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté les entrées ruleId et date de référence au tableau
-	public static function afterSave($containeur,$data) {
+	public static function afterSave($solutionManager,$data) {
 		// Contrôle sur la solution source
-		$solutionSource = $containeur->get('myddleware_rule.'.$data['module']['source']['solution']);
+		$solutionSource = $solutionManager->get($data['module']['source']['solution']);
 		$messagesSource = $solutionSource->afterRuleSave($data,'source');
 
-		$solutionTarget = $containeur->get('myddleware_rule.'.$data['module']['target']['solution']);
+		$solutionTarget = $solutionManager->get($data['module']['target']['solution']);
 		$messagesTarget = $solutionTarget->afterRuleSave($data,'target');
 		
 		$messages = array_merge($messagesSource,$messagesTarget);
