@@ -719,7 +719,7 @@ class rulecore {
 		}
 	}
 	
-	public function actionRule($event) {
+	public function actionRule($event, $jobName=null) {
 		switch ($event) {
 			case 'ALL':
 				return $this->runMyddlewareJob("ALL");
@@ -727,8 +727,9 @@ class rulecore {
 			case 'ERROR':
 				return $this->runMyddlewareJob("ERROR");
 				break;
+				// rajouter synchro etc en param de runMyddleWareJob()
 			case 'runMyddlewareJob':
-				return $this->runMyddlewareJob($this->rule['name_slug']);
+				return $this->runMyddlewareJob($this->rule['name_slug'], $jobName);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
@@ -917,7 +918,7 @@ class rulecore {
 		$doc->updateStatus($toStatus);
 	}
 	
-	protected function runMyddlewareJob($ruleSlugName) {
+	protected function runMyddlewareJob($ruleSlugName, $event=null) {
 		try{
 			$session = new Session();	
 
@@ -938,7 +939,16 @@ class rulecore {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
 			
-			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			//if user clicked on cancel all transfers of a rule
+			if($event === 'cancelDocumentJob'){
+				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:massaction cancel rule '.$this->ruleId.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			//if user clicked on delete all transfers from a rule
+			} elseif ($event === 'deleteDocumentJob') {
+				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:massaction remove rule '.$this->ruleId.' Y --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			} else {
+				exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$ruleSlugName.' --env='.$this->container->get( 'kernel' )->getEnvironment().' > '.$fileTmp.' &', $output);
+			}
+
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {

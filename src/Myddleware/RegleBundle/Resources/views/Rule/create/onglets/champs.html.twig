@@ -81,32 +81,31 @@
 
 	<p>{{'create_rule.step3.filter'|trans}} : <input id="hidefields" type="text" placeholder="{{'create_rule.step3.filter_fields'|trans}}" /></p>
 
-
-	{% for module_name, fields in cible %}
-	<h4 class="titre">{{ module_name }}</h4>
-		<div id="targetfields" data-title="true">
-		{% if cible %}	
-			{% for field, value in fields %}
-				<div data-show="true" class="champs{{ value ? ' require' : '' }}" id="{{ field }}">
-					<h1 class="nom ui-widget-header">{{ value ? '<span class="glyphicon glyphicon-star"></span>' : '' }} {{ field }} 
-						 <a class="fancybox" data-fancybox-type="iframe" href="{{ path('path_info_field',{'field' : field, 'type' : 'target' }) }}"><span class="glyphicon glyphicon-question-sign"></span></a>
-					</h1>
-					<div data-show="" class="ui-widget-content">
-						<ol>	
-							<li class="placeholder">{{'create_rule.step3.placeholder'|trans}}</li>	
-						</ol>
-						<ul>
-							<li class="formule_text" id="formule_{{ field }}"></li>
-						</ul>				
-						<p>							
-							<input class="formule btn-mydinv" type="button" value="{{'create_rule.step3.formula.create'|trans}}"/>
-						</p>
-					</div>
-				</div>	
-			{% endfor %}	
-		{% endif %}		
-		</div>
-	{% endfor %}
+	{% if cible %}	
+		{% for module_name, fields in cible %}
+			<h4 class="titre">{{ module_name }}</h4>
+			<div id="targetfields" data-title="true">
+				{% for field, value in fields %}
+					<div data-show="true" class="champs{{ value ? ' require' : '' }}" id="{{ field }}">
+						<h1 class="nom ui-widget-header">{{ value ? '<span class="glyphicon glyphicon-star"></span>' : '' }} {{ field }} 
+							<a class="fancybox" data-fancybox-type="iframe" href="{{ path('path_info_field',{'field' : field, 'type' : 'target' }) }}"><span class="glyphicon glyphicon-question-sign"></span></a>
+						</h1>
+						<div data-show="" class="ui-widget-content">
+							<ol>	
+								<li class="placeholder">{{'create_rule.step3.placeholder'|trans}}</li>	
+							</ol>
+							<ul>
+								<li class="formule_text" id="formule_{{ field }}"></li>
+							</ul>				
+							<p>							
+								<input class="formule btn-mydinv" type="button" value="{{'create_rule.step3.formula.create'|trans}}"/>
+							</p>
+						</div>
+					</div>	
+				{% endfor %}	
+			</div>
+		{% endfor %}
+	{% endif %}
 </div>
 
 <div class="clr"></div>

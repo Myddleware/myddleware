@@ -230,6 +230,13 @@ regle_displayflux:
     path:  /displayflux/{id}
     defaults: { _controller: RegleBundle:Default:displayFlux }
 
+regle_delete_all_transfers:
+    path: /view/delete/transfers/{id}
+    defaults: { _controller: RegleBundle:Default:deleteRuleTransfers }
+    
+regle_cancel_all_transfers:
+    path: /view/cancel/transfers/{id}
+    defaults: { _controller: RegleBundle:Default:cancelRuleTransfers }
 regle_edit:
     path:  /edit/{id}
     defaults: { _controller: RegleBundle:Default:ruleEdit }  
