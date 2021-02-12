@@ -391,11 +391,13 @@ class prestashopcore extends solution {
 		$xml = $xml->asXML();
 		$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 		$records = json_decode(json_encode((array) $simplexml->children()->children()), true);
-		//$nbStates = sizeof($states['order_state']);	
+
 		foreach ($records[$field] as $record) {
+			// The structure is different if there is only one language or several languages in Prestashop
+			$attributeId = (!empty($record['@attributes']['id']) ? $record['@attributes']['id'] : $record['id']);
 			$opt = array(
 				'resource' => $fields,
-				'id' => $record['@attributes']['id']
+				'id' =>  $attributeId
 			);
 			// Function to modify opt (used for custom needs)
 			$opt = $this->updateOptions('getList',$opt,$field);
@@ -408,11 +410,11 @@ class prestashopcore extends solution {
 			// S'il y a une langue on prends la liste dans le bon language
 			if (!empty($state['name']['language'])) {
 				// We don't know the language here because the user doesn't chose it yet. So we take the first one.
-				$list[$record['@attributes']['id']] = (is_array($state['name']['language']) ? current($state['name']['language']) : $state['name']['language']);
+				$list[$attributeId] = (is_array($state['name']['language']) ? current($state['name']['language']) : $state['name']['language']);
 			}
 			// Sinon on prend sans la langue (utile pour la liste language par exemple)
 			elseif (!empty($state['name'])) {
-				$list[$record['@attributes']['id']] = $state['name'];
+				$list[$attributeId] = $state['name'];
 			}
 		}
 		if (!empty($list)) {

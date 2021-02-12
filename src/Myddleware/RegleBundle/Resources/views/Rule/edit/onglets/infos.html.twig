@@ -44,6 +44,33 @@
 		  <span class="glyphicon glyphicon-sort"></span> {{'view_rule.action.displayflux'|trans}}
 		</button> 
 	</a>
+
+{# 
+	<a href="{{ path('regle_delete_transfers',{'id' : rule.GetId }) }}" title="" onclick="return(confirm('{{'view_rule.action.confirm_delete_transfers'|trans}}'));">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-edit"></span> {{'view_rule.action.delete_transfers'|trans}}
+		</button>
+	</a> #}
+	{# <a href="{{ path('flux_mass_cancel',{'id' : rule.GetId }) }}" title="" onclick="return(confirm('{{'list_flux.btn.mass_cancel_confirm'|trans}}'));">
+		<button type="button" class="btn-mydinv">
+		  <span class="glyphicon glyphicon-remove"></span> {{'list_flux.btn.cancel'|trans}}
+		</button>
+	</a> #}
+
+		
+	{% if is_granted('ROLE_SUPER_ADMIN') %}
+		<a href="{{ path('regle_cancel_all_transfers', {'id': rule.GetId })}}" title="" onclick="return(confirm('{{'list_flux.btn.mass_cancel_confirm'|trans}}'));">
+			<button type="button" class="btn-mydinv" id="canceltransfers">
+			<span class="glyphicon glyphicon-remove"></span> {{'list_flux.btn.cancel'|trans}}
+			</button>
+		</a>
+		<a href="{{ path('regle_delete_all_transfers', {'id': rule.GetId })}}" title="" onclick="return(confirm('{{'list_flux.btn.mass_delete_confirm'|trans}}'));">
+			<button type="button" class="btn-mydinv" id="deletetransfers">
+			<span class="glyphicon glyphicon-remove"></span> {{'list_flux.btn.delete'|trans}}
+			</button>
+		</a>
+	{% endif %}
+
 	<a href="{{ path('regle_delete',{'id' : rule.GetId }) }}" title="" onclick="return(confirm('{{'view_rule.action.confirm_delete_rule'|trans}}'));">
 		<button type="button" class="btn-mydinv">
 		  <span class="glyphicon glyphicon-remove"></span> {{'view_rule.action.delete_rule'|trans}}
