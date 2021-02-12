@@ -124,12 +124,13 @@ class cirrusshieldcore extends solution
                     }
                     // If the fields is a relationship
                     if ('LookupRelationship' == $field['DataType']) {
-                        $this->fieldsRelate[$field['Name']] = [
+                        $this->moduleFields[$field['Name']] = [
                             'label' => $field['Label'],
                             'type' => 'varchar(36)',
                             'type_bdd' => 'varchar(36)',
                             'required' => $field['IsRequired'],
                             'required_relationship' => $field['IsRequired'],
+							'relate' => true
                         ];
                     } else {
                         $this->moduleFields[$field['Name']] = [
@@ -137,6 +138,7 @@ class cirrusshieldcore extends solution
                             'type' => $field['DataType'],
                             'type_bdd' => $field['DataType'],
                             'required' => $field['IsRequired'],
+							'relate' => false
                         ];
                         // Add list of values
                         if (!empty($field['PicklistValues'])) {
@@ -147,12 +149,6 @@ class cirrusshieldcore extends solution
                     }
                 }
             }
-
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

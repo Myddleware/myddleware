@@ -142,12 +142,13 @@ class mauticcore extends solution
                 if (!empty($fieldlist['fields'])) {
                     foreach ($fieldlist['fields'] as $field) {
                         if ('relate' == $field['type']) {
-                            $this->fieldsRelate[$field['alias']] = [
+                            $this->moduleFields[$field['alias']] = [
                                 'label' => $field['label'],
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
                                 'required' => '',
                                 'required_relationship' => (!empty($field['isRequired']) ? true : false),
+								'relate' => true
                             ];
                         } else {
                             $this->moduleFields[$field['alias']] = [
@@ -155,6 +156,7 @@ class mauticcore extends solution
                                 'type' => ('text' == $field['type'] ? TextType::class : 'varchar(255)'),
                                 'type_bdd' => ('text' == $field['type'] ? $field['type'] : 'varchar(255)'),
                                 'required' => (!empty($field['isRequired']) ? true : false),
+								'relate' => false
                             ];
                             // manage dropdown lists
                             if (!empty($field['properties']['list'])) {
@@ -172,17 +174,7 @@ class mauticcore extends solution
                 if (!empty($moduleFields[$module])) {
                     $this->moduleFields = $moduleFields[$module];
                 }
-                // Field relate
-                if (!empty($fieldsRelate[$module])) {
-                    $this->fieldsRelate = $fieldsRelate[$module];
-                }
             }
-
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

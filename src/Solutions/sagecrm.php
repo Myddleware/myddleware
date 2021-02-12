@@ -34,8 +34,6 @@ class sagecrmcore extends solution
     private $username = '';
     private $password = '';
 
-    protected $fieldsRelate = [];
-
     protected $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
 
     protected $required_fields = ['default' => ['updateddate', 'createddate']];
@@ -288,34 +286,31 @@ class sagecrmcore extends solution
                             // Et si le champ n'est pas dans les id du tableau $IdByModule
                             if (!(isset($this->IdByModule[$module]) && $field->name == $this->IdByModule[$module])) {
                                 // Alors c'est un champ relation (OUF)
-                                $this->fieldsRelate[$field->name] = [
+                                $this->moduleFields[$field->name] = [
                                     'label' => $field->name,
                                     'type' => substr($field->type, 3),
                                     'type_bdd' => $type_bdd,
                                     'required' => $field->required,
                                     'required_relationship' => $field->required,
+									'relate' => true
                                 ];
                                 continue;
                             }
                         }
                     } else {
-                        $fields[$field->name] = [
+                        $this->moduleFields[$field->name] = [
                             'label' => $field->name,
                             'type' => substr($field->type, 3),
                             'type_bdd' => $type_bdd,
                             'required' => $field->required,
+							'relate' => false
                         ];
                         if (!empty($dropdownvalues[$field->name])) {
-                            $fields[$field->name]['option'] = $dropdownvalues[$field->name];
+                            $this->moduleFields[$field->name]['option'] = $dropdownvalues[$field->name];
                         }
                     }
                 }
-                // Ajout des champ relate au mapping des champs
-                if (!empty($this->fieldsRelate)) {
-                    $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-                }
-
-                return $fields;
+                return $this->moduleFields;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
                     throw new \Exception($fault->getMessage());

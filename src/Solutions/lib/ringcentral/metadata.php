@@ -167,10 +167,6 @@ $moduleFields = [
     ],
 ];
 
-$fieldsRelate = [
-    'call-log' => [],
-];
-
 // Metadata override if needed
 $file = __DIR__.'/../../../Custom/Solutions/lib/ringcentral/metadata.php';
 if (file_exists($file)) {

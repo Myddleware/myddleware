@@ -47,7 +47,6 @@ class solutioncore
 
     // Liste des champs d'un module
     protected $moduleFields = [];
-    protected $fieldsRelate = [];
 
     // Permet d'ajouter des champs nécessaires lorsque l'on va lire les données dans la solution source
     // Tableau de type array('id','date_modified')
@@ -257,31 +256,21 @@ class solutioncore
 
     // Cette méthode doit remplir les attributs :
     // moduleFields avec le tableu ci-dessus
-    // fieldsRelate avec la même structure que moduleFields mais ne contenant que les champs de type relation
     public function get_module_fields($module, $type = 'source')
     {
         $this->moduleFields = [];
-        $this->fieldsRelate = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
         $this->moduleFields['Myddleware_element_id'] = [
             'label' => 'ID '.$module,
             'type' => 'varchar(255)',
             'type_bdd' => 'varchar(255)',
             'required' => 0,
+			'relate' => false
         ];
 
         return $this->moduleFields;
     }
-
-    // Méthode permettant de renvoyer l'attribut fieldsRelate
-    public function get_module_fields_relate($module, $param)
-    {
-        if (isset($module)) {
-            $this->addRequiredRelationship($module);
-        }
-
-        return $this->fieldsRelate;
-    }
+	
 
     // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
     // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
@@ -505,27 +494,29 @@ class solutioncore
         }
         // Boucle sur tous les champs obligatoires
         foreach ($this->required_relationships[$module] as $required_relationship) {
-            if (!in_array($required_relationship, array_keys($this->fieldsRelate))) {
-                $this->fieldsRelate[$required_relationship] = [
+            if (!in_array($required_relationship, array_keys($this->moduleFields))) {
+                $this->moduleFields[$required_relationship] = [
                     'label' => $required_relationship,
                     'type' => 'text',
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
                     'required_relationship' => 1,
+					'relate' => true
                 ];
             } else {
-                $this->fieldsRelate[$required_relationship]['required_relationship'] = 1;
+                $this->moduleFields[$required_relationship]['required_relationship'] = 1;
             }
         }
 
         // Ajout systématique de l'id du module en cours dans les relation disponible : utile lorsque 2 modules source (2 règles) viennent mettre à jour 1 règle target
-        if (empty($this->fieldsRelate['id'])) {
-            $this->fieldsRelate['Myddleware_element_id'] = [
+        if (empty($this->moduleFields['id'])) {
+            $this->moduleFields['Myddleware_element_id'] = [
                 'label' => 'ID '.$module,
                 'type' => 'varchar(255)',
                 'type_bdd' => 'varchar(255)',
                 'required' => false,
                 'required_relationship' => 0,
+				'relate' => true
             ];
         }
     }

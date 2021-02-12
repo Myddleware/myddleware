@@ -218,23 +218,20 @@ class prestashopcore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
+						'relate' => false
                     ];
                 }
                 foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
-                    $this->fieldsRelate[$relationship] = [
+                    $this->moduleFields[$relationship] = [
                         'label' => $relationship,
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
                         'required_relationship' => 1,
+						'relate' => true
                     ];
                 }
-                // Ajout des champ relate au mapping des champs
-                if (!empty($this->fieldsRelate)) {
-                    $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-                }
-
-                return $this->moduleFields;
+                 return $this->moduleFields;
             }
 
             try { // try-catch PrestashopWebservice
@@ -254,6 +251,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
+							'relate' => false
                         ];
                         if ('id_gender' == $presta_field) {
                             $this->moduleFields['id_gender']['option'] = ['1' => 'Mr.', '2' => 'Mrs.'];
@@ -264,12 +262,13 @@ class prestashopcore extends solution
                             'id_' == substr($presta_field, 0, 3)
                          || '_id' == substr($presta_field, -3)
                     ) {
-                        $this->fieldsRelate[$presta_field] = [
+                        $this->moduleFields[$presta_field] = [
                             'label' => $presta_field,
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => 0,
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     } elseif (empty($value)) {
                         $this->moduleFields[$presta_field] = [
@@ -277,6 +276,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
+							'relate' => false
                         ];
                     } else {
                         if ('associations' == $presta_field) {
@@ -287,6 +287,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
+							'relate' => false
                         ];
                         if (isset($value['@attributes']['format'])) {
                             $this->moduleFields[$presta_field]['type'] = $value['@attributes']['format'];
@@ -305,10 +306,10 @@ class prestashopcore extends solution
                         // No error if order_state not accessible, the order status list won't accessible
                     }
                 }
-                if ('order_histories' == $module && isset($this->fieldsRelate['id_order_state'])) {
+                if ('order_histories' == $module && isset($this->moduleFields['id_order_state'])) {
                     try {
                         $order_states = $this->getList('order_state', 'order_states');
-                        $this->fieldsRelate['id_order_state']['option'] = $order_states;
+                        $this->moduleFields['id_order_state']['option'] = $order_states;
                     } catch (\Exception $e) {
                         // No error if order_state not accessible, the order status list won't accessible
                     }
@@ -323,7 +324,7 @@ class prestashopcore extends solution
                 }
                 // Ticket 450: Si c'est le module customer service messages, on rend la relation id_customer_thread obligatoire
                 if ('customer_messages' == $module) {
-                    $this->fieldsRelate['id_customer_thread']['required_relationship'] = 1;
+                    $this->moduleFields['id_customer_thread']['required_relationship'] = 1;
                 }
                 if ('customer_threads' == $module) {
                     $languages = $this->getList('language', 'languages');
@@ -342,12 +343,13 @@ class prestashopcore extends solution
                         'order_payments' == $module
                     and 'source' == $type
                 ) {
-                    $this->fieldsRelate['id_order'] = [
+                    $this->moduleFields['id_order'] = [
                         'label' => 'id_order',
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
                         'required_relationship' => 0,
+						'relate' => true
                     ];
                 }
                 // On enlève les champ date_add et date_upd si le module est en target
@@ -359,24 +361,6 @@ class prestashopcore extends solution
                         unset($this->moduleFields['date_upd']);
                     }
                 }
-
-                // Ajout des champ relate au mapping des champs
-                if (!empty($this->fieldsRelate)) {
-                    $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-                }
-
-                // Si l'extension est demandée alors on vide relate
-                if ($extension) {
-                    $this->fieldsRelate = [];
-                }
-                // Si le module est order_histories alors on ajoute les champs ID dans les champs diponible dans le mapping des champs
-                if (
-                        'order_histories' == $module
-                    && 'source' == $type
-                ) {
-                    $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-                }
-
                 return $this->moduleFields;
             } catch (PrestashopWebserviceException $e) {
                 // Here we are dealing with errors

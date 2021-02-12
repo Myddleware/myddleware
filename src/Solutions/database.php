@@ -149,49 +149,51 @@ class databasecore extends solution
                     'type' => $field[$this->fieldType],
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
+					'relate' => false
                 ];
                 if (
                         'ID' == strtoupper(substr($field[$this->fieldName], 0, 2))
                     or 'ID' == strtoupper(substr($field[$this->fieldName], -2))
                 ) {
-                    $this->fieldsRelate[$field[$this->fieldName]] = [
+                    $this->moduleFields[$field[$this->fieldName]] = [
                         'label' => $field[$this->fieldLabel],
                         'type' => $field[$this->fieldType],
                         'type_bdd' => 'varchar(255)',
                         'required' => false,
                         'required_relationship' => 0,
+						'relate' => true
                     ];
                 }
-                // If the field contains the id indicator, we add it to the fieldsRelate list
+                // If the field contains the id indicator, we add it to the moduleFields list
                 if (!empty($idFields)) {
                     foreach ($idFields as $idField) {
                         if (false !== strpos($field[$this->fieldName], $idField)) {
-                            $this->fieldsRelate[$field[$this->fieldName]] = [
+                            $this->moduleFields[$field[$this->fieldName]] = [
                                 'label' => $field[$this->fieldLabel],
                                 'type' => $field[$this->fieldType],
                                 'type_bdd' => 'varchar(255)',
                                 'required' => false,
                                 'required_relationship' => 0,
+								'relate' => true
                             ];
                         }
                     }
                 }
             }
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
+
             // Add field current ID in the relationships
             if ('target' == $type) {
-                $this->fieldsRelate['Myddleware_element_id'] = [
+                $this->moduleFields['Myddleware_element_id'] = [
                     'label' => 'ID '.$module,
                     'type' => 'varchar(255)',
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
                     'required_relationship' => 0,
+					'relate' => true
                 ];
             }
-
+			// Add relationship fields coming from other rules
+			$this->get_module_fields_relate($module, $param);
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -598,24 +600,21 @@ class databasecore extends solution
                 if (!empty($fields)) {
                     // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                     foreach ($fields as $field) {
-                        if (
-                                empty($this->fieldsRelate[$field['value']]) // Only if the field isn't already in the list
-                            and !empty($this->moduleFields[$field['value']]) // The field has to exist in the current module
-                        ) {
-                            $this->fieldsRelate[$field['value']] = [
+						// The field has to exist in the current module
+						if (!empty($this->moduleFields[$field['value']])) {
+                            $this->moduleFields[$field['value']] = [
                                 'label' => $field['value'],
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
                                 'required' => false,
                                 'required_relationship' => 0,
+								'relate' => true
                             ];
                         }
                     }
                 }
             }
         }
-
-        return parent::get_module_fields_relate($module, $param);
     }
 
     public function getFieldsParamUpd($type, $module)

@@ -216,6 +216,8 @@ $moduleFields = array (
         'event_informations__mep_event_cc_email_text' => array( 'label' => 'Event info : mep event cc email text', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__event_feature_image' => array( 'label' => 'Event info : event feature image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+		'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false)
     ),
     'mep_event_more_date' => array(
         'event_more_start_date' => array( 'label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -250,12 +252,5 @@ $moduleFields = array (
     ),
 
 
-);
-
-$fieldsRelate = array(
-    'mep_events' => array(
-        'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-    ),
 );
 

@@ -190,9 +190,7 @@ class sapcrmcore extends saproot
                         'APPOINTMENT__ORDERPLANNED__TIMEZONE_TO' => ['label' => 'ORDERPLANNED__TIMEZONE_TO', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_APPOINTMENT__ORDERPLANNED__TIMEZONE_TO'],
                         'APPOINTMENT__ORDERPLANNED__DOMINANT' => ['label' => 'ORDERPLANNED__DOMINANT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_APPOINTMENT__ORDERPLANNED__DOMINANT'],
                         'APPOINTMENT__ORDERPLANNED__DURATION' => ['label' => 'ORDERPLANNED__DURATION', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'readName' => 'ET_APPOINTMENT__ORDERPLANNED__DURATION'],
-                    ];
-                    $this->fieldsRelate = [
-                        'PARTNER__00000009__PARTNER_NO' => ['label' => '00000009__PARTNER_NO', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'readName' => 'ET_PARTNER__00000009__PARTNER_NO'],
+                        'PARTNER__00000009__PARTNER_NO' => ['label' => '00000009__PARTNER_NO', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'readName' => 'ET_PARTNER__00000009__PARTNER_NO', 'relate' => false],
                     ];
                     break;
             }
@@ -218,8 +216,6 @@ class sapcrmcore extends saproot
                         if ('1' == $mode) {
                             if (!empty($this->moduleFields[$field]['readName'])) {
                                 $convertFields[] = $this->moduleFields[$field]['readName'];
-                            } elseif (!empty($this->fieldsRelate[$field]['readName'])) {
-                                $convertFields[] = $this->fieldsRelate[$field]['readName'];
                             } else {
                                 throw new \Exception('The field '.$field.' has no readName. Failed to read data in SAP CRM. ');
                             }
@@ -232,11 +228,6 @@ class sapcrmcore extends saproot
                                 && !empty($values[$this->moduleFields[$field]['readName']])
                             ) {
                                 $convertFields[$field] = $values[$this->moduleFields[$field]['readName']];
-                            } elseif (
-                                    !empty($this->fieldsRelate[$field]['readName'])
-                                && !empty($values[$this->fieldsRelate[$field]['readName']])
-                            ) {
-                                $convertFields[$field] = $values[$this->fieldsRelate[$field]['readName']];
                             }
                         }
                     }

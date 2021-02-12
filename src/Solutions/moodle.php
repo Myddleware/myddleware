@@ -131,7 +131,6 @@ class moodlecore extends solution
         parent::get_module_fields($module, $type);
         try {
             $this->moduleFields = [];
-            $this->fieldsRelate = [];
 
             // Use Moodle metadata
             require 'lib/moodle/metadata.php';
@@ -155,17 +154,6 @@ class moodlecore extends solution
                 } catch (\Exception $e) {
                 }
             }
-
-            // Field relate
-            if (!empty($fieldsRelate[$module])) {
-                $this->fieldsRelate = $fieldsRelate[$module];
-            }
-
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

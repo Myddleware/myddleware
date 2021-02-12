@@ -100,15 +100,6 @@ class wordpresscore extends solution {
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = $moduleFields[$module];
             }
-
-            if (!empty($fieldsRelate[$module])) {
-				$this->fieldsRelate = $fieldsRelate[$module]; 
-			}	
-
-            if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-
             return $this->moduleFields;
 
         }catch(\Exception $e){

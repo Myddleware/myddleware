@@ -267,12 +267,13 @@ class vtigercrmcore extends solution
             foreach ($fields as $field) {
                 if (!in_array($field['name'], $escludeField)) {
                     if ('reference' == $field['type']['name'] || 'owner' == $field['type']['name']) {
-                        $this->fieldsRelate[$field['name']] = [
+                        $this->moduleFields[$field['name']] = [
                             'label' => $field['label'],
                             'required' => $field['mandatory'],
                             'type' => 'varchar(127)', // ? Settare il type giusto?
                             'type_bdd' => 'varchar(127)',
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     } else {
                         $this->moduleFields[$field['name']] = [
@@ -280,6 +281,7 @@ class vtigercrmcore extends solution
                             'required' => $field['mandatory'],
                             'type' => 'varchar(127)', // ? Settare il type giusto?
                             'type_bdd' => 'varchar(127)',
+							'relate' => false
                         ];
                         if ('picklist' == $field['type']['name'] || 'multipicklist' == $field['type']['name']) {
                             foreach ($field['type']['picklistValues'] as $option) {
@@ -288,10 +290,6 @@ class vtigercrmcore extends solution
                         }
                     }
                 }
-            }
-
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
             }
 
             return $this->moduleFields ?: false;

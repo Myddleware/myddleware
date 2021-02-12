@@ -226,12 +226,13 @@ class salesforcecore extends solution {
                 }
 
                 if ($field['type'] == 'reference') {
-                     $this->fieldsRelate[$field['name']] = array(
+                     $this->moduleFields[$field['name']] = array(
                                                 'label' => $field['label'],
                                                 'type' => $field['type'],
                                                 'type_bdd' => $type_bdd,
                                                 'required' => !$field['nillable'],
-												'required_relationship' => 0
+												'required_relationship' => 0,
+												'relate' => true
                                             );
                 }
                 else {
@@ -251,19 +252,21 @@ class salesforcecore extends solution {
 												'label' => $field['label'],
 												'type' => $field['type'],
 												'type_bdd' => $type_bdd,
-												'required' => $required
+												'required' => $required,
+												'relate' => false
 											);
 						if(strpos($field['name'], "__c")) // Si le champs est un champs custom, il n'est pas requis par défaut
 							$this->moduleFields[$field['name']]['required'] = false;
                     } 
 					else {
 						// Ajout du champ ID permettant de gérer les relations
-						$this->fieldsRelate['Myddleware_element_id'] = array(
+						$this->moduleFields['Myddleware_element_id'] = array(
                                                 'label' => $field['label'],
                                                 'type' => $field['type'],
                                                 'type_bdd' => $type_bdd,
                                                 'required' => !$field['nillable'],
-												'required_relationship' => 0
+												'required_relationship' => 0,
+												'relate' => true
                                             );
 					}
                     // Récupération des listes déroulantes
@@ -275,10 +278,6 @@ class salesforcecore extends solution {
                     }   
                 }           
             }
-			// Ajout des champ relate au mapping des champs 
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
 			return $this->moduleFields;
 		}
 		catch (\Exception $e) {

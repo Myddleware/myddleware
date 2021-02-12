@@ -38,6 +38,7 @@ $moduleFields = [
         'email' => ['label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'browser' => ['label' => 'Browser used by visitor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'created_at' => ['label' => 'Visitor creation date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'website_id' => ['label' => 'List of website identifiers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
     ],
     'conversation.json-unicode' => [
         'id' => ['label' => 'Conversation identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -50,20 +51,12 @@ $moduleFields = [
         'created_at' => ['label' => 'Conversation start time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'closed_at' => ['label' => 'Conversation end time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'tag_list' => ['label' => 'List of tag identifiers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-    ],
-];
-
-$fieldsRelate = [
-    'visitor' => [
-        'website_id' => ['label' => 'List of website identifiers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-    ],
-    'conversation.json-unicode' => [
-        'visitor_uid' => ['label' => 'Visitor unique identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-        'website_id' => ['label' => 'Website identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-        'operator_id' => ['label' => 'Operator identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-        'skill_id' => ['label' => 'Skill identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-        'rule_id' => ['label' => 'Rule identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-        'xmpp_id' => ['label' => 'XMPP related identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
+        'visitor_uid' => ['label' => 'Visitor unique identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'website_id' => ['label' => 'Website identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'operator_id' => ['label' => 'Operator identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'skill_id' => ['label' => 'Skill identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'rule_id' => ['label' => 'Rule identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'xmpp_id' => ['label' => 'XMPP related identifier', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
     ],
 ];
 

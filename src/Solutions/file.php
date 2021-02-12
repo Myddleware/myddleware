@@ -172,19 +172,21 @@ class filecore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => false,
+						'relate' => false
                     ];
 
-                    // If the field contains the id indicator, we add it to the fieldsRelate list
+                    // If the field contains the id indicator, we add it to the moduleFields list
                     $idFields = $this->getIdFields($module, $type);
                     if (!empty($idFields)) {
                         foreach ($idFields as $idField) {
                             if (false !== strpos($field, $idField)) {
-                                $this->fieldsRelate[str_replace($this->removeChar, '', $field)] = [
+                                $this->moduleFields[str_replace($this->removeChar, '', $field)] = [
                                     'label' => $field,
                                     'type' => 'varchar(255)',
                                     'type_bdd' => 'varchar(255)',
                                     'required' => false,
                                     'required_relationship' => 0,
+									'relate' => true
                                 ];
                             }
                         }
@@ -194,7 +196,8 @@ class filecore extends solution
             } else {
                 $this->moduleFields = [];
             }
-
+			// Add relationship fields coming from other rules
+			$this->get_module_fields_relate($module, $param);
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -244,23 +247,20 @@ class filecore extends solution
             if (!empty($fields)) {
                 // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                 foreach ($fields as $field) {
-                    if (
-                            empty($this->fieldsRelate[$field['value']]) // Only if the field isn't already in the list
-                        and !empty($this->moduleFields[$field['value']]) // The field has to exist in the current module
-                    ) {
-                        $this->fieldsRelate[$field['value']] = [
+					// The field has to exist in the current module
+                    if (!empty($this->moduleFields[$field['value']])) {
+                        $this->moduleFields[$field['value']] = [
                             'label' => $field['value'],
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     }
                 }
             }
         }
-
-        return parent::get_module_fields_relate($module, $param);
     }
 	
 

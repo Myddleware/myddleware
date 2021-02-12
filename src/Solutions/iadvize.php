@@ -107,24 +107,12 @@ class iadvizecore extends solution
         parent::get_module_fields($module, $type);
         try {
             $this->moduleFields = [];
-            $this->fieldsRelate = [];
-
+			
             // Use Iadvize metadata
             require 'lib/iadvize/metadata.php';
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = $moduleFields[$module];
             }
-
-            // Field relate
-            if (!empty($fieldsRelate[$module])) {
-                $this->fieldsRelate = $fieldsRelate[$module];
-            }
-
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

@@ -213,7 +213,7 @@ $moduleFields = array (
                             'coupon_lines'	=> array( 'label' => 'Coupon lines', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'refunds'	=> array( 'label' => 'Refunds', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'set_paid' => array( 'label' => 'Set paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            
+                            'customer_id'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
                         ),
                         'line_items' => array(
                             'id' =>array( 'label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -230,15 +230,7 @@ $moduleFields = array (
                             'meta_data' =>array( 'label' => 'Meta data', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'sku' =>array( 'label' => 'SKU', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'price' =>array( 'label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+							'order_id' => array( 'label' => 'Order Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+							'product_id'=> array( 'label' => 'Product id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
                             )
                     );
-
-$fieldsRelate = array (
-    'line_items' => array(
-        'order_id' => array( 'label' => 'Order Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'product_id'=> array( 'label' => 'Product id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-    ),
-    'orders' => array(
-         'customer_id'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-    )
-);

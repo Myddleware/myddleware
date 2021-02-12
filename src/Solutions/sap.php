@@ -104,7 +104,7 @@ class sapcore extends saproot
     {
         // Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
         if ('ET_BSEG' == $module) {
-            $this->fieldsRelate['ET_BKPF'] = [
+            $this->moduleFields['ET_BKPF'] = [
                 'label' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
                 'type' => 'varchar(255)',
                 'type_bdd' => 'varchar(255)',

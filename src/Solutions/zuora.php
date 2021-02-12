@@ -135,12 +135,13 @@ class zuoracore extends solution
                 foreach ($zupraFields as $field) {
                     // If the fields is a relationship
                     if ('id' == strtolower(substr($field, -2))) {
-                        $this->fieldsRelate[$field] = [
+                        $this->moduleFields[$field] = [
                             'label' => $field,
                             'type' => 'varchar(36)',
                             'type_bdd' => 'varchar(36)',
                             'required' => 0,
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     } else {
                         $this->moduleFields[$field] = [
@@ -148,15 +149,11 @@ class zuoracore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => 0,
+							'relate' => false
                         ];
                     }
                 }
             }
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

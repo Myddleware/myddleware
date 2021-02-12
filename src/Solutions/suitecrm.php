@@ -225,15 +225,17 @@ class suitecrmcore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
+						'relate' => false
                     ];
                 }
                 foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
-                    $this->fieldsRelate[$relationship] = [
+                    $this->moduleFields[$relationship] = [
                         'label' => $relationship,
                         'type' => 'varchar(36)',
                         'type_bdd' => 'varchar(36)',
                         'required' => 0,
                         'required_relationship' => 0,
+                        'relate' => true
                     ];
                 }
             } else {
@@ -271,12 +273,13 @@ class suitecrmcore extends solution
                         )
                         || 'created_by' == $field->name
                     ) {
-                        $this->fieldsRelate[$field->name] = [
+                        $this->moduleFields[$field->name] = [
                             'label' => $field->label,
                             'type' => 'varchar(36)',
                             'type_bdd' => 'varchar(36)',
                             'required' => $field->required,
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     }
                     //To enable to take out all fields where there are 'relate' in the type of the field
@@ -288,6 +291,7 @@ class suitecrmcore extends solution
                                 'type' => $field->type,
                                 'type_bdd' => $type_bdd,
                                 'required' => $field->required,
+								'relate' => false
                             ];
                         }
                         // Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
@@ -329,12 +333,13 @@ class suitecrmcore extends solution
                             )
                         ) {
                             // On met un préfix pour les relation custom afin de pouvoir les détecter dans le read
-                            $this->fieldsRelate[$this->customRelationship.$field->name] = [
+                            $this->moduleFields[$this->customRelationship.$field->name] = [
                                 'label' => $field->relationship,
                                 'type' => 'varchar(36)',
                                 'type_bdd' => 'varchar(36)',
                                 'required' => 0,
                                 'required_relationship' => 0,
+								'relate' => true
                             ];
                             // Get the name field for this relationship (already in array moduleFields but we need to flag it as a customrelationship)
                             if (!empty($this->moduleFields[$field->relationship.'_name'])) {
@@ -346,10 +351,6 @@ class suitecrmcore extends solution
                         }
                     }
                 }
-            }
-            // Ajout des champ relate au mapping des champs
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
             }
 
             return $this->moduleFields;

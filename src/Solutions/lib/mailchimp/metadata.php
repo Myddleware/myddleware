@@ -80,6 +80,7 @@ $moduleFields = [
         'social_card__description' => ['label' => 'Social card description', 'type' => TextType::class, 'required' => 0],
         'social_card__image_url' => ['label' => 'Social card image_url', 'type' => 'text', 'required' => 0],
         'type' => ['label' => 'Campaign Type', 'type' => 'text', 'required' => 1, 'option' => ['regular' => 'regular', 'plaintext' => 'plaintext', 'absplit' => 'absplit', 'rss' => 'rss', 'variate' => 'variate']],
+        'recipients__list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
     ],
     'members' => [
         'email_address' => ['label' => 'Email address', 'type' => 'text', 'required' => 1],
@@ -95,15 +96,7 @@ $moduleFields = [
         'timestamp_opt' => ['label' => 'Timestamp opt', 'type' => 'text', 'required' => 0],
         'merge_fields__FNAME' => ['label' => 'MERGE0', 'type' => 'text', 'required' => 0],
         'merge_fields__LNAME' => ['label' => 'First name', 'type' => 'text', 'required' => 0],
-    ],
-];
-
-$fieldsRelate = [
-    'campaigns' => [
-        'recipients__list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 0],
-    ],
-    'members' => [
-        'list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 1],
+        'list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
     ],
 ];
 

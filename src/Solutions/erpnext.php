@@ -149,12 +149,13 @@ class erpnextcore extends solution
                         continue;
                     }
                     if (in_array($field->fieldtype, ['Link', 'Dynamic Link'])) {
-                        $this->fieldsRelate[$field->fieldname] = [
+                        $this->moduleFields[$field->fieldname] = [
                             'label' => $field->label,
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'required_relationship' => '',
+							'relate' => true
                         ];
                     // Add field to manage dymamic links
                     } elseif (
@@ -167,13 +168,15 @@ class erpnextcore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'option' => $modules,
+							'relate' => false
                         ];
-                        $this->fieldsRelate['link_name'] = [
+                        $this->moduleFields['link_name'] = [
                             'label' => 'Link name',
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'required_relationship' => '',
+							'relate' => true
                         ];
                     } else {
                         $this->moduleFields[$field->fieldname] = [
@@ -181,6 +184,7 @@ class erpnextcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
+							'relate' => false
                         ];
                         if (!empty($field->options)) {
                             $options = explode(chr(10), $field->options);
@@ -211,6 +215,7 @@ class erpnextcore extends solution
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
                     'option' => $modules,
+					'relate' => false
                 ];
                 // Parentfield => field name in the parent module (eg. "items" in module Sales Invoice). We can't give the field list because we don't know the module selected yet
                 $this->moduleFields['parentfield'] = [
@@ -218,22 +223,18 @@ class erpnextcore extends solution
                     'type' => 'varchar(255)',
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
+					'relate' => false
                 ];
                 // Parent => value of the parent field (eg SINV-00001 which is the "Sales Invoice" parent)
-                $this->fieldsRelate['parent'] = [
+                $this->moduleFields['parent'] = [
                     'label' => 'Parent',
                     'type' => 'varchar(255)',
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
                     'required_relationship' => '',
+					'relate' => true
                 ];
             }
-
-            // Add relate field in the field mapping
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());

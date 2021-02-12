@@ -133,14 +133,12 @@ class magentocore extends solution
                         'dob' => ['label' => 'Birthdate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'taxvat' => ['label' => 'Taxvat value', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'confirmation' => ['label' => 'Confirmation flag', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'increment_id' => ['label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
-                        'store_id' => ['label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
-                        'website_id' => ['label' => 'Website ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
-                        'group_id' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
-                        'default_shipping' => ['label' => 'Default shipping address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
-                        'default_billing' => ['label' => 'Default billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
+                        'increment_id' => ['label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'store_id' => ['label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'website_id' => ['label' => 'Website ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'group_id' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'default_shipping' => ['label' => 'Default shipping address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'default_billing' => ['label' => 'Default billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                     ];
                     break;
                 case 'customer_address':
@@ -167,9 +165,7 @@ class magentocore extends solution
                         'telephone' => ['label' => 'Telephone number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'is_default_billing' => ['label' => 'True if the address is the default one for billing', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'is_default_shipping' => ['label' => 'True if the address is the default one for shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'customer_id' => ['label' => 'Customer ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
+                        'customer_id' => ['label' => 'Customer ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                     ];
                     try {
                         // Get list of countries
@@ -250,18 +246,12 @@ class magentocore extends solution
                         'entity_id' => ['label' => 'Entity ID (order ID)', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'gift_message_id' => ['label' => 'Gift message ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'gift_message' => ['label' => 'Gift message', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'customer_id' => ['label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_id' => ['label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false],
                     ];
                     break;
                 default:
                     throw new \Exception('Fields unreadable');
                     break;
-            }
-            // Ajout des champ relate au mapping des champs
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
             }
 
             // Add list here (field could exist in several fields or was part of a rrelate field)

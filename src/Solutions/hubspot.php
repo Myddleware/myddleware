@@ -310,12 +310,13 @@ class hubspotcore extends solution
                      or 'IDS' == strtoupper(substr($field['name'], -3))
                      or 'ID__VALUE' == strtoupper(substr($field['name'], -9)) // Used for module's type object
                 ) {
-                    $this->fieldsRelate[$field['name']] = [
+                    $this->moduleFields[$field['name']] = [
                         'label' => $field['label'],
                         'type' => 'varchar(36)',
                         'type_bdd' => 'varchar(36)',
                         'required' => 0,
                         'required_relationship' => 0,
+						'relate' => true
                     ];
                 }
                 $this->moduleFields[$field['name']] = [
@@ -323,6 +324,7 @@ class hubspotcore extends solution
                     'type' => $field['type'],
                     'type_bdd' => $field['type'],
                     'required' => 0,
+					'relate' => false
                 ];
                 // Add list of values
                 if (!empty($field['options'])) {

@@ -1408,18 +1408,15 @@ if (file_exists($file)) {
                 }
 
                 // Récupère la liste des paramètres cible
-                $rule_params_target = $solution_cible->getFieldsParamUpd('target', $module['cible']);
+                $ruleParamsTarget = $solution_cible->getFieldsParamUpd('target', $module['cible']);
 
                 // Récupère la liste des champs cible
-                $rule_fields_target = $solution_cible->get_module_fields($module['cible'], 'target');
+                $ruleFieldsTarget = $solution_cible->get_module_fields($module['cible'], 'target');
 
                 // Récupération de tous les modes de règle possibles pour la cible et la source
                 $targetMode = $solution_cible->getRuleMode($module['cible'], 'target');
 
                 $fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
-
-                // Liste des relations TARGET
-                $relation = $solution_cible->get_module_fields_relate($module['cible'], '');
 
                 $allowParentRelationship = $solution_cible->allowParentRelationship($this->sessionService->getParamRuleCibleModule($ruleKey));
 
@@ -1449,13 +1446,13 @@ if (file_exists($file)) {
                 $this->sessionService->setParamRuleSourceDateReference($ruleKey, $solution_source->referenceIsDate($module['source']));
 
                 // Ajoute des champs source pour la validation
-                $rule_params_source = $solution_source->getFieldsParamUpd('source', $module['source']);
+                $ruleParamsSource = $solution_source->getFieldsParamUpd('source', $module['source']);
 
                 // Récupère la liste des champs source
-                $rule_fields_source = $solution_source->get_module_fields($module['source'], 'source');
+                $ruleFieldsSource = $solution_source->get_module_fields($module['source'], 'source');
 
-                if ($rule_fields_source) {
-                    $this->sessionService->setParamRuleSourceFields($ruleKey, $rule_fields_source);
+                if ($ruleFieldsSource) {
+                    $this->sessionService->setParamRuleSourceFields($ruleKey, $ruleFieldsSource);
 
                     // Erreur champs, pas de données sources (Exemple: GotoWebinar)
 
@@ -1466,7 +1463,7 @@ if (file_exists($file)) {
                         exit;
                     }
 
-                    foreach ($rule_fields_source as $t => $k) {
+                    foreach ($ruleFieldsSource as $t => $k) {
                         $source['table'][$module['source']][$t] = $k['label'];
                     }
                     // Tri des champs sans tenir compte de la casse
@@ -1496,14 +1493,14 @@ if (file_exists($file)) {
                 // Préparation des champs cible
                 $cible['table'] = [];
 
-                if ($rule_fields_target) {
-                    $this->sessionService->setParamRuleTargetFields($ruleKey, $rule_fields_target);
+                if ($ruleFieldsTarget) {
+                    $this->sessionService->setParamRuleTargetFields($ruleKey, $ruleFieldsTarget);
 
-                    $tmp = $rule_fields_target;
+                    $tmp = $ruleFieldsTarget;
 
                     $normal = [];
                     $required = [];
-                    foreach ($rule_fields_target as $t => $k) {
+                    foreach ($ruleFieldsTarget as $t => $k) {
                         if (isset($k['required']) && true == $k['required']) {
                             $required[] = $t;
                         } else {
@@ -1549,38 +1546,44 @@ if (file_exists($file)) {
                 // -------------------	TARGET
                 $lst_relation_target = [];
                 $lst_relation_target_alpha = [];
-                if ($relation) {
-                    foreach ($relation as $key => $value) {
+                if ($ruleFieldsTarget) {
+                    foreach ($ruleFieldsTarget as $key => $value) {
+						// Only relationship fields
+						if (empty($value['relate'])) {
+							continue;
+						}
                         $lst_relation_target[] = $key;
                     }
 
                     asort($lst_relation_target);
 
                     foreach ($lst_relation_target as $name_relate) {
-                        $lst_relation_target_alpha[$name_relate]['required'] = $relation[$name_relate]['required_relationship'];
+                        $lst_relation_target_alpha[$name_relate]['required'] = $ruleFieldsTarget[$name_relate]['required_relationship'];
                         $lst_relation_target_alpha[$name_relate]['name'] = $name_relate;
-                        $lst_relation_target_alpha[$name_relate]['label'] = (!empty($relation[$name_relate]['label']) ? $relation[$name_relate]['label'] : $name_relate);
+                        $lst_relation_target_alpha[$name_relate]['label'] = (!empty($ruleFieldsTarget[$name_relate]['label']) ? $ruleFieldsTarget[$name_relate]['label'] : $name_relate);
                     }
                 }
 
                 // -------------------	SOURCE
                 // Liste des relations SOURCE
-                // Add parameters to be able to read rules linked in function get_module_fields_relate (used for database connector for example)
+                // Add parameters to be able to read rules linked 
                 $param['connectorSourceId'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
                 $param['connectorTargetId'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
                 $param['ruleName'] = $this->sessionService->getParamRuleName($ruleKey);
-                $relation_source = $solution_source->get_module_fields_relate($this->sessionService->getParamRuleSourceModule($ruleKey), $param);
                 $lst_relation_source = [];
                 $lst_relation_source_alpha = [];
                 $choice_source = [];
-                if ($relation_source) {
-                    foreach ($relation_source as $key => $value) {
+                if ($ruleFieldsSource) {
+                    foreach ($ruleFieldsSource as $key => $value) {
+						if (empty($value['relate'])) {
+							continue;	// We keep only relationship fields
+						}
                         $lst_relation_source[] = $key;
                     }
 
                     asort($lst_relation_source);
                     foreach ($lst_relation_source as $name_relate) {
-                        $lst_relation_source_alpha[$name_relate]['label'] = $relation_source[$name_relate]['label'];
+                        $lst_relation_source_alpha[$name_relate]['label'] = $ruleFieldsSource[$name_relate]['label'];
                     }
 
                     // préparation de la liste en html
@@ -1642,10 +1645,12 @@ if (file_exists($file)) {
                         // We get all relate fields from every source module
                         foreach ($ruleListRelation as $ruleRelation) {
                             // Get the relate fields from the source module of related rules
-                            $rule_fields_source = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
-                            $sourceRelateFields = $solution_source->get_module_fields_relate($ruleRelation['moduleSource'], '');
-                            if (!empty($sourceRelateFields)) {
-                                foreach ($sourceRelateFields as $key => $sourceRelateField) {
+                            $ruleFieldsSource = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
+                            if (!empty($ruleFieldsSource)) {
+                                foreach ($ruleFieldsSource as $key => $sourceRelateField) {
+									if (!empty($sourceRelateField['relate'])) {
+										continue;	// Only relationship fields
+									}
                                     $lstParentFields[$key] = $sourceRelateField['label'];
                                 }
                             }
@@ -1687,7 +1692,7 @@ if (file_exists($file)) {
                 ];
 
                 // paramètres de la règle
-                $rule_params = array_merge($rule_params_source, $rule_params_target);
+                $rule_params = array_merge($ruleParamsSource, $ruleParamsTarget);
 
                 // récupération des champs de type liste --------------------------------------------------
 

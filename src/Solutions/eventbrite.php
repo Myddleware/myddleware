@@ -155,10 +155,8 @@ class eventbritecore extends solution
                         'url' => ['label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'logo' => ['label' => 'Logo URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => ['draft' => 'draft', 'live' => 'live', 'started' => 'started', 'ended' => 'ended', 'canceled' => 'canceled']],
-                    ];
-                    $this->fieldsRelate = [
-                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0],
-                        'venue_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0],
+                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
+                        'venue_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
                     ];
                     break;
                 case 'Tickets':
@@ -176,9 +174,7 @@ class eventbritecore extends solution
                         'quantity_available' => ['label' => 'Quantity available', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
                         'quantity_sold' => ['label' => 'Quantity sold', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'visible' => ['label' => 'Visible', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'event_id' => ['label' => 'Event id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
+                        'event_id' => ['label' => 'Event id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
                     ];
                     break;
                 case 'Venues':
@@ -195,9 +191,7 @@ class eventbritecore extends solution
                         'longitude' => ['label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'latitude' => ['label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'Lat-Long' => ['label' => 'Latitude/Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
+                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
                     ];
                     break;
                 /* case 'Access_Codes':
@@ -279,10 +273,8 @@ class eventbritecore extends solution
                         // Liste des réponses à voir, probablement relation ou module
                         'answers' => ['label' => 'Answers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'order_id' => ['label' => 'Order ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    $this->fieldsRelate = [
-                        'event_id' => ['label' => 'Event ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1],
-                        'ticket_id' => ['label' => 'Ticket ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0],
+                        'event_id' => ['label' => 'Event ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+                        'ticket_id' => ['label' => 'Ticket ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
                     ];
                     break;
                 case 'Users':
@@ -302,11 +294,6 @@ class eventbritecore extends solution
                     throw new \Exception('Fields unreadable');
                     break;
             }
-            // Ajout des champ relate au mapping des champs
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;

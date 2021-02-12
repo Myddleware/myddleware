@@ -121,7 +121,6 @@ class sugarcrmcore extends solution
         parent::get_module_fields($module, $type);
         try {
             $this->moduleFields = [];
-            $this->fieldsRelate = [];
 
             // Call teh detail of all Sugar fields for the module
             $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=modules&module_filter='.$module);
@@ -151,6 +150,7 @@ class sugarcrmcore extends solution
                         'type' => $field->type,
                         'type_bdd' => $type_bdd,
                         'required' => (!empty($field->required) ? $field->required : 0),
+						'relate' => false
                     ];
 
                     // Add option for enum fields
@@ -175,12 +175,13 @@ class sugarcrmcore extends solution
                         )
                         or 'created_by' == $field->name
                     ) {
-                        $this->fieldsRelate[$field->name] = [
+                        $this->moduleFields[$field->name] = [
                             'label' => (!empty($field->comment) ? $field->comment : $field->name),
                             'type' => 'varchar(36)',
                             'type_bdd' => 'varchar(36)',
                             'required' => (!empty($field->required) ? $field->required : 0),
                             'required_relationship' => 0,
+							'relate' => true
                         ];
                     }
                 }

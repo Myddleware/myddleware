@@ -116,13 +116,6 @@ class woocommercecore extends solution {
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = $moduleFields[$module];
             }
-            if (!empty($fieldsRelate[$module])) {
-				$this->fieldsRelate = $fieldsRelate[$module]; 
-			}	
-			// Includ relate fields into moduleFields to display them in the field mapping tab
-			if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
 			return $this->moduleFields;
 
         } catch (\Exception $e) {		
