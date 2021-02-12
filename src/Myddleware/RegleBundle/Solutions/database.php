@@ -451,7 +451,7 @@ class databasecore extends solution {
 				}
 			}		
 			// Search for delete data 
-			$result = $this->searchDeletionByComparison($param, $result);
+			$result = $this->searchDeletionByComparison($param,$result);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -459,7 +459,7 @@ class databasecore extends solution {
 		return $result;
 	} // read($param)
 	
-	protected function searchDeletionByComparison($param, $result) {
+	protected function searchDeletionByComparison($param,$result) {
 		// If check deletion by comparaison is selected on the rule param
 		if (
 				!empty($param['ruleParams']['deletion'])
