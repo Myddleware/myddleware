@@ -2,8 +2,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -219,4 +219,29 @@ input[type="text"] {
 #champs #catalog {
 	max-height: 870px;
 	overflow: auto;
+}
+
+/*  Manual rule simulation buttons and input */
+
+.manual-simulation, .simulation-buttons {
+	margin-top: 3vh;
+	margin-left: 3vw;
+	margin-right: 3vw;
+	display: flex;
+	justify-content: space-around;
+	max-width: 50vw;
+}
+
+.manual-input {
+	max-width: 15vw;
+}
+
+.btn-success {
+	background-color: #CCC31C!important;
+	border-color: #CCC31C!important;
+}
+
+.btn-success:hover {
+	background-color: #D6CF49!important;
+	border-color: #D6CF49!important;
 }

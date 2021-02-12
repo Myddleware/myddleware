@@ -58,7 +58,7 @@ class microsoftsqlcore extends database
 	
 	// Query to get all the tables of the database
 	protected function get_query_show_tables() {
-		return 'SELECT table_name FROM information_schema.tables WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
+		return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
 	}
 	
 	// Query to get all the flieds of the table
