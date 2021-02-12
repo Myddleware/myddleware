@@ -158,105 +158,7 @@ class cirrusshieldcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
-
-    // Get the last data in the application
-    public function read_last($param)
-    {
-        try {
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-            $query = 'SELECT ';
-            // Build the SELECT
-            if (!empty($param['fields'])) {
-                foreach ($param['fields'] as $field) {
-                    $query .= $field.',';
-                }
-                // Delete the last coma
-                $query = rtrim($query, ',');
-            } else {
-                $query .= ' * ';
-            }
-
-            // Add the FROM
-            $query .= ' FROM '.$param['module'].' ';
-
-            // Generate the WHERE
-            if (!empty($param['query'])) {
-                $query .= ' WHERE ';
-                $first = true;
-                foreach ($param['query'] as $key => $value) {
-                    // Add the AND only if we are not on the first condition
-                    if ($first) {
-                        $first = false;
-                    } else {
-                        $query .= ' AND ';
-                    }
-                    // The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-                    if ('id' == $key) {
-                        $key = 'Id';
-                    }
-                    // Add the condition
-                    $query .= $key." = '".$value."' ";
-                }
-                // The function is called for a simulation (rule creation) if there is no query
-            } else {
-                $query .= " WHERE ModificationDate < '".date('Y-m-d H:i:s')."'"; // Need to add 'limit 1' here when the command LIMIT will be available
-            }
-
-            // Buid the input parameter
-            $selectparam = ['authToken' => $this->token,
-                'selectQuery' => $query,
-            ];
-            $url = sprintf('%s?%s', $this->url.'Query', http_build_query($selectparam));
-            $resultQuery = $this->call($url);
-
-            // If the query return an error
-            if (!empty($resultQuery['Message'])) {
-                throw new \Exception($resultQuery['Message']);
-            }
-            // If no result
-            if (empty($resultQuery)) {
-                $result['done'] = false;
-            }
-            // Format the result
-            // If several results, we take the first one
-            if (!empty($resultQuery[$param['module']][0])) {
-                $record = $resultQuery[$param['module']][0];
-            // If one result we take the first one
-            } else {
-                $record = $resultQuery[$param['module']];
-            }
-
-            foreach ($param['fields'] as $field) {
-                // We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-                if (isset($record[$field])) {
-                    // Cirrus return an array when the data is empty
-                    if (is_array($record[$field])) {
-                        $result['values'][$field] = '';
-                    } else {
-                        // The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-                        if ('Id' == $field) {
-                            $result['values']['id'] = $record[$field];
-                        } else {
-                            $result['values'][$field] = $record[$field];
-                        }
-                    }
-                }
-            }
-            if (!empty($result['values'])) {
-                $result['done'] = true;
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
 
     public function read($param)
     {
@@ -269,7 +171,7 @@ class cirrusshieldcore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
             // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Get the organization timezone
             if (empty($this->organizationTimezoneOffset)) {

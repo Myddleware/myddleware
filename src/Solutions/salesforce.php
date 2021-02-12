@@ -327,97 +327,6 @@ class salesforcecore extends solution {
 		}
 	}
 	
-
-	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {	
-		// Si le tableau de requête est présent alors construction de la requête
-		if (!empty($param['query'])) {
-			$query = '';
-			foreach ($param['query'] as $key => $value) {
-				if (!empty($query)) {
-					$query .= '+AND+';
-				} else {
-					$query .= '+WHERE+';
-				}
-				// rawurlencode => change space in %20 for ewample
-				$query .= $param['module'].".".$key."+=+'".rawurlencode($value)."'+";
-			}
-		}
-				
-		$result = array();
-		$result['error'] = '';
-		try {
-			if(!isset($param['fields'])) {
-				$param['fields'] = array();
-			}
-			$param['fields'] = array_unique($param['fields']);
-			$param['fields'] = $this->addRequiredField($param['fields']);
-			$param['fields'] = array_values($param['fields']);
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
-			// Construction de la requête pour Salesforce
-			$query_url = $this->instance_url."/services/data/".$this->versionApi."/query/?q=SELECT+";
-			
-			foreach ($param['fields'] as $field){
-				// $field = str_replace(" ", "", $field); // Solution si JQuery ajoute un espace, à n'utiliser qu'en dernier recours car fonctionne pas bien
-			    $query_url .= $field . ",+"; // Ajout de chaque champ souhaité
-			}
-			// Suppression de la dernière virgule en laissant le +
-			$query_url = rtrim($query_url,'+'); 
-			$query_url = rtrim($query_url,',').'+'; 
-			$query_url .= "FROM+".$param['module'];
-
-			if(isset($query)) {
-				$query_url .= $query;
-			}
-			$query_url .= "+ORDER+BY+LastModifiedDate+DESC"; // Tri par date de modification
-			$query_url .= "+LIMIT+1"; // Ajout de la limite souhaitée
-
-			// Appel de la requête
-			$query_request_data = $this->call($query_url, false);
-
-			if(isset($query_request_data['records'][0])) {
-				foreach ($query_request_data['records'][0] as $key => $value) {
-			        // On enlève le tableau "attributes" ajouté par Salesforce afin d'extraire les éléments souhaités
-					if(!($key == 'attributes')){
-						if($key == 'Id') {
-			            	$row[mb_strtolower($key)] = $query_request_data['records'][0][$key];
-						}
-						elseif($key=='LastModifiedDate') {
-							$row['date_modified'] = $query_request_data['records'][0][$key];
-						}
-						else {
-							$row[$key] = $query_request_data['records'][0][$key];
-						}
-					}
-					if($key == "MailingAddress") {
-						if(!empty($value)) {
-							$MailinAddress = "";
-							foreach ($value as $elem => $elemvalue) {
-								if(!empty($elemvalue))
-									$MailinAddress .= $elem .": " . $elemvalue ." ";
-							}
-							$MailinAddress = rtrim($MailinAddress,' ');
-							$row[$key] = $MailinAddress;
-						}
-					}
-			    }
-				$result['values'] = $row;
-				$result['done'] = true;
-			} 
-			else {
-				$result['done'] = false;
-				$result['error'] = $query_request_data;
-			}
-			return $result;
-		}
-		catch (\Exception $e) {
-			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			return $result;
-		}
-	} // read_last($param)	
-	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function read($param) {
@@ -447,7 +356,7 @@ class salesforcecore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			
 			// Récupération du nom du champ date
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
@@ -789,7 +698,7 @@ class salesforcecore extends solution {
 			}
 		} else {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
 			// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
 			$tab = explode(' ', $param['date_ref']);
@@ -818,7 +727,7 @@ class salesforcecore extends solution {
 	
 	// Génération du ORDER
 	protected function getOrder($param){	
-		$DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+		$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
 		} else {

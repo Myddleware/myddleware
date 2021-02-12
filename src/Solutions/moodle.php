@@ -171,46 +171,8 @@ class moodlecore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    /**
-     * Get the last data in the application.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function read_last($param)
-    {
-        // Query empty when the rule simulation is requested
-        if (empty($param['query'])) {
-            // For the simulation we set the search date to last week (we don't put 0 for peformance matters but it is possible to redefine it)
-            $param['date_ref'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-        }
-        // Init rule mode
-        $param['rule']['mode'] = '0';
-
-        // We re use read function for the read_last
-        $read = $this->read($param);
-
-        // Format output values
-        if (!empty($read['error'])) {
-            $result['error'] = $read['error'];
-        } else {
-            if (!empty($read['values'])) {
-                $result['done'] = true;
-                // Get only one record
-                $result['values'] = current($read['values']);
-            } else {
-                $result['done'] = false;
-            }
-        }
-
-        return $result;
-    }
-
-    // end function read_last
 
     // Read data in Moodle
     public function read($param)
@@ -220,7 +182,7 @@ class moodlecore extends solution
 
             // Put date ref in Moodle format
             $result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Add requiered fields
             $param['fields'] = $this->addRequiredField($param['fields']);

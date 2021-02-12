@@ -160,66 +160,8 @@ class ringcentralcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
-
-    public function read_last($param)
-    {
-        try {
-            // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-            // Generate the WHERE // no nedd because Ringcentral is used in source application only
-            if (!empty($param['query'])) {
-                // The function is called for a simulation (rule creation) if there is no query
-            } else {
-                $date = new \DateTime();
-                $date = date_modify($date, '-1 month');
-                $where = 'dateFrom='.$date->format('Y-m-d\TH:i:s.Z\Z');
-            }
-            // Call the function to Ringcentral
-            $records = $this->makeRequest($this->server, $this->token->access_token, '/restapi'.self::API_VERSION.'/account/~/extension/~/'.$param['module'].'?perPage=1&'.$where);
-
-            // Error managment
-            if (!empty($records->errorCode)) {
-                throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
-            }
-
-            // Transform result by adding a dimension for the presence module (only one record for each call)
-            if ('presence' == $param['module']) {
-                $recordsObj = new \stdClass();
-                $recordsObj->records = [$records];
-                $records = $recordsObj;
-            }
-
-            if (!empty($records->records)) {
-                // For each records
-                foreach ($records->records as $record) {
-                    // For each fields expected
-                    foreach ($param['fields'] as $field) {
-                        // The field could be a structure from_phoneNumber for example
-                        $fieldStructure = explode('__', $field);
-                        // If 2 dimensions
-                        if (!empty($fieldStructure[1])) {
-                            // If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
-                            $record->$field = (isset($record->$fieldStructure[0]->$fieldStructure[1]) ? $record->$fieldStructure[0]->$fieldStructure[1] : '');
-                        }
-                        $result['values'][$field] = $record->$field;
-                        $result['done'] = true;
-                    }
-                }
-            } else {
-                $result['done'] = false;
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
+	
 
     public function read($param)
     {
@@ -264,7 +206,7 @@ class ringcentralcore extends solution
                 $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
                 // Get the reference date field name
-                $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+                $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
                 $dateRef = $this->dateTimeFromMyddleware($dateRefExt[$extensionId]);
                 $pageNum = 1;
 

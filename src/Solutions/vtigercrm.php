@@ -302,120 +302,6 @@ class vtigercrmcore extends solution
         }
     }
 
-    /**
-     * Read Last.
-     *
-     * @param array $param
-     *
-     * @return array
-     */
-    public function read_last($param)
-    {
-        try {
-            if (empty($this->vtigerClient)) {
-                return [
-                    'error' => 'Error: no VtigerClient setup',
-                    'done' => -1,
-                ];
-            }
-
-            if (empty($this->moduleList)) {
-                $this->setModulePrefix();
-            }
-
-            $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
-            $where = '';
-            if (!empty($param['query'])) {
-                $where = 'WHERE ';
-                foreach ($param['query'] as $key => $item) {
-                    if ("'" === substr($where, -strlen("'"))) {
-                        $where .= ' AND ';
-                    }
-                    $where .= "$key = '$item'";
-                }
-            }
-            if ('LineItem' == $param['module']) {
-                $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module] $where;");
-
-                $parentModules = [];
-                foreach ($query['result'] as $parent) {
-                    $prefix = explode('x', $parent['parent_id'])[0];
-                    if (!array_key_exists($prefix, $parentModules)) {
-                        $parentModules[$prefix] = $this->moduleList[$prefix];
-                    }
-                }
-
-                $entity = [];
-                $maxtime = '';
-                foreach ($parentModules as $prefix => $moduleName) {
-                    $query = $this->vtigerClient->query("SELECT id, createdtime, modifiedtime FROM $moduleName $where ORDER BY modifiedtime ASC LIMIT 0, 1;");
-                    if (empty($query) || !$query['success']) {
-                        continue;
-                    }
-
-                    foreach ($query['result'] as $parentElement) {
-                        if (empty($maxtime) || $maxtime < $parentElement['modifiedtime']) {
-                            $maxtime = $parentElement['modifiedtime'];
-                            $retrive = $this->vtigerClient->retrieve($parentElement['id']);
-                            foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
-                                $lineitem['parent_id'] = $parentElement['id'];
-                                $lineitem['modifiedtime'] = $parentElement['modifiedtime'];
-                                $lineitem['createdtime'] = $parentElement['createdtime'];
-                                $entity[] = $lineitem;
-                            }
-                        }
-                    }
-                }
-
-                $query = ['success' => true, 'result' => $entity];
-            } else {
-                // If we search a specific record
-                if (!empty($param['query']['id'])) {
-                    $query = $this->vtigerClient->retrieve($param['query']['id']);
-                    // Add a dimension to the result to have the same format than the other call below
-                    if (!empty($query)) {
-                        $query['result'][0] = $query['result'];
-                    }
-                } else {
-                    $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where ORDER BY modifiedtime DESC LIMIT 0,1;");
-                }
-            }
-
-            if (empty($query) || (!empty($query) && !$query['success'])) {
-                return [
-                    'error' => 'Error: Request Failed!',
-                    'done' => -1,
-                ];
-            }
-
-            if (0 == count($query['result'])) {
-                return [
-                    'error' => 'No Data Retrived',
-                    'done' => false,
-                ];
-            }
-
-            $fields = $query['result'][0];
-            $result = ['done' => true];
-
-            foreach ($fields as $fieldName => $value) {
-                $result['values'][$fieldName] = $value;
-            }
-
-            /*
-            if(in_array($param['rule']['mode'], ["0", "S"])) {
-                $result['values']['date_modified'] = $fields['modifiedtime'];
-            } else if ($param['rule']['mode'] == "C") {
-                $result['values']['date_modified'] = $fields['createdtime'];
-            }
-            */
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
 
     /**
      * Read.
@@ -543,9 +429,9 @@ class vtigercrmcore extends solution
                     if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
-                        if (in_array($param['rule']['mode'], ['0', 'S'])) {
+                        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
                             $result['values'][$value['id']]['date_modified'] = $value['modifiedtime'];
-                        } elseif ('C' == $param['rule']['mode']) {
+                        } elseif ('C' == $param['ruleParams']['mode']) {
                             $result['values'][$value['id']]['date_modified'] = $value['createdtime'];
                         }
                         ++$result['count'];

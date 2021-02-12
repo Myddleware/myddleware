@@ -131,39 +131,6 @@ class sapecccore extends sap
         }
     }
 
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-    public function read_last($param)
-    {
-        if ('ET_BKPF' == $param['module']) {
-            // return $this->readOrder($param,true);
-            // Si 1 id est demandé alors on récupère l'opération correspondante
-            if (!empty($param['query']['id'])) {
-                // $parameters = array(
-                    // 'IvDateRef' => '',
-                    // 'IvLimit' => '',
-                    // 'IvBelnr' => $param['query']['id'],
-                    // 'IvBukrs' => '',
-                    // 'IvGjahr' => '',
-                    // 'IvTypeDate' => ''
-                // );
-            }
-            // Sinon envoie la date 99991231000000 à SAP pour qu'il nous renvoie le dernier élément
-            else {
-                $parameters = [
-                    'IvDateRef' => '99991231000000',
-                    'IvLimit' => '',
-                    'IvBelnr' => '',
-                    'IvBukrs' => '',
-                    'IvGjahr' => '',
-                    'IvTypeDate' => '',
-                ];
-            }
-
-            return $this->readMultiStructure($param, 'ZmydSearchFiDocument', $parameters, true);
-        }
-    }
-
-    // read_last($param)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function read($param)

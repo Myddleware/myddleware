@@ -162,85 +162,8 @@ class zuoracore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    // Get the last data in the application
-    public function read_last($param)
-    {
-        try {
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-            $query = 'SELECT ';
-            // Build the SELECT
-            if (!empty($param['fields'])) {
-                foreach ($param['fields'] as $field) {
-                    $query .= $field.',';
-                }
-                // Delete the last coma
-                $query = rtrim($query, ',');
-            } else {
-                $query .= ' * ';
-            }
-
-            // Add the FROM
-            $query .= ' FROM '.$param['module'].' ';
-
-            // Generate the WHERE
-            if (!empty($param['query'])) {
-                $query .= ' WHERE ';
-                $first = true;
-                foreach ($param['query'] as $key => $value) {
-                    // Add the AND only if we are not on the first condition
-                    if ($first) {
-                        $first = false;
-                    } else {
-                        $query .= ' AND ';
-                    }
-                    // The field id in Cirrus shield as a capital letter for the I, not in Myddleware
-                    if ('id' == $key) {
-                        $key = 'Id';
-                    }
-                    // Add the condition
-                    $query .= $key." = '".$value."' ";
-                }
-                // The function is called for a simulation (rule creation) if there is no query
-            } else {
-                $query .= " WHERE UpdatedDate < '".date('Y-m-d\TH:i:s')."'"; // Need to add 'limit 1' here when the command LIMIT will be available
-            }
-            // limit to 1 result
-            $this->instance->setQueryOptions(1);
-            // Call Zuora
-            $resultQuery = $this->instance->query($query);
-
-            // If no result
-            if (empty($resultQuery->result->records)) {
-                $result['done'] = false;
-            } else {
-                foreach ($param['fields'] as $field) {
-                    // We check the lower case because the result of the webservice return sfield without capital letter (first_name instead of First_Name)
-                    if (isset($resultQuery->result->records->$field)) {
-                        // The field id in Zuora  as a capital letter for the I, not in Myddleware
-                        if ('Id' == $field) {
-                            $result['values']['id'] = $resultQuery->result->records->$field;
-                        } else {
-                            $result['values'][$field] = $resultQuery->result->records->$field;
-                        }
-                    }
-                }
-                if (!empty($result['values'])) {
-                    $result['done'] = true;
-                }
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
 
     public function create($param)
     {

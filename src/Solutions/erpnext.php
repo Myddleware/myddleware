@@ -241,81 +241,8 @@ class erpnextcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    /**
-     * Get the last data in the application.
-     *
-     * @param $param
-     *
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function read_last($param)
-    {
-        try {
-            // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-            $fields = $param['fields'];
-            $result = [];
-            $record = [];
-            if (!empty($param['query'])) {
-                foreach ($param['query'] as $key => $value) {
-                    if ('id' === $key) {
-                        $key = 'name';
-                    }
-                    $filters_result[$key] = $value;
-                }
-                $filters = json_encode($filters_result);
-                $data = ['filters' => $filters, 'fields' => '["*"]'];
-                $q = http_build_query($data);
-                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
-                $resultQuery = $this->call($url, 'GET', '');
-                $record = $resultQuery->data[0]; // on formate pour qu'il refactoré le code des $result['values"]
-            } else {
-                $data = ['limit_page_length' => 1, 'fields' => '["*"]'];
-                $q = http_build_query($data);
-                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
-                //get list of modules
-
-                $resultQuery = $this->call($url, 'GET', '');
-                // If no result
-                if (empty($resultQuery)) {
-                    $result['done'] = false;
-                } else {
-                    $record = $resultQuery->data[0];
-                }
-            }
-            if (!empty($record)) {
-                foreach ($fields as $field) {
-                    if (isset($record->$field)) {
-                        $result['values'][$field] = $record->$field; // last record
-                    }
-                }
-                $result['values']['id'] = $record->name; // add id
-                $result['values']['date_modified'] = $record->modified; // modified
-            }
-            // If no result
-            if (empty($resultQuery)) {
-                $result['done'] = false;
-            } else {
-                if (!empty($result['values'])) {
-                    $result['done'] = true;
-                }
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
-
-    //end read_last
 
     /**
      * Function read data.
@@ -332,7 +259,7 @@ class erpnextcore extends solution
             // Remove Myddleware 's system fields
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             $fields = $param['fields'];
             $result['date_ref'] = $param['date_ref'];

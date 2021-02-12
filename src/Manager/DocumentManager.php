@@ -35,7 +35,7 @@ use App\Entity\DocumentRelationship as DocumentRelationship;
 use App\Entity\Job;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\myddlewareFormulaV1 as Formule; // SugarCRM Myddleware
+use App\Manager\FormulaManager;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleRelationShipRepository;
 use DateTime;
@@ -105,9 +105,9 @@ class documentcore
 	protected $container;
 	protected $logger;
 	/**
-	 * @var myddlewareFormulaV1core
+	 * @var formulaManager
 	 */
-	private $formule;
+	private $formulaManager;
 	/**
 	 * @var DocumentRepository
 	 */
@@ -126,7 +126,7 @@ class documentcore
 		RuleRelationShipRepository $ruleRelationshipsRepository = null,
 		ParameterBagInterface $params = null,
 		ToolsManager $tools = null,
-		FormulaManager $formule = null
+		FormulaManager $formulaManager = null
 	) {
 		$this->connection = $dbalConnection;
 		$this->logger = $logger;
@@ -135,7 +135,7 @@ class documentcore
 		$this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
 		// $param = $params->get('param');
 		$this->tools = $tools;
-		$this->formule = $formule;
+		$this->formulaManager = $formulaManager;
 	}
 	
 	
@@ -1041,20 +1041,26 @@ class documentcore
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
-		// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
-		$read['date_ref'] = '1970-01-02 00:00:00';	
-		$dataTarget = $this->solutionTarget->read_last($read);		
-		if (empty($dataTarget['done'])) {
+		$dataTarget = $this->solutionTarget->read($read);
+		// If read method returns no result with no error
+		if (
+				empty($dataTarget['values'])
+			AND empty($dataTarget['error'])	
+		) {
 			return false;
 		}
-		elseif ($dataTarget['done'] === -1) {
+		// If read method returns an error 
+		elseif (!empty($dataTarget['error'])) {
 			$this->message .= $dataTarget['error'];
 			return -1;
 		}
+		// If read method returns a result 
 		else {
-			$updateHistory = $this->updateHistoryTable($dataTarget['values']);		
+			// Select the first result
+			$record = current($dataTarget['values']);	
+			$updateHistory = $this->updateHistoryTable($record);		
 			if ($updateHistory === true) {
-				return $dataTarget['values']['id'];
+				return $record['id'];
 			}
 			// Erreur dans la mise à jour de la table historique
 			else {
@@ -1288,13 +1294,13 @@ class documentcore
 				}
 				// préparation des variables	 
 				
-				$formule = $this->container->get('formula.myddleware'); // service formule myddleware
-				$formule->init($ruleField['formula']); // mise en place de la règle dans la classe
-				$formule->generateFormule(); // Genère la nouvelle formule à la forme PhP
+				// $formule = $this->container->get('formula.myddleware'); // service formule myddleware
+				$this->formulaManager->init($ruleField['formula']); // mise en place de la règle dans la classe
+				$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
 				
 				// Exécute la règle si pas d'erreur de syntaxe
 				if(
-						$f = $formule->execFormule()
+						$f = $this->formulaManager->execFormule()
 				) {
 					// Try the formula first
 					try {

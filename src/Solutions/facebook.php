@@ -166,37 +166,8 @@ class facebookcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    // Get only one data from the application
-    public function read_last($param)
-    {
-        // Set the attribut readLast to true to stop the search when we found at least one record
-        $this->readLast = true;
-        // Set date_ref far in the past to be sure to found at least one record
-        $param['date_ref'] = '1970-01-01 00:00:00';
-        $param['rule']['mode'] = '0';
-        // We use the read function for the read_last
-        $read = $this->read($param);
-
-        // Format output values
-        if (!empty($read['error'])) {
-            $result['error'] = $read['error'];
-        } else {
-            if (!empty($read['values'])) {
-                $result['done'] = true;
-                // Get only one record
-                $result['values'] = current($read['values']);
-            } else {
-                $result['done'] = false;
-            }
-        }
-
-        return $result;
-    }
-
-    // end function read_last
 
     // Permet de lire les données
     public function read($param)
@@ -217,7 +188,7 @@ class facebookcore extends solution
             }
 
             // Get the reference field
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields']);

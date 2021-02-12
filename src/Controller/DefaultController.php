@@ -1259,15 +1259,25 @@ if (file_exists($file)) {
                 }
 
                 // Get source data
-                $source = $solution_source->read_last([
+                $source = $solution_source->read([
                     'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
                     'fields' => $sourcesfields,
+					'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
+					'limit' => 1,
                     'ruleParams' => $ruleParams, ]);
-
-                if (isset($source['done'])) {
-                    $before = [];
-                    $after = [];
-                    if ($source['done']) {
+// echo '<pre>';								
+// print_r([
+                    // 'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+                    // 'fields' => $sourcesfields,
+                    // 'ruleParams' => $ruleParams, ]);
+// print_r($source);
+// echo '</pre>';		
+// die();			
+				$before = [];
+				$after = [];
+                if (!empty($source['values'])) {
+					$record = current($source['values']); // Remove a dimension to the array because we need only one record
+                    if (!empty($record)) {
                         foreach ($target['fields'] as $f) {
                             foreach ($f as $name_fields_target => $k) {
                                 $r['after'] = [];
@@ -1281,9 +1291,9 @@ if (file_exists($file)) {
                                 ];
 
                                 // Transformation
-                                $response = $this->documentManager->getTransformValue($source['values'], $target_fields);
+                                $response = $this->documentManager->getTransformValue($record, $target_fields);
                                 if (!isset($response['message'])) {
-                                    $r['after'][$name_fields_target] = $this->documentManager->getTransformValue($source['values'], $target_fields);
+                                    $r['after'][$name_fields_target] = $this->documentManager->getTransformValue($record, $target_fields);
                                 }
                                 // If error during transformation, we send back the error
                                 if (
@@ -1299,8 +1309,8 @@ if (file_exists($file)) {
                                 } else {
                                     foreach ($k['champs'] as $fields) {
                                         // Fields couldn't be return. For example Magento return only field not empty
-                                        if (!empty($source['values'][$fields])) {
-                                            $k['fields'][$fields] = $source['values'][$fields];
+                                        if (!empty($record[$fields])) {
+                                            $k['fields'][$fields] = $record[$fields];
                                         } else {
                                             $k['fields'][$fields] = '';
                                         }
@@ -1331,7 +1341,7 @@ if (file_exists($file)) {
                 return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
                     'before' => $before, // source
                     'after' => $after, // target
-                    'data_source' => $source['done'],
+                    'data_source' => (!empty($record) ? true : false),
                     'params' => $this->sessionService->getParamRule($ruleKey),
                 ]
                 );

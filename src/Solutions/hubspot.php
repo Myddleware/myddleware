@@ -339,44 +339,8 @@ class hubspotcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    /**
-     * Get the last data in the application.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function read_last($param)
-    {
-        // Set the attribut readLast to true to stop the search when we found at leas one record
-        $this->readLast = true;
-        // date_ref far in the past to be sure to found at least one record
-        $param['date_ref'] = '1970-01-01 00:00:00';
-        $param['rule']['mode'] = '0';
-        $param['limit'] = 1;
-        // We re use read function for the read_last
-        $read = $this->read($param);
-
-        // Format output values
-        if (!empty($read['error'])) {
-            $result['error'] = $read['error'];
-        } else {
-            if (!empty($read['values'])) {
-                $result['done'] = true;
-                // Get only one record
-                $result['values'] = current($read['values']);
-            } else {
-                $result['done'] = false;
-            }
-        }
-
-        return $result;
-    }
-
-    // end function read_last
 
     /**
      * Function read data.
@@ -833,7 +797,7 @@ class hubspotcore extends solution
             }
 
             // ModificationDate or CreationDate
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             $property = '';
             // If date_ref is more than 30 days in the past or if an offset is in the reference

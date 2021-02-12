@@ -312,34 +312,8 @@ class eventbritecore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux ou pour réchercher un doublon dans la cible)
-    // Param contient :
-    //	module : le module appelé
-    //	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
-    //	query : les champs à rechercher, exemple : array('name'=>'mon_compte')
-    // Valeur de sortie est un tableau contenant :
-    //		done : Le nombre d'enregistrement trouvé
-    //   	values : les enregsitrements du module demandé (l'id' est obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier)
-    public function read_last($param)
-    {
-        if (!isset($param['fields'])) {
-            $param['fields'] = [];
-        }
-        $param['fields'] = $this->addRequiredField($param['fields']);
-
-        // Le readLast est différent en fonction de la référence de lecture,
-        // s'il s'agit d'un type user alors la lecture est directe
-        // mais s'il s'agit d'un type event c'est qu'il faut d'abord récupérer les event du users pour enseuite récupérer les autres éléments (ex : attendee)
-        if ('User' == $this->typeRead[$param['module']]) {
-            return $this->readLastUserType($param);
-        }
-        if ('Event' == $this->typeRead[$param['module']]) {
-            return $this->readLastEventType($param);
-        }
-    }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     // Param contient :

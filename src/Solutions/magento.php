@@ -284,121 +284,8 @@ class magentocore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read_last($param)
-    {
-        $result = [];
-        try {
-            // Ajout du champ id, obligatoire mais spécifique au module
-            if (!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
-                $fieldId = $this->idByModule[$param['module']];
-            }
-
-            // Init parameters for modules or submodules
-            $function = '';
-            $subModule = '';
-            switch ($param['module']) {
-                case 'customers':
-                    $function = 'customers/search';
-                    // No search if id is in the query, we call a get with the id in parameter
-                    if (!empty($param['query']['id'])) {
-                        $function = 'customers';
-                    }
-                    break;
-                case 'customer_address':
-                    $function = 'customers/search';
-                    $subModule = 'addresses';
-                    break;
-                case 'orders':
-                    $function = 'orders';
-                    break;
-                default:
-                    throw new \Exception('Module unknown. ');
-                    break;
-            }
-
-            // On va chercher le nom du champ pour la date de référence: Modification
-            $dateRefField = $this->getDateRefName($param['module'], '0');
-
-            $searchCriteria = '?';
-            $get = '';
-            // could be empty when simulation in Myddleware
-            if (!empty($param['query'])) {
-                foreach ($param['query'] as $key => $value) {
-                    // No search if id is in the query, we call a get with the id in parameter
-                    if ('id' == $key) {
-                        $get = '/'.$value;
-                        break;
-                    }
-                    if (!empty($searchCriteria)) {
-                        $searchCriteria .= '&';
-                    }
-                    $searchCriteria .= 'searchCriteria[filter_groups][0][filters][0][field]='.$key.'&searchCriteria[filter_groups][0][filters][0][value]='.$value.'&searchCriteria[filter_groups][0][filters][0][condition_type]=eq';
-                }
-            }
-            if (!empty($searchCriteria)) {
-                $searchCriteria .= '&';
-            }
-            $searchCriteria .= 'searchCriteria[pageSize]=1&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
-
-            // Call to Magento, get is the priority otherwise we use searchCriteria
-            $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.(!empty($get) ? $get : $searchCriteria), 'GET');
-            if (!empty($resultList['message'])) {
-                throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
-            }
-
-            // The respon of Magento when there is a simple get and when there is searchcriteria are differents.
-            if (!empty($resultList['items'][0])) {
-                $resultList = $resultList['items'][0];
-            }
-
-            // Traitement des résultats
-            if (!empty($resultList)) {
-                // if submodule, example addresses in the module customer
-                if (!empty($subModule)) {
-                    if (!empty($resultList[$subModule])) {
-                        $subRecords = $resultList['items'][0][$subModule];
-                        // date ref is taking from the main module
-                        $result['values']['date_modified'] = $resultList[$dateRefField];
-                    } else {
-                        $result['done'] = false;
-
-                        return $result;
-                    }
-                }
-                // Change format to be always compatible, submodule or not
-                else {
-                    $subRecords[0] = $resultList;
-                }
-
-                // remove one dimension by replacing the dimension by __
-                $subRecords[0] = $this->removeDimension($subRecords[0]);
-
-                foreach ($subRecords[0]  as $key => $value) {
-                    if ($key == $fieldId) {
-                        $result['values']['id'] = $value;
-                    }
-                    // If test if the field exist because Magento doens't return empty field
-                    if (in_array($key, $param['fields'])) {
-                        $result['values'][$key] = $value;
-                    }
-                }
-                $result['done'] = true;
-            } else {
-                $result['done'] = false;
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-        }
-
-        return $result;
-    }
-
-    // read_last($param)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function read($param)
@@ -433,7 +320,7 @@ class magentocore extends solution
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Get all data after the reference date
             $searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';

@@ -357,64 +357,7 @@ class suitecrmcore extends solution
             return false;
         }
     }
-
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-    public function read_last($param)
-    {
-        // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            $result['done'] = true;
-
-            return $result;
-        }
-        // Build the query to read data
-        $query = $this->generateQuery($param, 'read_last');
-
-        try {
-            if (!isset($param['fields'])) {
-                $param['fields'] = [];
-            }
-            // Ajout des champs obligatoires pour
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            $get_entry_list_parameters = [
-                'session' => $this->session,
-                'module_name' => $param['module'],
-                'query' => $query,
-                'order_by' => 'date_entered DESC',
-                'offset' => '0',
-                'select_fields' => $param['fields'],
-                'link_name_to_fields_array' => '',
-                'max_results' => '1',
-                'deleted' => 0,
-                'Favorites' => '',
-            ];
-            $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
-            // Si as d'erreur
-            if (isset($get_entry_list_result->result_count)) {
-                // Si pas de résultat
-                if (!isset($get_entry_list_result->entry_list[0])) {
-                    $result['done'] = false;
-                } else {
-                    foreach ($get_entry_list_result->entry_list[0]->name_value_list as $key => $value) {
-                        $result['values'][$key] = $value->value;
-                    }
-                    $result['done'] = true;
-                }
-            }
-            // Si erreur
-            else {
-                $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
-                $result['done'] = false;
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-
-            return $result;
-        }
-    }
+	
 
     // Permet de lire les données
     public function read($param)
@@ -440,7 +383,7 @@ class suitecrmcore extends solution
                 $param['limit'] = 100;
             }
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
             if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -484,7 +427,7 @@ class suitecrmcore extends solution
                     'session' => $this->session,
                     'module_name' => $param['module'],
                     'query' => $query,
-                    'order_by' => $DateRefField.' ASC',
+                    'order_by' => $dateRefField.' ASC',
                     'offset' => $param['offset'],
                     'select_fields' => $param['fields'],
                     'link_name_to_fields_array' => $link_name_to_fields_array,
@@ -505,7 +448,7 @@ class suitecrmcore extends solution
                         foreach ($entry->name_value_list as $value) {
                             $record[$value->name] = $value->value;
                             if (
-                                    $value->name == $DateRefField
+                                    $value->name == $dateRefField
                                 && (
                                         empty($result['date_ref'])
                                     || (
@@ -859,14 +802,14 @@ class suitecrmcore extends solution
             }
             // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
-            $DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
-                $query = 'prospect_lists.'.$DateRefField." > '".$param['date_ref']."'";
+                $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
             } elseif ('Employees' == $param['module']) {
-                $query = 'users.'.$DateRefField." > '".$param['date_ref']."'";
+                $query = 'users.'.$dateRefField." > '".$param['date_ref']."'";
             } else {
-                $query = strtolower($param['module']).'.'.$DateRefField." > '".$param['date_ref']."'";
+                $query = strtolower($param['module']).'.'.$dateRefField." > '".$param['date_ref']."'";
             }
         }
 

@@ -326,149 +326,8 @@ class sagecrmcore extends solution
             return false;
         }
     }
-
     // get_module_fields($module)
 
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-    public function read_last($param)
-    {
-        // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
-        $tmp = explode('_', $param['module'], 2);
-        $module = $tmp[1];
-        $prefix = $tmp[0];
-
-        $result = [];
-        try {
-            // Define SOAP connection options.
-            $options = [
-                'trace' => 1, // All fault tracing this allows for recording messages sent and received
-                'soap_version' => SOAP_1_1,
-                'authentication' => SOAP_AUTHENTICATION_BASIC,
-                'exceptions' => true,
-            ];
-            // Création du client et Connexion
-            $client = new \SoapClient($this->wsdl, $options);
-            $login_details = ['username' => $this->username, 'password' => $this->password];
-            $response = $client->logon($login_details);
-
-            if (isset($response->result->sessionid)) {
-                $sessionid = $response->result->sessionid;
-            } else {
-                throw new \Exception('No SessionID. Logon failed.');
-            }
-
-            // Création du SoapHeader
-            $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-							<sessionId>".$sessionid.'</sessionId>
-						</SessionHeader>';
-            $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
-            $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
-            // Apply header to client
-            $client->__setSoapHeaders([$session_header]);
-
-            // On traite les champs que l'on veut récupérer
-            if (!isset($param['fields'])) {
-                $param['fields'] = [];
-            }
-            $param['fields'] = array_unique($param['fields']);
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            $param['fields'] = array_values($param['fields']);
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-            // Si le tableau de requête est présent alors construction de la requête
-            if (!empty($param['query']['id'])) {
-                // Appel de la requête
-                $request = $client->queryentity(['entityname' => $module, 'id' => $param['query']['id']]);
-
-                // Déconnexion
-                $response = $client->logoff(['sessionId' => $sessionid]);
-
-                // Traitement des résultats
-                if (!empty($request->result->records)) {
-                    foreach ($request->result->records as $key => $value) {
-                        if ('updateddate' == $key) {
-                            $row['date_modified'] = $this->DateConverter($value);
-                        }
-                        if (in_array($key, $param['fields'])) {
-                            $row[$key] = $value;
-                        }
-                    }
-                    // On ajoute l'id du résultat, ici on peut directement mettre $param['query']['id'] (on ne serait pas ici si l'élément n'existait pas)
-                    $row['id'] = $param['query']['id'];
-                    $result['values'] = $row;
-                    $result['done'] = true;
-                } else {
-                    $result['done'] = false;
-                }
-            } else { // Sinon, on fait un readLast normal
-                $queryrecord = ['fieldlist' => '', 'queryString' => '', 'entityname' => $module, 'orderby' => $prefix.'_updateddate DESC'];
-
-                // Ajout du champ id, obligatoire mais spécifique au module
-                if (isset($this->IdByModule[$module])) { // Si le champ id existe dans le tableau
-                    $fieldID = $this->IdByModule[$module];
-                } else { // S'il n'existe pas alors on met "companyid" par exemple pour le module Company
-                    $fieldID = strtolower($module).'id';
-                }
-                $queryrecord['fieldlist'] = $prefix.'_'.$fieldID.',';
-
-                foreach ($param['fields'] as $field) {
-                    $queryrecord['fieldlist'] .= $prefix.'_'.$field.', ';
-                }
-                // Supprime l'espace et la dernière virgule
-                $queryrecord['fieldlist'] = rtrim($queryrecord['fieldlist'], ' ');
-                $queryrecord['fieldlist'] = rtrim($queryrecord['fieldlist'], ',');
-
-                // Appel de la requête
-                $request = $client->queryrecord($queryrecord);
-
-                // Déconnexion
-                $response = $client->logoff(['sessionId' => $sessionid]);
-
-                // Traitement des résultats
-                if (isset($request->result->records)) {
-                    $row = [];
-                    if (is_array($request->result->records)) { // SI ON A PLUSIEURS RESULTATS
-                        foreach ($request->result->records[0]->records as $field) {
-                            if ($field->name == $fieldID) {
-                                $row['id'] = $field->value;
-                            }
-                            if ('updateddate' == $field->name) {
-                                $row['date_modified'] = $this->DateConverter($field->value);
-                            }
-                            if (in_array($field->name, $param['fields'])) {
-                                $row[$field->name] = $field->value;
-                            }
-                        }
-                    } else { // SI ON A QU'UN SEUL RESULTAT
-                        foreach ($request->result->records->records as $field) {
-                            if ($field->name == $fieldID) {
-                                $row['id'] = $field->value;
-                            }
-                            if ('updateddate' == $field->name) {
-                                $row['date_modified'] = $this->DateConverter($field->value);
-                            }
-                            if (in_array($field->name, $param['fields'])) {
-                                $row[$field->name] = $field->value;
-                            }
-                        }
-                    }
-                    $result['values'] = $row;
-                    $result['done'] = true;
-                } else {
-                    $result['done'] = false;
-                }
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            $result['done'] = -1;
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return $result;
-        }
-    }
-
-    // read_last($param)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function read($param)
@@ -485,7 +344,7 @@ class sagecrmcore extends solution
         $result = [];
         try {
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $DateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             // Define SOAP connection options.
             $options = [

@@ -446,167 +446,8 @@ class prestashopcore extends solution
 
         return $out;
     }
-
     // xml2array ( $xmlObject, $out = array () )
 
-    // Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-    public function read_last($param)
-    {
-        try { // try-catch Myddleware
-            try { // try-catch PrestashopWebservice
-                $result = [];
-
-                if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-                    $result['done'] = true;
-
-                    return $result;
-                }
-
-                if (!isset($param['fields'])) {
-                    $param['fields'] = [];
-                }
-                // Ajout des champs obligatoires
-                $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-                $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-                // Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
-                $getCurrentState = false;
-                if (
-                        'orders' == $param['module']
-                    && in_array('current_state', $param['fields'])
-                ) {
-                    $getCurrentState = true;
-                    unset($param['fields'][array_search('current_state', $param['fields'])]);
-                }
-
-                $opt['limit'] = 1;
-                $opt['resource'] = $param['module'].'&date=1';
-                $opt['display'] = '[';
-                foreach ($param['fields'] as $field) {
-                    $opt['display'] .= $field.',';
-                }
-                $opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
-                $opt['display'] .= ']';
-
-                // On trie que si la référence est une date
-                if ($this->referenceIsDate($param['module'])) {
-                    $dateRefField = $this->getDateRefName($param['module'], '0');
-                    if ('date_add' == $dateRefField) {
-                        $opt['sort'] = '[date_add_ASC]';
-                    } else {
-                        $opt['sort'] = '[date_upd_ASC]';
-                    }
-                }
-
-                // Si le tableau de requête est présent alors construction de la requête
-                if (!empty($param['query'])) {
-                    // We return no result for order_histories as we never modify this module, always add a line. Avoid "no send" status
-                    if ('order_histories' == $param['module']) {
-                        $result['done'] = false;
-
-                        return $result;
-                    }
-                    // Building of the option array
-                    if (!empty($param['query']['id'])) {
-                        $options['id'] = (int) $param['query']['id'];
-                    } else {
-                        foreach ($param['query'] as $key => $value) {
-                            $options['filter['.$key.']'] = '['.$value.']';
-                        }
-                    }
-                    $options['resource'] = $param['module'];
-                    $xml = $this->webService->get($options);
-
-                    // If we search by ID we get directly all the data of the record
-                    $resources = $xml->children()->children();
-                    // Otherwise we have to get it if a ressource has been found
-                    if (
-                            !empty($resources)
-                        and empty($param['query']['id'])
-                    ) {
-                        // Get the id of the record
-                        foreach ($resources->attributes() as $key => $value) {
-                            if ('id' == $key) {
-                                $optionsDetail['id'] = (int) $value;
-                                $optionsDetail['resource'] = $param['module'];
-                                $xml = $this->webService->get($optionsDetail);
-                                $resources = $xml->children()->children();
-                                break;
-                            }
-                        }
-                    }
-
-                    // Creation of the output parameter
-                    if (empty($resources->id)) {
-                        $result['done'] = false;
-                    } else {
-                        $result['done'] = true;
-                        foreach ($resources as $key => $resource) {
-                            if (in_array($key, $param['fields'])) {
-                                $result['values'][$key] = (string) $resource;
-                            }
-                        }
-                    }
-
-                    return $result;
-                }
-                // Function to modify opt (used for custom needs)
-                $opt = $this->updateOptions('read_last', $opt, $param);
-
-                // Call when there is no query (simulation)
-                $xml = $this->webService->get($opt);
-                $xml = $xml->asXML();
-                $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-
-                if (empty(json_decode(json_encode((array) $simplexml->children()->children()), true))) {
-                    $result['done'] = false;
-                } else {
-                    $result['done'] = true;
-                    foreach ($simplexml->children()->children() as $data) {
-                        foreach ($data as $key => $value) {
-                            if (isset($value->language)) {
-                                $result['values'][$key] = (string) $value->language;
-                            } else {
-                                $result['values'][$key] = (string) $value;
-                            }
-                        }
-                    }
-                }
-                // Récupération du statut courant de la commande si elle est demandée
-                if ($getCurrentState) {
-                    $optState['limit'] = 1;
-                    $optState['resource'] = 'order_histories&date=1';
-                    $optState['display'] = '[id_order_state]';
-                    $optState['filter[id_order]'] = '['.$data->id.']';
-                    $optState['sort'] = '[date_add_DESC]';
-                    $xml = $this->webService->get($optState);
-                    $xml = $xml->asXML();
-                    $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-
-                    $currentState = $simplexml->children()->children();
-                    if (!empty($currentState)) {
-                        $result['values']['current_state'] = (string) $currentState->order_history->id_order_state;
-                    }
-                }
-
-                return $result;
-            } catch (PrestashopWebserviceException $e) {
-                // Here we are dealing with errors
-                $trace = $e->getTrace();
-                if (401 == $trace[0]['args'][0]) {
-                    throw new \Exception('Bad auth key');
-                }
-                throw new \Exception($e->getMessage());
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result['done'] = -1;
-
-            return $result;
-        }
-    }
-
-    // read_last($param)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function read($param)
@@ -620,7 +461,7 @@ class prestashopcore extends solution
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
 
             try { // try-catch PrestashopWebservice
                 $result = [];
@@ -802,7 +643,7 @@ class prestashopcore extends solution
     {
         try { // try-catch Myddleware
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             try { // try-catch PrestashopWebservice
                 $result = [];
                 // Init parameter to read in Prestashop

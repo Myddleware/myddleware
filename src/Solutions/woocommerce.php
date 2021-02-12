@@ -256,32 +256,6 @@ class woocommercecore extends solution {
         return $response;
     }
 
-    //Get last field (we read ALL then only retrieve one)
-    public function read_last($param) {
-        $result = array();
-        try{
-            //for simulation purposes, we create a new date_ref in the past
-            $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-            //get all instances of the module
-            $read = $this->read($param);
-
-            if (!empty($read['error'])) {
-                $result['error'] = $read['error'];
-            } else {
-                if (!empty($read['values'])) {
-                    $result['done'] = true;
-                    // Get only one record (the API sorts them by date by default, first one is therefore latest modified)
-                    $result['values'] = $read['values'][array_key_first($read['values'])]; 
-                } else {
-                    $result['done'] = false;
-                }
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;		
-        }
-        return $result;
-    }
     
    /**
 	 * Function create data
