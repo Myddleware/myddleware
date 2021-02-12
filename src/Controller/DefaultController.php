@@ -663,20 +663,26 @@ if (file_exists($file)) {
                 $this->sessionService->setParamRuleConnectorSourceId($key, (string) $rule->getConnectorSource()->getId());
                 $this->sessionService->setParamRuleConnectorCibleId($key, (string) $rule->getConnectorTarget()->getId());
                 $this->sessionService->setParamRuleLastId($key, $rule->getId());
+			
+				// Connector source -------------------
+                $connectorParamsSource = $this->getDoctrine()
+                    ->getManager()
+                    ->getRepository(ConnectorParam::class)
+                    ->findByConnector([$rule->getConnectorSource()]);
 
-                // Connector source -------------------
-                $connectorParamsSource = $rule->getConnectorSource();
                 $this->sessionService->setParamRuleSourceSolution($key, $rule->getConnectorSource()->getSolution()->getName());
 
                 foreach ($connectorParamsSource as $connector) {
-                    //A DEBUGGER : je pense qu'il faut supprimer la boucle foreach et vérifier dans session service
-                    // à quoi fait référence getValue() ????????
                     $this->sessionService->setParamRuleSourceConnector($key, $connector->getName(), $connector->getValue());
                 }
                 // Connector source -------------------
+				
+				// Connector target -------------------
+                $connectorParamsTarget = $this->getDoctrine()
+                    ->getManager()
+                    ->getRepository(ConnectorParam::class)
+                    ->findByConnector([$rule->getConnectorTarget()]);
 
-                // Connector target -------------------
-                $connectorParamsTarget = $rule->getConnectorTarget();
                 $this->sessionService->setParamRuleCibleSolution($key, $rule->getConnectorTarget()->getSolution()->getName());
 
                 foreach ($connectorParamsTarget as $connector) {
