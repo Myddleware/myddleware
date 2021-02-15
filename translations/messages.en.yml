@@ -307,7 +307,7 @@ list_flux:
         target_id: Target id
         confirm: Filter
         name: Name
-        content: document content
+        content: Document content
         source_content: Source
         target_content: Target
     tab:

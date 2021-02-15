@@ -2638,7 +2638,7 @@ if (file_exists($file)) {
                     $this->sessionService->setParamRuleParentName($key, $type, $p->getName(), $p->getValue()); // params connector
                 }
                 $this->sessionService->setParamRuleConnectorParent($key, $type, $id_connector); // id connector
-                $this->sessionService->setParamRuleParentName($key, $type, 'solution', $connector[0]->getSolution()->getName()); // nom de la solution
+                $this->sessionService->setParamRuleParentName($key, $type, 'solution', $connector->getSolution()->getName()); // nom de la solution
 
                 $solution = $this->solutionManager->get($this->sessionService->getParamRuleParentName($key, $type, 'solution'));
 
