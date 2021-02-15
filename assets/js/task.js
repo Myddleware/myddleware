@@ -32,7 +32,6 @@ $(function() {
 				type: "POST",
 				url: path_task_stop,					
 				success: function(data){
-					console.log(data);
 					location.reload();	
 				}
 			});	    	
