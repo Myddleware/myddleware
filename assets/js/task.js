@@ -21,8 +21,9 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-
+console.log("allo");
 $(function() {
+	console.log("heheo");
 	if($('#task_status','#task').attr('name') != "End"){
 		// Sauvegarde du connecteur
 		$('#task_refresh','#task').on('click', function(){	
@@ -30,10 +31,12 @@ $(function() {
 		});
 		
 		$('#task_stop','#task').on('click', function(){	
+			console.log('click');
 			$.ajax({
 				type: "POST",
 				url: path_task_stop,					
 				success: function(data){
+					console.log(data);
 					location.reload();	
 				}
 			});	    	

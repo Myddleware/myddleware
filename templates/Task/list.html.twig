@@ -49,13 +49,12 @@
 				<th>{{'list_task.th.message'|trans}}</th>
 			</tr> 
 		     {% for task in entities %}
-		     
-		     {% if task.message is not empty %}
-		    	<tr class="fd_normal">
-		     {% else %}
-		     	<tr>
-			 {% endif %}
-		     	<td><a href="{{ path('task_view',{'id' :task.id }) }}">{{ task.param }}</a></td>
+				{% if task.message is not empty %}
+					<tr class="fd_normal">
+				{% else %}
+					<tr>
+				{% endif %}	
+		     	<td><a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param }}</a></td>
 		     	<td class="ctr">	     		
 		     		{% if task.status|lower == 'end' %}
 		     		<span class="label label-default">{{ task.status }}</span>

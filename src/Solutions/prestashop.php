@@ -794,9 +794,11 @@ class prestashopcore extends solution
                                 $i = 0;
                                 $languageFound = false;
                                 foreach ($modele->$nodeKey->children() as $node) {
-                                    if ($node->attributes() == $param['ruleParams']['language']) {
-                                        $toSend->$nodeKey->language[$i][0] = $data[$nodeKey];
-                                        $languageFound = true;
+                                    if(!empty($param['ruleParams']['language'])) {
+                                        if ($node->attributes() == $param['ruleParams']['language']) {
+                                            $toSend->$nodeKey->language[$i][0] = $data[$nodeKey];
+                                            $languageFound = true;
+                                        }
                                     }
                                     ++$i;
                                 }

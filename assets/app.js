@@ -30,6 +30,7 @@ require('./js/jobscheduler.js')
 require('./js/fiche.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
+require('./js/task.js')
 
 // start the Stimulus application
 import './bootstrap';
