@@ -529,7 +529,7 @@
 					     	</td>	
 					     	<td>
 					     		{% if log.getJob is not empty %}
-					     			<a href="{{ path('task_view', {'id':log.getJob}) }}">{{ log.getJob }}</a>
+					     			<a href="{{ path('task_view', {'id':log.getJob.id}) }}">{{ log.getJob.id }}</a>
 					     		{% endif %}
 					     	</td>					     					     			     			     	
 					     	<td>{{ log.getDateCreated|date("d/m/Y H:i:s") }}</td>
