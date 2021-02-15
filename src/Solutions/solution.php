@@ -278,23 +278,80 @@ class solutioncore
     {
     }
 
-
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    // Param contient :
-    //	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
-    //	module : le module appelé
-    //	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
-    //	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
-    // Valeur de sortie est un tableau contenant :
-    //		count : Le nombre d'enregistrement trouvé
-    //		date_ref : la nouvelle date de référence
-    //   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
-    // 			     exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
-    // 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
-    public function read($param)
+	
+	// Helper function for the read call
+    public function readData($param)
     {
+		try { // try-catch Myddleware
+			if (empty($param['limit'])) {
+				$param['limit'] = 100;
+			}
+			if (empty($param['offset'])) {
+                $param['offset'] = 0;
+            }
+			// Add requiered fields based on attribute $required_fields
+			$param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+			$param['fields'] = array_unique($param['fields']);
+			// Remove Myddleware specific fields (not existing in the solution)
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			
+			// Read data
+			$readResult = $this->read($param);
+			
+			// Format data
+			if (!empty($readResult)) {
+				// Get the name of the field used for the reference
+				$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+				// Get the name of the field used as id
+				$idField = $this->getIdName($param['module']);
+				
+				// Sort data with the reference field
+				$modified  = array_column($readResult, $dateRefField);
+				array_multisort($modified, SORT_ASC, $readResult);
+				
+				// Add id and date_modified values into the read call result
+				foreach ($readResult as $record) {
+					// Check that the required fields 
+					if (empty($record[$idField])) {
+						throw new \Exception('Id field '.$idField.' is missing in this record '. print_r($record, true).'.');
+					}
+					if (empty($record[$dateRefField])) {
+						throw new \Exception('Reference field '.$dateRefField.' is missing in this record '. print_r($record, true).'.');
+					}
+					$record['id'] = $record[$idField];
+					$record['date_modified'] = $record[$dateRefField];
+					$result['values'][$record['id']] = $record;
+				}
+				
+				// Return the number of result
+				$result['count'] = count($result['values']);
+				// Calculate tthe reference date
+				$result['date_ref'] = $this->getReferenceCall($param,$result);
+			} else {
+				// Init values if no result
+				$result['count'] = 0;
+				$result['date_ref'] = $param['date_ref'];
+			}
+		} catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+        }
+print_r($result);		
+		return $result;
     }
-
+	
+	// Get the new records from the solution
+    // Param's content :
+    //		date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
+    //		module : module called
+    //		fields : rule field list, example : array('name','date_entered')
+    //		limit : max records that the rule can read (default limit is 100)
+    // Expected output :
+    //		Array with the list of records
+	public function read($param)
+    {
+		return null;
+    }
+	
     // Permet de créer un enregistrement
     // $param contient  :
     //  -> le module destinataire
@@ -595,9 +652,15 @@ class solutioncore
         return false;
     }
 
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+    // Return the name of the field used for the reference
     public function getDateRefName($moduleSource, $RuleMode)
     {
+    }
+	
+	// Return the name of the field used for the id
+    public function getIdName($module)
+    {
+		return 'id';
     }
 
     // The function return true if we can display the column parent in the rule view, relationship tab
@@ -717,6 +780,11 @@ class solutioncore
 
         return $params;
     }
+	
+	// Method de find the date ref after a read call 
+	protected function getReferenceCall($param, $result) {
+		return end($result['values'])['date_modified'];
+	}
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *

@@ -1041,7 +1041,7 @@ class documentcore
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
-		$dataTarget = $this->solutionTarget->read($read);
+		$dataTarget = $this->solutionTarget->readData($read);
 		// If read method returns no result with no error
 		if (
 				empty($dataTarget['values'])

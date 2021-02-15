@@ -595,7 +595,7 @@ if (file_exists($file)) {
                     $param['rule']['mode'] = '0';
                 }
                 $param['offset'] = '0';
-                $result = $solution_source->read($param);
+                $result = $solution_source->readData($param);
 
                 if (!empty($result['error'])) {
                     throw new Exception('Reading Issue: '.$result['error']);
@@ -1258,7 +1258,7 @@ if (file_exists($file)) {
                 }
 
                 // Get source data
-                $source = $solution_source->read([
+                $source = $solution_source->readData([
                     'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
                     'fields' => $sourcesfields,
 					'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop

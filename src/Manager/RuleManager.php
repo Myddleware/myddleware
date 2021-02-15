@@ -222,7 +222,7 @@ class rulecore
 				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
 				$read['date_ref'] = '1970-01-01 00:00:00';			
 			
-				$dataSource = $this->solutionSource->read($read);			;				
+				$dataSource = $this->solutionSource->readData($read);			;				
 				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
 				}
@@ -506,7 +506,7 @@ class rulecore
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
 			if ($connect === true) {												
-				$this->dataSource = $this->solutionSource->read($read);
+				$this->dataSource = $this->solutionSource->readData($read);
 				
 				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (
@@ -546,12 +546,7 @@ class rulecore
 	// This function run only when the limit call has been reached
 	protected function validateReadDataSource() {
 		if (!empty($this->dataSource['values'])) {
-			$dataSourceValues = $this->dataSource['values'];
-			
-			// Order data in the date_modified order
-			$modified  = array_column($dataSourceValues, 'date_modified');
-			array_multisort($modified, SORT_DESC, $dataSourceValues);
-			foreach ($dataSourceValues as $value) {
+			foreach ($this->dataSource['values'] as $value) {
 				// Check if the previous record has the same date_modified than the current record
 				if (
 						empty($previousValue)   // first call
