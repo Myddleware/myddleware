@@ -1263,15 +1263,7 @@ if (file_exists($file)) {
                     'fields' => $sourcesfields,
 					'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
 					'limit' => 1,
-                    'ruleParams' => $ruleParams, ]);
-// echo '<pre>';								
-// print_r([
-                    // 'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-                    // 'fields' => $sourcesfields,
-                    // 'ruleParams' => $ruleParams, ]);
-// print_r($source);
-// echo '</pre>';		
-// die();			
+                    'ruleParams' => $ruleParams, ]);		
 				$before = [];
 				$after = [];
                 if (!empty($source['values'])) {

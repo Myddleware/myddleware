@@ -367,7 +367,6 @@ class ZuoraAPIHelper
 
             return ZuoraAPIHelper::callAPIWithSession($soapRequest, $debug);
         } catch (Exception $e) {
-            //var_dump($e);
             throw new Exception($e->getMessage());
         }
     }
@@ -385,7 +384,6 @@ class ZuoraAPIHelper
 
             return callAPIWithClient(ZuoraAPIHelper::$client, ZuoraAPIHelper::$header, $soapRequest, $debug);
         } catch (Exception $e) {
-            //var_dump($e);
             throw new Exception($e->getMessage());
         }
     }
@@ -438,7 +436,6 @@ class ZuoraAPIHelper
                 ZuoraAPIHelper::$lastLoginTime = microtime(true);
             }
         } catch (Exception $e) {
-            //var_dump($e);
             return $e->getMessage();
         }
 
@@ -480,7 +477,6 @@ class ZuoraAPIHelper
         $client->myDebug = 0;
         $result = $client->login($login);
         $client->myDebug = $debug;
-        //if ($debug) var_dump($result);
 
         $session = $result->result->Session;
         $url = $result->result->ServerUrl;

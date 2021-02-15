@@ -245,14 +245,6 @@ class curl
         }
         curl_setopt($curl, CURLOPT_HTTPHEADER, $this->header);
 
-        /* Comment by Myddleware => no vardump in the code
-        if ($this->debug){
-            echo '<h1>Options</h1>';
-            var_dump($this->options);
-            echo '<h1>Header</h1>';
-            var_dump($this->header);
-        } */
-
         // set options
         foreach ($this->options as $name => $val) {
             if (is_string($name)) {
@@ -354,17 +346,6 @@ class curl
 
         $this->info = curl_getinfo($curl);
         $this->error = curl_error($curl);
-
-        /* Comment by Myddleware => no vardump in the code
-        if ($this->debug){
-            echo '<h1>Return Data</h1>';
-            var_dump($ret);
-            echo '<h1>Info</h1>';
-            var_dump($this->info);
-            echo '<h1>Error</h1>';
-            var_dump($this->error);
-        }
-        */
 
         curl_close($curl);
 
