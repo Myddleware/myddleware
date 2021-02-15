@@ -334,8 +334,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }
-print_r($result);		
+        }		
 		return $result;
     }
 	
