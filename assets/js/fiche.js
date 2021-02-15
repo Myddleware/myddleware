@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-$( document ).ready(function() {
+$(function() {
 	// ----------------------------- Fiche rule
 
 	//$( ".mapping p" ).hide();
@@ -91,7 +91,7 @@ $( document ).ready(function() {
         closeText: 'Fermer'		
 	});	
 	
-	$( '#saveRuleParams' ).click(function() {	
+	$( '#saveRuleParams' ).on('click', function() {	
 		loading_img = $('#myd_loading_img', '.myd_loading');	
 		$.ajax({
 			type: "POST",
@@ -123,7 +123,7 @@ $( document ).ready(function() {
 		});	
 	});
 	
-	$( '#simuleRuleFluxAction' ).click(function() {
+	$( '#simuleRuleFluxAction' ).on('click', function() {
 		simule_img = $('#simuleRuleFluxLoading_img', '.simuleRuleFluxLoading');	
 		$.ajax({
 			type: "GET",
@@ -137,14 +137,14 @@ $( document ).ready(function() {
 				$('#simuleRuleFluxResult').append('-');
 			},							
 			success: function(data){
-				obj = jQuery.parseJSON( data );
+				obj = data;
 				simule_img.hide();
 				simule_img.replaceWith("<span class='glyphicon glyphicon-ok'></span>");
 				$('.simuleRuleFluxLoading > span').show();
 				if(typeof obj.error === "undefined") {
 					$('#simuleRuleFlux').find('span').attr('class','glyphicon glyphicon-ok-circle');
 					$('#simuleRuleFluxResult').empty();
-					$('#simuleRuleFluxResult').append(data);
+					$('#simuleRuleFluxResult').val(data);
 				} else {
 					$('#simuleRuleFluxError').show();
 					$('#simuleRuleFluxError').append(obj.error);
@@ -154,6 +154,7 @@ $( document ).ready(function() {
 				      $('.simuleRuleFluxLoading > span').hide();
 				      $('.simuleRuleFluxLoading > span').replaceWith(simule_img);
 				      $('#simuleRuleFluxAction').find('span').attr('class','glyphicon glyphicon-play-circle');
+					  $('#simuleRuleFluxResult').val(data);
 				}, 2000);
 			}			
 		});

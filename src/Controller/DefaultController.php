@@ -576,7 +576,6 @@ if (file_exists($file)) {
                 $solution_source_nom = $rule->getConnectorSource()->getSolution()->getName();
 
                 // Connector source -------------------
-                // TODO : it's working but not yet displaying in twig template 
                 $connectorParamsSource = $this->getDoctrine()
                                                 ->getManager()
                                                 ->getRepository(ConnectorParam::class)
@@ -602,9 +601,8 @@ if (file_exists($file)) {
                     throw new Exception('Reading Issue: '.$result['error']);
                 }
                 if (isset($result['count'])) {
-                    return new Response($result['count']);
+                    return new Response($result['count']);              
                 }
-
                 return new Response(0);
             } catch (Exception $e) {
                 return new Response(json_encode(['error' => $e->getMessage()]));
