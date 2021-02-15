@@ -60,6 +60,7 @@ use Exception;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -2749,7 +2750,9 @@ if (file_exists($file)) {
 
                 //On passe l’adapter au bundle qui va s’occuper de la pagination
                 if ($orm) {
-                    $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                  
+                    // $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                    $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
                 } else {
                     $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
                 }

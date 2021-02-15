@@ -219,7 +219,7 @@ class documentcore
  			 	$documentEntity = $this->entityManager
 	                          // ->getRepository('RegleBundle:Document')
 							  ->getRepository(Document::class)
-	                          ->findOneById( $id_doc );	
+	                          ->find( $id_doc );	
 				$this->data['id'] = $documentEntity->getSource();	
 				$this->data['source_date_modified'] = $documentEntity->getSourceDateModified()->format('Y-m-d H:i:s');				
 			}

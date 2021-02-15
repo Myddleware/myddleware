@@ -301,7 +301,8 @@ list_flux:
         date_modified: Date de modification
         rule: Règle
         status: Statut
-        global_status: Statut global / Type
+        global_status: Statut global 
+        type: Type
         id: Identifiant
         source_id: Id source
         target_id: Id cible

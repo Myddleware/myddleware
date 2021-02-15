@@ -26,76 +26,73 @@
 {% block title %}{{parent()}} | {{'title.flux.list'|trans}}{% endblock %}
 {% block titlesm %}{{'title.flux.list'|trans}}{% endblock titlesm %} 
 {% block body %}
-    
-	<div id="flux" >
-	<form action="{{ path('flux_list', {'search': 1}) }}" method="post" enctype="multipart/form-data">
-	{% if nb > 0 %}
-	
-	<div id="fd-title-small" class="left">
-		<p>{{ 'list_flux.total'|trans }} :<p> <span class="nb">{{ nb }}</span>
-	</div>
-
-	<div class="left">
-		<fieldset><legend>{{'list_flux.filter.rule'|trans}}</legend>
- 			{{ form_label(form.rule, 'list_flux.filter.name'|trans ) }}
-			{{ form_widget(form.rule) }} 	
-		</fieldset>
-	</div>
-
-	<div class="clr"></div>
-	{% endif %}		
-
-		{# Les erreurs générales du formulaire. #}
-		{{ form_errors(form) }}
-	
-{#
-		<fieldset class="border"><legend>{{'list_flux.filter.date_created'|trans}}</legend>
-			{{ form_label(form.date_create_start, 'list_flux.start'|trans) }}
-			{{ form_widget(form.date_create_start) }} 
-			{{ form_label(form.date_create_start, 'list_flux.end'|trans) }}	
-			{{ form_widget(form.date_create_end) }}
-		</fieldset> 	
-#}		
-		<fieldset class="border"><legend>{{'list_flux.filter.id'|trans}}</legend>
- 			{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
-			{{ form_widget(form.source_id) }} 	
- 			{{ form_label(form.target_id, 'list_flux.filter.target_id'|trans) }}	
-			{{ form_widget(form.target_id) }}
-		</fieldset>
-
-		<fieldset class="border"><legend>{{'list_flux.filter.date_modified'|trans}}</legend>
- 			{{ form_label(form.date_modif_start, 'list_flux.start'|trans) }}
-			{{ form_widget(form.date_modif_start) }} 	
- 			{{ form_label(form.date_modif_end, 'list_flux.end'|trans) }}	
-			{{ form_widget(form.date_modif_end) }}
-		</fieldset>
-		
-		<fieldset class="border"><legend>{{'list_flux.filter.status'|trans}}</legend>
- 			{{ form_label(form.status, 'list_flux.filter.status'|trans) }}
-			{{ form_widget(form.status) }} 	
- 			{{ form_label(form.gblstatus, 'list_flux.filter.global_status'|trans) }}		
-			{{ form_widget(form.gblstatus) }} {{ form_widget(form.type) }}
-		</fieldset>
-		
-		<fieldset class="border"><legend>{{'list_flux.filter.content'|trans}}</legend>
-			{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
-			{{ form_widget(form.source_content) }} 
-			{{ form_label(form.target_content, 'list_flux.filter.target_content'|trans) }}	
-			{{ form_widget(form.target_content) }}
-		</fieldset> 	
-
-	
-		<div class="clr"></div>		
-		<div align="center">
-		{# Hidden dont CSRF #}
-		{{ form_rest(form) }}			
-			<p>{{ form_widget(form.click_filter) }}</p>
-			<p>
-				{% if condition > 0 %}
-					<a class="btn-large-mydinv" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">{{'list_flux.btn.filter_delete'|trans}}</a>
-				{% endif %}				
-			</p>
+	<div id="flux" class="container">
+	{{ form_start(form)}}
+	{# <form action="{{ path('flux_list', {'search': 1}) }}" method="post" enctype="multipart/form-data"> #}
+		{% if nb > 0 %}
+		<div id="fd-title-small" class="left">
+			<p>{{ 'list_flux.total'|trans }} :<p> <span class="nb">{{ nb }}</span>
 		</div>
+		<div class="left">
+			<fieldset><legend>{{'list_flux.filter.rule'|trans}}</legend>
+				{{ form_label(form.rule, 'list_flux.filter.name'|trans ) }} 
+				{{ form_widget(form.rule) }} 	
+			</fieldset>
+		</div>
+		<div class="clr"></div>
+		{% endif %}		
+		{# Les erreurs générales du formulaire. #}
+		{{ form_errors(form) }}		
+		<div class="form-row">
+			<div class="form-group col-md-3">
+				<h4>{{'list_flux.filter.id'|trans}}</h4>
+				{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
+				{{ form_widget(form.source_id) }} 	
+				{{ form_label(form.target_id, 'list_flux.filter.target_id'|trans) }}	
+				{{ form_widget(form.target_id) }}
+			</div>
+			<div class="form-group col-md-3">
+				<h4>{{'list_flux.filter.date_modified'|trans}}</h4>
+				{{ form_label(form.date_modif_start, 'list_flux.start'|trans) }}
+				{{ form_widget(form.date_modif_start) }} 	
+				{{ form_label(form.date_modif_end, 'list_flux.end'|trans) }}	
+				{{ form_widget(form.date_modif_end) }}
+			</div>
+			<div class="form-group col-md-3">
+				<h4>{{'list_flux.filter.status'|trans}}</h4>
+				{{ form_label(form.status, 'list_flux.filter.status'|trans) }}
+				{{ form_widget(form.status) }} 	
+				<div class="form-group row">
+					<div class="col-md-6">
+						{{ form_label(form.gblstatus, 'list_flux.filter.global_status'|trans) }}		
+						{{ form_widget(form.gblstatus) }} 
+					</div>
+					<div class="col-md-6">
+						{{ form_label(form.gblstatus, 'list_flux.filter.type'|trans) }}	
+						{{ form_widget(form.type) }}
+					</div>
+				</div>
+			</div>
+				<div class="form-group col-md-3">
+					<h4>{{'list_flux.filter.content'|trans}}</h4>
+					{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
+					{{ form_widget(form.source_content) }} 
+					{{ form_label(form.target_content, 'list_flux.filter.target_content'|trans) }}	
+					{{ form_widget(form.target_content) }}
+				</div>
+		</div>
+		
+			<div class="clr"></div>		
+			<div align="center">
+			{# Hidden dont CSRF #}
+			{{ form_rest(form) }}			
+				<p>{{ form_widget(form.click_filter) }}</p>
+				<p>
+					{% if condition > 0 %}
+						<a class="btn-large-mydinv" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">{{'list_flux.btn.filter_delete'|trans}}</a>
+					{% endif %}				
+				</p>
+			</div>
         {{ form_end(form) }}
 
 	<div class="massbtn">
