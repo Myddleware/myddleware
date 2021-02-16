@@ -33,28 +33,29 @@ namespace App\Manager;
 
 
 
-use App\Entity\DocumentData;
+use DateTime;
+use Exception;
+use DateTimeZone;
 use App\Entity\Job;
 use App\Entity\Rule;
-use App\Repository\DocumentDataRepository;
-use App\Repository\DocumentRepository;
+use App\Entity\DocumentData;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Yaml\Yaml;
 use App\Repository\JobRepository;
 use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
-use DateTime;
-use DateTimeZone;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
+use App\Repository\DocumentDataRepository;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class jobcore  {
 		
