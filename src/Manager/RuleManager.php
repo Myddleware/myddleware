@@ -1277,7 +1277,7 @@ class rulecore
 						// Permet de vérifier que l'on ne va pas créer un doublon dans la cible
 						$send['data'] = $this->checkDuplicate($send['data']);
 						$send['data'] = $this->clearSendData($send['data']);
-						$response = $this->solutionTarget->create($send);
+						$response = $this->solutionTarget->createData($send);
 					}
 					// Modification des données dans la cible
 					elseif ($type == 'U') {						
@@ -1285,12 +1285,12 @@ class rulecore
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
 						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
 						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);		
-						$response = $this->solutionTarget->update($send);						
+						$response = $this->solutionTarget->updateData($send);						
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {			
 						$send['data'] = $this->beforeDelete($send['data']);;
-						$response = $this->solutionTarget->delete($send);
+						$response = $this->solutionTarget->deleteData($send);
 					}
 					else {
 						$response[$documentId] = false;

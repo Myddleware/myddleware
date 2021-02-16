@@ -187,7 +187,7 @@ class facebookcore extends solution
             }
 
             // Get the reference field
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields']);
@@ -304,7 +304,7 @@ class facebookcore extends solution
         }
     }
 
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         // Only leads module for now
         return 'created_time';

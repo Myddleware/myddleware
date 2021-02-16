@@ -286,7 +286,7 @@ class sapcrmcore extends saproot
     }
 
     // Permet de créer des données
-    public function create($param)
+    public function createData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
@@ -363,7 +363,7 @@ class sapcrmcore extends saproot
     }
 
     // Permet de créer des données
-    public function update($param)
+    public function updateData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {

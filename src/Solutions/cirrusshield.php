@@ -167,7 +167,7 @@ class cirrusshieldcore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
             // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Get the organization timezone
             if (empty($this->organizationTimezoneOffset)) {
@@ -282,7 +282,7 @@ class cirrusshieldcore extends solution
     }
 
     // Create data in the target solution
-    public function create($param)
+    public function createData($param)
     {
         try {
             $i = 0;
@@ -390,17 +390,17 @@ class cirrusshieldcore extends solution
     }
 
     // Cirrus Shield use the same function for record's creation and modification
-    public function update($param)
+    public function updateData($param)
     {
         $this->update = true;
-        $result = $this->create($param);
+        $result = $this->createData($param);
         $this->update = false;
 
         return $result;
     }
 
     // retrun the reference date field name
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         // Creation and modification mode
         if (in_array($RuleMode, ['0', 'S'])) {

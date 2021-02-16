@@ -339,88 +339,55 @@ class databasecore extends solution
         return $result;
     }
 
-    // Permet de créer des données
-    public function create($param)
+    // Create the record 
+    protected function create($record)
     {
-        try {
-            // Get the target reference field
-            if (!isset($param['ruleParams']['targetFieldId'])) {
-                throw new \Exception('targetFieldId has to be specified for the data creation.');
-            }
+		// Get the target reference field
+		if (!isset($param['ruleParams']['targetFieldId'])) {
+			throw new \Exception('targetFieldId has to be specified for the data creation.');
+		}
 
-            // For every document
-            foreach ($param['data'] as $idDoc => $data) {
-                try {
-                    unset($idTarget);
-                    // Check control before create
-                    $data = $this->checkDataBeforeCreate($param, $data);
-                    // Query init
-                    $sql = 'INSERT INTO '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' (';
-                    $values = '(';
-                    // We build the query with every fields
-                    foreach ($data as $key => $value) {
-                        if ('target_id' == $key) {
-                            continue;
-                        // If the target reference field is in data sent, we save it to update the document
-                        } elseif ($key == $param['ruleParams']['targetFieldId']) {
-                            $idTarget = $value;
-                        }
-                        // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-                        $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-                        $values .= "'".$this->escape($value)."',";
-                    }
+		// Query init
+		$sql = 'INSERT INTO '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' (';
+		$values = '(';
+		// We build the query with every fields
+		foreach ($record as $key => $value) {
+			if ('target_id' == $key) {
+				continue;
+			// If the target reference field is in data sent, we save it to update the document
+			} elseif ($key == $param['ruleParams']['targetFieldId']) {
+				$idTarget = $value;
+			}
+			// Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
+			$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
+			$values .= "'".$this->escape($value)."',";
+		}
 
-                    // Remove the last coma
-                    $sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
-                    $values = substr($values, 0, -1);
-                    $values .= ')'; // VALUES (value1,value2,value3,...)
-                    $sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
-                    // Query validation
-                    $sql = $this->queryValidation($param, 'create', $sql);
+		// Remove the last coma
+		$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
+		$values = substr($values, 0, -1);
+		$values .= ')'; // VALUES (value1,value2,value3,...)
+		$sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
+		// Query validation
+		$sql = $this->queryValidation($param, 'create', $sql);
 
-                    $q = $this->pdo->prepare($sql);
-                    $exec = $q->execute();
-                    if (!$exec) {
-                        $errorInfo = $this->pdo->errorInfo();
-                        throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
-                    }
+		$q = $this->pdo->prepare($sql);
+		$exec = $q->execute();
+		if (!$exec) {
+			$errorInfo = $this->pdo->errorInfo();
+			throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+		}
 
-                    // If the target reference field isn't in data sent
-                    if (!isset($idTarget)) {
-                        // If the target reference field is a primary key auto increment, we retrive the value here
-                        $idTarget = $this->pdo->lastInsertId();
-                    }
-                    if (!isset($idTarget)) { // could be 0
-                        throw new \Exception('Create: No ID returned.');
-                    }
-                    // Send the target ifd to Myddleware
-                    $result[$idDoc] = [
-                        'id' => $idTarget,
-                        'error' => false,
-                    ];
-                } catch (\Exception $e) {
-                    $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $result[$idDoc] = [
-                        'id' => '-1',
-                        'error' => $error,
-                    ];
-                }
-                // Status modification for the transfer
-                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-            }
-        } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result[$idDoc] = [
-                'id' => '-1',
-                'error' => $error,
-            ];
-        }
-
-        return $result;
+		// If the target reference field isn't in data sent
+		if (!isset($idTarget)) {
+			// If the target reference field is a primary key auto increment, we retrive the value here
+			$idTarget = $this->pdo->lastInsertId();
+		}
+		return $idTarget;
     }
 
-    // Permet de créer des données
-    public function update($param)
+    // Update the record
+    protected function updateData($param)
     {
         try {
             // For every document
@@ -485,7 +452,7 @@ class databasecore extends solution
     }
 
     // Function to delete a record
-    public function delete($param)
+    public function deleteData($param)
     {
         try {
             // For every document

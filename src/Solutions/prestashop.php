@@ -448,7 +448,7 @@ class prestashopcore extends solution
 		}
 
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+		$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
 		try { // try-catch PrestashopWebservice
 			$result = [];
@@ -604,7 +604,7 @@ class prestashopcore extends solution
     {
         try { // try-catch Myddleware
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
             try { // try-catch PrestashopWebservice
                 $result = [];
                 // Init parameter to read in Prestashop
@@ -737,11 +737,11 @@ class prestashopcore extends solution
     // readManyToMany($param)
 
     // Permet de créer des données
-    public function create($param)
+    public function createData($param)
     {
         // If a sub record is created, it means that we will update the main module
         if (!empty($this->module_relationship_many_to_many[$param['module']])) {
-            return $this->update($param);
+            return $this->updateData($param);
         }
 
         foreach ($param['data'] as $idDoc => $data) {
@@ -832,12 +832,12 @@ class prestashopcore extends solution
     // create($param)
 
     // Permet de modifier des données
-    public function update($param)
+    public function updateData($param)
     {
         // We never update order_histories even if the methode update is called
         // For this module we always create a new line (so create methode is called)
         if ('order_histories' == $param['module']) {
-            return $this->create($param);
+            return $this->createData($param);
         }
 
         foreach ($param['data'] as $idDoc => $data) {
@@ -975,7 +975,7 @@ class prestashopcore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
         if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {

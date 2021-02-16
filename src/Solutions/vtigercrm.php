@@ -454,7 +454,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function create($param)
+    public function createData($param)
     {
         try {
             $subDocIdArray = [];
@@ -558,7 +558,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function update($param)
+    public function updateData($param)
     {
         try {
             $subDocIdArray = [];

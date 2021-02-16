@@ -189,13 +189,13 @@ class mailchimpcore extends solution
     }
 
     // Create data to Mailchimp
-    public function create($param)
+    public function createData($param)
     {
         return $this->createUpdate('POST', $param);
     }
 
     // Update data to Mailchimp
-    public function update($param)
+    public function updateData($param)
     {
         return $this->createUpdate('PATCH', $param);
     }

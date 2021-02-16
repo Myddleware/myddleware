@@ -255,7 +255,7 @@ class woocommercecore extends solution {
 	 * @param $param
 	 * @return mixed
 	 */
-	public function create($param) {
+	public function createData($param) {
 		return $this->upsert('create', $param);
 
     }
@@ -265,7 +265,7 @@ class woocommercecore extends solution {
 	 * @param $param
 	 * @return mixed
 	 */
-	public function update($param) {
+	public function updateData($param) {
 		return $this->upsert('update', $param);
 	}
 

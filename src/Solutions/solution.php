@@ -301,7 +301,7 @@ class solutioncore
 			// Format data
 			if (!empty($readResult)) {
 				// Get the name of the field used for the reference
-				$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+				$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 				// Get the name of the field used as id
 				$idField = $this->getIdName($param['module']);
 				
@@ -387,8 +387,48 @@ class solutioncore
     // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
-    public function create($param)
+    public function createData($param)
+    {        
+		try {
+            // For every document
+            foreach ($param['data'] as $idDoc => $data) {
+				try {
+					// Check control before create
+					$record = $this->checkDataBeforeCreate($param, $record);
+					// Call create methode 
+					$recordId = $this->create($record);
+					if (empty($recordId)) {
+						throw new \Exception('No Id returned. ');
+					}
+				} catch (\Exception $e) {
+                    $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $result[$idDoc] = [
+                        'id' => '-1',
+                        'error' => $error,
+                    ];
+                }
+                // Status modification for the transfer
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+			}
+		 } catch (\Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $result[$idDoc] = [
+                'id' => '-1',
+                'error' => $error,
+            ];
+        }
+
+        return $result;
+    }
+
+	// Create method : 
+	// - input : array with the record's data
+	// - output : the id of the new record
+	// An exception has to be generated when an error happends during the creation.
+	// this exception will be catched by the method createData
+	protected function create($record)
     {
+		return null;
     }
 
     // Permet de mettre à jour un enregistrement
@@ -420,12 +460,17 @@ class solutioncore
     // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
-    public function update($data)
+    public function updateData($data)
     {
     }
 
-    // Delete a record
-    public function delete($param)
+    protected function update($data)
+    {
+		return null;
+    }
+	
+	 // Delete a record
+    public function deleteData($param)
     {
         // Set an error by default
         foreach ($param['data'] as $idDoc => $data) {
@@ -436,6 +481,13 @@ class solutioncore
             // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
+    }
+
+
+    // Delete a record
+    protected function delete($param)
+    {
+        return null;
     }
 
     // Permet de renvoyer le mode de la règle en fonction du module target
@@ -654,7 +706,7 @@ class solutioncore
     }
 
     // Return the name of the field used for the reference
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
     }
 	

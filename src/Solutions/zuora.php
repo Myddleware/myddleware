@@ -162,7 +162,7 @@ class zuoracore extends solution
     // get_module_fields($module)
 
 
-    public function create($param)
+    public function createData($param)
     {
         // Get the action because we use the create function to update data as well
         if ($this->update) {
@@ -265,11 +265,11 @@ class zuoracore extends solution
     }
 
     // We use the create function to update data
-    public function update($param)
+    public function updateData($param)
     {
         $this->update = true;
 
-        return $this->create($param);
+        return $this->createData($param);
     }
 
     // Specific function for amend action

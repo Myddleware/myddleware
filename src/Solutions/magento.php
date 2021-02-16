@@ -310,7 +310,7 @@ class magentocore extends solution
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Get all data after the reference date
             $searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
@@ -392,7 +392,7 @@ class magentocore extends solution
         return $result;
     }
     // Permet de créer un enregistrement
-    public function create($param)
+    public function createData($param)
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -451,7 +451,7 @@ class magentocore extends solution
     }
 
     // Permet de mettre à jour un enregistrement
-    public function update($param)
+    public function updateData($param)
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -544,7 +544,7 @@ class magentocore extends solution
     // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         if (in_array($RuleMode, ['0', 'S'])) {
             return 'updated_at';

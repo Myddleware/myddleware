@@ -355,7 +355,7 @@ class salesforcecore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			
 			// Récupération du nom du champ date
-			$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
@@ -463,7 +463,7 @@ class salesforcecore extends solution {
 	} 
 	
 	// Permet de créer des données
-	public function create($param) {
+	public function createData($param) {
 		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
@@ -581,7 +581,7 @@ class salesforcecore extends solution {
 	} // create($param)
 	
 	// Permet de modifier des données
-	public function update($param) {		
+	public function updateData($param) {		
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
 		}
@@ -697,7 +697,7 @@ class salesforcecore extends solution {
 			}
 		} else {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
 			// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
 			$tab = explode(' ', $param['date_ref']);
@@ -726,7 +726,7 @@ class salesforcecore extends solution {
 	
 	// Génération du ORDER
 	protected function getOrder($param){	
-		$DateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+		$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
 		} else {
@@ -751,7 +751,7 @@ class salesforcecore extends solution {
 	}
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getDateRefName($moduleSource, $RuleMode) {
+	public function getRefFieldName($moduleSource, $RuleMode) {
 		if(in_array($RuleMode,array("0","S"))) {
 			return "LastModifiedDate";
 		} else if ($RuleMode == "C"){

@@ -378,7 +378,7 @@ class suitecrmcore extends solution
 			$param['limit'] = 100;
 		}
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+		$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
 		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
 		if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -589,7 +589,7 @@ class suitecrmcore extends solution
     }
 
     // Permet de créer des données
-    public function create($param)
+    public function createData($param)
     {
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -692,7 +692,7 @@ class suitecrmcore extends solution
     }
 
     // Permet de mettre à jour un enregistrement
-    public function update($param)
+    public function updateData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -745,14 +745,14 @@ class suitecrmcore extends solution
     }
 
     // Function to delete a record
-    public function delete($param)
+    public function deleteData($param)
     {
         // We set the flag deleted to 1 and we call the update function
         foreach ($param['data'] as $idDoc => $data) {
             $param['data'][$idDoc]['deleted'] = 1;
         }
 
-        return $this->update($param);
+        return $this->updateData($param);
     }
 
     // Build the query for read data to SuiteCRM
@@ -780,7 +780,7 @@ class suitecrmcore extends solution
             }
             // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
                 $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
@@ -812,7 +812,7 @@ class suitecrmcore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         if (in_array($RuleMode, ['0', 'S'])) {
             return 'date_modified';

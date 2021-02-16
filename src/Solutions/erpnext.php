@@ -260,7 +260,7 @@ class erpnextcore extends solution
             // Remove Myddleware 's system fields
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             $fields = $param['fields'];
             $result['date_ref'] = $param['date_ref'];
@@ -319,7 +319,7 @@ class erpnextcore extends solution
 
     // end function read
 
-    public function create($param)
+    public function createData($param)
     {
         return $this->createUpdate('create', $param);
     }
@@ -333,7 +333,7 @@ class erpnextcore extends solution
      *
      * @return mixed
      */
-    public function update($param)
+    public function updateData($param)
     {
         return $this->createUpdate('update', $param);
     }
@@ -439,7 +439,7 @@ class erpnextcore extends solution
     }
 
     // retrun the reference date field name
-    public function getDateRefName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {

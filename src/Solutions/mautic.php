@@ -183,7 +183,7 @@ class mauticcore extends solution
     // get_module_fields($module)
 
 
-    public function create($param)
+    public function createData($param)
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -198,7 +198,7 @@ class mauticcore extends solution
 
     // end function create
 
-    public function update($param)
+    public function updateData($param)
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -213,7 +213,7 @@ class mauticcore extends solution
 
     // end function create
 
-    public function delete($param)
+    public function deleteData($param)
     {
         // Specific management depending on the module
         switch ($param['module']) {

@@ -170,7 +170,7 @@ class moodlecore extends solution
 
             // Put date ref in Moodle format
             $result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Add requiered fields
             $param['fields'] = $this->addRequiredField($param['fields']);
@@ -232,7 +232,7 @@ class moodlecore extends solution
     }
 
     // Permet de créer des données
-    public function create($param)
+    public function createData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -341,7 +341,7 @@ class moodlecore extends solution
     }
 
     // Permet de mettre à jour un enregistrement
-    public function update($param)
+    public function updateData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -543,7 +543,7 @@ class moodlecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         switch ($moduleSource) {
             case 'get_course_completion_by_date':

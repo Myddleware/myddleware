@@ -528,12 +528,12 @@ class hubspotcore extends solution
      *
      * @return mixed
      */
-    public function create($param)
+    public function createData($param)
     {
         try {
             // Associate deal is always an update to Hubspot
             if ('associate_deal' == $param['module']) {
-                return $this->update($param);
+                return $this->updateData($param);
             }
             // Tranform Myddleware data to Mailchimp data
             foreach ($param['data'] as $idDoc => $data) {
@@ -629,7 +629,7 @@ class hubspotcore extends solution
      *
      * @return mixed
      */
-    public function update($param)
+    public function updateData($param)
     {
         try {
             $module = $this->formatModuleName($param['module']);
@@ -799,7 +799,7 @@ class hubspotcore extends solution
             }
 
             // ModificationDate or CreationDate
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             $property = '';
             // If date_ref is more than 30 days in the past or if an offset is in the reference
@@ -1292,7 +1292,7 @@ class hubspotcore extends solution
      *
      * @throws \Exception
      */
-    public function getDateRefName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode)
     {
         // Creation and modification mode
         if (in_array($RuleMode, ['0', 'S'])) {

@@ -335,7 +335,7 @@ class eventbritecore extends solution
     }
 
     // Permet de créer des données
-    public function create($param)
+    public function createData($param)
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -380,7 +380,7 @@ class eventbritecore extends solution
     }
 
     // Permet de créer des données
-    public function update($param)
+    public function updateData($param)
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
