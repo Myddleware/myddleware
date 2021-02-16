@@ -25,8 +25,8 @@
 
 namespace Myddleware\RegleBundle\Solutions;
 
-class microsoftsqlcore extends database {
-	
+class microsoftsqlcore extends database
+{
 	protected $driver;
 	protected $fieldName = 'COLUMN_NAME';
 	protected $fieldLabel = 'COLUMN_NAME';
@@ -36,18 +36,14 @@ class microsoftsqlcore extends database {
 	protected $stringSeparatorClose = ']';
 
 	// Generate PDO object
-	protected function generatePdo() {
-		return new \PDO('sqlsrv:Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
-
-		// dblib is deprecate
-		/*
+	protected function generatePdo()
+    {
 		$this->set_driver();
 		if ($this->driver == 'sqlsrv') {
 			return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'],$this->paramConnexion['login'], $this->paramConnexion['password']);
 		} else {
 			return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
 		}
-		*/
 	}
 	
 	// We use sqlsrv for windows and dblib for linux
@@ -101,12 +97,8 @@ class microsoftsqlcore extends database {
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__.'/../Custom/Solutions/microsoftsql.php';
-if(file_exists($file)){
-	require_once($file);
-}
-else {
-	//Sinon on met la classe suivante
-	class microsoftsql extends microsoftsqlcore {
-
-	}
+if (file_exists($file)) {
+    require_once $file;
+} else {
+	class microsoftsql extends microsoftsqlcore {}
 } 
