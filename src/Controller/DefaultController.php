@@ -450,20 +450,24 @@ if (file_exists($file)) {
         public function ruleExecAction($id)
         {
             try {
+
+                $rule = $this->ruleRepository->find($id);
+                
                 if ('ALL' == $id) {
-                    $this->ruleManager->actionRule('ALL');
+                    $this->ruleManager->actionRule('ALL', $rule);
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 } elseif ('ERROR' == $id) {
-                    $this->ruleManager->actionRule('ERROR');
+                    $this->ruleManager->actionRule('ERROR', $rule);
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
-                $rule = $this->ruleRepository->find($id);
+             
                 $this->ruleManager->actionRule('runMyddlewareJob', $rule);
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
+           
                 return $this->redirect($this->generateUrl('regle_list'));
             }
         }
