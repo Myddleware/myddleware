@@ -387,7 +387,7 @@ class databasecore extends solution
     }
 
     // Update the record
-    protected function updateData($param)
+    protected function update($param)
     {
         try {
             // For every document
