@@ -79,7 +79,6 @@ recreate: init
 restart: recreate
 	@echo ">>> Myddleware is ready."
 
-
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
 
