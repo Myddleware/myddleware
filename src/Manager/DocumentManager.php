@@ -122,11 +122,11 @@ class documentcore
 		LoggerInterface $logger,
 		Connection $dbalConnection,
 		EntityManagerInterface $entityManager,
+		FormulaManager $formulaManager = null,
 		DocumentRepository $documentRepository = null,
 		RuleRelationShipRepository $ruleRelationshipsRepository = null,
 		ParameterBagInterface $params = null,
-		ToolsManager $tools = null,
-		FormulaManager $formulaManager = null
+		ToolsManager $tools = null
 	) {
 		$this->connection = $dbalConnection;
 		$this->logger = $logger;
@@ -1041,6 +1041,7 @@ class documentcore
 		$read['query'] = $searchFields;
 		$read['ruleParams'] = $this->ruleParams;
 		$read['rule'] = $rule;
+		$read['call_type'] = 'history';
 		$dataTarget = $this->solutionTarget->readData($read);
 		// If read method returns no result with no error
 		if (

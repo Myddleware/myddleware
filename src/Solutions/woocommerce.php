@@ -107,7 +107,7 @@ class woocommercecore extends solution {
         );
     }
 
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         require('lib/woocommerce/metadata.php');
         parent::get_module_fields($module, $type);

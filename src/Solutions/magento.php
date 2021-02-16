@@ -112,7 +112,7 @@ class magentocore extends solution
     // get_modules()
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
         try {

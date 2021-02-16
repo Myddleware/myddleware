@@ -128,7 +128,7 @@ class mauticcore extends solution
     }
 
     // Get the fields available
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
         try {

@@ -86,6 +86,8 @@ class solutioncore
 
     // Specify if the class is called by the API
     protected $api;
+	
+	protected $message;
 
     // Instanciation de la classe de génération de log Symfony
     /**
@@ -160,9 +162,10 @@ class solutioncore
             $param['api'] = $this->api;				
 			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);				
 			$documentManager->setParam($param);	
-            //  Si on a un message on l'ajoute au document
-            if (!empty($value['error'])) {
-                $documentManager->setMessage($value['error']);
+            // If a message exist, we add it to the document logs
+            if (!empty($this->message)) {
+                $documentManager->setMessage($this->message);
+				$this->message = '';
             }
             // Mise à jour de la table document avec l'id target comme id de document
             // Si la création a fonctionné
@@ -256,7 +259,7 @@ class solutioncore
 
     // Cette méthode doit remplir les attributs :
     // moduleFields avec le tableu ci-dessus
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         $this->moduleFields = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
@@ -364,7 +367,7 @@ class solutioncore
     // Permet de créer un enregistrement
     // $param contient  :
     //  -> le module destinataire
-    //  -> les données à envoyer sour cette forme :
+    //  -> les données à envoyer sous cette forme :
     // Array
     // (
     // [0] => Array
@@ -391,15 +394,25 @@ class solutioncore
     {        
 		try {
             // For every document
-            foreach ($param['data'] as $idDoc => $data) {
+            foreach ($param['data'] as $idDoc => $record) {
 				try {
+					// Clean record by removing myddleware field
+					$record = $this->cleanMyddlewareRecord($record);
+					
 					// Check control before create
 					$record = $this->checkDataBeforeCreate($param, $record);
 					// Call create methode 
-					$recordId = $this->create($record);
+					$recordId = $this->create($param, $record);
+					
+					// Exception if no Id retruned
 					if (empty($recordId)) {
 						throw new \Exception('No Id returned. ');
 					}
+					// Format result
+					$result[$idDoc] = [
+                        'id' => $recordId,
+                        'error' => false
+                    ];
 				} catch (\Exception $e) {
                     $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $result[$idDoc] = [
@@ -417,7 +430,6 @@ class solutioncore
                 'error' => $error,
             ];
         }
-
         return $result;
     }
 
@@ -426,7 +438,7 @@ class solutioncore
 	// - output : the id of the new record
 	// An exception has to be generated when an error happends during the creation.
 	// this exception will be catched by the method createData
-	protected function create($record)
+	protected function create($param, $record)
     {
 		return null;
     }
@@ -435,7 +447,7 @@ class solutioncore
     // Permet de créer un enregistrement
     // $param contient  :
     //  -> le module destinataire
-    //  -> les données à envoyer sour cette forme (le champ id_target est obligatoire) :
+    //  -> les données à envoyer sous cette forme (le champ id_target est obligatoire) :
     // Array
     // (
     // [0] => Array
@@ -460,11 +472,53 @@ class solutioncore
     // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
-    public function updateData($data)
+    public function updateData($param)
     {
+		try {
+            // For every document
+            foreach ($param['data'] as $idDoc => $record) {
+				try {					
+					// Clean record by removing myddleware field
+					$record = $this->cleanMyddlewareRecord($record);
+					
+					if (empty($record['target_id'])) {
+						throw new \Exception('No target id found. Failed to update the record.');
+					}
+					// Check control before create
+					$record = $this->checkDataBeforeUpdate($param, $record);
+					// Call create methode 
+					$recordId = $this->update($param, $record);
+					
+					// Exception if no Id retruned
+					if (empty($recordId)) {
+						throw new \Exception('No Id returned. ');
+					}
+					// Format result
+					$result[$idDoc] = [
+                        'id' => $recordId,
+                        'error' => false
+                    ];
+				} catch (\Exception $e) {
+                    $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $result[$idDoc] = [
+                        'id' => '-1',
+                        'error' => $error,
+                    ];
+                }
+                // Status modification for the transfer
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+			}
+		 } catch (\Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $result[$idDoc] = [
+                'id' => '-1',
+                'error' => $error,
+            ];
+        }
+        return $result;
     }
 
-    protected function update($data)
+    protected function update($param, $data)
     {
 		return null;
     }
@@ -472,22 +526,54 @@ class solutioncore
 	 // Delete a record
     public function deleteData($param)
     {
-        // Set an error by default
-        foreach ($param['data'] as $idDoc => $data) {
+		try {
+            // For every document
+            foreach ($param['data'] as $idDoc => $record) {
+				try {					
+			
+					if (empty($record['target_id'])) {
+						throw new \Exception('No target id found. Failed to update the record.');
+					}
+					// Check control before delete
+					$record = $this->checkDataBeforeDelete($param, $record);
+					// Call delete methode 
+					$recordId = $this->delete($param, $record);
+					
+					// Exception if no Id retruned
+					if (empty($recordId)) {
+						throw new \Exception('No Id returned. ');
+					}
+					// Format result
+					$result[$idDoc] = [
+                        'id' => $recordId,
+                        'error' => false
+                    ];
+				} catch (\Exception $e) {
+                    $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $result[$idDoc] = [
+                        'id' => '-1',
+                        'error' => $error,
+                    ];
+                }
+                // Status modification for the transfer
+                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+			}
+		 } catch (\Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
-                'error' => 'Delete function not developped for this connector. Failed to delete this record in the target application. ',
+                'error' => $error,
             ];
-            // Modification du statut du flux
-            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
+        return $result;
     }
 
 
     // Delete a record
-    protected function delete($param)
+    protected function delete($param, $data)
     {
-        return null;
+        // Set an error by default
+		throw new \Exception('Delete function not developped for this connector. Failed to delete this record in the target application. ');
     }
 
     // Permet de renvoyer le mode de la règle en fonction du module target
@@ -648,6 +734,15 @@ class solutioncore
 
         return $fieldArray;
     }
+	
+	// Clean record before create/update
+    protected function cleanMyddlewareRecord($record){
+		if (isset($record['Myddleware_element_id'])) {
+			unset($record['Myddleware_element_id']);
+		}
+		return $record;
+	}
+	
 
 	// Calculate the date modified of the current record
 	protected function getModifiedDate($param, $record, $dateRefField) {

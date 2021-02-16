@@ -111,7 +111,7 @@ class sapcrmcore extends saproot
 
     // get_modules()
 
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         if ('target' == $type) {
             switch ($module) {

@@ -211,7 +211,7 @@ class suitecrmcore extends solution
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
         try {
@@ -371,12 +371,10 @@ class suitecrmcore extends solution
 			$deleted = true;
 			$param['fields'][] = 'deleted';
 		}
-
+		$totalCount = 0;
 		$currentCount = 0;
 		$query = '';
-		if (empty($param['limit'])) {
-			$param['limit'] = 100;
-		}
+
 		// On va chercher le nom du champ pour la date de référence: Création ou Modification
 		$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
@@ -431,7 +429,7 @@ class suitecrmcore extends solution
 			// Construction des données de sortie
 			if (isset($get_entry_list_result->result_count)) {
 				$currentCount = $get_entry_list_result->result_count;
-				// $result['count'] += $currentCount;
+				$totalCount += $currentCount;
 				$record = [];
 				$i = 0;
 				// For each records, we add all fields requested
@@ -496,13 +494,12 @@ class suitecrmcore extends solution
 			}
 		}
 		// On continue si le nombre de résultat du dernier appel est égal à la limite
-		while ($currentCount == $this->limitCall and $result['count'] < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
+		while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
 		// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
 		if (!empty($paramSave)) {
 			$resultRel = $this->readRelationship($paramSave, $result);
 			// Récupération des données sauf de la date de référence qui dépend des enregistrements parent
 			if (!empty($resultRel['count'])) {
-				// $result['count'] = $resultRel['count'];
 				$result = $resultRel['values'];
 			}
 			// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.

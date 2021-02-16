@@ -483,7 +483,6 @@ class jobcore  {
 				foreach ($documents as $document) {
 					// If new rule, we create a new instance of RuleManager
 					if ($param['ruleId'] != $document['rule_id']) {
-						// $rule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface);
 						$this->ruleManager->setApi($this->api);
 						$this->ruleManager->setJobId($this->id);
 						$this->ruleManager->setRule($document['rule_id']);

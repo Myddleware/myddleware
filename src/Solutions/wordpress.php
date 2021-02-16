@@ -93,7 +93,7 @@ class wordpresscore extends solution {
     }
 
 
-    public function get_module_fields($module, $type = 'source') {
+    public function get_module_fields($module, $type = 'source', $param = null) {
         parent::get_module_fields($module, $type);
         try {
             require_once('lib/wordpress/metadata.php');

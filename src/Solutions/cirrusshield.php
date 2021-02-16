@@ -107,7 +107,7 @@ class cirrusshieldcore extends solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source')
+    public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
         try {

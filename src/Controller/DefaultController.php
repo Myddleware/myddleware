@@ -593,12 +593,14 @@ if (file_exists($file)) {
                 $solution_source->login($connectorSource);
 
                 // Rule Mode
-                $param['rule']['mode'] = $rule->getParamByName('mode')->getValue();
+                $param['ruleParams']['mode'] = $rule->getParamByName('mode')->getValue();
 
-                if (empty($param['rule']['mode'])) {
-                    $param['rule']['mode'] = '0';
+                if (empty($param['ruleParams']['mode'])) {
+                    $param['ruleParams']['mode'] = '0';
                 }
+				
                 $param['offset'] = '0';
+				$param['call_type'] = 'read';
                 $result = $solution_source->readData($param);
 
                 if (!empty($result['error'])) {
@@ -1260,6 +1262,10 @@ if (file_exists($file)) {
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
                     }
                 }
+				// The mode is empty when we create the rule, so we set a default value
+				if (empty($ruleParams['ruleParams']['mode'])) {
+                    $ruleParams['mode'] = '0';
+                }
 
                 // Get source data
                 $source = $solution_source->readData([
@@ -1267,7 +1273,9 @@ if (file_exists($file)) {
                     'fields' => $sourcesfields,
 					'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
 					'limit' => 1,
-                    'ruleParams' => $ruleParams, ]);		
+                    'ruleParams' => $ruleParams,
+					'call_type' => 'simulation'
+					]);		
 				$before = [];
 				$after = [];
                 if (!empty($source['values'])) {
@@ -1443,8 +1451,13 @@ if (file_exists($file)) {
                 // Ajoute des champs source pour la validation
                 $ruleParamsSource = $solution_source->getFieldsParamUpd('source', $module['source']);
 
+                // Add parameters to be able to read rules linked 
+                $param['connectorSourceId'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
+                $param['connectorTargetId'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
+                $param['ruleName'] = $this->sessionService->getParamRuleName($ruleKey);
+
                 // Récupère la liste des champs source
-                $ruleFieldsSource = $solution_source->get_module_fields($module['source'], 'source');
+                $ruleFieldsSource = $solution_source->get_module_fields($module['source'], 'source', $param);
 
                 if ($ruleFieldsSource) {
                     $this->sessionService->setParamRuleSourceFields($ruleKey, $ruleFieldsSource);
@@ -1561,10 +1574,6 @@ if (file_exists($file)) {
 
                 // -------------------	SOURCE
                 // Liste des relations SOURCE
-                // Add parameters to be able to read rules linked 
-                $param['connectorSourceId'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
-                $param['connectorTargetId'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
-                $param['ruleName'] = $this->sessionService->getParamRuleName($ruleKey);
                 $lst_relation_source = [];
                 $lst_relation_source_alpha = [];
                 $choice_source = [];
