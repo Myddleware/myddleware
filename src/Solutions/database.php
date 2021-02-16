@@ -574,7 +574,7 @@ class databasecore extends solution
 
 	// Function to buid the SELECT query
 	protected function buildQuery($param, $query) {
-		return $query['select'].$query['from'].$query['where'].$query['order'].$query['limit'];
+		return $query['select'].$query['from'].$query['where'].(!empty($query['order']) ? $query['order'] : '').$query['limit'];
 	}
 	
     // Get the fieldId from the other rules to add them into the source relationship list field
