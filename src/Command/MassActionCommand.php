@@ -101,7 +101,7 @@ class MassActionCommand extends Command
 
         /** @var Job $job */
         $job = $data['job'];
-        $output->writeln($this->jobManager->getId());  // Ne pas supprimer car nécessaire pour afficher les log d'un job manuel
+		$output->writeln( '1;'.$this->jobManager->getId() );  // Do not remove, used for manual job and webservices (display logs)
 
         // Récupération des paramètres
         if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus'])) {

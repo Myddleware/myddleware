@@ -393,10 +393,8 @@ class prestashopcore extends solution
         $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
         $records = json_decode(json_encode((array) $simplexml->children()->children()), true);
         foreach ($records[$field] as $record) {
-
              // The structure is different if there is only one language or several languages in Prestashop
 			$attributeId = (!empty($record['@attributes']['id']) ? $record['@attributes']['id'] : $record['id']);
-
             $opt = [
                 'resource' => $fields,
                 'id' => $attributeId,

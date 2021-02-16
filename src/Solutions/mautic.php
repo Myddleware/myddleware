@@ -21,6 +21,9 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ NOTICE: please ensure you have correctly emptied your Mautic var/cache folder before
+ using Myddleware to avoid issues when connecting to Mautic API
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -51,6 +54,9 @@ class mauticcore extends solution
 
     // Enable to read deletion and to delete data
     protected $sendDeletion = true;
+	
+	//If you have Mautic 2 or lower, you must change this parameter to your version number
+	protected $mauticVersion = 3;
 
     public function getFieldsLogin()
     {
@@ -160,7 +166,13 @@ class mauticcore extends solution
                             ];
                             // manage dropdown lists
                             if (!empty($field['properties']['list'])) {
-                                $options = explode('|', $field['properties']['list']);
+								// For Mautic 2
+								if ($this->mauticVersion <= 2){
+									$options = explode('|', $field['properties']['list']);
+								// For Mautic 3 
+								} else {
+									$options = $field['properties']['list'];
+								}
                                 foreach ($options as $option) {
                                     $this->moduleFields[$field['alias']]['option'][$option] = $option;
                                 }

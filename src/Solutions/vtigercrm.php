@@ -81,6 +81,7 @@ class vtigercrmcore extends solution
         'DDT',
     ];
 
+	// Module list that allows to make parent relationships
     protected $allowParentRelationship = ['Quotes'];
 
     /** @var array */

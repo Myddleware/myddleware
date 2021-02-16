@@ -203,9 +203,16 @@ if (file_exists($file)) {
         // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
         protected $standardRuleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
+		// To allow sending a specific record ID to rule simulation
+		protected $simulationQueryField;
+	
         protected function getInstanceBdd()
         {
         }
+		
+		protected function getStandardRuleParam() {
+			return $this->standardRuleParam;
+		}
 
         /* ******************************************************
          * RULE
@@ -471,6 +478,33 @@ if (file_exists($file)) {
                 return $this->redirect($this->generateUrl('regle_list'));
             }
         }
+		
+		public function cancelRuleTransfersAction($id){
+			try {
+				$rule = $this->container->get('myddleware_rule.rule');
+				$rule->setRule($id);
+				$result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+		
+			} catch(\Exception $e){
+				return $e->getMessage();
+			}
+			return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+		
+		}
+
+
+		public function deleteRuleTransfersAction($id){
+			try {
+				   $rule = $this->container->get('myddleware_rule.rule');
+				   $rule->setRule($id);
+				   $result = $rule->actionRule('runMyddlewareJob', 'deleteDocumentJob');
+			} catch(\Exception $e){
+				return $e->getMessage();
+			}
+			 return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+		
+		}
+		
 
         /**
          * MODIFIE LES PARAMETRES D'UNE REGLE.
@@ -1266,16 +1300,43 @@ if (file_exists($file)) {
 				if (empty($ruleParams['ruleParams']['mode'])) {
                     $ruleParams['mode'] = '0';
                 }
+				
+				// Get result from AJAX request in regle.js 
+                $form = $request->request->all();
+                if(isset($form['query'])){
+                    $this->simulationQueryField = $form['query'];
+                }
+     
+                // Avoid sending query on specific record ID if the user didn't actually input something
+                if(empty($this->simulationQueryField)){
+					// Get source data
+					$source = $solution_source->readData([
+						'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+						'fields' => $sourcesfields,
+						'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
+						'limit' => 1,
+						'ruleParams' => $ruleParams,
+						'call_type' => 'simulation'
+						]);		
+                } else {
+						// Get source data
+						$source = $solution_source->readData([
+							'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+							'fields' => $sourcesfields,
+							'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
+							'limit' => 1,
+							'ruleParams' => $ruleParams,
+							'query' => array('id' => $this->simulationQueryField),
+							'call_type' => 'simulation'
+						]);	
 
-                // Get source data
-                $source = $solution_source->readData([
-                    'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-                    'fields' => $sourcesfields,
-					'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
-					'limit' => 1,
-                    'ruleParams' => $ruleParams,
-					'call_type' => 'simulation'
-					]);		
+                        // In case of wrong record ID input from user 
+                        if(!empty($source['error'])){
+                            return $this->render('RegleBundle:Rule:create/onglets/invalidrecord.html.twig');
+                        }   
+                }
+
+                
 				$before = [];
 				$after = [];
                 if (!empty($source['values'])) {
@@ -1346,6 +1407,7 @@ if (file_exists($file)) {
                     'after' => $after, // target
                     'data_source' => (!empty($record) ? true : false),
                     'params' => $this->sessionService->getParamRule($ruleKey),
+					'simulationQueryField' => $this->simulationQueryField,   
                 ]
                 );
             }
@@ -1835,6 +1897,7 @@ if (file_exists($file)) {
                     'parentRelationships' => $allowParentRelationship,
                     'lst_parent_fields' => $lstParentFields,
                     'regleId' => $ruleKey,
+					'simulationQueryField' => $this->simulationQueryField
                 ];
 
                 $result = $this->beforeRender($result);
@@ -2074,7 +2137,7 @@ if (file_exists($file)) {
                         if ('datereference' == $ruleParam->getName()) {
                             $date_reference = $ruleParam->getValue();
                         }
-                        if (in_array($ruleParam->getName(), $this->standardRuleParam)) {
+                        if (in_array($ruleParam->getName(), $this->getStandardRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
                         }
