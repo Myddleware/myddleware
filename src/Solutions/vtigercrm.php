@@ -31,6 +31,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class vtigercrmcore extends solution
 {
+	// Enable to delete data 
+	protected $sendDeletion = true;	
+	
     protected $limitPerCall = 100;
 
     protected $required_fields = [
@@ -656,6 +659,49 @@ class vtigercrmcore extends solution
 
         return $result;
     }
+
+	// Function to delete a record
+	public function deleteData($param) {
+		try {
+			// For every document
+			foreach($param['data'] as $idDoc => $data) {
+				try {
+					// Check control before delete
+					$data = $this->checkDataBeforeDelete($param, $data);
+					if (empty($data['target_id'])) {
+						throw new \Exception('No target id found. Failed to delete the record.');
+					}
+					// Delete the record
+					$resultDelete = $this->vtigerClient->delete($data['target_id']);
+					if (empty($resultDelete['success'])) {
+						throw new \Exception($resultDelete["error"]["message"] ?? "Error");
+					}
+					// Generate return for Myddleware
+					$result[$idDoc] = array(
+											'id' => $data['target_id'],
+											'error' => false
+										);
+				}
+				catch (\Exception $e) {
+					$error = 'Error : '.$e->getMessage();
+					$result[$idDoc] = array(
+							'id' => '-1',
+							'error' => $error
+					);
+				}
+				// Status modification for the transfer
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+			}
+		}
+		catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$result[$idDoc] = array(
+					'id' => '-1',
+					'error' => $error
+			);
+		}
+		return $result;
+	}
 
     // Clean a record by removing all Myddleware fields
     protected function cleanRecord($param, $data)
