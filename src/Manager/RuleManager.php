@@ -1038,8 +1038,6 @@ class rulecore
 				sleep(1);
 				$cpt++;
 			}
-			$this->logger->error( 'allo michel '. $fileTmp);
-
 			
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');
