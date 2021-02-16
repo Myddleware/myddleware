@@ -188,12 +188,6 @@ class Rule
      */
     private $documents;
 
-    /**
-     * @var Log[]
-     *
-     * @ORM\OneToMany(targetEntity="Log", mappedBy="rule")
-     */
-    private $logs;
 
     public function __construct()
     {
@@ -204,7 +198,6 @@ class Rule
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
-        $this->logs = new ArrayCollection();
     }
 
     /**
@@ -816,35 +809,6 @@ class Rule
         return $this;
     }
 
-    /**
-     * @return Collection|Logs[]
-     */
-    public function getLogs(): Collection
-    {
-        return $this->logs;
-    }
-
-    public function addLog(Log $log): self
-    {
-        if (!$this->logs->contains($log)) {
-            $this->logs[] = $log;
-            $log->setRule($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLog(Log $log): self
-    {
-        if ($this->logs->removeElement($log)) {
-            // set the owning side to null (unless already changed)
-            if ($log->getRule() === $this) {
-                $log->setRule(null);
-            }
-        }
-
-        return $this;
-    }
 
     public function __toString(){
         return  $this->id; 

@@ -153,13 +153,12 @@ class TaskController extends AbstractController
             $log->setDateCreated(new \DateTime());
             $log->setType('W');
             $log->setMessage('The task has been manually stopped. ');
-            $log->setRule('');
-            $log->setDocument('');
-            $log->setRef('');
+            // $log->setRule('');
+            // $log->setDocument('');
+            // $log->setRef('');
             $log->setJob($taskStop);
             $em->persist($log);
             $em->flush();
-
             return $this->redirect($this->generateURL('task_view', ['id' => $taskStop->getId()]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('task_list'));

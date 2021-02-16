@@ -167,6 +167,7 @@ class rulecore
 	}
 	
 	public function setRule($idRule) {
+
 		$this->ruleId = $idRule;
 		if (!empty($this->ruleId)) {
 			$rule = "SELECT *, (SELECT value FROM RuleParam WHERE rule_id = :ruleId and name= 'mode') mode FROM Rule WHERE id = :ruleId";
@@ -786,7 +787,8 @@ class rulecore
 		}
 	}
 	
-	public function actionRule($event, $jobName=null) {
+	public function actionRule($event, $rule, $jobName=null) {
+	
 		switch ($event) {
 			case 'ALL':
 				return $this->runMyddlewareJob("ALL");
@@ -795,7 +797,7 @@ class rulecore
 				return $this->runMyddlewareJob("ERROR");
 				break;
 			case 'runMyddlewareJob':
-				return $this->runMyddlewareJob($this->rule['name_slug'], $jobName);
+				return $this->runMyddlewareJob($rule->getId(), $jobName);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
@@ -987,19 +989,17 @@ class rulecore
 		$doc->updateStatus($toStatus);
 	}
 	
-	protected function runMyddlewareJob($ruleSlugName, $event=null) {
+	protected function runMyddlewareJob($ruleId, $event=null) {
 		try{
 			$session = new Session();	
-
 			// create temp file
-			$guid = uniqid();
-			
+			$guid = uniqid();	
 			// // récupération de l'exécutable PHP, par défaut c'est php
 			// $php = $this->parameterBagInterface->get('php');
 			// if (empty($php['executable'])) {
 			// 	$php['executable'] = 'php';
 			// }
-
+			
 
 			 //get ..\bin\php\php.exe file
 			 $phpBinaryFinder = new PhpExecutableFinder();
@@ -1017,25 +1017,29 @@ class rulecore
 			 $phpBinaryFinder = new PhpExecutableFinder();
 			 $phpBinaryPath = $phpBinaryFinder->find();
 			 $php = $phpBinaryPath;
+			
 			//if user clicked on cancel all transfers of a rule
 			if($event === 'cancelDocumentJob'){
-				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:massaction cancel rule '.$this->ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
 			//if user clicked on delete all transfers from a rule
 			} elseif ($event === 'deleteDocumentJob') {
-				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:massaction remove rule '.$this->ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
 			} else {
-				exec($php.' '.__DIR__.'/../../../../bin/console myddleware:synchro '.$this->ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+				exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
 			}
 
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
+				
 				if($cpt >= 29) {
 					throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_running_job')));
 				}
 				sleep(1);
 				$cpt++;
 			}
+			$this->logger->error( 'allo michel '. $fileTmp);
+
 			
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');

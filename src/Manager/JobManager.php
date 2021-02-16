@@ -385,7 +385,7 @@ class jobcore  {
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
 			}
-			exec($php['executable'].' '.__DIR__.'/../../../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
