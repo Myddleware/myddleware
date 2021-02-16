@@ -1104,6 +1104,11 @@ class vtigercrmcore extends solution
                 $result = $this->update($param);
             } else {
                 foreach ($param['data'] as $idDoc => $data) {
+                    $data = $this->checkDataBeforeDelete($param, $data);
+                    if (empty($data['target_id'])) {
+                        throw new \Exception('No target id found. Failed to delete the record.');
+                    }
+
                     $this->deleteElementOnVtiger($idDoc, $data, $result);
                     $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
                 }
