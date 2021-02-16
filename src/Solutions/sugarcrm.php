@@ -202,7 +202,7 @@ class sugarcrmcore extends solution
      *
      * @return mixed
      */
-    public function read($param)
+    public function readData($param)
     {
         try {
             $result = [];

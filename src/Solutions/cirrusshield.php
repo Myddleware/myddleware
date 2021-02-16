@@ -156,7 +156,7 @@ class cirrusshieldcore extends solution
     }
     // get_module_fields($module)
 
-    public function read($param)
+    public function readData($param)
     {
         try {
             $result['date_ref'] = $param['date_ref'];

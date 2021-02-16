@@ -311,22 +311,31 @@ class solutioncore
 				
 				// Add id and date_modified values into the read call result
 				foreach ($readResult as $record) {
-					// Check that the required fields 
-					if (empty($record[$idField])) {
-						throw new \Exception('Id field '.$idField.' is missing in this record '. print_r($record, true).'.');
+					// If the id column hasn't been defined in the read method we calculate it.
+					if (empty($record['id'])) {
+						if (empty($record[$idField])) {
+							throw new \Exception('Id field '.$idField.' is missing in this record '. print_r($record, true).'.');
+						}
+						$record['id'] = $record[$idField];
 					}
-					if (empty($record[$dateRefField])) {
-						throw new \Exception('Reference field '.$dateRefField.' is missing in this record '. print_r($record, true).'.');
+					// If the date_modified column hasn't been defined in the read method we calculate it.
+					if (empty($record['date_modified'])) {
+						if (empty($record[$dateRefField])) {
+							throw new \Exception('Reference field '.$dateRefField.' is missing in this record '. print_r($record, true).'.');
+						}
+						// Convert date ref into Myddleware format
+						$record['date_modified'] = $this->getModifiedDate($param, $record, $dateRefField);
 					}
-					$record['id'] = $record[$idField];
-					$record['date_modified'] = $record[$dateRefField];
 					$result['values'][$record['id']] = $record;
 				}
 				
 				// Return the number of result
 				$result['count'] = count($result['values']);
-				// Calculate tthe reference date
+				// Calculate the reference call
 				$result['date_ref'] = $this->getReferenceCall($param,$result);
+				if (empty($result['date_ref'])) {
+					throw new \Exception('Failed to get the reference call.');
+				}
 			} else {
 				// Init values if no result
 				$result['count'] = 0;
@@ -337,6 +346,7 @@ class solutioncore
         }		
 		return $result;
     }
+
 	
 	// Get the new records from the solution
     // Param's content :
@@ -442,7 +452,7 @@ class solutioncore
     public function setMessageCreateRule($module)
     {
     }
-
+	
     public function setApi($api)
     {
         $this->api = $api;
@@ -587,34 +597,26 @@ class solutioncore
         return $fieldArray;
     }
 
-    // Function de conversion de date format solution à une date format Myddleware
-    protected function dateToMyddleware($date)
-    {
-    }
-
-    // dateToMyddleware ($date)
+	// Calculate the date modified of the current record
+	protected function getModifiedDate($param, $record, $dateRefField) {
+		return $this->dateTimeToMyddleware($record[$dateRefField]);
+	}
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToMyddleware($dateTime)
     {
+		return $dateTime;
     }
-
     // dateTimeToMyddleware($dateTime)
 
-    // Function de conversion de date format Myddleware à une date format solution
-    protected function dateFromMyddleware($date)
-    {
-    }
-
-    // dateToMyddleware ($date)
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
     {
+		return $dateTime;
     }
-
     // dateTimeToMyddleware($dateTime)
-
+	
     protected function getInfoDocument($idDocument)
     {
         $connection = $this->getConn();
@@ -782,6 +784,7 @@ class solutioncore
 	
 	// Method de find the date ref after a read call 
 	protected function getReferenceCall($param, $result) {
+		// Result is sorted, the last one is the oldest one
 		return end($result['values'])['date_modified'];
 	}
 }

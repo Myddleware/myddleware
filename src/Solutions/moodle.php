@@ -163,7 +163,7 @@ class moodlecore extends solution
 
 
     // Read data in Moodle
-    public function read($param)
+    public function readData($param)
     {
         try {
             $result['count'] = 0;

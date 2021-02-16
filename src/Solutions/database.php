@@ -204,7 +204,7 @@ class databasecore extends solution
     // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         $result = [];
         // Decode field name (converted in method get_module_fields)
@@ -338,8 +338,6 @@ class databasecore extends solution
 
         return $result;
     }
-
-    // read($param)
 
     // Permet de créer des données
     public function create($param)

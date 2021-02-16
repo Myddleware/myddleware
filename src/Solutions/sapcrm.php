@@ -247,7 +247,7 @@ class sapcrmcore extends saproot
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         // Initialisation de la limit
         if (empty($param['limit'])) {
@@ -284,8 +284,6 @@ class sapcrmcore extends saproot
             return $this->readMultiStructure($param, 'ZmydSearchBp', $parameters, false);
         }
     }
-
-    // read($param)
 
     // Permet de créer des données
     public function create($param)

@@ -582,7 +582,6 @@ class prestashopcore extends solution
 		}		
         return $result;
     }
-    // read($param)
 
 	// Method de find the date ref after a read call 
 	protected function getReferenceCall($param, $result) {

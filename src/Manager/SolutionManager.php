@@ -134,7 +134,7 @@ class SolutionManager
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new Exception('Module '.$name.' not found. Please make sure that you have access to this module. ');
+            throw new Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware. ');
         }
 
         return $this->classes[$name];

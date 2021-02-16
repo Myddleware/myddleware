@@ -169,7 +169,7 @@ class facebookcore extends solution
 
 
     // Permet de lire les données
-    public function read($param)
+    public function readData($param)
     {
         try {
             $result = [];

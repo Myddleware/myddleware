@@ -252,7 +252,7 @@ class erpnextcore extends solution
      *
      * @return mixed
      */
-    public function read($param)
+    public function readData($param)
     {
         try {
             // Add required fields

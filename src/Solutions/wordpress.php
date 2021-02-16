@@ -108,7 +108,7 @@ class wordpresscore extends solution {
         }
     }
 
-    public function read($param){
+    public function readData($param){
         try {
           
             $result = [];

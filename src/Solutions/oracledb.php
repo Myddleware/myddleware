@@ -57,7 +57,7 @@ class oracledbcore extends database
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         $result = [];
         try {
@@ -163,8 +163,6 @@ class oracledbcore extends database
 
         return $result;
     }
-
-    // read($param)
 
     // Get the limit operator of the select query in the read last function
     protected function get_query_select_limit_offset($param, $method)

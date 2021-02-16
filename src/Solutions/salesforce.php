@@ -328,7 +328,7 @@ class salesforcecore extends solution {
 	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {
+	public function readData($param) {
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -460,7 +460,7 @@ class salesforcecore extends solution {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return $result;
 		}
-	} // read($param)
+	} 
 	
 	// Permet de créer des données
 	public function create($param) {
@@ -825,10 +825,6 @@ class salesforcecore extends solution {
 		ob_end_flush();
 		return $query_request_data;	
     } // call($method, $parameters)
-    
-	// Function de conversion de date format solution à une date format Myddleware
-	protected function dateToMyddleware($date) {
-	}// dateToMyddleware ($date)
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
 	protected function dateTimeToMyddleware($dateTime) {
@@ -838,10 +834,6 @@ class salesforcecore extends solution {
 		$dateTime = $tab[0];
 		return $dateTime;
 	}// dateTimeToMyddleware($dateTime)	
-	
-	// Function de conversion de date format Myddleware à une date format solution
-	protected function dateFromMyddleware($date) {
-	}// dateToMyddleware ($date)
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
 	protected function dateTimeFromMyddleware($dateTime) {

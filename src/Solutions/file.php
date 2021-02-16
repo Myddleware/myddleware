@@ -278,7 +278,7 @@ class filecore extends solution
     // 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         $count = 0;
         $offset = 0;
@@ -443,8 +443,6 @@ class filecore extends solution
 
         return $result;
     }
-
-    // read($param)
 
     // Transform the result
     protected function generateReadResult($param, $count, $values, $new_date_ref)

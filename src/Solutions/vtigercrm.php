@@ -308,7 +308,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function read($param)
+    public function readData($param)
     {
         try {
             if (empty($this->vtigerClient)) {

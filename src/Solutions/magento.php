@@ -278,7 +278,7 @@ class magentocore extends solution
 
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         $result = [];
         try {
@@ -391,9 +391,6 @@ class magentocore extends solution
 
         return $result;
     }
-
-    // read($param)
-
     // Permet de créer un enregistrement
     public function create($param)
     {

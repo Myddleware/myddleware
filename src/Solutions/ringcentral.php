@@ -153,7 +153,7 @@ class ringcentralcore extends solution
     // get_module_fields($module)
 	
 
-    public function read($param)
+    public function readData($param)
     {
         try {
             // Init the result date ref even if the date_ref isn't updated here. Indeed, the date ref is requiered in output of this function.

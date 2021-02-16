@@ -126,7 +126,7 @@ class woocommercecore extends solution {
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
-    public function read($param) { 
+    public function readData($param) { 
         try {
             $module = $param['module'];
             $result = [];

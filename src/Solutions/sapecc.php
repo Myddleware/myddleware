@@ -133,7 +133,7 @@ class sapecccore extends sap
 
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function readData($param)
     {
         // Initialisation de la limit
         if (empty($param['limit'])) {
@@ -172,8 +172,6 @@ class sapecccore extends sap
             return $this->readMultiStructure($param, $parameters,false);
         } */
     }
-
-    // read($param)
 
     // Permet de lire les document FI
     // C'est une règle particulière car elle peut générer de document fils sur d'autres règles

@@ -312,7 +312,7 @@ class eventbritecore extends solution
     //		count : Le nombre d'enregistrement trouvé
     //		date_ref : la nouvelle date de référence
     //   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18)
-    public function read($param)
+    public function readData($param)
     {
         if (!isset($param['fields'])) {
             $param['fields'] = [];
