@@ -77,12 +77,3 @@ uat.pem
 hosts
 NOTES.md
 *.ovpn
-
-# OCI:START
-!/src/Myddleware/RegleBundle/Custom/Solutions/mautic.php
-!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
-!/src/Myddleware/RegleBundle/Custom/Solutions/mysql.php
-!/src/Myddleware/RegleBundle/Custom/Solutions/oracledb.php
-!/src/Myddleware/RegleBundle/Custom/Solutions/vtigercrm.php
-!/src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
-# OCI:END
