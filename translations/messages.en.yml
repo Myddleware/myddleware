@@ -793,3 +793,24 @@ password_reset:
     old_password: Current password
     back_to_account: Go back to My Account
     submit: Submit
+
+install:
+    title: Myddleware Installation
+    database_setup: Setting up your database
+    test_button: Connect to database
+    requirements_checker: Myddleware Requirements Checker
+    system_status_ready: Your system is ready to run Myddleware 
+    system_status_not_ready: Your system is not ready to run Myddleware yet
+    user_setup: Create your Myddleware user login details
+    next_step: You can now go to the next page to set up your Myddleware user 
+    role_admin: Please note that these credentials will have administrator access rights to Myddleware
+    check_button: Check now 
+    next: Next
+    previous: Previous
+    requirements_info: Let's check whether your server meets the requirements to run a Myddleware project.
+    php_ini_error: WARNING ! No configuration file (php.ini) used by PHP!
+    php_ini_path_sentence:  PHP is using the following php.ini file
+    php_version_not_found: WARNING ! Could not find your PHP version
+    errors_to_do_message: You need to do the following before continuing
+    recommendations_to_do_message: Optional recommendations to improve your setup
+    note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory 
