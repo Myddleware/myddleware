@@ -42,7 +42,10 @@ update: init build up
 	@echo "Update done."
 
 require-vtiger-client:
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.21 -vvvv --ignore-platform-reqs
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.23 -vvvv --ignore-platform-reqs
+
+require-woocommerce-client:
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs
 
 setup-files:
 	@docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
