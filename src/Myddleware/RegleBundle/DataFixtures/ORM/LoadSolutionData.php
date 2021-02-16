@@ -5,10 +5,10 @@
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com	
- 
+ * @link http://www.myddleware.com
+
  This file is part of Myddleware.
- 
+
  Myddleware is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -24,18 +24,17 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\DataFixtures\ORM;
- 
+
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Myddleware\RegleBundle\Entity\Solution;
- 
+
 class LoadSolutionData implements FixtureInterface
 {
-    private $manager; 
+    private $manager;
 	protected $solutionData = array(
 									array('name' => 'sugarcrm',			'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'vtigercrm',		'active' => 1,'source' => 1,'target' => 1),
-									array('name' => 'opencrmitalia',	'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'salesforce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'prestashop',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'dolist',			'active' => 1,'source' => 1,'target' => 1),
@@ -65,10 +64,10 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'iadvize',			'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'woocommerce',		'active' => 1,'source' => 1,'target' => 1)
 							);
- 
+
     public function load(ObjectManager $manager){
-        $this->manager = $manager; 
-        $this->generateEntities(); 
+        $this->manager = $manager;
+        $this->generateEntities();
         $this->manager->flush();
     }
 
@@ -81,15 +80,15 @@ class LoadSolutionData implements FixtureInterface
 			if (
 					empty($sol)
 				 || empty($sol->getId()	)
-			) {	
+			) {
 				$sol = new Solution();
 			}
 			$sol->setName($solution['name']);
 			$sol->setActive($solution['active']);
 			$sol->setSource($solution['source']);
 			$sol->setTarget($solution['target']);
-			$this->manager->persist($sol); 
+			$this->manager->persist($sol);
         }
     }
- 
+
 }
