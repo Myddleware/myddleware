@@ -799,3 +799,24 @@ password_reset:
     old_password: Mot de passe actuel
     back_to_account: Retour à la page Mon Compte
     submit: Enregistrer
+
+install:
+    title: Installation de Myddleware
+    database_setup : Configuration de la base de données
+    test_button: Se connecter à la base de données
+    user_setup: Création de vos identifiants utilisateur Myddleware
+    role_admin: Ces identifiants Myddleware auront les droits administrateur
+    system_status_ready: Votre système est prêt à utiliser Myddleware
+    system_status_not_ready: Votre système n'est pas encore prêt à faire tourner Myddleware
+    requirements_checker: Vérification des paramètres nécessaires pour installer Myddleware
+    requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
+    check_button: Vérifier
+    next: Suivant
+    previous: Précédent
+    next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
+    php_ini_error: ATTENTION ! Le fichier de configuration PHP (php.ini) n'a pas été trouvé!
+    php_ini_path_sentence:  PHP utilise le fichier php.ini suivant 
+    php_version_not_found: ATTENTION ! Impossible de trouver votre version de PHP
+    errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
+    recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
+    note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware 
