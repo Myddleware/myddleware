@@ -2053,7 +2053,7 @@ if (file_exists($file)) {
                 if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
                     $oneRule = $this->entityManager->getRepository(Rule::class)->find($this->sessionService->getParamRuleLastId($ruleKey));
                     $oneRule->setDateModified(new \DateTime());
-                    $oneRule->setModifiedBy($this->getUser()->getId());
+                    $oneRule->setModifiedBy($this->getUser());
                 } else {
                     $oneRule = new Rule();
                     $oneRule->setConnectorSource($connector_source);
