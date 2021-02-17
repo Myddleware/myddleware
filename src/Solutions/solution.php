@@ -93,15 +93,15 @@ class solutioncore
     /**
      * @var Connection
      */
-    private $connection;
+    protected $connection;
     /**
      * @var ParameterBagInterface
      */
-    private $parameterBagInterface;
+    protected $parameterBagInterface;
 	/**
 	 * @var EntityManagerInterface
 	 */
-	private $entityManager;
+	protected $entityManager;
 
     public function __construct(
         LoggerInterface $logger,

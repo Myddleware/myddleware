@@ -269,9 +269,10 @@ class databasecore extends solution
             $query['from'] = 'FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
             // if a specific query is requested we don't use date_ref
+			$query['where'] = '';
             if (!empty($param['query'])) {
                 $nbFilter = count($param['query']);
-                $query['where'] = ' WHERE ';
+                $query['where'] .= ' WHERE ';
                 foreach ($param['query'] as $queryKey => $queryValue) {
                     // Manage query with id, to be replaced by the ref Id fieldname
                     if ('id' == $queryKey) {
@@ -294,7 +295,7 @@ class databasecore extends solution
                         $query['where'] .= ' AND ';
                     }
                 }
-            } else {
+            } elseif (!empty($param['ruleParams']['fieldDateRef'])) { // fieldDateRef can be empty for a simulation when the rule is created
                 $query['where'] = ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose." > '".$param['date_ref']."'";
             }
 			
@@ -325,6 +326,7 @@ class databasecore extends solution
                 $result['count'] = count($fetchAll);
                 foreach ($fetchAll as $elem) {
                     $row = [];
+					$row['id'] = ''; // init in case of simulation (when a rule is created)
                     // Generate an id in case myddleware_generated is selected in the rule
                     if (
 							!empty($param['ruleParams']['fieldId'])
@@ -578,11 +580,11 @@ class databasecore extends solution
 	}
 	
     // Get the fieldId from the other rules to add them into the source relationship list field
-    public function get_module_fields_relate($module, $param)
+    protected function get_module_fields_relate($module, $param)
     {
         if (!empty($param)) {
             // Get the rule list with the same connectors (both directions) to get the relate ones
-            $ruleListRelation = $this->container->get('doctrine')->getEntityManager()->getRepository(Rule::class)->createQueryBuilder('r')
+            $ruleListRelation = $this->entityManager->getRepository(Rule::class)->createQueryBuilder('r')
                             ->select('r.id')
                             ->where('(
 												r.connectorSource= ?1 
