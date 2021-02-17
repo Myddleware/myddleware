@@ -298,7 +298,7 @@ class jobcore  {
 					$param['ruleId'] = $documentError['rule_id'];
 					$param['jobId'] = $this->id;					
 					$param['api'] = $this->api;
-					$rule = new rule($this->logger, $this->container, $this->connection, $param);
+					$rule = new Rule($this->logger, $this->container, $this->connection, $param);
 					$errorActionDocument = $rule->actionDocument($documentError['id'],'rerun');
 					if (!empty($errorActionDocument)) {
 						$this->message .= print_r($errorActionDocument,true);
