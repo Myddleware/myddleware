@@ -479,6 +479,14 @@ if (file_exists($file)) {
             }
         }
 		
+         /**
+         * CANCEL ALL TRANSFERS FOR ONE RULE
+         *
+         * @param $id
+         *
+         *
+         * @Route("/view/cancel/documents/{id}", name="regle_cancel_all_transfers")
+         */
 		public function cancelRuleTransfersAction($id){
 			try {
 				$rule = $this->container->get('myddleware_rule.rule');
@@ -492,7 +500,13 @@ if (file_exists($file)) {
 		
 		}
 
-
+        /**
+         * DELETE ALL TRANSFERS FOR ONE RULE
+         *
+         * @param $id
+         *
+         * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers")
+         */
 		public function deleteRuleTransfersAction($id){
 			try {
 				   $rule = $this->container->get('myddleware_rule.rule');
