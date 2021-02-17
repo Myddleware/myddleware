@@ -64,15 +64,16 @@
 			{{'create_rule.step3.addfield.custom'|trans}}
 			</button> 
 			<div id="formatfield" style="display:none;">
-				<p><input type="text" />
+				<p>
+					<input type="text" />
 					<select>
 						{% for name, type_field in fieldMappingAddListType %}
 							<option value="{{name}}">{{ type_field }}</option> 
 						{% endfor %}
 					</select>
-				<button id="saveBtnField" type="button" class="btn btn-default" aria-label="Left Align">
-				  <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-				</button>				
+					<button id="saveBtnField" type="button" class="btn btn-default" aria-label="Left Align">
+					<span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+					</button>				
 				</p>
 			</div>
 		</div>

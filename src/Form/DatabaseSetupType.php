@@ -8,19 +8,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class DatabaseSetupType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('driver')
             ->add('host')
             ->add('port', IntegerType::class)
             ->add('name')
             ->add('user')
-            ->add('password')
-            ->add('OK', SubmitType::class,[
+            ->add('password', PasswordType::class, [
+                'required' => false          //this field needs to be nullable as localhost is often root with no password
+            ])
+            ->add('Save', SubmitType::class,[
                 'attr' => [
                     'class' => 'btn btn-success btn-block',
                 ]

@@ -1346,7 +1346,7 @@ if (file_exists($file)) {
 
                         // In case of wrong record ID input from user 
                         if(!empty($source['error'])){
-                            return $this->render('RegleBundle:Rule:create/onglets/invalidrecord.html.twig');
+                            return $this->render('Rule/create/onglets/invalidrecord.html.twig');
                         }   
                 }
 
