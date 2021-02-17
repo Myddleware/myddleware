@@ -25,7 +25,7 @@ class DatabaseSetupController extends AbstractController
           $database->setName($this->getParameter('database_name'));
           $database->setUser($this->getParameter('database_user'));
           $database->setSecret($this->getParameter('secret'));
-var_dump($database);
+
         $form = $this->createForm(DatabaseSetupType::class, $database);
         $form->handleRequest($request);
    

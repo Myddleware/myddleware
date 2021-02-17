@@ -231,7 +231,7 @@ $( document ).ready(function() {
 		});
 		loading.attr('class', 'myd_div_loading');
 		
-		var p = $('<p>Please wait. This can take few minutes.</p>');
+		var p = $('<p>Please wait. This can take a few minutes.</p>');
 		p.css({
 			"position": "absolute",
 			"top": $(window).height()/2 - 100,
@@ -1033,6 +1033,52 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			});					
 		} 
 	});
+
+	// ESTELLE TODO ; check whether this is still up to date (we might change to only one button)
+// For rule simulation, users can send a specific record ID to test the data with, instead of the default read_last
+$( "#validation_manual_simulation" ).on( "click", function(e){
+	// Prevent running simulation if the input is empty / invalid
+		if(select_record_id.value === false  || select_record_id.value === null || select_record_id.value === undefined || select_record_id.value === '' ){		
+			$('#manual-simulation-container')
+			.after('<div><span style="color : red;">Please insert a valid record ID if you want to run a manual simulation.</span></div>');
+			e.preventDefault();
+		}else{
+
+		if( require() ){	
+
+			$.ajax({
+				type: "POST",
+				url: path_simulation,
+				data:{
+					champs : recup_champs(),
+					formules : recup_formule(),
+					params : recup_params(),
+					relations : recup_relation(),
+					query: select_record_id.value
+				},
+				beforeSend:	function() {
+					$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );	
+
+				},	    					
+				success: function(data){
+					if(data == 0) {
+						$('#simulation_tab').html('error');	
+					}
+					else {
+						$('#simulation_tab').html(data);
+					}
+					}
+			});	
+		}
+
+	}
+});
+
+
+
+
+
+
 // ---- SIMULATION DE DONNEES ------------------------------------------------------------
 
 // ---- AJOUT CHAMP CIBLE  ---------------------------------------------------------------
@@ -1049,11 +1095,11 @@ function existField(name) {
 	return ((result == 0) ? true : false );
 }
 
-$( '#addField' ).click(function(){	
+$( '#addField' ).on('click',function(){	
 	 $( "#formatfield" ).toggle( "fadeIn", function() {});
 });
 
-$('#saveBtnField').click(function(){
+$('#saveBtnField').on('click',function(){
 	newfield = $('#formatfield input').val();
 	newtype = $('select','#formatfield').val();
 	fields =  htmlentities(removeSpace(newfield) + '_' + newtype);
@@ -1113,7 +1159,7 @@ function hideFields() {
 	}	
 }
 
-	$( '#hidefields' ).keyup(function() {	
+	$( '#hidefields' ).on('keyup', function() {	
 		hideFields();
 	});	
 
@@ -1290,7 +1336,7 @@ function verifFields(field_id,show) {
 	function recup_fields_relate() {
 		var relate_fields = [];	
 		$( '#fields_duplicate_target li' ).each(function(){
-			if( $(this).attr('data-active') == 'true' ) {
+			if( $(this).attr('data-active') === 'true' ) {
 				relate_fields.push( $.trim( $(this).text() ) );
 			}
 		});
@@ -1301,7 +1347,7 @@ function verifFields(field_id,show) {
 	function duplicate_fields_error() {
 		error=0;
 		$( 'li','#fields_duplicate_target' ).each(function(){
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				error++;
 			}
 		});
@@ -1320,7 +1366,7 @@ function verifFields(field_id,show) {
 		
 		var r = 0;
 		$( '#params').find( ".require" ).each(function(){
-			if($( this ).val() == "") {
+			if($( this ).val() === "") {
 				r++;	
 			}
 		});
@@ -1356,12 +1402,12 @@ function verifFields(field_id,show) {
 	}
 
 	// Affiche les champs obligatoire pour éviter les doublons
-	$( '#fields_duplicate_target' ).on( "click", 'li', function(){	
+	$( '#fields_duplicate_target' ).on( 'click', 'li', function(){	
 		
 		// si le champ est sélectionné
 		if(fields_exist($(this).text())) {
 			
-			if( $(this).attr('data-active') == 'false' ) {
+			if( $(this).attr('data-active') === 'false' ) {
 				$(this).attr('data-active','true');
 				$(this).addClass('active');
 			}
@@ -1371,7 +1417,7 @@ function verifFields(field_id,show) {
 			}					
 		}
 		else {
-			if( $(this).attr('class') == 'no_active' ) {
+			if( $(this).attr('class') === 'no_active' ) {
 				$(this).removeClass('no_active');
 			}
 			else {
@@ -1570,7 +1616,7 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		showBtnFlux();
 	});
 	
-	$('#cancelflux').click(function(){
+	$('#cancelflux').on('click',function(){
 		if (confirm(confirm_cancel)) { // Clic sur OK
 			$.ajax({
 				type: "POST",
@@ -1588,7 +1634,7 @@ if ( typeof fields !== "undefined" && typeof params !== "undefined" && typeof re
 		}		
 	});
 	
-	$('#reloadflux').click(function(){
+	$('#reloadflux').on('click', function(){
 		if (confirm(confirm_reload)) { // Clic sur OK
 			$.ajax({
 				type: "POST",
