@@ -64,42 +64,7 @@ class JobRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    /**
-     * @return Job[]
-     */
-    public function getLogStatistique()
-    {
-        $sub = $this->_em->createQueryBuilder();
-        $sub->select('MAX(begin)');
-        $sub->from('App:Job', 'job');
-        $sub->andWhere('job.param = :param')
-            ->setParameter('param', 'notification')
-            ->andWhere('job.end >= job.begin');
-
-        $qb = $this->createQueryBuilder('j');
-        $qb
-            ->select('COUNT(DISTINCT log.doc_id) as cpt')
-            ->addSelect('document.global_status')
-            ->join('j.log', 'log')
-            ->join('log.document', 'document')
-            ->andWhere('document.deleted = 0')
-            ->andWhere('j.begin BETWEEN ('.$sub->getDQL().') AND :now')
-            ->andWhere(
-                $qb->expr()->orX(
-                    'document.globalStatus <> :error',
-                    $qb->expr()->andX(
-                        'document.globalStatus = :error',
-                        'document.dateModified BETWEEN ('.$sub->getDQL().' AND :now)'
-                    )
-                )
-            )
-            ->setParameter('error', 'Error')
-            ->setParameter('now', new DateTime())
-            ->groupBy('document.globalStatus');
-
-        return $qb->getQuery()->getResult();
-    }
-
+   
     /**
      * @return Job[]
      */

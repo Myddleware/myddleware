@@ -121,8 +121,6 @@ if (file_exists($file)) {
             $this->tools = $tools;
             $this->params = $params;
             $this->twig = $twig;
-            // TODO: we SHOULD NOT be sending a request within a constructor, this needs to be initialise in a different way
-            // $this->setEmailAddresses();
             $this->fromEmail = $this->params->get('email_from') ?? 'no-reply@myddleware.com';
         }
 
@@ -130,6 +128,8 @@ if (file_exists($file)) {
         public function sendAlert()
         {
             try {
+				// Get the email adresses of all ADMIN
+				$this->setEmailAddresses();
                 $notificationParameter = $this->params->get('notification');
                 if (empty($notificationParameter['alert_time_limit'])) {
                     throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
@@ -157,7 +157,7 @@ if (file_exists($file)) {
                     // Send the message to all admins
                     foreach ($this->emailAddresses as $emailAddress) {
                         $message->setTo($emailAddress);
-                        $send = $this->mailer->send($message);
+                        $send = $this->mailer->send($message);						
                         if (!$send) {
                             $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
                             throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
@@ -177,13 +177,37 @@ if (file_exists($file)) {
         public function sendNotification()
         {
             try {
+				// Get the email adresses of all ADMIN
+				$this->setEmailAddresses();
                 // Check that we have at least one email address
                 if (empty($this->emailAddresses)) {
-                    throw new Exception('No email address found to send notification. You should have at leas one admin user with an email address.');
+                    throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
                 }
-
                 // Récupération du nombre de données transférées depuis la dernière notification. On en compte qu'une fois les erreurs
-                $cptLogs = $this->jobRepository->getLogStatistique();
+				$sqlParams = "	SELECT
+									count(distinct Log.doc_id) cpt,
+									Document.global_status
+								FROM Job
+									INNER JOIN Log
+										ON Log.job_id = Job.id
+									INNER JOIN Rule
+										ON Log.rule_id = Rule.id
+									INNER JOIN Document
+										 ON Document.id = Log.doc_id
+										AND Document.deleted = 0
+								WHERE
+										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+									AND (
+											Document.global_status != 'Error'
+										OR (
+												Document.global_status = 'Error'
+											AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+										)
+									)
+								GROUP BY Document.global_status";
+				$stmt = $this->connection->prepare($sqlParams);
+				$stmt->execute();	   				
+				$cptLogs = $stmt->fetchAll();
                 $job_open = 0;
                 $job_close = 0;
                 $job_error = 0;
@@ -211,9 +235,9 @@ if (file_exists($file)) {
                 // Récupération des règles actives
                 $activeRules = $this->ruleRepository->findBy(['active' => true, 'deleted' => false]);
                 if (!empty($activeRules)) {
-                    $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);
+                    $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);					
                     foreach ($activeRules as $activeRule) {
-                        $textMail .= ' - '.$activeRule['name'].chr(10);
+                        $textMail .= ' - '.$activeRule->getName().chr(10);
                     }
                 } else {
                     $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'no_active_rule']).chr(10);
@@ -239,14 +263,15 @@ if (file_exists($file)) {
                 // Create text
                 $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
 
-                $message = Swift_Message::newInstance()
-                    ->setSubject($this->tools->getTranslation(['email_notification', 'subject']))
+                $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
+				$message
                     ->setFrom((!empty($this->params->get('email_from')) ? $this->params->get('email_from') : 'no-reply@myddleware.com'))
                     ->setBody($textMail);
                 // Send the message to all admins
                 foreach ($this->emailAddresses as $emailAddress) {
                     $message->setTo($emailAddress);
-                    $send = $this->mailer->send($message);
+                    $send = $this->mailer->send($message);		
+echo $emailAddress.' : '.$send.' : '.$this->tools->getTranslation(['email_notification', 'subject']).chr(10);			
                     if (!$send) {
                         $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
                         throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
@@ -255,7 +280,7 @@ if (file_exists($file)) {
 
                 return true;
             } catch (Exception $e) {
-                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';				
                 $this->logger->error($error);
                 throw new Exception($error);
             }
@@ -264,7 +289,7 @@ if (file_exists($file)) {
         // Add every admin email in the notification list
         private function setEmailAddresses()
         {
-            $users = $this->userRepository->findEmailsToNotification();
+            $users = $this->userRepository->findEmailsToNotification();			
             foreach ($users as $user) {
                 $this->emailAddresses[] = $user['email'];
             }

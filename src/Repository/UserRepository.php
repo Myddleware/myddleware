@@ -56,9 +56,9 @@ class UserRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('u')
             ->select('u.email')
-            ->where('u.roles NOT LIKE :role')
+            ->where('u.roles LIKE :role')
             ->andWhere('u.enabled = 1')
-            ->setParameter('role', '%ROLE_ADMIN%')
+            ->setParameter('role', '%ADMIN%')
             ->getQuery()
             ->getResult();
     }
