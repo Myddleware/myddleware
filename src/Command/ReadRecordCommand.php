@@ -86,10 +86,7 @@ class ReadRecordCommand extends Command
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');
         $filterValues = $input->getArgument('filterValues');
-        $filterValuesArray = explode(',', $filterValues);
-        if (empty($filterValuesArray)) {
-            throw new Exception('No filter values found. Please add values to run this action.');
-        }
+
         $rule = $this->ruleRepository->findOneBy(['id' => $ruleId, 'deleted' => false]);
         if (null === $rule) {
             throw new Exception('No rule found. Please add values to run this action.');
@@ -107,8 +104,8 @@ class ReadRecordCommand extends Command
         /** @var Job $job */
         $job = $data['job'];
 
-        $this->jobManager->readRecord($rule, $filterQuery, $filterValuesArray);
-        $output->writeln($job->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
+        $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
+        $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
 
         // Close job if it has been created
         $responseCloseJob = $this->jobManager->closeJob($job);

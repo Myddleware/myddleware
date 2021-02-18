@@ -295,11 +295,10 @@ class jobcore  {
 			if(!empty($documentsError)) {
 				// include_once 'rule.php';		
 				foreach ($documentsError as $documentError) {
-					$param['ruleId'] = $documentError['rule_id'];
-					$param['jobId'] = $this->id;					
-					$param['api'] = $this->api;
-					$rule = new Rule($this->logger, $this->container, $this->connection, $param);
-					$errorActionDocument = $rule->actionDocument($documentError['id'],'rerun');
+					$this->ruleManager->setRule($documentError['rule_id']);
+					$this->ruleManager->setJobId($this->id);
+					$this->ruleManager->setApi($this->api);	
+					$errorActionDocument = $this->ruleManager->actionDocument($documentError['id'],'rerun');
 					if (!empty($errorActionDocument)) {
 						$this->message .= print_r($errorActionDocument,true);
 					}
@@ -391,7 +390,7 @@ class jobcore  {
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
 			}
-			exec($php['executable'].' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->container->get( 'kernel' )->getEnvironment().'  > '.$fileTmp.' &', $output);
+			exec($php['executable'].' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -419,7 +418,7 @@ class jobcore  {
 			}
 			// Renvoie du message en session
 			$session = new Session();
-			$session->set( 'info', array('<a href="'.$this->container->get('router')->generate('task_view', array('id'=>$idJob)).'" target="_blank">'.$this->container->get('translator')->trans('session.task.msglink').'</a>. '.$this->container->get('translator')->trans('session.task.msginfo')));
+			$session->set( 'info', array('<a href="'.$this->router->generate('task_view', array('id'=>$idJob)).'" target="_blank">'.$this->tools->getTranslation(array('session', 'task', 'msglink')).'</a>. '.$this->tools->getTranslation(array('session', 'task', 'msginfo'))));
 			return $idJob;
 		} catch (\Exception $e) {
 			$session = new Session();
@@ -528,23 +527,23 @@ class jobcore  {
 			if (empty($rule['id'])) {
 				throw new \Exception ('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
 			}
-			// Instantiate the rule
-			$ruleParam['ruleId'] = $ruleId;
-			$ruleParam['jobId']  = $this->id;		
-			$ruleParam['api'] = $this->api;
-			$rule = new rule($this->logger, $this->container, $this->connection, $ruleParam);			
+
+			// We instance the rule
+			$this->ruleManager->setRule($ruleId);
+			$this->ruleManager->setJobId($this->id);
+			$this->ruleManager->setApi($this->api);			
 			
 			// Try to read data for each values
 			foreach ($filterValuesArray as $value) {
 				// Generate documents 
-				$documents = $rule->generateDocuments($value, true, '', $filterQuery);
+				$documents = $this->ruleManager->generateDocuments($value, true, '', $filterQuery);
 				if (!empty($documents->error)) {
 					throw new \Exception($documents->error);
-				}
+				}				
 				// Run documents
 				if (!empty($documents)) {
 					foreach ($documents as $doc) {
-						$errors = $rule->actionDocument($doc->id,'rerun');
+						$errors = $this->ruleManager->actionDocument($doc->id,'rerun');
 						// Check errors
 						if (!empty($errors)) {									
 							$this->message .=  'Document '.$doc->id.' in error (rule '.$ruleId.')  : '.$errors[0].'. ';

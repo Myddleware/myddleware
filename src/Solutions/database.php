@@ -205,7 +205,7 @@ class databasecore extends solution
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
-    {		
+    {	
         $result = [];
         // Decode field name (converted in method get_module_fields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
@@ -377,7 +377,6 @@ class databasecore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-
         return $result;
     }
 
