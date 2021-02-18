@@ -121,7 +121,8 @@ if (file_exists($file)) {
             $this->tools = $tools;
             $this->params = $params;
             $this->twig = $twig;
-            $this->setEmailAddresses();
+            // TODO: we SHOULD NOT be sending a request within a constructor, this needs to be initialise in a different way
+            // $this->setEmailAddresses();
             $this->fromEmail = $this->params->get('email_from') ?? 'no-reply@myddleware.com';
         }
 

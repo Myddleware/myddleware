@@ -5,11 +5,24 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="col">
-
-        {{ form(form) }}
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Panel Heading
+                </div>
+                <div class="panel-body">
+                    {{ form(form) }}
+                    {% if submitted %}
+                     <a href="{{ path('database_connect') }}" id="test">
+                        <button type="button" class="btn btn-primary btn-block"> Test connection </button>
+                     </a>
+                     {% else %}
+                        <button type="button" class="btn btn-primary btn-block" disabled> Test connection </button>
+                    {% endif %} 
+                </div>
+            </div>
         </div>
-        <button type="button" class="btn btn-primary btn-block"> Test connection </button>
+       
     </div>
 </div>
 {% endblock %}

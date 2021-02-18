@@ -1,0 +1,46 @@
+{% extends 'baseone.html.twig' %}
+
+{% block title %}{% endblock %}
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Loading database tables
+                </div>
+                <div class="panel-body">
+                    {% if connection_failed_message %}
+                        <p class="alert-danger">{{ connection_failed_message }}</p>
+                        <p>Go back to the previous page to reset your database connection</p>
+                    {% else %}
+                        <p class="alert-success">{{ connection_success_message }}</p>
+                        {% if connection_success_message %}
+                            <p>{{'install.next_step' | trans }}</p>
+                        {% endif %}
+                    {% endif %}
+                    <div class="buttons">
+                        <button class="btn btn-default btn-lg" id="previous-btn">
+                            <a href="{{ path('database_connect') }}" id="previous">
+                                {{ 'install.previous' | trans }}
+                            </a>
+                        </button>
+                        {% if connection_failed_message %}
+                            <button class="btn btn-default btn-lg" id="next-btn" disabled>
+                                {{ 'install.next' | trans }}
+                            </button>
+                        {% elseif connection_success_message %}
+                            <button class="btn btn-default btn-lg" id="next-btn">
+                                <a href="{{ path('install_user_setup') }}" id="next">
+                                    {{ 'install.next' | trans }}
+                                </a>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

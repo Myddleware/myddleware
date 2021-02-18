@@ -31,7 +31,7 @@ use Serializable;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * User.
+ * User
  *
  * @ORM\Table(name="users")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -40,6 +40,7 @@ class User implements UserInterface, Serializable
 {
     const ROLE_DEFAULT = 'ROLE_USER';
     const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    const ROLE_ADMIN = 'ROLE_ADMIN';
 
     /**
      * @ORM\Id
