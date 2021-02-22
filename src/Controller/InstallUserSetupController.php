@@ -6,16 +6,16 @@ use Exception;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use Symfony\Component\Routing\Annotation\Route;
 
 class InstallUserSetupController extends AbstractController
 {
 
 
-/**
+    /**
      * @Route("install/user/setup", name="install_user_setup")
      */
-    public function setupUserAction(Request $request){
+    public function setupUser(Request $request){
         try {   
             $user = new User();
             $em = $this->getDoctrine()->getManager();

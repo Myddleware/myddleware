@@ -152,7 +152,7 @@ class DatabaseSetupController extends AbstractController
                $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
                $this->connectionSuccessMessage = '';
            }
-
+var_dump($content);
         return $this->render('database_setup/load_fixtures.html.twig', 
             [
                 'connection_success_message' =>  $this->connectionSuccessMessage,
