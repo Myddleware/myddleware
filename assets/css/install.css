@@ -1,0 +1,43 @@
+body {
+    background: url('../images/login/fd.jpg') ;
+    background-size: cover;
+}
+
+#logo {
+    background: url('../images/login/logo.png') no-repeat;
+    background-size: contain;
+}
+
+code {
+    background-color: #444446;
+    color: #fff;
+}
+
+
+.panel-primary {
+    min-width: 75vw;
+    max-width: 75vw;
+    border: none;
+}
+
+.panel-primary .panel-body {
+    padding: 30px;
+}
+
+.register-container {
+  min-width: 500px;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: rgba(0,0,0,0.03) 4px 4px 4px;
+}
+
+
+.panel-heading {
+    text-align: center;
+    font-weight: bold;
+}
+
+.panel-footer {
+    background-color: #fff!important;
+    border: none;
+}

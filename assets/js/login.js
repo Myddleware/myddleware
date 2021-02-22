@@ -2,8 +2,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -21,8 +21,10 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
+const $ = require('jquery');
+require('../css/login.css');
 
-$(document).ready(function() {
+$(function() {
 
 	$('#myd_connexion .load').hide();
 	$('#_error').hide();
@@ -34,7 +36,7 @@ $(document).ready(function() {
 	    }
 	} );
 
-	$('form').keypress(function(e){
+	$('form').on('keypress', function(e){
 	    if( e.which == 13 ){
 	    	if( $('#password').val() != '' && $('#username').val() != '') {
 	    		$("#control").click();

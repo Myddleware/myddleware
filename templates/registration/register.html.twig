@@ -1,0 +1,59 @@
+{% extends 'baseone.html.twig' %}
+{% block stylesheets %}
+
+    {{ encore_entry_link_tags('install') }}
+{% endblock %}
+{% block body %}
+<div id="myd_top"></div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {% for flashError in app.flashes('verify_email_error') %}
+                <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+            {% endfor %}
+            <p><span id="logo"></span></p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Install step 5 : create your Myddleware account</div>
+                        <div class="panel-body">
+                            <div class="panel panel-success register-container">
+                                <div class="panel-heading">
+                                    Register 
+                                </div>
+                                <div class="panel-body">
+                                    {{ form_start(registrationForm) }}
+                                        {{ form_row(registrationForm.username) }}
+                                        {{ form_row(registrationForm.email) }}
+                                        {{ form_row(registrationForm.plainPassword, {
+                                            label: 'Password'
+                                            }) 
+                                        }}
+                                        {{ form_row(registrationForm.agreeTerms) }}
+
+                                        <button type="submit" class="btn btn-success">Register</button>
+                                    {{ form_end(registrationForm) }}
+                                    <div class="panel-footer">
+                                        <a href="{{path('database_fixtures_load')}}">
+                                            <button type="button" class="btn btn-default btn-block">
+                                                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                                    Go back to database setup
+                                            </button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer>
+{% include 'footer.html.twig' %}
+</footer>
+ {% block javascripts %}
+     {{ encore_entry_script_tags('install') }}
+ {% endblock %}
+{% endblock %}

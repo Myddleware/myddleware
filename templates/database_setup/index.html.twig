@@ -1,28 +1,54 @@
 {% extends 'baseone.html.twig' %}
 
 {% block title %}{% endblock %}
-
+{% block stylesheets %}
+    {{ encore_entry_link_tags('install') }}
+{% endblock %}
 {% block body %}
+<div id="myd_top"></div>
 <div class="container">
     <div class="row">
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Panel Heading
-                </div>
-                <div class="panel-body">
-                    {{ form(form) }}
-                    {% if submitted %}
-                     <a href="{{ path('database_connect') }}" id="test">
-                        <button type="button" class="btn btn-primary btn-block"> Test connection </button>
-                     </a>
-                     {% else %}
-                        <button type="button" class="btn btn-primary btn-block" disabled> Test connection </button>
-                    {% endif %} 
+        <div class="col">
+           <p><span id="logo"></span></p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading"> Install Step 2 : setting up your Myddleware database</div>
+                        <div class="panel-body">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Database information
+                                </div>
+                                <div class="panel-body">
+                                    {{ form(form) }}
+                                    {% if submitted %}
+                                    <a href="{{ path('database_connect') }}" id="test">
+                                        <button type="button" class="btn btn-primary btn-block"> Test connection </button>
+                                    </a>
+                                    {% else %}
+                                        <button type="button" class="btn btn-primary btn-block" disabled> Test connection </button>
+                                    {% endif %} 
+                                    <div class="panel-footer">
+                                        <a href="{{path('install_requirements')}}">
+                                            <button type="button" class="btn btn-default btn-block">
+                                                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                                    Go back to requirements check
+                                            </button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-       
     </div>
 </div>
+<footer>
+    {% include 'footer.html.twig' %}
+</footer>
+ {% block javascripts %}
+     {{ encore_entry_script_tags('install') }}
+ {% endblock %}
 {% endblock %}

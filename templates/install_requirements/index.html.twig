@@ -1,68 +1,85 @@
 
 {% extends 'baseone.html.twig' %}
 {% block title %} titre{% endblock %}
- {# <link rel="stylesheet" type="text/css" href="{{ asset('css/layout.css') }}"/> #}
-
+{% block stylesheets %}
+    {{ encore_entry_link_tags('install') }}
+{% endblock %}
 {% block body %}
+<div id="myd_top"></div>
 <div class="container">
     <div class="row">
         <div class="col">
-        <a href="#"><span id="logo">logo</span></a>
-        <article class="panel panel-success">
-            <div class="panel-heading">
-                <h1 class="panel-title">{{ 'install.requirements_checker' | trans }}</h1>
-            </div>
-            <div class="panel-body requirements-tab">
-                <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
-                {# {% if ini_path %}
-                    <p>{{'install.php_ini_path_sentence' | trans }} :</p>
-                    <p id="ini-path" class="alert-success" role="alert">{{ ini_path }} </p>
-                {% else %}
-                    <p class="bg-danger">{{'install.php_ini_error' | trans }}</p>
-                {% endif %} #}
-                {% if php_version %}
-                    <p>PHP version : </p>
-                    <p class="alert-success">{{ php_version }}</p>
-                {% else %}
-                   <p>{{ 'install.php_version_not_found' | trans }}</p>
-                {% endif %}
-                <p><strong>{{ system_status }}</strong></p>
-                {% if error_messages %}
-                <p>{{ 'install.errors_to_do_message' | trans }} : </p>
-                <ul class="list-group">
-                   {% for message in error_messages %}
-                        <li class="list-group-item-danger">{{ message }} </li>
-                   {% endfor %}
-                </ul>
-                {% endif %}
-                {% if recommendation_messages %}
-                    <p>{{ 'install.recommendations_to_do_message' | trans }} : </p>
-                    <ul class="list-group">
-                        {% for message in recommendation_messages %}
-                                <li class="list-group-item-warning">{{ message }} </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                <aside class="panel panel-info">
-                    <div class="panel-heading">
-                        <h6 class="panel-title">Note</h6>
+            <p> <span id="logo"></span></p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading"> Install Step 1 : checking Myddleware requirements</div>
+                        <div class="panel-body">
+                            <article class="panel panel-success">
+                                <div class="panel-heading">
+                                    <h1 class="panel-title">{{ 'install.requirements_checker' | trans }}</h1>
+                                </div>
+                                <div class="panel-body requirements-tab">
+                                    <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
+                                    {# {% if ini_path %}
+                                        <p>{{'install.php_ini_path_sentence' | trans }} :</p>
+                                        <p id="ini-path" class="alert-success" role="alert">{{ ini_path }} </p>
+                                    {% else %}
+                                        <p class="bg-danger">{{'install.php_ini_error' | trans }}</p>
+                                    {% endif %} #}
+                                    {% if php_version %}
+                                        <p>PHP version : </p>
+                                        <p class="alert-success">{{ php_version }}</p>
+                                    {% else %}
+                                    <p>{{ 'install.php_version_not_found' | trans }}</p>
+                                    {% endif %}
+                                    <p><strong>{{ system_status }}</strong></p>
+                                    {% if error_messages %}
+                                    <p>{{ 'install.errors_to_do_message' | trans }} : </p>
+                                    <ul class="list-group">
+                                    {% for message in error_messages %}
+                                            <li class="list-group-item-danger">{{ message }} </li>
+                                    {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                    {% if recommendation_messages %}
+                                        <p>{{ 'install.recommendations_to_do_message' | trans }} : </p>
+                                        <ul class="list-group">
+                                            {% for message in recommendation_messages %}
+                                                    <li class="list-group-item-warning">{{ message }} </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    <aside class="panel panel-info">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">Note</h6>
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>{{ 'install.note_message' | trans }} :</p>
+                                            <code>php bin/symfony_requirements</code>
+                                        </div>
+                                    </aside>
+                                    <div class="buttons">
+                                        <button class="btn btn-success btn-lg" onClick="window.location.reload()">{{ 'install.check_button' | trans }}</button>
+                                        {% if not error_messages %} 
+                                        <a href="{{path('database_setup')}}">
+                                            <button class="btn btn-default btn-lg">{{ 'install.next' | trans }}</button>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div> 
+                            </article>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <p>{{ 'install.note_message' | trans }} :</p>
-                        <code>php bin/symfony_requirements</code>
-                    </div>
-                </aside>
-                <div class="buttons">
-                    <button class="btn btn-success btn-lg" onClick="window.location.reload()">{{ 'install.check_button' | trans }}</button>
-                    {% if not error_messages %} 
-                    <a href="{{path('database_setup')}}">
-                        <button class="btn btn-default btn-lg">{{ 'install.next' | trans }}</button>
-                    </a>
-                    {% endif %}
                 </div>
-            </div> 
-          
-        </article>
+            </div>
+        </div>
+    </div>
 </div>
+<footer>
 {% include 'footer.html.twig' %}
+</footer>
+ {% block javascripts %}
+     {{ encore_entry_script_tags('install') }}
+ {% endblock %}
 {% endblock %}
