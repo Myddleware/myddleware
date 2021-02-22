@@ -41,6 +41,9 @@ update: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 	@echo "Update done."
 
+dump-autoload: init up
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar dump-autoload --no-scripts
+
 require-vtiger-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.23 -vvvv --ignore-platform-reqs --no-scripts
 
