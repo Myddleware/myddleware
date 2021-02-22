@@ -136,8 +136,8 @@ class sapecccore extends sap
     public function readData($param)
     {
         // Initialisation de la limit
-        if (empty($param['limit'])) {
-            $param['limit'] = $this->limit;
+        if (empty($param['ruleParams']['limit'])) {
+            $param['ruleParams']['limit'] = $this->limit;
         }
         // Conversion de la date ref au format SAP
         if (!empty($param['date_ref'])) {
@@ -148,7 +148,7 @@ class sapecccore extends sap
             $parameters = [
                 'IvDateRef' => $param['date_ref_format'],
                 'IvLimit' => 5,
-                // 'IvLimit' => $param['limit'],
+                // 'IvLimit' => $param['ruleParams']['limit'],
                 'IvBelnr' => '',
                 'IvBukrs' => $param['ruleParams']['BUKRS'],
                 'IvGjahr' => $param['ruleParams']['GJAHR'],
@@ -165,7 +165,7 @@ class sapecccore extends sap
         /* if ($param['module'] == 'BU_PARTNER') {
             $parameters = array(
                         'IvDateRef' => $param['date_ref_format'],
-                        'IvLimit' => $param['limit'],
+                        'IvLimit' => $param['ruleParams']['limit'],
                         'IvParner' => '',
                         'IvTypeDate' => ($param['ruleParams']['mode'] == 'C' ? 'C' : 'U')
                     );

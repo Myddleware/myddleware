@@ -79,7 +79,7 @@ class microsoftsqlcore extends database
             $param['offset'] = 0;
         }
 
-        return ' OFFSET '.$param['offset'].' ROWS FETCH NEXT '.$param['limit'].' ROWS ONLY';
+        return ' OFFSET '.$param['offset'].' ROWS FETCH NEXT '.$param['ruleParams']['limit'].' ROWS ONLY';
     }
 
     // Function to escape characters

@@ -328,8 +328,8 @@ class sagecrmcore extends solution
     public function readData($param)
     {
         $result = [];
-        if (empty($param['limit'])) {
-            $param['limit'] = 100;
+        if (empty($param['ruleParams']['limit'])) {
+            $param['ruleParams']['limit'] = 100;
         }
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
@@ -422,7 +422,7 @@ class sagecrmcore extends solution
                         $result['values'][$recordFields[$fieldID]] = $row;
                         ++$cpt;
                         $result['count'] = $cpt;
-                        if ($cpt >= $param['limit']) {
+                        if ($cpt >= $param['ruleParams']['limit']) {
                             break;
                         }
                     }

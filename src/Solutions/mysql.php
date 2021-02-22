@@ -61,7 +61,7 @@ class mysqlcore extends database
             $param['offset'] = 0;
         }
 
-        return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
+        return ' LIMIT '.$param['ruleParams']['limit'].' OFFSET '.$param['offset'];
     }
 }// class mysqlcore
 

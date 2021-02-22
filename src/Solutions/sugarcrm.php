@@ -210,8 +210,8 @@ class sugarcrmcore extends solution
             $result['date_ref'] = $param['date_ref'];
 
             // Set default limit
-            if (empty($param['limit'])) {
-                $param['limit'] = $this->defaultLimit;
+            if (empty($param['ruleParams']['limit'])) {
+                $param['ruleParams']['limit'] = $this->defaultLimit;
             }
             // Remove Myddleware 's system fields
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
@@ -220,7 +220,7 @@ class sugarcrmcore extends solution
 
             // Init search parameters
             $filterArgs = [
-                'max_num' => $param['limit'],
+                'max_num' => $param['ruleParams']['limit'],
                 'offset' => 0,
                 'fields' => implode($param['fields'], ','),
                 'order_by' => 'date_modified',

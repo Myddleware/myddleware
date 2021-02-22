@@ -65,8 +65,8 @@ class oracledbcore extends database
             if (empty($param['date_ref'])) {
                 $param['date_ref'] = 0;
             }
-            if (empty($param['limit'])) {
-                $param['limit'] = 100;
+            if (empty($param['ruleParams']['limit'])) {
+                $param['ruleParams']['limit'] = 100;
             }
 
             // Add requiered fields
@@ -181,7 +181,7 @@ class oracledbcore extends database
         }
         */
 
-        return " ROWNUM BETWEEN $param[offset] AND ".($param['limit'] + $param['offset']);
+        return " ROWNUM BETWEEN $param[offset] AND ".($param['ruleParams']['limit'] + $param['offset']);
     }
 }// class oracledbcore
 

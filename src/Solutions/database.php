@@ -214,8 +214,8 @@ class databasecore extends solution
             if (empty($param['date_ref'])) {
                 $param['date_ref'] = 0;
             }
-            if (empty($param['limit'])) {
-                $param['limit'] = 100;
+            if (empty($param['ruleParams']['limit'])) {
+                $param['ruleParams']['limit'] = 100;
             }
 
             // Add the deletion field into the list field to be read if deletion is enabled on the rule
@@ -305,7 +305,7 @@ class databasecore extends solution
 			}
 			$query['limit'] = $this->get_query_select_limit_offset($param, 'read'); // Add query limit
 			
-			// Build query
+			// Build query	
 			$requestSQL = $this->buildQuery($param, $query);
 			
             // Query validation

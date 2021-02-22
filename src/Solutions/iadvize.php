@@ -135,8 +135,8 @@ class iadvizecore extends solution
             $result['count'] = 0;
             $result['date_ref'] = $param['date_ref'];
 
-            if (empty($param['limit'])) {
-                $param['limit'] = $this->defaultLimit;
+            if (empty($param['ruleParams']['limit'])) {
+                $param['ruleParams']['limit'] = $this->defaultLimit;
             }
 
             // Remove Myddleware 's system fields
@@ -230,7 +230,7 @@ class iadvizecore extends solution
         }
         // We have to returns only the number of records corresponding to the limit
         // We start by the end of the array (record sorted by created_at ASC)
-        $offset = $param['limit'] * (-1);
+        $offset = $param['ruleParams']['limit'] * (-1);
 
         return array_slice($records, $offset, null, true);
     }
@@ -280,7 +280,7 @@ class iadvizecore extends solution
         }
         // We have to returns only the number of records corresponding to the limit
         // We start by the end of the array (record sorted by created_at ASC)
-        $offset = $param['limit'] * (-1);
+        $offset = $param['ruleParams']['limit'] * (-1);
 
         return array_slice($records, $offset, null, true);
     }

@@ -130,8 +130,8 @@ class wordpresscore extends solution {
 			// Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
-            if(empty($param['limit'])){
-                $param['limit'] = $this->defaultLimit;
+            if(empty($param['ruleParams']['limit'])){
+                $param['ruleParams']['limit'] = $this->defaultLimit;
             }
            
             $stop = false;

@@ -250,8 +250,8 @@ class sapcrmcore extends saproot
     public function readData($param)
     {
         // Initialisation de la limit
-        if (empty($param['limit'])) {
-            $param['limit'] = $this->limit;
+        if (empty($param['ruleParams']['limit'])) {
+            $param['ruleParams']['limit'] = $this->limit;
         }
         // Conversion de la date ref au format SAP
         if (!empty($param['date_ref'])) {
@@ -261,7 +261,7 @@ class sapcrmcore extends saproot
         if ('CRMD_ORDER' == $param['module']) {
             $parameters = [
                 'IvDateRef' => $param['date_ref_format'],
-                'IvLimit' => $param['limit'],
+                'IvLimit' => $param['ruleParams']['limit'],
                 'IvObjectId' => '',
                 'IvObjectType' => '',
                 'IvProcessType' => '',
@@ -273,7 +273,7 @@ class sapcrmcore extends saproot
         if ('BU_PARTNER' == $param['module']) {
             $parameters = [
                 'IvDateRef' => $param['date_ref_format'],
-                'IvLimit' => $param['limit'],
+                'IvLimit' => $param['ruleParams']['limit'],
                 // 'IvLimit' => 100,
                 'IvParner' => '',
                 'IvBuGroup' => (empty($param['ruleParams']['BU_GROUP']) ? '' : $param['ruleParams']['BU_GROUP']),

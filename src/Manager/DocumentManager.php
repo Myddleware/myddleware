@@ -234,8 +234,13 @@ class documentcore
 			$this->createDocLog();
 		}			
 	}
-	
-	public function setParam($param) {
+
+	// Set the document param
+	// Clear parameter is used when we call the same instance of the Document to manage several documents (from RuleManager class)
+	public function setParam($param, $clear = false) {
+		if ($clear) {
+			$this->clearAttributes();
+		}
 		// Chargement des solution si elles sont présentent dans les paramètres de construction
 		if (!empty($param['solutionTarget'])) {
 			$this->solutionTarget = $param['solutionTarget'];
@@ -248,9 +253,6 @@ class documentcore
 		}
 		if (!empty($param['api'])) {
 			$this->api = $param['api'];
-		}
-		if (!empty($param['key'])) {
-			$this->key = $param['key'];
 		}
 		if (!empty($param['parentId'])) {
 			$this->parentId = $param['parentId'];
@@ -277,7 +279,7 @@ class documentcore
 				// Instanciate attribut sourceData
 				$this->setDocument($param['id_doc_myddleware']);
 			}
-			else {
+			else {				
 				$this->id = uniqid('', true);
 				$this->dateCreated = gmdate('Y-m-d H:i:s');
 				$this->ruleName = $param['rule']['name_slug'];
@@ -304,6 +306,37 @@ class documentcore
 		if (!empty($param['ruleRelationships'])) {
 			$this->ruleRelationships = $param['ruleRelationships'];
 		}
+	}
+	
+	// Clear all class attributes
+	protected function clearAttributes() {
+		$this->id = '';
+		$this->message = '';
+		$this->dateCreated = '';
+		$this->ruleName = '';
+		$this->ruleMode = '';
+		$this->ruleId = '';
+		$this->ruleFields = array();
+		$this->ruleRelationships = array();
+		$this->ruleParams = array();
+		$this->sourceId = '';
+		$this->targetId = '';
+		$this->parentId = '';
+		$this->sourceData = array();
+		$this->data = array();
+		$this->documentType = '';
+		$this->jobActive = true;
+		$this->attempt = '';
+		$this->userId = '';
+		$this->status = '';
+		$this->document_data = array();
+		$this->solutionTarget = '';
+		$this->solutionSource = '';
+		$this->jobId = '';
+		$this->docIdRefError = '';
+		$this->transformError = false;
+		$this->api = '';    // Specify if the class is called by the API
+		$this->ruleDocuments = array();		
 	}
 	
 	public function createDocument() {	

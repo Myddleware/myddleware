@@ -84,9 +84,9 @@ class rulecore
 	 */
 	private $parameterBagInterface;
 	/**
-	 * @var document
+	 * @var documentManager
 	 */
-	private $document;
+	private $documentManager;
 	/**
 	 * @var string
 	 */
@@ -139,8 +139,8 @@ class rulecore
 		KernelInterface $kernel = null,
 		SessionInterface $session = null,
 		SolutionManager $solutionManager = null,
-		ToolsManager $tools = null
-		// DocumentManager $document,
+		ToolsManager $tools = null,
+		DocumentManager $documentManager
 	) {
 		$this->logger = $logger;
 		$this->connection = $connection;
@@ -153,6 +153,7 @@ class rulecore
 		$this->router = $router;
 		$this->session = $session;
 		$this->solutionManager = $solutionManager;
+		$this->documentManager = $documentManager;
 		$this->parameterBagInterface = $parameterBagInterface;
 		$this->env = $this->parameterBagInterface->get('kernel.environment');	
 		$this->formuleManager = $formuleManager;		
@@ -244,23 +245,23 @@ class rulecore
 			if (!empty($dataSource['values'])) {
 				foreach($dataSource['values'] as $docData) {
 					// Generate document
-					$doc['rule'] = $this->rule;
-					$doc['ruleFields'] = $this->ruleFields;
-					$doc['ruleRelationships'] = $this->ruleRelationships;
-					$doc['data'] = $docData;
-					$doc['jobId'] = $this->jobId;		
-					$doc['api'] = $this->api;		
+					$docParam['rule'] = $this->rule;
+					$docParam['ruleFields'] = $this->ruleFields;
+					$docParam['ruleRelationships'] = $this->ruleRelationships;
+					$docParam['data'] = $docData;
+					$docParam['jobId'] = $this->jobId;		
+					$docParam['api'] = $this->api;		
 					// If the document is a child, we save the parent in the table Document
 					if (!empty($param['parent_id'])) {
-						$doc['parentId'] = $param['parent_id'];		
+						$docParam['parentId'] = $param['parent_id'];		
 					}
-					$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-					$document->setParam($doc);
-					$createDocument = $document->createDocument();		
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($docParam, true);
+					$createDocument = $this->documentManager->createDocument();		
 					if (!$createDocument) {
-						throw new \Exception ('Failed to create document : '.$document->getMessage());
+						throw new \Exception ('Failed to create document : '.$this->documentManager->getMessage());
 					}
-					$documents[] = $document;
+					$documents[] = $this->documentManager;
 				}
 				return $documents;
 			}
@@ -394,12 +395,11 @@ class rulecore
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
 							$param['api'] = $this->api;		
-							// Set the param values
-							$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-							$document->setParam($param);
-							$createDocument = $document->createDocument();
+							// Set the param values and clear all document attributes
+							$this->documentManager->setParam($param, true);
+							$createDocument = $this->documentManager->createDocument();
 							if (!$createDocument) {
-								$readSource['error'] .= $document->getMessage();
+								$readSource['error'] .= $this->documentManager->getMessage();
 							}
 						}			
 					}
@@ -502,7 +502,6 @@ class rulecore
 		$read['ruleParams'] = $this->ruleParams;
 		$read['fields'] = $this->sourceFields;
 		$read['offset'] = 0;
-		$read['limit'] = $this->limit;
 		$read['jobId'] = $this->jobId;
 		$read['manual'] = $this->manual;
 		$read['call_type'] = 'read';
@@ -600,9 +599,9 @@ class rulecore
 				$param['id_doc_myddleware'] = $document['id'];
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;				
-				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-				$doc->setParam($param);
-				$response[$document['id']] = $doc->filterDocument($this->ruleFilters);
+				// Set the param values and clear all document attributes
+				$this->documentManager->setParam($param, true);
+				$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
 			}			
 		}
 		return $response;
@@ -625,9 +624,9 @@ class rulecore
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
 				$param['ruleRelationships'] = $this->ruleRelationships;
-				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-				$doc->setParam($param);
-				$response[$document['id']] = $doc->ckeckPredecessorDocument();
+				// Set the param values and clear all document attributes
+				$this->documentManager->setParam($param, true);
+				$response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
 			}			
 		}
 		return $response;
@@ -666,9 +665,9 @@ class rulecore
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
 				$param['ruleRelationships'] = $this->ruleRelationships;
-				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-				$doc->setParam($param);
-				$response[$document['id']] = $doc->ckeckParentDocument();
+				// Set the param values and clear all document attributes
+				$this->documentManager->setParam($param, true);
+				$response[$document['id']] = $this->documentManager->ckeckParentDocument();
 			}			
 		}			
 		return $response;
@@ -691,7 +690,6 @@ class rulecore
 			$param['ruleRelationships'] = $this->ruleRelationships;
 			$param['jobId'] = $this->jobId;
 			$param['api'] = $this->api;
-			$param['key'] = $this->key;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
 			$migrationParameters = $this->parameterBagInterface->get('migration');
 			if (!empty($migrationParameters['mode'])) {
@@ -708,9 +706,9 @@ class rulecore
 			// Transformation de tous les docuements sélectionnés
 			foreach ($documents as $document) { 			
 				$param['id_doc_myddleware'] = $document['id'];
-				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->formuleManager);
-				$doc->setParam($param);
-				$response[$document['id']] = $doc->transformDocument();
+				// Set the param values and clear all document attributes
+				$this->documentManager->setParam($param, true);
+				$response[$document['id']] = $this->documentManager->transformDocument();
 			}	
 		}	
 		return $response;		
@@ -744,11 +742,10 @@ class rulecore
 				$param['ruleRelationships'] = $this->ruleRelationships;
 				$param['jobId'] = $this->jobId;
 				$param['api'] = $this->api;
-				$param['key'] = $this->key;
-				$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-				$doc->setParam($param);
-				$response[$document['id']] = $doc->getTargetDataDocument();
-				$response['doc_status'] = $doc->getStatus();
+				// Set the param values and clear all document attributes
+				$this->documentManager->setParam($param, true);
+				$response[$document['id']] = $this->documentManager->getTargetDataDocument();
+				$response['doc_status'] = $this->documentManager->getStatus();
 			}			
 		}	
 		return $response;			
@@ -948,11 +945,11 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-		$doc->setParam($param);
-		$doc->documentCancel(); 
+		// Set the param values and clear all document attributes
+		$this->documentManager->setParam($param, true);
+		$this->documentManager->documentCancel(); 
 		$session = new Session();
-		$message = $doc->getMessage();
+		$message = $this->documentManager->getMessage();
 		
 		// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
 		// On affiche alors le message directement dans Myddleware
@@ -961,7 +958,7 @@ class rulecore
 				$session->set( 'success', array('Data transfer has been successfully cancelled.'));
 			}
 			else {
-				$session->set( 'error', array($doc->getMessage()));
+				$session->set( 'error', array($this->documentManager->getMessage()));
 			}
 		}
 	}
@@ -971,11 +968,11 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-		$doc->setParam($param);
-		$doc->changeDeleteFlag($deleteFlag); 
+		// Set the param values and clear all document attributes
+		$this->documentManager->setParam($param, true);
+		$this->documentManager->changeDeleteFlag($deleteFlag); 
 		$session = new Session();
-		$message = $doc->getMessage();
+		$message = $this->documentManager->getMessage();
 		
 		// Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
 		// On affiche alors le message directement dans Myddleware
@@ -984,7 +981,7 @@ class rulecore
 				$session->set( 'success', array('Data transfer has been successfully removed.'));
 			}
 			else {
-				$session->set( 'error', array($doc->getMessage()));
+				$session->set( 'error', array($this->documentManager->getMessage()));
 			}
 		}
 	}
@@ -994,9 +991,9 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
-		$doc = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-		$doc->setParam($param);
-		$doc->updateStatus($toStatus);
+		// Set the param values and clear all document attributes
+		$this->documentManager->setParam($param, true);
+		$this->documentManager->updateStatus($toStatus);
 	}
 	
 	protected function runMyddlewareJob($ruleId, $event=null) {
@@ -1092,12 +1089,12 @@ class rulecore
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;	
-		$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-		$document->setParam($param);	
-		$status = $document->getStatus();
+		// Set the param values and clear all document attributes
+		$this->documentManager->setParam($param, true);
+		$status = $this->documentManager->getStatus();
 		// Si la règle n'est pas chargée alors on l'initialise.
 		if (empty($this->ruleId)) {
-			$this->ruleId = $document->getRuleId();
+			$this->ruleId = $this->documentManager->getRuleId();
 			$this->setRule($this->ruleId);
 			$this->setRuleRelationships();
 			$this->setRuleParam();
@@ -1369,11 +1366,11 @@ class rulecore
 					$param['id_doc_myddleware'] = $key;
 					$param['jobId'] = $this->jobId;
 					$param['api'] = $this->api;
-					$document = new DocumentManager($this->logger, $this->connection, $this->entityManager);
-					$document->setParam($param);	
-					$document->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
-					$document->setTypeError('W');
-					$document->updateStatus('Transformed');
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$this->documentManager->setMessage('Failed to send document because this record is already send in another document. To prevent create duplicate data in the target system, this document will be send in the next job.');
+					$this->documentManager->setTypeError('W');
+					$this->documentManager->updateStatus('Transformed');
 					// Suppression du document dans l'envoi
 					unset($transformedData[$key]);
 				}

@@ -175,8 +175,8 @@ class facebookcore extends solution
             $result = [];
             $result['error'] = '';
             $result['count'] = 0;
-            if (empty($param['limit'])) {
-                $param['limit'] = 100;
+            if (empty($param['ruleParams']['limit'])) {
+                $param['ruleParams']['limit'] = 100;
             }
 
             // Explode the module name when the module is created with the module name and moduleId
@@ -265,14 +265,14 @@ class facebookcore extends solution
             // We read the result from the end to the beginning (oldest record first) and keep only the number of record expected
             if (
                     !empty($result['values'])
-                and count($result['values']) > $param['limit']
+                and count($result['values']) > $param['ruleParams']['limit']
             ) {
                 $reverseValues = array_reverse($result['values'], true);
                 $result['values'] = [];
                 foreach ($reverseValues as $key => $value) {
                     if (
                             !empty($result['values'])
-                        and count($result['values']) >= $param['limit']
+                        and count($result['values']) >= $param['ruleParams']['limit']
                     ) {
                         break;
                     }
