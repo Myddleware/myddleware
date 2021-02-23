@@ -44,7 +44,7 @@ class DatabaseParameter
     private $user;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $password;
 
@@ -52,6 +52,11 @@ class DatabaseParameter
      * @ORM\Column(type="string", length=255)
      */
     private $secret;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $allowInstall;
 
     public function getId(): ?int
     {
@@ -138,6 +143,18 @@ class DatabaseParameter
     public function setSecret(string $secret): self
     {
         $this->secret = $secret;
+
+        return $this;
+    }
+
+    public function getAllowInstall(): ?bool
+    {
+        return $this->allowInstall;
+    }
+
+    public function setAllowInstall(bool $allowInstall): self
+    {
+        $this->allowInstall = $allowInstall;
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\DatabaseParameterRepository;
 use App\Security\SecurityAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,11 +15,30 @@ use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 
 class RegistrationController extends AbstractController
 {
+
+
+    private $databaseParameterRepository;
+
+    public function __construct(DatabaseParameterRepository $databaseParameterRepository)
+    {
+        $this->databaseParameterRepository = $databaseParameterRepository;
+    }
+
     /**
      * @Route("/register", name="app_register")
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, SecurityAuthenticator $authenticator): Response
     {
+
+        //to help voter decide whether we allow access to install process again or not
+        $databases = $this->databaseParameterRepository->findAll();
+        if(!empty($databases)){
+            foreach($databases as $database) {
+                $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+            }
+        } 
+
+
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -39,8 +59,17 @@ class RegistrationController extends AbstractController
             $user->setUsernameCanonical($user->getUsername());
             $user->setEmailCanonical($user->getEmail());
             $entityManager = $this->getDoctrine()->getManager();
+
+
+         // block install from here as user has successfully installed Myddleware now
+            foreach($databases as $database){
+                $database->setAllowInstall(false);
+                $entityManager->persist($database);
+            }
+
             $entityManager->persist($user);
             $entityManager->flush();
+
             // do anything else you need here, like send an email
 
             return $guardHandler->authenticateUserAndHandleSuccess(

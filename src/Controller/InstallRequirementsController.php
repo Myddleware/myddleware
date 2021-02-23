@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Requirements\SymfonyRequirements;
 use Symfony\Component\HttpFoundation\Response;
+use App\Repository\DatabaseParameterRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,11 +16,30 @@ class InstallRequirementsController extends AbstractController
     private $phpVersion;
     private $systemStatus;
 
+    private $databaseParameterRepository;
+
+    public function __construct(DatabaseParameterRepository $databaseParameterRepository)
+    {
+        $this->databaseParameterRepository = $databaseParameterRepository;
+    }
+
+
+
+
     /**
      * @Route("/install/requirements", name="install_requirements")
      */
     public function index(TranslatorInterface $translator): Response
     {
+
+        //to help voter decide whether we allow access to install process again or not
+        $databases = $this->databaseParameterRepository->findAll();
+        if(!empty($databases)){
+            foreach($databases as $database) {
+                $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+            }
+        } 
+
 
         $this->symfonyRequirements = new SymfonyRequirements();
 

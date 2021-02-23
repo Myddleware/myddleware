@@ -5,9 +5,11 @@ namespace App\Controller;
 use Exception;
 use App\Form\DatabaseSetupType;
 use App\Entity\DatabaseParameter;
+use App\Repository\DatabaseParameterRepository;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -22,6 +24,15 @@ class DatabaseSetupController extends AbstractController
 
     private $connectionSuccessMessage;
     private $connectionFailedMessage;
+    private $databaseParameterRepository;
+
+    private $entityManager;
+
+    public function __construct(DatabaseParameterRepository $databaseParameterRepository, EntityManagerInterface $entityManager)
+    {
+        $this->databaseParameterRepository = $databaseParameterRepository;
+        $this->entityManager = $entityManager;
+    }
 
     /**
      * @Route("install/database/setup", name="database_setup")
@@ -32,6 +43,15 @@ class DatabaseSetupController extends AbstractController
         try {
 
             $submitted = false;
+
+
+              //to help voter decide whether we allow access to install process again or not
+            $databases = $this->databaseParameterRepository->findAll();
+            if(!empty($databases)){
+                foreach($databases as $db) {
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $db);
+                }
+            } 
 
             //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
@@ -60,7 +80,18 @@ class DatabaseSetupController extends AbstractController
                     file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
                 }
 
+                // will be used by the InstallVoter to determine access to all install routes
+                $database->setAllowInstall(true);
+
+                // TODO: decide what to do on the following 
+                // I need the allowinstall paramater for guard/voter reasons, however for security reasons I should probably not
+                // be storing ALL db info into the actual db
+                $this->entityManager->persist($database);
+                $this->entityManager->flush();
+
+                // allow to proceed to next step
                 $submitted = true;
+
             }
 
             return $this->render('database_setup/index.html.twig', [
@@ -81,6 +112,14 @@ class DatabaseSetupController extends AbstractController
     {
         try {
 
+            //to help voter decide whether we allow access to install process again or not
+            $databases = $this->databaseParameterRepository->findAll();
+            if(!empty($databases)){
+                foreach($databases as $database) {
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+                }
+            } 
+          
             $env = $kernel->getEnvironment();
 
             $application = new Application($kernel);
@@ -107,6 +146,8 @@ class DatabaseSetupController extends AbstractController
                 $this->connectionSuccessMessage = '';
             }
 
+
+          
             return $this->render('database_setup/database_connection.html.twig', [
                 'connection_success_message' =>  $this->connectionSuccessMessage,
                 'connection_failed_message' => $this->connectionFailedMessage,
@@ -123,7 +164,15 @@ class DatabaseSetupController extends AbstractController
      */
       public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response 
       {
-        
+      
+          //to help voter decide whether we allow access to install process again or not
+          $databases = $this->databaseParameterRepository->findAll();
+          if(!empty($databases)){
+              foreach($databases as $database) {
+                  $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+              }
+          } 
+
         $env = $kernel->getEnvironment();
         $application = new Application($kernel);
         $application->setAutoExit(false);
