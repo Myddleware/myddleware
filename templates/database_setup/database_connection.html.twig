@@ -24,9 +24,6 @@
                                         <p>Go back to the previous page to reset your database connection</p>
                                     {% else %}
                                         <p class="alert-success">{{ connection_success_message }}</p>
-                                        {% if connection_success_message %}
-                                            <p>{{'install.next_step' | trans }}</p>
-                                        {% endif %}
                                     {% endif %}
                                     <div class="buttons">
                                         <button class="btn btn-default btn-lg" id="previous-btn">

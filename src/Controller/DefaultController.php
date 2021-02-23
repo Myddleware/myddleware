@@ -485,7 +485,7 @@ if (file_exists($file)) {
          * @param $id
          *
          *
-         * @Route("/view/cancel/documents/{id}", name="regle_cancel_all_transfers")
+         * @Route("/view/cancel/documents/{id}", name="rule_cancel_all_transfers")
          */
 		public function cancelRuleTransfersAction($id){
 			try {

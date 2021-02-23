@@ -13,7 +13,7 @@ code {
     color: #fff;
 }
 
-
+/* title panel with explanations */
 .panel-primary {
     min-width: 75vw;
     max-width: 75vw;
@@ -24,7 +24,7 @@ code {
     padding: 30px;
 }
 
-.register-container {
+.register-container, .panel-success, .panel-default {
   min-width: 500px;
   max-width: 500px;
   margin: auto;

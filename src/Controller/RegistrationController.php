@@ -38,7 +38,6 @@ class RegistrationController extends AbstractController
             $user->setEnabled(true);
             $user->setUsernameCanonical($user->getUsername());
             $user->setEmailCanonical($user->getEmail());
-
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();

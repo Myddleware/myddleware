@@ -132,7 +132,7 @@ class DatabaseSetupController extends AbstractController
          $fixturesInput = new ArrayInput(array(
             'command' => 'doctrine:fixtures:load',
              '--append' => true,
-            // '--env' => $env
+              '--env' => $env
         ));
 
         $fixturesOutput = new BufferedOutput();
@@ -144,7 +144,7 @@ class DatabaseSetupController extends AbstractController
 
            //send the message sent by Doctrine to the user's view
            $this->connectionSuccessMessage = $content;
-
+        
            //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
            if(strlen($this->connectionSuccessMessage) > 150) {
                $this->connectionFailedMessage = $this->connectionSuccessMessage;
