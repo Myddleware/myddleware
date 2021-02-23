@@ -71,6 +71,8 @@ uat.pem
 !var/mysql/.gitkeep
 /var/vpn/*
 !var/vpn/.gitkeep
+/web/testws/
+docker-compose.override.yml.old
 
 # Secrets
 .env
