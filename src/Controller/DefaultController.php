@@ -489,9 +489,9 @@ if (file_exists($file)) {
          */
 		public function cancelRuleTransfersAction($id){
 			try {
-				$rule = $this->container->get('myddleware_rule.rule');
-				$rule->setRule($id);
-				$result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+	
+                $this->ruleManager->setRule($id);
+				$result = $this->ruleManager->actionRule('runMyddlewareJob', 'cancelDocumentJob');
 		
 			} catch(\Exception $e){
 				return $e->getMessage();
@@ -509,9 +509,9 @@ if (file_exists($file)) {
          */
 		public function deleteRuleTransfersAction($id){
 			try {
-				   $rule = $this->container->get('myddleware_rule.rule');
-				   $rule->setRule($id);
-				   $result = $rule->actionRule('runMyddlewareJob', 'deleteDocumentJob');
+				
+                $this->ruleManager->setRule($id);
+				$result = $this->ruleManager->actionRule('runMyddlewareJob', 'deleteDocumentJob');
 			} catch(\Exception $e){
 				return $e->getMessage();
 			}

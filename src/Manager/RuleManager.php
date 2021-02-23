@@ -794,7 +794,7 @@ class rulecore
 		}
 	}
 	
-	public function actionRule($event, $rule, $jobName=null) {
+	public function actionRule($event, $jobName=null) {
 	
 		switch ($event) {
 			case 'ALL':
@@ -804,7 +804,7 @@ class rulecore
 				return $this->runMyddlewareJob("ERROR");
 				break;
 			case 'runMyddlewareJob':
-				return $this->runMyddlewareJob($rule->getId(), $jobName);
+				return $this->runMyddlewareJob($this->ruleId, $jobName);
 				break;
 			default:
 				return 'Action '.$event.' unknown. Failed to run this action. ';
