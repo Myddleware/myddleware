@@ -23,10 +23,10 @@
                                     {{ form(form) }}
                                     {% if submitted %}
                                     <a href="{{ path('database_connect') }}" id="test">
-                                        <button type="button" class="btn btn-primary btn-block"> Test connection </button>
+                                        <button type="button" class="btn btn-primary btn-block"> {{'install.next'|trans}}  </button>
                                     </a>
                                     {% else %}
-                                        <button type="button" class="btn btn-primary btn-block" disabled> Test connection </button>
+                                        <button type="button" class="btn btn-primary btn-block" disabled> {{'install.next'|trans}} </button>
                                     {% endif %} 
                                     <div class="panel-footer">
                                         <a href="{{path('install_requirements')}}">
