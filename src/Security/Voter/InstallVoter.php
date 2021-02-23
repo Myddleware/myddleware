@@ -11,7 +11,8 @@ class InstallVoter extends Voter
 {
     protected function supports($attribute, $subject)
     {
-
+        
+// TODO : change database parameter to another new object called Config with only allowInstall inside
 
              // only vote on `DatabaseParameter` objects
              if (!$subject instanceof DatabaseParameter) {
