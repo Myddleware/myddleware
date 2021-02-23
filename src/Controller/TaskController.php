@@ -30,6 +30,7 @@ use App\Entity\Log;
 use App\Manager\JobManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
+use Psr\Log\LoggerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
@@ -63,15 +64,23 @@ class TaskController extends AbstractController
      * @var DocumentRepository
      */
     private $documentRepository;
-
+	/**
+	 * @var LoggerInterface
+	 */
+	private $LoggerInterface;
     /**
      * TaskController constructor.
      */
-    public function __construct(JobManager $jobManager, JobRepository $jobRepository, DocumentRepository $documentRepository)
-    {
+    public function __construct(
+		JobManager $jobManager, 
+		JobRepository $jobRepository, 
+		DocumentRepository $documentRepository,
+		LoggerInterface $LoggerInterface
+	) {
         $this->jobRepository = $jobRepository;
         $this->jobManager = $jobManager;
         $this->documentRepository = $documentRepository;
+        $this->LoggerInterface = $LoggerInterface;
     }
 
     /**
@@ -148,7 +157,7 @@ class TaskController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             // Get job detail
-            $jobData = $this->jobManager->getLogData($taskStop);
+            $jobData = $this->jobManager->getLogData($taskStop);              			
 
             // Stop task and update statistics
             $taskStop->setOpen($jobData['Open']);
@@ -159,21 +168,14 @@ class TaskController extends AbstractController
             $taskStop->setEnd(new \DateTime());
             $em->persist($taskStop);
 
-            // $this->documentRepository->find();
-
-            //TODO 
-            // Add log to indicate this action
-            $log = new Log();
-            $log->setDateCreated(new \DateTime());
-            $log->setType('W');
-            $log->setMessage('The task has been manually stopped. ');
-            // $log->setRule(''); //nullable
-            $log->setDocument('');  //need to pass a document entity here
-            // $log->setRef(''); //nullable
-            $log->setJob($taskStop);
-            $em->persist($log);
-            $em->flush();
-         
+			// Add log to indicate this action
+			$log = new Log();	
+			$log->setDateCreated(new \DateTime);
+			$log->setType('W');
+			$log->setMessage('The task has been manually stopped. ');
+			$log->setJob($taskStop);
+			$em->persist($log);
+			$em->flush();        
             return $this->redirect($this->generateURL('task_view', ['id' => $taskStop->getId()]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('task_list'));
