@@ -575,6 +575,7 @@ class vtigercrmcore extends solution
 
         try {
             $queryParam = $this->getVtigerReadQueryParam($param);
+            $hasVtigerRelatedRecordFields = $this->hasVtigerRelatedRecordFields($param['fields']);
             $where = $this->getVtigerReadWhereCondition($param);
 
             $orderBy = 'ORDER BY modifiedtime ASC';
@@ -612,6 +613,10 @@ class vtigercrmcore extends solution
                     if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
+                        if ($hasVtigerRelatedRecordFields) {
+                            $retrieveResponse = $this->getVtigerClient()->retrieve($value['id'], 1);
+                            $result['values'][$value['id']] = empty($retrieveResponse['success']) ? $value : $retrieveResponse['result'];
+                        }
                         if (in_array($param['rule']['mode'], ['0', 'S'])) {
                             $result['values'][$value['id']]['date_modified'] = $value['modifiedtime'];
                         } elseif ($param['rule']['mode'] == 'C') {
@@ -1314,6 +1319,22 @@ class vtigercrmcore extends solution
         }
 
         return $baseFields;
+    }
+
+    /**
+     * @param $fieldsList
+     *
+     * @return array
+     */
+    protected function hasVtigerRelatedRecordFields($fieldsList)
+    {
+        foreach ($fieldsList as $field) {
+            if (preg_match('/__/', $field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
