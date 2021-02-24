@@ -79,6 +79,7 @@ docker-compose.override.yml.old
 hosts
 NOTES.md
 *.ovpn
+.pwd.var
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/mautic.php
