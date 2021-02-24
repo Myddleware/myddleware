@@ -154,6 +154,7 @@ class vtigercrmcore extends solution
     protected function createVtigerClient()
     {
         $client = new VtigerClient($this->paramConnexion['url']);
+        file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
         $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
 
         if (empty($result['success'])) {
