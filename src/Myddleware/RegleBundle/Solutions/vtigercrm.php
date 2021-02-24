@@ -444,6 +444,7 @@ class vtigercrmcore extends solution
 
             $module = $param["module"];
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields'] ?? []);
+            $hasVtigerRelatedRecordFields = $this->hasVtigerRelatedRecordFields($param['fields']);
             $baseFields = $this->cleanVtigerRelatedRecordFields($param['fields']);
 
             $queryParam = implode(',', $baseFields ?? "") ?: '*';
@@ -452,6 +453,7 @@ class vtigercrmcore extends solution
             if ($module == "LineItem") {
                 $query = $this->readLastVtigerLineItemQuery($param, $where);
             } elseif (empty($param['query']['id'])) {
+                file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
                 $query = $this->getVtigerClient()->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
             } else {
                 $query = $this->getVtigerClient()->retrieve($param['query']['id']);
@@ -464,6 +466,11 @@ class vtigercrmcore extends solution
 
             if (empty($query['result'][0])) {
                 return $this->errorVtigerNoDataRetrieved(['done' => false]);
+            }
+
+            if ($hasVtigerRelatedRecordFields) {
+                $retrieveResponse = $this->getVtigerClient()->retrieve($query['result'][0]['id'], 1);
+                $query['result'][0] = empty($retrieveResponse['success']) ? $query['result'][0] : $retrieveResponse['result'];
             }
 
             $result = ['done' => true];
@@ -485,6 +492,7 @@ class vtigercrmcore extends solution
     protected function readLastVtigerLineItemQuery($param, $where)
     {
         $module = $param['module'];
+        file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
         $query = $this->getVtigerClient()->query("SELECT parent_id FROM {$module} {$where};");
 
         $parentModules = [];
@@ -501,6 +509,7 @@ class vtigercrmcore extends solution
         $entity = [];
         $maxTime = '';
         foreach ($parentModules as $prefix => $moduleName) {
+            file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
             $query = $this->getVtigerClient()->query("SELECT id, createdtime, modifiedtime FROM {$moduleName} {$where} ORDER BY modifiedtime ASC LIMIT 0, 1;");
             if (empty($$query['success']) || empty($query['result'])) {
                 continue;
@@ -593,6 +602,7 @@ class vtigercrmcore extends solution
                     $query = $this->readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall);
                 } else {
                     $sql = "SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;";
+                    file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
                     $query = $this->getVtigerClient()->query($sql);
                 }
 
@@ -613,10 +623,10 @@ class vtigercrmcore extends solution
                     if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
-                        //if ($hasVtigerRelatedRecordFields) {
+                        if ($hasVtigerRelatedRecordFields) {
                             $retrieveResponse = $this->getVtigerClient()->retrieve($value['id'], 1);
                             $result['values'][$value['id']] = empty($retrieveResponse['success']) ? $value : $retrieveResponse['result'];
-                        //}
+                        }
                         if (in_array($param['rule']['mode'], ['0', 'S'])) {
                             $result['values'][$value['id']]['date_modified'] = $value['modifiedtime'];
                         } elseif ($param['rule']['mode'] == 'C') {
@@ -651,6 +661,7 @@ class vtigercrmcore extends solution
             $this->setModulePrefix();
         }
 
+        file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
         $query = $this->getVtigerClient()->query("SELECT parent_id FROM $param[module];");
 
         $parentModules = [];
@@ -663,6 +674,7 @@ class vtigercrmcore extends solution
 
         $entities = [];
         foreach ($parentModules as $prefix => $moduleName) {
+            file_put_contents('/var/www/html/var/logs/vtigercrm.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
             $query = $this->getVtigerClient()->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
             if (empty($query['success'])) {
                 continue;

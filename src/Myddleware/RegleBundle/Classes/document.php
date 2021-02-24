@@ -1229,7 +1229,7 @@ class documentcore {
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
-		try {		
+	    try {
 			//--
 			if (!empty($ruleField['formula'])) {
 				// -- -- -- Formula management
@@ -1246,7 +1246,7 @@ class documentcore {
 							}
 							else {
 								// Erreur
-								throw new \Exception( 'The field '.$listFields.' is unknow in the formula '.$ruleField['formula'].'. ' );
+								throw new \Exception( 'The field '.$listFields.' is unknown in the formula '.$ruleField['formula'].'. ' );
 							}
 						}
 					}									
@@ -1270,7 +1270,7 @@ class documentcore {
 				) {
 					// Try the formula first
 					try {
-						eval($f.';'); // exec
+					    eval($f.';'); // exec
 					} catch (\ParseError $e) {
 						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
 					}

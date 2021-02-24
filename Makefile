@@ -51,7 +51,7 @@ require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
 
 setup-files:
-	#@docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
+	@docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
 	@docker-compose run --rm myddleware chmod 777 -R var/cache var/logs || true
 
 setup-database: up sleep
@@ -67,6 +67,7 @@ logs-rotate:
 	@cd var/logs; if [ -f background.log ]; then cp background.log rotate/background.$(shell date +%s).log; truncate -s 0 background.log; fi
 	@cd var/logs; if [ -f prod.log ]; then cp prod.log rotate/prod.$(shell date +%s).log; truncate -s 0 prod.log; fi
 	@cd var/logs; if [ -f vtigercrm.log ]; then cp vtigercrm.log rotate/vtigercrm.$(shell date +%s).log; truncate -s 0 vtigercrm.log; fi
+	@chmod 777 -R var/logs || true
 
 debug: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
