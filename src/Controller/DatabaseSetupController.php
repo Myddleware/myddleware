@@ -3,34 +3,37 @@
 namespace App\Controller;
 
 use Exception;
+use App\Entity\Config;
 use App\Form\DatabaseSetupType;
 use App\Entity\DatabaseParameter;
-use App\Repository\DatabaseParameterRepository;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Doctrine\DBAL\Exception as DBALException;
-use Doctrine\DBAL\Exception\ConnectionException;
+use App\Repository\ConfigRepository;
+use Doctrine\DBAL\ConnectionException as DBALConnectionException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use Doctrine\DBAL\Driver\PDO\Exception as DBALDriverPDOException;
+use Doctrine\DBAL\Exception\TableNotFoundException;
 
 class DatabaseSetupController extends AbstractController
 {
 
     private $connectionSuccessMessage;
     private $connectionFailedMessage;
-    private $databaseParameterRepository;
+    private $configRepository;
 
     private $entityManager;
 
-    public function __construct(DatabaseParameterRepository $databaseParameterRepository, EntityManagerInterface $entityManager)
+    public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager)
     {
-        $this->databaseParameterRepository = $databaseParameterRepository;
+        $this->configRepository = $configRepository;
         $this->entityManager = $entityManager;
     }
 
@@ -44,21 +47,69 @@ class DatabaseSetupController extends AbstractController
 
             $submitted = false;
 
-            // TODO : test db connection
-            $connected = $this->getDoctrine()->getConnection()->isConnected();
+            //to help voter decide whether we allow access to install process again or not
+            $configs = $this->configRepository->findAll();
+            if(!empty($configs)){
+                foreach($configs as $config) {
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+                }
+            } else {
 
-            if($connected){
+                //clear database of all previous configs (to prevent conflicts with Voter on whether or not installation is allowed)
+                $this->configRepository->deleteAll();
+                $config = new Config();
+                // will be used by the InstallVoter to determine access to all install routes
+                $config->setAllowInstall(true);
+                $this->entityManager->persist($config);
+                $this->entityManager->flush();
+            
+            }
 
-              //to help voter decide whether we allow access to install process again or not
-                $databases = $this->databaseParameterRepository->findAll();
-                if(!empty($databases)){
-                    foreach($databases as $db) {
-                        $this->denyAccessUnlessGranted('DATABASE_EDIT', $db);
-                    }
-                } 
+            //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
+            $database = new DatabaseParameter();
+            $database->setDriver($this->getParameter('database_driver'));
+            $database->setHost($this->getParameter('database_host'));
+            $database->setPort($this->getParameter('database_port'));
+            $database->setName($this->getParameter('database_name'));
+            $database->setUser($this->getParameter('database_user'));
+            $database->setSecret($this->getParameter('secret'));
 
-            } else { 
+            // force user to change the default Symfony secret for security
+            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
+                $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
+            }
 
+            $form = $this->createForm(DatabaseSetupType::class, $database);
+            $form->handleRequest($request);
+    
+            // send database parameters to .env.local
+            if ($form->isSubmitted() && $form->isValid()){
+
+                $envLocal = __DIR__.'/../../.env.local';
+
+                if(file_exists($envLocal) && is_file($envLocal)){
+                    // we edit the database connection parameters with form input
+                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                    file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
+                }
+
+                    // allow to proceed to next step
+                    $submitted = true;
+
+                }
+
+                return $this->render('database_setup/index.html.twig', [
+                    'form' => $form->createView(),
+                    'submitted' => $submitted
+                ]);
+
+        } catch  (Exception $e) {
+
+            if($e instanceof ConnectionException | $e instanceof TableNotFoundException){
+
+                $submitted = false;
+              
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
                 $database->setDriver($this->getParameter('database_driver'));
@@ -78,7 +129,9 @@ class DatabaseSetupController extends AbstractController
         
                 // send database parameters to .env.local
                 if ($form->isSubmitted() && $form->isValid()){
+
                     $envLocal = __DIR__.'/../../.env.local';
+
                     if(file_exists($envLocal) && is_file($envLocal)){
                         // we edit the database connection parameters with form input
                         $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
@@ -86,29 +139,29 @@ class DatabaseSetupController extends AbstractController
                         file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
                     }
 
-                    // will be used by the InstallVoter to determine access to all install routes
-                    $database->setAllowInstall(true);
+                        // allow to proceed to next step
+                        $submitted = true;
+                    }
 
-                    // TODO: decide what to do on the following 
-                    // I need the allowinstall paramater for guard/voter reasons, however for security reasons I should probably not
-                    // be storing ALL db info into the actual db
-                    $this->entityManager->persist($database);
-                    $this->entityManager->flush();
-
-                    // allow to proceed to next step
-                    $submitted = true;
-
-                }
-
+                //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
                 return $this->render('database_setup/index.html.twig', [
                     'form' => $form->createView(),
-                    'submitted' => $submitted
+                    'submitted' => $submitted,
+    
                 ]);
-            }
 
-        } catch  (Exception $e) {
-            throw new Exception($e->getMessage());
+            } else {
+                throw new Exception($e->getMessage().' '. $e->getFile().' Line :  '.$e->getLine());
+            }
         }
+
+        //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
+        return $this->render('database_setup/index.html.twig', [
+            'form' => $form->createView(),
+            'submitted' => $submitted,
+
+        ]);
+       
     }
 
     /**
@@ -119,23 +172,28 @@ class DatabaseSetupController extends AbstractController
     {
         try {
 
-            // TODO : test db connection
             $connected = $this->getDoctrine()->getConnection()->isConnected();
 
             if($connected){
 
-
                 //to help voter decide whether we allow access to install process again or not
-                $databases = $this->databaseParameterRepository->findAll();
-                if(!empty($databases)){
-                    foreach($databases as $database) {
-                        $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+                $configs = $this->configRepository->findAll();
+                if(!empty($configs)){
+                    foreach($configs as $config) {
+                        $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
                     }
                 } 
             
-                
             } else {     
-
+           
+                 //to help voter decide whether we allow access to install process again or not
+                 $configs = $this->configRepository->findAll();
+                 if(!empty($configs)){
+                     foreach($configs as $config) {
+                         $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+                     }
+                 } 
+             
                 $env = $kernel->getEnvironment();
 
                 $application = new Application($kernel);
@@ -161,8 +219,17 @@ class DatabaseSetupController extends AbstractController
                     $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
                     $this->connectionSuccessMessage = '';
                 }
+         
+                //clear database of all previous configs (to prevent conflicts with Voter on whether or not installation is allowed)
+                $this->configRepository->deleteAll();
+             
+                $config = new Config();
+                // will be used by the InstallVoter to determine access to all install routes
+                $config->setAllowInstall(true);
 
-
+            
+                $this->entityManager->persist($config);
+                $this->entityManager->flush();
             
                 return $this->render('database_setup/database_connection.html.twig', [
                     'connection_success_message' =>  $this->connectionSuccessMessage,
@@ -171,8 +238,20 @@ class DatabaseSetupController extends AbstractController
             }  
 
         } catch(ConnectionException  | DBALException  | Exception $e){
+            
+            // if the database doesn't exist yet, create it
+            if($e instanceof ConnectionException ){
+                $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. <br/> '.$e->getMessage();
+                return $this->render('database_setup/database_connection.html.twig', [
+                    'connection_success_message' =>  $this->connectionSuccessMessage,
+                    'connection_failed_message' => $this->connectionFailedMessage,
+                ]);
+            }
+
             return $this->redirectToRoute('database_setup');
-        }  
+        } 
+        
+        
       }
 
     /**
@@ -183,10 +262,10 @@ class DatabaseSetupController extends AbstractController
       {
       
           //to help voter decide whether we allow access to install process again or not
-          $databases = $this->databaseParameterRepository->findAll();
-          if(!empty($databases)){
-              foreach($databases as $database) {
-                  $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+          $configs = $this->configRepository->findAll();
+          if(!empty($configs)){
+              foreach($configs as $config) {
+                  $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
               }
           } 
 

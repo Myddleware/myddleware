@@ -2,26 +2,27 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
-use App\Repository\DatabaseParameterRepository;
+use App\Repository\ConfigRepository;
 use App\Security\SecurityAuthenticator;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class RegistrationController extends AbstractController
 {
 
 
-    private $databaseParameterRepository;
+    private $configRepository;
 
-    public function __construct(DatabaseParameterRepository $databaseParameterRepository)
+    public function __construct(ConfigRepository $configRepository)
     {
-        $this->databaseParameterRepository = $databaseParameterRepository;
+        $this->configRepository = $configRepository;
     }
 
     /**
@@ -30,14 +31,16 @@ class RegistrationController extends AbstractController
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, SecurityAuthenticator $authenticator): Response
     {
 
+        try {
+
+     
         //to help voter decide whether we allow access to install process again or not
-        $databases = $this->databaseParameterRepository->findAll();
-        if(!empty($databases)){
-            foreach($databases as $database) {
-                $this->denyAccessUnlessGranted('DATABASE_EDIT', $database);
+        $configs = $this->configRepository->findAll();
+        if(!empty($configs)){
+            foreach($configs as $config) {
+                $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
             }
         } 
-
 
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -62,9 +65,9 @@ class RegistrationController extends AbstractController
 
 
          // block install from here as user has successfully installed Myddleware now
-            foreach($databases as $database){
-                $database->setAllowInstall(false);
-                $entityManager->persist($database);
+            foreach($configs as $config){
+                $config->setAllowInstall(false);
+                $entityManager->persist($config);
             }
 
             $entityManager->persist($user);
@@ -79,7 +82,9 @@ class RegistrationController extends AbstractController
                 'main' // firewall name in security.yaml
             );
         }
-
+    } catch (Exception $e ){
+        return $this->redirectToRoute('login');
+    }
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);

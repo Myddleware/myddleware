@@ -53,11 +53,6 @@ class DatabaseParameter
      */
     private $secret;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $allowInstall;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -147,15 +142,4 @@ class DatabaseParameter
         return $this;
     }
 
-    public function getAllowInstall(): ?bool
-    {
-        return $this->allowInstall;
-    }
-
-    public function setAllowInstall(bool $allowInstall): self
-    {
-        $this->allowInstall = $allowInstall;
-
-        return $this;
-    }
 }
