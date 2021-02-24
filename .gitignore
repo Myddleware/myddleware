@@ -12,7 +12,7 @@
 /var/logs/*
 /var/sessions/*
 !var/cache/.gitkeep
-!var/logs/.gitkeep
+!var/logs/rotate/.gitkeep
 !var/sessions/.gitkeep
 
 # Parameters

@@ -63,6 +63,11 @@ setup: setup-files setup-database
 logs: debug
 	@docker-compose logs -f myddleware
 
+logs-rotate:
+	@cd var/logs; if [ -f background.log ]; then cp background.log rotate/background.$(shell date +%s).log; truncate -s 0 background.log; fi
+	@cd var/logs; if [ -f prod.log ]; then cp prod.log rotate/prod.$(shell date +%s).log; truncate -s 0 prod.log; fi
+	@cd var/logs; if [ -f vtigercrm.log ]; then cp vtigercrm.log rotate/vtigercrm.$(shell date +%s).log; truncate -s 0 vtigercrm.log; fi
+
 debug: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
 
