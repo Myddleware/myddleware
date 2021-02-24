@@ -470,8 +470,10 @@ class vtigercrmcore extends solution
             }
 
             if ($hasVtigerRelatedRecordFields) {
+                file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__.' ID='.$query['result'][0]['id']."\n", FILE_APPEND);
                 $retrieveResponse = $this->getVtigerClient()->retrieve($query['result'][0]['id'], 1);
                 $query['result'][0] = empty($retrieveResponse['success']) ? $query['result'][0] : $retrieveResponse['result'];
+                file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__.' '.json_encode($retrieveResponse)."\n", FILE_APPEND);
             }
 
             $result = ['done' => true];
