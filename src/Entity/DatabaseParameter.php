@@ -44,7 +44,7 @@ class DatabaseParameter
     private $user;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $password;
 
@@ -141,4 +141,5 @@ class DatabaseParameter
 
         return $this;
     }
+
 }

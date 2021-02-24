@@ -16,7 +16,7 @@ class DatabaseParameterRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Database::class);
+        parent::__construct($registry, DatabaseParameter::class);
     }
 
     // /**
