@@ -561,8 +561,13 @@ class databasecore extends solution {
 					$sql = $this->queryValidation($param, 'create', $sql);	
 					
 					$q = $this->pdo->prepare($sql);
-					$exec = $q->execute();	
-					if(!$exec) {
+                    if (!$q) {
+                        $errorInfo = $this->pdo->errorInfo();
+                        throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                    }
+
+                    $exec = $q->execute();
+					if (!$exec) {
 						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
 					}
