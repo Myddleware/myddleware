@@ -613,10 +613,10 @@ class vtigercrmcore extends solution
                     if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
-                        if ($hasVtigerRelatedRecordFields) {
+                        //if ($hasVtigerRelatedRecordFields) {
                             $retrieveResponse = $this->getVtigerClient()->retrieve($value['id'], 1);
                             $result['values'][$value['id']] = empty($retrieveResponse['success']) ? $value : $retrieveResponse['result'];
-                        }
+                        //}
                         if (in_array($param['rule']['mode'], ['0', 'S'])) {
                             $result['values'][$value['id']]['date_modified'] = $value['modifiedtime'];
                         } elseif ($param['rule']['mode'] == 'C') {
