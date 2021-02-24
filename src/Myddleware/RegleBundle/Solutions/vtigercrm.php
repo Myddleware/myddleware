@@ -687,7 +687,9 @@ class vtigercrmcore extends solution
      */
     protected function getVtigerReadQueryParam($param)
     {
-        $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
+        $fields = $this->cleanVtigerRelatedRecordFields($param['fields']);
+
+        $queryParam = implode(',', $fields ?? '') ?: '*';
         if ($queryParam != '*') {
             $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
             $queryParam = implode(',', $requiredField) . ',' . $queryParam;
