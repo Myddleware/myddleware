@@ -588,14 +588,16 @@ class vtigercrmcore extends solution
                 $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
 
                 if ($param['module'] == 'LineItem') {
+                    $sql = 'readVtigerLineItemQuery()';
                     $query = $this->readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall);
                 } else {
-                    $query = $this->getVtigerClient()->query("SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;");
+                    $sql = "SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;";
+                    $query = $this->getVtigerClient()->query($sql);
                 }
 
                 if (empty($query['success'])) {
                     return [
-                        'error' => 'Error: Request Failed! (' . ($query['error']['message'] ?? 'Error') . ')',
+                        'error' => 'Error: Request Failed! (' . ($query['error']['message'] ?? 'Error') . ' SQL: "'.$sql.'")',
                         'count' => 0,
                     ];
                 }
