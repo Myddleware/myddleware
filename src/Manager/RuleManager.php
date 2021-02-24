@@ -158,21 +158,10 @@ class rulecore
 		$this->env = $this->parameterBagInterface->get('kernel.environment');	
 		$this->formuleManager = $formuleManager;		
 
-		$this->setRuleParam();
-		$this->setLimit();
-		$this->setRuleRelationships();
+		// $this->setRuleParam();
+		// $this->setLimit();
+		// $this->setRuleRelationships();
 		// $this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
-	}
-	
-	// Set the limit rule
-	protected function setLimit() {
-		// Change the default value if a limit exists on the rule
-		if (!empty($this->ruleParams['limit'])) {
-			$this->limit = $this->ruleParams['limit'];
-		}
-		// Add one to the rule limit because when we reach the limit in the read finction,
-		// we remove at least one record (see function validateReadDataSource)
-		$this->limit++;
 	}
 	
 	public function setRule($idRule) {
@@ -186,6 +175,7 @@ class rulecore
 			$this->rule = $stmt->fetch();
 			// Set the rule parameters and rule relationships
 			$this->setRuleParam();
+			$this->setLimit();
 			$this->setRuleRelationships();
 			// Set the rule fields (we use the name_slug in $this->rule)
 			$this->setRuleField();
@@ -1384,7 +1374,7 @@ class rulecore
 	}
 	
 	protected function selectDocuments($status, $type = '') {
-		try {					
+		try {		
 			$query_documents = "	SELECT * 
 									FROM Document 
 									WHERE 
@@ -1574,6 +1564,18 @@ class rulecore
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
 	}
+	
+	// Set the limit rule
+	protected function setLimit() {
+		// Change the default value if a limit exists on the rule
+		if (!empty($this->ruleParams['limit'])) {
+			$this->limit = $this->ruleParams['limit'];
+		}
+		// Add one to the rule limit because when we reach the limit in the read finction,
+		// we remove at least one record (see function validateReadDataSource)
+		$this->limit++;
+	}
+		
     
 	// Permet de charger toutes les filtres de la règle
 	protected function setRuleFilter() {
