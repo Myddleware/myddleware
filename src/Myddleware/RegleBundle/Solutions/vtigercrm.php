@@ -597,7 +597,8 @@ class vtigercrmcore extends solution
 
                 if (empty($query['success'])) {
                     return [
-                        'error' => 'Error: Request Failed! (' . ($query['error']['message'] ?? 'Error') . ' SQL: "'.$sql.'")',
+                        //'error' => 'Error: Request Failed! (' . ($query['error']['message'] ?? 'Error') . ' SQL: "'.$sql.'")',
+                        'error' => 'Error: Request Failed! (' . ($query['error']['message'] ?? 'Error') . ')',
                         'count' => 0,
                     ];
                 }
