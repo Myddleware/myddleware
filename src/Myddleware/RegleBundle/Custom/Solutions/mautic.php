@@ -4,7 +4,7 @@ namespace Myddleware\RegleBundle\Solutions;
 
 class mauticbase extends mauticcore
 {
-    protected $mauticVersion = 3;
+    protected $mauticVersion = 2;
 }
 
 $file = __DIR__.'/mautic.client.php';
