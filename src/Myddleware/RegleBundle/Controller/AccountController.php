@@ -85,7 +85,7 @@ class AccountController extends BaseController
             $process = new \Symfony\Component\Process\Process('php ' . $this->container->get('kernel')->getRootDir() . '/console cache:clear --env=' . $this->container->get('kernel')->getEnvironment());
             $process->run();
             if (!$process->isSuccessful()) {
-                throw new Symfony\Component\Process\Exception\ProcessFailedException($process);
+                throw new \Symfony\Component\Process\Exception\ProcessFailedException($process);
             }
         } catch (Exception $e) {
             $session->set('error', array($this->get('translator')->trans('error.account.language_change') . $e->getMessage()));

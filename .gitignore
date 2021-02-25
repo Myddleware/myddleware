@@ -12,7 +12,7 @@
 /var/logs/*
 /var/sessions/*
 !var/cache/.gitkeep
-!var/logs/.gitkeep
+!var/logs/rotate/.gitkeep
 !var/sessions/.gitkeep
 
 # Parameters
@@ -63,16 +63,29 @@ deploy_key.pub
 uat.pem
 /*.retry
 /CLONE/
-/var/databases/filebrowser.db
+/var/databases/*
+!var/databases/.gitkeep
 /var/openvpn/*
 !var/openvpn/.gitkeep
+/var/mysql/*
+!var/mysql/.gitkeep
+/var/vpn/*
+!var/vpn/.gitkeep
+/web/testws/
+docker-compose.override.yml.old
 
 # Secrets
 .env
 hosts
 NOTES.md
 *.ovpn
+.pwd.var
 
 # OCI:START
+!/src/Myddleware/RegleBundle/Custom/Solutions/mautic.php
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/mysql.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/oracledb.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/vtigercrm.php
+!/src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
 # OCI:END

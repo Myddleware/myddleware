@@ -318,6 +318,8 @@ class databasecore extends solution {
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function read($param) {		
 		$result = array();
+		$result['count'] = 0;
+		$result['date_ref'] = $param['date_ref'];
 		// Decode field name (converted in method get_module_fields)
 		$param['fields'] = array_map('rawurldecode',$param['fields']);
 		try {
@@ -333,6 +335,7 @@ class databasecore extends solution {
 			if (
 					!empty($param['ruleParams']['deletion'])
 				AND	!empty($param['ruleParams']['deletionField'])
+				AND	$param['ruleParams']['deletionField'] != 'compareTable'	// Not a physical field, only used to compare table and Myddleware
 			) {
 				$param['fields'][] = $param['ruleParams']['deletionField'];
 			}
@@ -355,23 +358,23 @@ class databasecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
 			// Query building
-			$requestSQL = $this->get_query_select_header($param, 'read');	
+			$query['select'] = $this->get_query_select_header($param, 'read');	
 			// Build field list
 			foreach ($param['fields'] as $field){
 				// myddleware_generated isn't a real field in the database
 				if ($field != 'myddleware_generated') {
-					$requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // 
+					$query['select'] .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // 
 				}
 			}
 			// Remove the last coma
-			$requestSQL = rtrim($requestSQL,' '); 
-			$requestSQL = rtrim($requestSQL,',').' '; 
-			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
+			$query['select'] = rtrim($query['select'],' '); 
+			$query['select'] = rtrim($query['select'],',').' '; 
+			$query['from'] = "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
 			// if a specific query is requested we don't use date_ref
 			if (!empty($param['query'])) {
 				$nbFilter = count($param['query']);
-				$requestSQL .= " WHERE ";
+				$query['where'] = " WHERE ";
 				foreach ($param['query'] as $queryKey => $queryValue) {
 					// Manage query with id, to be replaced by the ref Id fieldname
 					if ($queryKey == 'id') {
@@ -380,18 +383,22 @@ class databasecore extends solution {
 						}
 						$queryKey = $param['ruleParams']['fieldId'];
 					}
-					$requestSQL .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
+					$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
 					$nbFilter--;
 					if ($nbFilter > 0){
-						$requestSQL .= " AND ";	
+						$query['where'] .= " AND ";	
 					}
 				}
 			} else {
-				$requestSQL .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
+				$query['where'] = " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
 			
-			$requestSQL .= " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
-			$requestSQL .= $this->get_query_select_limit_offset($param, 'read'); // Add query limit
+			$query['order'] = " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
+			$query['limit'] = $this->get_query_select_limit_offset($param, 'read'); // Add query limit
+			
+			// Build query
+			$requestSQL = $this->buildQuery($param, $query);
+	
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
@@ -442,13 +449,78 @@ class databasecore extends solution {
 					}
 					$result['values'][$row['id']] = $row;
 				}
-			}
+			}		
+			// Search for delete data 
+			$result = $this->searchDeletionByComparison($param, $result);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}			
+		}	
 		return $result;
 	} // read($param)
+	
+	protected function searchDeletionByComparison($param, $result) {
+		// If check deletion by comparaison is selected on the rule param
+		if (
+				!empty($param['ruleParams']['deletion'])
+			AND	!empty($param['ruleParams']['deletionField'])
+			AND	$param['ruleParams']['deletionField'] == 'compareTable'	
+		) {
+			// Search all data in the source application (can take long time)
+			$requestSQL = 'SELECT '.$this->stringSeparatorOpen.$param['ruleParams']['fieldId'].$this->stringSeparatorClose.' FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
+			$q = $this->pdo->prepare($requestSQL);		
+			$exec = $q->execute();
+			if(!$exec) {
+				$errorInfo = $this->pdo->errorInfo();
+				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
+			}
+			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+			// If result is empty, we stop the process because it would remove all data
+			if(!empty($fetchAll)) {
+				// Format result
+				foreach ($fetchAll as $sourceTableRecord) {
+					$sourceTableRecords[$sourceTableRecord[$param['ruleParams']['fieldId']]] = $sourceTableRecord[$param['ruleParams']['fieldId']];
+				}				
+				// Get all records already manage by Myddleware for this rule
+				// Prepare query to get the fieldId from the orther rules with the same connectors			
+				$connection = $this->getConn();
+				$query = "	SELECT source_id, GROUP_CONCAT(type) type
+							FROM Document 
+							WHERE 
+									global_status != 'Cancel'
+								AND rule_id = :id_rule
+							GROUP BY source_id";								
+				$stmt = $connection->prepare($query);
+				$stmt->bindValue(":id_rule", $param['rule']['id']);
+				$stmt->execute();	   				
+				$documents = $stmt->fetchAll(); 
+				
+				// Test all document found in Myddleware
+				foreach ($documents as $document) {
+					// if Myddleware record doesn't exist anymore in the source table
+					// and if no deletion document has alreday been generated for this record
+					// we generate a deletetion document
+					if (
+							!isset($sourceTableRecords[$document['source_id']])
+						AND strpos($document['type'], 'D') === false
+					) {
+						$row = array();
+						// Init all fields of the document
+						foreach ($param['fields'] as $field) {
+							$row[$field] = '';
+						}
+						// Fill Myddleware fields
+						$row['myddleware_deletion'] = true;
+						$row['id'] = $document['source_id'];
+						$row['date_modified'] = date('Y-m-d H:i:s');
+						$result['values'][$document['source_id']] = $row;
+						$result['count']++;
+					}
+				}
+			}
+		}
+		return $result;
+	}
 	
 	// Permet de créer des données
 	public function create($param) {	
@@ -489,8 +561,13 @@ class databasecore extends solution {
 					$sql = $this->queryValidation($param, 'create', $sql);	
 					
 					$q = $this->pdo->prepare($sql);
-					$exec = $q->execute();	
-					if(!$exec) {
+                    if (!$q) {
+                        $errorInfo = $this->pdo->errorInfo();
+                        throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                    }
+
+                    $exec = $q->execute();
+					if (!$exec) {
 						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
 					}
@@ -661,6 +738,11 @@ class databasecore extends solution {
 		return $requestSQL;
 	}
 	
+	// Function to buid the SELECT query
+	protected function buildQuery($param, $query) {
+		return $query['select'].$query['from'].$query['where'].$query['order'].$query['limit'];
+	}
+	
 	// Get the header of the select query in the read last function
 	protected function get_query_select_header($param, $method) {
 		return "SELECT ";
@@ -763,6 +845,9 @@ class databasecore extends solution {
 					}
 					// Add the possibility to generate an unique id
 					$idParam['option']['myddleware_generated'] = 'Generated by Myddleware';
+					
+					// Add a parameter for deletion to automatically check if a record has been deleted from the database
+					$deletionParam['option']['compareTable'] = 'Compare source table with Myddleware';
 
 					$params[] = $idParam;
 					$params[] = $dateParam;

@@ -47,10 +47,11 @@ Adesso possiamo generare il file `.ovpn` da inviare alla Workstastion o Server r
 Usare il seguente comando
 
 ```
-docker-compose -f docker-compose.yml exec vpn get_client NOMECLIENT > NOMECLIENT.ovpn
+docker-compose -f docker-compose.yml exec vpn get_client NOMECLIENT > var/vpn/NOMECLIENT.ovpn
 ```
 
-Consegnare il file appena creato e la chiava segreta dell'utente a chi opportuno.
+Per poter scaricare il file accedere al FileManager web presente con il progetto Myddleware dentro la cartella VPN,
+poi consegnare il file appena creato e la chiava segreta a dovrà connettere il cliente alla VPN.
 
 ## Casi particolari
 

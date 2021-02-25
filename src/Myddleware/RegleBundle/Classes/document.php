@@ -747,6 +747,22 @@ class documentcore {
 			// Transformation des données et insertion dans la table target
 			$transformed = $this->updateTargetTable();
 			if ($transformed) {
+				// If the type of this document is Create and if the field Myddleware_element_id isn't empty, 
+				// it means that the target ID is mapped in the rule field
+				// In this case, we force the document's type to Update because Myddleware will update the record into the target application
+				// using Myddleware_element_id as the target ID
+				if ($this->documentType == 'C') {
+					$target = $this->getDocumentData('T');	
+					if (!empty($target['Myddleware_element_id'])) {
+						$this->targetId = $target['Myddleware_element_id'];
+						if($this->updateTargetId($this->targetId)) {
+							$this->updateType('U');
+						} else {
+							throw new \Exception( 'The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ' );
+						}
+					}
+				}
+			
 				// If the type of this document is Update and the id of the target is missing, we try to get this ID
 				// Except if the rule is a child (no target id is required, it will be send with the parent rule)
 				if (
@@ -1213,7 +1229,7 @@ class documentcore {
 	En sortie la fonction renvoie la valeur du champ à envoyer dans le cible	
 	 */
 	public function getTransformValue($source,$ruleField) {
-		try {		
+	    try {
 			//--
 			if (!empty($ruleField['formula'])) {
 				// -- -- -- Formula management
@@ -1230,7 +1246,7 @@ class documentcore {
 							}
 							else {
 								// Erreur
-								throw new \Exception( 'The field '.$listFields.' is unknow in the formula '.$ruleField['formula'].'. ' );
+								throw new \Exception( 'The field '.$listFields.' is unknown in the formula '.$ruleField['formula'].'. ' );
 							}
 						}
 					}									
@@ -1254,7 +1270,7 @@ class documentcore {
 				) {
 					// Try the formula first
 					try {
-						eval($f.';'); // exec
+					    eval($f.';'); // exec
 					} catch (\ParseError $e) {
 						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
 					}

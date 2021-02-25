@@ -48,10 +48,35 @@ Adesso l'applicazione sara correttamente installata per accedere usate le seguen
 - Usate le seguenti credenziali: admin/admin
 
 > **AVVISO**: Potrebbe essere necessario aggiungere per la specifica installazione di myddleware delle regole di /etc/hosts
-> ad esempio per raggiungere CRM locali on dentro reti speciali, bastera scrivere le regole dentro il file `hosts` che trovate nella root del prpgetto
+> ad esempio per raggiungere CRM locali on dentro reti speciali, basterà scrivere le regole dentro il file `hosts` che trovate nella root del prpgetto
 
-Adesso bisogna mettere l'applicazione in modalità PRODUCTION
+Adesso bisogna mettere la applicazione in modalità PRODUCTION
 
 ```bash
 make prod
 ```
+
+## Fase finale
+
+La fase finale si occupa di far riavviare myddleware automaticamente qual'ora il server in cui si trovi sia spento e poi riaccesso
+
+seguire i seguenti passi 
+
+- Creare una nuova cartella con il seguente comando `sudo mkdir -p /etc/myddleware`
+
+- Copiare il file `docker-compose.sh` che si trova dentro la cartella `dev/script` nella nuova cartella `/etc/myddleware/`
+
+- Modificare il file appena copiato aggiugendo un blocco di codice per ogni istanza myddleware presente sul server
+indicando per ogniuna il nome istanza nel comando `echo` e la directory in cui è installata nel comando `cd`
+
+- Copiare il `myddleware.service` che si trova dentro la cartella `dev/script` nella cartella `/etc/systemd/system/`
+
+- Eseguire il comando `systemctl enable myddleware`
+
+Adesso riavviare il server e controllare al suo riavvio con il comando seguente (dopo qualche minuti) 
+
+```shell
+journalctl -u myddleware.service
+```
+
+Dovranno essere presenti i messaggi di log di 'RIAVVIO MYDDLEWARE: ...'

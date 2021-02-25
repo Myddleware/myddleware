@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "546012ae337fed0d324d2a2d3076a06a",
+    "content-hash": "0f6b8b9afa6abc30621bd63d47433298",
     "packages": [
         {
             "name": "api-platform/api-pack",
@@ -156,6 +156,54 @@
                 "swagger"
             ],
             "time": "2019-01-15T16:03:45+00:00"
+        },
+        {
+            "name": "automattic/woocommerce",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/woocommerce/wc-api-php.git",
+                "reference": "a71aa95cc3de3f1d68c6303525d03c0557a96137"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/woocommerce/wc-api-php/zipball/a71aa95cc3de3f1d68c6303525d03c0557a96137",
+                "reference": "a71aa95cc3de3f1d68c6303525d03c0557a96137",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">= 5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Automattic\\WooCommerce\\": [
+                        "src/WooCommerce"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Claudio Sanches",
+                    "email": "claudio.sanches@automattic.com"
+                }
+            ],
+            "description": "A PHP wrapper for the WooCommerce REST API",
+            "keywords": [
+                "api",
+                "woocommerce"
+            ],
+            "time": "2019-01-16T20:28:40+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -881,6 +929,7 @@
                 "cache",
                 "caching"
             ],
+            "abandoned": true,
             "time": "2019-11-29T11:22:01+00:00"
         },
         {
@@ -2451,16 +2500,16 @@
         },
         {
             "name": "javanile/vtiger-client",
-            "version": "0.0.21",
+            "version": "0.0.24",
             "source": {
                 "type": "git",
                 "url": "https://github.com/javanile/vtiger-client.git",
-                "reference": "9da3945059c9ffb6158cb3fd8f8346abb7f53dfc"
+                "reference": "f3c3af68005b327ace366e61fee30ebe646ef626"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/javanile/vtiger-client/zipball/9da3945059c9ffb6158cb3fd8f8346abb7f53dfc",
-                "reference": "9da3945059c9ffb6158cb3fd8f8346abb7f53dfc",
+                "url": "https://api.github.com/repos/javanile/vtiger-client/zipball/f3c3af68005b327ace366e61fee30ebe646ef626",
+                "reference": "f3c3af68005b327ace366e61fee30ebe646ef626",
                 "shasum": ""
             },
             "require": {
@@ -2486,7 +2535,7 @@
                     "email": "bianco@javanile.org"
                 }
             ],
-            "time": "2020-11-18T00:43:40+00:00"
+            "time": "2021-02-24T18:13:24+00:00"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -4087,6 +4136,7 @@
                 }
             ],
             "description": "A security checker for your composer.lock",
+            "abandoned": "https://github.com/fabpot/local-php-security-checker",
             "time": "2019-11-01T13:20:14+00:00"
         },
         {
@@ -6101,12 +6151,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },
@@ -6808,7 +6858,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2"
+        "php": ">=7.2 <7.4"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"

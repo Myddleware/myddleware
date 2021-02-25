@@ -65,6 +65,11 @@ class DefaultControllerCore extends Controller
 	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
 	protected $standardRuleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','deletionField','deletion','language');
     
+    // To allow sending a specific record ID to rule simulation
+    protected $simulationQueryField;
+
+
+
 	protected function getInstanceBdd()
     {
         if (empty($this->em)) {
@@ -74,6 +79,10 @@ class DefaultControllerCore extends Controller
             $this->connection = $this->get('database_connection');
         }
     }
+	
+	protected function getStandardRuleParam() {
+		return $this->standardRuleParam;
+	}
 
     /* ******************************************************
      * RULE
@@ -315,6 +324,33 @@ class DefaultControllerCore extends Controller
             return $this->redirect($this->generateUrl('regle_list'));
         }
     }
+
+    public function cancelRuleTransfersAction($id){
+        try {
+            $rule = $this->container->get('myddleware_rule.rule');
+            $rule->setRule($id);
+            $result = $rule->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+    
+        } catch(\Exception $e){
+            return $e->getMessage();
+        }
+        return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+    
+    }
+
+
+    public function deleteRuleTransfersAction($id){
+        try {
+               $rule = $this->container->get('myddleware_rule.rule');
+               $rule->setRule($id);
+               $result = $rule->actionRule('runMyddlewareJob', 'deleteDocumentJob');
+        } catch(\Exception $e){
+            return $e->getMessage();
+        }
+         return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+    
+    }
+
 
     // MODIFIE LES PARAMETRES D UNE REGLE
     public function ruleUpdParamsAction($id) {
@@ -844,8 +880,7 @@ class DefaultControllerCore extends Controller
                         $em = $this->getDoctrine()->getManager();
                         $solution = $em->getRepository('RegleBundle:Solution')
                             ->findOneByName($classe);
-
-
+                            
                         $connector = new Connector();
                         $connector->setSolution($solution);
 
@@ -1120,7 +1155,6 @@ class DefaultControllerCore extends Controller
                 '' // Params flux
             );
 
-
             $solution_source_nom = $serviceSession->getParamRuleSourceSolution($ruleKey);
             $solution_source = $this->get('myddleware_rule.' . $solution_source_nom);
             $solution_source->login($serviceSession->getParamRuleSource($ruleKey));
@@ -1133,7 +1167,6 @@ class DefaultControllerCore extends Controller
                 foreach ($target['fields'] as $f) {
                     if (isset($f)) {
                         foreach ($f as $name_fields_target => $k) {
-
                             if (isset($k['champs'])) {
                                 $sourcesfields = array_merge($k['champs'], $sourcesfields);
                             } else {
@@ -1156,23 +1189,46 @@ class DefaultControllerCore extends Controller
 		
 			// Add rule param if exist (the aren't exist in rule creation)
 			$ruleParams = array();
-			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey);
-			if (!empty($ruleParamsResult)) {
+			$ruleParamsResult = $this->getDoctrine()->getManager()->getRepository('RegleBundle:RuleParam')->findByRule($ruleKey); 
+            if (!empty($ruleParamsResult)) {
 				foreach ($ruleParamsResult as $ruleParamsObj) {
-					$ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+                    $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
 				}
-			}
-			
-            // Get source data
-            $source = $solution_source->read_last(array(
-                'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
-                'fields' => $sourcesfields,
-				'ruleParams' => $ruleParams));
+            }
+          
+                // Get result from AJAX request in regle.js 
+                $form = $request->request->all();
+                if(isset($form['query'])){
+                    $this->simulationQueryField = $form['query'];
+                }
+     
+                // Avoid sending query on specific record ID if the user didn't actually input something
+                if(empty($this->simulationQueryField)){
+                    // Get source data
+                    $source = $solution_source->read_last(array(
+                        'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+                        'fields' => $sourcesfields,
+                        'ruleParams' => $ruleParams
+                    ));
+                } else {
+                        // Get source data with query on specific record ID
+                        $source = $solution_source->read_last(array(
+                            'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
+                            'fields' => $sourcesfields,
+                            'ruleParams' => $ruleParams,
+                            'query' => array('id' => $this->simulationQueryField)
+                        )); 
+
+                        // In case of wrong record ID input from user 
+                        if(!empty($source['error'])){
+                            return $this->render('RegleBundle:Rule:create/onglets/invalidrecord.html.twig');
+                        }   
+                }
 
             if (isset($source['done'])) {
                 $before = array();
                 $after = array();
-                if ($source['done']) {
+                if ($source['done']) {             
                     foreach ($target['fields'] as $f) {
                         foreach ($f as $name_fields_target => $k) {
                             $r['after'] = array();
@@ -1188,17 +1244,17 @@ class DefaultControllerCore extends Controller
 
                             // Transformation
                             $r['after'][$name_fields_target] = $doc->getTransformValue($source['values'], $target_fields);
-							// If error during transformation, we send back the error
-							if (
-									$r['after'][$name_fields_target] == null 
-								AND !empty($doc->getMessage())
-							) {
-								$r['after'][$name_fields_target] = $doc->getMessage();
-								// Refresh the document message
-								$doc->setMessage('');
-							}
+                            // If error during transformation, we send back the error
+                            if (
+                                    $r['after'][$name_fields_target] == null 
+                                AND !empty($doc->getMessage())
+                            ) {
+                                $r['after'][$name_fields_target] = $doc->getMessage();
+                                // Refresh the document message
+                                $doc->setMessage('');
+                            }
 
-							$k['fields'] = array();
+                            $k['fields'] = array();
                             if (empty($k['champs'])) {
                                 $k['fields']['Formula'] = ((isset($k['formule'][0]) ? $k['formule'][0] : ''));
                             } else {
@@ -1232,14 +1288,16 @@ class DefaultControllerCore extends Controller
                     }
                 }
             }
+
             return $this->render('RegleBundle:Rule:create/onglets/simulation_tab.html.twig', array(
                     'before' => $before, // source
                     'after' => $after, // target
                     'data_source' => $source['done'],
-                    'params' => $serviceSession->getParamRule($ruleKey)
+                    'params' => $serviceSession->getParamRule($ruleKey),
+                    'simulationQueryField' => $this->simulationQueryField,        
                 )
             );
-
+            
         } else {
             throw $this->createNotFoundException('Error');
         }
@@ -1726,7 +1784,8 @@ class DefaultControllerCore extends Controller
                 'fieldMappingAddListType' => $fieldMappingAdd,
                 'parentRelationships' => $allowParentRelationship,
                 'lst_parent_fields' => $lstParentFields,
-                'regleId' => $ruleKey
+                'regleId' => $ruleKey,
+                'simulationQueryField' => $this->simulationQueryField
             );
 
             $result = $this->beforeRender($result);
@@ -1736,7 +1795,6 @@ class DefaultControllerCore extends Controller
             $result['lst_parent_fields'] = tools::composeListHtml($result['lst_parent_fields'], ' ');
             $result['lst_rule'] = tools::composeListHtml($result['lst_rule'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
             $result['lst_filter'] = tools::composeListHtml($result['lst_filter'], $this->get('translator')->trans('create_rule.step3.relation.fields'));
-
             return $this->render('RegleBundle:Rule:create/step3.html.twig', $result);
 
             // ----------------
@@ -1888,8 +1946,8 @@ class DefaultControllerCore extends Controller
             // On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
             $this->em->flush();
             $sessionService->setRuleId($ruleKey, $oneRule->getId());
-            $nameRule = $oneRule->getNameSlug();
 
+            $nameRule = $oneRule->getNameSlug();
             // BEFORE SAVE rev 1.08 ----------------------
             $relationshipsBeforeSave = $request->request->get('relations');
             $before_save = RuleClass::beforeSave($this->container,
@@ -1970,7 +2028,7 @@ class DefaultControllerCore extends Controller
                         if ($ruleParam->getName() == 'datereference') {
                             $date_reference = $ruleParam->getValue();
                         }
-						if (in_array($ruleParam->getName(), $this->standardRuleParam)) {
+						if (in_array($ruleParam->getName(), $this->getStandardRuleParam())) {
 							$this->em->remove($ruleParam);
 							$this->em->flush();
 						}
@@ -1978,6 +2036,7 @@ class DefaultControllerCore extends Controller
                 }
             } // Create mode
             else {
+             
                 if ($sessionService->isParamRuleSourceDateReference($ruleKey) && $sessionService->getParamRuleSourceDateReference($ruleKey)) {
                     $date_reference = date('Y-m-d 00:00:00');
                 } else {
@@ -2573,7 +2632,6 @@ class DefaultControllerCore extends Controller
     // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
     private function createListeParamsRule($fields, $formula, $params)
     {
-
         $phrase_placeholder = $this->get('translator')->trans('rule.step3.placeholder');
         $tab = array();
 
@@ -2611,7 +2669,6 @@ class DefaultControllerCore extends Controller
                 $tab['params'][$p['name']] = $p['value'];
             }
         }
-
         return $tab;
     }
 
@@ -2691,6 +2748,8 @@ class DefaultControllerCore extends Controller
             return $encrypter->decrypt($tab_params);
         }
     }
+
+
 
 }
 
