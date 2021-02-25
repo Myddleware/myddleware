@@ -80,8 +80,3 @@ journalctl -u myddleware.service
 ```
 
 Dovranno essere presenti i messaggi di log di 'RIAVVIO MYDDLEWARE: ...'
-
-
-
-
-
