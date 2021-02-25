@@ -57,8 +57,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'facebook',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'iadvize',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'wooeventmanager',	'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'wordpress',		    'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'wooeventmanager',	'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'wordpress',		    'active' => 0, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)
@@ -70,19 +70,28 @@ class LoadSolutionData implements FixtureInterface
 
     private function generateEntities()
     {
-        foreach ($this->solutionData as $solution) {
-            // Check if the solution doesn't exist in Myddleware we create it else we update it
-            $sol = $this->manager->getRepository(Solution::class)->findOneByName($solution['name']);
-            if (
-                    empty($sol)
-                 || empty($sol->getId())
-            ) {
-                $sol = new Solution();
-            }
-            $sol->setName($solution['name']);
-            $sol->setActive($solution['active']);
-            $sol->setSource($solution['source']);
-            $sol->setTarget($solution['target']);
+		// Get all solutions already in the database
+		$solutions = $this->manager->getRepository(Solution::class)->findAll();
+        foreach ($this->solutionData as $solutionData) {
+			$foundSolution = false;
+			if (!empty($solutions)) {
+				foreach ($solutions as $solution) {
+					if ($solution->getName() == $solutionData['name']) {
+						$foundSolution = true;
+						$sol = $solution;					
+						break;
+					}
+				}
+			}
+
+            // If we didn't found the solution we create a new one, otherwise we update it
+			if (!$foundSolution) {
+                $sol = new Solution();			
+            }		
+            $sol->setName($solutionData['name']);
+            $sol->setActive($solutionData['active']);
+            $sol->setSource($solutionData['source']);
+            $sol->setTarget($solutionData['target']);
             $this->manager->persist($sol);
         }
     }
