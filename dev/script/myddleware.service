@@ -7,7 +7,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=/srv/docker
+WorkingDirectory=/etc/myddleware/
 ExecStart=bash /etc/myddleware/docker-compose.sh
 TimeoutStartSec=5
 
