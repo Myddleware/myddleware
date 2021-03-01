@@ -7,8 +7,12 @@
 {% block body %}
 <div id="myd_top"></div>
 <div class="container">
+
+
     <div class="row">
         <div class="col">
+
+
            <p><span id="logo"></span></p>
             <div class="row">
                 <div class="col-md-6">
@@ -23,10 +27,12 @@
                                     {{ form(form) }}
                                     {% if submitted %}
                                     <a href="{{ path('database_connect') }}" id="test">
-                                        <button type="button" class="btn btn-primary btn-block"> {{'install.next'|trans}}  </button>
+                                        <button type="button" class="btn btn-primary btn-block">
+                                         {{'install.next'|trans}} 
+                                           <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> </button>
                                     </a>
                                     {% else %}
-                                        <button type="button" class="btn btn-primary btn-block" disabled> {{'install.next'|trans}} </button>
+                                        <button type="button" class="btn btn-default btn-block" disabled> {{'install.next'|trans}} </button>
                                     {% endif %} 
                                     <div class="panel-footer">
                                         <a href="{{path('install_requirements')}}">
@@ -48,7 +54,9 @@
 <footer>
     {% include 'footer.html.twig' %}
 </footer>
+
  {% block javascripts %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
      {{ encore_entry_script_tags('install') }}
  {% endblock %}
 {% endblock %}
