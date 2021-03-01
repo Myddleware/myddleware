@@ -882,7 +882,9 @@ class vtigercrmcore extends solution
             return;
         }
 
+        $lineItemIndex = 0;
         foreach ($lineItems as $idDoc => $lineItem) {
+            /*
             $lineItemMatched = false;
             $sequenceSpan = '';
             foreach ($retrieve['result']['LineItems'] as $retrieveLineItem) {
@@ -902,7 +904,19 @@ class vtigercrmcore extends solution
                     'error' => "LineItem mismatch, problem with source sequence_no='$lineItem[sequence_no]' target spans over '$sequenceSpan'",
                 ];
             }
+            */
+            $targetLineItemIndex = 0;
+            foreach ($retrieve['result']['LineItems'] as $retrieveLineItem) {
+                if ($lineItemIndex === $targetLineItemIndex) {
+                    $result[$idDoc] = [
+                        'id' => $retrieveLineItem['id'],
+                        'error' => false,
+                    ];
+                }
+                $targetLineItemIndex++;
+            }
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+            $lineItemIndex++;
         }
     }
 
