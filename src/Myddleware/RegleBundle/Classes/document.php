@@ -476,7 +476,6 @@ class documentcore {
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
-            /*REMOVE*/$this->message = __LINE__;
 			return false;
 		}
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -605,7 +604,6 @@ class documentcore {
 						$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
 						$this->updateStatus('Cancel');
 						$this->connection->commit(); // -- COMMIT TRANSACTION
-                        /*REMOVE*/$this->message = __LINE__;
 						return false;
 					}
 					throw new \Exception('No target id found for a document with the type Update. ');
@@ -624,16 +622,16 @@ class documentcore {
 					$this->ruleMode == 'C' 
 				AND $this->documentType == 'U'
 				AND !$this->isChild()
-			) {	
+			) {
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+				$lastMessage = $this->message;
 				$this->updateStatus('Filter');
 				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 				$this->connection->commit(); // -- COMMIT TRANSACTION
-                /*REMOVE*/$this->message = __LINE__;
+                $this->message = $lastMessage;
 				return false;
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION
-            /*REMOVE*/$this->message = __LINE__;
 			return true;
 		} catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -643,7 +641,6 @@ class documentcore {
 			$this->typeError = 'E';
 			$this->updateStatus('Predecessor_KO');
 			$this->logger->error($this->message);
-            /*REMOVE*/$this->message = __LINE__;
 			return false;
 		}		
 	}
