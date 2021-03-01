@@ -7,7 +7,6 @@ use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Form\Type\UserForgotPasswordType;
 use App\Manager\NotificationManager;
-use App\Repository\ConfigRepository;
 use App\Repository\UserRepository;
 use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,10 +49,6 @@ class SecurityController extends AbstractController
      */
     private $securityService;
 
-    /**
-     * @var ConfigRepository;
-     */
-    private $configRepository;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
@@ -61,8 +56,8 @@ class SecurityController extends AbstractController
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
-        SecurityService $securityService,
-        ConfigRepository $configRepository
+        SecurityService $securityService
+
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->encoder = $encoder;
@@ -70,7 +65,6 @@ class SecurityController extends AbstractController
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
         $this->securityService = $securityService;
-        $this->configRepository = $configRepository;
     }
 
     /**
