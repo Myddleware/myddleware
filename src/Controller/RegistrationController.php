@@ -66,8 +66,12 @@ class RegistrationController extends AbstractController
 
          // block install from here as user has successfully installed Myddleware now
             foreach($configs as $config){
-                $config->setAllowInstall(false);
-                $entityManager->persist($config);
+                // $config->setAllowInstall(false);
+                if($config->getClef() === 'allow_install'){
+                    $config->setValue('false');
+                    $entityManager->persist($config);
+                }
+               
             }
 
             $entityManager->persist($user);

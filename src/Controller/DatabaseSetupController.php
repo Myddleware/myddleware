@@ -56,11 +56,10 @@ class DatabaseSetupController extends AbstractController
                 }
             } else {
 
-                //clear database of all previous configs (to prevent conflicts with Voter on whether or not installation is allowed)
-                $this->configRepository->deleteAll();
-                $config = new Config();
                 // will be used by the InstallVoter to determine access to all install routes
-                $config->setAllowInstall(true);
+                $config = new Config();
+                $config->setClef('allow_install');
+                $config->setValue('true');
                 $this->entityManager->persist($config);
                 $this->entityManager->flush();
             
@@ -206,21 +205,16 @@ class DatabaseSetupController extends AbstractController
                 $this->connectionSuccessMessage = $content;
 
                 //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
-                if(strlen($this->connectionSuccessMessage) > 250) {
+                if(strlen($this->connectionSuccessMessage) > 300) {
                     $this->connectionFailedMessage = $this->connectionSuccessMessage;
                     // trim the message to remove unnecessary stack trace
                     $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
-                    // $this->connectionSuccessMessage = '';
                 }
                
-                //clear database of all previous configs (to prevent conflicts with Voter on whether or not installation is allowed)
-                $this->configRepository->deleteAll();
-             
+                 // will be used by the InstallVoter to determine access to all install routes
                 $config = new Config();
-                // will be used by the InstallVoter to determine access to all install routes
-                $config->setAllowInstall(true);
-
-            
+                $config->setClef('allow_install');
+                $config->setValue('true');
                 $this->entityManager->persist($config);
                 $this->entityManager->flush();
            
@@ -287,11 +281,10 @@ class DatabaseSetupController extends AbstractController
            $this->connectionSuccessMessage = $content;
         
            //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
-           if(strlen($this->connectionSuccessMessage) > 150) {
+           if(strlen($this->connectionSuccessMessage) > 300) {
                $this->connectionFailedMessage = $this->connectionSuccessMessage;
                // trim the message to remove unnecessary stack trace
                $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
-               $this->connectionSuccessMessage = '';
            }
 
         return $this->render('database_setup/load_fixtures.html.twig', 

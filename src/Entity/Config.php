@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ConfigRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ConfigRepository::class)
@@ -18,23 +19,42 @@ class Config
     private $id;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Unique
      */
-    private $allowInstall;
+    private $clef;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $value;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getAllowInstall(): ?bool
+
+    public function getClef(): ?string
     {
-        return $this->allowInstall;
+        return $this->clef;
     }
 
-    public function setAllowInstall(?bool $allowInstall): self
+    public function setClef(string $clef): self
     {
-        $this->allowInstall = $allowInstall;
+        $this->clef = $clef;
+
+        return $this;
+    }
+
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
+
+    public function setValue(string $value): self
+    {
+        $this->value = $value;
 
         return $this;
     }
