@@ -21,6 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\DBAL\Driver\PDO\Exception as DBALDriverPDOException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class DatabaseSetupController extends AbstractController
 {
@@ -151,7 +152,7 @@ class DatabaseSetupController extends AbstractController
                 ]);
 
             } else {
-                throw new Exception($e->getMessage().' '. $e->getFile().' Line :  '.$e->getLine());
+                return $this->redirectToRoute('login');
             }
         }
 
@@ -183,16 +184,8 @@ class DatabaseSetupController extends AbstractController
                         $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
                     }
                 } 
-            
+
             } else {     
-           
-                 //to help voter decide whether we allow access to install process again or not
-                 $configs = $this->configRepository->findAll();
-                 if(!empty($configs)){
-                     foreach($configs as $config) {
-                         $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-                     }
-                 } 
              
                 $env = $kernel->getEnvironment();
 
@@ -213,13 +206,13 @@ class DatabaseSetupController extends AbstractController
                 $this->connectionSuccessMessage = $content;
 
                 //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
-                if(strlen($this->connectionSuccessMessage) > 150) {
+                if(strlen($this->connectionSuccessMessage) > 250) {
                     $this->connectionFailedMessage = $this->connectionSuccessMessage;
                     // trim the message to remove unnecessary stack trace
                     $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
-                    $this->connectionSuccessMessage = '';
+                    // $this->connectionSuccessMessage = '';
                 }
-         
+               
                 //clear database of all previous configs (to prevent conflicts with Voter on whether or not installation is allowed)
                 $this->configRepository->deleteAll();
              
@@ -230,7 +223,7 @@ class DatabaseSetupController extends AbstractController
             
                 $this->entityManager->persist($config);
                 $this->entityManager->flush();
-            
+           
                 return $this->render('database_setup/database_connection.html.twig', [
                     'connection_success_message' =>  $this->connectionSuccessMessage,
                     'connection_failed_message' => $this->connectionFailedMessage,
@@ -238,17 +231,21 @@ class DatabaseSetupController extends AbstractController
             }  
 
         } catch(ConnectionException  | DBALException  | Exception $e){
-            
-            // if the database doesn't exist yet, create it
-            if($e instanceof ConnectionException ){
-                $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. <br/> '.$e->getMessage();
+  
+            // if the database doesn't exist yet, ask user to go create it
+            if($e instanceof ConnectionException){
+                $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
                 return $this->render('database_setup/database_connection.html.twig', [
                     'connection_success_message' =>  $this->connectionSuccessMessage,
                     'connection_failed_message' => $this->connectionFailedMessage,
                 ]);
             }
 
-            return $this->redirectToRoute('database_setup');
+            if($e instanceof AccessDeniedException ) {
+                return $this->redirectToRoute('login');
+            }
+
+             return $this->redirectToRoute('database_setup');
         } 
         
         
@@ -261,6 +258,8 @@ class DatabaseSetupController extends AbstractController
       public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response 
       {
       
+        try {
+
           //to help voter decide whether we allow access to install process again or not
           $configs = $this->configRepository->findAll();
           if(!empty($configs)){
@@ -284,9 +283,6 @@ class DatabaseSetupController extends AbstractController
         $application->run($fixturesInput, $fixturesOutput);
         $content = $fixturesOutput->fetch();
 
- //TODO : bugfix -> this currently doesn't work from here (but it does in terminal command line..)
- // view https://github.com/Myddleware/myddleware/issues/451 to get full error message from doctrine
-
            //send the message sent by Doctrine to the user's view
            $this->connectionSuccessMessage = $content;
         
@@ -303,6 +299,14 @@ class DatabaseSetupController extends AbstractController
                 'connection_success_message' =>  $this->connectionSuccessMessage,
                 'connection_failed_message' => $this->connectionFailedMessage,
             ]);
+
+        } catch (Exception $e){
+         
+            if($e instanceof AccessDeniedException ) {
+                return $this->redirectToRoute('login');
+            }
+        }
+
       }
 
 

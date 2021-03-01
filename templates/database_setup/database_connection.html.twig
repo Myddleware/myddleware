@@ -22,7 +22,7 @@
                                     {% if connection_failed_message %}
                                         <p class="alert-danger">{{ connection_failed_message }}</p>
                                         <p>Go back to the previous page to reset your database connection</p>
-                                    {% else %}
+                                    {% elseif connection_success_message %}
                                         <p class="alert-success">{{ connection_success_message }}</p>
                                     {% endif %}
                                     <div class="buttons">

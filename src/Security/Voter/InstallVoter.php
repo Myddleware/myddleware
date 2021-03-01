@@ -12,9 +12,9 @@ class InstallVoter extends Voter
     protected function supports($attribute, $subject)
     {
         
-// TODO : change database parameter to another new object called Config with only allowInstall inside
+// TODO : change Config structure to key/value pairs for allowInstall
 
-             // only vote on `DatabaseParameter` objects
+             // only vote on `Config` objects
              if (!$subject instanceof Config) {
                 return false;
             }
