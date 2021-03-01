@@ -869,7 +869,7 @@ class vtigercrmcore extends solution
             foreach ($lineItems as $idDoc => $lineItem) {
                 $result[$idDoc] = [
                     'id' => '-1',
-                    'error' => $resultUpdate["error"]["message"]
+                    'error' => $resultUpdate['error']['message']
                 ];
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
@@ -877,22 +877,32 @@ class vtigercrmcore extends solution
             return;
         }
 
-        $retrive = $this->getVtigerClient()->retrieve($resultUpdate['result']['id']);
-        if (empty($retrive['success']) || empty($retrive['result']['LineItems'])) {
+        $retrieve = $this->getVtigerClient()->retrieve($resultUpdate['result']['id']);
+        if (empty($retrieve['success']) || empty($retrieve['result']['LineItems'])) {
             return;
         }
 
         foreach ($lineItems as $idDoc => $lineItem) {
-            foreach ($retrive['result']['LineItems'] as $retriveLineItem) {
-                if ($retriveLineItem['sequence_no'] != $lineItem['sequence_no']) {
+            $lineItemMatched = false;
+            $sequenceSpan = '';
+            foreach ($retrieve['result']['LineItems'] as $retrieveLineItem) {
+                $sequenceSpan .= $sequenceSpan ? ','.$retrieveLineItem['sequence_no'] : $retrieveLineItem['sequence_no'];
+                if ($retrieveLineItem['sequence_no'] != $lineItem['sequence_no']) {
                     continue;
                 }
+                $lineItemMatched = true;
                 $result[$idDoc] = [
-                    'id' => $retriveLineItem['id'],
+                    'id' => $retrieveLineItem['id'],
                     'error' => false,
                 ];
-                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
+            if (!$lineItemMatched) {
+                $result[$idDoc] = [
+                    'id' => -1,
+                    'error' => "LineItem mismatch, problem with source sequence_no='$lineItem[sequence_no]' target spans over '$sequenceSpan'",
+                ];
+            }
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
     }
 
