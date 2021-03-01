@@ -1032,7 +1032,7 @@ class rulecore {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
 			}
 			else {
-				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
+				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO ('.json_encode($response[$id_document]).')';
 			}
 		}
 		if ($response[$id_document] === true || in_array($status,array('Predecessor_OK','Relate_KO'))) {
