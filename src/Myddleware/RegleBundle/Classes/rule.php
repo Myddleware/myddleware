@@ -553,6 +553,9 @@ class rulecore {
 				$param['ruleRelationships'] = $this->ruleRelationships;
 				$doc = new document($this->logger, $this->container, $this->connection, $param);
 				$response[$document['id']] = $doc->ckeckPredecessorDocument();
+				if (!$response[$document['id']]) {
+				    $this->logger->error("Predecessor for document '$document[id]' with message: ".$doc->getMessage());
+                }
 			}			
 		}
 		return $response;
