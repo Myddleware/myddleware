@@ -428,10 +428,10 @@ class jobcore  {
 				// Run documents
 				if (!empty($documents)) {
 					foreach ($documents as $doc) {
-						$errors = $rule->actionDocument($doc->id,'rerun');
+						$errors = $rule->actionDocument($doc->id, 'rerun');
 						// Check errors
 						if (!empty($errors)) {									
-							$this->message .=  'Document '.$doc->id.' in error on job (rule '.$ruleId.')  : '.$errors[0].'. ';
+							$this->message .=  'Document '.$doc->id.' in error on job (rule '.$ruleId.')  : ('.count($errors).') '.$errors[0].'. ';
 						}
 					}
 				}
