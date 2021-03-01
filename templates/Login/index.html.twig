@@ -59,6 +59,10 @@
 			</form>
 		</div>
 		<div class="grey">
+			<p>Before trying to log in, please ensure you've completed the installation process</p>
+			<a href="{{ path('install_requirements')}}">
+				<button type="button" class="btn-mydinv">Install Myddleware</button>
+			</a>	
 			{% if platform_sh == true %}
 				<p class="ctr"><span class="logo_platform"></span></p>
 			{% else %}

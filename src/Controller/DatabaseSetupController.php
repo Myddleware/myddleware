@@ -90,8 +90,9 @@ class DatabaseSetupController extends AbstractController
                 if(file_exists($envLocal) && is_file($envLocal)){
                     // we edit the database connection parameters with form input
                     $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                    $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
                     // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                    file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
+                    file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
                 }
 
                     // allow to proceed to next step

@@ -7,6 +7,7 @@ use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Form\Type\UserForgotPasswordType;
 use App\Manager\NotificationManager;
+use App\Repository\ConfigRepository;
 use App\Repository\UserRepository;
 use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,13 +50,19 @@ class SecurityController extends AbstractController
      */
     private $securityService;
 
+    /**
+     * @var ConfigRepository;
+     */
+    private $configRepository;
+
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
         EncoderFactoryInterface $encoder,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
-        SecurityService $securityService
+        SecurityService $securityService,
+        ConfigRepository $configRepository
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->encoder = $encoder;
@@ -63,6 +70,7 @@ class SecurityController extends AbstractController
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
         $this->securityService = $securityService;
+        $this->configRepository = $configRepository;
     }
 
     /**
@@ -76,7 +84,7 @@ class SecurityController extends AbstractController
         if ($this->getUser() instanceof User) {
             return $this->redirectToRoute('regle_panel');
         }
-
+        
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         if(!empty($error)){
