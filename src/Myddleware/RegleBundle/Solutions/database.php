@@ -640,10 +640,6 @@ class databasecore extends solution {
 					$sql = $this->queryValidation($param, 'update', $sql);					
 					// Execute the query					
 					$q = $this->pdo->prepare($sql);
-                    if($this->pdo->errorInfo()) {
-                        $errorInfo = $this->pdo->errorInfo();
-                        throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
-                    }
 					$exec = $q->execute();
 					if(!$exec) {
 						$errorInfo = $this->pdo->errorInfo();						
