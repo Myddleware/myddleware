@@ -431,7 +431,7 @@ class jobcore  {
 						$errors = $rule->actionDocument($doc->id,'rerun');
 						// Check errors
 						if (!empty($errors)) {									
-							$this->message .=  'Document '.$doc->id.' in error (rule '.$ruleId.')  : '.$errors[0].'. ';
+							$this->message .=  'Document '.$doc->id.' in error on job (rule '.$ruleId.')  : '.$errors[0].'. ';
 						}
 					}
 				}
