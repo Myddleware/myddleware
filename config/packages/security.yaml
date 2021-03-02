@@ -1,7 +1,8 @@
 #app/config/security.yaml
 security:
     encoders:
-        App\Entity\User: sha512
+        App\Entity\User:
+            algorithm: bcrypt
 
     providers:
         username_provider:

@@ -101,20 +101,25 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         if (!$user->isEnabled()) {
             throw new CustomUserMessageAuthenticationException('Votre compte est désactivé.');
         }
+
+       //TODO : THIS NEEDS TO BE UPDATED / FINISHED TO BE IN LINE WITH NEW ENCRYTPION (bcrypt)
+
         // FOS USER BUNDLE ALGORYTHM
-        $password = $credentials['password'];
-        $salt = $user->getSalt();
-        $this->securityService->hashPassword($password, $salt);
+        // $password = $credentials['password'];
+        // $salt = $user->getSalt();
+      
+        // $this->securityService->hashPassword($password, $salt);
 
-        // Check validation
-        if ($password === $user->getPassword()) {
-            // Save Last Login date
-            $user->setLastLogin(new DateTime());
-            $this->entityManager->flush();
+        // // Check validation
+        // if ($password === $user->getPassword()) {
+        //     // Save Last Login date
+        //     $user->setLastLogin(new DateTime());
+        //     $this->entityManager->flush();
 
-            return true;
-        }
+        //     return true;
+        // }
 
+        return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
         throw new CustomUserMessageAuthenticationException('Identifiants invalides.');
     }
 

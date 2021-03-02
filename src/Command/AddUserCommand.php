@@ -13,6 +13,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use function Symfony\Component\String\u;
 use App\Utils\Validator;
@@ -61,8 +62,9 @@ class AddUserCommand extends Command
     private $passwordEncoder;
     private $validator;
     private $users;
+    private $securityService;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users)
+    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, SecurityService $securityService)
     {
         parent::__construct();
 
@@ -70,6 +72,7 @@ class AddUserCommand extends Command
         $this->passwordEncoder = $encoder;
         $this->validator = $validator;
         $this->users = $users;
+        $this->securityService = $securityService;
     }
 
     /**
@@ -180,13 +183,15 @@ class AddUserCommand extends Command
        
         $user->setUsername($username);
         $user->setEmail($email);
-        $user->setRoles([$isAdmin ? 'ROLE_ADMIN' : 'ROLE_USER']);
+        // $user->setRoles([$isAdmin ? 'ROLE_ADMIN' : 'ROLE_USER']);
+        $user->addRole('ROLE_ADMIN');
         $user->setEnabled(true);
         $user->setUsernameCanonical($username);
         $user->setEmailCanonical($email);
-
+        
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
         $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
+        // $encodedPassword = $this->securityService->hashPassword($plainPassword, null);
         $user->setPassword($encodedPassword);
 
         $this->entityManager->persist($user);
