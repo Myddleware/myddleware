@@ -506,7 +506,7 @@ class erpnextcore extends solution
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
             throw new \Exception('curl extension is missing!');
         }
-        $fileTmp = $this->container->getParameter('kernel.cache_dir').'/myddleware/solutions/erpnext/erpnext.txt';
+        $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/solutions/erpnext/erpnext.txt';
         $fs = new Filesystem();
         try {
             $fs->mkdir(dirname($fileTmp));
