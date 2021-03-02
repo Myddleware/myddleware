@@ -457,20 +457,18 @@ if (file_exists($file)) {
         public function ruleExecAction($id)
         {
             try {
-
-                $rule = $this->ruleRepository->find($id);
-                
+                $this->ruleManager->setRule($id);
                 if ('ALL' == $id) {
-                    $this->ruleManager->actionRule('ALL', $rule);
+                    $this->ruleManager->actionRule('ALL');
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 } elseif ('ERROR' == $id) {
-                    $this->ruleManager->actionRule('ERROR', $rule);
+                    $this->ruleManager->actionRule('ERROR');
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
              
-                $this->ruleManager->actionRule('runMyddlewareJob', $rule);
+                $this->ruleManager->actionRule('runMyddlewareJob');
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
