@@ -29,6 +29,7 @@ class AppKernel extends Kernel
             new Myddleware\RegleBundle\RegleBundle(),   
             new Myddleware\UserBundle\UserBundle(),
             new Myddleware\ApiBundle\v1_0\MyddlewareApiBundle(),
+            new Myddleware\InstallBundle\MyddlewareInstallBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

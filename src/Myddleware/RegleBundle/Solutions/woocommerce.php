@@ -2,8 +2,8 @@
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  StÃ©phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2017  StÃ©phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
  *
  * This file is part of Myddleware.
@@ -72,6 +72,7 @@ class woocommercecore extends solution {
     public function login($paramConnexion) {
         parent::login($paramConnexion);
 		try{	
+       
             $this->woocommerce = new Client(
                 $this->paramConnexion['url'],
                 $this->paramConnexion['consumerkey'],
@@ -116,17 +117,18 @@ class woocommercecore extends solution {
                 $this->moduleFields = $moduleFields[$module];
             }
             if (!empty($fieldsRelate[$module])) {
-				        $this->fieldsRelate = $fieldsRelate[$module]; 
-			      }	
-            // Includ relate fields into moduleFields to display them in the field mapping tab
-            if (!empty($this->fieldsRelate)) {
-                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            }
-            return $this->moduleFields;
-          } catch (\Exception $e) {		
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
-            return false;
-		    }	
+				$this->fieldsRelate = $fieldsRelate[$module]; 
+			}	
+			// Includ relate fields into moduleFields to display them in the field mapping tab
+			if (!empty($this->fieldsRelate)) {
+				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			}
+			return $this->moduleFields;
+
+        } catch (\Exception $e) {		
+			$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
+			return false;
+		}	
     }
 
     // Read all fields, ordered by date_modified
@@ -156,16 +158,15 @@ class woocommercecore extends solution {
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
             } 
-             // Remove Myddleware's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+            // Remove Myddleware's system fields
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
-            // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields'],$module);
+			// Add required fields
+			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
             $stop = false;
             $count = 0;
             $page = 1;
-
             do {
                 //for specific requests (e.g. readrecord with an id)
                 if(!empty($query)){
@@ -280,7 +281,95 @@ class woocommercecore extends solution {
 			$result['done'] = -1;		
         }
         return $result;
+    }
+    
+   /**
+	 * Function create data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function create($param) {
+		return $this->upsert('create', $param);
+
+    }
+    
+    /**
+	 * Function update data
+	 * @param $param
+	 * @return mixed
+	 */
+	public function update($param) {
+		return $this->upsert('update', $param);
 	}
+
+    public function upsert($method, $param){
+        foreach($param['data'] as $idDoc => $data){
+            try{
+                $result= array();
+                $param['method'] = $method;
+                $module = $param['module'];
+                $data = $this->checkDataBeforeCreate($param, $data);
+          
+                if($method === 'create'){
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->post($module, $data);
+                } else {
+                    $targetId = $data['target_id'];
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
+                }
+                
+            $response = $recordResult;
+            if($response){
+                $record = $response;
+                 if(!empty($record->id)){
+                    $result[$idDoc] = array(
+                                            'id' => $record->id,
+                                            'error' => false
+                                    );
+                 } else  {
+                    throw new \Exception('Error during '.print_r($response));
+                }
+            }
+            }catch(\Exception $e){
+                $error = $e->getMessage();
+                $result[$idDoc] = array(
+                                        'id' => '-1',
+                                        'error' => $error
+                                        );
+            } 
+            // Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+        }
+
+        return $result;
+    }
+
+
+    // Check data before create 
+	// Add a throw exeption if error
+	protected function checkDataBeforeCreate($param,$data) {
+		// Exception if the job has been stopped manually
+        $this->isJobActive($param);
+		return $data;
+	}
+
+	// Check data before update 
+	// Add a throw exeption if error
+	protected function checkDataBeforeUpdate($param,$data) {
+		// Exception if the job has been stopped manually
+		$this->isJobActive($param);
+		return $data;
+	}
+	
+	// Check data before update 
+	// Add a throw exeption if error
+	protected function checkDataBeforeDelete($param,$data) {
+		// Exception if the job has been stopped manually
+		$this->isJobActive($param);
+		return $data;
+	}
+
 
     // Convert date to Myddleware format 
 	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
