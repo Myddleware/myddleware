@@ -37,6 +37,7 @@ class wordpresscore extends solution {
     protected $delaySearch2 = '-1 week';
   	// Module without reference date
 	protected $moduleWithoutReferenceDate = array('users');
+   
 
     public function getFieldsLogin(){
         return array(
@@ -211,10 +212,15 @@ class wordpresscore extends solution {
                                             $json = unserialize($json);
                                             $moreDatesArray = $json;
                                             foreach($moreDatesArray as $subSubRecordKey => $subSubRecord){
+                                                // we need to manually add the event id here
+                                                 $eventID = $record['id'];
+                                                 $subSubRecord['event_id'] = $eventID;
                                                 foreach($subSubRecord as $subSubFieldName => $subSubFieldValue){
                                                     $newResponse[$key][$subSubFieldName] = $subSubFieldValue;
                                                 }
                                             }
+
+                                          
                                         }
                                     }
                                 } else {
@@ -227,6 +233,7 @@ class wordpresscore extends solution {
                     }    
                 }  
     
+           
             return $newResponse;
         }
         return $response;

@@ -295,5 +295,8 @@ $fieldsRelate = array(
         'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
     ),
+    'mep_event_more_date' => array(
+        'event_id' =>  array('label' => 'MEP Event ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+    )
 );
 
