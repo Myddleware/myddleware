@@ -55,7 +55,7 @@ setup-files:
 	@docker-compose run --rm myddleware chmod 777 -R var/cache var/logs || true
 
 setup-database: up sleep
-	@docker-compose  exec myddleware bash prepare-database.sh
+	@docker-compose exec myddleware bash prepare-database.sh
 
 setup: setup-files setup-database
 	@echo "Setup Myddleware files and database: OK!"
