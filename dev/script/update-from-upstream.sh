@@ -5,6 +5,8 @@ set -e
 
 cd CLONE
 
+#git pull https://github.com/Myddleware/myddleware.git Release-2.5.7 -X theirs --no-edit
+
 git push origin --delete hotfix || true
 git checkout master
 git checkout -b hotfix
@@ -21,3 +23,6 @@ git push
 
 cd ..
 rm -fr CLONE
+
+
+
