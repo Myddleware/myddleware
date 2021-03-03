@@ -45,10 +45,10 @@ class wooeventmanagercore extends wordpress {
                 'mep_events' =>	'Events',
                 'mep_cat' =>	'Categories',
                 'mep_org' =>	'Organizers',
-                'mep_event_more_date' => 'Event More Date'
+                'mep_event_more_date' => 'Event More Date',
                 // these modules are part of the PRO subscription to the Woocommerce Event Manager Plugin
                 // 'mep_event_speaker'	 => 'Event Speaker List',
-                // 'mep_event_attendee' =>	'Event Attendee List',
+                'mep_event_attendee' =>	'Event Attendee List',
                 );
         }
     }
