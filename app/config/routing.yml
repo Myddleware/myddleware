@@ -1,8 +1,3 @@
-myddleware_install:
-    resource: "@MyddlewareInstallBundle/Controller/"
-    type:     annotation
-    prefix:   /install
-
 myddleware_api:
     resource: "@MyddlewareApiBundle/Resources/config/routing.yml"
     prefix:   /api
