@@ -163,8 +163,8 @@ class solutioncore
 			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);				
 			$documentManager->setParam($param);	
             // If a message exist, we add it to the document logs
-            if (!empty($this->message)) {
-                $documentManager->setMessage($this->message);
+            if (!empty($value['error'])) {
+                $documentManager->setMessage($value['error']);				
 				$this->message = '';
             }
             // Mise à jour de la table document avec l'id target comme id de document
@@ -268,7 +268,7 @@ class solutioncore
             'type' => 'varchar(255)',
             'type_bdd' => 'varchar(255)',
             'required' => 0,
-			'relate' => false
+			'relate' => true
         ];
 
         return $this->moduleFields;

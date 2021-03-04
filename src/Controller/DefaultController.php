@@ -457,20 +457,18 @@ if (file_exists($file)) {
         public function ruleExecAction($id)
         {
             try {
-
-                $rule = $this->ruleRepository->find($id);
-                
+                $this->ruleManager->setRule($id);
                 if ('ALL' == $id) {
-                    $this->ruleManager->actionRule('ALL', $rule);
+                    $this->ruleManager->actionRule('ALL');
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 } elseif ('ERROR' == $id) {
-                    $this->ruleManager->actionRule('ERROR', $rule);
+                    $this->ruleManager->actionRule('ERROR');
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
              
-                $this->ruleManager->actionRule('runMyddlewareJob', $rule);
+                $this->ruleManager->actionRule('runMyddlewareJob');
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
@@ -1642,7 +1640,7 @@ if (file_exists($file)) {
                     asort($lst_relation_target);
 
                     foreach ($lst_relation_target as $name_relate) {
-                        $lst_relation_target_alpha[$name_relate]['required'] = $ruleFieldsTarget[$name_relate]['required_relationship'];
+                        $lst_relation_target_alpha[$name_relate]['required'] = (!empty($ruleFieldsTarget[$name_relate]['required_relationship']) ? 1 : 0);
                         $lst_relation_target_alpha[$name_relate]['name'] = $name_relate;
                         $lst_relation_target_alpha[$name_relate]['label'] = (!empty($ruleFieldsTarget[$name_relate]['label']) ? $ruleFieldsTarget[$name_relate]['label'] : $name_relate);
                     }
@@ -1723,15 +1721,15 @@ if (file_exists($file)) {
                 if ($allowParentRelationship) {
                     if (!empty($ruleListRelation)) {
                         // We get all relate fields from every source module
-                        foreach ($ruleListRelation as $ruleRelation) {
+                        foreach ($ruleListRelation as $ruleRelation) {					
                             // Get the relate fields from the source module of related rules
                             $ruleFieldsSource = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
-                            if (!empty($ruleFieldsSource)) {
+                            if (!empty($ruleFieldsSource)) {								
                                 foreach ($ruleFieldsSource as $key => $sourceRelateField) {
-									if (!empty($sourceRelateField['relate'])) {
+									if (empty($sourceRelateField['relate'])) {
 										continue;	// Only relationship fields
 									}
-                                    $lstParentFields[$key] = $sourceRelateField['label'];
+                                    $lstParentFields[$key] = $ruleRelation['name'].' - '.$sourceRelateField['label'];
                                 }
                             }
                         }
