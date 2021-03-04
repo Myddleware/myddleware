@@ -116,16 +116,25 @@ class documentcore
 	 * @var RuleRelationShipRepository
 	 */
 	private $ruleRelationshipsRepository;
+	/**
+	 * @var ParameterBagInterface
+	 */
+	private $parameterBagInterface;
+	/**
+	 * @var SolutionManager
+	 */
+	private $solutionManager;
 
 	// Instanciation de la classe de génération de log Symfony
 	public function __construct(
 		LoggerInterface $logger,
 		Connection $dbalConnection,
 		EntityManagerInterface $entityManager,
+		SolutionManager $solutionManager = null,
 		FormulaManager $formulaManager = null,
 		DocumentRepository $documentRepository = null,
 		RuleRelationShipRepository $ruleRelationshipsRepository = null,
-		ParameterBagInterface $params = null,
+		ParameterBagInterface $parameterBagInterface = null,
 		ToolsManager $tools = null
 	) {
 		$this->connection = $dbalConnection;
@@ -133,9 +142,11 @@ class documentcore
 		$this->entityManager = $entityManager;
 		$this->documentRepository = $documentRepository;
 		$this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
+		$this->parameterBagInterface = $parameterBagInterface;
 		// $param = $params->get('param');
 		$this->tools = $tools;
 		$this->formulaManager = $formulaManager;
+		$this->solutionManager = $solutionManager;
 	}
 	
 	
@@ -998,19 +1009,17 @@ class documentcore
 	// Get the child rule of the current rule
 	// If child rule exist, we run it
 	protected function runChildRule() {
-	
-		$ruleParam['ruleId'] = $this->ruleId;
-		$ruleParam['jobId'] = $this->jobId;		
-		$parentRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);
+		$parentRule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface, $this->formulaManager, $this->solutionManager, clone $this);	
+		$parentRule->setRule($this->ruleId);
+		$parentRule->setJobId($this->jobId);
 		// Get the child rules of the current rule
-		$childRuleIds = $parentRule->getChildRules();
+		$childRuleIds = $parentRule->getChildRules();	
 		if (!empty($childRuleIds)) {
 			foreach($childRuleIds as $childRuleId) {
 				// Instantiate the child rule
-				$ruleParam['ruleId'] = $childRuleId['field_id'];
-				$ruleParam['jobId'] = $this->jobId;				
-				$childRule = new rule($this->logger, $this->container, $this->connection, $ruleParam);				
-
+				$childRule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface, $this->formulaManager, $this->solutionManager, clone $this);							
+				$childRule->setRule($childRuleId['field_id']);
+				$childRule->setJobId($this->jobId);
 				// Build the query in function generateDocuments
 				if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
 					$idQuery = $this->sourceData[$childRuleId['field_name_source']];

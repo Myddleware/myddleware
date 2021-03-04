@@ -44,6 +44,7 @@ class prestashopcore extends solution
         'combinations' => ['id'],
         'stock_availables' => ['id'],
         'order_histories' => ['id', 'date_add'],
+        'order_details' => ['id'],
         'customer_messages' => ['id', 'date_add'],
         'order_carriers' => ['id', 'date_add'],
         'order_payments' => ['id', 'date_add', 'order_reference'],
@@ -592,8 +593,8 @@ class prestashopcore extends solution
 			return $date->format('Y-m-d H:i:s');
 		}
 		// if the reference is an increment
-		else{ 
-			return $value + 1;
+		else{ 		
+			return end($result['values'])['date_modified']++;
 		}
 	}
 
@@ -960,7 +961,7 @@ class prestashopcore extends solution
         if (
                 'target' == $type
             and (
-                    in_array($module, ['customer_messages'])
+                    in_array($module, ['customer_messages', 'order_details'])
                  or array_key_exists($module, $this->module_relationship_many_to_many)
             )
         ) { // Si le module est dans le tableau alors c'est uniquement de la création
@@ -978,6 +979,9 @@ class prestashopcore extends solution
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
         if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
             return 'date_add';
+        }
+        if (in_array($moduleSource, ['order_details'])) {
+            return 'id';
         }
         if (in_array($RuleMode, ['0', 'S'])) {
             return 'date_upd';
