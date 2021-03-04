@@ -268,7 +268,7 @@ class solutioncore
             'type' => 'varchar(255)',
             'type_bdd' => 'varchar(255)',
             'required' => 0,
-			'relate' => false
+			'relate' => true
         ];
 
         return $this->moduleFields;
