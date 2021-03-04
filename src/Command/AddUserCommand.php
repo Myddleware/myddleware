@@ -12,11 +12,13 @@
 namespace App\Command;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Entity\Config;
+use App\Utils\Validator;
 use App\Service\SecurityService;
+use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use function Symfony\Component\String\u;
-use App\Utils\Validator;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
@@ -62,9 +64,9 @@ class AddUserCommand extends Command
     private $passwordEncoder;
     private $validator;
     private $users;
-    private $securityService;
+    private $configRepository;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, SecurityService $securityService)
+    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
     {
         parent::__construct();
 
@@ -72,7 +74,8 @@ class AddUserCommand extends Command
         $this->passwordEncoder = $encoder;
         $this->validator = $validator;
         $this->users = $users;
-        $this->securityService = $securityService;
+        $this->configRepository = $configRepository;
+  
     }
 
     /**
@@ -191,8 +194,22 @@ class AddUserCommand extends Command
         
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
         $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
-        // $encodedPassword = $this->securityService->hashPassword($plainPassword, null);
+      
         $user->setPassword($encodedPassword);
+
+        // prevent user from accessing installation process from browser (using Voter)
+        $allowInstalls= $this->configRepository->findBy(['clef'=> 'allow_install']);
+        if(!empty($allowInstalls)){
+            foreach($allowInstalls as $allowInstall){
+                $allowInstall->setValue('false');
+                $this->entityManager->persist($allowInstall);
+            }
+        } else {
+            $blockInstall = new Config();
+            $blockInstall->setClef('allow_install');
+            $blockInstall->setValue('false');
+            $this->entityManager->persist($blockInstall);
+        }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
