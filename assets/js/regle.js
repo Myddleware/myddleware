@@ -486,8 +486,7 @@ $( document ).ready(function() {
 										solutionjs : true
 									},						
 									url: Routing.generate('connector_callback'),
-									success: function(data){
-									
+									success: function(data){	
 										// if 1ere fois
 										if(data != 1) {		
 											

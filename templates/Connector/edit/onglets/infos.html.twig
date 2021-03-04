@@ -93,4 +93,7 @@
 		<span class="glyphicon glyphicon-exclamation-sign"></span> {{'error.connexion'|trans}} : <span class="error"></span>
 	</div>
 <form>
-</div>  
+</div>
+{% block javascripts %}
+    {{ encore_entry_script_tags('connector') }}
+{% endblock %}

@@ -21,9 +21,10 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
+const $ = require('jquery');
+require('../css/connector.css');
 
-$( document ).ready(function() {
-
+$( function() {
 	// Sauvegarde du connecteur
 	/*$('#connector_save','#connector').click(function(){	
 		params = [];
@@ -55,7 +56,7 @@ $( document ).ready(function() {
 	});*/
 
 	// Test connexion
-	$('#connexion').click(function(){
+	$('#connexion').on('click', function(){
 		var datas = '';
 		var parent = 'source';
 		var status = $('#source_status img');

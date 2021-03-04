@@ -24,7 +24,9 @@
 
 {% extends 'base.html.twig' %}
 {% block title %}{{parent()}} | {{'title.connector.edit'|trans}} {% endblock %}
-{% block titlesm %}<a href="{{ path('regle_connector_list') }}">{{'breadcrumb.connector_list'|trans}}</a> <span class="glyphicon glyphicon-chevron-right"></span> {{'title.connector.edit'|trans}} {{ form.vars.name }} {% endblock titlesm %} 
+{% block titlesm %}<a href="{{ path('regle_connector_list') }}">{{'breadcrumb.connector_list'|trans}}</a>
+ <span class="glyphicon glyphicon-chevron-right"></span>
+  {{'title.connector.edit'|trans}} {{ connector_name }} {% endblock titlesm %} 
 {% block body %}
     <div id="connector">
 		<div id="tabs">	

@@ -620,9 +620,12 @@ class ConnectorController extends AbstractController
         }
         // Display the connector
         else {
+        
             return $this->render('Connector/edit/fiche.html.twig', [
                 'connector' => $connector,
-                'form' => $form->createView(), ]
+                'form' => $form->createView(), 
+                'connector_name' => $connector->getName()
+                ]
             );
         }
     }
