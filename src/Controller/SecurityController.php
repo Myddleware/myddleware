@@ -169,7 +169,7 @@ class SecurityController extends AbstractController
                 if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) {
                     $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
                 } else { // si existe on ajoute +1
-                    ++$_SESSION['myddleware']['secure'][$lastUsername]['attempt'];
+                    $_SESSION['myddleware']['secure'][$lastUsername]['attempt'];
                 }
 
                 // si le nombre de tentative est supérieur à 5 alors on ajoute une date de contrôle
