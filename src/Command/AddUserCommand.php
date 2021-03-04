@@ -84,14 +84,14 @@ class AddUserCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Creates users and stores them in the database')
+            ->setDescription('Creates Myddleware users and stores them in the database')
             ->setHelp($this->getCommandHelp())
             // commands can optionally define arguments and/or options (mandatory and optional)
             // see https://symfony.com/doc/current/components/console/console_arguments.html
             ->addArgument('username', InputArgument::OPTIONAL, 'The username of the new user')
             ->addArgument('password', InputArgument::OPTIONAL, 'The plain password of the new user')
             ->addArgument('email', InputArgument::OPTIONAL, 'The email of the new user')
-            ->addOption('admin', null, InputOption::VALUE_NONE, 'If set, the user is created as an administrator')
+            ->addOption('superadmin', null, InputOption::VALUE_NONE, 'If set, the user is created as a super administrator')
         ;
     }
 
@@ -176,7 +176,7 @@ class AddUserCommand extends Command
         $plainPassword = $input->getArgument('password');
         $email = $input->getArgument('email');
 
-        $isAdmin = $input->getOption('admin');
+        $isSuperAdmin = $input->getOption('superadmin');
 
         // make sure to validate the user data is correct
         $this->validateUserData($username, $plainPassword, $email);
@@ -186,8 +186,7 @@ class AddUserCommand extends Command
        
         $user->setUsername($username);
         $user->setEmail($email);
-        // $user->setRoles([$isAdmin ? 'ROLE_ADMIN' : 'ROLE_USER']);
-        $user->addRole('ROLE_ADMIN');
+        $user->setRoles($isSuperAdmin ? ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] : ['ROLE_ADMIN']);
         $user->setEnabled(true);
         $user->setUsernameCanonical($username);
         $user->setEmailCanonical($email);
@@ -214,7 +213,7 @@ class AddUserCommand extends Command
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->io->success(sprintf('%s was successfully created: %s (%s)', $isAdmin ? 'Administrator user' : 'User', $user->getUsername(), $user->getEmail()));
+        $this->io->success(sprintf('%s was successfully created: %s (%s)', $isSuperAdmin ? 'Super Administrator user' : 'User', $user->getUsername(), $user->getEmail()));
 
         $event = $stopwatch->stop('add-user-command');
         if ($output->isVerbose()) {
@@ -256,9 +255,9 @@ class AddUserCommand extends Command
         return <<<'HELP'
                 The <info>%command.name%</info> command creates new users and saves them in the database:
                 <info>php %command.full_name%</info> <comment>username password email</comment>
-                By default the command creates regular users. To create administrator users,
-                add the <comment>--admin</comment> option:
-                <info>php %command.full_name%</info> username password email <comment>--admin</comment>
+                By default the command creates admin users. If you want to create Super Admin users, 
+                add the --superadmin option:
+                <info> php %command.full_name%</info> <comment>--superadmin</comment>
                 If you omit any of the three required arguments, the command will ask you to
                 provide the missing values:
                 # command will ask you for the email
