@@ -452,7 +452,7 @@ if (file_exists($file)) {
                 // Detecte si la session est le support ---------
 
                 // Get rule object
-                $rule = $em->getRepository(Rule::class)->findOneById($doc[0]->getRule());
+                $rule = $em->getRepository(Rule::class)->find($doc[0]->getRule());
 
                 // Loading tables source, target, history
                 $sourceData = $this->listeFluxTable($id, 'S');
@@ -479,7 +479,7 @@ if (file_exists($file)) {
                 // Get the rule name of every child doc
                 $postDocumentsRule = [];
                 foreach ($postDocuments as $postDocument) {
-                    $postDocumentsRule[$postDocument->getId()] = $em->getRepository(Rule::class)->findOneById($postDocument->getRule())->getName();
+                    $postDocumentsRule[$postDocument->getId()] = $em->getRepository(Rule::class)->find($postDocument->getRule())->getName();
                 }
 
                 // PARENT RELATE DOCUMENT
@@ -494,11 +494,11 @@ if (file_exists($file)) {
                 $parentDocuments = [];
                 $parentDocumentsRule = [];
                 foreach ($parentRelationships as $parentRelationship) {
-                    $parentDocuments[$i] = $em->getRepository(Document::class)->findOneById($parentRelationship->getDocRelId());
+                    $parentDocuments[$i] = $em->getRepository(Document::class)->find($parentRelationship->getDocRelId());
                     $parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
                     // Get the rule name of every relate doc
                     foreach ($parentDocuments as $parentDocument) {
-                        $parentDocumentsRule[$parentDocument->getId()] = $em->getRepository(Rule::class)->findOneById($parentDocument->getRule())->getName();
+                        $parentDocumentsRule[$parentDocument->getId()] = $em->getRepository(Rule::class)->find($parentDocument->getRule())->getName();
                     }
                     ++$i;
                 }
@@ -515,11 +515,11 @@ if (file_exists($file)) {
                 $childDocuments = [];
                 $childDocumentsRule = [];
                 foreach ($childRelationships as $childRelationship) {
-                    $childDocuments[$i] = $em->getRepository(Document::class)->findOneById($childRelationship->getDocId());
+                    $childDocuments[$i] = $em->getRepository(Document::class)->find($childRelationship->getDocId());
                     $childDocuments[$i]->sourceField = $childRelationship->getSourceField();
                     // Get the rule name of every relate doc
                     foreach ($childDocuments as $childDocument) {
-                        $childDocumentsRule[$childDocument->getId()] = $em->getRepository(Rule::class)->findOneById($childDocument->getRule())->getName();
+                        $childDocumentsRule[$childDocument->getId()] = $em->getRepository(Rule::class)->find($childDocument->getRule())->getName();
                     }
                     ++$i;
                 }
@@ -699,7 +699,7 @@ if (file_exists($file)) {
                 if (!empty($id)) {
                     // Get the rule id and the source_id from the document id
                     $em = $this->getDoctrine()->getManager();
-                    $doc = $em->getRepository(Document::class)->findOneById($id);
+                    $doc = $em->getRepository(Document::class)->find($id);
                     if (!empty($doc)) {
                         if (!empty($doc->getSource())) {
                             $this->jobManager->runBackgroundJob('readrecord', [$doc->getRule(), 'id', $doc->getSource()]);

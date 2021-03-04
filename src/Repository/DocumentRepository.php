@@ -303,14 +303,15 @@ class DocumentRepository extends ServiceEntityRepository
     public function getFluxPagination(array $data)
     {
         $qb = $this->createQueryBuilder('document');
-        $qb
+            $qb
             ->select('document.id, document.dateCreated, document.dateModified as date_modified, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
             ->addSelect('user.username, rule.name as rule_name, rule.id as rule_id')
             ->join('document.rule', 'rule')
             ->join('document.createdBy', 'user')
             ->where('document.deleted = 0');
 
-        if (!empty($data['search']) && 1 != $data['page']) {
+        if (!empty($data['search'])) {
+
             if (!empty($data['source_content']) && is_string($data['source_content'])) {
                 $qb->innerJoin('document.datas', 'document_data')
                     ->andWhere('document_data.date LIKE :source_content')
@@ -341,25 +342,25 @@ class DocumentRepository extends ServiceEntityRepository
 
             if (!empty($data['rule']) && is_string($data['rule'])) {
                 $qb
-                    ->andWhere('rule.name <= :rule_name')
+                    ->andWhere('rule.name = :rule_name')
                     ->setParameter('rule_name', trim($data['rule']));
             }
 
             if (!empty($data['status'])) {
                 $qb
-                    ->andWhere('document.status <= :status')
+                    ->andWhere('document.status = :status')
                     ->setParameter('status', $data['status']);
             }
 
             if (!empty($data['gblstatus'])) {
                 $qb
-                    ->andWhere('document.globalStatus <= :globalStatus')
+                    ->andWhere('document.globalStatus = :globalStatus')
                     ->setParameter('globalStatus', $data['gblstatus']);
             }
 
             if (!empty($data['type'])) {
                 $qb
-                    ->andWhere('document.type <= :type')
+                    ->andWhere('document.type = :type')
                     ->setParameter('type', $data['type']);
             }
 
@@ -382,7 +383,7 @@ class DocumentRepository extends ServiceEntityRepository
             if (!empty($data['limit'])) {
                 $qb->setMaxResults($data['limit']);
             }
-        }
+    }
 
         $qb->orderBy('document.dateModified', 'DESC');
 
