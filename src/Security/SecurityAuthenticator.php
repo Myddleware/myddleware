@@ -21,6 +21,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityAuthenticator extends AbstractFormLoginAuthenticator
 {
@@ -38,13 +39,16 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
 
     private $env;
 
+    private $translator;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager = null,
         UserPasswordEncoderInterface $passwordEncoder,
         SecurityService $securityService,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        TranslatorInterface $translator
     ) {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
@@ -52,6 +56,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         $this->passwordEncoder = $passwordEncoder;
         $this->securityService = $securityService;
         $this->env = $kernel->getEnvironment();
+        $this->translator = $translator;
     }
 
     public function supports(Request $request)
@@ -90,7 +95,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
 
         if (!$user) {
             // fail authentication with a custom error
-            throw new CustomUserMessageAuthenticationException('Identifiants invalides.');
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('login.invalid_credentials'));
         }
 
         return $user;
@@ -99,28 +104,21 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
     public function checkCredentials($credentials, UserInterface $user)
     {
         if (!$user->isEnabled()) {
-            throw new CustomUserMessageAuthenticationException('Votre compte est désactivé.');
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('login.disabled_account'));
         }
 
-       //TODO : THIS NEEDS TO BE UPDATED / FINISHED TO BE IN LINE WITH NEW ENCRYTPION (bcrypt)
-
-        // FOS USER BUNDLE ALGORYTHM
-        // $password = $credentials['password'];
-        // $salt = $user->getSalt();
-      
-        // $this->securityService->hashPassword($password, $salt);
-
-        // // Check validation
-        // if ($password === $user->getPassword()) {
-        //     // Save Last Login date
-        //     $user->setLastLogin(new DateTime());
-        //     $this->entityManager->flush();
-
-        //     return true;
-        // }
+        //check password, if correct, add last login to database
+        if($this->passwordEncoder->isPasswordValid($user, $credentials['password'])){
+            $user->setLastLogin(new DateTime());
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        } else {
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('login.invalid_credentials'));
+        }
 
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
-        throw new CustomUserMessageAuthenticationException('Identifiants invalides.');
+
+       
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

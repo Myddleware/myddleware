@@ -760,6 +760,8 @@ login:
     error_session: Error of session
     text_up_right: More information about myddleware
     text_bottom_right: You will be redirected towards our site
+    invalid_credentials: Invalid credentials
+    disabled_account: Your account has been disabled
     platform:
         line1: Thanks for using the Platform.sh Continuous Deployment Cloud Hosting
         line2: "For your first connexion, use this login/password : admin/admin"
