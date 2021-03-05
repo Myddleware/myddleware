@@ -928,18 +928,25 @@ class SessionService
     //############ FLUX FILTER ###################
 
     public function setFluxFilterWhere($where)
-    {
+    {	
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['flux_filter']['where'] = $where;
-
+		if (!empty($where)) {
+			foreach($where as $key => $value) {
+				$myddlewareSession['flux_filter']['customWhere'][$key] = $value;
+			}
+		}
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getFluxFilterWhere()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-
-        return !empty($myddlewareSession['flux_filter']['where']) ? $myddlewareSession['flux_filter']['where'] : null;
+		$customWhere = null;
+		if (!empty($myddlewareSession['flux_filter']['customWhere'])) {
+			$customWhere = $myddlewareSession['flux_filter']['customWhere'];
+			unset($myddlewareSession['flux_filter']['customWhere']);
+		}
+        return $customWhere;
     }
 
     public function setFluxFilterRuleName($ruleName)

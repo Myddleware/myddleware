@@ -135,7 +135,7 @@ if (file_exists($file)) {
             if ($rule) {
                 $this->sessionService->setFluxFilterRuleName($rule[0]->getName());
                 $this->sessionService->setFluxFilterGlobalStatus('Error');
-                $this->sessionService->setFluxFilterWhere("WHERE name='".$rule[0]->getName()."' AND global_status IN ('Error','Open') ");
+                $this->sessionService->setFluxFilterWhere(array('rule' => $rule[0]->getName(), 'gblstatus' => array('Error','Open')));
             } else {
                 $this->sessionService->removeFluxFilter();
             }
@@ -155,7 +155,7 @@ if (file_exists($file)) {
          * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
          */
         public function fluxListAction(Request $request, $page, $search = 1)
-        {
+        {	
             //--- Liste status traduction
             $lstStatusTwig = DocumentManager::lstStatus();
             foreach ($lstStatusTwig as $key => $value) {
@@ -284,17 +284,17 @@ if (file_exists($file)) {
 
             $form->handleRequest($request);
             // condition d'affichage
+            $data = [];
             $where = '';
             $from = 'FROM Document ';
             // $where = ($this->sessionService->isFluxFilterCWhereExist() ? $this->sessionService->getFluxFilterWhere() : '');
             if (!empty($this->sessionService->getFluxFilterWhere())) {
-                $where = $this->sessionService->getFluxFilterWhere();
+                $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
                 $this->sessionService->removeFluxFilter();
             }
 
             $conditions = 0;
             //---[ FORM ]-------------------------
-            $data = [];
             if ($form->get('click_filter')->isClicked()) {
                 $data = $form->getData();
                 $data['user'] = $this->getUser();
@@ -366,6 +366,7 @@ if (file_exists($file)) {
                 }
             } // end clicked
             //---[ FORM ]-------------------------
+			
             $r = $this->documentRepository->getFluxPagination($data);
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $r,

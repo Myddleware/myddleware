@@ -307,86 +307,96 @@ class DocumentRepository extends ServiceEntityRepository
             ->select('document.id, document.dateCreated, document.dateModified as date_modified, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
             ->addSelect('user.username, rule.name as rule_name, rule.id as rule_id')
             ->join('document.rule', 'rule')
-            ->join('document.createdBy', 'user')
-            ->where('document.deleted = 0');
+            ->join('document.createdBy', 'user');
+		
+		if (!empty($data['source_content']) && is_string($data['source_content'])) {
+			$qb->innerJoin('document.datas', 'document_data')
+				->andWhere('document_data.data LIKE :source_content')
+				->andWhere('document_data.type = :document_data_type')
+				->setParameter('source_content', '%'.$data['source_content'].'%')
+				->setParameter('document_data_type', 'S');
+		}
 
-        if (!empty($data['search'])) {
+		if (!empty($data['target_content']) && is_string($data['target_content'])) {
+			$qb->innerJoin('document.datas', 'document_data')
+				->andWhere('document_data.data LIKE :target_content')
+				->andWhere('document_data.type = :document_data_type')
+				->setParameter('target_content', '%'.$data['target_content'].'%')
+				->setParameter('document_data_type', 'T');
+		}
 
-            if (!empty($data['source_content']) && is_string($data['source_content'])) {
-                $qb->innerJoin('document.datas', 'document_data')
-                    ->andWhere('document_data.date LIKE :source_content')
-                    ->andWhere('document_data.type = :document_data_type')
-                    ->setParameter('source_content', '%'.$data['source_content'].'%')
-                    ->setParameter('document_data_type', 'S');
-            }
+		if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+			$qb
+				->andWhere('document.dateModified >= :dateModified')
+				->setParameter('dateModified', $data['date_modif_start']);
+		}
 
-            if (!empty($data['target_content']) && is_string($data['target_content'])) {
-                $qb->innerJoin('document.datas', 'document_data')
-                    ->andWhere('document_data.date LIKE :target_content')
-                    ->andWhere('document_data.type = :document_data_type')
-                    ->setParameter('target_content', '%'.$data['target_content'].'%')
-                    ->setParameter('document_data_type', 'T');
-            }
+		if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+			$qb
+				->andWhere('document.dateModified <= :dateModifiedEnd')
+				->setParameter('dateModifiedEnd', $data['date_modif_end']);
+		}
 
-            if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-                $qb
-                    ->andWhere('document.dateModified >= :dateModified')
-                    ->setParameter('dateModified', $data['date_modif_start']);
-            }
+		if (
+				(!empty($data['rule']) && is_string($data['rule']))
+			 OR (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
+		) {
+			$ruleFilter = (!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']);
+			$qb
+				->andWhere('rule.name = :rule_name')
+				->setParameter('rule_name', trim($ruleFilter));
+		}
 
-            if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-                $qb
-                    ->andWhere('document.dateModified <= :dateModifiedEnd')
-                    ->setParameter('dateModifiedEnd', $data['date_modif_end']);
-            }
+		if (!empty($data['status'])) {
+			$qb
+				->andWhere('document.status = :status')
+				->setParameter('status', $data['status']);
+		}
 
-            if (!empty($data['rule']) && is_string($data['rule'])) {
-                $qb
-                    ->andWhere('rule.name = :rule_name')
-                    ->setParameter('rule_name', trim($data['rule']));
-            }
+		// customWhere can have several status (open and error from the error dashlet in the home page)
+		if (!empty($data['customWhere']['gblstatus'])) {
+			$i = 1;
+			$orModule = $qb->expr()->orx();
+			foreach ($data['customWhere']['gblstatus'] as $gblstatus) {
+				$orModule->add($qb->expr()->eq('document.globalStatus', ':gblstatus'.$i));
+				$qb->setParameter('gblstatus'.$i, $gblstatus);
+				$i++;		 
+			}
+			// $orModule->add($qb->expr()->isNull('p.module'));
+			$qb->andWhere($orModule);
+		} elseif (!empty($data['gblstatus'])) {
+			$qb
+				->andWhere('document.globalStatus = :globalStatus')
+				->setParameter('globalStatus', $data['gblstatus']);
+		}
 
-            if (!empty($data['status'])) {
-                $qb
-                    ->andWhere('document.status = :status')
-                    ->setParameter('status', $data['status']);
-            }
+		if (!empty($data['type'])) {
+			$qb
+				->andWhere('document.type = :type')
+				->setParameter('type', $data['type']);
+		}
 
-            if (!empty($data['gblstatus'])) {
-                $qb
-                    ->andWhere('document.globalStatus = :globalStatus')
-                    ->setParameter('globalStatus', $data['gblstatus']);
-            }
+		if (!empty($data['target_id'])) {
+			$qb
+				->andWhere('document.target LIKE :target')
+				->setParameter('target', '%'.$data['target_id'].'%');
+		}
 
-            if (!empty($data['type'])) {
-                $qb
-                    ->andWhere('document.type = :type')
-                    ->setParameter('type', $data['type']);
-            }
-
-            if (!empty($data['target_id'])) {
-                $qb
-                    ->andWhere('document.target LIKE :target')
-                    ->setParameter('target', '%'.$data['target_id'].'%');
-            }
-
-            if (!empty($data['source_id'])) {
-                $qb
-                    ->andWhere('document.source LIKE :source')
-                    ->setParameter('source', '%'.$data['source_id'].'%');
-            }
-            if (!empty($data['user']) && !$data['user']->isAdmin()) {
-                $qb
-                    ->andWhere('document.createdBy = :createdBy')
-                    ->setParameter('createdBy', $data['user']);
-            }
-            if (!empty($data['limit'])) {
-                $qb->setMaxResults($data['limit']);
-            }
-    }
+		if (!empty($data['source_id'])) {
+			$qb
+				->andWhere('document.source LIKE :source')
+				->setParameter('source', '%'.$data['source_id'].'%');
+		}
+		if (!empty($data['user']) && !$data['user']->isAdmin()) {
+			$qb
+				->andWhere('document.createdBy = :createdBy')
+				->setParameter('createdBy', $data['user']);
+		}
+		if (!empty($data['limit'])) {
+			$qb->setMaxResults($data['limit']);
+		}
 
         $qb->orderBy('document.dateModified', 'DESC');
-
         return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
 }

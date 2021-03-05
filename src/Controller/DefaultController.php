@@ -402,7 +402,7 @@ if (file_exists($file)) {
                 ]
                 );
 
-            $this->sessionService->setFluxFilterWhere("WHERE Document.deleted = 0 AND Document.rule_id = '".$rule->getId()."'");
+            $this->sessionService->setFluxFilterWhere(array('rule' => $rule->getName()));
             $this->sessionService->setFluxFilterRuleName($rule->getName());
 
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
