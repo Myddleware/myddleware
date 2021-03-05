@@ -3,8 +3,8 @@
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  StÃ©phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  StÃ©phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
  *
  * This file is part of Myddleware.
@@ -37,6 +37,7 @@ class wordpresscore extends solution {
     protected $delaySearch2 = '-1 week';
   	// Module without reference date
 	protected $moduleWithoutReferenceDate = array('users');
+   
 
     public function getFieldsLogin(){
         return array(
@@ -211,10 +212,15 @@ class wordpresscore extends solution {
                                             $json = unserialize($json);
                                             $moreDatesArray = $json;
                                             foreach($moreDatesArray as $subSubRecordKey => $subSubRecord){
+                                                // we need to manually add the event id here
+                                                 $eventID = $record['id'];
+                                                 $subSubRecord['event_id'] = $eventID;
                                                 foreach($subSubRecord as $subSubFieldName => $subSubFieldValue){
                                                     $newResponse[$key][$subSubFieldName] = $subSubFieldValue;
                                                 }
                                             }
+
+                                          
                                         }
                                     }
                                 } else {
@@ -227,6 +233,7 @@ class wordpresscore extends solution {
                     }    
                 }  
     
+           
             return $newResponse;
         }
         return $response;
@@ -273,9 +280,9 @@ class wordpresscore extends solution {
 		return $dto->format('Y-m-d\TH:i:s');
 	}
 
-    // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
+    // Permet d'indiquer le type de rÃ©fÃ©rence, si c'est une date (true) ou un texte libre (false)
     public function referenceIsDate($module) {
-        // Le module users n'a pas de date de référence. On utilise donc l'ID comme référence
+        // Le module users n'a pas de date de rÃ©fÃ©rence. On utilise donc l'ID comme rÃ©fÃ©rence
         if(in_array($module, $this->moduleWithoutReferenceDate)){
             return false;
         }

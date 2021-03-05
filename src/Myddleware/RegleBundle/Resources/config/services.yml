@@ -151,8 +151,9 @@ services:
         class: Myddleware\RegleBundle\Solutions\wooeventmanager
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.wordpress:
-        class: Myddleware\RegleBundle\Solutions\worpress
+        class: Myddleware\RegleBundle\Solutions\wordpress
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", 'rule']

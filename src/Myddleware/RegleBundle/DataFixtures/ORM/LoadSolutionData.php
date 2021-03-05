@@ -65,7 +65,8 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'iadvize',			'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'woocommerce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'wooeventmanager',	'active' => 1,'source' => 1,'target' => 1),
-									array('name' => 'worpress',			'active' => 1,'source' => 1,'target' => 1)
+									array('name' => 'wordpress',		'active' => 1,'source' => 1,'target' => 1)
+
 							);
 
     public function load(ObjectManager $manager){
