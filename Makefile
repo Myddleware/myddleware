@@ -91,6 +91,9 @@ restart: recreate
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
 
+docker-stop-all:
+	@docker stop $$(docker ps -qa | grep -v $${MAKEBAT_CONTAINER_ID:-null}) >/dev/null 2>/dev/null || true
+
 reset: clean
 	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \
 		read AGREE && [ "$${AGREE}" = "YES" ] && docker-compose down -v --remove-orphans
