@@ -113,8 +113,7 @@
 
 
  body {
-	 /* CEST MON URL PERSO QUI MARCHE DONC IL FAUT QUE TU LA MODIFIES */
-	   background: url('/myddleware_3b/myddleware/public/build/images/login/fd.jpg') repeat-y;
+	   background: url('./../images/login/fd.jpg') repeat-y;
 	   background-color: #9DC0E1;
 	
    overflow-y:hidden;
