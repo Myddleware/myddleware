@@ -114,7 +114,7 @@
 
  body {
 	 /* CEST MON URL PERSO QUI MARCHE DONC IL FAUT QUE TU LA MODIFIES */
-	   background: url('/mwfullinstall/myddleware/public/build/images/login/fd.jpg') repeat-y;
+	   background: url('/myddleware_3b/myddleware/public/build/images/login/fd.jpg') repeat-y;
 	   background-color: #9DC0E1;
 	
    overflow-y:hidden;
@@ -123,24 +123,23 @@
 
   #myd_connexion .logo { 
 	
-	/* CETTE URL MARCHE MAIS NE MARCHE PAS CEST LURL MAGIQUE */
-	   /* background: url('images/login/logo.png') no-repeat; */
+	   background: url('./../images/login/logo.png') no-repeat; 
 	   background-size: 158px; 
 }
 
 	 #myd_connexion .logo {
-	   /* background: url('images/login/logo.png') no-repeat; */
+	  background: url('./../images/login/logo.png') no-repeat; 
 	  background-size: 158px;
 	 }
 	
 	 #myd_connexion .logo_platform {
-	  /* background: url('images/login/logo_platform.png') no-repeat; */
+	  background: url('./../images/login/logo_platform.png') no-repeat;
 	  background-size: 158px;
 	 }
 	
 	 #myd_connexion .logo_empty {
-	 /* background: url('images/login/logo_empty.png') no-repeat;
-	 background-size: 158px; */
+	 background: url('./../images/login/logo_empty.png') no-repeat;
+	 background-size: 158px; 
 	 }
 	
  .btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {

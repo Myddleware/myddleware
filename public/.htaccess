@@ -8,6 +8,9 @@ DirectoryIndex index.php
     RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
     RewriteRule ^(.*) - [E=BASE:%1]
 
+	# 301 Redirect to fix bug on the duplicate build in the URL
+	RewriteRule ^build/build/(.*) build/$1
+
     # Sets the HTTP_AUTHORIZATION header removed by Apache
     RewriteCond %{HTTP:Authorization} .
     RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -22,6 +25,7 @@ DirectoryIndex index.php
 
     # Rewrite all other queries to the front controller.
     RewriteRule ^ %{ENV:BASE}/index.php [L]
+	
 </IfModule>
 
 <IfModule !mod_rewrite.c>
