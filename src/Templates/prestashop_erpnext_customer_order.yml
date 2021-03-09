@@ -1,0 +1,80 @@
+name: prestashop_erpnext_customer_order
+description: 'Customer, orders and products from Prestashop to ERPNext'
+rules:
+    -
+        name: 'Products to ERPNext'
+        nameSlug: products_to_erpnext
+        sourceSolution: prestashop
+        targetSolution: erpnext
+        sourceModule: products
+        targetModule: Item
+        fields:
+            - { target: item_code, source: reference, formula: null }
+            - { target: item_name, source: name, formula: null }
+            - { target: standard_rate, source: price, formula: null }
+            - { target: item_group, source: my_value, formula: '"Consumable"' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Customer to ERPNExt'
+        nameSlug: customer_to_erpnext
+        sourceSolution: prestashop
+        targetSolution: erpnext
+        sourceModule: customers
+        targetModule: Customer
+        fields:
+            - { target: customer_name, source: lastname;firstname, formula: '{lastname}." ".{firstname}' }
+            - { target: email_id, source: email, formula: null }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'OrderItem to ERPNExt'
+        nameSlug: orderitem_to_erpnext
+        sourceSolution: prestashop
+        targetSolution: erpnext
+        sourceModule: order_details
+        targetModule: 'Sales Invoice Item'
+        fields:
+            - { target: amount, source: total_price_tax_incl, formula: null }
+            - { target: description, source: product_name, formula: null }
+            - { target: discount_amount, source: reduction_amount, formula: null }
+            - { target: net_amount, source: total_price_tax_excl, formula: null }
+            - { target: qty, source: product_quantity, formula: null }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: item_code, fieldId: products_to_erpnext, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: C }
+    -
+        name: 'Order to ERPNExt sales invoice'
+        nameSlug: order_to_erpnext_sales_invoice
+        sourceSolution: prestashop
+        targetSolution: erpnext
+        sourceModule: orders
+        targetModule: 'Sales Invoice'
+        fields:
+            - { target: grand_total, source: total_paid, formula: null }
+            - { target: net_total, source: total_wrapping_tax_excl, formula: null }
+            - { target: paid_amount, source: total_paid, formula: null }
+            - { target: total, source: total_paid, formula: null }
+            - { target: conversion_rate, source: my_value, formula: '"1"' }
+            - { target: status, source: my_value, formula: '"Paid"' }
+        relationships:
+            - { fieldNameSource: id_customer, fieldNameTarget: customer, fieldId: customer_to_erpnext, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: id_order, fieldId: orderitem_to_erpnext, parent: true }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }

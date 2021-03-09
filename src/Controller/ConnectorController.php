@@ -56,6 +56,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ConnectorController extends AbstractController
 {
+	protected$params;
+	
     /**
      * @var SessionService
      */
@@ -84,6 +86,14 @@ class ConnectorController extends AbstractController
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
+		// Init parameters
+		$configRepository = $this->entityManager->getRepository(Config::class);
+		$configs = $configRepository->findAll();
+		if (!empty($configs)) {
+			foreach ($configs as $config) {
+				$this->params[$config->getName()] = $config->getvalue();
+			}
+		}	
     }
 
     /* ******************************************************
@@ -462,7 +472,7 @@ class ConnectorController extends AbstractController
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $this->entityManager->getRepository(Connector::class)
                                               ->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId()),
-                'maxPerPage' => $this->getParameter('pager'),
+                'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ]);
 

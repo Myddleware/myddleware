@@ -27,6 +27,7 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Entity\Log;
+use App\Entity\Config;
 use App\Manager\JobManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
@@ -39,6 +40,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Class TaskController.
@@ -49,7 +51,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TaskController extends AbstractController
 {
-
+	protected $params;
+	
     /**
      * @var JobManager
      */
@@ -59,7 +62,10 @@ class TaskController extends AbstractController
      * @var JobRepository
      */
     private $jobRepository;
-
+	/**
+	 * @var EntityManagerInterface
+	 */
+	private $entityManager;
     /**
      * @var DocumentRepository
      */
@@ -75,12 +81,22 @@ class TaskController extends AbstractController
 		JobManager $jobManager, 
 		JobRepository $jobRepository, 
 		DocumentRepository $documentRepository,
-		LoggerInterface $LoggerInterface
+		LoggerInterface $LoggerInterface,
+		EntityManagerInterface $entityManager
 	) {
         $this->jobRepository = $jobRepository;
         $this->jobManager = $jobManager;
         $this->documentRepository = $documentRepository;
         $this->LoggerInterface = $LoggerInterface;
+		$this->entityManager = $entityManager;
+		// Initialise parameters
+		$configRepository = $this->entityManager->getRepository(Config::class);
+		$configs = $configRepository->findAll();
+		if (!empty($configs)) {
+			foreach ($configs as $config) {
+				$this->params[$config->getName()] = $config->getvalue();
+			}
+		}		
     }
 
     /**
@@ -99,7 +115,7 @@ class TaskController extends AbstractController
         $jobs = $this->jobRepository->findBy([], ['status' => 'DESC', 'begin' => 'DESC'], 1000);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $jobs,
-            'maxPerPage' => $this->getParameter('pager'),
+            'maxPerPage' => $this->params['pager'],
             'page' => $page,
         ], false);
 
@@ -128,7 +144,7 @@ class TaskController extends AbstractController
 
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $em->getRepository(Log::class)->findBy(['job' => $task], ['id' => 'DESC']),
-                'maxPerPage' => $this->getParameter('pager'),
+                'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
 

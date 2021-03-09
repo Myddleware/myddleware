@@ -52,6 +52,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /* * * * * * * *  * * * * * *  * * * * * *
     si custom file exist alors on fait un include de la custom class
@@ -70,12 +71,17 @@ if (file_exists($file)) {
      */
     class FluxController extends AbstractController
     {
+		protected $params;
+		
         private $sessionService;
         /**
          * @var TranslatorInterface
          */
         private $translator;
-
+		/**
+         * @var EntityManagerInterface
+         */
+        private $entityManager;
         /**
          * @var JobManager
          */
@@ -94,13 +100,23 @@ if (file_exists($file)) {
             TranslatorInterface $translator,
             JobManager $jobManager,
             SolutionManager $solutionManager,
-            DocumentRepository $documentRepository
+            DocumentRepository $documentRepository,
+			EntityManagerInterface $entityManager
         ) {
             $this->sessionService = $sessionService;
             $this->translator = $translator;
             $this->jobManager = $jobManager;
             $this->solutionManager = $solutionManager;
             $this->documentRepository = $documentRepository;
+			$this->entityManager = $entityManager;
+			// Initialise parameters
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->params[$config->getName()] = $config->getvalue();
+				}
+			}				
         }
 
         /* ******************************************************
@@ -156,7 +172,7 @@ if (file_exists($file)) {
          * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
          */
         public function fluxListAction(Request $request, $page, $search = 1)
-        {	
+        {					
             //--- Liste status traduction
             $lstStatusTwig = DocumentManager::lstStatus();
             foreach ($lstStatusTwig as $key => $value) {
@@ -373,7 +389,7 @@ if (file_exists($file)) {
             $r = $this->documentRepository->getFluxPagination($data);
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $r,
-                'maxPerPage' => $this->getParameter('pager'),
+                'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
 
@@ -469,7 +485,7 @@ if (file_exists($file)) {
                             ['document' => $id],
                             ['id' => 'DESC']
                         ),
-                    'maxPerPage' => $this->getParameter('pager'),
+                    'maxPerPage' => $this->params['pager'],
                     'page' => $page,
                 ], false);
 

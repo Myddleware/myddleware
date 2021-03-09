@@ -1,5 +1,5 @@
 name: prestashop_suitecrm_customers_orders_products
-description: 'Customer, orders and products from Prestashop to SsuiteCRM'
+description: 'Customer, orders and products from Prestashop to SuiteCRM'
 rules:
     -
         name: Customers
