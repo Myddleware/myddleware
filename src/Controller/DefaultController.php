@@ -192,7 +192,7 @@ if (file_exists($file)) {
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
-			// Initialise parameters
+			// Init parameters
 			$configRepository = $this->entityManager->getRepository(Config::class);
 			$configs = $configRepository->findAll();
 			if (!empty($configs)) {

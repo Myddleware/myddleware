@@ -109,7 +109,7 @@ if (file_exists($file)) {
             $this->solutionManager = $solutionManager;
             $this->documentRepository = $documentRepository;
 			$this->entityManager = $entityManager;
-			// Initialise parameters
+			// Init parameters
 			$configRepository = $this->entityManager->getRepository(Config::class);
 			$configs = $configRepository->findAll();
 			if (!empty($configs)) {

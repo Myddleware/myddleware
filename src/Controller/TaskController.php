@@ -89,7 +89,7 @@ class TaskController extends AbstractController
         $this->documentRepository = $documentRepository;
         $this->LoggerInterface = $LoggerInterface;
 		$this->entityManager = $entityManager;
-		// Initialise parameters
+		// Init parameters
 		$configRepository = $this->entityManager->getRepository(Config::class);
 		$configs = $configRepository->findAll();
 		if (!empty($configs)) {
