@@ -148,7 +148,6 @@ if (file_exists($file)) {
 
             return $this->message;
         }
-        }
 
         protected function updateFiles()
         {
