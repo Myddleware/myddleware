@@ -67,12 +67,34 @@ class DatabaseSetupController extends AbstractController
 
             //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
-            $database->setDriver($this->getParameter('database_driver'));
-            $database->setHost($this->getParameter('database_host'));
-            $database->setPort($this->getParameter('database_port'));
-            $database->setName($this->getParameter('database_name'));
-            $database->setUser($this->getParameter('database_user'));
-            $database->setSecret($this->getParameter('secret'));
+            $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+            foreach($parameters as $parameter){
+                $value = $this->getParameter($parameter);
+                if(!empty($value)){
+                     switch($parameter) {
+                         case 'database_driver':
+                             $database->setDriver($value);
+                             break;
+                         case 'database_host':
+                             $database->setHost($value);
+                             break;
+                         case 'database_port':
+                             $database->setPort($value);
+                             break;
+                         case 'database_name':
+                             $database->setName($value);
+                             break;
+                         case 'database_user':
+                             $database->setUser($value);
+                             break;
+                         case 'secret':
+                             $database->setSecret($value);
+                             break;
+                         default:
+                             break;
+                     }
+                }
+            }     
 
             // force user to change the default Symfony secret for security
             if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
@@ -113,15 +135,38 @@ class DatabaseSetupController extends AbstractController
               
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
-                $database->setDriver($this->getParameter('database_driver'));
-                $database->setHost($this->getParameter('database_host'));
-                $database->setPort($this->getParameter('database_port'));
-                $database->setName($this->getParameter('database_name'));
-                $database->setUser($this->getParameter('database_user'));
-                $database->setSecret($this->getParameter('secret'));
+
+           $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+           foreach($parameters as $parameter){
+               $value = $this->getParameter($parameter);
+               if(!empty($value)){
+                    switch($parameter) {
+                        case 'database_driver':
+                            $database->setDriver($value);
+                            break;
+                        case 'database_host':
+                            $database->setHost($value);
+                            break;
+                        case 'database_port':
+                            $database->setPort($value);
+                            break;
+                        case 'database_name':
+                            $database->setName($value);
+                            break;
+                        case 'database_user':
+                            $database->setUser($value);
+                            break;
+                        case 'secret':
+                            $database->setSecret($value);
+                            break;
+                        default:
+                            break;
+                    }
+               }
+           }     
 
                 // force user to change the default Symfony secret for security
-                if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
+                if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
                     $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
                 }
 
