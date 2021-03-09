@@ -108,25 +108,16 @@ class DatabaseSetupController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()){
 
                 $envLocal = __DIR__.'/../../.env.local';
+                // we edit the database connection parameters with form input
+                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
+                // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
+    
+                // allow to proceed to next step
+                $submitted = true;
 
-                if(file_exists($envLocal) && is_file($envLocal)){
-                    // we edit the database connection parameters with form input
-                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                    $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
-                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                    file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
-                } else {
-                      // we edit the database connection parameters with form input
-                      $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                      $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
-                      // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                      file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
-                }
-
-                    // allow to proceed to next step
-                    $submitted = true;
-
-                }
+            }
 
                 return $this->render('database_setup/index.html.twig', [
                     'form' => $form->createView(),
@@ -183,22 +174,13 @@ class DatabaseSetupController extends AbstractController
                 if ($form->isSubmitted() && $form->isValid()){
 
                     $envLocal = __DIR__.'/../../.env.local';
-
-                    if(file_exists($envLocal) && is_file($envLocal)){
-                        // we edit the database connection parameters with form input
-                        $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                        // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                        file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
-                    } else {
-                          // we edit the database connection parameters with form input
-                        $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                        $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
-                        // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                        file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
-                    }
-
-                        // allow to proceed to next step
-                        $submitted = true;
+                    // we edit the database connection parameters with form input
+                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                    file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
+            
+                    // allow to proceed to next step
+                    $submitted = true;
                     }
 
                 //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
