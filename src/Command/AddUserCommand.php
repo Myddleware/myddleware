@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace App\Command;
 
 use App\Entity\User;
@@ -35,19 +26,17 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  * To use this command, open a terminal window, enter into your project
  * directory and execute the following:
  *
- *     $ php bin/console app:add-user
+ *     $ php bin/console myddleware:add-user
  *
  * To output detailed information, increase the command verbosity:
  *
- *     $ php bin/console app:add-user -vv
+ *     $ php bin/console myddleware:add-user -vv
  *
  * See https://symfony.com/doc/current/console.html
  *
  * We use the default services.yaml configuration, so command classes are registered as services.
  * See https://symfony.com/doc/current/console/commands_as_services.html
  *
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- * @author Yonel Ceruto <yonelceruto@gmail.com>
  */
 class AddUserCommand extends Command
 {
