@@ -22,7 +22,7 @@ class Config
      * @ORM\Column(type="string", length=255)
      * @Assert\Unique
      */
-    private $clef;
+    private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -35,14 +35,14 @@ class Config
     }
 
 
-    public function getClef(): ?string
+    public function getName(): ?string
     {
-        return $this->clef;
+        return $this->name;
     }
 
-    public function setClef(string $clef): self
+    public function setName(string $name): self
     {
-        $this->clef = $clef;
+        $this->name = $name;
 
         return $this;
     }

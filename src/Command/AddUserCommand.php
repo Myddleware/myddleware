@@ -197,7 +197,7 @@ class AddUserCommand extends Command
         $user->setPassword($encodedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)
-        $allowInstalls= $this->configRepository->findBy(['clef'=> 'allow_install']);
+        $allowInstalls= $this->configRepository->findBy(['name'=> 'allow_install']);
         if(!empty($allowInstalls)){
             foreach($allowInstalls as $allowInstall){
                 $allowInstall->setValue('false');
@@ -205,7 +205,7 @@ class AddUserCommand extends Command
             }
         } else {
             $blockInstall = new Config();
-            $blockInstall->setClef('allow_install');
+            $blockInstall->setName('allow_install');
             $blockInstall->setValue('false');
             $this->entityManager->persist($blockInstall);
         }

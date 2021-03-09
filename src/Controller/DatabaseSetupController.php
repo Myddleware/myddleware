@@ -58,7 +58,7 @@ class DatabaseSetupController extends AbstractController
 
                 // will be used by the InstallVoter to determine access to all install routes
                 $config = new Config();
-                $config->setClef('allow_install');
+                $config->setName('allow_install');
                 $config->setValue('true');
                 $this->entityManager->persist($config);
                 $this->entityManager->flush();
@@ -214,7 +214,7 @@ class DatabaseSetupController extends AbstractController
                
                  // will be used by the InstallVoter to determine access to all install routes
                 $config = new Config();
-                $config->setClef('allow_install');
+                $config->setName('allow_install');
                 $config->setValue('true');
                 $this->entityManager->persist($config);
                 $this->entityManager->flush();

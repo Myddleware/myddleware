@@ -50,7 +50,7 @@ class InstallVoter extends Voter
     }
 
     public function canInstall($config){
-        if($config->getClef() === 'allow_install'){
+        if($config->getName() === 'allow_install'){
             if($config->getValue() === 'true'){
                 return true;
             } elseif ($config->getValue() === 'false'){
