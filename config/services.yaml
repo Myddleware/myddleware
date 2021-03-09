@@ -4,9 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-  locale: 'fr'
+  locale: 'en'
   env: '%env(APP_ENV)%'
-  fallbacks: ['%locale%', 'en']
+  fallbacks: ['%locale%', 'fr']
+  secret: '%env(APP_SECRET)%'
 
 services:
   # default configuration for services in *this* file

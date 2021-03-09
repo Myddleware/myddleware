@@ -1,5 +1,6 @@
-var url = Routing.generate('jobscheduler_input');
-$(document).ready(function () {
+// var url = Routing.generate('jobscheduler_input');
+var url = 'jobscheduler/getFieldsSelect';
+$(function(){
     fieldTreatment();
 });
 
