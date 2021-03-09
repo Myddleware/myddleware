@@ -30,6 +30,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 $file = __DIR__.'/../Custom/Manager/ToolsManager.php';
 if (file_exists($file)) {
@@ -58,12 +59,15 @@ if (file_exists($file)) {
         public function __construct(
             LoggerInterface $logger,
             Connection $connection,
-            KernelInterface $kernel
+            KernelInterface $kernel,
+			RequestStack $requestStack
         ) {
             $this->logger = $logger;
             $this->connection = $connection;
             $this->projectDir = $kernel->getProjectDir();
-            $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.en.yml'));
+			$request = $requestStack->getCurrentRequest();
+            $language = $request ? $request->getLocale() : 'EN';
+            $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.'.$language.'.yml'));
         }
 
         // Compose une liste html avec les options

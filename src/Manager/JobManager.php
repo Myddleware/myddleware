@@ -90,7 +90,7 @@ class jobcore  {
 	/**
 	 * @var TemplateManager
 	 */
-	private $template;
+	private $templateManager;
 	/**
 	 * @var TranslatorInterface
 	 */
@@ -143,7 +143,7 @@ class jobcore  {
 		SessionInterface $session,
 		ToolsManager $tools,
 		RuleManager $ruleManager,
-		TemplateManager $template,
+		TemplateManager $templateManager,
 		UpgradeManager $upgrade
 	) {
 		$this->logger = $logger; // gestion des logs symfony monolog
@@ -158,7 +158,7 @@ class jobcore  {
 		$this->tools = $tools;
 		$this->ruleManager = $ruleManager;
 		$this->upgrade = $upgrade;
-		$this->template = $template;
+		$this->templateManager = $templateManager;
 		$this->projectDir = $kernel->getProjectDir();
 		$this->jobRepository = $jobRepository;
 		$this->documentRepository = $documentRepository;
@@ -688,7 +688,6 @@ class jobcore  {
 	}
 	
 	public function generateTemplate($nomTemplate,$descriptionTemplate,$rulesId) {
-		// include_once 'template.php';
 		try {
 			// Init array
 			$templateArray = array(
@@ -696,23 +695,21 @@ class jobcore  {
 								'description' => $descriptionTemplate
 							);
 			if (!empty($rulesId)) {
-				$template = new template($this->logger, $this->container, $this->connection);
-				$rulesOrderIds = $template->setRules($rulesId);
-
+				$rulesOrderIds = $this->templateManager->setRules($rulesId);
 				foreach($rulesOrderIds as $rulesOrderId) {	
 					// Generate array with all rules parameters
-					$templateArray['rules'][] = $template->extractRule($rulesOrderId['rule_id']);
+					$templateArray['rules'][] = $this->templateManager->extractRule($rulesOrderId['rule_id']);
 				}
 				// Ecriture du fichier
-				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
-				file_put_contents($this->parameterBagInterface->get('kernel.root_dir').'/../src/Templates/'.$nomTemplate.'.yml', $yaml);
+				$yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);			
+				file_put_contents($this->parameterBagInterface->get('kernel.root_dir').'/Templates/'.$nomTemplate.'.yml', $yaml);
 			}
 		} catch (\Exception $e) {
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$this->logger->error($this->message);
-			return false;
-		}	
-		return true;
+			$this->logger->error($this->message);	
+			return array('success' => false, 'message' => $this->message);
+		}			
+		return array('success' => true, 'message' => '');
 	}
 	
 	// Permet d'indiquer que le job est lancé manuellement

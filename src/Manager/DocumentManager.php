@@ -1206,7 +1206,6 @@ class documentcore
 				}
 			}		
 			$documentEntity = $this->entityManager
-	                          // ->getRepository('RegleBundle:Document')
 							  ->getRepository(Document::class)
 	                          ->findOneById( $this->id );	
 			$documentData = new DocumentDataEntity();

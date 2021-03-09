@@ -43,6 +43,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 
 $file = __DIR__.'/../Custom/Manager/TemplateManager.php';
 if (file_exists($file)) {
@@ -69,6 +70,7 @@ if (file_exists($file)) {
         protected $entityManager;
         protected $sourceSolution;
         protected $targetSolution;
+		protected $connection;
         /**
          * @var LoggerInterface
          */
@@ -102,10 +104,12 @@ if (file_exists($file)) {
             RuleManager $ruleManager,
             SessionInterface $session,
             TranslatorInterface $translator,
-            RequestStack $requestStack
+            RequestStack $requestStack,
+			DriverConnection $dbalConnection
         ) {
             $this->logger = $logger;
             $this->entityManager = $entityManager;
+			$this->connection = $dbalConnection;
             $this->solutionManager = $solutionManager;
             $this->ruleManager = $ruleManager;
             $this->session = $session;
@@ -115,6 +119,18 @@ if (file_exists($file)) {
             $request = $requestStack->getCurrentRequest();
             $this->lang = $request ? $request->getLocale() : 'EN';
         }
+		
+		// Sort rule (rule parent first)
+		public function setRules($rules) {
+			$this->rules = $rules;
+			$rulesString = trim(implode(',',$rules));
+			$query = "SELECT rule_id FROM RuleOrder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY RuleOrder.order ASC";
+			$stmt = $this->connection->prepare($query);
+			$stmt->bindValue("rules", $rulesString);
+			$stmt->execute();	    		
+			return $stmt->fetchALL();
+		}
+
 
         // Permet de lister les templates pour les connecteurs selectionnés
         public function getTemplates(string $solutionSourceName, string $solutionTarget)
@@ -130,8 +146,11 @@ if (file_exists($file)) {
         }
 
         // Extract all the data of the rule
-        public function extractRule(Rule $rule)
+        public function extractRule($ruleId)
         {
+			$rule = $this->entityManager
+							  ->getRepository(Rule::class)
+	                          ->findOneById( $ruleId );	
             // General data
             $data['name'] = $rule->getName();
             $data['nameSlug'] = $rule->getNameSlug();
