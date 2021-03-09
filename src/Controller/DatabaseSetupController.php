@@ -97,7 +97,7 @@ class DatabaseSetupController extends AbstractController
             }     
 
             // force user to change the default Symfony secret for security
-            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
+            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
                 $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
             }
 
