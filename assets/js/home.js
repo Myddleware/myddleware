@@ -31,7 +31,7 @@ function drawChart() {
 	if ($('#pie_chart_error_doc').length) {
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('graph_type_error_doc'),
+			url: 'graph/type/error/doc',
 			success: function (dataServ) {
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
@@ -47,7 +47,7 @@ function drawChart() {
 	if ($('#pie_chart_transfer_rule').length) {
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('graph_type_transfer_rule'),
+			url: 'graph/type/transfer/rule',
 			success: function (dataServ) {
 				
 				var data = google.visualization.arrayToDataTable(dataServ);
@@ -63,7 +63,7 @@ function drawChart() {
 	if ($('#column_chart_histo').length) {
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('graph_type_transfer_histo'),
+			url: 'graph/type/transfer/histo',
 			success: function (dataServ) {
 				
 				var data = google.visualization.arrayToDataTable(dataServ);
@@ -81,7 +81,7 @@ function drawChart() {
 	if ($('#column_chart_job_histo').length) {
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('graph_type_job_histo'),
+			url: 'graph/type/job/histo',
 			success: function (dataServ) {
 				
 				var data = google.visualization.arrayToDataTable(dataServ);

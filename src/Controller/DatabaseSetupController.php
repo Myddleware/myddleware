@@ -67,15 +67,37 @@ class DatabaseSetupController extends AbstractController
 
             //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
-            $database->setDriver($this->getParameter('database_driver'));
-            $database->setHost($this->getParameter('database_host'));
-            $database->setPort($this->getParameter('database_port'));
-            $database->setName($this->getParameter('database_name'));
-            $database->setUser($this->getParameter('database_user'));
-            $database->setSecret($this->getParameter('secret'));
+            $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+            foreach($parameters as $parameter){
+                $value = $this->getParameter($parameter);
+                if(!empty($value)){
+                     switch($parameter) {
+                         case 'database_driver':
+                             $database->setDriver($value);
+                             break;
+                         case 'database_host':
+                             $database->setHost($value);
+                             break;
+                         case 'database_port':
+                             $database->setPort($value);
+                             break;
+                         case 'database_name':
+                             $database->setName($value);
+                             break;
+                         case 'database_user':
+                             $database->setUser($value);
+                             break;
+                         case 'secret':
+                             $database->setSecret($value);
+                             break;
+                         default:
+                             break;
+                     }
+                }
+            }     
 
             // force user to change the default Symfony secret for security
-            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
+            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
                 $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
             }
 
@@ -86,19 +108,18 @@ class DatabaseSetupController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()){
 
                 $envLocal = __DIR__.'/../../.env.local';
+                // we edit the database connection parameters with form input
+                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
+                // add Symfony secret to .env.local 
+                $appSecret = 'APP_SECRET='.$database->getSecret();
+                // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+    
+                // allow to proceed to next step
+                $submitted = true;
 
-                if(file_exists($envLocal) && is_file($envLocal)){
-                    // we edit the database connection parameters with form input
-                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                    $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
-                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                    file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString, LOCK_EX);
-                }
-
-                    // allow to proceed to next step
-                    $submitted = true;
-
-                }
+            }
 
                 return $this->render('database_setup/index.html.twig', [
                     'form' => $form->createView(),
@@ -113,15 +134,38 @@ class DatabaseSetupController extends AbstractController
               
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
-                $database->setDriver($this->getParameter('database_driver'));
-                $database->setHost($this->getParameter('database_host'));
-                $database->setPort($this->getParameter('database_port'));
-                $database->setName($this->getParameter('database_name'));
-                $database->setUser($this->getParameter('database_user'));
-                $database->setSecret($this->getParameter('secret'));
+
+           $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+           foreach($parameters as $parameter){
+               $value = $this->getParameter($parameter);
+               if(!empty($value)){
+                    switch($parameter) {
+                        case 'database_driver':
+                            $database->setDriver($value);
+                            break;
+                        case 'database_host':
+                            $database->setHost($value);
+                            break;
+                        case 'database_port':
+                            $database->setPort($value);
+                            break;
+                        case 'database_name':
+                            $database->setName($value);
+                            break;
+                        case 'database_user':
+                            $database->setUser($value);
+                            break;
+                        case 'secret':
+                            $database->setSecret($value);
+                            break;
+                        default:
+                            break;
+                    }
+               }
+           }     
 
                 // force user to change the default Symfony secret for security
-                if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt') {
+                if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
                     $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
                 }
 
@@ -132,16 +176,15 @@ class DatabaseSetupController extends AbstractController
                 if ($form->isSubmitted() && $form->isValid()){
 
                     $envLocal = __DIR__.'/../../.env.local';
-
-                    if(file_exists($envLocal) && is_file($envLocal)){
-                        // we edit the database connection parameters with form input
-                        $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                        // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                        file_put_contents($envLocal, PHP_EOL.$newUrl, LOCK_EX);
-                    }
-
-                        // allow to proceed to next step
-                        $submitted = true;
+                    // we edit the database connection parameters with form input
+                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                    $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
+                    $appSecret = 'APP_SECRET='.$database->getSecret();
+                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                    file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+            
+                    // allow to proceed to next step
+                    $submitted = true;
                     }
 
                 //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form

@@ -1,5 +1,5 @@
-var url = Routing.generate('jobscheduler_input');
-$(document).ready(function () {
+var url = 'jobscheduler/getFieldsSelect';
+$(function(){
     fieldTreatment();
 });
 
@@ -72,7 +72,7 @@ function fieldTreatment($event) {
             });
         },
         error: function (err) {
-            alert("An error ocurred while loading data ...");
+            console.log(err.responseText);
         }
     });
 
