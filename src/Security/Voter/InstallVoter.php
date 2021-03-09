@@ -33,7 +33,7 @@ class InstallVoter extends Voter
             return false;
         }
 
-     
+        
         $config = $subject;
         
         // ... (check conditions and return true to grant permission) ...

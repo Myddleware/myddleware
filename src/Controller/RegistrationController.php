@@ -38,7 +38,9 @@ class RegistrationController extends AbstractController
         $configs = $this->configRepository->findAll();
         if(!empty($configs)){
             foreach($configs as $config) {
-                $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+                if($config->getName() === 'allow_install'){
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+                }
             }
         } 
 
@@ -86,6 +88,7 @@ class RegistrationController extends AbstractController
             );
         }
     } catch (Exception $e ){
+        dd($e);
         return $this->redirectToRoute('login');
     }
         return $this->render('registration/register.html.twig', [
