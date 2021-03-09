@@ -32,6 +32,7 @@ use App\Entity\Document;
 use App\Entity\RuleOrder;
 use App\Entity\RuleParam;
 use App\Entity\DocumentData;
+use App\Entity\Config;
 use App\Manager\DocumentManager;
 use Psr\Log\LoggerInterface;
 use App\Repository\RuleRepository;
@@ -56,7 +57,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class rulecore
 {
 	protected $connection;
-	protected $container;
 	protected $logger;
 	protected $ruleId;
 	protected $rule;
@@ -155,13 +155,8 @@ class rulecore
 		$this->solutionManager = $solutionManager;
 		$this->documentManager = $documentManager;
 		$this->parameterBagInterface = $parameterBagInterface;
-		$this->env = $this->parameterBagInterface->get('kernel.environment');	
+		$this->env = getenv('APP_ENV');	
 		$this->formulaManager = $formulaManager;		
-
-		// $this->setRuleParam();
-		// $this->setLimit();
-		// $this->setRuleRelationships();
-		// $this->tools = new MyddlewareTools($this->logger, $this->container, $this->connection);			
 	}
 	
 	public function setRule($idRule) {
@@ -305,15 +300,12 @@ class rulecore
 	
 			// Connect to the application
 			if ($type == 'source') {	
-				// $this->solutionSource = $this->container->get('myddleware_rule.'.$r['name']);	
-				// $this->solutionSource = $this->solutionManager->get($connector->getSolution()->getName());
 				$this->solutionSource = $this->solutionManager->get($r['name']);
 				$this->solutionSource->setApi($this->api);				
 				$loginResult = $this->solutionSource->login($params);			
 				$c = (($this->solutionSource->connexion_valide) ? true : false );				
 			}
 			else {
-				// $this->solutionTarget = $this->container->get('myddleware_rule.'.$r['name']);	
 				$this->solutionTarget = $this->solutionManager->get($r['name']);	
 				$this->solutionTarget->setApi($this->api);
 				$loginResult = $this->solutionTarget->login($params);			
@@ -369,8 +361,13 @@ class rulecore
 					$i = 0;
 					if($this->dataSource['values']) {
 						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
-						$migrationParameters = $this->parameterBagInterface->get('migration');
-						if (!empty($migrationParameters['mode'])) {
+						$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+						$migrationMode = $configRepository->findOneBy(['name'=> 'migration_mode']);
+						if (!empty($migrationMode)) {
+							$migrationParameters = $migrationMode->getValue();
+						}
+
+						if (!empty($migrationParameters)) {
 							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
 						}				
 						// Boucle sur chaque document
@@ -990,17 +987,11 @@ class rulecore
 			$session = new Session();	
 			// create temp file
 			$guid = uniqid();	
-			// // récupération de l'exécutable PHP, par défaut c'est php
-			// $php = $this->parameterBagInterface->get('php');
-			// if (empty($php['executable'])) {
-			// 	$php['executable'] = 'php';
-			// }
-			
 
-			 //get ..\bin\php\php.exe file
-			 $phpBinaryFinder = new PhpExecutableFinder();
-			 $phpBinaryPath = $phpBinaryFinder->find();
-			 $php = $phpBinaryPath;
+			// Get the php executable 
+			$phpBinaryFinder = new PhpExecutableFinder();
+			$phpBinaryPath = $phpBinaryFinder->find();
+			$php = $phpBinaryPath;
 			
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
@@ -1009,10 +1000,6 @@ class rulecore
 			} catch (IOException $e) {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
 			}
-			 //get ..\bin\php\php.exe file
-			 $phpBinaryFinder = new PhpExecutableFinder();
-			 $phpBinaryPath = $phpBinaryFinder->find();
-			 $php = $phpBinaryPath;
 			
 			//if user clicked on cancel all transfers of a rule
 			if($event === 'cancelDocumentJob'){

@@ -277,39 +277,31 @@ class documentcore
 			$this->jobActive = false;
 		}		
 
-		// If mode isn't front ofice => only when the user click on "Simulation" during the rule creation
-		if(
-				empty($param['mode']) 
-			 || (
-					!empty($param['mode'])
-				&& $param['mode'] != 'front_office'
-			)
-		) {
-			// Init attribut of the class Document
-			if (!empty($param['id_doc_myddleware'])) {	
-				// Instanciate attribut sourceData
-				$this->setDocument($param['id_doc_myddleware']);
-			}
-			else {				
-				$this->id = uniqid('', true);
-				$this->dateCreated = gmdate('Y-m-d H:i:s');
-				$this->ruleName = $param['rule']['name_slug'];
-				$this->ruleMode = $param['rule']['mode'];
-				$this->ruleId = $param['rule']['id'];
-				$this->ruleFields = $param['ruleFields'];
-				$this->data = $param['data'];
-				$this->sourceId = $this->data['id'];
-				$this->userId = $param['rule']['created_by'];
-				$this->status = 'New';
-				$this->attempt = 0;			
-				// Set the deletion type if myddleware deletion flag is true
-				if (!empty($this->data['myddleware_deletion'])) {
-					$this->documentType = 'D';
-				}
-			} 
-			// Ajout des paramètre de la règle
-			$this->setRuleParam();
+		// Init attribut of the class Document
+		if (!empty($param['id_doc_myddleware'])) {	
+			// Instanciate attribut sourceData
+			$this->setDocument($param['id_doc_myddleware']);
 		}
+		else {				
+			$this->id = uniqid('', true);
+			$this->dateCreated = gmdate('Y-m-d H:i:s');
+			$this->ruleName = $param['rule']['name_slug'];
+			$this->ruleMode = $param['rule']['mode'];
+			$this->ruleId = $param['rule']['id'];
+			$this->ruleFields = $param['ruleFields'];
+			$this->data = $param['data'];
+			$this->sourceId = $this->data['id'];
+			$this->userId = $param['rule']['created_by'];
+			$this->status = 'New';
+			$this->attempt = 0;			
+			// Set the deletion type if myddleware deletion flag is true
+			if (!empty($this->data['myddleware_deletion'])) {
+				$this->documentType = 'D';
+			}
+		} 
+		// Ajout des paramètre de la règle
+		$this->setRuleParam();
+
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
 			$this->ruleFields = $param['ruleFields'];
@@ -1352,8 +1344,6 @@ class documentcore
 					}
 				}
 				// préparation des variables	 
-				
-				// $formule = $this->container->get('formula.myddleware'); // service formule myddleware
 				$this->formulaManager->init($ruleField['formula']); // mise en place de la règle dans la classe
 				$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
 				

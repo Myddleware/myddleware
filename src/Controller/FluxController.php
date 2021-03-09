@@ -31,6 +31,7 @@ use App\Entity\DocumentData;
 use App\Entity\DocumentRelationship;
 use App\Entity\Log;
 use App\Entity\Rule;
+use App\Entity\Config;
 use App\Manager\document as doc;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
@@ -301,10 +302,12 @@ if (file_exists($file)) {
                 $data['search'] = $search;
                 $data['page'] = $page;
 
-                $transferParameters = $this->getParameter('transfer');
-                if (!empty($transferParameters['search_limit'])) {
-                    $data['limit'] = $transferParameters['search_limit'];
-                }
+				// Get the limit parameter 
+				$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+				$searchLimit = $configRepository->findOneBy(['name'=> 'search_limit']);
+				if (!empty($searchLimit)) {
+					$data['limit'] = $searchLimit->getValue();
+				}
 
                 $r = $this->documentRepository->getFluxPagination($data);
                 if (empty($data['source_content'])) {

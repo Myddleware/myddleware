@@ -33,7 +33,15 @@ class LoadConfigData implements FixtureInterface
 {
     private $manager;
     protected $configData = [
-        ['name' => 'executable', 'value' => 'php72']
+		['name' => 'allow_install', 'value' => true, 'update' => false],
+		['name' => 'extension_allowed', 'value' => '["xml","wsdl"]', 'update' => false],
+		['name' => 'pager', 'value' => 20, 'update' => false],
+		['name' => 'migration_mode', 'value' => false, 'update' => false],
+		['name' => 'alert_time_limit', 'value' => 60, 'update' => false],
+		['name' => 'search_limit', 'value' => 1000, 'update' => false],
+		['name' => 'git_branch', 'value' => 'master', 'update' => false],
+		['name' => 'base_uri', 'value' => '', 'update' => false],
+		['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false]
     ];
 
     public function load(ObjectManager $manager)
@@ -55,14 +63,21 @@ class LoadConfigData implements FixtureInterface
 						$foundConfig = true;
 						$conf = $config;					
 						break;
-					}
+					} 
 				}
+			}
+			// Update only if the config has the flag update = true
+			if (
+					$foundConfig 
+				AND !$configData['update']
+			) {
+				continue;
 			}
 
             // If we didn't found the config we create a new one, otherwise we update it
 			if (!$foundConfig) {
                 $conf = new Config();			
-            }		
+            }				
             $conf->setName($configData['name']);
             $conf->setValue($configData['value']);
             $this->manager->persist($conf);

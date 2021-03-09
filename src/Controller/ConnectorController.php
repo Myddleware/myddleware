@@ -28,6 +28,7 @@ namespace App\Controller;
 use App\Entity\Connector;
 use App\Entity\Rule;
 use App\Entity\Solution;
+use App\Entity\Config;
 use App\Form\ConnectorType;
 use App\Manager\permission;
 use App\Manager\SolutionManager;
@@ -279,7 +280,14 @@ class ConnectorController extends AbstractController
                 $this->sessionService->setUploadError($error);
             } else {
                 // A list of permitted file extensions
-                $allowed = $this->getParameter('extension_allowed');
+				$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+				$extensionAllowed = $configRepository->findOneBy(['name'=> 'extension_allowed']);
+				if (!empty($extensionAllowed)) {
+					$allowedJson = $extensionAllowed->getValue();				
+					if (!empty($allowedJson)) {
+						$allowed = json_decode($allowedJson);
+					}
+				}
                 $extension = pathinfo($_FILES['myfile']['name'], PATHINFO_EXTENSION);
 
                 if (!in_array(strtolower($extension), $allowed)) {

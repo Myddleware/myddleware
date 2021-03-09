@@ -28,7 +28,6 @@ namespace App\Manager;
 use Doctrine\DBAL\Driver\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -52,10 +51,6 @@ if (file_exists($file)) {
         protected $language;
         protected $translations;
         /**
-         * @var ParameterBagInterface
-         */
-        private $params;
-        /**
          * @var string
          */
         private $projectDir;
@@ -63,15 +58,12 @@ if (file_exists($file)) {
         public function __construct(
             LoggerInterface $logger,
             Connection $connection,
-            ParameterBagInterface $params,
             KernelInterface $kernel
         ) {
             $this->logger = $logger;
             $this->connection = $connection;
-            $this->params = $params;
-            $this->language = $this->params->get('locale');
             $this->projectDir = $kernel->getProjectDir();
-            $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.'.$this->language.'.yml'));
+            $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.en.yml'));
         }
 
         // Compose une liste html avec les options

@@ -38,6 +38,7 @@ use App\Entity\RuleParamAudit;
 use App\Entity\RuleRelationShip;
 use App\Entity\Solution;
 use App\Entity\User;
+use App\Entity\Config;
 use App\Form\ConnectorType;
 use App\Manager\DocumentManager;
 use App\Manager\FormulaManager;
@@ -91,10 +92,7 @@ if (file_exists($file)) {
     {
         private $formuleManager;
         private $sessionService;
-        /**
-         * @var mixed
-         */
-        private $locale;
+
         /**
          * @var ParameterBagInterface
          */
@@ -194,8 +192,14 @@ if (file_exists($file)) {
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
-            $this->params = $params;
-            $this->locale = $params->get('locale');
+			// Initialise parameters
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->params[$config->getName()] = $config->getvalue();
+				}
+			}		
         }
 
         // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
@@ -242,7 +246,7 @@ if (file_exists($file)) {
 
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser()),
-                    'maxPerPage' => $this->params->get('pager'),
+                    'maxPerPage' => $this->params['pager'],
                     'page' => $page,
                 ]);
 
@@ -1006,7 +1010,7 @@ if (file_exists($file)) {
                             'action' => $this->generateUrl('regle_connector_insert'),
                             'attr' => [
                                 'fieldsLogin' => $fieldsLogin,
-                                'secret' => $this->params->get('secret'),
+                                'secret' => $this->getParameter('secret'),
                             ],
                         ]);
 
@@ -2394,10 +2398,9 @@ if (file_exists($file)) {
          *
          * @Route("/panel", name="regle_panel")
          */
-        public function panelAction()
+        public function panelAction(Request $request)
         {
-            $language = $this->locale;
-            $myddleware_support = $this->params->get('myddleware_support');
+            $language = $request->getLocale();
 
             $this->getInstanceBdd();
             $solution = $this->entityManager->getRepository(Solution::class)
@@ -2860,7 +2863,7 @@ if (file_exists($file)) {
         private function decrypt_params($tab_params)
         {
             // Instanciate object to decrypte data
-            $encrypter = new Encrypter(substr($this->params->get('secret'), -16));
+            $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
             if (is_array($tab_params)) {
                 $return_params = [];
                 foreach ($tab_params as $key => $value) {

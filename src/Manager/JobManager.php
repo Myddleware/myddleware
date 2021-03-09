@@ -56,6 +56,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 class jobcore  {
 		
@@ -368,6 +369,7 @@ class jobcore  {
 		try{
 			// Création d'un fichier temporaire
 			$guid = uniqid();
+			$php = 'php';
 			// If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
 			if ($param[0] == 'cancel') {
 				$param[] = 'Y';
@@ -376,11 +378,10 @@ class jobcore  {
 			// Formatage des paramètres
 			$params = implode(' ',$param);
 			
-			// récupération de l'exécutable PHP, par défaut c'est php
-			$php = $this->parameterBagInterface->get('php');
-			if (empty($php['executable'])) {
-				$php['executable'] = 'php';
-			}
+			// Get the php executable 
+			$phpBinaryFinder = new PhpExecutableFinder();
+			$phpBinaryPath = $phpBinaryFinder->find();
+			$php = $phpBinaryPath;
 				
 			//Create your own folder in the cache directory
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
@@ -390,7 +391,7 @@ class jobcore  {
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
 			}
-			exec($php['executable'].' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &', $output);
+			exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {

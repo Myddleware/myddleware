@@ -25,17 +25,18 @@
 
 namespace App\Manager;
 
-use Doctrine\DBAL\Driver\Connection;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Ldap\Adapter\ConnectionInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Config;
 
 $file = __DIR__.'/../Custom/Manager/UpgradeManager.php';
 if (file_exists($file)) {
@@ -52,8 +53,6 @@ if (file_exists($file)) {
     {
         protected $env;
         protected $em;
-        protected $newParameters;
-        protected $currentParameters;
         protected $phpExecutable = 'php';
         protected $message = '';
         protected $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
@@ -62,55 +61,41 @@ if (file_exists($file)) {
          */
         private $logger;
         /**
-         * @var ConnectionInterface
-         */
-        private $connection;
-        /**
          * @var string
          */
         private $projectDir;
         /**
-         * @var ParameterBagInterface
-         */
-        private $params;
-        /**
          * @var KernelInterface
          */
         private $kernel;
-
+		/**
+		 * @var EntityManagerInterface
+		 */
+		private $entityManager;
+		
         public function __construct(
             LoggerInterface $logger,
-            Connection $connection,
             KernelInterface $kernel,
-            ParameterBagInterface $params
+			EntityManagerInterface $entityManager
         ) {
-            $this->logger = $logger; // gestion des logs symfony monolog
-            $this->connection = $connection;
+            $this->logger = $logger; 
             $this->kernel = $kernel;
+			$this->entityManager = $entityManager;
             $this->env = $kernel->getEnvironment();
             $this->projectDir = $kernel->getProjectDir();
-            $this->params = $params;
+			// Initialise parameters
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->params[$config->getName()] = $config->getvalue();
+				}
+			}
 
-            // New parameters in file parameters.yml.dist
-            $this->newParameters['parameters'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/parameters.yml.dist'));
-            $this->newParameters['parameters_public'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_public.yml.dist'));
-            $this->newParameters['parameters_smtp'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_smtp.yml.dist'));
-            // Current parameters in file parameters.yml
-            $this->currentParameters['parameters'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/parameters.yml'));
-            $this->currentParameters['parameters_public'] = '';
-            if (file_exists($this->projectDir.'/config/public/parameters_public.yml')) {
-                $this->currentParameters['parameters_public'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_public.yml'));
-            }
-            $this->currentParameters['parameters_smtp'] = '';
-            if (file_exists($this->projectDir.'/config/public/parameters_smtp.yml')) {
-                $this->currentParameters['parameters_smtp'] = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_smtp.yml'));
-            }
-
-            // Get php executable
-            $phpParameter = $this->params->get('php');
-            if (!empty($phpParameter['executable'])) {
-                $this->phpExecutable = $phpParameter['executable'];
-            }
+			// Get the php executable 
+			$phpBinaryFinder = new PhpExecutableFinder();
+			$phpBinaryPath = $phpBinaryFinder->find();
+			$this->phpExecutable = $phpBinaryPath;
         }
 
         public function processUpgrade($output)
@@ -118,12 +103,6 @@ if (file_exists($file)) {
             try {
                 // Customize update process
                 $this->beforeUpdate($output);
-
-                // Add new parameters
-                $output->writeln('<comment>Update parameters...</comment>');
-                $this->updateParameters();
-                $output->writeln('<comment>Update parameters OK</comment>');
-                $this->message .= 'Update parameters OK'.chr(10);
 
                 // Update file
                 $output->writeln('<comment>Update files...</comment>');
@@ -136,11 +115,6 @@ if (file_exists($file)) {
                 $this->updateVendors();
                 $output->writeln('<comment>Update vendors OK</comment>');
                 $this->message .= 'Update vendors OK'.chr(10);
-
-                /* // Clear boostrap cache
-                $output->writeln('<comment>Clear boostrap cache...</comment>');
-                $this->clearBoostrapCache();
-                $output->writeln('<comment>Clear boostrap cache OK</comment>'); */
 
                 // Update database
                 $output->writeln('<comment>Update database...</comment>');
@@ -160,17 +134,11 @@ if (file_exists($file)) {
                 $output->writeln('<comment>Clear Symfony cache OK</comment>');
                 $this->message .= 'Clear Symfony cache OK'.chr(10);
 
-                // Change Myddleware version
-                $output->writeln('<comment>Update version...</comment>');
-                $this->changeVersion();
-                $output->writeln('<comment>Update version OK</comment>');
-                $this->message .= 'Update version OK'.chr(10);
-
                 // Customize update process
                 $this->afterUpdate($output);
 
-                $output->writeln('<info>Myddleware has been successfully updated in version '.$this->newParameters['parameters']['parameters']['myd_version'].'</info>');
-                $this->message .= 'Myddleware has been successfully updated in version '.$this->newParameters['parameters']['parameters']['myd_version'].chr(10);
+                $output->writeln('<info>Myddleware has been successfully updated in version '.$this->params['myd_version'].'</info>');
+                $this->message .= 'Myddleware has been successfully updated in version '.$this->params['myd_version'].chr(10);
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
@@ -180,35 +148,12 @@ if (file_exists($file)) {
 
             return $this->message;
         }
-
-        // Update parameters with dist file
-        protected function updateParameters()
-        {
-            // Foreach parameter file
-            foreach ($this->newParameters as $key => $yml) {
-                // Check if a parameter exists in dist file and not in the parameter file
-                foreach ($yml['parameters'] as $newParameterKey => $newParameterValue) {
-                    if (
-                        empty($this->currentParameters[$key]['parameters'])
-                        or false === array_key_exists($newParameterKey, $this->currentParameters[$key]['parameters'])
-                    ) {
-                        // Add it i the parameter file
-                        $this->currentParameters[$key]['parameters'][$newParameterKey] = $newParameterValue;
-                        $new_yaml = Yaml::dump($this->currentParameters[$key], 4);
-                        file_put_contents($this->projectDir.'/config/'.('parameters' == $key ? '' : 'public/').$key.'.yml', $new_yaml);
-                        $info = 'New parameter '.$newParameterKey.' added to the file config/'.('parameters' == $key ? '' : 'public/').$key.'.yml';
-                        echo $info.chr(10);
-                        $this->logger->info($info);
-                        $this->message .= $info.chr(10);
-                    }
-                }
-            }
         }
 
         protected function updateFiles()
         {
             // Update master if git_branch is empty otherwise we update the specific branch
-            $command = (!empty($this->params->get('git_branch'))) ? 'git pull origin '.$this->params->get('git_branch') : 'git pull';
+            $command = (!empty($this->params['git_branch'])) ? 'git pull origin '.$this->params['git_branch'] : 'git pull';
             $process = new Process($command);
             $process->run();
             // executes after the command finishes
@@ -348,11 +293,6 @@ if (file_exists($file)) {
                     $this->message .= $process->getOutput().chr(10);
                 }
             }
-
-            // Refresh new parameters in file parameters.yml.dist
-            $this->newParameters['parameters'] = Yaml::parse(file_get_contents($this->projectDir.'/config/parameters.yml.dist'));
-            $this->newParameters['parameters_public'] = Yaml::parse(file_get_contents($this->projectDir.'/config/public/parameters_public.yml.dist'));
-            $this->newParameters['parameters_smtp'] = Yaml::parse(file_get_contents($this->projectDir.'/config/public/parameters_smtp.yml.dist'));
         }
 
         // Finish install
@@ -394,25 +334,6 @@ if (file_exists($file)) {
                 echo $content.chr(10);
                 $this->logger->info($content);
                 $this->message .= $content.chr(10);
-            }
-        }
-
-        // Myddleware upgrade
-        protected function changeVersion()
-        {
-            // Read the file parameters.yml.dist with the new version of Myddleware
-            if (!empty($this->newParameters['parameters']['parameters']['myd_version'])) {
-                if ($this->newParameters['parameters']['parameters']['myd_version'] != $this->currentParameters['parameters']['parameters']['myd_version']) {
-                    $this->currentParameters['parameters']['parameters']['myd_version'] = $this->newParameters['parameters']['parameters']['myd_version'];
-                    $new_yaml = Yaml::dump($this->currentParameters['parameters'], 4);
-                    file_put_contents($this->projectDir.'/config/parameters.yml', $new_yaml);
-                    $info = 'Version changed to '.$this->newParameters['parameters']['parameters']['myd_version'].' in the file /config/parameters.yml';
-                    echo $info.chr(10);
-                    $this->logger->info($info);
-                    $this->message .= $info.chr(10);
-                }
-            } else {
-                throw new \Exception('No version in the file parameters.yml.dist. Failed to update the version of Myddleware.');
             }
         }
 

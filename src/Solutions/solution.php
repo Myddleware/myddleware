@@ -58,9 +58,6 @@ class solutioncore
     // Classe permettant d'enregistrer les log Symfony
     protected $logger;
 
-    // Classe permettant la connexion à la base données
-    protected $container;
-
     // Tableau comportant les différents types de BDD valides
     protected $type_valide = ['text'];
 

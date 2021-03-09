@@ -26,6 +26,7 @@
 namespace App\Manager;
 
 use App\Entity\User;
+use App\Entity\Config;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
@@ -119,9 +120,17 @@ if (file_exists($file)) {
             $this->ruleRepository = $ruleRepository;
             $this->mailer = $mailer;
             $this->tools = $tools;
-            $this->params = $params;
+            // $this->params = $params;
             $this->twig = $twig;
-            $this->fromEmail = $this->params->get('email_from') ?? 'no-reply@myddleware.com';
+			// Initialise parameters
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->params[$config->getName()] = $config->getvalue();
+				}
+			}	
+            $this->fromEmail = $this->params['email_from'] ?? 'no-reply@myddleware.com';
         }
 
         // Send alert if a job is running too long
@@ -130,13 +139,12 @@ if (file_exists($file)) {
             try {
 				// Get the email adresses of all ADMIN
 				$this->setEmailAddresses();
-                $notificationParameter = $this->params->get('notification');
-                if (empty($notificationParameter['alert_time_limit'])) {
+                if (empty($this->params['alert_time_limit'])) {
                     throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
                 }
                 // Calculate the date corresponding to the beginning still authorised
                 $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
-                $timeLimit->modify('-'.$notificationParameter['alert_time_limit'].' minutes');
+                $timeLimit->modify('-'.$this->params['alert_time_limit'].' minutes');
 
                 // Search if a job is lasting more time that the limit authorized
                 $job = $this->jobRepository->findJobStarted($timeLimit);
@@ -144,10 +152,10 @@ if (file_exists($file)) {
                 if (!$job) {
                     // Create text
                     $textMail = $this->translator->trans('email_alert.body', [
-                        '%min%' => $notificationParameter['alert_time_limit'],
+                        '%min%' => $this->params['alert_time_limit'],
                         '%begin%' => $job['begin'],
                         '%id%' => $job['id'],
-                        'base_uri' => $this->params->get('base_uri') ?? '',
+                        'base_uri' => $this->params['base_uri'] ?? '',
                     ]);
 
                     $message =
@@ -257,21 +265,20 @@ if (file_exists($file)) {
                 }
 
                 // Add url if the parameter base_uri is defined in app\config\public
-                if (!empty($this->params->get('base_uri'))) {
-                    $textMail .= chr(10).$this->params->get('base_uri').chr(10);
+                if (!empty($this->params['base_uri'])) {
+                    $textMail .= chr(10).$this->params['base_uri'].chr(10);
                 }
                 // Create text
                 $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
 
                 $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
 				$message
-                    ->setFrom((!empty($this->params->get('email_from')) ? $this->params->get('email_from') : 'no-reply@myddleware.com'))
+                    ->setFrom((!empty($this->params['email_from']) ? $this->params['email_from'] : 'no-reply@myddleware.com'))
                     ->setBody($textMail);
                 // Send the message to all admins
                 foreach ($this->emailAddresses as $emailAddress) {
                     $message->setTo($emailAddress);
-                    $send = $this->mailer->send($message);		
-echo $emailAddress.' : '.$send.' : '.$this->tools->getTranslation(['email_notification', 'subject']).chr(10);			
+                    $send = $this->mailer->send($message);				
                     if (!$send) {
                         $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
                         throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
