@@ -85,7 +85,7 @@ class vtigercrmcore extends solution
     ];
 
 	// Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Quotes'];
+    protected $allowParentRelationship = ['Quotes', 'SalesOrder'];
 
     /** @var array */
     protected $moduleList;

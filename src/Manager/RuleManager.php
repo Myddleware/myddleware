@@ -74,6 +74,7 @@ class rulecore
 	protected $limit = 100;
 	protected $limitReadCommit = 1000;
 	protected $tools;
+	protected $configParams;
 	protected $api;    // Specify if the class is called by the API
 	/**
 	 * @var EntityManagerInterface
@@ -156,7 +157,15 @@ class rulecore
 		$this->documentManager = $documentManager;
 		$this->parameterBagInterface = $parameterBagInterface;
 		$this->env = getenv('APP_ENV');	
-		$this->formulaManager = $formulaManager;		
+		$this->formulaManager = $formulaManager;
+		// Init config parameters
+		$configRepository = $this->entityManager->getRepository(Config::class);
+		$configs = $configRepository->findAll();
+		if (!empty($configs)) {
+			foreach ($configs as $config) {
+				$this->configParams[$config->getName()] = $config->getvalue();
+			}
+		}			
 	}
 	
 	public function setRule($idRule) {
@@ -361,13 +370,7 @@ class rulecore
 					$i = 0;
 					if($this->dataSource['values']) {
 						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
-						$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-						$migrationMode = $configRepository->findOneBy(['name'=> 'migration_mode']);
-						if (!empty($migrationMode)) {
-							$migrationParameters = $migrationMode->getValue();
-						}
-
-						if (!empty($migrationParameters)) {
+						if (!empty($this->configParams['migration_mode'])) {
 							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
 						}				
 						// Boucle sur chaque document
@@ -633,8 +636,7 @@ class rulecore
 			$param['jobId'] = $this->jobId;			
 			$param['ruleRelationships'] = $this->ruleRelationships;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->parameterBagInterface->get('migration');
-			if (!empty($migrationParameters['mode'])) {
+			if (!empty($this->configParams['migration_mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
 					foreach($this->ruleRelationships as $ruleRelationship) {
@@ -677,8 +679,7 @@ class rulecore
 			$param['jobId'] = $this->jobId;
 			$param['api'] = $this->api;
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-			$migrationParameters = $this->parameterBagInterface->get('migration');
-			if (!empty($migrationParameters['mode'])) {
+			if (!empty($this->configParams['migration_mode'])) {
 				if (!empty($this->ruleRelationships)) {
 					// Get all documents of every rules linked
 					foreach($this->ruleRelationships as $ruleRelationship) {
