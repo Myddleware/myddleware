@@ -25,25 +25,26 @@
 
 namespace App\Manager;
 
-use App\Entity\Connector;
-use App\Entity\ConnectorParam;
+use Exception;
 use App\Entity\Rule;
-use App\Entity\RuleField;
-use App\Entity\RuleFilter;
-use App\Entity\RuleParam;
-use App\Entity\RuleRelationShip;
 use App\Entity\User;
-use App\Repository\ConnectorParamRepository;
+use App\Entity\Connector;
+use App\Entity\RuleField;
+use App\Entity\RuleParam;
+use App\Entity\RuleFilter;
+use App\Manager\JobManager;
+use Psr\Log\LoggerInterface;
+use App\Entity\ConnectorParam;
+use App\Entity\RuleRelationShip;
+use Symfony\Component\Yaml\Yaml;
 use App\Repository\ConnectorRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Repository\ConnectorParamRepository;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 $file = __DIR__.'/../Custom/Manager/TemplateManager.php';
 if (file_exists($file)) {
