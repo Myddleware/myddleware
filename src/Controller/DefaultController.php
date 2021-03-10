@@ -2019,6 +2019,7 @@ if (file_exists($file)) {
             $this->getInstanceBdd();
             $this->entityManager->getConnection()->beginTransaction();
             try {
+
                 /*
                  * get rule id in the params in regle.js. In creation, regleId = 0
                  */

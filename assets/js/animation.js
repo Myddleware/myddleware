@@ -536,9 +536,17 @@ function animConfirm(choice_lst) {
 	template = '';	
 	if(choice_lst == 'template') {
 		$('#template').find('tr').each(function(){
-			if($(this).attr('class') == 'info') {
-				template = $(this).find('span').attr('data-id');
-			}
+			$(this).find('span').each(function(){
+				if( $(this).data('id') !== null ){
+					template = $(this).data('id');
+				}
+			});
+			// TODO: this doesn't work any more because the class info isn't there so I added the fix 
+			// above while we find out why the class info isn't there
+			// if($(this).attr('class') === 'info') {
+			// 	template = $(this).find('span').attr('data-id');
+	
+			// }
 		});		
 	}	
 			

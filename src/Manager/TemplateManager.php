@@ -96,6 +96,11 @@ if (file_exists($file)) {
          */
         private $translator;
 
+        /**
+         * @var JobManager
+         */
+        private $jobManager;
+
         public function __construct(
             LoggerInterface $logger,
             EntityManagerInterface $entityManager,
@@ -105,7 +110,8 @@ if (file_exists($file)) {
             SessionInterface $session,
             TranslatorInterface $translator,
             RequestStack $requestStack,
-			DriverConnection $dbalConnection
+			DriverConnection $dbalConnection,
+            JobManager $jobManager
         ) {
             $this->logger = $logger;
             $this->entityManager = $entityManager;
@@ -118,6 +124,7 @@ if (file_exists($file)) {
             $this->templateDir = $this->projectDir.'/src/Templates/';
             $request = $requestStack->getCurrentRequest();
             $this->lang = $request ? $request->getLocale() : 'EN';
+            $this->jobManager = $jobManager;
         }
 		
 		// Sort rule (rule parent first)
@@ -150,7 +157,7 @@ if (file_exists($file)) {
         {
 			$rule = $this->entityManager
 							  ->getRepository(Rule::class)
-	                          ->findOneById( $ruleId );	
+	                          ->find( $ruleId );	
             // General data
             $data['name'] = $rule->getName();
             $data['nameSlug'] = $rule->getNameSlug();
