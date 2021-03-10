@@ -514,19 +514,19 @@ class vtigercrmcore extends solution
         foreach ($parentModules as $prefix => $moduleName) {
             //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
             $query = $this->getVtigerClient()->query("SELECT id, createdtime, modifiedtime FROM {$moduleName} {$where} ORDER BY modifiedtime ASC LIMIT 0, 1;");
-            if (empty($$query['success']) || empty($query['result'])) {
+            if (empty($query['success']) || empty($query['result'])) {
                 continue;
             }
             foreach ($query['result'] as $parentElement) {
                 if ($maxTime && $maxTime >= $parentElement['modifiedtime']) {
                     continue;
                 }
-                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
-                if (empty($retrive['result']['LineItems'])) {
+                $retrieve = $this->getVtigerClient()->retrieve($parentElement['id']);
+                if (empty($retrieve['result']['LineItems'])) {
                     continue;
                 }
                 $maxTime = $parentElement['modifiedtime'];
-                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
+                foreach ($retrieve['result']['LineItems'] as $index => $lineItem) {
                     $lineItem['parent_id'] = $parentElement['id'];
                     $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
                     $lineItem['createdtime'] = $parentElement['createdtime'];
@@ -661,7 +661,7 @@ class vtigercrmcore extends solution
     protected function readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall)
     {
         if (empty($this->moduleList)) {
-            $this->setModulePrefix();
+            $this->setAllModulesPrefix();
         }
 
         //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
@@ -684,11 +684,13 @@ class vtigercrmcore extends solution
             }
 
             foreach ($query['result'] as $parentElement) {
-                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
-                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
+                $retrieve = $this->getVtigerClient()->retrieve($parentElement['id']);
+                foreach ($retrieve['result']['LineItems'] as $index => $lineItem) {
+                    /*
                     if ($index == 0) {
                         continue;
                     }
+                    */
                     $lineItem['parent_id'] = $parentElement['id'];
                     $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
                     $lineItem['createdtime'] = $parentElement['createdtime'];
@@ -869,7 +871,7 @@ class vtigercrmcore extends solution
             foreach ($lineItems as $idDoc => $lineItem) {
                 $result[$idDoc] = [
                     'id' => '-1',
-                    'error' => $resultUpdate["error"]["message"]
+                    'error' => $resultUpdate['error']['message']
                 ];
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
@@ -877,22 +879,46 @@ class vtigercrmcore extends solution
             return;
         }
 
-        $retrive = $this->getVtigerClient()->retrieve($resultUpdate['result']['id']);
-        if (empty($retrive['success']) || empty($retrive['result']['LineItems'])) {
+        $retrieve = $this->getVtigerClient()->retrieve($resultUpdate['result']['id']);
+        if (empty($retrieve['success']) || empty($retrieve['result']['LineItems'])) {
             return;
         }
 
+        $lineItemIndex = 0;
         foreach ($lineItems as $idDoc => $lineItem) {
-            foreach ($retrive['result']['LineItems'] as $retriveLineItem) {
-                if ($retriveLineItem['sequence_no'] != $lineItem['sequence_no']) {
+            /*
+            $lineItemMatched = false;
+            $sequenceSpan = '';
+            foreach ($retrieve['result']['LineItems'] as $retrieveLineItem) {
+                $sequenceSpan .= $sequenceSpan ? ','.$retrieveLineItem['sequence_no'] : $retrieveLineItem['sequence_no'];
+                if ($retrieveLineItem['sequence_no'] != $lineItem['sequence_no']) {
                     continue;
                 }
+                $lineItemMatched = true;
                 $result[$idDoc] = [
-                    'id' => $retriveLineItem['id'],
+                    'id' => $retrieveLineItem['id'],
                     'error' => false,
                 ];
-                $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
+            if (!$lineItemMatched) {
+                $result[$idDoc] = [
+                    'id' => -1,
+                    'error' => "LineItem mismatch, problem with source sequence_no='$lineItem[sequence_no]' target spans over '$sequenceSpan'",
+                ];
+            }
+            */
+            $targetLineItemIndex = 0;
+            foreach ($retrieve['result']['LineItems'] as $retrieveLineItem) {
+                if ($lineItemIndex === $targetLineItemIndex) {
+                    $result[$idDoc] = [
+                        'id' => $retrieveLineItem['id'],
+                        'error' => false,
+                    ];
+                }
+                $targetLineItemIndex++;
+            }
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+            $lineItemIndex++;
         }
     }
 
