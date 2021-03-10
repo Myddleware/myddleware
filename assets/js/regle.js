@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-global.path_img = '/build/images/';
+global.path_img = '../../build/images/';
 // Rev 1.1.0 Upload Files ------------------------------
 // Fermeture de la fancybox
 $(".fancybox_upload").fancybox({
@@ -353,7 +353,7 @@ $( document ).ready(function() {
 						
 					$.ajax({
 						type: "POST",
-						url: Routing.generate('regle_inputs'),
+						url: '../inputs',
 						data:{
 							solution : val,
 							parent : parent,
@@ -442,7 +442,7 @@ $( document ).ready(function() {
 
 			$.ajax({
 				type: "POST",
-				url: Routing.generate('regle_inputs'),
+				url: '../inputs',
 				data:{
 					champs : datas,
 					parent : parent,
@@ -471,7 +471,8 @@ $( document ).ready(function() {
 							solutionjs : true,
 							detectjs : true
 						}, 						
-						url: Routing.generate('connector_callback'),
+						// url: Routing.generate('connector_callback'),
+						url: '../connector/callback/',
 						success: function(data){
 							param = data.split(';');
 							
@@ -579,7 +580,7 @@ $( document ).ready(function() {
 	function champs(solution,champs,parent) {	
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('regle_inputs'),
+			url: '../inputs',
 			data:{
 				solution : solution,
 				parent : parent,

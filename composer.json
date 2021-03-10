@@ -26,7 +26,6 @@
         "symfony/framework-bundle": "4.4.*",
         "symfony/templating": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
-        "doctrine/orm": "^2.8.2",
         "doctrine/doctrine-bundle": "1.12.*",
         "twig/extensions": "~1.0",
         "symfony/swiftmailer-bundle": "^3.2",
@@ -103,22 +102,8 @@
             "SymfonyStandard\\Composer::hookRootPackageInstall"
         ],
         "post-install-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles"
         ],
         "post-update-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles"
         ],
     "auto-scripts": {
       "requirements-checker": "script"
@@ -135,18 +120,6 @@
         "symfony-var-dir": "var",
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
-        "incenteev-parameters": [{
-                "file": "config/packages/parameters.yml"
-            },
-            {
-                "file": "config/packages/public/parameters_smtp.yml",
-                "dist-file": "config/packages/public/parameters_smtp.yml.dist"
-            },
-            {
-                "file": "config/packages/public/parameters_public.yml",
-                "dist-file": "config/packages/public/parameters_public.yml.dist"
-            }
-        ],
         "branch-alias": {
             "dev-master": "3.2-dev"
         },
