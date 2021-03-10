@@ -51,11 +51,11 @@ require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
 
 setup-files:
-	@docker-compose run --rm myddleware php composer.phar run-script post-install-cmd
-	@docker-compose run --rm myddleware chmod 777 -R var/cache var/logs || true
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache var/logs || true
 
 setup-database: up sleep
-	@docker-compose exec myddleware bash prepare-database.sh
+	@docker-compose -f docker-compose.yml exec myddleware bash prepare-database.sh
 
 setup: setup-files setup-database
 	@echo "Setup Myddleware files and database: OK!"
