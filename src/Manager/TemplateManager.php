@@ -450,7 +450,7 @@ if (file_exists($file)) {
                 // Commit the rules in the database
                 $this->entityManager->flush();
 
-                $this->ruleManager->orderRules();
+                $this->jobManager->orderRules();
                 // Set the message in Myddleware UI
                 $this->session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
             } catch (Exception $e) {
