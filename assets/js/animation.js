@@ -98,7 +98,7 @@ $(function() {
 	 		
 	 		$(this).attr('class','btn btn-primary');
 	 		$('#btn_module').attr('class','btn btn-default');	 		
-			$('.rule-create-submit').hide();
+			$('.rule-create-submit').show();
 	 		$('#template').fadeIn(1000);	
 	 		$('#module').fadeOut(1000);	
 	 		$('#submodules').fadeOut(1000);	

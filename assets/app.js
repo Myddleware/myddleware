@@ -12,7 +12,7 @@ Routing.setRoutingData(routes);
 // Set Routing global
 global.Routing = Routing;
 global.lang = $('html').attr('lang');
-global.path_img = '/build/images/';
+global.path_img = 'build/images/';
 
 require('./vendors/jquery-ui/jquery-ui.min.js')
 require('./vendors/bootstrap/js/bootstrap.min.js')
