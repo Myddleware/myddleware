@@ -2578,6 +2578,8 @@ if (file_exists($file)) {
                         $user = $this->getUser();
 
                         $this->template->convertTemplate($ruleName, $templateName, $connectorSourceId, $connectorTargetId, $user);
+						// Sort the rules
+						$this->jobManager->orderRules();
                         // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                         return new Response('template');
                     }

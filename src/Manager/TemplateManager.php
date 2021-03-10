@@ -32,7 +32,6 @@ use App\Entity\Connector;
 use App\Entity\RuleField;
 use App\Entity\RuleParam;
 use App\Entity\RuleFilter;
-use App\Manager\JobManager;
 use Psr\Log\LoggerInterface;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleRelationShip;
@@ -97,11 +96,6 @@ if (file_exists($file)) {
          */
         private $translator;
 
-        /**
-         * @var JobManager
-         */
-        private $jobManager;
-
         public function __construct(
             LoggerInterface $logger,
             EntityManagerInterface $entityManager,
@@ -111,8 +105,7 @@ if (file_exists($file)) {
             SessionInterface $session,
             TranslatorInterface $translator,
             RequestStack $requestStack,
-			DriverConnection $dbalConnection,
-            JobManager $jobManager
+			DriverConnection $dbalConnection
         ) {
             $this->logger = $logger;
             $this->entityManager = $entityManager;
@@ -125,7 +118,6 @@ if (file_exists($file)) {
             $this->templateDir = $this->projectDir.'/src/Templates/';
             $request = $requestStack->getCurrentRequest();
             $this->lang = $request ? $request->getLocale() : 'EN';
-            $this->jobManager = $jobManager;
         }
 		
 		// Sort rule (rule parent first)
@@ -458,7 +450,6 @@ if (file_exists($file)) {
                 // Commit the rules in the database
                 $this->entityManager->flush();
 
-                $this->jobManager->orderRules();
                 // Set the message in Myddleware UI
                 $this->session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
             } catch (Exception $e) {
