@@ -660,6 +660,7 @@ class vtigercrmcore extends solution
             $this->setAllModulesPrefix();
         }
 
+        /*
         //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
         $query = $this->getVtigerClient()->query("SELECT parent_id FROM $param[module];");
 
@@ -670,9 +671,13 @@ class vtigercrmcore extends solution
                 $parentModules[$prefix] = $this->moduleList[$prefix];
             }
         }
+        */
 
         $entities = [];
-        foreach ($parentModules as $prefix => $moduleName) {
+        foreach ($this->moduleList as $prefix => $moduleName) {
+            if (!in_array($moduleName, $this->inventoryModules)) {
+                continue;
+            }
             //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
             $query = $this->getVtigerClient()->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
             if (empty($query['success'])) {
