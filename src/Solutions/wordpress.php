@@ -98,7 +98,7 @@ class wordpresscore extends solution {
         try {
             require_once('lib/wordpress/metadata.php');
             if(!empty($moduleFields[$module])){
-                $this->moduleFields = $moduleFields[$module];
+				$this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
             return $this->moduleFields;
 

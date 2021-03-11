@@ -248,13 +248,16 @@ class rulecore
 					if (!empty($param['parent_id'])) {
 						$docParam['parentId'] = $param['parent_id'];		
 					}
+					// We have to clone the document because if we have several child documents,
+					// the result $documents will have a list of several instances of the same document 
+					$childDocument = clone($this->documentManager);
 					// Set the param values and clear all document attributes
-					$this->documentManager->setParam($docParam, true);
-					$createDocument = $this->documentManager->createDocument();		
+					$childDocument->setParam($docParam, true);
+					$createDocument = $childDocument->createDocument();		
 					if (!$createDocument) {
 						throw new \Exception ('Failed to create document : '.$this->documentManager->getMessage());
 					}
-					$documents[] = $this->documentManager;
+					$documents[] = $childDocument;
 				}
 				return $documents;
 			}
@@ -992,16 +995,14 @@ class rulecore
 			// Get the php executable 
 			$phpBinaryFinder = new PhpExecutableFinder();
 			$phpBinaryPath = $phpBinaryFinder->find();
-			$php = $phpBinaryPath;
-			
+			$php = $phpBinaryPath;			
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {
 				$fs->mkdir(dirname($fileTmp));
 			} catch (IOException $e) {
 				throw new \Exception ($this->tools->getTranslation(array('messages', 'rule', 'failed_create_directory')));
-			}
-			
+			}				
 			//if user clicked on cancel all transfers of a rule
 			if($event === 'cancelDocumentJob'){
 				exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
@@ -1010,8 +1011,7 @@ class rulecore
 				exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
 			} else {
 				exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
-			}
-
+			}			
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
 			while (!file_exists($fileTmp)) {
@@ -1039,7 +1039,7 @@ class rulecore
 			}
 			
 			// transform all information of the first line in an arry
-			$result = explode(';',$firstLine);
+			$result = explode(';',$firstLine);	
 			// Renvoie du message en session
 			if ($result[0]) {
 				$session->set('info', array('<a href="'.$this->router->generate('task_view', array('id'=>trim($result[1]))).'" target="blank_">'.$this->tools->getTranslation(array('messages', 'rule', 'open_running_task')).'</a>.'));
@@ -1057,7 +1057,7 @@ class rulecore
 	}
 	
 	// Permet de relancer un document quelque soit son statut
-	protected function rerun($id_document) {
+	protected function rerun($id_document) {	
 		$session = new Session();
 		$msg_error = array();
 		$msg_success = array();
@@ -1162,8 +1162,7 @@ class rulecore
 			else {			
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);				
 			}
-		}		
-			
+		}					
 		// If the job is manual, we display error in the UI
 		if ($this->manual) {
 			if (!empty($msg_error)) {

@@ -215,8 +215,6 @@ class suitecrmcore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $this->moduleFields = [];
-
             // Si le module est un module "fictif" relation créé pour Myddlewar
             if (array_key_exists($module, $this->module_relationship_many_to_many)) {
                 foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {

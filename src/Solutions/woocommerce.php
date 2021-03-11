@@ -111,10 +111,9 @@ class woocommercecore extends solution {
     {
         require('lib/woocommerce/metadata.php');
         parent::get_module_fields($module, $type);
-
         try {
             if(!empty($moduleFields[$module])){
-                $this->moduleFields = $moduleFields[$module];
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
 			return $this->moduleFields;
 
@@ -126,7 +125,7 @@ class woocommercecore extends solution {
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
-    public function readData($param) { 
+    public function readData($param) {
         try {
             $module = $param['module'];
             $result = [];
@@ -143,7 +142,15 @@ class woocommercecore extends solution {
                 foreach ($param['query'] as $key => $value) { 
                     if($key === 'id'){
                         $query = strval('/'.$value);
-                    }
+                    } else {
+						// in case of query on sub module, we check if that the search field is the parent id
+						if(
+								!empty($this->subModules[$param['module']])
+							AND $this->subModules[$param['module']]['parent_id'] == $key
+						){
+							$query = strval('/'.$value);
+						}
+					}
                 }  
 		    }   
   

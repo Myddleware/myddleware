@@ -105,13 +105,11 @@ class iadvizecore extends solution
     public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
-        try {
-            $this->moduleFields = [];
-			
+        try {	
             // Use Iadvize metadata
             require 'lib/iadvize/metadata.php';
             if (!empty($moduleFields[$module])) {
-                $this->moduleFields = $moduleFields[$module];
+				$this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
             return $this->moduleFields;
         } catch (\Exception $e) {

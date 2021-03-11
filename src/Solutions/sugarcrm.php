@@ -120,8 +120,6 @@ class sugarcrmcore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $this->moduleFields = [];
-
             // Call teh detail of all Sugar fields for the module
             $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/v10/metadata?type_filter=modules&module_filter='.$module);
 

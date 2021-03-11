@@ -1019,20 +1019,19 @@ class documentcore
 					//throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
 					continue;
 				}
-
 				// Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule 
-				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_target']);
+				$docsChildRule = $childRule->generateDocuments($idQuery, true, array('parent_id' => $this->id), $childRuleId['field_name_target']);			
 				if (!empty($docsChildRule->error)) {
 					throw new \Exception($docsChildRule->error);
 				}
 				// Run documents
 				if (!empty($docsChildRule)) {
 					foreach ($docsChildRule as $doc) {
-						$errors = $childRule->actionDocument($doc->id,'rerun');
+						$errors = $childRule->actionDocument($doc->id,'rerun');						
 						// If a child is in error, we stop the whole processus : child document not saved (roolback) and parent document in error checking
 						if (!empty($errors)) {									
 							// The error should be clear because the child document won't be saved
-							throw new \Exception( 'Child document in error (rule '.$childRuleId['field_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/'.$this->container->get( 'kernel' )->getEnvironment().'.log) for more information. ');
+							throw new \Exception( 'Child document in error (rule '.$childRuleId['field_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/'.$this->parameterBagInterface->get('kernel.environment').'.log) for more information. ');
 						}
 					}
 				}
@@ -1776,7 +1775,7 @@ class documentcore
 	
 	public function documentCancel() {
 		// Search if the document has child documents
-		$childDocuments = $this->getChildDocuments();		
+		$childDocuments = $this->getChildDocuments();	
 		if (!empty($childDocuments)) {
 			// We cancel each child, but a child document can be a parent document too, so we make a recursive call
 			foreach ($childDocuments as $childDocument) {
@@ -1784,7 +1783,8 @@ class documentcore
 				if ($childDocument['global_status'] != 'Cancel') {
 					$param['id_doc_myddleware'] = $childDocument['id'];
 					$param['jobId'] = $this->jobId;
-					$docChild = new document($this->logger, $this->container, $this->connection, $param);
+					$docChild = clone($this);
+					$docChild->setParam($param, true);
 					$docChild->documentCancel();
 				}			
 			}

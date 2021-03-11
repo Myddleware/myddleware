@@ -307,7 +307,8 @@ class DocumentRepository extends ServiceEntityRepository
             ->select('document.id, document.dateCreated, document.dateModified as date_modified, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
             ->addSelect('user.username, rule.name as rule_name, rule.id as rule_id')
             ->join('document.rule', 'rule')
-            ->join('document.createdBy', 'user');
+            ->join('document.createdBy', 'user')
+			->andWhere('document.deleted = 0');
 		
 		if (!empty($data['source_content']) && is_string($data['source_content'])) {
 			$qb->innerJoin('document.datas', 'document_data_source')

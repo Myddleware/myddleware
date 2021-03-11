@@ -119,7 +119,7 @@ class magentocore extends solution
             // Pour chaque module, traitement différent
             switch ($module) {
                 case 'customers':
-                    $this->moduleFields = [
+                    $moduleFields = [
                         'id' => ['label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'created_at' => ['label' => 'Created_at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -142,7 +142,7 @@ class magentocore extends solution
                     ];
                     break;
                 case 'customer_address':
-                    $this->moduleFields = [
+                    $moduleFields = [
                         'id' => ['label' => 'ID address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'created_at' => ['label' => 'Created_at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -171,14 +171,14 @@ class magentocore extends solution
                         // Get list of countries
                         $countries = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/directory/countries', 'GET');
                         foreach ($countries as $country) {
-                            $this->moduleFields['country_id']['option'][$country['id']] = $country['full_name_locale'];
+                            $moduleFields['country_id']['option'][$country['id']] = $country['full_name_locale'];
                         }
                     } catch (\Exception $e) {
                         // We don't bloc the program if the ws for countries didn't work
                     }
                     break;
                 case 'orders':
-                    $this->moduleFields = [
+                    $moduleFields = [
                         'id' => ['label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'parent_id' => ['label' => 'Parent ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'increment_id' => ['label' => 'Increment ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -256,17 +256,17 @@ class magentocore extends solution
 
             // Add list here (field could exist in several fields or was part of a rrelate field)
             try {
-                if (!empty($this->moduleFields['website_id'])) {
+                if (!empty($moduleFields['website_id'])) {
                     // Get list of website
                     $websites = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/store/websites ', 'GET');
                     foreach ($websites as $website) {
-                        $this->moduleFields['website_id']['option'][$website['id']] = $website['name'];
+                        $moduleFields['website_id']['option'][$website['id']] = $website['name'];
                     }
                 }
             } catch (\Exception $e) {
                 // We don't bloc the program if the ws for countries didn't work
             }
-
+			$this->moduleFields = array_merge($this->moduleFields, $moduleFields);
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage();

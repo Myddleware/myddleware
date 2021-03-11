@@ -130,12 +130,10 @@ class moodlecore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $this->moduleFields = [];
-
             // Use Moodle metadata
             require 'lib/moodle/metadata.php';
             if (!empty($moduleFields[$module])) {
-                $this->moduleFields = $moduleFields[$module];
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
             // If the field catagory ID exist we fill it by requesting Moodle
             if (!empty($this->moduleFields['categoryid'])) {

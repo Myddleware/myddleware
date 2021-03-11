@@ -128,7 +128,6 @@ class facebookcore extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $this->moduleFields = [];
             $fields = [];
 
             // When the module is created with the module name and moduleId
