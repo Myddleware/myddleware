@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MyddlewareDemoteUserCommand extends Command
+class DemoteUserCommand extends Command
 {
     protected static $defaultName = 'myddleware:demote-user';
     protected static $defaultDescription = 'Demote an Myddleware existing user by removing a role';

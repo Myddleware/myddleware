@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MyddlewarePromoteUserCommand extends Command
+class PromoteUserCommand extends Command
 {
     protected static $defaultName = 'myddleware:promote-user';
     protected static $defaultDescription = 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN';
