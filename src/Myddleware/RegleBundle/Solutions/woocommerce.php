@@ -150,7 +150,15 @@ class woocommercecore extends solution {
                 foreach ($param['query'] as $key => $value) { 
                     if($key === 'id'){
                         $query = strval('/'.$value);
-                    }
+					} else {
+						// in case of query on sub module, we check if that the search field is the parent id
+						if(
+								!empty($this->subModules[$param['module']])
+							AND $this->subModules[$param['module']]['parent_id'] == $key
+						){
+							$query = strval('/'.$value);
+						}
+					}
                 }  
 		    }   
   
