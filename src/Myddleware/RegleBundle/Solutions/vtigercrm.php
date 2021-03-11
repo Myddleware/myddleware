@@ -514,19 +514,19 @@ class vtigercrmcore extends solution
         foreach ($parentModules as $prefix => $moduleName) {
             //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
             $query = $this->getVtigerClient()->query("SELECT id, createdtime, modifiedtime FROM {$moduleName} {$where} ORDER BY modifiedtime ASC LIMIT 0, 1;");
-            if (empty($$query['success']) || empty($query['result'])) {
+            if (empty($query['success']) || empty($query['result'])) {
                 continue;
             }
             foreach ($query['result'] as $parentElement) {
                 if ($maxTime && $maxTime >= $parentElement['modifiedtime']) {
                     continue;
                 }
-                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
-                if (empty($retrive['result']['LineItems'])) {
+                $retrieve = $this->getVtigerClient()->retrieve($parentElement['id']);
+                if (empty($retrieve['result']['LineItems'])) {
                     continue;
                 }
                 $maxTime = $parentElement['modifiedtime'];
-                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
+                foreach ($retrieve['result']['LineItems'] as $index => $lineItem) {
                     $lineItem['parent_id'] = $parentElement['id'];
                     $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
                     $lineItem['createdtime'] = $parentElement['createdtime'];
@@ -661,7 +661,7 @@ class vtigercrmcore extends solution
     protected function readVtigerLineItemQuery($param, $where, $orderBy, $nDataCall)
     {
         if (empty($this->moduleList)) {
-            $this->setModulePrefix();
+            $this->setAllModulesPrefix();
         }
 
         //file_put_contents('/var/www/html/var/logs/vtigercrm.0.log', __FILE__.':'.__LINE__."\n", FILE_APPEND);
@@ -684,11 +684,13 @@ class vtigercrmcore extends solution
             }
 
             foreach ($query['result'] as $parentElement) {
-                $retrive = $this->getVtigerClient()->retrieve($parentElement['id']);
-                foreach ($retrive['result']['LineItems'] as $index => $lineItem) {
+                $retrieve = $this->getVtigerClient()->retrieve($parentElement['id']);
+                foreach ($retrieve['result']['LineItems'] as $index => $lineItem) {
+                    /*
                     if ($index == 0) {
                         continue;
                     }
+                    */
                     $lineItem['parent_id'] = $parentElement['id'];
                     $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
                     $lineItem['createdtime'] = $parentElement['createdtime'];
