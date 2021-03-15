@@ -172,7 +172,7 @@ class rulecore
 
 		$this->ruleId = $idRule;
 		if (!empty($this->ruleId)) {
-			$rule = "SELECT *, (SELECT value FROM RuleParam WHERE rule_id = :ruleId and name= 'mode') mode FROM Rule WHERE id = :ruleId";
+			$rule = "SELECT *, (SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode FROM rule WHERE id = :ruleId";
 		    $stmt = $this->connection->prepare($rule);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();
@@ -285,18 +285,18 @@ class rulecore
 			}
 		 
 			// Get the name of the application			
-		    $sql = "SELECT Solution.name  
-		    		FROM Connector
-						INNER JOIN Solution 
-							ON Solution.id  = Connector.sol_id
-		    		WHERE Connector.id = :connId";
+		    $sql = "SELECT solution.name  
+		    		FROM connector
+						INNER JOIN solution 
+							ON solution.id  = connector.sol_id
+		    		WHERE connector.id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $connId);
 		    $stmt->execute();		
 			$r = $stmt->fetch();			
 			// Get params connection
 		    $sql = "SELECT id, conn_id, name, value
-		    		FROM ConnectorParam 
+		    		FROM connectorparam 
 		    		WHERE conn_id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $connId);
@@ -421,7 +421,7 @@ class rulecore
 	
 	// Get the status of the current job
 	protected function getJobStatus() {		
-		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
+		$sqlJobDetail = "SELECT * FROM job WHERE id = :jobId";
 		$stmt = $this->connection->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $this->jobId);
 		$stmt->execute();	    
@@ -860,7 +860,7 @@ class rulecore
 	
 	// Get all document of the rule
 	protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false) {
-		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId";
+		$sql = "SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->execute();	    
@@ -889,7 +889,7 @@ class rulecore
 			$queryBidirectionalRules = "SELECT 
 											id, 
 											name
-										FROM Rule 
+										FROM rule 
 										WHERE 
 												conn_id_source = :conn_id_target
 											AND conn_id_target = :conn_id_source
@@ -1196,14 +1196,14 @@ class rulecore
 	// Check if the rule is a child rule
 	public function isChild() {
 		try {					
-			$queryChild = "	SELECT Rule.id 
-									FROM RuleRelationShip 
-										INNER JOIN Rule
-											ON Rule.id  = RuleRelationShip.rule_id 
+			$queryChild = "	SELECT rule.id 
+									FROM rulerelationship 
+										INNER JOIN rule
+											ON rule.id  = rulerelationship.rule_id 
 									WHERE 
-											RuleRelationShip.field_id = :ruleId
-										AND RuleRelationShip.parent = 1
-										AND Rule.deleted = 0
+											rulerelationship.field_id = :ruleId
+										AND rulerelationship.parent = 1
+										AND rule.deleted = 0
 								";							
 			$stmt = $this->connection->prepare($queryChild);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1362,12 +1362,12 @@ class rulecore
 	protected function selectDocuments($status, $type = '') {
 		try {		
 			$query_documents = "	SELECT * 
-									FROM Document 
+									FROM document 
 									WHERE 
 											rule_id = :ruleId
 										AND status = :status
-										AND Document.deleted = 0 
-									ORDER BY Document.source_date_modified ASC	
+										AND document.deleted = 0 
+									ORDER BY document.source_date_modified ASC	
 									LIMIT $this->limit
 								";							
 			$stmt = $this->connection->prepare($query_documents);
@@ -1384,7 +1384,7 @@ class rulecore
 	protected function getDocumentHeader($documentId) {
 		try {
 			// We allow to get date from a document flagged deleted
-			$query_document = "SELECT * FROM Document WHERE id = :documentId";
+			$query_document = "SELECT * FROM document WHERE id = :documentId";
 			$stmt = $this->connection->prepare($query_document);
 			$stmt->bindValue(":documentId", $documentId);
 		    $stmt->execute();	   				
@@ -1405,25 +1405,25 @@ class rulecore
 		$limit = " LIMIT ".$this->limit;
 		// Si un document est en paramètre alors on filtre la requête sur le document 
 		if (!empty($documentId)) {
-			$documentFilter = " Document.id = '$documentId'";
+			$documentFilter = " document.id = '$documentId'";
 		}
 		elseif (!empty($parentDocId)) {
-			$documentFilter = " Document.parent_id = '$parentDocId' AND Document.rule_id = '$parentRuleId' "; 
+			$documentFilter = " document.parent_id = '$parentDocId' AND document.rule_id = '$parentRuleId' "; 
 			// No limit when it comes to child rule. A document could have more than $limit child documents
 			$limit = "";
 		}
 		// Sinon on récupère tous les documents élligible pour l'envoi
 		else {
-			$documentFilter = 	"	Document.rule_id = '$this->ruleId'
-								AND Document.status = 'Ready_to_send'
-								AND Document.deleted = 0 
-								AND Document.type = '$type' ";
+			$documentFilter = 	"	document.rule_id = '$this->ruleId'
+								AND document.status = 'Ready_to_send'
+								AND document.deleted = 0 
+								AND document.type = '$type' ";
 		}
 		// Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
-		$sql = "SELECT Document.id id_doc_myddleware, Document.target_id, Document.source_date_modified
-				FROM Document
+		$sql = "SELECT document.id id_doc_myddleware, document.target_id, document.source_date_modified
+				FROM document
 				WHERE $documentFilter 
-				ORDER BY Document.source_date_modified ASC
+				ORDER BY document.source_date_modified ASC
 				$limit";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute();	    
@@ -1472,7 +1472,7 @@ class rulecore
 		try {	
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
-							FROM RuleField 
+							FROM rulefield 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1516,7 +1516,7 @@ class rulecore
 			
 		try {
 			$sqlParams = "SELECT * 
-							FROM RuleParam 
+							FROM ruleparam 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1538,7 +1538,7 @@ class rulecore
 	protected function setRuleRelationships() {
 		try {					
 			$sqlFields = "SELECT * 
-							FROM RuleRelationShip 
+							FROM rulerelationship 
 							WHERE 
 									rule_id = :ruleId
 								AND rule_id IS NOT NULL";
@@ -1567,7 +1567,7 @@ class rulecore
 	protected function setRuleFilter() {
 		try {					
 			$sqlFields = "SELECT * 
-							FROM RuleFilter 
+							FROM rulefilter 
 							WHERE 
 								rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlFields);
@@ -1584,11 +1584,11 @@ class rulecore
 	public function getChildRules() {
 		try {		
 			// get the rule linked to the current rule and check if they have the param child
-			$sqlFields = "SELECT RuleRelationShip.*
-							FROM RuleRelationShip
+			$sqlFields = "SELECT rulerelationship.*
+							FROM rulerelationship
 							WHERE 
-									RuleRelationShip.rule_id = :ruleId
-								AND RuleRelationShip.parent = 1";
+									rulerelationship.rule_id = :ruleId
+								AND rulerelationship.parent = 1";
 			$stmt = $this->connection->prepare($sqlFields);			
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();	   				
