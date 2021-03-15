@@ -193,18 +193,18 @@ class documentcore
 	public function setDocument($id_doc) {
 		try {		
 			$sqlParams = "	SELECT 
-								Document.*, 
-								Rule.name_slug,
-								RuleParam.value mode,
-								Rule.conn_id_source,
-								Rule.module_source
-							FROM Document 
-								INNER JOIN Rule
-									ON Document.rule_id = Rule.id
-								INNER JOIN RuleParam
-									ON  RuleParam.rule_id = Rule.id
-									AND RuleParam.name= 'mode'
-							WHERE Document.id = :id_doc";											
+								document.*, 
+								rule.name_slug,
+								ruleparam.value mode,
+								rule.conn_id_source,
+								rule.module_source
+							FROM document 
+								INNER JOIN rule
+									ON document.rule_id = rule.id
+								INNER JOIN ruleparam
+									ON  ruleparam.rule_id = rule.id
+									AND ruleparam.name= 'mode'
+							WHERE document.id = :id_doc";											
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":id_doc", $id_doc);
 			$stmt->execute();	   				
@@ -352,7 +352,7 @@ class documentcore
 				return false;
 			}			
 			// Création du header de la requête 
-			$query_header = "INSERT INTO Document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id) VALUES";		
+			$query_header = "INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id) VALUES";		
 			// Création de la requête d'entête
 			$date_modified = $this->data['date_modified'];
 			// Source_id could contain accent
@@ -408,7 +408,7 @@ class documentcore
 	}
 			
 	public function getJobStatus() {
-		$sqlJobDetail = "SELECT * FROM Job WHERE id = :jobId";
+		$sqlJobDetail = "SELECT * FROM job WHERE id = :jobId";
 		$stmt = $this->connection->prepare($sqlJobDetail);
 		$stmt->bindValue(":jobId", $this->jobId);
 		$stmt->execute();	    
@@ -560,17 +560,17 @@ class documentcore
 		try {
 			// Check predecessor in the current rule
 			$sqlParams = "	SELECT 
-								Document.id,							
-								Document.rule_id,
-								Document.status,
-								Document.global_status											
-							FROM Document								
+								document.id,							
+								document.rule_id,
+								document.status,
+								document.global_status											
+							FROM document								
 							WHERE 
-									Document.rule_id = :rule_id 
-								AND Document.source_id = :source_id 
-								AND Document.date_created < :date_created  
-								AND Document.deleted = 0 
-								AND Document.global_status IN ('Error','Open')
+									document.rule_id = :rule_id 
+								AND document.source_id = :source_id 
+								AND document.date_created < :date_created  
+								AND document.deleted = 0 
+								AND document.global_status IN ('Error','Open')
 							LIMIT 1	
 							";								
 			$stmt = $this->connection->prepare($sqlParams);
@@ -601,17 +601,17 @@ class documentcore
 			// Check predecessor in the child rule
 			// Get all child rules 
 			$sqlGetChildRules = "	SELECT DISTINCT
-										RuleRelationShip.rule_id 											
-									FROM Document
-										INNER JOIN RuleRelationShip
-											ON RuleRelationShip.field_id = Document.rule_id
-											AND RuleRelationShip.parent = 1
-										INNER JOIN Rule
-											ON Rule.id = RuleRelationShip.rule_id 									
+										rulerelationship.rule_id 											
+									FROM document
+										INNER JOIN rulerelationship
+											ON rulerelationship.field_id = document.rule_id
+											AND rulerelationship.parent = 1
+										INNER JOIN rule
+											ON rule.id = rulerelationship.rule_id 									
 									WHERE 
-											Document.rule_id = :rule_id 
-										AND Document.deleted = 0 
-										AND	Rule.deleted = 0";					
+											document.rule_id = :rule_id 
+										AND document.deleted = 0 
+										AND	rule.deleted = 0";					
 			$stmt = $this->connection->prepare($sqlGetChildRules);
 			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
 			$stmt->execute();	    
@@ -619,16 +619,16 @@ class documentcore
 			if($childRules) {
 				// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
 				$sqlParamsChild = "	SELECT 
-										Document.id,							
-										Document.rule_id,
-										Document.status,
-										Document.global_status											
-									FROM Document								
+										document.id,							
+										document.rule_id,
+										document.status,
+										document.global_status											
+									FROM document								
 									WHERE 
-											Document.rule_id = :rule_id 
-										AND Document.source_id = :source_id 
-										AND Document.deleted = 0 
-										AND Document.date_created < :date_created  
+											document.rule_id = :rule_id 
+										AND document.source_id = :source_id 
+										AND document.deleted = 0 
+										AND document.date_created < :date_created  
 										AND (
 												global_status = 'Error'
 											 OR (
@@ -771,7 +771,7 @@ class documentcore
 				// Si aucun document parent n'est trouvé alors bloque le document
 				if ($error) {
 					// récupération du nom de la règle pour avoir un message plus clair
-					$sqlParams = "	SELECT name FROM Rule WHERE id = :rule_id";								
+					$sqlParams = "	SELECT name FROM rule WHERE id = :rule_id";								
 					$stmt = $this->connection->prepare($sqlParams);
 					$stmt->bindValue(":rule_id", $ruleRelationship['field_id']);
 					$stmt->execute();	   				
@@ -1206,7 +1206,7 @@ class documentcore
 			}		
 			$documentEntity = $this->entityManager
 							  ->getRepository(Document::class)
-	                          ->findOneById( $this->id );	
+	                          ->find( $this->id );	
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
 			$documentData->setType($type); // Source		
@@ -1431,7 +1431,7 @@ class documentcore
 	protected function getRule() {
 		try {
 			if (!empty($this->ruleId)) {
-				$rule = "SELECT * FROM Rule WHERE id = :ruleId";
+				$rule = "SELECT * FROM rule WHERE id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
@@ -1447,14 +1447,14 @@ class documentcore
 	
 	// Check if the document is a child
 	public function isChild() {	
-		$sqlIsChild = "	SELECT Rule.id 
-									FROM RuleRelationShip 
-										INNER JOIN Rule
-											ON Rule.id  = RuleRelationShip.rule_id 
+		$sqlIsChild = "	SELECT rule.id 
+									FROM rulerelationship 
+										INNER JOIN rule
+											ON rule.id  = rulerelationship.rule_id 
 									WHERE 
-											RuleRelationShip.field_id = :ruleId
-										AND RuleRelationShip.parent = 1
-										AND Rule.deleted = 0
+											rulerelationship.field_id = :ruleId
+										AND rulerelationship.parent = 1
+										AND rule.deleted = 0
 								";		
 		$stmt = $this->connection->prepare($sqlIsChild);
 		$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1469,7 +1469,7 @@ class documentcore
 	// Check if the document is a child
 	protected function getChildDocuments() {	
 		try {
-			$sqlGetChilds = "SELECT * FROM Document WHERE parent_id = :docId AND deleted = 0 ";		
+			$sqlGetChilds = "SELECT * FROM document WHERE parent_id = :docId AND deleted = 0 ";		
 			$stmt = $this->connection->prepare($sqlGetChilds);
 			$stmt->bindValue(":docId", $this->id);
 			$stmt->execute();	    
@@ -1483,11 +1483,11 @@ class documentcore
 		
 	// Check if the document is a parent
 	protected function isParent() {	
-		$sqlIsChild = "	SELECT RuleRelationShip.rule_id 
-							FROM RuleRelationShip 				
+		$sqlIsChild = "	SELECT rulerelationship.rule_id 
+							FROM rulerelationship 				
 							WHERE 
-									RuleRelationShip.rule_id = :ruleId
-								AND RuleRelationShip.parent = 1
+									rulerelationship.rule_id = :ruleId
+								AND rulerelationship.parent = 1
 								";		
 		$stmt = $this->connection->prepare($sqlIsChild);
 		$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1512,7 +1512,7 @@ class documentcore
 					}
 				}			
 			} elseif (!empty($this->ruleId)) {
-				$rule = "SELECT * FROM RuleField WHERE rule_id = :ruleId";
+				$rule = "SELECT * FROM rulefield WHERE rule_id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
@@ -1522,7 +1522,7 @@ class documentcore
 				}
 				
 				// Ajout des champs de relation s'il y en a
-				$rule = "SELECT * FROM RuleRelationShip WHERE rule_id = :ruleId";
+				$rule = "SELECT * FROM rulerelationship WHERE rule_id = :ruleId";
 				$stmt = $this->connection->prepare($rule);
 				$stmt->bindValue(":ruleId", $this->ruleId);
 				$stmt->execute();		
@@ -1559,7 +1559,7 @@ class documentcore
 	protected function setRuleParam() {	
 		try {
 			$sqlParams = "SELECT * 
-							FROM RuleParam 
+							FROM ruleparam 
 							WHERE rule_id = :ruleId";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":ruleId", $this->ruleId);
@@ -1584,43 +1584,43 @@ class documentcore
 			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
 			$sqlParamsSoure = "	SELECT 
-								Document.id, 
-								Document.target_id, 
-								Document.global_status 
-							FROM Document 
+								document.id, 
+								document.target_id, 
+								document.global_status 
+							FROM document 
 							WHERE 
-									Document.rule_id IN (:ruleId)	
+									document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.source_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.source_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";
 							
 			// On prépare la requête pour rechercher dans la partie target
 			$sqlParamsTarget = "SELECT 
-								Document.id, 
-								Document.source_id target_id, 
-								Document.global_status 
-							FROM Document 
+								document.id, 
+								document.source_id target_id, 
+								document.global_status 
+							FROM document 
 							WHERE 
-									Document.rule_id IN (:ruleId)	
+									document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.target_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.target_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY target_id DESC, global_status DESC
 							LIMIT 1";	
 					
@@ -1809,7 +1809,7 @@ class documentcore
 			if ($globalStatus == 'Error' || $globalStatus == 'Close') {
 				$this->attempt++;
 			}
-			$query = "	UPDATE Document 
+			$query = "	UPDATE document 
 								SET 
 									date_modified = :now,
 									global_status = :globalStatus,
@@ -1847,7 +1847,7 @@ class documentcore
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query = "	UPDATE Document 
+			$query = "	UPDATE document 
 								SET 
 									date_modified = :now,
 									deleted = :deleted
@@ -1908,7 +1908,7 @@ class documentcore
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query = "	UPDATE Document 
+			$query = "	UPDATE document 
 								SET 
 									date_modified = :now,
 									type = :new_type
@@ -1938,7 +1938,7 @@ class documentcore
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query = "	UPDATE Document 
+			$query = "	UPDATE document 
 								SET 
 									date_modified = :now,
 									target_id = :target_id
@@ -1970,16 +1970,16 @@ class documentcore
 		try {
 			// Calcul du sens de la relation. Si on ne trouve pas (exemple des relations custom) alors on met 1 par défaut.
 			$sqlParams = "	SELECT 
-								IF(RuleA.conn_id_source = RuleB.conn_id_source, '1', IF(RuleA.conn_id_source = RuleB.conn_id_target, '-1', '1')) direction
-							FROM RuleRelationShip
-								INNER JOIN Rule RuleA
-									ON RuleRelationShip.rule_id = RuleA.id
+								IF(rulea.conn_id_source = ruleb.conn_id_source, '1', IF(rulea.conn_id_source = ruleb.conn_id_target, '-1', '1')) direction
+							FROM rulerelationship
+								INNER JOIN rule rulea
+									ON rulerelationship.rule_id = rulea.id
 									#AND RuleA.deleted = 0
-								INNER JOIN Rule RuleB
-									ON RuleRelationShip.field_id = RuleB.id		
+								INNER JOIN rule ruleb
+									ON rulerelationship.field_id = ruleb.id		
 									#AND RuleB.deleted = 0
 							WHERE  
-								RuleRelationShip.id = :id 
+								rulerelationship.id = :id 
 						";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue(":id", $ruleRelationship['id']);
@@ -2003,32 +2003,32 @@ class documentcore
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT 
 									source_id record_id,
-									Document.id document_id								
-								FROM Document
+									document.id document_id								
+								FROM document
 								WHERE  
-										Document.rule_id = :ruleRelateId 
-									AND Document.source_id != '' 
-									AND Document.deleted = 0 
-									AND Document.target_id = :record_id 
+										document.rule_id = :ruleRelateId 
+									AND document.source_id != '' 
+									AND document.deleted = 0 
+									AND document.target_id = :record_id 
 									AND (
-											Document.global_status = 'Close' 
-										 OR Document.status = 'No_send'
+											document.global_status = 'Close' 
+										 OR document.status = 'No_send'
 									)	 
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT 
 									target_id record_id,
-									Document.id document_id
-								FROM Document 
+									document.id document_id
+								FROM document 
 								WHERE  
-										Document.rule_id = :ruleRelateId 
-									AND Document.source_id = :record_id 
-									AND Document.deleted = 0 
-									AND Document.target_id != '' 
+										document.rule_id = :ruleRelateId 
+									AND document.source_id = :record_id 
+									AND document.deleted = 0 
+									AND document.target_id != '' 
 									AND (
-											Document.global_status = 'Close' 
-										 OR Document.status = 'No_send'
+											document.global_status = 'Close' 
+										 OR document.status = 'No_send'
 									)	
 								LIMIT 1";	
 			}
@@ -2098,22 +2098,22 @@ class documentcore
 			// Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT *								
-								FROM Document
+								FROM document
 								WHERE  
-										Document.rule_id = :ruleRelateId 
-									AND Document.target_id = :record_id 
-									AND Document.status = :status 
-									AND Document.deleted = 0 
+										document.rule_id = :ruleRelateId 
+									AND document.target_id = :record_id 
+									AND document.status = :status 
+									AND document.deleted = 0 
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT *
-								FROM Document 
+								FROM document 
 								WHERE  
-										Document.rule_id = :ruleRelateId 
-									AND Document.source_id = :record_id 
-									AND Document.status = :status 
-									AND Document.deleted = 0 
+										document.rule_id = :ruleRelateId 
+									AND document.source_id = :record_id 
+									AND document.status = :status 
+									AND document.deleted = 0 
 								LIMIT 1";	
 			}
 			else {
@@ -2150,7 +2150,7 @@ class documentcore
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query_header = "INSERT INTO Log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)";
+			$query_header = "INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)";
 			$stmt = $this->connection->prepare($query_header); 
 			$stmt->bindValue(":created",$now);
 			$stmt->bindValue(":typeError",$this->typeError);
