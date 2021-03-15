@@ -184,7 +184,7 @@ class jobcore  {
 		try {
 			// Get the connector ID
 		    $sqlRule = "SELECT * 
-		    		FROM Rule 
+		    		FROM rule 
 		    		WHERE 
 							(
 								name_slug = :filter
@@ -280,14 +280,14 @@ class jobcore  {
 		try {
 			// Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
 			$sqlParams = "	SELECT * 
-							FROM Document
-								INNER JOIN RuleOrder
-									ON Document.rule_id = RuleOrder.rule_id
+							FROM document
+								INNER JOIN ruleorder
+									ON document.rule_id = ruleorder.rule_id
 							WHERE 
 									global_status = 'Error'
 								AND deleted = 0 
 								AND attempt <= :attempt 
-							ORDER BY RuleOrder.order ASC, source_date_modified ASC	
+							ORDER BY ruleorder.order ASC, source_date_modified ASC	
 							LIMIT $limit";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("attempt", $attempt);
@@ -317,7 +317,7 @@ class jobcore  {
 		$this->id = uniqid('', true);
 		$this->start = microtime(true);		
 		// Check if a job is already running
-		$sqlJobOpen = "SELECT * FROM Job WHERE status = 'Start' LIMIT 1";
+		$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
 		$stmt = $this->connection->prepare($sqlJobOpen);
 		$stmt->execute();	    
 		$job = $stmt->fetch(); // 1 row		
@@ -447,9 +447,9 @@ class jobcore  {
 			// Filter on rule or docuement depending on the data type
 			$where = ' WHERE ';
 			if ($dataType == 'rule') {
-				$where .= " Rule.id IN $queryIn ";
+				$where .= " rule.id IN $queryIn ";
 			} elseif ($dataType == 'document') {
-				$where .= " Document.id IN $queryIn ";
+				$where .= " document.id IN $queryIn ";
 			}
 			// No filter on status if the action is restore/changeStatus or if forceAll = 'Y'
 			if (
@@ -457,28 +457,28 @@ class jobcore  {
 				AND $action	!= 'restore'
 				AND $action	!= 'changeStatus'
 			) {
-				$where .= " AND Document.global_status IN ('Open','Error') ";
+				$where .= " AND document.global_status IN ('Open','Error') ";
 			}
 			// Filter on relevant delete flag (select deleted = 1 only for restore action)
 			if ($action	== 'restore') {
-				$where .= " AND Document.deleted = 1 ";
+				$where .= " AND document.deleted = 1 ";
 			} else {
-				$where .= " AND Document.deleted = 0 ";
+				$where .= " AND document.deleted = 0 ";
 			}
 			// Filter on status for the changeStatus action
 			if ($action	== 'changeStatus') {
-				$where .= " AND Document.status = '$fromStatus' ";
+				$where .= " AND document.status = '$fromStatus' ";
 			}
 			
 			// Build the query
 			$sqlParams = "	SELECT 
-								Document.id,
-								Document.rule_id
-							FROM Document	
-								INNER JOIN Rule
-									ON Document.rule_id = Rule.id"
+								document.id,
+								document.rule_id
+							FROM document	
+								INNER JOIN rule
+									ON document.rule_id = rule.id"
 							.$where."
-							ORDER BY Rule.id";	
+							ORDER BY rule.id";	
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$documents = $stmt->fetchAll();								
@@ -520,7 +520,7 @@ class jobcore  {
 			}	
 			
 			// Check that the rule value is valid
-			$sqlRule = "SELECT * FROM Rule WHERE id = :filter AND deleted = 0";
+			$sqlRule = "SELECT * FROM rule WHERE id = :filter AND deleted = 0";
 		    $stmt = $this->connection->prepare($sqlRule);
 			$stmt->bindValue("filter", $ruleId);
 		    $stmt->execute();	    
@@ -572,13 +572,13 @@ class jobcore  {
 	public function getRules() {
 		try {
 			$sqlParams = "	SELECT name_slug 
-							FROM RuleOrder
-								INNER JOIN Rule
-									ON Rule.id = RuleOrder.rule_id
+							FROM ruleorder
+								INNER JOIN rule
+									ON rule.id = ruleorder.rule_id
 							WHERE 
-									Rule.active = 1
-								AND	Rule.deleted = 0
-							ORDER BY RuleOrder.order ASC";
+									rule.active = 1
+								AND	rule.deleted = 0
+							ORDER BY ruleorder.order ASC";
 			$stmt = $this->connection->prepare($sqlParams);
 		    $stmt->execute();	   				
 			$rules = $stmt->fetchAll();
@@ -604,14 +604,14 @@ class jobcore  {
 			// Récupération de toutes les règles avec leurs règles liées (si plusieurs elles sont toutes au même endroit)
 			// Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
 			$sql = "SELECT
-						Rule.id,
-						GROUP_CONCAT(RuleRelationShip.field_id SEPARATOR ';') field_id
-					FROM Rule
-						LEFT OUTER JOIN RuleRelationShip
-							ON Rule.id = RuleRelationShip.rule_id
+						rule.id,
+						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id
+					FROM rule
+						LEFT OUTER JOIN rulerelationship
+							ON rule.id = rulerelationship.rule_id
 					WHERE
-						Rule.deleted = 0
-					GROUP BY Rule.id";
+						rule.deleted = 0
+					GROUP BY rule.id";
 			$stmt = $this->connection->prepare($sql);
 			$stmt->execute();	    
 			$rules = $stmt->fetchAll(); 	
@@ -664,12 +664,12 @@ class jobcore  {
 				}
 				
 				// On vide la table RuleOrder
-				$sql = "DELETE FROM RuleOrder";
+				$sql = "DELETE FROM ruleorder";
 				$stmt = $this->connection->prepare($sql);
 				$stmt->execute();	
 				
 				//Mise à jour de la table
-				$insert = "INSERT INTO RuleOrder VALUES ";
+				$insert = "INSERT INTO ruleorder VALUES ";
 				foreach ($ruleKeyVakue as $key => $value) {
 					$insert .= "('$key','$value'),";
 				}
@@ -732,17 +732,17 @@ class jobcore  {
 	public function setConfigValue($name,$value) {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 		// Récupération de la valeur de la config
-		$select = "	SELECT * FROM Config WHERE conf_name = '$name'";
+		$select = "	SELECT * FROM config WHERE conf_name = '$name'";
 		$stmt = $this->connection->prepare($select);
 		$stmt->execute();	   				
 		$config = $stmt->fetch();
 		try {
 			// S'il n'existe pas on fait un INSERT sinon un UPDATE
 			if (empty($config)) {
-				$sqlParams = "INSERT INTO Config (conf_name, conf_value) VALUES (:name, :value)";
+				$sqlParams = "INSERT INTO config (conf_name, conf_value) VALUES (:name, :value)";
 			}
 			else {
-				$sqlParams = "UPDATE Config SET conf_value = :value WHERE conf_name = :name";
+				$sqlParams = "UPDATE config SET conf_value = :value WHERE conf_name = :name";
 			}
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("value", $value);
@@ -761,7 +761,7 @@ class jobcore  {
 	// Permet d'indiquer que le job est lancé manuellement
 	public function getConfigValue($name) {
 		// Récupération de la valeur de la config
-		$select = "	SELECT * FROM Config WHERE conf_name = '$name'";
+		$select = "	SELECT * FROM config WHERE conf_name = '$name'";
 		$stmt = $this->connection->prepare($select);
 		$stmt->execute();	   				
 		$config = $stmt->fetch();
@@ -778,14 +778,14 @@ class jobcore  {
 	public function clearData() {
 		// Récupération de chaque règle et du paramètre de temps de suppression
 		$sqlParams = "	SELECT 
-							Rule.id,
-							Rule.name,
-							RuleParam.value days
-						FROM Rule
-							INNER JOIN RuleParam
-								ON Rule.id = RuleParam.rule_id
+							rule.id,
+							rule.name,
+							ruleparam.value days
+						FROM rule
+							INNER JOIN ruleparam
+								ON rule.id = ruleparam.rule_id
 						WHERE
-							RuleParam.name = 'delete'";
+							ruleparam.name = 'delete'";
 		$stmt = $this->connection->prepare($sqlParams);
 		$stmt->execute();	   				
 		$rules = $stmt->fetchAll();	
@@ -799,15 +799,15 @@ class jobcore  {
 				$this->connection->beginTransaction();						
 				try {
 					$deleteSource = "
-						DELETE DocumentData
-						FROM Document
-							INNER JOIN DocumentData
-								ON Document.id = DocumentData.doc_id
+						DELETE documentdata
+						FROM document
+							INNER JOIN documentdata
+								ON document.id = documentdata.doc_id
 						WHERE 
-								Document.rule_id = :ruleId
-							AND Document.global_status IN ('Close','Cancel')
-							AND Document.deleted = 0 
-							AND Document.date_modified < :limitDate	";							
+								document.rule_id = :ruleId
+							AND document.global_status IN ('Close','Cancel')
+							AND document.deleted = 0 
+							AND document.date_modified < :limitDate	";							
 					$stmt = $this->connection->prepare($deleteSource);
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("limitDate", $limitDate->format('Y-m-d H:i:s'));
@@ -826,16 +826,16 @@ class jobcore  {
 				$this->connection->beginTransaction();						
 				try {	
 					$deleteLog = "
-						DELETE Log
-						FROM Log
-							INNER JOIN Document
-								ON Log.doc_id = Document.id
+						DELETE log
+						FROM log
+							INNER JOIN document
+								ON log.doc_id = document.id
 						WHERE 
-								Log.rule_id = :ruleId
-							AND Log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
-							AND Document.global_status IN ('Close','Cancel')
-							AND Document.deleted = 0 
-							AND Document.date_modified < :limitDate	";						
+								log.rule_id = :ruleId
+							AND log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
+							AND document.global_status IN ('Close','Cancel')
+							AND document.deleted = 0 
+							AND document.date_modified < :limitDate	";						
 					$stmt = $this->connection->prepare($deleteLog);
 					$stmt->bindValue("ruleId", $rule['id']);
 					$stmt->bindValue("limitDate", $limitDate->format('Y-m-d H:i:s'));
@@ -858,7 +858,7 @@ class jobcore  {
 			// Suppression des jobs de transfert vide
 			$deleteJob = " 	
 				DELETE 
-				FROM Job
+				FROM job
 				WHERE 
 						status = 'End'
 					AND param NOT IN ('cleardata', 'notification')
@@ -894,14 +894,14 @@ class jobcore  {
 			$this->logData['Error'] = 0;
 			$this->logData['paramJob'] = $this->paramJob;
 			$sqlParams = "	SELECT 
-								count(distinct Document.id) nb,
-								Document.global_status
-							FROM Log
-								INNER JOIN Document
-									ON Log.doc_id = Document.id
+								count(distinct document.id) nb,
+								document.global_status
+							FROM log
+								INNER JOIN document
+									ON log.doc_id = document.id
 							WHERE
-								Log.job_id = :id
-							GROUP BY Document.global_status";
+								log.job_id = :id
+							GROUP BY document.global_status";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("id", $this->id);
 		    $stmt->execute();	   				
@@ -927,13 +927,13 @@ class jobcore  {
 			$sqlParams = "	SELECT 
 								Connector_target.sol_id sol_id_target,
 								Connector_source.sol_id sol_id_source
-							FROM (SELECT DISTINCT rule_id FROM Log WHERE job_id = :id) rule_job
-								INNER JOIN Rule
-									ON rule_job.rule_id = Rule.id
-								INNER JOIN Connector Connector_source
-									ON Connector_source.id = Rule.conn_id_source
-								INNER JOIN Connector Connector_target
-									ON Connector_target.id = Rule.conn_id_target";
+							FROM (SELECT DISTINCT rule_id FROM log WHERE job_id = :id) rule_job
+								INNER JOIN rule
+									ON rule_job.rule_id = rule.id
+								INNER JOIN connector Connector_source
+									ON Connector_source.id = rule.conn_id_source
+								INNER JOIN connector Connector_target
+									ON Connector_target.id = rule.conn_id_target";
 			$stmt = $this->connection->prepare($sqlParams);
 			$stmt->bindValue("id", $this->id);
 		    $stmt->execute();	   				
@@ -952,12 +952,12 @@ class jobcore  {
 			
 			// Get the document detail if requested
 			if ($documentDetail == true) {
-				$sqlParamsDoc = "	SELECT DISTINCT Document.*
-								FROM Log
-									INNER JOIN Document
-										ON Log.doc_id = Document.id
+				$sqlParamsDoc = "	SELECT DISTINCT document.*
+								FROM log
+									INNER JOIN document
+										ON log.doc_id = document.id
 								WHERE
-									Log.job_id = :id";
+									log.job_id = :id";
 				$stmt = $this->connection->prepare($sqlParamsDoc);
 				$stmt->bindValue("id", $this->id);
 				$stmt->execute();	   				
@@ -997,7 +997,7 @@ class jobcore  {
 			if (!empty($this->message)) {
 				$message = htmlspecialchars($this->message);
 			}
-			$query_header = "UPDATE Job 
+			$query_header = "UPDATE job 
 							SET 
 								end = :now, 
 								status = 'End', 
@@ -1030,7 +1030,7 @@ class jobcore  {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$now = gmdate('Y-m-d H:i:s');
-			$query_header = "INSERT INTO Job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
+			$query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
 			$stmt = $this->connection->prepare($query_header);
 			$stmt->execute();
 			$this->connection->commit(); // -- COMMIT TRANSACTION
