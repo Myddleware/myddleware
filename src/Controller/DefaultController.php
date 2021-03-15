@@ -2310,7 +2310,7 @@ if (file_exists($file)) {
                     foreach ($request->request->get('filter') as $filter) {
                         $oneRuleFilter = new RuleFilter();
                         $oneRuleFilter->setTarget($filter['target']);
-                        $oneRuleFilter->setRule($oneRule->getId());
+                        $oneRuleFilter->setRule($oneRule);
                         $oneRuleFilter->setType($filter['filter']);
                         $oneRuleFilter->setValue($filter['value']);
                         $this->entityManager->persist($oneRuleFilter);
