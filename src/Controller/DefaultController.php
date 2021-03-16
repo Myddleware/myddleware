@@ -2217,10 +2217,11 @@ if (file_exists($file)) {
                                 'name' => 'bidirectional',
                                 'value' => $oneRule->getId(),
                             ]);
+                        $bidirectionalRule = $this->ruleRepository->find($bidirectional);
                         // If the bidirectional parameter doesn't exist on the opposite rule we create it
                         if (empty($ruleParamBidirectionalOpposite)) {
                             $ruleParamBidirectionalOpposite = new RuleParam();
-                            $ruleParamBidirectionalOpposite->setRule($bidirectional);
+                            $ruleParamBidirectionalOpposite->setRule($bidirectionalRule);
                             $ruleParamBidirectionalOpposite->setName('bidirectional');
                             $ruleParamBidirectionalOpposite->setValue($oneRule->getId());
                             $this->entityManager->persist($ruleParamBidirectionalOpposite);
