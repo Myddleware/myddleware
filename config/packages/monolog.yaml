@@ -7,7 +7,7 @@ monolog:
             # log to var/log/(environment).log
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             # log *all* messages (debug is lowest level)
-            level: debug
+            level: error
 
         syslog_handler:
             type: syslog

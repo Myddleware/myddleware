@@ -78,8 +78,11 @@ class RerunErrorCommand extends Command
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
         $api = $input->getArgument('api');
+		
+		// Set the API value
+        $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('Rerun error : limit '.$limit.', attempt '.$attempt, $api);
+        $data = $this->jobManager->initJob('Rerun error : limit '.$limit.', attempt '.$attempt);
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');

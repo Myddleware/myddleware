@@ -92,8 +92,11 @@ class ReadRecordCommand extends Command
             throw new Exception('No rule found. Please add values to run this action.');
         }
         $api = $input->getArgument('api');
+		
+		// Set the API value
+        $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')', $api);
+        $data = $this->jobManager->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')');
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');

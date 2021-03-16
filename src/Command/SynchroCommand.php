@@ -107,8 +107,8 @@ class SynchroCommand extends Command
 			// Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
 			$this->jobManager->message = '';		
 			$this->jobManager->setApi($api);					
-			
-			if ($this->jobManager->initJob('Synchro : '.$rule)) {
+			$data = $this->jobManager->initJob('Synchro : '.$rule)
+			if (true === $data['success']) {
 				$output->writeln( '1;'.$this->jobManager->getId() );  // Not removed, user for manual job and webservices
 				
 				if (!empty($rule)) {			

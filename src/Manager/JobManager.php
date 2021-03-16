@@ -323,19 +323,18 @@ class jobcore  {
 		$job = $stmt->fetch(); // 1 row		
 		// Error if one job is still running
 		if (!empty($job)) {
-	
 			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
-			return false;
+			return array('success' => false, 'message' => $this->message);
 		}
 		// Create Job
 		$insertJob = $this->insertJob();
 		if ($insertJob) {
 			$this->createdJob = true;
-			return true;
+			return array('success' => true, 'message' => '');
 		}
 		else {
 			$this->message .=  'Failed to create the Job in the database';		
-			return false;
+			return array('success' => false, 'message' => $this->message);
 		}
 	}
 	
