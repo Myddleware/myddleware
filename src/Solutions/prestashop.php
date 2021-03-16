@@ -903,7 +903,7 @@ class prestashopcore extends solution
                         }
                     }
 
-                    if (isset($toSend->message)) {
+                    if (isset($toUpdate->message)) {
                         $toUpdate->message = str_replace(chr(13).chr(10), "\n", $toUpdate->message);
                         $toUpdate->message = str_replace(chr(13), "\n", $toUpdate->message);
                         $toUpdate->message = str_replace(chr(10), "\n", $toUpdate->message);
