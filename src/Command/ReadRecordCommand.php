@@ -96,8 +96,7 @@ class ReadRecordCommand extends Command
 		// Set the API value
         $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('read records wilth filter '.$filterQuery.' IN ('.$filterValues.')');
-
+        $data = $this->jobManager->initJob('read records with filter '.$filterQuery.' IN ('.$filterValues.')');
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);

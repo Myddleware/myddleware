@@ -124,7 +124,7 @@ if (file_exists($file)) {
 		public function setRules($rules) {
 			$this->rules = $rules;
 			$rulesString = trim(implode(',',$rules));
-			$query = "SELECT rule_id FROM RuleOrder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY RuleOrder.order ASC";
+			$query = "SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC";
 			$stmt = $this->connection->prepare($query);
 			$stmt->bindValue("rules", $rulesString);
 			$stmt->execute();	    		
