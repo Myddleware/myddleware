@@ -75,3 +75,7 @@ yarn-error.log
 ###> local env file ###
 .env.local
 ###> env file ###
+
+## vscode parameters ## 
+.vscode
+## vscode parameters ##

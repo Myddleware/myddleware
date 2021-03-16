@@ -57,8 +57,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'facebook',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'iadvize',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'wooeventmanager',	'active' => 0, 'source' => 1, 'target' => 1],
-        ['name' => 'wordpress',		    'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'wooeventmanager',	'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'wordpress',		    'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)
