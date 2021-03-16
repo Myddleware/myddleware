@@ -193,26 +193,26 @@ if (file_exists($file)) {
                 }
                 // Récupération du nombre de données transférées depuis la dernière notification. On en compte qu'une fois les erreurs
 				$sqlParams = "	SELECT
-									count(distinct Log.doc_id) cpt,
-									Document.global_status
-								FROM Job
-									INNER JOIN Log
-										ON Log.job_id = Job.id
-									INNER JOIN Rule
-										ON Log.rule_id = Rule.id
-									INNER JOIN Document
-										 ON Document.id = Log.doc_id
-										AND Document.deleted = 0
+									count(distinct log.doc_id) cpt,
+									document.global_status
+								FROM job
+									INNER JOIN log
+										ON log.job_id = job.id
+									INNER JOIN rule
+										ON log.rule_id = rule.id
+									INNER JOIN document
+										 ON document.id = log.doc_id
+										AND document.deleted = 0
 								WHERE
-										Job.begin BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+										job.begin BETWEEN (SELECT MAX(begin) FROM job WHERE param = 'notification' AND end >= begin) AND NOW()
 									AND (
-											Document.global_status != 'Error'
+											document.global_status != 'Error'
 										OR (
-												Document.global_status = 'Error'
-											AND Document.date_modified BETWEEN (SELECT MAX(begin) FROM Job WHERE param = 'notification' AND end >= begin) AND NOW()
+												document.global_status = 'Error'
+											AND document.date_modified BETWEEN (SELECT MAX(begin) FROM job WHERE param = 'notification' AND end >= begin) AND NOW()
 										)
 									)
-								GROUP BY Document.global_status";
+								GROUP BY document.global_status";
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->execute();	   				
 				$cptLogs = $stmt->fetchAll();

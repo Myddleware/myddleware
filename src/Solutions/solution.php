@@ -765,10 +765,10 @@ class solutioncore
     {
         $connection = $this->getConn();
         $sqlParams = '	SELECT *
-						FROM Document 
-							INNER JOIN Rule
-								 ON Document.rule_id = Rule.id
-								AND Document.deleted = 0
+						FROM document 
+							INNER JOIN rule
+								 ON document.rule_id = Rule.id
+								AND document.deleted = 0
 						WHERE id = :id_doc';
         $stmt = $connection->prepare($sqlParams);
         $stmt->bindValue(':id_doc', $idDocument);
@@ -782,7 +782,7 @@ class solutioncore
     protected function getSourceId($idDoc)
     {
         // Récupération du source_id
-        $sql = 'SELECT `source_id` FROM `Document` WHERE `id` = :idDoc AND Document.deleted = 0';
+        $sql = 'SELECT `source_id` FROM `document` WHERE `id` = :idDoc AND document.deleted = 0';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':idDoc', $idDoc);
         $stmt->execute();
@@ -878,7 +878,7 @@ class solutioncore
     // Check if the job is still active
     protected function isJobActive($param)
     {
-        $sqlJobDetail = 'SELECT * FROM Job WHERE id = :jobId';
+        $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $param['jobId']);
         $stmt->execute();
@@ -895,11 +895,11 @@ class solutioncore
     protected function getParamLogin($connId)
     {
         // RECUPERE LE NOM DE LA SOLUTION
-        $sql = 'SELECT Solution.name  
-				FROM Connector
-					INNER JOIN Solution 
-						ON Solution.id  = Connector.sol_id
-				WHERE Connector.id = :connId';
+        $sql = 'SELECT solution.name  
+				FROM connector
+					INNER JOIN solution 
+						ON solution.id  = connector.sol_id
+				WHERE connector.id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
         $stmt->execute();
@@ -907,7 +907,7 @@ class solutioncore
 
         // RECUPERE LES PARAMS DE CONNEXION
         $sql = 'SELECT id, conn_id, name, value
-				FROM ConnectorParam 
+				FROM connectorparam 
 				WHERE conn_id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
