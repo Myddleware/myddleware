@@ -372,11 +372,9 @@ class jobcore  {
 			// If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
 			if ($param[0] == 'cancel') {
 				$param[] = 'Y';
-			}
-			
+			}	
 			// Formatage des paramètres
 			$params = implode(' ',$param);
-			
 			// Get the php executable 
 			$phpBinaryFinder = new PhpExecutableFinder();
 			$phpBinaryPath = $phpBinaryFinder->find();
@@ -400,7 +398,7 @@ class jobcore  {
 				sleep(1);
 				$cpt++;
 			}
-			
+//TODO : bugfix - the job ID is not sent to the document, hence the error no task id given' is always thrown 
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');
 			// Massaction returns "1;" + the job ID
@@ -528,7 +526,7 @@ class jobcore  {
 				throw new \Exception ('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
 			}
 
-			// We instance the rule
+			// We instanciate the rule
 			$this->ruleManager->setRule($ruleId);
 			$this->ruleManager->setJobId($this->id);
 			$this->ruleManager->setApi($this->api);			

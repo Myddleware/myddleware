@@ -79,6 +79,7 @@ class MassActionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
         $ids = $input->getArgument('ids');	
@@ -102,7 +103,7 @@ class MassActionCommand extends Command
         /** @var Job $job */
         $job = $data['job'];
 		$output->writeln( '1;'.$this->jobManager->getId() );  // Do not remove, used for manual job and webservices (display logs)
-
+//TODO : bugfix - $this->jobManager->getId() is actually empty when running a background job (see JobManager runBackgroundJob()) and so the task isn't launched
         // Récupération des paramètres
         if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus'])) {
             throw new Exception('Action '.$action.' unknown. Please use action rerun, cancel or remove.');

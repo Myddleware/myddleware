@@ -1,38 +1,35 @@
 <?php
 
-// src/EventListener/ExceptionListener.php
 namespace App\EventListener;
 
-use Symfony\Component\HttpFoundation\Response;
+use Doctrine\DBAL\Exception\ConnectionException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ExceptionListener
 {
+
+    private $router;
+
+    public function __construct(UrlGeneratorInterface $router)
+    {
+        $this->router = $router;
+    }
+
     public function onKernelException(ExceptionEvent $event)
     {	
-        // You get the exception object from the received event
+        
         $exception = $event->getThrowable();
-        $message = sprintf(
-            'My Error says: %s with code: %s',
-            $exception->getMessage(),
-            $exception->getCode()
-        );
+  
+        if ($exception instanceof ConnectionException) {
 
-        // Customize your response object to display the exception details
-        $response = new Response();
-        $response->setContent($message);
+            $urlInstall=  $this->router->generate('install_requirements');
+            
+            $response = new RedirectResponse($urlInstall);
+            $event->setResponse($response);
+          
+        } 
 
-        // HttpExceptionInterface is a special type of exception that
-        // holds status code and header details
-        if ($exception instanceof HttpExceptionInterface) {
-            $response->setStatusCode($exception->getStatusCode());
-            $response->headers->replace($exception->getHeaders());
-        } else {
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        // sends the modified response object to the event
-        $event->setResponse($response);
     }
 }
