@@ -21,6 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\DBAL\Driver\PDO\Exception as DBALDriverPDOException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use InvalidArgumentException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class DatabaseSetupController extends AbstractController
@@ -137,31 +138,39 @@ class DatabaseSetupController extends AbstractController
 
            $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
            foreach($parameters as $parameter){
-               $value = $this->getParameter($parameter);
-               if(!empty($value)){
-                    switch($parameter) {
-                        case 'database_driver':
-                            $database->setDriver($value);
-                            break;
-                        case 'database_host':
-                            $database->setHost($value);
-                            break;
-                        case 'database_port':
-                            $database->setPort($value);
-                            break;
-                        case 'database_name':
-                            $database->setName($value);
-                            break;
-                        case 'database_user':
-                            $database->setUser($value);
-                            break;
-                        case 'secret':
-                            $database->setSecret($value);
-                            break;
-                        default:
-                            break;
+               try {
+                    $value = $this->getParameter($parameter);
+                    if(!empty($value)){
+                        switch($parameter) {
+                            case 'database_driver':
+                                $database->setDriver($value);
+                                break;
+                            case 'database_host':
+                                $database->setHost($value);
+                                break;
+                            case 'database_port':
+                                $database->setPort($value);
+                                break;
+                            case 'database_name':
+                                $database->setName($value);
+                                break;
+                            case 'database_user':
+                                $database->setUser($value);
+                                break;
+                            case 'secret':
+                                $database->setSecret($value);
+                                break;
+                            default:
+                                break;
+                        }
                     }
+               } catch (Exception $e){
+                   if($e instanceof InvalidArgumentException){
+                      continue;
+                   }
+                 
                }
+              
            }     
 
                 // force user to change the default Symfony secret for security
