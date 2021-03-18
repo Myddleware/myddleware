@@ -131,7 +131,13 @@ class vtigercrmcore extends solution
      *
      * @var string[]
      */
-    protected $allowParentRelationship = array('Quotes');
+    protected $allowParentRelationship = [
+        'Quotes',         
+        'PurchaseOrder',
+        'SalesOrder',
+        'Invoice',
+        'ServiceContracts'
+    ];
 
     /**
      * Current module list.
