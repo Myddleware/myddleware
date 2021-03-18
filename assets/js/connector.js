@@ -3,7 +3,7 @@
 
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2015 - 2021  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -23,6 +23,9 @@
 *********************************************************************************/
 const $ = require('jquery');
 require('../css/connector.css');
+
+// WARNING - ALL ROUTING & IMAGES PATHS HAVE BEEN MODIFIED 'MANUALLY', THIS WILL NEED TO BE LOOKED INTO LATER
+// AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 
 
 $( function() {
 	// Sauvegarde du connecteur
@@ -74,7 +77,8 @@ $( function() {
 		
 		$.ajax({
 			type: "POST",
-			url: Routing.generate('regle_inputs'),
+			// url: Routing.generate('regle_inputs'),
+			url: '../../inputs',
 			data:{
 				champs : datas,
 				parent : parent,
@@ -83,7 +87,7 @@ $( function() {
 			},	
 			beforeSend:	function() {				
 				status.removeAttr("src");
-				status.attr("src",path_img + "loader.gif");							
+				status.attr("src", "../" +path_img + "loader.gif");							
 			},				
 			success: function(json){
 				
@@ -91,7 +95,7 @@ $( function() {
 				// Si connexion echoue
 				if(!json.success) {							
 					status.removeAttr("src");
-					status.attr("src",path_img + "status_offline.png");
+					status.attr("src", "../" +path_img + "status_offline.png");
 					$('#msg_status span.error').html(json.message);
 					$('#msg_status').show();
 					return false;
@@ -103,7 +107,8 @@ $( function() {
 						solutionjs : true,
 						detectjs : true
 					}, 				
-					url: Routing.generate('connector_callback'),
+					// url: Routing.generate('connector_callback'),
+					url: '../callback/',
 					success: function(data){
 						param = data.split(';');
 						
@@ -117,7 +122,8 @@ $( function() {
 								data:{
 									solutionjs : true
 								},					
-								url: Routing.generate('connector_callback'),
+								// url: Routing.generate('connector_callback'),
+								url: '../callback/',
 								success: function(data){	
 
 									// if 1ere fois
@@ -129,25 +135,25 @@ $( function() {
 											    if(win.closed) {  
 											        clearInterval(timer);  									        
 											        if (confirm("Reconnect")) {
-											        	$('#connexion').click();
+											        	$('#connexion').trigger();
 											        } 
 											    }  
 											}, 1000); 												
 										} 
 										else {
-											$('#connexion').click();
+											$('#connexion').trigger();
 										} 																									
 																			
 										r = data.split(';');							
 																	
 										status.removeAttr("src");
-										status.attr("src",path_img+"status_offline.png");
+										status.attr("src", "../" +path_img+"status_offline.png");
 										$('#msg_status span.error').html(r[0]);
 										$('#msg_status').show();																												
 									}
 									else {									
 										status.removeAttr("src");
-										status.attr("src",path_img+"status_online.png");
+										status.attr("src", "../"+path_img+"status_online.png");
 										$('#msg_status').hide();
 										$('#msg_status span.error').html('');	
 										$('#step_modules_confirme').removeAttr('disabled');					
@@ -158,13 +164,13 @@ $( function() {
 						else {						
 							if(!json.success) {								
 								status.removeAttr("src");
-								status.attr("src",path_img+"status_offline.png");
+								status.attr("src","../" +path_img+"status_offline.png");
 								$('#msg_status span.error').html(r[0]);
 								$('#msg_status').show();
 							}
 							else{
 								status.removeAttr("src");
-								status.attr("src",path_img+"status_online.png");
+								status.attr("src","../" +path_img+"status_online.png");
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
 							}						
