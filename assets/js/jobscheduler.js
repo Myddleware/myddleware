@@ -1,13 +1,17 @@
 var url = '../jobscheduler/getFieldsSelect';
-
+require('../css/jobscheduler.css');
 
 $(function(){
     if(window.location.href.indexOf("edit") > -1 ){
         url = '../../jobscheduler/getFieldsSelect';
     }
+    if(window.location.href.indexOf("show") > -1 ){
+        url = '../../jobscheduler/getFieldsSelect';
+    }
     if(window.location.href.indexOf("jobscheduler") > -1){
-        require('../css/jobscheduler.css');
+     
         fieldTreatment();
+        
     }
 });
 
