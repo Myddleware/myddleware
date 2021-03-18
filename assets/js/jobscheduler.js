@@ -1,4 +1,5 @@
-var url = 'jobscheduler/getFieldsSelect';
+var url = '../jobscheduler/getFieldsSelect';
+require('../css/jobscheduler.css');
 $(function(){
     fieldTreatment();
 });

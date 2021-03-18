@@ -20,15 +20,6 @@
     padding-right: 20px;
 }
 
-#link_button {
-    text-decoration: none;
-    color: #000;
-}
-
-#link_button:hover {
-    text-decoration: none;
-}
-
 .jobscheduler_text {
     padding: 30px 50px 30px 50px;
     text-align: justify;
@@ -42,4 +33,11 @@
     list-style: none;
     padding: 5px;
     color: red;
+}
+
+form {
+    padding-top: 100px;
+    margin-left: 200px;
+    max-width: 50vw;
+    
 }
