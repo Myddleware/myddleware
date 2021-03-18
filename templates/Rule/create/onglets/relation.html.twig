@@ -42,13 +42,13 @@
 	{% for rule in lst_relation_target %}
 		<tr class="line-relation">
 			<td>			    	
-				<select class="lst_source_relate" id="lst_source_{{ rule.name }}" name="">
+				<select class="lst_source_relate form-control" id="lst_source_{{ rule.name }}" name="">
 					{{ lst_relation_source | raw }}
 				</select>
 			</td>
 			<td class="arrow"><img width="20px" src="{{ asset('build/images/template/arrow-mapping.png') }}" alt="mapping" /></td>
 			<td>
-				<select class="lst_rule_relate" id="lst_{{ rule.name }}" name="">
+				<select class="lst_rule_relate form-control" id="lst_{{ rule.name }}" name="">
 					{{ lst_rule | raw }}
 				</select>
 			</td>
@@ -57,7 +57,7 @@
 				{% if rule.required %}
 					<span class="glyphicon glyphicon-star"></span>
 				{% endif %}		
-				<input readonly="readonly" class="title" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
+				<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 			</td>
 		</tr>
 	{% endfor %}

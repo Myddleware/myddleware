@@ -184,14 +184,13 @@
 
 #animation select{
 	padding: 5px;
-    /*width: 85px;*/
     overflow: hidden;
     text-align: left;
     font-size: 1em;
     border-radius: 1px;
-    -webkit-box-shadow: rgba(0,0,0,.6) -1px -2px 2px;
-    -moz-box-shadow:  rgba(0,0,0,.6) 0px 2px 2px;
-   background:white;
+    -webkit-box-shadow: rgba(0,0,0,0.05) -1px -2px 2px;
+    -moz-box-shadow:  rgba(0,0,0,0.05) 0px 2px 2px;
+
 }
 
 /* PROGRESS-BAR */
@@ -449,9 +448,8 @@ h2 { margin-top: 50px;}
 	cursor: pointer;
 }
 
-
-/* Update SF4 */
-
-select {
-    border: solid 1px #c3c3c3;
+/* added to compensate the fact that jobscheduler.css is loaded when it shouldn't be */
+#nameverif {
+    margin: 0;
+    padding: 0;
 }

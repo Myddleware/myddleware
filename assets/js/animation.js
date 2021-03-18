@@ -342,7 +342,7 @@ function addChoice() {
 
 // Affiche la liste des modules si le connecteur est sélectionné
 function addModule(type) {
-	 $('#animation-Connecteur-' + type).change(function() {
+	 $('#animation-Connecteur-' + type).on('change', function() {
 	 	
 		$('#connector-' + type +'-error').hide();
 		$('#connector-' + type +'-success').hide();	 	
