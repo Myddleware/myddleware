@@ -1,5 +1,6 @@
 var url = '../jobscheduler/getFieldsSelect';
 require('../css/jobscheduler.css');
+
 $(function(){
     fieldTreatment();
 });
@@ -22,6 +23,11 @@ function fieldTreatment($event) {
         url: url,
         data: {
             type: type
+        },
+        beforeSend:	function() {
+            console.log(url);
+            console.log(type);
+            console.log(__dirname);
         },
         success: function (option) {
             if ($event) {
@@ -73,7 +79,63 @@ function fieldTreatment($event) {
             });
         },
         error: function (err) {
-            console.log(err.responseText);
+            // In Edit view, the URL isn't the same (because of the id parameter), so we try the request again with different path
+            $.ajax({
+                type: "GET",
+                url: '../'+url,
+                data: {
+                    type: type
+                },
+                success: function (option) {
+                    if ($event) {
+                        refreshFields();
+                    }
+                    if (!option) {
+                        return;
+                    }
+                    delete option.name;
+                    // initialization input
+                    $.each(option, function (key, option) {
+                        var fieldName = '';
+                        var fieldValue = '';
+                        if (key === 'param1') {
+                            fieldName = paramName1;
+                            fieldValue = paramValue1;
+                            field_name = "paramValue1";
+                            $("#bloc_paramName1").show();
+                            $("#bloc_paramvalue1").show();
+                        } else {
+                            fieldName = paramName2;
+                            fieldValue = paramValue2;
+                            field_name = "paramValue2";
+                            $("#bloc_paramName2").show();
+                            $("#bloc_paramvalue2").show();
+                        }
+                        fieldName.val(Object.keys(option)[0]);
+                        var fieldType = option[Object.keys(option)[0]]['fieldType'];
+                        if (fieldType === 'list') { // if input is select option
+                            fieldValue.replaceWith(function ($this) {
+        
+                                var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-control" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');
+                                fieldValue.append('<option value  selected="selected">> Select ' + $(this).find("option:selected").text() + ' ...</option>');
+                                for (var item in option[Object.keys(option)[0]].option) {
+                                    if (item == fieldValue.val()) {
+                                        select.append('<option value="' + item + '"selected="selected">' + option[Object.keys(option)[0]].option[item] + '</option>');
+                                    } else {
+                                        select.append('<option value="' + item + '" >' + option[Object.keys(option)[0]].option[item] + '</option>');
+                                    }
+                                }
+                                return select;
+                            });
+                        } else if (fieldType === 'int') {
+                            fieldValue.replaceWith(function () {
+                                var input = $('<input id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" type="number" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']" class="form-control" value="' + fieldValue.val() + '" />');
+                                return input;
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 
