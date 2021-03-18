@@ -131,41 +131,9 @@
 		
     </script>
     {# ------------- PARAMETRES JQUERY ------------- #}
+	{% block javascripts %}
+		 {{ encore_entry_script_tags('rulelist') }}
+	{% endblock %}
 {% endblock %}
 
-{% block cssin %}
-#new_rule{
-	float: right;
-	position: relative;
-	top: 5px;
-	right: 50px;
-	color: #0069b4;
-}
-#new_rule:hover{
-	color: #cdc400;
-	text-decoration: none;
-	cursor: pointer;
-}
-.myd_div_loading{
-	background: url("{{ asset('build/images/regle/loading') }}.gif") no-repeat center center;
-}
 
-.myd_div_loading_logo{
-	background: url("{{ asset('build/images/regle/logo/logo') }}.png") no-repeat center center;
-}
-{% endblock cssin %}
-
-{% block js %}
-	<script type="text/javascript"> 
-		//Nada Activer la regle sur la liste des regles
-		$( ".onoffswitch-label" ).click(function(e) {
-			path_fiche_update = $(this).parent().children('input').attr('title');
-			$.ajax({
-				type: "POST",
-				url: path_fiche_update,						
-					success: function(data){				
-				}			
-			});	
-		});
-	</script> 
-{% endblock js %}

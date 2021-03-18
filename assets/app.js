@@ -31,6 +31,7 @@ require('./js/fiche.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
+require('./js/rulelist.js')
 
 // start the Stimulus application
 import './bootstrap';

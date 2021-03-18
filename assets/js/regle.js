@@ -66,7 +66,7 @@ function name_file_upload() {
 // Rev 1.1.0 Upload Files ------------------------------
 
 function confirm_upload() {
-	$('#link_wsdl').click(function(e){
+	$('#link_wsdl').on('click', function(e){
 		if( $('#param_wsdl').val() != '' ) {
 			if(confirm("Souhaitez-vous abandonner l'ancien fichier de configuration ?")) {
 				return true;				
@@ -104,11 +104,11 @@ function removeSpace(string) {
 }
 // rev 1.08 --------
 
-$( document ).ready(function() {
+$(function() {
 	// ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
 	$( window ).load(function(){
 		// Bouton action "Exécuter règles actives"
-		$( "#exec_all", "#rule").click(function(e) {
+		$( "#exec_all", "#rule").on('click', function(e) {
 			if (confirm(confirm_exec_all)) { // Clic sur OK
 				btn_action_fct();
 			} else {
@@ -116,7 +116,7 @@ $( document ).ready(function() {
 			}
 		});
 		// Bouton action "Relancer les erreurs"
-		$( "#exec_error", "#rule").click(function(e) {
+		$( "#exec_error", "#rule").on('click', function(e) {
 			if (confirm(confirm_exec_error)) { // Clic sur OK
 				btn_action_fct();
 			} else {
@@ -125,7 +125,7 @@ $( document ).ready(function() {
 		});
 		// ----------------------------- Boutons d'actions (affichage d'un loading)
 		// Appelé pour: "Annuler transfert" et "Exécuter la règle"
-		$( ".btn_action_loading" ).click(function(e) {
+		$( ".btn_action_loading" ).on('click', function(e) {
 			btn_action_fct();
 		});
 		
@@ -143,15 +143,15 @@ $( document ).ready(function() {
 	
 	/* infobulle mapping des champs */
 	function fields_target_hover() {
-		$( '.ch' ).hover(		
-			function() {
-				$( this ).append( $( '<div class="info_delete_fields"><span class="glyphicon glyphicon-info-sign"></span> '+ infobulle_fields +'</div>' ) );
-			}, function() {
-				$( this ).find( "div:last" ).remove();
-			}
+		$( '.ch' ).on( 'hover', function() {
+			$( this ).append( $( '<div class="info_delete_fields"><span class="glyphicon glyphicon-info-sign"></span> '+ infobulle_fields +'</div>' ) );
+		}, 
+		function() {
+			$( this ).find( "div:last" ).remove();
+		}
 		);	
 		
-		$( '.ch' ).click(function(){
+		$( '.ch' ).on('click', function(){
 			$( this ).find( "div:last" ).remove();
 		});		
 	}
@@ -190,11 +190,11 @@ $( document ).ready(function() {
 		
 	}
 		
-	$('#rule_previous').click(function(){
+	$('#rule_previous').on('click', function(){
 		previous_next(0);
 	});
 
-	$('#rule_next').click(function(){
+	$('#rule_next').on('click', function(){
 		previous_next(1);
 	});	
 
@@ -557,7 +557,7 @@ $( document ).ready(function() {
 
 		});	
 		
-		$( div_clock , 'input').keyup(function() {
+		$( div_clock , 'input').on('keyup', function() {
 			
 			var err = 0;
 			var btn = $( $(this) ).find( ".testing" );
@@ -785,7 +785,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 		}			
 	}	
 
-	$( '#area_insert' ).keyup(function() {		
+	$( '#area_insert' ).on('keyup', function() {		
 		colorationSyntax();
 		theme(style_template);	
 	});	
@@ -854,7 +854,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 	//-- syntax color
 
 		// Filtre des fonctions pour les formules
-		$( '#filter' ).change(function() {
+		$( '#filter' ).on('change', function() {
 			var cat = $("select[name='filter_functions'] > option:selected").attr("data-type");
 
 			if( cat >= 1 ) {

@@ -138,38 +138,38 @@ menu .caret, #myd_top .caret {
 }
 
 .myd_div_loading{
-    background: url('./../images/loading.gif') no-repeat center center;
+    background: url('../images/loading.gif') no-repeat center center;
 }
 
 .myd_div_loading_logo{
-    background: url('./../images/logo/logo.png') no-repeat center center;
+    background: url('../images/logo/logo.png') no-repeat center center;
 }
 
 
 #animation .loader-source {
-    background: url('./../images/loader-source.gif');
+    background: url('../images/loader-source.gif');
     background-repeat:no-repeat;
 }
 
 #animation .loader-cible {
-    background: url('./../images/loader-cible.gif');
+    background: url('../images/loader-cible.gif');
     background-repeat:no-repeat;
 }
 
 #animation-myddleware-back-1 > .animation-myddleware-logo {
-    background: url('./../images/logo/text.png');
+    background: url('../images/logo/text.png');
 }
 
 #animation-myddleware-back-2 > .animation-myddleware-logo {
-    background: url('./../images/logo/up.png');
+    background: url('../images/logo/up.png');
 }
 
 #animation-myddleware-back-3 > .animation-myddleware-logo {
-    background: url('./../images/logo/down.png') right top;
+    background: url('../images/logo/down.png') right top;
 }
 
 #animation .arcleft-c  {
-    background: url('./../images/template/left-arc-color.png') no-repeat right;
+    background: url('../images/template/left-arc-color.png') no-repeat right;
     height: 165px;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -179,7 +179,7 @@ menu .caret, #myd_top .caret {
 }
 
 #animation .arcleft-g  {
-    background: url('./../images/template/left-arc-gray.png') no-repeat right;
+    background: url('../images/template/left-arc-gray.png') no-repeat right;
     height: 165px;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -189,7 +189,7 @@ menu .caret, #myd_top .caret {
 }
 
 #animation .arcright-c  {
-    background: url('./../images/template/right-arc-color.png') no-repeat left;
+    background: url('../images/template/right-arc-color.png') no-repeat left;
     height: 165px;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -199,7 +199,7 @@ menu .caret, #myd_top .caret {
 }
 
 #animation .arcright-g  {
-    background: url('./../images/template/right-arc-gray.png') no-repeat left;
+    background: url('../images/template/right-arc-gray.png') no-repeat left;
     height: 165px;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -215,7 +215,7 @@ menu .caret, #myd_top .caret {
 
 #animation .animation-content-left-toggle-btn, #animation .animation-content-right-toggle-btn {
     background: #CACACA;
-    background-image: url('./../images/data.png');
+    background-image: url('../images/data.png');
     background-size: 15px 22px;
     background-position: 10px 5px;
     background-repeat: no-repeat;
