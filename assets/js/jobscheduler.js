@@ -24,11 +24,6 @@ function fieldTreatment($event) {
         data: {
             type: type
         },
-        beforeSend:	function() {
-            console.log(url);
-            console.log(type);
-            console.log(__dirname);
-        },
         success: function (option) {
             if ($event) {
                 refreshFields();
