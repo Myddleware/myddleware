@@ -1,14 +1,13 @@
 var url = '../jobscheduler/getFieldsSelect';
 require('../css/jobscheduler.css');
 
-if(window.location.href.indexOf("edit") > -1 ){
-    console.log(window.location.href);
-    url = '../../jobscheduler/getFieldsSelect';
-}
-
-
 $(function(){
-    fieldTreatment();
+    if(window.location.href.indexOf("edit") > -1 ){
+        url = '../../jobscheduler/getFieldsSelect';
+    }
+    if(window.location.href.indexOf("jobscheduler") > -1){
+        fieldTreatment();
+    }
 });
 
 $('select#myddleware_reglebundle_jobscheduler_command').on('change', fieldTreatment);
