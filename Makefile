@@ -53,7 +53,7 @@ require-woocommerce-client:
 
 setup-files:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd
-	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache var/logs || true
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/ var/logs/ || true
 
 setup-database: up sleep
 	@docker-compose -f docker-compose.yml exec myddleware bash prepare-database.sh
@@ -88,6 +88,9 @@ recreate: init
 
 restart: recreate
 	@echo ">>> Myddleware is ready."
+
+fix:
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/ var/logs/ || true
 
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
