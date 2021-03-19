@@ -82,6 +82,7 @@ NOTES.md
 .pwd.var
 
 # OCI:START
+!/src/Myddleware/RegleBundle/Custom/Solutions/database.php
 !/src/Myddleware/RegleBundle/Custom/Solutions/mautic.php
 !/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
 !/src/Myddleware/RegleBundle/Custom/Solutions/mysql.php
