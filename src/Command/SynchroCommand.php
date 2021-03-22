@@ -160,7 +160,7 @@ class SynchroCommand extends Command
 						}
 					}
 				}	
-			}
+			}	
 		}
 		catch(\Exception $e) {			
 			$this->jobManager->message .= $e->getMessage();
@@ -173,6 +173,8 @@ class SynchroCommand extends Command
 		if (!empty($this->jobManager->message)) {
 			$output->writeln( '0;<error>'.$this->jobManager->message.'</error>');
 			$this->logger->error( $this->jobManager->message );
-		} 		
+		} 	
+		
+		
     }
 }

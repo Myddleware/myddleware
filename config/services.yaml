@@ -47,10 +47,6 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
            
-  twig.extension.intl:
-    class: Twig_Extensions_Extension_Intl
-    tags:
-      - { name: twig.extension }
 
   App\manager\SolutionManager:
     public: false

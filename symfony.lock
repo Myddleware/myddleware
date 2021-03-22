@@ -194,6 +194,9 @@
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
+    "jetbrains/phpstorm-stubs": {
+        "version": "v2019.3"
+    },
     "jquery/jquery": {
         "version": "2.1.3"
     },
@@ -202,6 +205,15 @@
     },
     "kriswallsmith/buzz": {
         "version": "v0.10"
+    },
+    "laminas/laminas-code": {
+        "version": "3.5.1"
+    },
+    "laminas/laminas-eventmanager": {
+        "version": "3.3.1"
+    },
+    "laminas/laminas-zendframework-bridge": {
+        "version": "1.2.0"
     },
     "lcobucci/jwt": {
         "version": "3.4.2"
@@ -278,9 +290,6 @@
     "phpdocumentor/type-resolver": {
         "version": "1.4.0"
     },
-    "phpsec/phpsec": {
-        "version": "0.6.5"
-    },
     "phpstan/phpstan": {
         "version": "0.12.64"
     },
@@ -289,9 +298,6 @@
     },
     "phpstan/phpstan-symfony": {
         "version": "0.12.12"
-    },
-    "pimple/pimple": {
-        "version": "v1.1.1"
     },
     "psr/cache": {
         "version": "1.0.1"
@@ -310,6 +316,12 @@
     },
     "ralouphie/getallheaders": {
         "version": "3.0.3"
+    },
+    "roave/better-reflection": {
+        "version": "4.3.0"
+    },
+    "roave/signature": {
+        "version": "1.2.0"
     },
     "sabre/event": {
         "version": "5.1.2"
@@ -491,18 +503,6 @@
             "webpack.config.js"
         ]
     },
-    "twig/extensions": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "1.0",
-            "ref": "a86723ee8d8b2f9437c8ce60a5546a1c267da5ed"
-        },
-        "files": [
-            "./config/packages/twig_extensions.yaml"
-        ]
-    },
     "twig/twig": {
         "version": "v2.14.1"
     },
@@ -520,12 +520,6 @@
     },
     "willdurand/negotiation": {
         "version": "v2.3.1"
-    },
-    "zendframework/zend-code": {
-        "version": "3.4.1"
-    },
-    "zendframework/zend-eventmanager": {
-        "version": "3.2.1"
     },
     "zendframework/zend-hydrator": {
         "version": "1.1.0"

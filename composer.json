@@ -27,7 +27,6 @@
         "symfony/templating": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
         "doctrine/doctrine-bundle": "1.12.*",
-        "twig/extensions": "~1.0",
         "symfony/swiftmailer-bundle": "^3.2",
         "symfony/monolog-bundle": "^3.1.2",
         "symfony/expression-language": "~4.4",
@@ -37,7 +36,6 @@
         "jquery/jquery_ui": "1.11.1",
         "twitter/bootstrap": "4.6.0",
         "leafo/lessphp": "0.4.0",
-        "phpsec/phpsec":"0.6.*",
         "white-october/pagerfanta-bundle": "dev-master",
         "pagerfanta/pagerfanta": "^2.0.0",
         "illuminate/encryption": "5.3.*@dev",
@@ -61,7 +59,9 @@
     "symfony/web-profiler-bundle": "4.4.*",
     "composer/package-versions-deprecated": "1.11.99.1",
     "doctrine/doctrine-migrations-bundle": "^3.0",
-    "symfony/proxy-manager-bridge": "4.4.*"
+    "symfony/proxy-manager-bridge": "4.4.*",
+    "roave/better-reflection": "^4.3",
+    "laminas/laminas-code": "^3.5"
     },
     "repositories": [
         {
