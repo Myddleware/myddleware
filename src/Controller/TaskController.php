@@ -35,6 +35,7 @@ use Psr\Log\LoggerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -141,9 +142,10 @@ class TaskController extends AbstractController
     {
         try {
             $em = $this->getDoctrine()->getManager();
-
+            $task = $this->jobRepository->find($task);
+            $taskId = $task->getId();
             $compact = $this->nav_pagination([
-                'adapter_em_repository' => $em->getRepository(Log::class)->findBy(['job' => $task], ['id' => 'DESC']),
+                'adapter_em_repository' => $em->getRepository(Log::class)->findBy(['job' => $taskId], ['id' => 'DESC']),
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
@@ -229,7 +231,7 @@ class TaskController extends AbstractController
 
             //On passe l’adapter au bundle qui va s’occuper de la pagination
             if ($orm) {
-                $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
             } else {
                 $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
             }

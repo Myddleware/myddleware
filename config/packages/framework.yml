@@ -6,18 +6,6 @@ framework:
     form:            ~
     csrf_protection: ~
     validation: { enable_annotations: true, enabled: true }
-    templating:
-        engines: ['twig']
     default_locale:  "%locale%"
     session:         ~
     fragments:       ~
-    http_method_override: true
-
-# FOSUserBundle configuration
-#fos_user:
-#    db_driver: orm
-#    firewall_name: main
-#    user_class: Myddleware\LoginBundle\Entity\User
-#    from_email:
-#        address:        contact@myddleware.com
-#        sender_name:    Myddleware contact

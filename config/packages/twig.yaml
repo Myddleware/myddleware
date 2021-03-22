@@ -4,4 +4,5 @@ twig:
     globals:
         myd_version: "%myd_version%"
         locales: '%fallbacks%'
-    form_theme: ['bootstrap_4_layout.html.twig']    
+    form_theme: ['bootstrap_4_layout.html.twig']
+    exception_controller: null

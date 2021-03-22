@@ -323,7 +323,7 @@ class jobcore  {
 		$job = $stmt->fetch(); // 1 row		
 		// Error if one job is still running
 		if (!empty($job)) {
-			$this->message .= $this->tools->getTranslation(array('messages', 'rule', 'another_task_running')).';'.$job['id'];
+			$this->message .= $job['id'].';'.$this->tools->getTranslation(array('messages', 'rule', 'another_task_running'));
 			return array('success' => false, 'message' => $this->message);
 		}
 		// Create Job
@@ -767,7 +767,8 @@ class jobcore  {
 	
 	// Myddleware upgrade
 	public function upgrade($output) {
-		$upgrade = new upgrade($this->logger, $this->container, $this->connection);			
+		// $upgrade = new Upgrade($this->logger, $this->container, $this->connection);	
+		$upgrade = $this->upgradeManager;
 		$this->message = $upgrade->processUpgrade($output);		
 	}
 

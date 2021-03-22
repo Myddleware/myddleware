@@ -24,7 +24,6 @@
         "symfony/dotenv": "4.4.*",
         "symfony/flex": "^1.1",
         "symfony/framework-bundle": "4.4.*",
-        "symfony/templating": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
         "doctrine/doctrine-bundle": "1.12.*",
         "symfony/swiftmailer-bundle": "^3.2",
@@ -41,7 +40,6 @@
         "illuminate/encryption": "5.3.*@dev",
         "friendsofsymfony/jsrouting-bundle": "^2.3",
         "api-platform/core": "2.2.10",
-        "api-platform/api-pack": "^1.1",
         "lexik/jwt-authentication-bundle": "^2.6",
         "mautic/api-library": "^2.15",
         "javanile/vtiger-client": "^0.0.13",
@@ -61,7 +59,18 @@
     "doctrine/doctrine-migrations-bundle": "^3.0",
     "symfony/proxy-manager-bridge": "4.4.*",
     "roave/better-reflection": "^4.3",
-    "laminas/laminas-code": "^3.5"
+    "laminas/laminas-code": "^3.5",
+    "nelmio/cors-bundle": "^2.1",
+    "symfony/asset": "4.4.*",
+    "doctrine/orm": "^2.7",
+    "symfony/security-bundle": "4.4.*",
+    "doctrine/annotations": "^1.0",
+    "phpdocumentor/reflection-docblock": "^5.2",
+    "symfony/property-access": "4.4.*",
+    "symfony/property-info": "4.4.*",
+    "symfony/serializer": "4.4.*",
+    "symfony/validator": "4.4.*",
+    "symfony/http-foundation": "4.4.*"
     },
     "repositories": [
         {
