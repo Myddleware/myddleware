@@ -768,7 +768,7 @@ class jobcore  {
 	// Myddleware upgrade
 	public function upgrade($output) {
 		// $upgrade = new Upgrade($this->logger, $this->container, $this->connection);	
-		$upgrade = $this->upgradeManager;
+		$upgrade = $this->upgrade;
 		$this->message = $upgrade->processUpgrade($output);		
 	}
 
