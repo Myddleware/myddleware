@@ -563,12 +563,18 @@ class databasecore extends solution {
 					$q = $this->pdo->prepare($sql);
                     if (!$q) {
                         $errorInfo = $this->pdo->errorInfo();
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
                         throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
                     }
 
                     $exec = $q->execute();
 					if (!$exec) {
 						$errorInfo = $this->pdo->errorInfo();
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
 						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
 					}
 					
