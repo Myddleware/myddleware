@@ -3323,7 +3323,6 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
   					relations : recup_relation()
 				},
 				beforeSend:	function() {
-					console.log('coucou');
 					$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );									
 				},	    					
 				success: function(data){
@@ -3362,7 +3361,6 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 						query: select_record_id.value
 					},
 					beforeSend:	function() {
-						console.log('coucououcou');
 						$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );	
 													
 					},	    					

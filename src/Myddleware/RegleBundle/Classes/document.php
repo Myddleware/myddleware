@@ -1311,7 +1311,7 @@ class documentcore {
 				}
 			}
 			// Si le champ est envoyé sans transformation
-			elseif (isset($source[$ruleField['source_field_name']])) {			
+			elseif (isset($source[$ruleField['source_field_name']])) {		
 				return $this->checkField($source[$ruleField['source_field_name']]);
 			}
 			// If Myddleware_element_id is requested, we return the id 
@@ -1321,12 +1321,12 @@ class documentcore {
 			) {			
 				return $this->checkField($source['id']);
 			}
-			elseif (is_null($source[$ruleField['source_field_name']])) {			
+			elseif (is_null($source[$ruleField['source_field_name']])) {	
 				return null;
 			}
 			else {
 				throw new \Exception( 'Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField,true) );
-			}
+			}			
 		}
 		catch(\Exception $e) {		
 			$this->typeError = 'E';

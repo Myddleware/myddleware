@@ -290,7 +290,7 @@ class magentocore extends solution {
 						'discount_invoiced' => array('label' => 'Discount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_percent' => array('label' => 'Discount_percent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_refunded' => array('label' => 'Discount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'event_id' => array('label' => 'Event_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'event_id' => array('label' => 'Event_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'ext_order_item_id' => array('label' => 'Ext_order_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'free_shipping' => array('label' => 'Free_shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'gw_base_price' => array('label' => 'Gw_base_price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -331,13 +331,13 @@ class magentocore extends solution {
 						'qty_refunded' => array('label' => 'Qty_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_returned' => array('label' => 'Qty_returned', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_shipped' => array('label' => 'Qty_shipped', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'quote_item_id' => array('label' => 'Quote_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'quote_item_id' => array('label' => 'Quote_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_invoiced' => array('label' => 'Row_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_total' => array('label' => 'Row_total', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_total_incl_tax' => array('label' => 'Row_total_incl_tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_weight' => array('label' => 'Row_weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'sku' => array('label' => 'Sku', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'store_id' => array('label' => 'Store_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'store_id' => array('label' => 'Store_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_amount' => array('label' => 'Tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_before_discount' => array('label' => 'Tax_before_discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_canceled' => array('label' => 'Tax_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -355,6 +355,9 @@ class magentocore extends solution {
 					$this->fieldsRelate = array(
 						'order_id' => array('label' => 'Order_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'product_id' => array('label' => 'Product_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'quote_item_id' => array('label' => 'Quote_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'store_id' => array('label' => 'Store_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'event_id' => array('label' => 'Event_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					);
 					break;
 				case 'products':
@@ -474,7 +477,7 @@ class magentocore extends solution {
 			$searchCriteria .= 'searchCriteria[pageSize]=1&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC'; 
 	
 			// Call to Magento, get is the priority otherwise we use searchCriteria
-			$resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.(!empty($get) ? $get : $searchCriteria), 'GET');
+			$resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.(!empty($get) ? $get : $searchCriteria), 'GET');	
 			if (!empty($resultList['message'])) {
 				throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'],true) : ''));
 			}
@@ -489,8 +492,15 @@ class magentocore extends solution {
 				// if submodule, example addresses in the module customer
 				if (!empty($subModule)) {
 					if (!empty($resultList[$subModule])) {
-						$subRecords = $resultList['items'][0][$subModule];
-						// date ref is taking from the main module
+						if($subModule === 'items'){
+							$subRecords = $resultList['items'][0];
+							$result['values'] = $subRecords;
+							
+						} else {
+							//BUG submodule = items, which throws an error because resultListe[items][0][items] doesn't exist
+							$subRecords = $resultList['items'][0][$subModule];
+						}
+						// date ref is taken from the main module
 						$result['values']['date_modified'] = $resultList[$dateRefField]; 			
 					 }
 					 else {
@@ -503,9 +513,9 @@ class magentocore extends solution {
 					$subRecords[0] = $resultList;
 				}
 
+if(!empty($subRecords[0])){
 				// remove one dimension by replacing the dimension by __
-				$subRecords[0] = $this->removeDimension($subRecords[0]);
-						
+				$subRecords[0] = $this->removeDimension($subRecords[0]);	
 				foreach ($subRecords[0]  as $key => $value) {
 					if ($key == $fieldId) {
 						$result['values']['id'] = $value; 
@@ -517,6 +527,7 @@ class magentocore extends solution {
 						$result['values'][$key] = null;
 					}
 				}
+}	
 				$result['done'] = true;
 			}
 			else {
@@ -526,7 +537,7 @@ class magentocore extends solution {
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$result['done'] = -1;			
-		}		
+		}	
 		return $result;
 	} // read_last($param)
 		
@@ -776,6 +787,7 @@ class magentocore extends solution {
 	
 	// remove one dimension by replacing the dimension by __
 	protected function removeDimension($subRecords) {
+	
 		foreach ($subRecords as $key => $value) {
 			if (is_array($value)) {
 				foreach ($value as $subKey => $subValue) {
