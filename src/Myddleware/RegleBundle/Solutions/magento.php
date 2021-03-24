@@ -134,6 +134,7 @@ class magentocore extends solution {
 						'dob' => array('label' => 'Birthdate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'taxvat' => array('label' => 'Taxvat value', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'confirmation' => array('label' => 'Confirmation flag', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0),
+						'gender' =>  array('label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					);
 					$this->fieldsRelate = array(
 						'increment_id' => array('label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
@@ -186,59 +187,59 @@ class magentocore extends solution {
 				case 'orders':
 					$this->moduleFields = array(
 						'id' => array('label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'parent_id' => array('label' => 'Parent ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'parent_id' => array('label' => 'Parent ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'increment_id' => array('label' => 'Increment ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'store_id' => array('label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'created_at' => array('label' => 'Date of creation', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'updated_at' => array('label' => 'Date of updating', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'is_active' => array('label' => 'Defines whether the order is active', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'is_active' => array('label' => 'Defines whether the order is active', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_amount' => array('label' => 'Tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'shipping_amount' => array('label' => 'Shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_amount' => array('label' => 'Discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'subtotal' => array('label' => 'Subtotal sum', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'grand_total' => array('label' => 'Grand total sum', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_paid' => array('label' => 'Total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_refunded' => array('label' => 'Total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_paid' => array('label' => 'Total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_refunded' => array('label' => 'Total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'total_qty_ordered' => array('label' => 'Total quantity ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_canceled' => array('label' => 'Total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_invoiced' => array('label' => 'Total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_online_refunded' => array('label' => 'Total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'total_offline_refunded' => array('label' => 'Total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_canceled' => array('label' => 'Total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_invoiced' => array('label' => 'Total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_online_refunded' => array('label' => 'Total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'total_offline_refunded' => array('label' => 'Total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_tax_amount' => array('label' => 'Base tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_shipping_amount' => array('label' => 'Base shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_discount_amount' => array('label' => 'Base discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_subtotal' => array('label' => 'Base subtotal', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_grand_total' => array('label' => 'Base grand total', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_paid' => array('label' => 'Base total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_refunded' => array('label' => 'Base total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_qty_ordered' => array('label' => 'Base total quantity ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_canceled' => array('label' => 'Base total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_invoiced' => array('label' => 'Base total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_online_refunded' => array('label' => 'Base total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_total_offline_refunded' => array('label' => 'Base total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_paid' => array('label' => 'Base total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_refunded' => array('label' => 'Base total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_qty_ordered' => array('label' => 'Base total quantity ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_canceled' => array('label' => 'Base total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_invoiced' => array('label' => 'Base total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_online_refunded' => array('label' => 'Base total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_total_offline_refunded' => array('label' => 'Base total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'billing_address_id' => array('label' => 'Billing address ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'billing_firstname' => array('label' => 'First name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'billing_lastname' => array('label' => 'Last name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'billing_firstname' => array('label' => 'First name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'billing_lastname' => array('label' => 'Last name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'shipping_address_id' => array('label' => 'Shipping address ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'shipping_firstname' => array('label' => 'First name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'shipping_lastname' => array('label' => 'Last name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'shipping_firstname' => array('label' => 'First name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'shipping_lastname' => array('label' => 'Last name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'billing_name' => array('label' => 'Billing name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'shipping_name' => array('label' => 'Shipping name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'shipping_name' => array('label' => 'Shipping name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'store_to_base_rate' => array('label' => 'Store to base rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'store_to_order_rate' => array('label' => 'Store to order rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_to_global_rate' => array('label' => 'Base to global rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_to_order_rate' => array('label' => 'Base to order rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'weight' => array('label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'store_name' => array('label' => 'Store name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'remote_ip' => array('label' => 'Remote IP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'remote_ip' => array('label' => 'Remote IP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'status' => array('label' => 'Order status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'state' => array('label' => 'Order state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'applied_rule_ids' => array('label' => 'Applied rule IDs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'applied_rule_ids' => array('label' => 'Applied rule IDs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'global_currency_code' => array('label' => 'Global currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_currency_code' => array('label' => 'Base currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'store_currency_code' => array('label' => 'Store currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'order_currency_code' => array('label' => 'Order currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'shipping_method' => array('label' => 'Shipping method', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'shipping_method' => array('label' => 'Shipping method', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'shipping_description' => array('label' => 'Shipping description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'customer_email' => array('label' => 'Email address of the customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'customer_firstname' => array('label' => 'Customer first name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -250,8 +251,24 @@ class magentocore extends solution {
 						'customer_is_guest' => array('label' => 'Defines whether the customer is a guest', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'email_sent' => array('label' => 'Defines whether the email notification is sent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'entity_id' => array('label' => 'Entity ID (order ID)', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gift_message_id' => array('label' => 'Gift message ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gift_message' => array('label' => 'Gift message', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),			
+						// 'gift_message_id' => array('label' => 'Gift message ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gift_message' => array('label' => 'Gift message', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),	
+		
+						'base_shipping_discount_tax_compensation_amnt' => array('label' => 'Base_ shipping discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'base_shipping_discount_amount' => array('label' => 'Base shipping discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'base_subtotal_incl_tax' => array('label' => 'Base subtotal incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'base_total_due' => array('label' => 'Base total due', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'customer_dob'  => array('label' => 'Customer DOB', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'customer_gender' => array('label' => 'Customer gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'discount_tax_compensation_amount' =>  array('label' => 'Discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'protect_code' =>   array('label' => 'Protect code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'shipping_discount_amount' => array('label' => 'Shipping discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'shipping_discount_tax_compensation_amount' => array('label' => 'Shipping discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
+						'shipping_incl_tax' =>  array('label' => 'Shipping incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
+						'shipping_tax_amount' => array('label' => 'Shipping tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
+						'subtotal_incl_tax' =>  array('label' => 'Subtotal incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
+						'total_due' =>   array('label' => 'Total due', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
+						'total_item_count' =>  array('label' => 'Total item count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0), 
 					);
 					$this->fieldsRelate = array(
 						'customer_id' => array('label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -259,17 +276,17 @@ class magentocore extends solution {
 					break;
 				case 'orders_items':
 					$this->moduleFields = array(
-						'additional_data' => array('label' => 'Additional data', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'additional_data' => array('label' => 'Additional data', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'amount_refunded' => array('label' => 'Amount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'applied_rule_ids' => array('label' => 'Applied rule IDs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'applied_rule_ids' => array('label' => 'Applied rule IDs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_amount_refunded' => array('label' => 'Base amount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_cost' => array('label' => 'Base cost', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_cost' => array('label' => 'Base cost', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_discount_amount' => array('label' => 'Base discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_discount_invoiced' => array('label' => 'Base discount invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_discount_refunded' => array('label' => 'Base discount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_discount_refunded' => array('label' => 'Base discount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_discount_tax_compensation_amount' => array('label' => 'Base discount_tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_discount_tax_compensation_invoiced' => array('label' => 'Base discount tax compensation invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_discount_tax_compensation_refunded' => array('label' => 'Base discount tax compensation refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_discount_tax_compensation_invoiced' => array('label' => 'Base discount tax compensation invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_discount_tax_compensation_refunded' => array('label' => 'Base discount tax compensation refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_original_price' => array('label' => 'Base original price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_price' => array('label' => 'Base price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_price_incl_tax' => array('label' => 'Base price incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -279,42 +296,42 @@ class magentocore extends solution {
 						'base_tax_amount' => array('label' => 'Base tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_tax_before_discount' => array('label' => 'Base tax before discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'base_tax_invoiced' => array('label' => 'Base tax invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_tax_refunded' => array('label' => 'Base tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_weee_tax_applied_amount' => array('label' => 'Base weee tax applied amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_weee_tax_applied_row_amnt' => array('label' => 'Base_weee_tax_applied_row_amnt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_weee_tax_disposition' => array('label' => 'Base_weee_tax_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'base_weee_tax_row_disposition' => array('label' => 'Base_weee_tax_row_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_tax_refunded' => array('label' => 'Base tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_weee_tax_applied_amount' => array('label' => 'Base weee tax applied amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_weee_tax_applied_row_amnt' => array('label' => 'Base_weee_tax_applied_row_amnt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_weee_tax_disposition' => array('label' => 'Base_weee_tax_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'base_weee_tax_row_disposition' => array('label' => 'Base_weee_tax_row_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'created_at' => array('label' => 'Created_at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'description' => array('label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_amount' => array('label' => 'Discount_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_invoiced' => array('label' => 'Discount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_percent' => array('label' => 'Discount_percent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'discount_refunded' => array('label' => 'Discount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'discount_refunded' => array('label' => 'Discount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'event_id' => array('label' => 'Event_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'ext_order_item_id' => array('label' => 'Ext_order_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'ext_order_item_id' => array('label' => 'Ext_order_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'free_shipping' => array('label' => 'Free_shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_price' => array('label' => 'Gw_base_price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_price_invoiced' => array('label' => 'Gw_base_price_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_price_refunded' => array('label' => 'Gw_base_price_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_tax_amount' => array('label' => 'Gw_base_tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_tax_amount_invoiced' => array('label' => 'Gw_base_tax_amount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_base_tax_amount_refunded' => array('label' => 'Gw_base_tax_amount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_id' => array('label' => 'Gw_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_price' => array('label' => 'Gw_price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_price_invoiced' => array('label' => 'Gw_price_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_price_refunded' => array('label' => 'Gw_price_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_tax_amount' => array('label' => 'Gw_tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_tax_amount_invoiced' => array('label' => 'Gw_tax_amount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'gw_tax_amount_refunded' => array('label' => 'Gw_tax_amount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_price' => array('label' => 'Gw_base_price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_price_invoiced' => array('label' => 'Gw_base_price_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_price_refunded' => array('label' => 'Gw_base_price_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_tax_amount' => array('label' => 'Gw_base_tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_tax_amount_invoiced' => array('label' => 'Gw_base_tax_amount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_base_tax_amount_refunded' => array('label' => 'Gw_base_tax_amount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_id' => array('label' => 'Gw_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_price' => array('label' => 'Gw_price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_price_invoiced' => array('label' => 'Gw_price_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_price_refunded' => array('label' => 'Gw_price_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_tax_amount' => array('label' => 'Gw_tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_tax_amount_invoiced' => array('label' => 'Gw_tax_amount_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'gw_tax_amount_refunded' => array('label' => 'Gw_tax_amount_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'discount_tax_compensation_amount' => array('label' => 'Discount_tax_compensation_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'discount_tax_compensation_canceled' => array('label' => 'Discount_tax_compensation_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'discount_tax_compensation_invoiced' => array('label' => 'Discount_tax_compensation_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'discount_tax_compensation_refunded' => array('label' => 'Discount_tax_compensation_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'discount_tax_compensation_canceled' => array('label' => 'Discount_tax_compensation_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'discount_tax_compensation_invoiced' => array('label' => 'Discount_tax_compensation_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'discount_tax_compensation_refunded' => array('label' => 'Discount_tax_compensation_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'is_qty_decimal' => array('label' => 'Is_qty_decimal', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'is_virtual' => array('label' => 'Is_virtual', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'item_id' => array('label' => 'Item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'locked_do_invoice' => array('label' => 'Locked_do_invoice', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'locked_do_ship' => array('label' => 'Locked_do_ship', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'locked_do_invoice' => array('label' => 'Locked_do_invoice', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'locked_do_ship' => array('label' => 'Locked_do_ship', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'name' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'no_discount' => array('label' => 'No_discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'order_id' => array('label' => 'Order_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -324,12 +341,12 @@ class magentocore extends solution {
 						'price_incl_tax' => array('label' => 'Price_incl_tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'product_id' => array('label' => 'Product_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'product_type' => array('label' => 'Product_type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'qty_backordered' => array('label' => 'Qty_backordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'qty_backordered' => array('label' => 'Qty_backordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_canceled' => array('label' => 'Qty_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_invoiced' => array('label' => 'Qty_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_ordered' => array('label' => 'Qty_ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_refunded' => array('label' => 'Qty_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'qty_returned' => array('label' => 'Qty_returned', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'qty_returned' => array('label' => 'Qty_returned', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'qty_shipped' => array('label' => 'Qty_shipped', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						// 'quote_item_id' => array('label' => 'Quote_item_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_invoiced' => array('label' => 'Row_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -337,19 +354,19 @@ class magentocore extends solution {
 						'row_total_incl_tax' => array('label' => 'Row_total_incl_tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'row_weight' => array('label' => 'Row_weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'sku' => array('label' => 'Sku', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						// 'store_id' => array('label' => 'Store_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						'store_id' => array('label' => 'Store_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_amount' => array('label' => 'Tax_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'tax_before_discount' => array('label' => 'Tax_before_discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'tax_canceled' => array('label' => 'Tax_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'tax_before_discount' => array('label' => 'Tax_before_discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'tax_canceled' => array('label' => 'Tax_canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_invoiced' => array('label' => 'Tax_invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'tax_percent' => array('label' => 'Tax_percent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'tax_refunded' => array('label' => 'Tax_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'tax_refunded' => array('label' => 'Tax_refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'updated_at' => array('label' => 'Updated_at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'weee_tax_applied' => array('label' => 'Weee_tax_applied', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'weee_tax_applied_amount' => array('label' => 'Weee_tax_applied_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'weee_tax_applied_row_amount' => array('label' => 'Weee_tax_applied_row_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'weee_tax_disposition' => array('label' => 'Weee_tax_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-						'weee_tax_row_disposition' => array('label' => 'Weee_tax_row_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'weee_tax_applied' => array('label' => 'Weee_tax_applied', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'weee_tax_applied_amount' => array('label' => 'Weee_tax_applied_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'weee_tax_applied_row_amount' => array('label' => 'Weee_tax_applied_row_amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'weee_tax_disposition' => array('label' => 'Weee_tax_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+						// 'weee_tax_row_disposition' => array('label' => 'Weee_tax_row_disposition', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 						'weight' => array('label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
 					);
 					$this->fieldsRelate = array(
@@ -497,7 +514,7 @@ class magentocore extends solution {
 							$result['values'] = $subRecords;
 							
 						} else {
-							//BUG submodule = items, which throws an error because resultListe[items][0][items] doesn't exist
+							// when submodule = items, it throws an error because resultList[items][0][items] doesn't exist
 							$subRecords = $resultList['items'][0][$subModule];
 						}
 						// date ref is taken from the main module
@@ -513,21 +530,21 @@ class magentocore extends solution {
 					$subRecords[0] = $resultList;
 				}
 
-if(!empty($subRecords[0])){
-				// remove one dimension by replacing the dimension by __
-				$subRecords[0] = $this->removeDimension($subRecords[0]);	
-				foreach ($subRecords[0]  as $key => $value) {
-					if ($key == $fieldId) {
-						$result['values']['id'] = $value; 
+				if(!empty($subRecords[0])){
+					// remove one dimension by replacing the dimension by __
+					$subRecords[0] = $this->removeDimension($subRecords[0]);	
+					foreach ($subRecords[0]  as $key => $value) {
+						if ($key == $fieldId) {
+							$result['values']['id'] = $value; 
+						}
+						// test if the field exists because Magento doens't return empty fields
+						if(in_array($key, $param['fields'])) {
+							$result['values'][$key] = $value;
+						} else {
+							$result['values'][$key] = null;
+						}
 					}
-					// If test if the field exist because Magento doens't return empty field
-					if(in_array($key, $param['fields'])) {
-						$result['values'][$key] = $value;
-					} else {
-						$result['values'][$key] = null;
-					}
-				}
-}	
+				}	
 				$result['done'] = true;
 			}
 			else {
@@ -536,7 +553,7 @@ if(!empty($subRecords[0])){
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;			
+			$result['done'] = -1;	
 		}	
 		return $result;
 	} // read_last($param)

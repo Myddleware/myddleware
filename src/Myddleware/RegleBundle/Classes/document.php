@@ -25,12 +25,13 @@
 
 namespace Myddleware\RegleBundle\Classes;
 
-use Symfony\Bridge\Monolog\Logger; // Gestion des logs
-use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
+use Exception;
 use Doctrine\DBAL\Connection; // Connexion BDD
-use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // SugarCRM Myddleware
+use Symfony\Bridge\Monolog\Logger; // Gestion des logs
 use Myddleware\RegleBundle\Entity\DocumentData as DocumentDataEntity;
 use Myddleware\RegleBundle\Entity\DocumentRelationship as DocumentRelationship;
+use Myddleware\RegleBundle\Classes\tools as MyddlewareTools; // SugarCRM Myddleware
+use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
 
 class documentcore { 
 	
