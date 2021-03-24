@@ -642,28 +642,54 @@ class magentocore extends solution {
 					// Transform data from Magento to create document in Myddleware
 					if (!empty($subRecordsNoDimension)) {
 						foreach ($subRecordsNoDimension as $subRecordNoDimension) {
-							$row = array();							
+							$row = array();		
+
 							// Ajout de l'ID, $fieldId vaut "customer_id" pour le module "customer" par exemple
 							if (!empty($subRecordNoDimension[$fieldId])) {
 								$row['id'] = $subRecordNoDimension[$fieldId]; 
-							}
-							else {
+							} else {
 								throw new \Exception('Failed to find an Id for a record.');
 							}
+
 							foreach ($subRecordNoDimension as $key => $value) {
 								if ($key == $dateRefField) {
 									$row['date_modified'] = $value;
 									// Sauvegarde de la date de référence
-									if (	
-											empty($result['date_ref'])
-										 || $value > $result['date_ref']
-									) {
+									if (empty($result['date_ref']) || $value > $result['date_ref']) {
 										$result['date_ref'] = $value;
 									}
 								}
-								// Magento doens't return empty field
+//TODO ESTELLE - BOUCLER SUR LES PARAM FIELDS POUR CHAQUE SUBRECORD POUR COMPARER AVEC CE QUE MAGENTO
+
+					// echo $key;
+					// echo PHP_EOL;
+					// print_r( $param['fields']);
+					// Magento doens't return empty field
 								if(in_array($key, $param['fields'])) {
 									$row[$key] = $value;
+								} else {
+									// $row[$key] = '';
+								// 	echo 'key';
+								// 	echo PHP_EOL;
+								// 	echo $key;
+								// 	echo PHP_EOL;
+								// 	foreach($param['fields'] as $paramField){
+								// 			// $row[$paramField] = null;
+								// 			if($paramField === $key){
+								// 				echo 'if';
+								// 				echo PHP_EOL;
+								// 				echo $paramField;
+								// 				echo PHP_EOL;
+								// 				$row[$key] = $value;
+								// 			} else {
+								// 				echo 'else';
+								// 				echo PHP_EOL;
+								// 				echo $paramField;
+								// 				echo PHP_EOL;
+								// 				$row[$paramField] = null;
+								// 			}
+								// 	}
+									// $row[$key] = null;
 								}
 							}
 							$result['values'][$row['id']] = $row;
