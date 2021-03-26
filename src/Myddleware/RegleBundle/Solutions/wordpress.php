@@ -123,11 +123,9 @@ class wordpresscore extends solution {
           
             $result = [];
             $module = $param['module'];
-            $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
-          //il faudra rajouter le if < 
+			$result['count'] = 0;
             $dateRefWPFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
-          
 
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
@@ -143,55 +141,47 @@ class wordpresscore extends solution {
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
-           
-            $stop = false;
-            $count = 0;
-            $page = 1;
-//boucle infinie ???
-            // do {
-               
-                $client = HttpClient::create();
-                $response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module);
-                $statusCode = $response->getStatusCode();
-                $contentType = $response->getHeaders()['content-type'][0];
-                $content = $response->getContent();
-                $content = $response->toArray();
-                
-              
-                if(!empty($content)){             
-                    //used for complex fields that contain arrays
-                    $content = $this->convertResponse($param, $content);
-                   
-                    foreach($content as $record){
-                        //ATTENTION CETTE PARTIE DOIT ETRE CHANGEE CAR CEST UN TRAITEMENT FICTIF : on ne recoit aucune date dans users
-                       //de toute facon users ne renvoie qu'un seul record !! 
-                        if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
-                            $record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
-                        }
-
-                        if($dateRefWPFormat < $record['modified']){
-                            foreach($param['fields'] as $field){        
-                                $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
-                              
-                            }
-                            if($module === 'users'){
-                                // the data sent without an API key is different than the one in documentation
-                                // need to find a way to generate WP Rest API key / token
-                                $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-                            }else{
-                                $result['values'][$record['id']]['date_modified'] = $record['modified'];
-                            }
-                            
-                            $result['values'][$record['id']]['id'] = $record['id'];
-                            $count++;
-                        }
-                    }
-                }
-                $page++;
-                $result['count'] = $count;
+                         
+			$client = HttpClient::create();
+			$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module);
+			$statusCode = $response->getStatusCode();
+			$contentType = $response->getHeaders()['content-type'][0];
+			$content = $response->getContent();
+			$content = $response->toArray();
+			
+		  
+			if(!empty($content)){             
+				//used for complex fields that contain arrays
+				$content = $this->convertResponse($param, $content);
+			   
+				foreach($content as $record){
+					if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
+						$record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
+					}
+					if($record['modified'] > $dateRefWPFormat){				
+						foreach($param['fields'] as $field){        
+							$result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
+						  
+						}
+						if($module === 'users'){
+							// the data sent without an API key is different than the one in documentation
+							// need to find a way to generate WP Rest API key / token
+							$result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+						}else{
+							$result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($record['modified']);
+						}
+						
+						if ( $result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
+							$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
+						}
+						$result['values'][$record['id']]['id'] = $record['id'];
+						$result['count']++;
+					}
+				}
+			}
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
-        }
+        }		
         return $result;
     }
 
@@ -265,18 +255,15 @@ class wordpresscore extends solution {
 
 
     // Convert date to Myddleware format 
-	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+	// 2020-07-08T12:33:06 to 2020-07-08 12:33:06
 	protected function dateTimeToMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
-		// We save the UTC date in Myddleware
-		$dto->setTimezone(new \DateTimeZone('UTC'));
 		return $dto->format("Y-m-d H:i:s");
 	}
 	
     //convert from Myddleware format to Woocommerce format
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
-		// Return date to UTC timezone
 		return $dto->format('Y-m-d\TH:i:s');
 	}
 
