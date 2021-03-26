@@ -566,7 +566,7 @@ class databasecore extends solution {
                         if (empty($errorInfo[2])) {
                             $errorInfo[2] = implode(', ', $errorInfo);
                         }
-                        throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                        throw new \Exception('Create: Prepare '.$errorInfo[2].' . Query : '.$sql);
                     }
 
                     $exec = $q->execute();
@@ -575,7 +575,7 @@ class databasecore extends solution {
                         if (empty($errorInfo[2])) {
                             $errorInfo[2] = implode(', ', $errorInfo);
                         }
-						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+						throw new \Exception('Create: Execute '.$errorInfo[2].' . Query : '.$sql);
 					}
 					
 					// If the target reference field isn't in data sent
