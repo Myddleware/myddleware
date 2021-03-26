@@ -561,7 +561,7 @@ class databasecore extends solution {
 					$sql = $this->queryValidation($param, 'create', $sql);	
 					
 					$q = $this->pdo->prepare($sql);
-                    if (!$q) {
+                    if ($q === false) {
                         $errorInfo = $this->pdo->errorInfo();
                         if (empty($errorInfo[2])) {
                             $errorInfo[2] = implode(', ', $errorInfo);
@@ -570,7 +570,7 @@ class databasecore extends solution {
                     }
 
                     $exec = $q->execute();
-					if (!$exec) {
+					if ($exec === false) {
 						$errorInfo = $this->pdo->errorInfo();
                         if (empty($errorInfo[2])) {
                             $errorInfo[2] = implode(', ', $errorInfo);
