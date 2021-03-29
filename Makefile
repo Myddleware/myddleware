@@ -77,6 +77,8 @@ debug: init
 dev: init
 	@docker-compose run --rm myddleware bash -c "cd var/logs; rm -f vtigercrm.log; touch vtigercrm.log; chmod 777 vtigercrm.log"
 	@docker-compose up -d
+	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh
+	@docker-compose exec vtiger2 bash dev/script/vtiger-install.sh
 
 prod: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans
