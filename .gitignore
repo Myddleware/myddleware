@@ -82,6 +82,7 @@ NOTES.md
 .pwd.var
 /opencrmitalia_modules
 /vtiger.json
+/modules_local/
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/database.php
