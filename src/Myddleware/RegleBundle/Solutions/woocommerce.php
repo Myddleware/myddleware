@@ -46,6 +46,8 @@ class woocommercecore extends solution {
                                                       'parent_id' => 'order_id')
                             );
                       
+    protected $customFields = array();
+
     //Log in form parameters
     public function getFieldsLogin()
     {
@@ -123,6 +125,25 @@ class woocommercecore extends solution {
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
 			}
+            // include custom fields that could have been added with a plugin 
+            // (for instance Checkout Field Editor for WooCommerce allows you to create custom fields for your order forms)
+            // the custom fields need to be added manually in src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
+            if(!empty($this->customFields)){
+                foreach($this->customFields as $customModuleKey => $customModule){
+                    foreach($customModule as $customField){
+                        if($module === $customModuleKey){
+                            $this->moduleFields[$customField] = array(      
+                                                                    'label'=> ucfirst($customField),
+                                                                    'type' => 'varchar(255)',
+                                                                    'type_bdd' => 'varchar(255)',
+                                                                    'required'=> 0
+                                                                );
+                         
+                    
+                        }
+                    }
+                }
+            }
 			return $this->moduleFields;
 
         } catch (\Exception $e) {		
@@ -152,10 +173,7 @@ class woocommercecore extends solution {
                         $query = strval('/'.$value);
 					} else {
 						// in case of query on sub module, we check if that the search field is the parent id
-						if(
-								!empty($this->subModules[$param['module']])
-							AND $this->subModules[$param['module']]['parent_id'] == $key
-						){
+						if( !empty($this->subModules[$param['module']]) AND $this->subModules[$param['module']]['parent_id'] == $key) {
 							$query = strval('/'.$value);
 						}
 					}
@@ -203,6 +221,20 @@ class woocommercecore extends solution {
                         //either we read all from a date_ref or we read based on a query (readrecord)
                         if($dateRefWooFormat < $record->date_modified || (!empty($query))){
                             foreach($param['fields'] as $field){
+                                    // we handle custom fields here, such as for instance fields added with a woocommerce plugin like Checkout Field Editor 
+                                    // this requires to have src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
+                                    foreach($this->customFields as $customModuleKey => $customModule){
+                                        foreach($customModule as $customFieldKey => $customField){
+                                            if($field === $customField){
+                                                foreach($record->meta_data as $meta_data){
+                                                    if($meta_data->key === $customField ){
+                                                        $record->$field =  $meta_data->value; 
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+  
                                 // If we have a 2 dimensional array we break it down  
                                 $fieldStructure = explode('__',$field);
                                 $fieldGroup = '';
