@@ -80,6 +80,7 @@ hosts
 NOTES.md
 *.ovpn
 .pwd.var
+modules_local/
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/database.php
