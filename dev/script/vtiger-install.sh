@@ -267,6 +267,3 @@ echo "Updating ...DONE."
 
 echo ""
 echo "Done."
-echo ""
-echo " --> Open <http://localhost:${vtiger_port}>"
-echo ""
