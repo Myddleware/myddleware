@@ -149,6 +149,26 @@ input[type="text"] {
   max-height: 870px;
   overflow: auto;
 }
+.manual-simulation,
+.simulation-buttons {
+  margin-top: 3vh;
+  margin-left: 3vw;
+  margin-right: 3vw;
+  display: flex;
+  justify-content: space-around;
+  max-width: 50vw;
+}
+.manual-input {
+  max-width: 15vw;
+}
+.btn-success {
+  background-color: #CCC31C !important;
+  border-color: #CCC31C !important;
+}
+.btn-success:hover {
+  background-color: #D6CF49 !important;
+  border-color: #D6CF49 !important;
+}
 
 .ui-timepicker-div .ui-widget-header {
   margin-bottom: 8px;

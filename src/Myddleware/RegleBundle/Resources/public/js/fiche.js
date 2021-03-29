@@ -22,12 +22,12 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-$( document ).ready(function() {
+$(function() {
 	// ----------------------------- Fiche rule
 
 	//$( ".mapping p" ).hide();
 
-	$( ".mapping > .title" ).click(function() {
+	$( ".mapping > .title" ).on('click', function() {
 		$('p',$( this ).parent()).toggle( "fadein" );
 	});
 	
@@ -52,7 +52,7 @@ $( document ).ready(function() {
 	
 // Paramètres -------------------------------------------------------------	
 	
-	$( "#activerule" ).click(function() {	
+	$( "#activerule" ).on('click', function() {	
 		$.ajax({
 			type: "POST",
 			url: path_fiche_update,						
@@ -91,7 +91,7 @@ $( document ).ready(function() {
         closeText: 'Fermer'		
 	});	
 	
-	$( '#saveRuleParams' ).click(function() {	
+	$( '#saveRuleParams' ).on('click', function() {	
 		loading_img = $('#myd_loading_img', '.myd_loading');	
 		$.ajax({
 			type: "POST",
@@ -123,7 +123,7 @@ $( document ).ready(function() {
 		});	
 	});
 	
-	$( '#simuleRuleFluxAction' ).click(function() {
+	$( '#simuleRuleFluxAction' ).on('click', function() {
 		simule_img = $('#simuleRuleFluxLoading_img', '.simuleRuleFluxLoading');	
 		$.ajax({
 			type: "GET",

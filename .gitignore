@@ -52,28 +52,5 @@
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
 
-# IDEs
-.idea/
-.vscode/
-
-# Deployment & DevOps
-.temp/
-deploy_key
-deploy_key.pub
-uat.pem
-/*.retry
-/CLONE/
-/var/databases/*
-!var/databases/.gitkeep
-/var/openvpn/*
-!var/openvpn/.gitkeep
-/var/mysql/*
-!var/mysql/.gitkeep
-/var/vpn/*
-!var/vpn/.gitkeep
-
-# Secrets
-.env
-hosts
-NOTES.md
-*.ovpn
+# VSCode 
+/.vscode 
