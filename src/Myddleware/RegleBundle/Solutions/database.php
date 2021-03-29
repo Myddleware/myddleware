@@ -561,15 +561,22 @@ class databasecore extends solution {
 					$sql = $this->queryValidation($param, 'create', $sql);	
 					
 					$q = $this->pdo->prepare($sql);
-                    if (!$q) {
+                    if ($q === false) {
                         $errorInfo = $this->pdo->errorInfo();
-                        throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
+                        throw new \Exception('Create: Prepare '.$errorInfo[2].' . Query : '.$sql);
                     }
 
+                    //$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
                     $exec = $q->execute();
-					if (!$exec) {
+					if ($exec === false) {
 						$errorInfo = $this->pdo->errorInfo();
-						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
+						throw new \Exception('Create: Execute '.$errorInfo[2].' . Query : '.$sql);
 					}
 					
 					// If the target reference field isn't in data sent

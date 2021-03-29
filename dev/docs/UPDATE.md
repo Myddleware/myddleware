@@ -7,6 +7,7 @@ eseguire i seguenti comandi. (La cartella myhost puù variare da cliente a clien
 ```
 sudo su
 cd /home/(myhost)/myddleware
+make down
 git pull
 ```
 

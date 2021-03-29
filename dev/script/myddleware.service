@@ -8,8 +8,8 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=/etc/myddleware/
-ExecStart=bash /etc/myddleware/docker-compose.sh
-TimeoutStartSec=5
+ExecStart=/bin/bash /etc/myddleware/docker-compose.sh
+TimeoutStartSec=60
 
 [Install]
 WantedBy=multi-user.target

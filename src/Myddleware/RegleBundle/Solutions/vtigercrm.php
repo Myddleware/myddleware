@@ -118,12 +118,10 @@ class vtigercrmcore extends solution
      * @var string[]
      */
     protected $inventoryModules = [
-        "Invoice",
-        "SalesOrder",
-        "Quotes",
-        "PurchaseOrder",
-        "GreenTimeControl",
-        "DDT",
+        'Invoice',
+        'SalesOrder',
+        'Quotes',
+        'PurchaseOrder'
     ];
 
     /**
@@ -131,9 +129,18 @@ class vtigercrmcore extends solution
      *
      * @var string[]
      */
-    protected $allowParentRelationship = array('Quotes', 'SalesOrder');
+    protected $allowParentRelationship = [
+        'Invoice',
+        'Quotes',
+        'SalesOrder',
+        'PurchaseOrder'
+    ];
 
-    /** @var array $moduleList */
+    /**
+     * Current module list.
+     *
+     * @var array $moduleList
+     */
     protected $moduleList;
 
     /**
