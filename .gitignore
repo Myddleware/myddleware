@@ -80,6 +80,8 @@ hosts
 NOTES.md
 *.ovpn
 .pwd.var
+/opencrmitalia_modules
+/vtiger.json
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/database.php
