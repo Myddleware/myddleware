@@ -25,6 +25,7 @@
 
  namespace Myddleware\RegleBundle\Solutions;
 
+use Exception;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -141,47 +142,61 @@ class wordpresscore extends solution {
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
-                         
-			$client = HttpClient::create();
-			$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module);
-			$statusCode = $response->getStatusCode();
-			$contentType = $response->getHeaders()['content-type'][0];
-			$content = $response->getContent();
-			$content = $response->toArray();
-			
-		  
-			if(!empty($content)){             
-				//used for complex fields that contain arrays
-				$content = $this->convertResponse($param, $content);
-			   
-				foreach($content as $record){
-					if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
-						$record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
-					}
-					if($record['modified'] > $dateRefWPFormat){				
-						foreach($param['fields'] as $field){        
-							$result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
-						  
-						}
-						if($module === 'users'){
-							// the data sent without an API key is different than the one in documentation
-							// need to find a way to generate WP Rest API key / token
-							$result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-						}else{
-							$result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($record['modified']);
-						}
-						
-						if ( $result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
-							$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
-						}
-						$result['values'][$record['id']]['id'] = $record['id'];
-						$result['count']++;
-					}
-				}
-			}
+             
+            $stop = false;
+            $page = 1;
+            $count = 0;
+            do {
+
+                $client = HttpClient::create();
+                $response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->defaultLimit.'&page='.$page);
+                $statusCode = $response->getStatusCode();
+                $contentType = $response->getHeaders()['content-type'][0];
+                $content = $response->getContent();
+                $content = $response->toArray();
+              
+                if(!empty($content)){
+                    $currentCount = 0;
+                    //used for complex fields that contain arrays
+                    $content = $this->convertResponse($param, $content);
+                
+                    foreach($content as $record){
+                        $currentCount++;
+                        if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
+                            $record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
+                        }
+                        if($record['modified'] > $dateRefWPFormat){				
+                            foreach($param['fields'] as $field){        
+                                $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
+                            
+                            }
+                            if($module === 'users'){
+                                // the data sent without an API key is different than the one in documentation
+                                // need to find a way to generate WP Rest API key / token
+                                $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+                            }else{
+                                $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($record['modified']);
+                            }
+                            
+                            if ( $result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
+                                $result['date_ref'] = $result['values'][$record['id']]['date_modified'];
+                            }
+                            $result['values'][$record['id']]['id'] = $record['id'];
+                            $result['count']++;
+                            $count++;
+                        }
+                    }
+                } else {
+                    $stop = true;
+                }
+                $page++;
+    
+            } while(!$stop && $currentCount === $this->defaultLimit) ;
+
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
         }		
+       
         return $result;
     }
 
