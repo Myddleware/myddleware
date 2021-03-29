@@ -1,8 +1,8 @@
-name: woocommerce_vtigercrm_customers_orders_products
-description: 'Send Woocommerce customers, orders & products into Vtiger'
+name: woocommerce_vtigercrm_customers_salesorders_products
+description: 'Send Woocommerce customers, sales orders & products into Vtiger'
 rules:
     -
-        name: Products
+        name: 'Products'
         nameSlug: products
         sourceSolution: woocommerce
         targetSolution: vtigercrm
@@ -21,7 +21,7 @@ rules:
             - { name: datereference, value: '1970-01-01 00:00:00' }
             - { name: mode, value: '0' }
     -
-        name: Accounts
+        name: 'Accounts'
         nameSlug: accounts
         sourceSolution: woocommerce
         targetSolution: vtigercrm
@@ -68,12 +68,12 @@ rules:
             - { name: datereference, value: '1970-01-01 00:00:00' }
             - { name: mode, value: '0' }
     -
-        name: Quotes
-        nameSlug: quotes
+        name: 'Sales Order'
+        nameSlug: salesorder
         sourceSolution: woocommerce
         targetSolution: vtigercrm
         sourceModule: orders
-        targetModule: Quotes
+        targetModule: SalesOrder
         fields:
             - { target: bill_street, source: billing__address_1;billing__address_2, formula: '{billing__address_1}." ".{billing__address_2}' }
             - { target: ship_street, source: shipping__address_1;shipping__address_2, formula: '({shipping__address_1} == "" ? ({shipping__address_2} == "" ? "No address" : {shipping__address_1}) : {shipping__address_1}." ".{shipping__address_2})' }
@@ -89,11 +89,12 @@ rules:
             - { target: ship_country, source: shipping__country, formula: null }
             - { target: ship_state, source: shipping__state, formula: null }
             - { target: assigned_user_id, source: my_value, formula: '1' }
-            - { target: quotestage, source: my_value, formula: '"Created"' }
+            - { target: invoicestatus, source: my_value, formula: '"Paid"' }
+            - { target: sostatus, source: my_value, formula: '"Approved"' }
             - { target: hdnTaxType, source: my_value, formula: '"individual"' }
         relationships:
             - { fieldNameSource: customer_id, fieldNameTarget: account_id, fieldId: accounts, parent: false }
-            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: Myddleware_element_id, fieldId: line_items, parent: true }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: order_id, fieldId: line_items, parent: true }
         params:
             - { name: description, value: '' }
             - { name: limit, value: '100' }
