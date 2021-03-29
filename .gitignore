@@ -52,24 +52,5 @@
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
 
-# IDEs
-.idea/
-.vscode/
-
-# Deployment & DevOps
-.temp/
-deploy_key
-deploy_key.pub
-uat.pem
-/*.retry
-/CLONE/
-/var/databases/filebrowser.db
-
-# Secrets
-.env
-hosts
-NOTES.md
-
-# OCI:START
-!/src/Myddleware/RegleBundle/Custom/Solutions/microsoftsql.php
-# OCI:END
+# VSCode 
+/.vscode 

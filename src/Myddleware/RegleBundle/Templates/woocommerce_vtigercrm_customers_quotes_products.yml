@@ -1,0 +1,102 @@
+name: woocommerce_vtigercrm_customers_quotes_products
+description: 'Send Woocommerce customers, quotes & products into Vtiger'
+rules:
+    -
+        name: Products
+        nameSlug: products
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: products
+        targetModule: Products
+        fields:
+            - { target: productname, source: name, formula: null }
+            - { target: description, source: description, formula: null }
+            - { target: unit_price, source: price, formula: null }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+            - { target: discontinued, source: my_value, formula: '1' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Accounts
+        nameSlug: accounts
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: customers
+        targetModule: Accounts
+        fields:
+            - { target: accountname, source: first_name;last_name, formula: '{first_name}.'' ''.{last_name}' }
+            - { target: bill_city, source: billing__city, formula: null }
+            - { target: bill_code, source: billing__postcode, formula: null }
+            - { target: bill_country, source: billing__country, formula: null }
+            - { target: bill_state, source: billing__state, formula: null }
+            - { target: bill_street, source: billing__address_1;billing__address_2, formula: '{billing__address_1}." ".{billing__address_2}' }
+            - { target: email1, source: email, formula: null }
+            - { target: phone, source: billing__phone, formula: null }
+            - { target: ship_city, source: shipping__city, formula: null }
+            - { target: ship_code, source: shipping__postcode, formula: null }
+            - { target: ship_country, source: shipping__country, formula: null }
+            - { target: ship_state, source: shipping__state, formula: null }
+            - { target: ship_street, source: shipping__address_1;shipping__address_2, formula: '{shipping__address_1}." ".{shipping__address_2}' }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+            - { target: accounttype, source: my_value, formula: '"Customer"' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: accountname }
+    -
+        name: 'Line Items'
+        nameSlug: line_items
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: line_items
+        targetModule: LineItem
+        fields:
+            - { target: quantity, source: quantity, formula: null }
+            - { target: listprice, source: price, formula: null }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: productid, fieldId: products, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Quotes
+        nameSlug: quotes
+        sourceSolution: woocommerce
+        targetSolution: vtigercrm
+        sourceModule: orders
+        targetModule: Quotes
+        fields:
+            - { target: bill_street, source: billing__address_1;billing__address_2, formula: '{billing__address_1}." ".{billing__address_2}' }
+            - { target: ship_street, source: shipping__address_1;shipping__address_2, formula: '({shipping__address_1} == "" ? ({shipping__address_2} == "" ? "No address" : {shipping__address_1}) : {shipping__address_1}." ".{shipping__address_2})' }
+            - { target: subject, source: number, formula: '"Woo commerce order ".{number}' }
+            - { target: bill_city, source: billing__city, formula: null }
+            - { target: bill_code, source: billing__postcode, formula: null }
+            - { target: bill_country, source: billing__country, formula: null }
+            - { target: bill_state, source: billing__state, formula: null }
+            - { target: hdnGrandTotal, source: total, formula: null }
+            - { target: pre_tax_total, source: total_tax, formula: null }
+            - { target: ship_city, source: shipping__city, formula: null }
+            - { target: ship_code, source: shipping__postcode, formula: null }
+            - { target: ship_country, source: shipping__country, formula: null }
+            - { target: ship_state, source: shipping__state, formula: null }
+            - { target: assigned_user_id, source: my_value, formula: '1' }
+            - { target: quotestage, source: my_value, formula: '"Created"' }
+            - { target: hdnTaxType, source: my_value, formula: '"individual"' }
+        relationships:
+            - { fieldNameSource: customer_id, fieldNameTarget: account_id, fieldId: accounts, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: Myddleware_element_id, fieldId: line_items, parent: true }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
