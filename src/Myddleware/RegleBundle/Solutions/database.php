@@ -405,9 +405,11 @@ class databasecore extends solution {
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);
             $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            //$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            if ($pdoDriverName == 'dblib') {
+                $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            }
 			$exec = $q->execute();
-			if (!$exec) {
+			if ($exec === false) {
 				$errorInfo = $this->pdo->errorInfo();
 				if (empty($errorInfo[2])) {
                     $errorInfo[2] = '['.$pdoDriverName.':'.$exec.'] '.implode(', ', $errorInfo);
