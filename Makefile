@@ -47,7 +47,7 @@ dump-autoload: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar dump-autoload --no-scripts
 
 require-vtiger-client:
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.24 -vvvv --ignore-platform-reqs --no-scripts
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.25 -vvvv --ignore-platform-reqs --no-scripts
 
 require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
