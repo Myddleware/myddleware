@@ -410,7 +410,7 @@ class databasecore extends solution {
 			if (!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				if (empty($errorInfo[2])) {
-                    $errorInfo[2] = '['.$pdoDriverName.'] '.implode(', ', $errorInfo);
+                    $errorInfo[2] = '['.$pdoDriverName.':'.$exec.'] '.implode(', ', $errorInfo);
                 }
 				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
