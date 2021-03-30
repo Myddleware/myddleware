@@ -407,7 +407,7 @@ class databasecore extends solution {
             $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
             //$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 			$exec = $q->execute();
-			if ($exec === null) {
+			if (!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				if (empty($errorInfo[2])) {
                     $errorInfo[2] = '['.$pdoDriverName.'] '.implode(', ', $errorInfo);
