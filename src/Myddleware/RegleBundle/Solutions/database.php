@@ -524,7 +524,7 @@ class databasecore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {	
-		try {			
+		try {		
 			// Get the target reference field
 			if(!isset($param['ruleParams']['targetFieldId'])) {
 				throw new \Exception('targetFieldId has to be specified for the data creation.');
@@ -643,7 +643,7 @@ class databasecore extends solution {
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
 											'id' => $idTarget,
-											'error' => ($q->rowCount() ? false : 'There is no error but 0 row has been updated.')
+											'error' => ($q->rowCount() ? false : 'There is no error but 0 rows have been updated')
 									);									
 				}
 				catch (\Exception $e) {
@@ -719,7 +719,7 @@ class databasecore extends solution {
 	
 	// Function to escape characters 
 	protected function escape($value) {
-		return $value;
+		return str_replace("'", "''", $value);
 	}
 	
 	// Get the strings which can identify what field is an id in the table

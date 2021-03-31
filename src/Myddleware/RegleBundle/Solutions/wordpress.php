@@ -132,7 +132,6 @@ class wordpresscore extends solution {
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
             } 
-
             // Remove Myddleware's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
@@ -158,8 +157,8 @@ class wordpresscore extends solution {
                 if(!empty($content)){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
-                    $content = $this->convertResponse($param, $content);
-                
+                    $content = $this->convertResponse($param, $content);     
+
                     foreach($content as $record){
                         $currentCount++;
                         if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
@@ -174,7 +173,7 @@ class wordpresscore extends solution {
                                 // the data sent without an API key is different than the one in documentation
                                 // need to find a way to generate WP Rest API key / token
                                 $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-                            }else{
+                            }else {
                                 $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($record['modified']);
                             }
                             
@@ -195,13 +194,12 @@ class wordpresscore extends solution {
 
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
-        }		
-       
+        }    
         return $result;
     }
 
     //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
-    public function convertResponse($param, $response) {
+    protected function convertResponse($param, $response) {
              $newResponse = array();
              if(!empty($response)){
                foreach($response as $key => $record){  
@@ -211,34 +209,31 @@ class wordpresscore extends solution {
                                 $newSubFieldName = $fieldName.'__'.$subFieldKey;
                                 if(is_array($subFieldValue)){
                                     if(array_key_exists(0, $subFieldValue)){
-                                        $newResponse[$key][$newSubFieldName] = $subFieldValue[0];  
-                                        if($newSubFieldName === 'event_informations__mep_event_more_date'){
+                                        if ($param['module'] != 'mep_event_more_date' ) {
+                                            $newResponse[$key][$newSubFieldName] = $subFieldValue[0];  
+                                        } elseif ($newSubFieldName === 'event_informations__mep_event_more_date'){
                                             $json = $subFieldValue[0];
                                             $json = unserialize($json);
-                                            $moreDatesArray = $json;
+                                            $moreDatesArray = $json;  
                                             foreach($moreDatesArray as $subSubRecordKey => $subSubRecord){
                                                 // we need to manually add the event id here
-                                                 $eventID = $record['id'];
-                                                 $subSubRecord['event_id'] = $eventID;
-                                                foreach($subSubRecord as $subSubFieldName => $subSubFieldValue){
-                                                    $newResponse[$key][$subSubFieldName] = $subSubFieldValue;
-                                                }
-                                            }
-
-                                          
+                                                $eventID = $record['id'];
+                                                $moreDatesArray[$subSubRecordKey]['event_id'] = $eventID;
+                                                $moreDatesArray[$subSubRecordKey]['id'] = $eventID.'_'.$subSubRecordKey;
+                                                $moreDatesArray[$subSubRecordKey]['modified'] = $record['modified'];
+                                            } 
+                                            $newResponse = array_merge($newResponse, $moreDatesArray);              
                                         }
                                     }
-                                } else {
+                                } elseif($param['module'] != 'mep_event_more_date') {
                                     $newResponse[$key][$newSubFieldName] = $subFieldValue; 
                                 }
                             }
-                        } else{
+                        } elseif($param['module'] != 'mep_event_more_date'){
                             $newResponse[$key][$fieldName] = $fieldValue;
                         }
                     }    
                 }  
-    
-           
             return $newResponse;
         }
         return $response;

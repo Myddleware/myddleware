@@ -217,6 +217,7 @@ $moduleFields = array (
         '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
     'mep_event_more_date' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_start_date' => array( 'label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_start_time' => array( 'label' => 'Start time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_end_date' => array( 'label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
