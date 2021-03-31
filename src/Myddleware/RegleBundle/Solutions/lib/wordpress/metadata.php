@@ -163,7 +163,6 @@ $moduleFields = array (
         'mep_org' => array( 'label' => 'MEP Organizers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         // 'event_informations' => array( 'label' => 'Event informations', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___edit_lock' => array( 'label' => 'Event info : edit lock', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'event_informations__link_wc_product' => array( 'label' => 'Event info : link_wc_product', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__check_if_run_once' => array( 'label' => 'Event info : check if run once', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___edit_last' => array( 'label' => 'Event info : edit last', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__mep_available_seat' => array( 'label' => 'Event info : mep available seat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -293,8 +292,10 @@ $moduleFields = array (
 
 $fieldsRelate = array(
     'mep_events' => array(
-        'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+        'mep_cat__0' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'mep_org__0' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'event_informations__link_wc_product' => array( 'label' => 'Event info : product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        
     ),
     'mep_event_more_date' => array(
         'event_id' =>  array('label' => 'MEP Event ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)

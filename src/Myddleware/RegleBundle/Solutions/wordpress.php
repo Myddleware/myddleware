@@ -35,7 +35,7 @@ class wordpresscore extends solution {
     protected $apiSuffix = '/wp-json/wp/v2/';
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
-    protected $delaySearch2 = '-1 week';
+
   	// Module without reference date
 	protected $moduleWithoutReferenceDate = array('users');
    
@@ -121,12 +121,14 @@ class wordpresscore extends solution {
 
     public function read($param){
         try {
-          
             $result = [];
             $module = $param['module'];
-            $result['date_ref'] = $param['ruleParams']['datereference'];
+            $result['date_ref'] = $param['date_ref'];
 			$result['count'] = 0;
-            $dateRefWPFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
+			// Change the date format only for module with a date as a reference
+			if (!in_array($module, $this->moduleWithoutReferenceDate)) {
+				$dateRefWPFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
+			}
 
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
@@ -146,13 +148,23 @@ class wordpresscore extends solution {
             $page = 1;
             $count = 0;
             do {
-
                 $client = HttpClient::create();
-                $response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->defaultLimit.'&page='.$page);
-                $statusCode = $response->getStatusCode();
-                $contentType = $response->getHeaders()['content-type'][0];
-                $content = $response->getContent();
-                $content = $response->toArray();
+				// In case a specific record is requested
+				if (!empty($param['query']['id'])) {
+					$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'/'.$param['query']['id']);
+					$statusCode = $response->getStatusCode();
+					$contentType = $response->getHeaders()['content-type'][0];
+					$content2 = $response->getContent();
+					$content2 = $response->toArray();
+					// Add a dimension to fit with the rest of the method
+					$content[] = $content2;
+				} else {
+					$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->defaultLimit.'&page='.$page);
+					$statusCode = $response->getStatusCode();
+					$contentType = $response->getHeaders()['content-type'][0];
+					$content = $response->getContent();
+					$content = $response->toArray();
+				}
               
                 if(!empty($content)){
                     $currentCount = 0;
@@ -161,26 +173,39 @@ class wordpresscore extends solution {
 
                     foreach($content as $record){
                         $currentCount++;
-                        if($module === 'users' || $module === 'mep_cat' || $module === 'mep_org'){
-                            $record['modified'] =  date('Y-m-d H:i:s', strtotime($this->delaySearch2));
-                        }
-                        if($record['modified'] > $dateRefWPFormat){				
-                            foreach($param['fields'] as $field){        
+						// If the reference is a date we check the date_modified field otherwise we check the id which is an integer
+                        if(
+							(
+									in_array($module, $this->moduleWithoutReferenceDate)
+								AND $record['id'] > $param['date_ref']
+							)
+							OR (
+									!in_array($module, $this->moduleWithoutReferenceDate)
+								AND $record['modified'] > $dateRefWPFormat
+							)
+						) {
+                            foreach($param['fields'] as $field){
                                 $result['values'][$record['id']][$field] = (!empty($record[$field]) ? $record[$field] : '');
-                            
                             }
-                            if($module === 'users'){
+                            if(in_array($module, $this->moduleWithoutReferenceDate)){
                                 // the data sent without an API key is different than the one in documentation
                                 // need to find a way to generate WP Rest API key / token
-                                $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+                                $result['values'][$record['id']]['date_modified'] = date('Y-m-d H:i:s');
                             }else {
                                 $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($record['modified']);
                             }
-                            
-                            if ( $result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
-                                $result['date_ref'] = $result['values'][$record['id']]['date_modified'];
-                            }
                             $result['values'][$record['id']]['id'] = $record['id'];
+                            
+							// No reference date for this module so we store the ids in the reference field
+							if(in_array($module, $this->moduleWithoutReferenceDate)){
+								if ($record['id'] > $result['date_ref']) {
+									$result['date_ref'] =  $record['id'];
+								}
+							}elseif ( $result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
+                                if ($result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
+									$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
+								}
+                            }
                             $result['count']++;
                             $count++;
                         }
@@ -194,7 +219,7 @@ class wordpresscore extends solution {
 
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
-        }    
+        }
         return $result;
     }
 
@@ -243,7 +268,11 @@ class wordpresscore extends solution {
         $result = [];
         try{
             //for simulation purposes, we create a new date_ref in the past
-            $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+			if (in_array($param['module'], $this->moduleWithoutReferenceDate)) {
+				$param['date_ref'] = 0;
+			} else {
+				$param['date_ref'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
+			}
             $read = $this->read($param);
             if(!empty($read['error'])){
                 $result['error'] = $read['error'];
@@ -277,9 +306,8 @@ class wordpresscore extends solution {
 		return $dto->format('Y-m-d\TH:i:s');
 	}
 
-    // Permet d'indiquer le type de rÃ©fÃ©rence, si c'est une date (true) ou un texte libre (false)
+    // Some module hasn't any reference date. In this case, we use the record id as reference
     public function referenceIsDate($module) {
-        // Le module users n'a pas de date de rÃ©fÃ©rence. On utilise donc l'ID comme rÃ©fÃ©rence
         if(in_array($module, $this->moduleWithoutReferenceDate)){
             return false;
         }
