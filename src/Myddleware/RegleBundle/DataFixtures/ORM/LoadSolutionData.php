@@ -68,7 +68,7 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'wordpress',		'active' => 1,'source' => 1,'target' => 1)
 
 							);
- 
+
     public function load(ObjectManager $manager){
         $this->manager = $manager; 
         $this->generateEntities(); 

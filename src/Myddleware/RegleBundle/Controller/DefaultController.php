@@ -1209,7 +1209,7 @@ class DefaultControllerCore extends Controller
                         'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                         'fields' => $sourcesfields,
                         'ruleParams' => $ruleParams
-                    ));
+                    )); 
                 } else {
                         // Get source data with query on specific record ID
                         $source = $solution_source->read_last(array(
