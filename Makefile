@@ -4,6 +4,7 @@ init:
 	@[ -f hosts ] || touch hosts
 	@[ -f .env ] || cp .env.example .env
 	@[ -f scheduler.sh ] || touch scheduler.sh
+	@[ -f crontab.client ] || touch crontab.client
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f database.client.php ] || cp  ../../../../../var/solutions/database.client.php database.client.php
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mautic.client.php ] || cp  ../../../../../var/solutions/mautic.client.php mautic.client.php
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f microsoftsql.client.php ] || cp  ../../../../../var/solutions/microsoftsql.client.php microsoftsql.client.php
@@ -33,6 +34,11 @@ down:
 
 build:
 	@docker-compose build myddleware
+
+push:
+	@docker login
+	@docker build -t opencrmitalia/myddleware .
+	@docker push opencrmitalia/myddleware
 
 install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts

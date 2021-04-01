@@ -78,6 +78,7 @@ docker-compose.override.yml.old
 .env
 hosts
 /scheduler.sh
+/crontab.client
 NOTES.md
 *.ovpn
 .pwd.var
