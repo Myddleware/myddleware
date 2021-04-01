@@ -942,7 +942,6 @@ class DefaultControllerCore extends Controller
                                 return new JsonResponse(["success" => true]); // Connexion valide
                             } else {
                                 $sessionService->removeParamRule($ruleKey);
-
                                 return new JsonResponse(["success" => false, 'message' => $this->get('translator')->trans($result['error'])]);// Erreur de connexion
                             }
                         } else {
