@@ -78,11 +78,7 @@ class microsoftsqlcore extends database
 		return " OFFSET ".$param['offset']." ROWS FETCH NEXT ".$param['limit']." ROWS ONLY";
 	}
 	
-	// Function to escape characters 
-	protected function escape($value) {
-		return str_replace("'", "''", $value);
-	}
-	
+
 	protected function get_query_select_header($param, $method) {
 		// The limit is managed with TOP if we don't have the offset parameter
 		if ($method == 'read_last') {
