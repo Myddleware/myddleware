@@ -197,7 +197,14 @@ class opencrmitaliacore extends vtigercrm
         $id = [];
         foreach ($describe['result']['result']['columns'] as $field) {
             if ($field['isprimarykey']) {
-                $id[] = $create['result']['record'][$field['paramname']];
+                $keyPart = '0';
+                $record = $create['result']['record'];
+                if (isset($record[$field['columnname']]) && $record[$field['columnname']]) {
+                    $keyPart = $record[$field['columnname']];
+                } elseif (isset($record[$field['paramname']]) && $record[$field['paramname']]) {
+                    $keyPart = $record[$field['paramname']];
+                }
+                $id[] = $keyPart;
             }
         }
 
