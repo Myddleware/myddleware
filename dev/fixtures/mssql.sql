@@ -16,7 +16,7 @@ CREATE TABLE A_Persone (
     City VARCHAR(255)
 );
 
-INSERT INTO A_Persone (PersonID, LastName, FirstName, Email, City) VALUES (1, 'Rossi', 'Mario', 'mario@rossi.it', 'Milano')
+INSERT INTO A_Persone (PersonID, LastName, FirstName, Email, City) VALUES (2682, 'Rossi', 'Mario', 'mario@rossi.it', 'Milano')
 
 --
 -- Gestione Prodotti/Listini

@@ -100,16 +100,8 @@ class opencrmitaliacore extends vtigercrm
         }
 
         if (in_array($module, $this->dbRecordModules)) {
-            $vtigerClient = $this->getVtigerClient();
-            $describe = $vtigerClient->post([
-                 'form_params' => [
-                     'operation' => 'dbrecord_crud_row',
-                     'sessionName' => $vtigerClient->getSessionName(),
-                     'name' => $module,
-                     'mode' => 'describe'
-                 ],
-            ]);
             $fields = [];
+            $describe = $this->describeDbRecordModule($module);
             foreach ($describe['result']['result']['columns'] as $field) {
                 $field['name'] = $field['paramname'];
                 if ($field['columntype'] == 'reference') {
@@ -154,11 +146,11 @@ class opencrmitaliacore extends vtigercrm
                         'element' => json_encode($data),
                     ],
                 ]);
-                if (empty($create['success'])/* || empty($create['result']['id'])*/) {
+                if (empty($create['success']) || empty($create['result']['success'])) {
                     throw new \Exception($resultCreate["error"]["message"] ?? json_encode($create).' DATA: '.json_encode($data));
                 }
                 $result[$idDoc] = [
-                    'id' => $create['result']['id'],
+                    'id' => $this->assignIdDbRecordModule($param['module'], $create),
                     'error' => false,
                 ];
             } catch (\Exception $e) {
@@ -172,6 +164,46 @@ class opencrmitaliacore extends vtigercrm
         }
 
         return $result;
+    }
+
+    /**
+     *
+     */
+    protected function describeDbRecordModule($module)
+    {
+        $vtigerClient = $this->getVtigerClient();
+
+        $describe = $vtigerClient->post([
+            'form_params' => [
+                'operation' => 'dbrecord_crud_row',
+                'sessionName' => $vtigerClient->getSessionName(),
+                'name' => $module,
+                'mode' => 'describe'
+            ],
+        ]);
+
+        return $describe;
+    }
+
+    /**
+     * @param $module
+     * @param $create
+     * @return string
+     */
+    protected function assignIdDbRecordModule($module, $create)
+    {
+        $describe = $this->describeDbRecordModule($module);
+
+        $id = [];
+        foreach ($describe['result']['result']['columns'] as $field) {
+            if ($field['isprimarykey']) {
+                $id[] = $create['result']['record'][$field['paramname']];
+            }
+        }
+
+        #file_put_contents('../var/logs/mio.log', json_encode($create['result'])."\n", FILE_APPEND);
+
+        return implode('_', $id);
     }
 }
 
