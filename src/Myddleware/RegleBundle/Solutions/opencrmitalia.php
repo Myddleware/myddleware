@@ -71,6 +71,10 @@ class opencrmitaliacore extends vtigercrm
      */
     public function get_modules($type = 'source')
     {
+        if ($this->notVtigerClient()) {
+            return $this->errorMissingVtigerClient();
+        }
+
         $modules = parent::get_modules($type);
 
         $dbRecordModules = [];
@@ -91,6 +95,10 @@ class opencrmitaliacore extends vtigercrm
      */
     public function get_module_fields($module, $type = 'source')
     {
+        if ($this->notVtigerClient()) {
+            return $this->errorMissingVtigerClient();
+        }
+
         if (in_array($module, $this->dbRecordModules)) {
             $vtigerClient = $this->getVtigerClient();
             $describe = $vtigerClient->post([
@@ -104,12 +112,66 @@ class opencrmitaliacore extends vtigercrm
             $fields = [];
             foreach ($describe['result']['result']['columns'] as $field) {
                 $field['name'] = $field['paramname'];
+                if ($field['columntype'] == 'reference') {
+                    $field['type']['name'] = 'reference';
+                }
                 $fields[] = $field;
             }
+            //var_dump($fields);
+            //die();
             return $this->populateModuleFieldsFromVtigerModule($fields, $module, $type);
         }
 
         return parent::get_module_fields($module, $type);
+    }
+
+    /**
+     * Create new record in target
+     *
+     * @param array $param
+     * @return array
+     */
+    public function create($param)
+    {
+        if (!in_array($param['module'], $this->dbRecordModules)) {
+            return parent::create($param);
+        }
+
+        if ($this->notVtigerClient()) {
+            return $this->errorMissingVtigerClient();
+        }
+
+        $result = [];
+        $vtigerClient = $this->getVtigerClient();
+        foreach ($param['data'] as $idDoc => $data) {
+            try {
+                $create = $vtigerClient->post([
+                    'form_params' => [
+                        'operation' => 'dbrecord_crud_row',
+                        'sessionName' => $vtigerClient->getSessionName(),
+                        'name' => $param['module'],
+                        'mode' => 'create',
+                        'element' => json_encode($data),
+                    ],
+                ]);
+                if (empty($create['success'])/* || empty($create['result']['id'])*/) {
+                    throw new \Exception($resultCreate["error"]["message"] ?? json_encode($create).' DATA: '.json_encode($data));
+                }
+                $result[$idDoc] = [
+                    'id' => $create['result']['id'],
+                    'error' => false,
+                ];
+            } catch (\Exception $e) {
+                $result[$idDoc] = array(
+                    'id' => '-1',
+                    'error' => $e->getMessage()
+                );
+            }
+
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+        }
+
+        return $result;
     }
 }
 
