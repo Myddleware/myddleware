@@ -14,11 +14,10 @@ curl -fsSL "${endpoint}" \
   -d "sessionName=${sessionName}" \
   -d "operation=dbrecord_crud_row" \
   -d "name=ProductPricebook" \
-  -d "mode=read" \
+  -d "mode=select" \
   -d "element={
-        \"pricebookid\": \"24\",
-        \"productid\": \"25\",
-        \"currencyid\": \"1\"
+        \"limint\": \"10\",
+        \"offset\": \"0\"
   }"
 
 echo ""

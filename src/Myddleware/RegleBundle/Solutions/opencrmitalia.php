@@ -109,6 +109,7 @@ class opencrmitaliacore extends vtigercrm
             $describe = $this->describeDbRecordModule($module);
             foreach ($describe['result']['result']['columns'] as $field) {
                 $field['name'] = $field['paramname'];
+                $field['label'] = $field['paramname'];
                 if ($field['columntype'] == 'reference') {
                     $field['type']['name'] = 'reference';
                 }
@@ -142,8 +143,25 @@ class opencrmitaliacore extends vtigercrm
         $vtigerClient = $this->getVtigerClient();
 
         if (empty($param['query']['id'])) {
-            throw new \Exception(json_encode($param));
-            $query = $this->getVtigerClient()->query("SELECT {$queryParam} FROM {$module} {$where} ORDER BY modifiedtime DESC LIMIT 0,1;");
+            $select = $vtigerClient->post([
+                'form_params' => [
+                    'operation' => 'dbrecord_crud_row',
+                    'sessionName' => $vtigerClient->getSessionName(),
+                    'name' => $param['module'],
+                    'mode' => 'select',
+                    'element' => json_encode([
+                        'limit' => 1,
+                        'offset' => 0
+                    ]),
+                ],
+            ]);
+            if (empty($select['success']) || empty($select['result']['success'])) {
+                throw new \Exception($select["error"]["message"] ?? json_encode($select));
+            }
+            if (empty($select['result']['records'][0])) {
+                throw new \Exception("No records found on module '{$param[module]}'");
+            }
+            $result['values'] = $select['result']['records'][0];
         } elseif (in_array('id', $param['fields'])) {
             throw new \Exception(json_encode($param));
             $query = $this->getVtigerClient()->retrieve($param['query']['id']);
@@ -171,6 +189,80 @@ class opencrmitaliacore extends vtigercrm
     }
 
     /**
+     * Read
+     *
+     * @param array $param
+     * @return array
+     */
+    public function read($param)
+    {
+        //file_put_contents('../var/logs/mio.log', json_encode($param)."\n", FILE_APPEND);
+
+        if (!in_array($param['module'], $this->dbRecordModules)) {
+            return parent::create($param);
+        }
+
+        if ($this->notVtigerClient()) {
+            return $this->errorMissingVtigerClient(['done' => false]);
+        }
+
+        if (empty($param['offset'])) {
+            $param['offset'] = 0;
+        }
+
+        if (empty($param['limit'])) {
+            $param['limit'] = $this->limitPerCall;
+        }
+
+        $vtigerClient = $this->getVtigerClient();
+
+        $result = [
+            'count' => 0,
+        ];
+
+        try {
+            $select = $vtigerClient->post([
+                'form_params' => [
+                    'operation' => 'dbrecord_crud_row',
+                    'sessionName' => $vtigerClient->getSessionName(),
+                    'name' => $param['module'],
+                    'mode' => 'select',
+                    'element' => json_encode([
+                        //'orderby' => ''
+                        'limit' => $param['limit'],
+                        'offset' => 0
+                    ]),
+                ],
+            ]);
+
+            if (empty($select['success']) || empty($select['result']['success'])) {
+                throw new \Exception($select["error"]["message"] ?? json_encode($select));
+            }
+
+            if (empty($select['result']['records'][0])) {
+                throw new \Exception('No record found in module: '.$param['module']);
+            }
+
+            $result['values'] = [];
+            foreach($select['result']['records'] as $record) {
+                $id = $this->assignIdDbRecordModule($param['module'], $record);
+                $result['date_ref'] = date('Y-m-d H:s:i');
+                $result['values'][$id] = $record;
+                if (in_array($param['rule']['mode'], ['0', 'S'])) {
+                    $result['values'][$id]['date_modified'] = date('Y-m-d H:s:i');
+                } elseif ($param['rule']['mode'] == 'C') {
+                    $result['values'][$id]['date_modified'] = date('Y-m-d H:s:i');
+                }
+                $result['count']++;
+            }
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
+        }
+
+        return $result;
+    }
+
+        /**
      * Create new record in target
      *
      * @param array $param
@@ -203,7 +295,7 @@ class opencrmitaliacore extends vtigercrm
                     throw new \Exception($create["error"]["message"] ?? json_encode($create).' DATA: '.json_encode($data));
                 }
                 $result[$idDoc] = [
-                    'id' => $this->assignIdDbRecordModule($param['module'], $create),
+                    'id' => $this->assignIdDbRecordModule($param['module'], $create['result']['record']),
                     'error' => false,
                 ];
             } catch (\Exception $e) {
@@ -252,7 +344,7 @@ class opencrmitaliacore extends vtigercrm
                     throw new \Exception($update["error"]["message"] ?? json_encode($update).' DATA: '.json_encode($data));
                 }
                 if (empty($result[$idDoc]['id'])) {
-                    $result[$idDoc]['id'] = $this->assignIdDbRecordModule($param['module'], $update);
+                    $result[$idDoc]['id'] = $this->assignIdDbRecordModule($param['module'], $update['result']['record']);
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
@@ -297,7 +389,7 @@ class opencrmitaliacore extends vtigercrm
      * @param $create
      * @return string
      */
-    protected function assignIdDbRecordModule($module, $create)
+    protected function assignIdDbRecordModule($module, $record)
     {
         $describe = $this->describeDbRecordModule($module);
 
@@ -305,7 +397,6 @@ class opencrmitaliacore extends vtigercrm
         foreach ($describe['result']['result']['columns'] as $field) {
             if ($field['isprimarykey']) {
                 $keyPart = '0';
-                $record = $create['result']['record'];
                 if (isset($record[$field['columnname']]) && $record[$field['columnname']]) {
                     $keyPart = $record[$field['columnname']];
                 } elseif (isset($record[$field['paramname']]) && $record[$field['paramname']]) {
