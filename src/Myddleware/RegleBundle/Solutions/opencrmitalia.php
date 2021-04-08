@@ -5,7 +5,6 @@ use Javanile\VtigerClient\VtigerClient;
 
 class opencrmitaliacore extends vtigercrm
 {
-
 	/** @var array inventoryModules */
 	protected $inventoryModules = [
 		"Invoice",
@@ -23,6 +22,13 @@ class opencrmitaliacore extends vtigercrm
 		'delete' => 'advinv_delete',
 		'retrieve' => 'advinv_retrieve',
 	];
+
+    /**
+     * List of modules managed through dbrecord webservices.
+     */
+    protected $dbRecordModules = [
+        'ProductPricebook'
+    ];
 
 	/**
 	 * Make the login
@@ -56,6 +62,55 @@ class opencrmitaliacore extends vtigercrm
 			return ['error' => $error];
 		}
 	}
+
+    /**
+     * Return of the modules without the specified ones.
+     *
+     * @param string $type
+     * @return array|bool
+     */
+    public function get_modules($type = 'source')
+    {
+        $modules = parent::get_modules($type);
+
+        $dbRecordModules = [];
+        foreach ($this->dbRecordModules as $module) {
+            $dbRecordModules[$module] = $module;
+        }
+
+        return array_merge($modules, $dbRecordModules);
+    }
+
+    /**
+     * Return the fields for a specific module without the specified ones.
+     *
+     * @param string $module
+     * @param string $type
+     *
+     * @return array|bool
+     */
+    public function get_module_fields($module, $type = 'source')
+    {
+        if (in_array($module, $this->dbRecordModules)) {
+            $vtigerClient = $this->getVtigerClient();
+            $describe = $vtigerClient->post([
+                 'form_params' => [
+                     'operation' => 'dbrecord_crud_row',
+                     'sessionName' => $vtigerClient->getSessionName(),
+                     'name' => $module,
+                     'mode' => 'describe'
+                 ],
+            ]);
+            $fields = [];
+            foreach ($describe['result']['result']['columns'] as $field) {
+                $field['name'] = $field['paramname'];
+                $fields[] = $field;
+            }
+            return $this->populateModuleFieldsFromVtigerModule($fields, $module, $type);
+        }
+
+        return parent::get_module_fields($module, $type);
+    }
 }
 
 /* * * * * * * *  * * * * * *  * * * * * *
