@@ -193,7 +193,7 @@ view_rule:
         save: Save
         simule: Simulate Transfers
         result: Estimated transfers
-        details: " Represents the number of transfers that will be created for the next lunch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
+        details: " Represents the number of transfers that will be created for the next launch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
 
 rule:
     source: Source

@@ -77,10 +77,14 @@ docker-compose.override.yml.old
 # Secrets
 .env
 hosts
+/scheduler.sh
+/crontab.client
 NOTES.md
 *.ovpn
 .pwd.var
-modules_local/
+/opencrmitalia_modules
+/vtiger.json
+/modules_local/
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/database.php

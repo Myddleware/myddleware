@@ -3,6 +3,8 @@
 init:
 	@[ -f hosts ] || touch hosts
 	@[ -f .env ] || cp .env.example .env
+	@[ -f scheduler.sh ] || touch scheduler.sh
+	@[ -f crontab.client ] || touch crontab.client
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f database.client.php ] || cp  ../../../../../var/solutions/database.client.php database.client.php
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mautic.client.php ] || cp  ../../../../../var/solutions/mautic.client.php mautic.client.php
 	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f microsoftsql.client.php ] || cp  ../../../../../var/solutions/microsoftsql.client.php microsoftsql.client.php
@@ -33,9 +35,17 @@ down:
 build:
 	@docker-compose build myddleware
 
+push:
+	@docker login
+	@docker build -t opencrmitalia/myddleware .
+	@docker push opencrmitalia/myddleware
+
 install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 	@echo "Install done."
+
+clean-cache:
+	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
 
 update: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/* vendor
@@ -43,11 +53,16 @@ update: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
 	@echo "Update done."
 
+refresh: init up
+	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/
+	@docker-compose -f docker-compose.yml up -d --force-recreate myddleware
+
 dump-autoload: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar dump-autoload --no-scripts
 
 require-vtiger-client:
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.24 -vvvv --ignore-platform-reqs --no-scripts
+	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require javanile/vtiger-client:0.0.25 -vvvv --ignore-platform-reqs --no-scripts
 
 require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
@@ -79,6 +94,8 @@ dev: init
 	@docker-compose up -d
 	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh
 	@docker-compose exec vtiger2 bash dev/script/vtiger-install.sh
+	@docker-compose exec mssql sqlcmd -S '127.0.0.1' -U 'sa' -P 'Secret.1234!' -i /fixtures/mssql.sql
+
 
 prod: init
 	@docker-compose -f docker-compose.yml up -d --remove-orphans

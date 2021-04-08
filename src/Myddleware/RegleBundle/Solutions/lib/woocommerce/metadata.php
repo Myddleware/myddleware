@@ -3,8 +3,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  StÃ©phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  StÃ©phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -83,7 +83,7 @@ $moduleFields = array (
                             'cross_sell_ids' => array( 'label' => 'Cross_sell_ids', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'parent_id' => array( 'label' => 'Parent_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             'purchase_note' => array( 'label' => 'Purchase_note', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                            // 'categories' => array( 'label' => 'Categories', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+                            'categories' => array( 'label' => 'Categories', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             // 'categories__id' => array( 'label' => 'Categories ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             // 'categories__name' => array( 'label' => 'Categories Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
                             // 'categories__slug' => array( 'label' => 'Categories Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),

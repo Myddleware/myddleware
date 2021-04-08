@@ -942,7 +942,6 @@ class DefaultControllerCore extends Controller
                                 return new JsonResponse(["success" => true]); // Connexion valide
                             } else {
                                 $sessionService->removeParamRule($ruleKey);
-
                                 return new JsonResponse(["success" => false, 'message' => $this->get('translator')->trans($result['error'])]);// Erreur de connexion
                             }
                         } else {
@@ -1209,7 +1208,7 @@ class DefaultControllerCore extends Controller
                         'module' => $serviceSession->getParamRuleSourceModule($ruleKey),
                         'fields' => $sourcesfields,
                         'ruleParams' => $ruleParams
-                    ));
+                    )); 
                 } else {
                         // Get source data with query on specific record ID
                         $source = $solution_source->read_last(array(

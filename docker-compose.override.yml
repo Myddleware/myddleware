@@ -90,6 +90,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Secret.1234!
     volumes:
+      - ./dev/fixtures:/fixtures
       - mssql:/var/opt/mssql/data
 
   adminer:

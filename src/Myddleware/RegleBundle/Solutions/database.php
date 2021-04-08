@@ -403,11 +403,17 @@ class databasecore extends solution {
 			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
 			// Appel de la requête
-			$q = $this->pdo->prepare($requestSQL);		
+			$q = $this->pdo->prepare($requestSQL);
+            $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($pdoDriverName == 'dblib') {
+                $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            }
 			$exec = $q->execute();
-
-			if(!$exec) {
+			if ($exec === false) {
 				$errorInfo = $this->pdo->errorInfo();
+				if (empty($errorInfo[2])) {
+                    $errorInfo[2] = '['.$pdoDriverName.':'.$exec.'] '.implode(', ', $errorInfo);
+                }
 				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
@@ -455,7 +461,7 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
+		}		
 		return $result;
 	} // read($param)
 	
@@ -524,7 +530,7 @@ class databasecore extends solution {
 	
 	// Permet de créer des données
 	public function create($param) {	
-		try {			
+		try {		
 			// Get the target reference field
 			if(!isset($param['ruleParams']['targetFieldId'])) {
 				throw new \Exception('targetFieldId has to be specified for the data creation.');
@@ -569,6 +575,7 @@ class databasecore extends solution {
                         throw new \Exception('Create: Prepare '.$errorInfo[2].' . Query : '.$sql);
                     }
 
+                    //$this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
                     //$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
                     $exec = $q->execute();
 					if ($exec === false) {
@@ -655,7 +662,7 @@ class databasecore extends solution {
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
 											'id' => $idTarget,
-											'error' => ($q->rowCount() ? false : 'There is no error but 0 row has been updated.')
+											'error' => ($q->rowCount() ? false : 'There is no error but 0 rows have been updated')
 									);									
 				}
 				catch (\Exception $e) {
@@ -731,7 +738,7 @@ class databasecore extends solution {
 	
 	// Function to escape characters 
 	protected function escape($value) {
-		return $value;
+		return str_replace("'", "''", $value);
 	}
 	
 	// Get the strings which can identify what field is an id in the table
