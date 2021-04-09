@@ -575,8 +575,10 @@ class databasecore extends solution {
                         throw new \Exception('Create: Prepare '.$errorInfo[2].' . Query : '.$sql);
                     }
 
-                    //$this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
-                    //$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                    if ($pdoDriverName == 'dblib') {
+                        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    }
                     $exec = $q->execute();
 					if ($exec === false) {
 						$errorInfo = $this->pdo->errorInfo();
