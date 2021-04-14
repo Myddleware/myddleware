@@ -1,5 +1,4 @@
 <?php
-
 $moduleFields = array (
     'pages' => array(
         'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -51,55 +50,55 @@ $moduleFields = array (
         'tags' => array( 'label' => 'Tags', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
-    'categories' => array(
-        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'count' => array( 'label' => 'Count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'description' => array( 'label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'name' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'taxonomy' => array( 'label' => 'Taxonomy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'parent' => array( 'label' => 'Parent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-    ),
+    // 'categories' => array(
+    //     'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'count' => array( 'label' => 'Count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'description' => array( 'label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'name' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'taxonomy' => array( 'label' => 'Taxonomy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'parent' => array( 'label' => 'Parent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    //     '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    // ),
  //TODO
-    'types'=>	array(
+    // 'types'=>	array(
 
-    ),
-    'statuses'=> array(
+    // ),
+    // 'statuses'=> array(
 
-    ),
-    'settings' =>	array(
+    // ),
+    // 'settings' =>	array(
 
-    ),
-    'search' =>	array(
+    // ),
+    // 'search' =>	array(
 
-    ),
-    'block-types'=>	array(
+    // ),
+    // 'block-types'=>	array(
 
-    ),
-    'blocks' =>	array(
+    // ),
+    // 'blocks' =>	array(
 
-    ),
-    'block-renderer' =>	array(
+    // ),
+    // 'block-renderer' =>	array(
 
-    ),
-    'plugins' => array(
+    // ),
+    // 'plugins' => array(
 
-    ), 
-    'media' => array(
+    // ), 
+    // 'media' => array(
 
-    ),
-    'taxonomies' => array(
+    // ),
+    // 'taxonomies' => array(
 
-    ),
-    'tags' => array(
+    // ),
+    // 'tags' => array(
 
-    ),
-    'themes' => array(
+    // ),
+    // 'themes' => array(
 
-    ),
+    // ),
     'comments' => array(
         'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'post' => array( 'label' => 'Post', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -115,29 +114,6 @@ $moduleFields = array (
         'type' => array( 'label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'author_avatar_urls' => array( 'label' => 'Author Avatar URLs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-    ),
-    'users' => array(
-        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'username' => array( 'label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'name' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'first_name' => array( 'label' => 'First Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'last_name' => array( 'label' => 'Last Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'email' => array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'url' => array( 'label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'description' => array( 'label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'locale' => array( 'label' => 'Locale', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'nickname' => array( 'label' => 'Nickname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'registered_date' => array( 'label' => 'Registered Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'roles' => array( 'label' => 'Roles', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'password' => array( 'label' => 'Password', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'capabilities' => array( 'label' => 'Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'extra_capabilities' => array( 'label' => 'Extra Capabilities', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'avatar_urls' => array( 'label' => 'Avatar URLs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'woocommerce_meta' => array( 'label' => 'Woocommerce Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
 
@@ -157,14 +133,13 @@ $moduleFields = array (
         'content__rendered' => array( 'label' => 'Content rendered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'content__protected' => array( 'label' => 'Content protected', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'excerpt__rendered' => array( 'label' => 'Excerpt rendered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'excerp__protected' => array( 'label' => 'Excerpt protected', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'excerpt__protected' => array( 'label' => 'Excerpt protected', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'featured_media' => array( 'label' => 'Featured Media', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'template' => array( 'label' => 'Template', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'mep_cat' => array( 'label' => 'MEP Categories', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'mep_org' => array( 'label' => 'MEP Organizers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         // 'event_informations' => array( 'label' => 'Event informations', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___edit_lock' => array( 'label' => 'Event info : edit lock', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        'event_informations__link_wc_product' => array( 'label' => 'Event info : link_wc_product', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__check_if_run_once' => array( 'label' => 'Event info : check if run once', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations___edit_last' => array( 'label' => 'Event info : edit last', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__mep_available_seat' => array( 'label' => 'Event info : mep available seat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -216,10 +191,9 @@ $moduleFields = array (
         'event_informations__mep_event_cc_email_text' => array( 'label' => 'Event info : mep event cc email text', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_informations__event_feature_image' => array( 'label' => 'Event info : event feature image', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-		'mep_cat' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-        'mep_org' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false)
     ),
     'mep_event_more_date' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_start_date' => array( 'label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_start_time' => array( 'label' => 'Start time', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'event_more_end_date' => array( 'label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
@@ -250,7 +224,58 @@ $moduleFields = array (
         'meta' => array( 'label' => 'Meta', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         '_links' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     ),
+    'mep_event_attendee' => array(
+        'id' => array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date' => array( 'label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'date_gmt' => array( 'label' => 'Date GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'guid__rendered' => array( 'label' => 'Guid rendered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'modified' => array( 'label' => 'Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'modified_gmt' => array( 'label' => 'Modified GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'slug' => array( 'label' => 'Slug', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'status' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'type' => array( 'label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'link' => array( 'label' => 'Link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'title__rendered' => array( 'label' => 'Title__rendered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'template' => array( 'label' => 'Template', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__mep_event_show_attendee_list' => array( 'label' => 'Attendee infos : Mep_event_show_attendee_list', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__mep_event_attendee_edit_frontend' => array( 'label' => 'Attendee infos : Mep_event_attendee_edit_frontend', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_name' => array( 'label' => 'Attendee infos : EA name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_address_1' => array( 'label' => 'Attendee infos : EA address_1', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_email' => array( 'label' => 'Attendee infos : EA email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_phone' => array( 'label' => 'Attendee infos : EA phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_gender' => array( 'label' => 'Attendee infos : EA gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_company' => array( 'label' => 'Attendee infos : EA company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_desg' => array( 'label' => 'Attendee infos : EA desg', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_website' => array( 'label' => 'Attendee infos : EA website', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_vegetarian' => array( 'label' => 'Attendee infos : EA vegetarian', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_tshirtsize' => array( 'label' => 'Attendee infos : EA tshirtsize', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_ticket_type' => array( 'label' => 'Attendee infos : EA ticket type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_ticket_qty' => array( 'label' => 'Attendee infos : EA ticket qty', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_ticket_price' => array( 'label' => 'Attendee infos : EA ticket price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_payment_method' => array( 'label' => 'Attendee infos : EA payment method', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_event_name' => array( 'label' => 'Attendee infos : EA event name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_event_id' => array( 'label' => 'Attendee infos : EA event ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_order_id' => array( 'label' => 'Attendee infos : EA order ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_user_id' => array( 'label' => 'Attendee infos : EA user ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__mep_checkin' => array( 'label' => 'Attendee infos : Mep checkin', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_ticket_no' => array( 'label' => 'Attendee infos : EA ticket no', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_event_date' => array( 'label' => 'Attendee infos : EA event date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_order_status' => array( 'label' => 'Attendee infos : EAorder status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'attendee_informations__ea_partecipazione_cognome' => array( 'label' => 'Attendee infos : EA partecipazione cognome', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
 
 
+);
+
+$fieldsRelate = array(
+    'mep_events' => array(
+        'mep_cat__0' => array('label' => 'MEP Category', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'mep_org__0' => array('label' => 'MEP Organizer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'event_informations__link_wc_product' => array( 'label' => 'Event info : product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        
+    ),
+    'mep_event_more_date' => array(
+        'event_id' =>  array('label' => 'MEP Event ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
+    )
 );
 
