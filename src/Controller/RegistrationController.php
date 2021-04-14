@@ -88,7 +88,7 @@ class RegistrationController extends AbstractController
             );
         }
     } catch (Exception $e ){
-        dd($e);
+
         return $this->redirectToRoute('login');
     }
         return $this->render('registration/register.html.twig', [

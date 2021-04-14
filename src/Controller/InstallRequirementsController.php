@@ -70,7 +70,7 @@ class InstallRequirementsController extends AbstractController
 
                     $checkPassed = true;
 
-                // TODO : get php.ini path info and display it in twig
+           
 
                     $requirementsErrorMesssages = [];
                     foreach($this->symfonyRequirements->getRequirements() as $req){
