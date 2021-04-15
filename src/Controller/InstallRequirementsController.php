@@ -38,63 +38,51 @@ class InstallRequirementsController extends AbstractController
      */
     public function index(TranslatorInterface $translator): Response
     {
+ 
+        $this->symfonyRequirements = new SymfonyRequirements();
+
+        $this->phpVersion = phpversion();
+
+        $checkPassed = true;
+
+        $requirementsErrorMesssages = [];
+        foreach($this->symfonyRequirements->getRequirements() as $req){
+            if(!$req->isFulfilled()){
+                $requirementsErrorMesssages[] = $req->getHelpText();
+                $checkPassed = false;
+            }
+        }
+
+        $recommendationMesssages = array();
+        foreach($this->symfonyRequirements->getRecommendations() as $req){
+            if(!$req->isFulfilled()){
+                $recommendationMesssages[] = $req->getHelpText();
+            } 
+        }
+
+        $this->systemStatus = '';
+        if(!$checkPassed){
+            $this->systemStatus = $translator->trans('install.system_status_not_ready');
+        }else{
+            $this->systemStatus = $translator->trans('install.system_status_ready');
+        }
+
+        //allow access if no errors
+        return $this->render('install_requirements/index.html.twig', [
+            'php_version' => $this->phpVersion,
+            'error_messages' => $requirementsErrorMesssages,
+            'recommendation_messages' => $recommendationMesssages,
+            'system_status' => $this->systemStatus
+        ]);
 
         try {
 
-            $connected = $this->getDoctrine()->getConnection()->isConnected();
-            // if there's already a DB connection, deny access to install
-            if($connected){
-                //to help voter decide whether we allow access to install process again or not
-                $configs = $this->configRepository->findAll();
-                if(!empty($configs)){
-                    foreach($configs as $config) {
-                        $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
-                    }
-                } 
-                return null;
-            } else { 
-
-                    // attempt to make connection
-                    $configs = $this->configRepository->findAll();
-                    if(!empty($configs)){
-                        foreach($configs as $config) {
-                            $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
-                        }
-                    }
-
-                    //if not yet connected to DB, allow access 
-                
-                    $this->symfonyRequirements = new SymfonyRequirements();
-
-                    $this->phpVersion = phpversion();
-
-                    $checkPassed = true;
-
-           
-
-                    $requirementsErrorMesssages = [];
-                    foreach($this->symfonyRequirements->getRequirements() as $req){
-                        if(!$req->isFulfilled()){
-                            $requirementsErrorMesssages[] = $req->getHelpText();
-                            $checkPassed = false;
-                        }
-                    }
-
-                    $recommendationMesssages = array();
-                    foreach($this->symfonyRequirements->getRecommendations() as $req){
-                        if(!$req->isFulfilled()){
-                            $recommendationMesssages[] = $req->getHelpText();
-                        } 
-                    }
-
-                    $this->systemStatus = '';
-                    if(!$checkPassed){
-                        $this->systemStatus = $translator->trans('install.system_status_not_ready');
-                    }else{
-                        $this->systemStatus = $translator->trans('install.system_status_ready');
-                    }
-        
-
+            //to help voter decide whether we allow access to install process again or not
+            $configs = $this->configRepository->findAll();
+            if(!empty($configs)){
+                foreach($configs as $config) {
+                    $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
+                }
             }
 
         } catch(Exception | DBALException | PDOException | DoctrinePDOException | TableNotFoundException $e){
@@ -138,18 +126,20 @@ class InstallRequirementsController extends AbstractController
                     'system_status' => $this->systemStatus
                 ]);
     
+            } else {
+                // if other error, deny access
+                return $this->redirectToRoute('login');
             }
             
-            // if other error, deny access
-            return $this->redirectToRoute('login');
         }
-            //allow access if no errors
-            return $this->render('install_requirements/index.html.twig', [
-                'php_version' => $this->phpVersion,
-                'error_messages' => $requirementsErrorMesssages,
-                'recommendation_messages' => $recommendationMesssages,
-                'system_status' => $this->systemStatus
-            ]);
+        
+        //allow access if no errors
+        return $this->render('install_requirements/index.html.twig', [
+            'php_version' => $this->phpVersion,
+            'error_messages' => $requirementsErrorMesssages,
+            'recommendation_messages' => $recommendationMesssages,
+            'system_status' => $this->systemStatus
+        ]);
 
     }
 }

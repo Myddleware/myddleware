@@ -68,32 +68,35 @@ class DatabaseSetupController extends AbstractController
 
             //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
-            $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+            $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
             foreach($parameters as $parameter){
                 $value = $this->getParameter($parameter);
                 if(!empty($value)){
-                     switch($parameter) {
-                         case 'database_driver':
-                             $database->setDriver($value);
-                             break;
-                         case 'database_host':
-                             $database->setHost($value);
-                             break;
-                         case 'database_port':
-                             $database->setPort($value);
-                             break;
-                         case 'database_name':
-                             $database->setName($value);
-                             break;
-                         case 'database_user':
-                             $database->setUser($value);
-                             break;
-                         case 'secret':
-                             $database->setSecret($value);
-                             break;
-                         default:
-                             break;
-                     }
+                    switch($parameter) {
+                        case 'database_driver':
+                            $database->setDriver($value);
+                            break;
+                        case 'database_host':
+                            $database->setHost($value);
+                            break;
+                        case 'database_port':
+                            $database->setPort($value);
+                            break;
+                        case 'database_name':
+                            $database->setName($value);
+                            break;
+                        case 'database_user':
+                            $database->setUser($value);
+                            break;
+                        case 'database_password':
+                            $database->setPassword($value);
+                            break;
+                        case 'secret':
+                            $database->setSecret($value);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }     
 
@@ -136,7 +139,7 @@ class DatabaseSetupController extends AbstractController
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
 
-           $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'secret'];
+           $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
            foreach($parameters as $parameter){
                try {
                     $value = $this->getParameter($parameter);
@@ -156,6 +159,9 @@ class DatabaseSetupController extends AbstractController
                                 break;
                             case 'database_user':
                                 $database->setUser($value);
+                                break;
+                            case 'database_password':
+                                $database->setPassword($value);
                                 break;
                             case 'secret':
                                 $database->setSecret($value);
