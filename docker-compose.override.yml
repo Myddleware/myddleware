@@ -24,6 +24,9 @@ services:
       - MYSQL_HOST=mysql1
       - MYSQL_DATABASE=vtiger
       - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+      - .:/app
+      - ./dev/opencrmitalia_modules:/app/opencrmitalia_modules
     links:
       - mysql1
 
@@ -55,6 +58,9 @@ services:
       - MYSQL_HOST=mysql2
       - MYSQL_DATABASE=vtiger
       - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+      - .:/app
+      - ./dev/opencrmitalia_modules:/app/opencrmitalia_modules
     links:
       - mysql2
 
@@ -84,6 +90,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Secret.1234!
     volumes:
+      - ./dev/fixtures:/fixtures
       - mssql:/var/opt/mssql/data
 
   adminer:
