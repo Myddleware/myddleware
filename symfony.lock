@@ -58,6 +58,9 @@
     "doctrine/dbal": {
         "version": "2.12.1"
     },
+    "doctrine/deprecations": {
+        "version": "v0.5.3"
+    },
     "doctrine/doctrine-bundle": {
         "version": "1.12",
         "recipe": {
@@ -214,6 +217,9 @@
     },
     "laminas/laminas-zendframework-bridge": {
         "version": "1.2.0"
+    },
+    "lcobucci/clock": {
+        "version": "2.0.0"
     },
     "lcobucci/jwt": {
         "version": "3.4.2"
