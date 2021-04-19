@@ -25,13 +25,13 @@ mv ./src/Myddleware/RegleBundle/Custom/Solutions/oracle.php ./src/Myddleware/Reg
 
 viene aggiunto semplicemente la parola '.client' prima dell'estensione '.php'.
 
-A questo punto si deve ripetere più volte la segueti operazione
+A questo punto si deve ripetere almeno due o tre volte il seguente comando
 
 ```
 git pull
 ```
 
-Fino a quando il messaggio non sarà
+Fino a quando il messaggio a video non sarà come questo
 
 ```
 Already up to date.
