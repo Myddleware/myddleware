@@ -18,8 +18,13 @@ class InstallVoter extends Voter
                 return false;
             }
 
-            return true;
-     
+            // only vote on 'allow_install' property
+            if($subject->getName() !== 'allow_install'){
+                return false;
+            }
+
+            // return true;
+
         return in_array($attribute, ['DATABASE_EDIT', 'DATABASE_VIEW'])
             && $subject instanceof Config;
     }
@@ -58,6 +63,8 @@ class InstallVoter extends Voter
             } else {
                 throw new LogicException();
             }
+        } else {
+            return false;
         }
     }
 }

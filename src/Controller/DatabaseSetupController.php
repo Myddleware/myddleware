@@ -49,12 +49,11 @@ class DatabaseSetupController extends AbstractController
 
             $submitted = false;
 
+            $config = $this->configRepository->findOneByAllowInstall('allow_install');
             //to help voter decide whether we allow access to install process again or not
-            $configs = $this->configRepository->findAll();
-            if(!empty($configs)){
-                foreach($configs as $config) {
-                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-                }
+            if(!empty($config)){
+              if($config->getName() === 'allow_install'){
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config); }
             } else {
 
                 // will be used by the InstallVoter to determine access to all install routes
@@ -70,7 +69,15 @@ class DatabaseSetupController extends AbstractController
             $database = new DatabaseParameter();
             $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
             foreach($parameters as $parameter){
-                $value = $this->getParameter($parameter);
+                try {
+                    $value = $this->getParameter($parameter);
+                } catch(Exception $e){
+                    //if parameters are not accessible yet
+                    if($e instanceof InvalidArgumentException ){
+                        continue;
+                    }
+                }
+       
                 if(!empty($value)){
                     switch($parameter) {
                         case 'database_driver':
@@ -97,7 +104,7 @@ class DatabaseSetupController extends AbstractController
                         default:
                             break;
                     }
-                }
+                } 
             }     
 
             // force user to change the default Symfony secret for security
@@ -133,93 +140,86 @@ class DatabaseSetupController extends AbstractController
         } catch  (Exception $e) {
 
             if($e instanceof ConnectionException | $e instanceof TableNotFoundException){
-
+          
                 $submitted = false;
               
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
 
-           $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
-           foreach($parameters as $parameter){
-               try {
-                    $value = $this->getParameter($parameter);
-                    if(!empty($value)){
-                        switch($parameter) {
-                            case 'database_driver':
-                                $database->setDriver($value);
-                                break;
-                            case 'database_host':
-                                $database->setHost($value);
-                                break;
-                            case 'database_port':
-                                $database->setPort($value);
-                                break;
-                            case 'database_name':
-                                $database->setName($value);
-                                break;
-                            case 'database_user':
-                                $database->setUser($value);
-                                break;
-                            case 'database_password':
-                                $database->setPassword($value);
-                                break;
-                            case 'secret':
-                                $database->setSecret($value);
-                                break;
-                            default:
-                                break;
+                $parameters = [ 'database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
+                foreach($parameters as $parameter){
+                    try {
+                            $value = $this->getParameter($parameter);
+                            if(!empty($value)){
+                                switch($parameter) {
+                                    case 'database_driver':
+                                        $database->setDriver($value);
+                                        break;
+                                    case 'database_host':
+                                        $database->setHost($value);
+                                        break;
+                                    case 'database_port':
+                                        $database->setPort($value);
+                                        break;
+                                    case 'database_name':
+                                        $database->setName($value);
+                                        break;
+                                    case 'database_user':
+                                        $database->setUser($value);
+                                        break;
+                                    case 'database_password':
+                                        $database->setPassword($value);
+                                        break;
+                                    case 'secret':
+                                        $database->setSecret($value);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                    } catch (Exception $e){
+                        if($e instanceof InvalidArgumentException){
+                            // continue;
+                            // force user to change the default Symfony secret for security
+                            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
+                                $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
+                            }
+
+                            $form = $this->createForm(DatabaseSetupType::class, $database);
+                            $form->handleRequest($request);
+                    
+                            // send database parameters to .env.local
+                            if ($form->isSubmitted() && $form->isValid()){
+
+                                $envLocal = __DIR__.'/../../.env.local';
+                                // we edit the database connection parameters with form input
+                                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                                $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
+                                $appSecret = 'APP_SECRET='.$database->getSecret();
+                                // write new URL into the .env.local file (EOL ensures it's written on a new line)
+                                file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+                        
+                                // allow to proceed to next step
+                                $submitted = true;
+                            }
+
+                            //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
+                            return $this->render('database_setup/index.html.twig', [
+                                'form' => $form->createView(),
+                                'submitted' => $submitted,
+                
+                            ]);
+                        } else {
+                            return $this->redirectToRoute('login');
                         }
                     }
-               } catch (Exception $e){
-                   if($e instanceof InvalidArgumentException){
-                      continue;
-                   }
-                 
-               }
-              
-           }     
-
-                // force user to change the default Symfony secret for security
-                if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
-                    $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
-                }
-
-                $form = $this->createForm(DatabaseSetupType::class, $database);
-                $form->handleRequest($request);
+                } 
+            }  
+          
+        }  
         
-                // send database parameters to .env.local
-                if ($form->isSubmitted() && $form->isValid()){
-
-                    $envLocal = __DIR__.'/../../.env.local';
-                    // we edit the database connection parameters with form input
-                    $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                    $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
-                    $appSecret = 'APP_SECRET='.$database->getSecret();
-                    // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                    file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
-            
-                    // allow to proceed to next step
-                    $submitted = true;
-                    }
-
-                //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
-                return $this->render('database_setup/index.html.twig', [
-                    'form' => $form->createView(),
-                    'submitted' => $submitted,
-    
-                ]);
-
-            } else {
-                return $this->redirectToRoute('login');
-            }
-        }
-
         //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
-        return $this->render('database_setup/index.html.twig', [
-            'form' => $form->createView(),
-            'submitted' => $submitted,
-
-        ]);
+        return $this->redirectToRoute('login');
        
     }
 
@@ -229,62 +229,58 @@ class DatabaseSetupController extends AbstractController
      */
     public function connectDatabase(Request $request, KernelInterface $kernel): Response
     {
+  
         try {
 
-            $connected = $this->getDoctrine()->getConnection()->isConnected();
-
-            if($connected){
-
-                //to help voter decide whether we allow access to install process again or not
-                $configs = $this->configRepository->findAll();
-                if(!empty($configs)){
-                    foreach($configs as $config) {
-                        $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-                    }
-                } 
-
-            } else {     
-             
-                $env = $kernel->getEnvironment();
-
-                $application = new Application($kernel);
-                $application->setAutoExit(false);
-            
-                // we execute Doctrine console commands to test the connection to the database
-                $input = new ArrayInput(array(
-                    'command' => 'doctrine:schema:update',
-                    '--force' => true,
-                    '--env' => $env
-                ));
-                $output = new BufferedOutput();
-                $application->run($input, $output);
-                $content = $output->fetch();
-
-                //send the message sent by Doctrine to the user's view
-                $this->connectionSuccessMessage = $content;
-
-                //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
-                if(strlen($this->connectionSuccessMessage) > 300) {
-                    $this->connectionFailedMessage = $this->connectionSuccessMessage;
-                    // trim the message to remove unnecessary stack trace
-                    $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
+            //to help voter decide whether we allow access to install process again or not
+            $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            if(!empty($config)){
+                if($config->getName() === 'allow_install'){
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
                 }
-               
-                 // will be used by the InstallVoter to determine access to all install routes
+            } 
+            $env = $kernel->getEnvironment();
+
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
+        
+            // we execute Doctrine console commands to test the connection to the database
+            $input = new ArrayInput(array(
+                'command' => 'doctrine:schema:update',
+                '--force' => true,
+                '--env' => $env
+            ));
+            $output = new BufferedOutput();
+            $application->run($input, $output);
+            $content = $output->fetch();
+
+            //send the message sent by Doctrine to the user's view
+            $this->connectionSuccessMessage = $content;
+
+            //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
+            if(strlen($this->connectionSuccessMessage) > 300) {
+                $this->connectionFailedMessage = $this->connectionSuccessMessage;
+                // trim the message to remove unnecessary stack trace
+                $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
+            }
+            
+            // will be used by the InstallVoter to determine access to all install routes
+            if(!$config){
                 $config = new Config();
                 $config->setName('allow_install');
-                $config->setValue('true');
-                $this->entityManager->persist($config);
-                $this->entityManager->flush();
-           
-                return $this->render('database_setup/database_connection.html.twig', [
-                    'connection_success_message' =>  $this->connectionSuccessMessage,
-                    'connection_failed_message' => $this->connectionFailedMessage,
-                ]);
-            }  
+            }
+            $config->setValue('true');
+            $this->entityManager->persist($config);
+            $this->entityManager->flush();
+        
+            return $this->render('database_setup/database_connection.html.twig', [
+                'connection_success_message' =>  $this->connectionSuccessMessage,
+                'connection_failed_message' => $this->connectionFailedMessage,
+            ]);
+        
 
         } catch(ConnectionException  | DBALException  | Exception $e){
-  
+
             // if the database doesn't exist yet, ask user to go create it
             if($e instanceof ConnectionException){
                 $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
@@ -302,66 +298,68 @@ class DatabaseSetupController extends AbstractController
         } 
         
         
-      }
+    }
+
 
     /**
      * Attempt to load Myddleware fixtures to database
      * @Route("install/database/fixtures/load", name="database_fixtures_load")
      */
-      public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response 
-      {
+    public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response 
+    {
       
         try {
 
-          //to help voter decide whether we allow access to install process again or not
-          $configs = $this->configRepository->findAll();
-          if(!empty($configs)){
-              foreach($configs as $config) {
-                  $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-              }
-          } 
-
-        $env = $kernel->getEnvironment();
-        $application = new Application($kernel);
-        $application->setAutoExit(false);
-    
-         //load database tables
-         $fixturesInput = new ArrayInput(array(
-            'command' => 'doctrine:fixtures:load',
-             '--append' => true,
-              '--env' => $env
-        ));
-
-        $fixturesOutput = new BufferedOutput();
-        $application->run($fixturesInput, $fixturesOutput);
-        $content = $fixturesOutput->fetch();
-
-           //send the message sent by Doctrine to the user's view
-           $this->connectionSuccessMessage = $content;
+            $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            dump($config);
+            //to help voter decide whether we allow access to install process again or not
+            if(!empty($config)){
+                if($config->getName() === 'allow_install'){
+                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+                } 
+            } 
+            $env = $kernel->getEnvironment();
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
         
-           //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
-           if(strlen($this->connectionSuccessMessage) > 300) {
-               $this->connectionFailedMessage = $this->connectionSuccessMessage;
-               // trim the message to remove unnecessary stack trace
-               $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
-           }
+            //load database tables
+            $fixturesInput = new ArrayInput(array(
+                'command' => 'doctrine:fixtures:load',
+                '--append' => true,
+                '--env' => $env
+            ));
 
-        return $this->render('database_setup/load_fixtures.html.twig', 
-            [
-                'connection_success_message' =>  $this->connectionSuccessMessage,
-                'connection_failed_message' => $this->connectionFailedMessage,
-            ]);
+            $fixturesOutput = new BufferedOutput();
+            $application->run($fixturesInput, $fixturesOutput);
+            $content = $fixturesOutput->fetch();
+
+            //send the message sent by Doctrine to the user's view
+            $this->connectionSuccessMessage = $content;
+            
+            //slight bug : sometimes the ERROR message is sent as a success, so if it's too long we reset it as an error
+            if(strlen($this->connectionSuccessMessage) > 300) {
+                $this->connectionFailedMessage = $this->connectionSuccessMessage;
+                // trim the message to remove unnecessary stack trace
+                $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
+            }
+
+            return $this->render('database_setup/load_fixtures.html.twig', 
+                [
+                    'connection_success_message' =>  $this->connectionSuccessMessage,
+                    'connection_failed_message' => $this->connectionFailedMessage,
+                ]);
 
         } catch (Exception $e){
-         
+    //   dd($e);
             if($e instanceof AccessDeniedException ) {
                 return $this->redirectToRoute('login');
             }
         }
 
-      }
-
-
-    
-
+        return $this->render('database_setup/load_fixtures.html.twig', 
+        [
+            'connection_success_message' =>  $this->connectionSuccessMessage,
+            'connection_failed_message' => $this->connectionFailedMessage,
+        ]);
+    }
 }

@@ -39,49 +39,15 @@ class InstallRequirementsController extends AbstractController
     public function index(TranslatorInterface $translator): Response
     {
  
-        $this->symfonyRequirements = new SymfonyRequirements();
-
-        $this->phpVersion = phpversion();
-
-        $checkPassed = true;
-
-        $requirementsErrorMesssages = [];
-        foreach($this->symfonyRequirements->getRequirements() as $req){
-            if(!$req->isFulfilled()){
-                $requirementsErrorMesssages[] = $req->getHelpText();
-                $checkPassed = false;
-            }
-        }
-
-        $recommendationMesssages = array();
-        foreach($this->symfonyRequirements->getRecommendations() as $req){
-            if(!$req->isFulfilled()){
-                $recommendationMesssages[] = $req->getHelpText();
-            } 
-        }
-
-        $this->systemStatus = '';
-        if(!$checkPassed){
-            $this->systemStatus = $translator->trans('install.system_status_not_ready');
-        }else{
-            $this->systemStatus = $translator->trans('install.system_status_ready');
-        }
-
-        //allow access if no errors
-        return $this->render('install_requirements/index.html.twig', [
-            'php_version' => $this->phpVersion,
-            'error_messages' => $requirementsErrorMesssages,
-            'recommendation_messages' => $recommendationMesssages,
-            'system_status' => $this->systemStatus
-        ]);
-
         try {
 
             //to help voter decide whether we allow access to install process again or not
             $configs = $this->configRepository->findAll();
             if(!empty($configs)){
                 foreach($configs as $config) {
-                    $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
+                    if($config->getName() === 'allow_install'){
+                        $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
+                    }
                 }
             }
 
@@ -132,7 +98,34 @@ class InstallRequirementsController extends AbstractController
             }
             
         }
-        
+        $this->symfonyRequirements = new SymfonyRequirements();
+
+        $this->phpVersion = phpversion();
+
+        $checkPassed = true;
+
+        $requirementsErrorMesssages = [];
+        foreach($this->symfonyRequirements->getRequirements() as $req){
+            if(!$req->isFulfilled()){
+                $requirementsErrorMesssages[] = $req->getHelpText();
+                $checkPassed = false;
+            }
+        }
+
+        $recommendationMesssages = array();
+        foreach($this->symfonyRequirements->getRecommendations() as $req){
+            if(!$req->isFulfilled()){
+                $recommendationMesssages[] = $req->getHelpText();
+            } 
+        }
+
+        $this->systemStatus = '';
+        if(!$checkPassed){
+            $this->systemStatus = $translator->trans('install.system_status_not_ready');
+        }else{
+            $this->systemStatus = $translator->trans('install.system_status_ready');
+        }
+
         //allow access if no errors
         return $this->render('install_requirements/index.html.twig', [
             'php_version' => $this->phpVersion,
@@ -140,6 +133,14 @@ class InstallRequirementsController extends AbstractController
             'recommendation_messages' => $recommendationMesssages,
             'system_status' => $this->systemStatus
         ]);
+        
+        // //allow access if no errors
+        // return $this->render('install_requirements/index.html.twig', [
+        //     'php_version' => $this->phpVersion,
+        //     'error_messages' => $requirementsErrorMesssages,
+        //     'recommendation_messages' => $recommendationMesssages,
+        //     'system_status' => $this->systemStatus
+        // ]);
 
     }
 }

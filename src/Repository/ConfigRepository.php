@@ -32,6 +32,16 @@ class ConfigRepository extends ServiceEntityRepository
         return $qb->getQuery()->getSingleScalarResult() ?? 0;
     }
 
+    public function findOneByAllowInstall($value): ?Config
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.name = :allow_install')
+            ->setParameter('allow_install', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
     // /**
     //  * @return Config[] Returns an array of Config objects
     //  */
