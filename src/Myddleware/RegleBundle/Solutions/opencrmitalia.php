@@ -19,7 +19,6 @@ class opencrmitaliacore extends vtigercrm
 	protected $clientOperationsMap = [
 		'create' => 'advinv_create',
 		'update' => 'advinv_update',
-		'delete' => 'advinv_delete',
 		'retrieve' => 'advinv_retrieve',
 	];
 
