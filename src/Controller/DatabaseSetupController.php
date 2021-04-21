@@ -4,10 +4,11 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Config;
+use Psr\Log\LoggerInterface;
+use InvalidArgumentException;
 use App\Form\DatabaseSetupType;
 use App\Entity\DatabaseParameter;
 use App\Repository\ConfigRepository;
-use Doctrine\DBAL\ConnectionException as DBALConnectionException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,12 +17,12 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Doctrine\DBAL\Exception\TableNotFoundException;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\DBAL\ConnectionException as DBALConnectionException;
 use Doctrine\DBAL\Driver\PDO\Exception as DBALDriverPDOException;
-use Doctrine\DBAL\Exception\TableNotFoundException;
-use InvalidArgumentException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class DatabaseSetupController extends AbstractController
@@ -30,13 +31,19 @@ class DatabaseSetupController extends AbstractController
     private $connectionSuccessMessage;
     private $connectionFailedMessage;
     private $configRepository;
+     /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     private $entityManager;
 
-    public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager)
+    public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager, LoggerInterface $logger)
     {
         $this->configRepository = $configRepository;
         $this->entityManager = $entityManager;
+        $this->logger = $logger;
+        
     }
 
     /**
@@ -46,24 +53,21 @@ class DatabaseSetupController extends AbstractController
     {
 
         try {
-
             $submitted = false;
-
-            $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            try {
+                // Do you have a DB ? Is it filled yet ? Do you have permission to install?
+                $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            } catch (Exception $e){
+                if($e instanceof TableNotFoundException){
+                  //DO NOTHING HERE, this means that you have a DB but it's still empty
+                }
+            }
+          
             //to help voter decide whether we allow access to install process again or not
             if(!empty($config)){
               if($config->getName() === 'allow_install'){
                     $this->denyAccessUnlessGranted('DATABASE_EDIT', $config); }
-            } else {
-
-                // will be used by the InstallVoter to determine access to all install routes
-                $config = new Config();
-                $config->setName('allow_install');
-                $config->setValue('true');
-                $this->entityManager->persist($config);
-                $this->entityManager->flush();
-            
-            }
+            } 
 
             //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
@@ -116,8 +120,7 @@ class DatabaseSetupController extends AbstractController
             $form->handleRequest($request);
     
             // send database parameters to .env.local
-            if ($form->isSubmitted() && $form->isValid()){
-
+            if ($form->isSubmitted() && $form->isValid()){    
                 $envLocal = __DIR__.'/../../.env.local';
                 // we edit the database connection parameters with form input
                 $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
@@ -179,7 +182,6 @@ class DatabaseSetupController extends AbstractController
                             }
                     } catch (Exception $e){
                         if($e instanceof InvalidArgumentException){
-                            // continue;
                             // force user to change the default Symfony secret for security
                             if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
                                 $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
@@ -232,8 +234,16 @@ class DatabaseSetupController extends AbstractController
   
         try {
 
-            //to help voter decide whether we allow access to install process again or not
-            $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            try {
+                // Do you have a DB ? Is it filled yet ? Do you have permission to install?
+                $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            } catch (Exception $e){
+                if($e instanceof TableNotFoundException){
+                  //DO NOTHING HERE, this means that you have a DB but it's still empty
+                }
+            }
+
+            // //to help voter decide whether we allow access to install process again or not
             if(!empty($config)){
                 if($config->getName() === 'allow_install'){
                     $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
@@ -280,7 +290,7 @@ class DatabaseSetupController extends AbstractController
         
 
         } catch(ConnectionException  | DBALException  | Exception $e){
-
+// dd($e);
             // if the database doesn't exist yet, ask user to go create it
             if($e instanceof ConnectionException){
                 $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
@@ -290,11 +300,18 @@ class DatabaseSetupController extends AbstractController
                 ]);
             }
 
+            if($e instanceof TableNotFoundException ){
+                return $this->render('database_setup/database_connection.html.twig', [
+                    'connection_success_message' =>  $this->connectionSuccessMessage,
+                    'connection_failed_message' => $this->connectionFailedMessage,
+                ]);
+            }
+
             if($e instanceof AccessDeniedException ) {
                 return $this->redirectToRoute('login');
             }
-
-             return $this->redirectToRoute('database_setup');
+            //TODO : there is STILL an issue, I end up here when I shouldn't
+            return $this->redirectToRoute('database_setup');
         } 
         
         
