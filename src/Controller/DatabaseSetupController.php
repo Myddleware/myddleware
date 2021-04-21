@@ -311,7 +311,7 @@ class DatabaseSetupController extends AbstractController
         try {
 
             $config = $this->configRepository->findOneByAllowInstall('allow_install');
-            dump($config);
+        
             //to help voter decide whether we allow access to install process again or not
             if(!empty($config)){
                 if($config->getName() === 'allow_install'){
@@ -350,7 +350,6 @@ class DatabaseSetupController extends AbstractController
                 ]);
 
         } catch (Exception $e){
-    //   dd($e);
             if($e instanceof AccessDeniedException ) {
                 return $this->redirectToRoute('login');
             }
