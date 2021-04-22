@@ -72,6 +72,7 @@ class rulecore
 	protected $manual;
 	protected $key;
 	protected $limit = 100;
+	protected $offset = 0;
 	protected $limitReadCommit = 1000;
 	protected $tools;
 	protected $configParams;
@@ -493,7 +494,8 @@ class rulecore
 		$read['date_ref'] = $this->ruleParams['datereference'];
 		$read['ruleParams'] = $this->ruleParams;
 		$read['fields'] = $this->sourceFields;
-		$read['offset'] = 0;
+		$read['offset'] = $this->offset;
+		$read['limit'] = $this->limit;
 		$read['jobId'] = $this->jobId;
 		$read['manual'] = $this->manual;
 		$read['call_type'] = 'read';
@@ -508,8 +510,7 @@ class rulecore
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
 			if ($connect === true) {												
-				$this->dataSource = $this->solutionSource->readData($read);
-				
+				$this->dataSource = $this->solutionSource->readData($read);				
 				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (
 						!empty($this->dataSource['count'])
@@ -548,7 +549,12 @@ class rulecore
 	// This function run only when the limit call has been reached
 	protected function validateReadDataSource() {
 		if (!empty($this->dataSource['values'])) {
-			foreach ($this->dataSource['values'] as $value) {
+			$dataSourceValues = $this->dataSource['values'];
+			
+			// Order data in the date_modified order
+			$modified  = array_column($dataSourceValues, 'date_modified');
+			array_multisort($modified, SORT_DESC, $dataSourceValues);		
+			foreach ($dataSourceValues as $value) {
 				// Check if the previous record has the same date_modified than the current record
 				if (
 						empty($previousValue)   // first call

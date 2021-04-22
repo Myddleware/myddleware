@@ -1027,7 +1027,7 @@ class hubspotcore extends solution
                     and (!empty($resultOffset['exec']['hasMore']) // No more data to read
                          or !empty($resultOffset['exec']['has-more'])
                         )
-                    and count($result['exec'][$keyResult]) < ($param['ruleParams']['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
+                    and count($result['exec'][$keyResult]) < ($param['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
                 );
             }
             // Module Company or Engagement
@@ -1088,7 +1088,7 @@ class hubspotcore extends solution
                     and (!empty($resultOffset['exec']['hasMore']) // No more data to read
                          or !empty($resultOffset['exec']['has-more'])
                         )
-                    and count($result['exec']['results']) < ($param['ruleParams']['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
+                    and count($result['exec']['results']) < ($param['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
                 );
             }
         } else {
@@ -1111,7 +1111,7 @@ class hubspotcore extends solution
         // If we have read all records we set the migration mode to false and let the read function set the reference date thanks to the default value '1970-01-01 00:00:00'
         if (
                 empty($result['exec']['results']) // We can have another index than result, with deal_pipeline for example
-             or count($result['exec']['results']) < ($param['ruleParams']['limit'] - 1) // (-1 see method rule->setLimit)
+             or count($result['exec']['results']) < ($param['limit'] - 1) // (-1 see method rule->setLimit)
         ) {
             $this->migrationMode = false;
             $result['date_ref'] = '1970-01-01 00:00:00';

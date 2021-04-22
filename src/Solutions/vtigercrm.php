@@ -332,8 +332,8 @@ class vtigercrmcore extends solution
             if (empty($param['offset'])) {
                 $param['offset'] = 0;
             }
-            if (empty($param['ruleParams']['limit'])) {
-                $param['ruleParams']['limit'] = 100;
+            if (empty($param['limit'])) {
+                $param['limit'] = 100;
             }
 
             $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
@@ -370,7 +370,7 @@ class vtigercrmcore extends solution
                 $orderby = '';
             }
 
-            $dataLeft = $param['ruleParams']['limit'];
+            $dataLeft = $param['limit'];
             do {
                 $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
                 // TODO: Considerare di implementare Sync API in VtigerClient

@@ -461,7 +461,7 @@ class prestashopcore extends solution
 				unset($param['fields'][array_search('current_state', $param['fields'])]);
 			}
 
-			$opt['limit'] = $param['ruleParams']['limit'];
+			$opt['limit'] = $param['limit'];
 			$opt['resource'] = $param['module'].'&date=1';
 			$opt['display'] = '[';
 			foreach ($param['fields'] as $field) {
@@ -614,7 +614,7 @@ class prestashopcore extends solution
 
                 // Ajout des champs obligatoires
                 $param['fields'] = $this->addRequiredField($param['fields'], $searchModule);
-                $opt['limit'] = $param['ruleParams']['limit'];
+                $opt['limit'] = $param['limit'];
                 $opt['resource'] = $searchModule.'&date=1';
                 $opt['display'] = 'full';
 

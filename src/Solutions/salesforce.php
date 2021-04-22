@@ -339,8 +339,8 @@ class salesforcecore extends solution {
 		$queryOrder = '';
 		$queryLimit = '';
 		$queryOffset = '';
-		if (empty($param['ruleParams']['limit'])) {
-			$param['ruleParams']['limit'] = 100;
+		if (empty($param['limit'])) {
+			$param['limit'] = 100;
 		}
 		if (!isset($param['offset'])) {
 			$param['offset'] = 0;
@@ -370,7 +370,7 @@ class salesforcecore extends solution {
 			$queryOrder = $this->getOrder($param);	
 		
 			// Gstion du LIMIT
-			$queryLimit .= "+LIMIT+" . $param['ruleParams']['limit']; // Ajout de la limite souhaitée
+			$queryLimit .= "+LIMIT+" . $param['limit']; // Ajout de la limite souhaitée
 			
 			// On lit les données dans Salesforce
 			do {		
@@ -422,7 +422,7 @@ class salesforcecore extends solution {
 						$row = array();
 					}
 					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
-					$param['offset'] += $param['ruleParams']['limit'];
+					$param['offset'] += $param['limit'];
 					// Récupération de la date de référence de l'avant dernier enregistrement afin de savoir si on doit faire un appel supplémentaire 
 					// currentCount -2 car si 5 résultats dans la tableau alors on veut l'entrée 3 (l'index des tableau commence à 0)
 					$previousRefDate = '';
@@ -438,7 +438,7 @@ class salesforcecore extends solution {
 			// 1.	Le nombre de résultat du dernier appel est égal à la limite
 			// 2.	Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement 
 			while (
-						$currentCount == $param['ruleParams']['limit']
+						$currentCount == $param['limit']
 					&& !empty($previousRefDate)
 					&& $previousRefDate == $result['date_ref']	
 			);
@@ -447,7 +447,7 @@ class salesforcecore extends solution {
 			// alors on supprime le dernier enregistrement et on mets à jour la date de référence
 			// Ce dernier enregistrement sera lu la prochaine fois
 			if (
-					$currentCount == $param['ruleParams']['limit']	
+					$currentCount == $param['limit']	
 				&& !empty($result['values'][$record['Id']]) // $record['Id'] contient le dernier id lu	
 			) {
 				unset($result['values'][$record['Id']]);

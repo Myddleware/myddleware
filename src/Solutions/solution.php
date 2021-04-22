@@ -283,8 +283,8 @@ class solutioncore
     public function readData($param)
     {
 		try { // try-catch Myddleware
-			if (empty($param['ruleParams']['limit'])) {
-				$param['ruleParams']['limit'] = 100;
+			if (empty($param['limit'])) {
+				$param['limit'] = 100;
 			}
 			if (empty($param['offset'])) {
                 $param['offset'] = 0;

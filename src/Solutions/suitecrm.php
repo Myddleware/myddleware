@@ -492,7 +492,7 @@ class suitecrmcore extends solution
 			}
 		}
 		// On continue si le nombre de résultat du dernier appel est égal à la limite
-		while ($currentCount == $this->limitCall and $totalCount < $param['ruleParams']['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
+		while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
 		// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
 		if (!empty($paramSave)) {
 			$resultRel = $this->readRelationship($paramSave, $result);
@@ -528,8 +528,8 @@ class suitecrmcore extends solution
 
     protected function readRelationship($param, $dataParent)
     {
-        if (empty($param['ruleParams']['limit'])) {
-            $param['ruleParams']['limit'] = 100;
+        if (empty($param['limit'])) {
+            $param['limit'] = 100;
         }
         $result['error'] = '';
         $i = 0;
@@ -549,7 +549,7 @@ class suitecrmcore extends solution
                     'deleted' => '0',
                     'order_by' => '',
                     'offset' => 0,
-                    'limit' => $param['ruleParams']['limit'],
+                    'limit' => $param['limit'],
                 ];
                 $get_entry_list_result = $this->call('get_relationships', $get_relationships_parameters);
 

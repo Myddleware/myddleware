@@ -132,8 +132,8 @@ class woocommercecore extends solution {
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
-            if(empty($param['ruleParams']['limit'])){
-                $param['ruleParams']['limit'] = $this->defaultLimit;
+            if(empty($param['limit'])){
+                $param['limit'] = $this->defaultLimit;
             }
 
             // adding query parameters into the request

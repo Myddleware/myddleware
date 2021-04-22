@@ -16,7 +16,7 @@
 /config/packages/public/parameters_custom.yml
 
 # Custom directory
-/src/Myddleware/RegleBundle/Custom/*
+/src/Custom/*
 
 # Managed by Composer
 /app/bootstrap.php.cache
