@@ -242,3 +242,10 @@ $fieldsRelate = array (
          'customer_id'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
     )
 );
+
+
+// Metadata override if needed
+$file = __DIR__.'/../../../Custom/Solutions/lib/woocommerce/metadata.php';
+if(file_exists($file)){
+	require_once($file);
+}						
