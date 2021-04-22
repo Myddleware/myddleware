@@ -55,4 +55,5 @@ Adesso si puo riportare l'ambiente nella modalità PRODUCTION con il seguente co
 
 ```
 make prod
+make fix
 ``` 
