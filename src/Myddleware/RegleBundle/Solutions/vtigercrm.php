@@ -1204,8 +1204,8 @@ class vtigercrmcore extends solution
         try {
             $resultDelete = $this->getVtigerClient()->delete($id);
 
-            if (empty($resultDelete['success']) || empty($resultDelete['status']) || $resultDelete['status'] != 'successful') {
-                throw new \Exception($resultDelete["error"]["message"] ?? "Error");
+            if (empty($resultDelete['success']) || empty($resultDelete['result']['status']) || $resultDelete['result']['status'] != 'successful') {
+                throw new \Exception($resultDelete["error"]["message"] ?? json_encode($resultDelete));
             }
 
             $result[$idDoc] = [
