@@ -821,9 +821,10 @@ class databasecore extends solution {
 		return parent::get_module_fields_relate($module, $param);
 	}
 
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module) {
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
+
 			// List only real database field so we remove the Myddleware_element_id field
 			unset($fieldsSource['Myddleware_element_id']);
 			if(!empty($fieldsSource)) {
@@ -868,7 +869,7 @@ class databasecore extends solution {
 					$params[] = $idParam;
 					$params[] = $dateParam;
 					$params[] = $deletionParam;
-				} else {
+                } else {
 					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(
 								'id' => 'targetFieldId',

@@ -4,6 +4,9 @@ namespace Myddleware\RegleBundle\Solutions;
 
 class microsoftsqlbase extends microsoftsqlcore
 {
+    protected $readDeletion = true;
+    protected $sendDeletion = true;
+
     public function read($param)
     {
         // Redefine reference date format (add milliseconds)

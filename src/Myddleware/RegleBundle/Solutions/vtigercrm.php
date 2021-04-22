@@ -32,6 +32,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class vtigercrmcore extends solution
 {
     /**
+     * Apply deletion of record as target.
+     *
+     * @param bool $sendDeletion
+     */
+    protected $sendDeletion = true;
+
+    /**
      * Limit number of element per API call.
      *
      * @var int

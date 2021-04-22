@@ -13,7 +13,8 @@ CREATE TABLE A_Persone (
     LastName VARCHAR(255),
     FirstName VARCHAR(255),
     Email VARCHAR(255),
-    City VARCHAR(255)
+    City VARCHAR(255),
+    IsDeleted BIT
 );
 
 INSERT INTO A_Persone (PersonID, LastName, FirstName, Email, City) VALUES (2682, 'Rossi', 'Mario', 'mario@rossi.it', 'Milano')
