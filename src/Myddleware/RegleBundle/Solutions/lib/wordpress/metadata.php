@@ -302,3 +302,8 @@ $fieldsRelate = array(
     )
 );
 
+// Metadata override if needed
+$file = __DIR__.'/../../../Custom/Solutions/lib/wordpress/metadata.php';
+if(file_exists($file)){
+	require_once($file);
+}						
