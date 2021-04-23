@@ -60,6 +60,7 @@ class rulecore {
 	protected $manual;
 	protected $key;
 	protected $limit = 100;
+	protected $offset = 0;
 	protected $limitReadCommit = 1000;
 	protected $tools;
 	protected $api; 	// Specify if the class is called by the API
@@ -424,7 +425,7 @@ class rulecore {
 		$read['date_ref'] = $this->ruleParams['datereference'];
 		$read['ruleParams'] = $this->ruleParams;
 		$read['fields'] = $this->sourceFields;
-		$read['offset'] = 0;
+		$read['offset'] = $this->offset;
 		$read['limit'] = $this->limit;
 		$read['jobId'] = $this->jobId;
 		$read['manual'] = $this->manual;
