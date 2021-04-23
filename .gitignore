@@ -85,6 +85,7 @@ NOTES.md
 /opencrmitalia_modules
 /vtiger.json
 /modules_local/
+/custom-rule.sh
 
 # OCI:START
 !/src/Myddleware/RegleBundle/Custom/Solutions/database.php
