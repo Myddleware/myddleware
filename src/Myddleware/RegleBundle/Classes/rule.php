@@ -505,7 +505,7 @@ class rulecore {
 				break;
 			}
 			if (empty($this->dataSource['values'])) {
-				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].' with value of '.$previousValue['date_modified'].'. Myddleware cannot garanty all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribut in job and rule class.');
+				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].' with value of ('.$previousValue['date_modified'].'). Myddleware cannot garanty all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribut in job and rule class.');
 			}
 			return true;
 		}
