@@ -275,7 +275,7 @@ class DatabaseSetupController extends AbstractController
             }
             
             // will be used by the InstallVoter to determine access to all install routes
-            if(!$config){
+            if(empty($config)){
                 $config = new Config();
                 $config->setName('allow_install');
             }
