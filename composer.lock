@@ -2311,16 +2311,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.8.1",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1"
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/35ea11d335fd638b5882ff1725228b3d35496ab1",
-                "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/dc960a912984efb74d0a90222870c72c87f10c91",
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91",
                 "shasum": ""
             },
             "require": {
@@ -2380,9 +2380,9 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/1.8.1"
+                "source": "https://github.com/guzzle/psr7/tree/1.8.2"
             },
-            "time": "2021-03-21T16:25:00+00:00"
+            "time": "2021-04-26T09:17:50+00:00"
         },
         {
             "name": "iadvize/apirestclient",
@@ -3051,69 +3051,53 @@
             "time": "2021-02-25T21:54:58+00:00"
         },
         {
-            "name": "lcobucci/jwt",
-            "version": "3.4.5",
+            "name": "lcobucci/clock",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "511629a54465e89a31d3d7e4cf0935feab8b14c1"
+                "url": "https://github.com/lcobucci/clock.git",
+                "reference": "353d83fe2e6ae95745b16b3d911813df6a05bfb3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/511629a54465e89a31d3d7e4cf0935feab8b14c1",
-                "reference": "511629a54465e89a31d3d7e4cf0935feab8b14c1",
+                "url": "https://api.github.com/repos/lcobucci/clock/zipball/353d83fe2e6ae95745b16b3d911813df6a05bfb3",
+                "reference": "353d83fe2e6ae95745b16b3d911813df6a05bfb3",
                 "shasum": ""
             },
             "require": {
-                "ext-mbstring": "*",
-                "ext-openssl": "*",
-                "php": "^5.6 || ^7.0"
+                "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "mikey179/vfsstream": "~1.5",
-                "phpmd/phpmd": "~2.2",
-                "phpunit/php-invoker": "~1.1",
-                "phpunit/phpunit": "^5.7 || ^7.3",
-                "squizlabs/php_codesniffer": "~2.3"
-            },
-            "suggest": {
-                "lcobucci/clock": "*"
+                "infection/infection": "^0.17",
+                "lcobucci/coding-standard": "^6.0",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-deprecation-rules": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpstan/phpstan-strict-rules": "^0.12",
+                "phpunit/php-code-coverage": "9.1.4",
+                "phpunit/phpunit": "9.3.7"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.1-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
-                    "Lcobucci\\JWT\\": "src"
-                },
-                "files": [
-                    "compat/class-aliases.php",
-                    "compat/json-exception-polyfill.php",
-                    "compat/lcobucci-clock-polyfill.php"
-                ]
+                    "Lcobucci\\Clock\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3-Clause"
+                "MIT"
             ],
             "authors": [
                 {
-                    "name": "Luís Otávio Cobucci Oblonczyk",
-                    "email": "lcobucci@gmail.com",
-                    "role": "Developer"
+                    "name": "Luís Cobucci",
+                    "email": "lcobucci@gmail.com"
                 }
             ],
-            "description": "A simple library to work with JSON Web Token and JSON Web Signature",
-            "keywords": [
-                "JWS",
-                "jwt"
-            ],
+            "description": "Yet another clock abstraction",
             "support": {
-                "issues": "https://github.com/lcobucci/jwt/issues",
-                "source": "https://github.com/lcobucci/jwt/tree/3.4.5"
+                "issues": "https://github.com/lcobucci/clock/issues",
+                "source": "https://github.com/lcobucci/clock/tree/2.0.x"
             },
             "funding": [
                 {
@@ -3125,7 +3109,83 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2021-02-16T09:40:01+00:00"
+            "time": "2020-08-27T18:56:02+00:00"
+        },
+        {
+            "name": "lcobucci/jwt",
+            "version": "4.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lcobucci/jwt.git",
+                "reference": "ae4165a76848e070fdac691e773243d10cd06ce1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/ae4165a76848e070fdac691e773243d10cd06ce1",
+                "reference": "ae4165a76848e070fdac691e773243d10cd06ce1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "ext-openssl": "*",
+                "lcobucci/clock": "^2.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "infection/infection": "^0.20",
+                "lcobucci/coding-standard": "^6.0",
+                "mikey179/vfsstream": "^1.6",
+                "phpbench/phpbench": "^0.17",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-deprecation-rules": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpstan/phpstan-strict-rules": "^0.12",
+                "phpunit/php-invoker": "^3.1",
+                "phpunit/phpunit": "^9.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Lcobucci\\JWT\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Luís Cobucci",
+                    "email": "lcobucci@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A simple library to work with JSON Web Token and JSON Web Signature",
+            "keywords": [
+                "JWS",
+                "jwt"
+            ],
+            "support": {
+                "issues": "https://github.com/lcobucci/jwt/issues",
+                "source": "https://github.com/lcobucci/jwt/tree/4.0.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/lcobucci",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/lcobucci",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2021-03-23T23:47:22+00:00"
         },
         {
             "name": "leafo/lessphp",
@@ -4270,32 +4330,34 @@
         },
         {
             "name": "roave/better-reflection",
-            "version": "4.3.0",
+            "version": "4.12.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/BetterReflection.git",
-                "reference": "aa017e698b47feed410721f3d20e2bacfcba59d5"
+                "reference": "73c376c7245b2928837ed1e8bef446f57f1148a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/aa017e698b47feed410721f3d20e2bacfcba59d5",
-                "reference": "aa017e698b47feed410721f3d20e2bacfcba59d5",
+                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/73c376c7245b2928837ed1e8bef446f57f1148a0",
+                "reference": "73c376c7245b2928837ed1e8bef446f57f1148a0",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "jetbrains/phpstorm-stubs": "2019.3",
-                "nikic/php-parser": "^4.4.0",
-                "php": ">=7.2.0,<7.5.0",
-                "phpdocumentor/reflection-docblock": "^5.1.0",
-                "phpdocumentor/type-resolver": "^1.1.0",
-                "roave/signature": "^1.0"
+                "nikic/php-parser": "^4.6.0",
+                "php": ">=7.4.1,<7.5.0",
+                "phpdocumentor/reflection-docblock": "^5.2.2",
+                "phpdocumentor/type-resolver": "^1.4.0",
+                "roave/signature": "^1.3"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^7.0.2",
-                "phpstan/phpstan": "^0.12.25",
-                "phpunit/phpunit": "^8.5.4",
-                "vimeo/psalm": "3.11.2"
+                "doctrine/coding-standard": "^8.2.0",
+                "infection/infection": "^0.20.0",
+                "phpstan/phpstan": "0.12.25",
+                "phpunit/phpunit": "^9.4.4",
+                "roave/infection-static-analysis-plugin": "^1.2",
+                "vimeo/psalm": "^4.2"
             },
             "suggest": {
                 "composer/composer": "Required to use the ComposerSourceLocator"
@@ -4340,32 +4402,32 @@
             "description": "Better Reflection - an improved code reflection API",
             "support": {
                 "issues": "https://github.com/Roave/BetterReflection/issues",
-                "source": "https://github.com/Roave/BetterReflection/tree/4.3.0"
+                "source": "https://github.com/Roave/BetterReflection/tree/4.12.2"
             },
-            "time": "2020-05-28T14:10:32+00:00"
+            "time": "2020-12-17T17:48:54+00:00"
         },
         {
             "name": "roave/signature",
-            "version": "1.2.0",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/Signature.git",
-                "reference": "577ee14d2abaeb315a5cd2d86d7e3df46a7dac56"
+                "reference": "5b5bb9499cfbcc78d9f472e03af1e97e4341ec7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/Signature/zipball/577ee14d2abaeb315a5cd2d86d7e3df46a7dac56",
-                "reference": "577ee14d2abaeb315a5cd2d86d7e3df46a7dac56",
+                "url": "https://api.github.com/repos/Roave/Signature/zipball/5b5bb9499cfbcc78d9f472e03af1e97e4341ec7c",
+                "reference": "5b5bb9499cfbcc78d9f472e03af1e97e4341ec7c",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3 || ^7.4"
+                "php": "7.4.*|8.0.*"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^8.1",
-                "infection/infection": "^0.17.5",
-                "phpunit/phpunit": "^9.3",
-                "vimeo/psalm": "^3.16"
+                "doctrine/coding-standard": "^8.2",
+                "infection/infection": "^0.20.2",
+                "phpunit/phpunit": "^9.5.1",
+                "vimeo/psalm": "^4.4"
             },
             "type": "library",
             "autoload": {
@@ -4380,9 +4442,9 @@
             "description": "Sign and verify stuff",
             "support": {
                 "issues": "https://github.com/Roave/Signature/issues",
-                "source": "https://github.com/Roave/Signature/tree/1.2.0"
+                "source": "https://github.com/Roave/Signature/tree/1.4.0"
             },
-            "time": "2020-10-01T08:18:39+00:00"
+            "time": "2021-01-25T09:39:37+00:00"
         },
         {
             "name": "sensio/framework-extra-bundle",
@@ -7484,16 +7546,16 @@
         },
         {
             "name": "phpstan/phpstan-symfony",
-            "version": "0.12.26",
+            "version": "0.12.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-symfony.git",
-                "reference": "69d0cbf86ab953232fdf164ca05eabcbb490da58"
+                "reference": "a3b3976441534082e971228f0ad4d5ab51ba20b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-symfony/zipball/69d0cbf86ab953232fdf164ca05eabcbb490da58",
-                "reference": "69d0cbf86ab953232fdf164ca05eabcbb490da58",
+                "url": "https://api.github.com/repos/phpstan/phpstan-symfony/zipball/a3b3976441534082e971228f0ad4d5ab51ba20b1",
+                "reference": "a3b3976441534082e971228f0ad4d5ab51ba20b1",
                 "shasum": ""
             },
             "require": {
@@ -7548,9 +7610,9 @@
             "description": "Symfony Framework extensions and rules for PHPStan",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-symfony/issues",
-                "source": "https://github.com/phpstan/phpstan-symfony/tree/0.12.26"
+                "source": "https://github.com/phpstan/phpstan-symfony/tree/0.12.27"
             },
-            "time": "2021-04-19T21:32:53+00:00"
+            "time": "2021-04-25T16:29:33+00:00"
         },
         {
             "name": "sabre/event",
