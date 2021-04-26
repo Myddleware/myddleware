@@ -112,8 +112,8 @@ class DatabaseSetupController extends AbstractController
             }     
 
             // force user to change the default Symfony secret for security
-            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
-                $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
+            if($database->getSecret() === 'Thissecretisnotsosecretchangeit' || $database->getSecret() === null || empty($database)) {
+                $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware')); 
             }
 
             $form = $this->createForm(DatabaseSetupType::class, $database);
@@ -183,7 +183,7 @@ class DatabaseSetupController extends AbstractController
                     } catch (Exception $e){
                         if($e instanceof InvalidArgumentException){
                             // force user to change the default Symfony secret for security
-                            if($database->getSecret() === 'ThisTokenIsNotSoSecretChangeIt' || $database->getSecret() === null) {
+                            if($database->getSecret() === 'Thissecretisnotsosecretchangeit' || $database->getSecret() === null || empty($database)) {
                                 $database->setSecret(md5(rand(0,10000).date('YmdHis').'myddleware'));
                             }
 
@@ -290,7 +290,7 @@ class DatabaseSetupController extends AbstractController
         
 
         } catch(ConnectionException  | DBALException  | Exception $e){
-// dd($e);
+
             // if the database doesn't exist yet, ask user to go create it
             if($e instanceof ConnectionException){
                 $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
