@@ -1,43 +1,43 @@
 parameters:
 #    regle.example.class: Myddleware\RegleBundle\Example
 
-services:  
-             
+services:
+
      kernel.listener.request_listener:
         class: Myddleware\RegleBundle\EventListener\RequestListener
         tags:
            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-     myddleware_session.service:  
+     myddleware_session.service:
          class: Myddleware\RegleBundle\Service\SessionService
          arguments: ["@session"]
-         
-     formula.myddleware:  
+
+     formula.myddleware:
          class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
-     myddleware_job.job:  
+     myddleware_job.job:
          class: Myddleware\RegleBundle\Classes\job
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.home:  
+     myddleware.home:
          class: Myddleware\RegleBundle\Classes\home
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_tools.tools:  
+     myddleware_tools.tools:
          class: Myddleware\RegleBundle\Classes\tools
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.document:  
+     myddleware.document:
          class: Myddleware\RegleBundle\Classes\document
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", %param%]
-     myddleware.template:  
+     myddleware.template:
          class: Myddleware\RegleBundle\Classes\template
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.jobScheduler:  
+     myddleware.jobScheduler:
          class: Myddleware\RegleBundle\Classes\jobScheduler
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.upgrade:  
+     myddleware.upgrade:
          class: Myddleware\RegleBundle\Classes\upgrade
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.notification:  
+     myddleware.notification:
          class: Myddleware\RegleBundle\Classes\notification
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.permission:  
+     myddleware.permission:
          class: Myddleware\RegleBundle\Classes\permission
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware.twig.user_extension:
@@ -49,7 +49,7 @@ services:
         class: Myddleware\RegleBundle\Twig\RegleExtension
         tags:
             - { name: twig.extension }
-     
+
      # Rule services
      myddleware_rule.salesforce:
          class: Myddleware\RegleBundle\Solutions\salesforce
@@ -74,9 +74,6 @@ services:
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.vtigercrm:
          class: Myddleware\RegleBundle\Solutions\vtigercrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.opencrmitalia:
-         class: Myddleware\RegleBundle\Solutions\opencrmitalia
          arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
      myddleware_rule.bittle:
          class: Myddleware\RegleBundle\Solutions\bittle
@@ -161,4 +158,4 @@ services:
          class: Myddleware\RegleBundle\Form\Type\ProfileFormType
          tags:
              - { name: form.type, alias: regle_user_profile }
-  
+
