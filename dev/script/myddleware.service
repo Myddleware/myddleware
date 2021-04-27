@@ -1,0 +1,15 @@
+# /etc/systemd/system/myddleware.service
+
+[Unit]
+Description=Myddleware Restart Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/etc/myddleware/
+ExecStart=/bin/bash /etc/myddleware/docker-compose.sh
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target
