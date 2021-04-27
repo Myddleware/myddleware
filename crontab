@@ -1,2 +1,0 @@
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-*/5 * * * * root bash /var/www/html/myddleware-cron.sh 2>&1

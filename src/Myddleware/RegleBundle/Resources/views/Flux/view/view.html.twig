@@ -48,7 +48,7 @@
 
 			{% if doc %}				
 				{# si le flux n'est pas au statut Cancel ou Close #}
-				{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) %}
+				{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) or is_granted('ROLE_SUPER_ADMIN') %}
 				
 					<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}" title="{{'view_flux.btn.reload'|trans}}">
 						<button type="button" class="btn-mydinv">

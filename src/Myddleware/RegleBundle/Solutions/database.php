@@ -5,10 +5,10 @@
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com	
- 
+ * @link http://www.myddleware.com
+
  This file is part of Myddleware.
- 
+
  Myddleware is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -28,14 +28,14 @@ namespace Myddleware\RegleBundle\Solutions;
 use Symfony\Bridge\Monolog\Logger;
 use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType; 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class databasecore extends solution { 
+class databasecore extends solution {
 
 	protected $driver;
 	protected $pdo;
 	protected $charset = 'utf8';
-	
+
 	protected $stringSeparatorOpen = '`';
 	protected $stringSeparatorClose = '`';
 
@@ -44,7 +44,7 @@ class databasecore extends solution {
 		try {
 			try {
 				$this->pdo = $this->generatePdo();
-			    $this->connexion_valide = true;	
+			    $this->connexion_valide = true;
 			} catch (\PDOException $e) {
 				$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->logger->error($error);
@@ -56,8 +56,8 @@ class databasecore extends solution {
 			return array('error' => $error);
 		}
 	} // login($paramConnexion)
- 	
-	public function getFieldsLogin() {	
+
+	public function getFieldsLogin() {
 		return array(
 					 array(
                             'name' => 'login',
@@ -86,12 +86,12 @@ class databasecore extends solution {
                         )
 		);
 	}
-	
+
 	// Get all tables from the database
-	public function get_modules($type = 'source') {		
+	public function get_modules($type = 'source') {
 		try{
 			$modules = array();
-			
+
 			// Send the query to the database
 			$q = $this->pdo->prepare($this->get_query_show_tables());
 			$exec = $q->execute();
@@ -105,20 +105,20 @@ class databasecore extends solution {
 			foreach ($fetchAll as $table) {
 				if(isset($table[0]))
 					$modules[$table[0]] = $table[0];
-			}		
+			}
 			return $modules;
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			return $error;			
+			return $error;
 		}
-	} 	
-	
+	}
+
 	// Get all fields from the table selected
 	public function get_module_fields($module, $type = 'source') {
 		parent::get_module_fields($module, $type);
 		try{
 			// parent::get_module_fields($module, $type);
-			// Get all fields of the table in input	
+			// Get all fields of the table in input
 			$q = $this->pdo->prepare($this->get_query_describe_table($module));
 			$exec = $q->execute();
 			if(!$exec) {
@@ -126,14 +126,14 @@ class databasecore extends solution {
 				throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
 			}
 			// Format the fields
-			$fields = $q->fetchAll();		
+			$fields = $q->fetchAll();
 			// Get field ID
-			$idFields = $this->getIdFields($module,$type,$fields);			
-		
+			$idFields = $this->getIdFields($module,$type,$fields);
+
 			foreach ($fields as $field) {
 				// Convert field to be compatible with Myddleware. For example, error happens when there is space in the field name
 				$field[$this->fieldName] = rawurlencode($field[$this->fieldName]);
-				
+
 				$this->moduleFields[$field[$this->fieldName]] = array(
 						'label' => $field[$this->fieldLabel],
 						'type' => $field[$this->fieldType],
@@ -154,7 +154,7 @@ class databasecore extends solution {
 				}
 				// If the field contains the id indicator, we add it to the fieldsRelate list
 				if (!empty($idFields)) {
-					foreach ($idFields as $idField) {		
+					foreach ($idFields as $idField) {
 						if (strpos($field[$this->fieldName],$idField) !== false) {
 							$this->fieldsRelate[$field[$this->fieldName]] = array(
 									'label' => $field[$this->fieldLabel],
@@ -167,10 +167,10 @@ class databasecore extends solution {
 					}
 				}
 			}
-			// Add relate field in the field mapping 
+			// Add relate field in the field mapping
 			if (!empty($this->fieldsRelate)) {
 				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}		
+			}
 			// Add field current ID in the relationships
 			if ($type == 'target') {
 				$this->fieldsRelate['Myddleware_element_id'] = array(
@@ -180,17 +180,17 @@ class databasecore extends solution {
 										'required' => false,
 										'required_relationship' => 0
 									);
-			}			
+			}
 			return $this->moduleFields;
 		}
 		catch (\Exception $e){
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			return false;
 		}
-	} // get_module_fields($module) 
-		
+	} // get_module_fields($module)
+
 	// Permet de récupérer le dernier enregistrement de la solution (utilisé pour tester le flux)
-	public function read_last($param) {		
+	public function read_last($param) {
 		$result = array();
 		$result['error'] = '';
 		// Decode field name (converted in method get_module_fields)
@@ -198,11 +198,11 @@ class databasecore extends solution {
 		try {
 			// Add requiered fields
 			if(!empty($param['ruleParams']['fieldId'])) {
-				$this->required_fields =  array('default' => array($param['ruleParams']['fieldId']));	
+				$this->required_fields =  array('default' => array($param['ruleParams']['fieldId']));
 			} elseif(!empty($param['ruleParams']['targetFieldId'])) {
-				$this->required_fields =  array('default' => array($param['ruleParams']['targetFieldId']));	
+				$this->required_fields =  array('default' => array($param['ruleParams']['targetFieldId']));
 			}
-			
+
 			$where = '';
 			// Generate the WHERE
 			if (!empty($param['query'])) {
@@ -212,7 +212,7 @@ class databasecore extends solution {
 					} else {
 						$where .= ' WHERE ';
 					}
-					// If key is id, it has to be replaced by the real name of the id in the target table 
+					// If key is id, it has to be replaced by the real name of the id in the target table
 					if ($key == 'id') {
 						if(!empty($param['ruleParams']['targetFieldId'])) {
 							$key = $param['ruleParams']['targetFieldId'];
@@ -224,24 +224,24 @@ class databasecore extends solution {
 					$where .= $this->stringSeparatorOpen.$key.$this->stringSeparatorClose." = '".$value."'";
 				}
 			} // else the function is called for a simulation (rule creation), the limit is manage in the query creation
-			
+
 			if(!isset($param['fields'])) {
 				$param['fields'] = array();
 			}
-		
-			$param['fields'] = array_unique($param['fields']);	
-			$param['fields'] = $this->addRequiredField($param['fields']);	
-			$param['fields'] = array_values($param['fields']);		
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);	
-			
+
+			$param['fields'] = array_unique($param['fields']);
+			$param['fields'] = $this->addRequiredField($param['fields']);
+			$param['fields'] = array_values($param['fields']);
+			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+
 			// Construction de la requête SQL
-			$param['limit'] = 1;	
-			$requestSQL = $this->get_query_select_header($param, 'read_last');		
+			$param['limit'] = 1;
+			$requestSQL = $this->get_query_select_header($param, 'read_last');
 			foreach ($param['fields'] as $field){
-				// If key is id, it has to be replaced by the real name of the id in the target table 
-				if ($field == 'id') {			
+				// If key is id, it has to be replaced by the real name of the id in the target table
+				if ($field == 'id') {
 					if(!empty($param['ruleParams']['targetFieldId'])) {
-						$field = $param['ruleParams']['targetFieldId'];			
+						$field = $param['ruleParams']['targetFieldId'];
 					}
 					else {
 						throw new \Exception('"targetFieldId" has to be specified for read the data in the target table.');
@@ -250,23 +250,23 @@ class databasecore extends solution {
 				$requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // Ajout de chaque champ souhaité
 			}
 			// Remove the last coma/space
-			$requestSQL = rtrim($requestSQL,' '); 
-			$requestSQL = rtrim($requestSQL,',').' '; 
+			$requestSQL = rtrim($requestSQL,' ');
+			$requestSQL = rtrim($requestSQL,',').' ';
 			$requestSQL .= "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 			$requestSQL .= $where; // $where vaut '' s'il n'y a pas, ça enlève une condition inutile.
 			$requestSQL .= $this->get_query_select_limit_offset($param, 'read_last'); // Add query limit
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read_last', $requestSQL);
-		
+
 			// Appel de la requête
 			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
-			
+
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
 				throw new \Exception('ReadLast: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
-			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);			
+			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
 			$row = array();
 			if(!empty($fetchAll[0])) {
 				foreach ($fetchAll[0] as $key => $value) {
@@ -279,19 +279,19 @@ class databasecore extends solution {
 						OR
 							(
 								!empty($param['ruleParams']['targetFieldId'])
-							&& $key === $param['ruleParams']['targetFieldId']						
+							&& $key === $param['ruleParams']['targetFieldId']
 							)
 					) { // ID non trouvé
 						$row[$key] = $value;
 						$row['id'] = $value;
-					} 
+					}
 					if(
 							!empty($param['ruleParams']['fieldDateRef'])
 						&& $key === $param['ruleParams']['fieldDateRef']
 					) {
 						$row[$key] = $value;
 						$row['date_modified'] = $value;
-					} 
+					}
 					// On doit faire le continue de façon extérieur car le fieldId peut être égal au fieldDateRef
 					if (!empty($row[$key])) {
 						continue;
@@ -302,7 +302,7 @@ class databasecore extends solution {
 				}
 				$result['values'] = $row;
 				$result['done'] = true;
-			} 
+			}
 			else {
 				$result['done'] = false;
 				$result['error'] = "No data found in ".$param['module'];
@@ -310,27 +310,27 @@ class databasecore extends solution {
 		}
 		catch (\Exception $e) {
 			$result['done'] = -1;
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';					
-		}					
+		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+		}
 		return $result;
 	} // read_last($param)
-	
+
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function read($param) {		
+	public function read($param) {
 		$result = array();
 		$result['count'] = 0;
 		$result['date_ref'] = $param['date_ref'];
 		// Decode field name (converted in method get_module_fields)
 		$param['fields'] = array_map('rawurldecode',$param['fields']);
 		try {
-			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)		
+			// On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)
 			if(empty($param['date_ref'])) {
 				$param['date_ref'] = 0;
 			}
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
 			}
-			
+
 			// Add the deletion field into the list field to be read if deletion is enabled on the rule
 			if (
 					!empty($param['ruleParams']['deletion'])
@@ -339,7 +339,7 @@ class databasecore extends solution {
 			) {
 				$param['fields'][] = $param['ruleParams']['deletionField'];
 			}
-			
+
 			// Add requiered fields
 			if(!isset($param['ruleParams']['fieldId'])) {
 				throw new \Exception('FieldId has to be specified for the read.');
@@ -348,7 +348,7 @@ class databasecore extends solution {
 				throw new \Exception('"fieldDateRef" has to be specified for the read.');
 			}
 			$this->required_fields =  array('default' => array($param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']));
-			
+
 			if(!isset($param['fields'])) {
 				$param['fields'] = array();
 			}
@@ -356,19 +356,19 @@ class databasecore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields']);
 			$param['fields'] = array_values($param['fields']);
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
+
 			// Query building
-			$query['select'] = $this->get_query_select_header($param, 'read');	
+			$query['select'] = $this->get_query_select_header($param, 'read');
 			// Build field list
 			foreach ($param['fields'] as $field){
 				// myddleware_generated isn't a real field in the database
 				if ($field != 'myddleware_generated') {
-					$query['select'] .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; // 
+					$query['select'] .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose. ", "; //
 				}
 			}
 			// Remove the last coma
-			$query['select'] = rtrim($query['select'],' '); 
-			$query['select'] = rtrim($query['select'],',').' '; 
+			$query['select'] = rtrim($query['select'],' ');
+			$query['select'] = rtrim($query['select'],',').' ';
 			$query['from'] = "FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
 
 			// if a specific query is requested we don't use date_ref
@@ -383,31 +383,37 @@ class databasecore extends solution {
 						}
 						$queryKey = $param['ruleParams']['fieldId'];
 					}
-					$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' "; 
+					$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' ";
 					$nbFilter--;
 					if ($nbFilter > 0){
-						$query['where'] .= " AND ";	
+						$query['where'] .= " AND ";
 					}
 				}
 			} else {
 				$query['where'] = " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " > '".$param['date_ref']."'";
 			}
-			
+
 			$query['order'] = " ORDER BY ".$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose. " ASC"; // Tri par date utilisateur
 			$query['limit'] = $this->get_query_select_limit_offset($param, 'read'); // Add query limit
-			
+
 			// Build query
 			$requestSQL = $this->buildQuery($param, $query);
-	
+
 			// Query validation
 			$requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
 			// Appel de la requête
-			$q = $this->pdo->prepare($requestSQL);		
+			$q = $this->pdo->prepare($requestSQL);
+            $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($pdoDriverName == 'dblib') {
+                $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            }
 			$exec = $q->execute();
-
-			if(!$exec) {
+			if ($exec === false) {
 				$errorInfo = $this->pdo->errorInfo();
+				if (empty($errorInfo[2])) {
+                    $errorInfo[2] = '['.$pdoDriverName.':'.$exec.'] '.implode(', ', $errorInfo);
+                }
 				throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
 			}
 			$fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
@@ -429,7 +435,7 @@ class databasecore extends solution {
 							// If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
 							if ((bool)strtotime($value)) {;
 								$row['date_modified'] = (string)date('Y-m-d H:i:s');
-							} else {							
+							} else {
 								$row['date_modified'] = date('Y-m-d H:i:s');
 							}
 							$result['date_ref'] = $value;
@@ -438,7 +444,7 @@ class databasecore extends solution {
 							// Encode the field to match with the fields retruned by method get_module_fields
 							$row[rawurlencode($key)] = $value;
 						}
-						// Manage deletion by adding the flag Myddleware_deletion to the record						
+						// Manage deletion by adding the flag Myddleware_deletion to the record
 						if (
 								!empty($param['ruleParams']['deletion'])
 							AND $param['ruleParams']['deletionField'] === $key
@@ -449,26 +455,26 @@ class databasecore extends solution {
 					}
 					$result['values'][$row['id']] = $row;
 				}
-			}		
-			// Search for delete data 
+			}
+			// Search for delete data
 			$result = $this->searchDeletionByComparison($param, $result);
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}	
+		}
 		return $result;
 	} // read($param)
-	
+
 	protected function searchDeletionByComparison($param, $result) {
 		// If check deletion by comparaison is selected on the rule param
 		if (
 				!empty($param['ruleParams']['deletion'])
 			AND	!empty($param['ruleParams']['deletionField'])
-			AND	$param['ruleParams']['deletionField'] == 'compareTable'	
+			AND	$param['ruleParams']['deletionField'] == 'compareTable'
 		) {
 			// Search all data in the source application (can take long time)
 			$requestSQL = 'SELECT '.$this->stringSeparatorOpen.$param['ruleParams']['fieldId'].$this->stringSeparatorClose.' FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose;
-			$q = $this->pdo->prepare($requestSQL);		
+			$q = $this->pdo->prepare($requestSQL);
 			$exec = $q->execute();
 			if(!$exec) {
 				$errorInfo = $this->pdo->errorInfo();
@@ -480,21 +486,21 @@ class databasecore extends solution {
 				// Format result
 				foreach ($fetchAll as $sourceTableRecord) {
 					$sourceTableRecords[$sourceTableRecord[$param['ruleParams']['fieldId']]] = $sourceTableRecord[$param['ruleParams']['fieldId']];
-				}				
+				}
 				// Get all records already manage by Myddleware for this rule
-				// Prepare query to get the fieldId from the orther rules with the same connectors			
+				// Prepare query to get the fieldId from the orther rules with the same connectors
 				$connection = $this->getConn();
 				$query = "	SELECT source_id, GROUP_CONCAT(type) type
-							FROM Document 
-							WHERE 
+							FROM Document
+							WHERE
 									global_status != 'Cancel'
 								AND rule_id = :id_rule
-							GROUP BY source_id";								
+							GROUP BY source_id";
 				$stmt = $connection->prepare($query);
 				$stmt->bindValue(":id_rule", $param['rule']['id']);
-				$stmt->execute();	   				
-				$documents = $stmt->fetchAll(); 
-				
+				$stmt->execute();
+				$documents = $stmt->fetchAll();
+
 				// Test all document found in Myddleware
 				foreach ($documents as $document) {
 					// if Myddleware record doesn't exist anymore in the source table
@@ -521,17 +527,17 @@ class databasecore extends solution {
 		}
 		return $result;
 	}
-	
+
 	// Permet de créer des données
-	public function create($param) {	
-		try {		
+	public function create($param) {
+		try {
 			// Get the target reference field
 			if(!isset($param['ruleParams']['targetFieldId'])) {
 				throw new \Exception('targetFieldId has to be specified for the data creation.');
 			}
-		
+
 			// For every document
-			foreach($param['data'] as $idDoc => $data) {					
+			foreach($param['data'] as $idDoc => $data) {
 				try {
 					unset($idTarget);
 					// Check control before create
@@ -540,10 +546,10 @@ class databasecore extends solution {
 					$sql = "INSERT INTO ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." (";
 					$values = "(";
 					// We build the query with every fields
-					foreach ($data as $key => $value) {				
+					foreach ($data as $key => $value) {
 						if($key == "target_id") {
 							continue;
-						// If the target reference field is in data sent, we save it to update the document	
+						// If the target reference field is in data sent, we save it to update the document
 						} elseif($key == $param['ruleParams']['targetFieldId']) {
 							$idTarget = $value;
 						}
@@ -551,22 +557,37 @@ class databasecore extends solution {
 						$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.",";
 						$values .= "'".$this->escape($value)."',";
 					}
-					
+
 					// Remove the last coma
 					$sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
 					$values = substr($values, 0, -1);
 					$values .= ")"; // VALUES (value1,value2,value3,...)
-					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)	
+					$sql .= ") VALUES ".$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
 					// Query validation
-					$sql = $this->queryValidation($param, 'create', $sql);	
-					
+					$sql = $this->queryValidation($param, 'create', $sql);
+
 					$q = $this->pdo->prepare($sql);
-					$exec = $q->execute();	
-					if(!$exec) {
+                    if ($q === false) {
+                        $errorInfo = $this->pdo->errorInfo();
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
+                        throw new \Exception('Create: Prepare '.$errorInfo[2].' . Query : '.$sql);
+                    }
+
+                    $pdoDriverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                    if ($pdoDriverName == 'dblib') {
+                        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    }
+                    $exec = $q->execute();
+					if ($exec === false) {
 						$errorInfo = $this->pdo->errorInfo();
-						throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+                        if (empty($errorInfo[2])) {
+                            $errorInfo[2] = implode(', ', $errorInfo);
+                        }
+						throw new \Exception('Create: Execute '.$errorInfo[2].' . Query : '.$sql);
 					}
-					
+
 					// If the target reference field isn't in data sent
 					if (!isset($idTarget)) {
 						// If the target reference field is a primary key auto increment, we retrive the value here
@@ -589,7 +610,7 @@ class databasecore extends solution {
 					);
 				}
 				// Status modification for the transfer
-				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
 		}
 		catch (\Exception $e) {
@@ -598,53 +619,53 @@ class databasecore extends solution {
 					'id' => '-1',
 					'error' => $error
 			);
-		}		
+		}
 		return $result;
 	}
 
 	// Permet de créer des données
 	public function update($param) {
-		try {			
+		try {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				try {
 					// Check control before delete
 					$data = $this->checkDataBeforeUpdate($param, $data);
 					// Query init
-					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET "; 
+					$sql = "UPDATE ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." SET ";
 					// We build the query with every fields
 					// Boucle sur chaque champ du document
-					foreach ($data as $key => $value) {				
+					foreach ($data as $key => $value) {
 						if($key == "target_id") {
 							$idTarget = $value;
 							continue;
-						// Myddleware_element_id is a Myddleware field, it doesn't exist in the target database	
+						// Myddleware_element_id is a Myddleware field, it doesn't exist in the target database
 						} elseif ($key == "Myddleware_element_id") {
 							continue;
 						}
-						// Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)						
+						// Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
 						$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."='".$this->escape($value)."',";
 					}
-					if(empty($idTarget)) {					
+					if(empty($idTarget)) {
 						throw new \Exception('No target id found. Failed to update the record.');
 					}
 					// Remove the last coma
 					$sql = substr($sql, 0, -1);
-					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";	
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$idTarget."'";
 					// Query validation
-					$sql = $this->queryValidation($param, 'update', $sql);					
-					// Execute the query					
+					$sql = $this->queryValidation($param, 'update', $sql);
+					// Execute the query
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					if(!$exec) {
-						$errorInfo = $this->pdo->errorInfo();						
+						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
 					}
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
 											'id' => $idTarget,
 											'error' => ($q->rowCount() ? false : 'There is no error but 0 rows have been updated')
-									);									
+									);
 				}
 				catch (\Exception $e) {
 					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -654,7 +675,7 @@ class databasecore extends solution {
 					);
 				}
 				// Status modification for the transfer
-				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
 		}
 		catch (\Exception $e) {
@@ -666,10 +687,10 @@ class databasecore extends solution {
 		}
 		return $result;
 	}
-	
+
 	// Function to delete a record
 	public function delete($param) {
-		try {		
+		try {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				try {
@@ -679,22 +700,22 @@ class databasecore extends solution {
 						throw new \Exception('No target id found. Failed to delete the record.');
 					}
 					// Query init
-					$sql = "DELETE FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." "; 
-					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$data['target_id']."'";	
+					$sql = "DELETE FROM ".$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose." ";
+					$sql .= " WHERE ".$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$data['target_id']."'";
 					// Query validation
-					$sql = $this->queryValidation($param, 'delete', $sql);					
-					// Execute the query					
+					$sql = $this->queryValidation($param, 'delete', $sql);
+					// Execute the query
 					$q = $this->pdo->prepare($sql);
 					$exec = $q->execute();
 					if(!$exec) {
-						$errorInfo = $this->pdo->errorInfo();						
+						$errorInfo = $this->pdo->errorInfo();
 						throw new \Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
 					}
 					// Send the target ifd to Myddleware
 					$result[$idDoc] = array(
 											'id' => $data['target_id'],
 											'error' => ($q->rowCount() ? false : 'There is no error but the record was already deleted.')
-										);									
+										);
 				}
 				catch (\Exception $e) {
 					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -704,7 +725,7 @@ class databasecore extends solution {
 					);
 				}
 				// Status modification for the transfer
-				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
 		}
 		catch (\Exception $e) {
@@ -716,41 +737,41 @@ class databasecore extends solution {
 		}
 		return $result;
 	}
-	
-	// Function to escape characters 
+
+	// Function to escape characters
 	protected function escape($value) {
 		return str_replace("'", "''", $value);
 	}
-	
+
 	// Get the strings which can identify what field is an id in the table
 	protected function getIdFields($module,$type,$fields) {
 		// default is id
 		return array('id');
 	}
-	
+
 	// Function to check, modify or validate the query
 	protected function queryValidation($param, $functionName, $requestSQL) {
 		return $requestSQL;
 	}
-	
+
 	// Function to buid the SELECT query
 	protected function buildQuery($param, $query) {
 		return $query['select'].$query['from'].$query['where'].$query['order'].$query['limit'];
 	}
-	
+
 	// Get the header of the select query in the read last function
 	protected function get_query_select_header($param, $method) {
 		return "SELECT ";
 	}
-	
-	// Get the fieldId from the other rules to add them into the source relationship list field 
-	public function get_module_fields_relate($module, $param) {	
+
+	// Get the fieldId from the other rules to add them into the source relationship list field
+	public function get_module_fields_relate($module, $param) {
 		if (!empty($param)) {
-			// Get the rule list with the same connectors (both directions) to get the relate ones 
+			// Get the rule list with the same connectors (both directions) to get the relate ones
 			$ruleListRelation = $this->container->get('doctrine')->getEntityManager()->getRepository('RegleBundle:Rule')->createQueryBuilder('r')
 							->select('r.id')
 							->where('(
-												r.connectorSource= ?1 
+												r.connectorSource= ?1
 											AND r.connectorTarget= ?2
 											AND r.name != ?3
 											AND r.deleted = 0
@@ -760,21 +781,21 @@ class databasecore extends solution {
 											AND r.connectorSource= ?2
 											AND r.name != ?3
 											AND r.deleted = 0
-									)')	
+									)')
 							->setParameter(1, (int)$param['connectorSourceId'])
 							->setParameter(2, (int)$param['connectorTargetId'])
 							->setParameter(3, $param['ruleName'])
 							->getQuery()
 							->getResult();
 			if (!empty($ruleListRelation)) {
-				// Prepare query to get the fieldId from the orther rules with the same connectors			
+				// Prepare query to get the fieldId from the orther rules with the same connectors
 				$sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
 				foreach($ruleListRelation as $ruleRelation) {
 					$sql .= "'$ruleRelation[id]',";
 				}
 				// Remove the last coma
 				$sql = substr($sql,0,-1);
-				$sql .= ")";	
+				$sql .= ")";
 				$stmt = $this->conn->prepare($sql);
 				$stmt->execute();
 				$fields = $stmt->fetchAll();
@@ -795,14 +816,15 @@ class databasecore extends solution {
 						}
 					}
 				}
-			}	
+			}
 		}
 		return parent::get_module_fields_relate($module, $param);
 	}
 
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module) {
 		try {
 			$fieldsSource = $this->get_module_fields($module, $type, false);
+
 			// List only real database field so we remove the Myddleware_element_id field
 			unset($fieldsSource['Myddleware_element_id']);
 			if(!empty($fieldsSource)) {
@@ -815,7 +837,7 @@ class databasecore extends solution {
 								'label' => 'Primary key in your source table',
 								'required'	=> true
 							);
-					// Add param to store the fieldname corresponding to the record reference date		
+					// Add param to store the fieldname corresponding to the record reference date
 					$dateParam = array(
 								'id' => 'fieldDateRef',
 								'name' => 'fieldDateRef',
@@ -840,14 +862,14 @@ class databasecore extends solution {
 					}
 					// Add the possibility to generate an unique id
 					$idParam['option']['myddleware_generated'] = 'Generated by Myddleware';
-					
+
 					// Add a parameter for deletion to automatically check if a record has been deleted from the database
 					$deletionParam['option']['compareTable'] = 'Compare source table with Myddleware';
 
 					$params[] = $idParam;
 					$params[] = $dateParam;
 					$params[] = $deletionParam;
-				} else {
+                } else {
 					// Add param to store the fieldname corresponding to the record id
 					$idParam = array(
 								'id' => 'targetFieldId',
@@ -878,7 +900,7 @@ class databasecore extends solution {
 
 }
 
-/* * * * * * * *  * * * * * *  * * * * * * 
+/* * * * * * * *  * * * * * *  * * * * * *
 	si custom file exist alors on fait un include de la custom class
  * * * * * *  * * * * * *  * * * * * * * */
 $file = __DIR__.'/../Custom/Solutions/database.php';
@@ -888,6 +910,6 @@ if(file_exists($file)){
 else {
 	//Sinon on met la classe suivante
 	class database extends databasecore {
-		
+
 	}
 }
