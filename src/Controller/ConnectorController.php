@@ -25,27 +25,31 @@
 
 namespace App\Controller;
 
-use App\Entity\Connector;
+use Exception;
 use App\Entity\Rule;
-use App\Entity\Solution;
 use App\Entity\Config;
+use App\Entity\Solution;
+use App\Entity\Connector;
+use Pagerfanta\Pagerfanta;
 use App\Form\ConnectorType;
 use App\Manager\permission;
-use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
-use App\Repository\RuleRepository;
 use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
+use App\Manager\SolutionManager;
+use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Pagerfanta\Doctrine\Collections\CollectionAdapter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class ConnectorController.
@@ -367,7 +371,7 @@ class ConnectorController extends AbstractController
         $solution = $this->getDoctrine()
                             ->getManager()
                             ->getRepository(Solution::class)
-                            ->findOneByName($this->sessionService->getParamConnectorSourceSolution());
+                            ->findOneBy(['name', $this->sessionService->getParamConnectorSourceSolution()]);
 
         $connector = new Connector();
         $connector->setSolution($solution);
@@ -466,6 +470,17 @@ class ConnectorController extends AbstractController
     public function connectorListAction($page = 1)
     {
         try {
+
+            // $config = new Configuration();
+            // $connection = [
+            //     'driver' => 'pdo',
+            //     'memory' => true
+            // ];
+            
+            // $em = EntityManager::create($connection, $config);
+            // $connectorTest = $em->getRepository(Connector::class);
+            // $connectorTest->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId());
+
             // ---------------
             $compact['nb'] = 0;
 
@@ -752,11 +767,21 @@ class ConnectorController extends AbstractController
          */
 
         if (is_array($params)) {
+            // dd($params['adapter_em_repository']);
+            // var_dump($params['adapter_em_repository']);
+            // die();
             $compact = [];
-
             //On passe l’adapter au bundle qui va s’occuper de la pagination
             if ($orm) {
-                $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                //TODO BUGFIX : this needs to be changed
+                // getquery returns a query
+                // getquery()->getresult() returns an array
+                // BUT we need a collection, not an array... not sure how to implement this
+                // $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                $array = (array) $params['adapter_em_repository'];
+                $adapter = new CollectionAdapter($params['adapter_em_repository']);
+                $pagerfanta = new Pagerfanta($adapter);
+                $compact['pager'] = $pagerfanta;
             } else {
                 $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
             }

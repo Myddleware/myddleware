@@ -73,6 +73,6 @@ class ConnectorRepository extends ServiceEntityRepository
 
         $qb->orderBy('c.id', 'DESC');
 
-        return $qb->getQuery();
+        return $qb->getQuery()->getResult();
     }
 }
