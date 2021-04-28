@@ -427,8 +427,8 @@ class databasecore extends solution {
 						}
 						if($key === $param['ruleParams']['fieldDateRef']) {
 							// If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
-							if ((bool)strtotime($value)) {;
-								$row['date_modified'] = (string)date('Y-m-d H:i:s');
+							if (strtotime($value) !== false) {;
+								$row['date_modified'] = $value;
 							} else {							
 								$row['date_modified'] = date('Y-m-d H:i:s');
 							}
