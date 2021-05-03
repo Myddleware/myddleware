@@ -17,7 +17,7 @@
       <path value="$PROJECT_DIR$/vendor/psr/container" />
       <path value="$PROJECT_DIR$/vendor/phpdocumentor/reflection-docblock" />
       <path value="$PROJECT_DIR$/vendor/phpdocumentor/reflection-common" />
-      <path value="$PROJECT_DIR$/vendor/white-october/pagerfanta-bundle" />
+      <path value="$PROJECT_DIR$/vendor/babdev/pagerfanta-bundle" />
       <path value="$PROJECT_DIR$/vendor/iadvize/apirestclient" />
       <path value="$PROJECT_DIR$/vendor/twitter/bootstrap" />
       <path value="$PROJECT_DIR$/vendor/jdorn/sql-formatter" />

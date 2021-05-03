@@ -25,34 +25,35 @@
 
 namespace App\Controller;
 
-use App\Entity\Document;
-use App\Entity\DocumentAudit;
-use App\Entity\DocumentData;
-use App\Entity\DocumentRelationship;
+use Exception;
 use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
+use App\Entity\Document;
+use Pagerfanta\Pagerfanta;
+use App\Manager\JobManager;
+use App\Entity\DocumentData;
+use App\Entity\DocumentAudit;
+use App\Service\SessionService;
 use App\Manager\document as doc;
 use App\Manager\DocumentManager;
-use App\Manager\JobManager;
 use App\Manager\SolutionManager;
-use App\Repository\DocumentRepository;
-use App\Service\SessionService;
-use Exception;
+use App\Entity\DocumentRelationship;
 use Pagerfanta\Adapter\ArrayAdapter;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /* * * * * * * *  * * * * * *  * * * * * *
     si custom file exist alors on fait un include de la custom class
@@ -806,7 +807,9 @@ if (file_exists($file)) {
 
                 //On passe l’adapter au bundle qui va s’occuper de la pagination
                 if ($orm) {
-                    $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                    $queryBuilder = $params['adapter_em_repository'];
+                    $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+                    $compact['pager'] = $pagerfanta;
                 } else {
                     $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
                 }

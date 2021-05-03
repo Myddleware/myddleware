@@ -2834,9 +2834,7 @@ if (file_exists($file)) {
                 $compact = [];
 
                 //On passe l’adapter au bundle qui va s’occuper de la pagination
-                if ($orm) {
-                  
-                    // $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
+                if ($orm) {  
                     $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
                 } else {
                     $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));

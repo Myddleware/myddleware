@@ -42,6 +42,7 @@ use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Adapter\AdapterInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -767,20 +768,11 @@ class ConnectorController extends AbstractController
          */
 
         if (is_array($params)) {
-            // dd($params['adapter_em_repository']);
-            // var_dump($params['adapter_em_repository']);
-            // die();
             $compact = [];
             //On passe l’adapter au bundle qui va s’occuper de la pagination
             if ($orm) {
-                //TODO BUGFIX : this needs to be changed
-                // getquery returns a query
-                // getquery()->getresult() returns an array
-                // BUT we need a collection, not an array... not sure how to implement this
-                // $compact['pager'] = new Pagerfanta(new DoctrineORMAdapter($params['adapter_em_repository']));
-                $array = (array) $params['adapter_em_repository'];
-                $adapter = new CollectionAdapter($params['adapter_em_repository']);
-                $pagerfanta = new Pagerfanta($adapter);
+                $queryBuilder = $params['adapter_em_repository'];
+                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
                 $compact['pager'] = $pagerfanta;
             } else {
                 $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
