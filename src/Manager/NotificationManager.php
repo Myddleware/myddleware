@@ -56,15 +56,12 @@ if (file_exists($file)) {
     {
         protected $entityManager;
         protected $emailAddresses;
+        protected $configParams;
         protected $tools;
         /**
          * @var LoggerInterface
          */
         private $logger;
-        /**
-         * @var ParameterBagInterface
-         */
-        private $params;
         /**
          * @var Connection
          */
@@ -108,7 +105,6 @@ if (file_exists($file)) {
             RuleRepository $ruleRepository,
             Swift_Mailer $mailer,
             ToolsManager $tools,
-            ParameterBagInterface $params,
             Environment $twig
         ) {
             $this->logger = $logger;
@@ -120,17 +116,7 @@ if (file_exists($file)) {
             $this->ruleRepository = $ruleRepository;
             $this->mailer = $mailer;
             $this->tools = $tools;
-            // $this->params = $params;
             $this->twig = $twig;
-			// Initialise parameters
-			$configRepository = $this->entityManager->getRepository(Config::class);
-			$configs = $configRepository->findAll();
-			if (!empty($configs)) {
-				foreach ($configs as $config) {
-					$this->params[$config->getName()] = $config->getvalue();
-				}
-			}	
-            $this->fromEmail = $this->params['email_from'] ?? 'no-reply@myddleware.com';
         }
 
         // Send alert if a job is running too long
@@ -139,12 +125,14 @@ if (file_exists($file)) {
             try {
 				// Get the email adresses of all ADMIN
 				$this->setEmailAddresses();
-                if (empty($this->params['alert_time_limit'])) {
+				// Set all config parameters
+				$this->setConfigParam();
+                if (empty($this->configParams['alert_time_limit'])) {
                     throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
                 }
                 // Calculate the date corresponding to the beginning still authorised
                 $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
-                $timeLimit->modify('-'.$this->params['alert_time_limit'].' minutes');
+                $timeLimit->modify('-'.$this->configParams['alert_time_limit'].' minutes');
 
                 // Search if a job is lasting more time that the limit authorized
                 $job = $this->jobRepository->findJobStarted($timeLimit);
@@ -152,15 +140,15 @@ if (file_exists($file)) {
                 if (!$job) {
                     // Create text
                     $textMail = $this->translator->trans('email_alert.body', [
-                        '%min%' => $this->params['alert_time_limit'],
+                        '%min%' => $this->configParams['alert_time_limit'],
                         '%begin%' => $job['begin'],
                         '%id%' => $job['id'],
-                        'base_uri' => $this->params['base_uri'] ?? '',
+                        'base_uri' => $this->configParams['base_uri'] ?? '',
                     ]);
 
                     $message =
                         (new Swift_Message($this->translator->trans('email_alert.subject')))
-                        ->setFrom($this->fromEmail)
+                        ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
                         ->setBody($textMail);
                     // Send the message to all admins
                     foreach ($this->emailAddresses as $emailAddress) {
@@ -185,6 +173,8 @@ if (file_exists($file)) {
         public function sendNotification()
         {
             try {
+				// Set all config parameters
+				$this->setConfigParam();
 				// Get the email adresses of all ADMIN
 				$this->setEmailAddresses();
                 // Check that we have at least one email address
@@ -265,15 +255,15 @@ if (file_exists($file)) {
                 }
 
                 // Add url if the parameter base_uri is defined in app\config\public
-                if (!empty($this->params['base_uri'])) {
-                    $textMail .= chr(10).$this->params['base_uri'].chr(10);
+                if (!empty($this->configParams['base_uri'])) {
+                    $textMail .= chr(10).$this->configParams['base_uri'].chr(10);
                 }
                 // Create text
                 $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
 
                 $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
 				$message
-                    ->setFrom((!empty($this->params['email_from']) ? $this->params['email_from'] : 'no-reply@myddleware.com'))
+                    ->setFrom((!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'))
                     ->setBody($textMail);
                 // Send the message to all admins
                 foreach ($this->emailAddresses as $emailAddress) {
@@ -305,7 +295,7 @@ if (file_exists($file)) {
         public function resetPassword(User $user)
         {
             $message = (new Swift_Message('Initialisation du mot de passe'))
-                ->setFrom($this->fromEmail)
+                ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
                 ->setTo($user->getEmail())
                 ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
 
@@ -315,5 +305,19 @@ if (file_exists($file)) {
                 throw new Exception('Failed to send email');
             }
         }
+		
+		// Get the content of the table config
+		protected function setConfigParam() {
+			if (empty($this->configParams)) {
+				$configRepository = $this->entityManager->getRepository(Config::class);
+				$configs = $configRepository->findAll();
+				if (!empty($configs)) {
+					foreach ($configs as $config) {
+						$this->configParams[$config->getName()] = $config->getvalue();
+					}
+				}			
+			}			
+		}
+	
     }
 }

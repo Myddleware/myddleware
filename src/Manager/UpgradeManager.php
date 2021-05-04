@@ -56,6 +56,7 @@ if (file_exists($file)) {
         protected $phpExecutable = 'php';
         protected $message = '';
         protected $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
+        protected $configParams;
         /**
          * @var LoggerInterface
          */
@@ -83,14 +84,6 @@ if (file_exists($file)) {
 			$this->entityManager = $entityManager;
             $this->env = $kernel->getEnvironment();
             $this->projectDir = $kernel->getProjectDir();
-			// Initialise parameters
-			$configRepository = $this->entityManager->getRepository(Config::class);
-			$configs = $configRepository->findAll();
-			if (!empty($configs)) {
-				foreach ($configs as $config) {
-					$this->params[$config->getName()] = $config->getvalue();
-				}
-			}
 
 			// Get the php executable 
 			$phpBinaryFinder = new PhpExecutableFinder();
@@ -103,6 +96,8 @@ if (file_exists($file)) {
             try {
                 // Customize update process
                 $this->beforeUpdate($output);
+				// Set all config parameters
+				$this->setConfigParam();
 
                 // Update file
                 $output->writeln('<comment>Update files...</comment>');
@@ -137,8 +132,8 @@ if (file_exists($file)) {
                 // Customize update process
                 $this->afterUpdate($output);
 
-                $output->writeln('<info>Myddleware has been successfully updated in version '.$this->params['myd_version'].'</info>');
-                $this->message .= 'Myddleware has been successfully updated in version '.$this->params['myd_version'].chr(10);
+                $output->writeln('<info>Myddleware has been successfully updated in version '.$this->configParams['myd_version'].'</info>');
+                $this->message .= 'Myddleware has been successfully updated in version '.$this->configParams['myd_version'].chr(10);
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
@@ -152,7 +147,7 @@ if (file_exists($file)) {
         protected function updateFiles()
         {
             // Update master if git_branch is empty otherwise we update the specific branch
-            $command = (!empty($this->params['git_branch'])) ? 'git pull origin '.$this->params['git_branch'] : 'git pull';
+            $command = (!empty($this->configParams['git_branch'])) ? 'git pull origin '.$this->configParams['git_branch'] : 'git pull';
             $process = new Process($command);
             $process->run();
             // executes after the command finishes
@@ -335,6 +330,19 @@ if (file_exists($file)) {
                 $this->message .= $content.chr(10);
             }
         }
+
+		// Get the content of the table config
+		protected function setConfigParam() {
+			if (empty($this->configParams)) {
+				$configRepository = $this->entityManager->getRepository(Config::class);
+				$configs = $configRepository->findAll();
+				if (!empty($configs)) {
+					foreach ($configs as $config) {
+						$this->configParams[$config->getName()] = $config->getvalue();
+					}
+				}
+			}
+		}
 
         // Function to customize the update process
         protected function beforeUpdate($output)
