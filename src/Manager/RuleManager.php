@@ -159,14 +159,6 @@ class rulecore
 		$this->parameterBagInterface = $parameterBagInterface;
 		$this->env = getenv('APP_ENV');	
 		$this->formulaManager = $formulaManager;
-		// Init config parameters
-		$configRepository = $this->entityManager->getRepository(Config::class);
-		$configs = $configRepository->findAll();
-		if (!empty($configs)) {
-			foreach ($configs as $config) {
-				$this->configParams[$config->getName()] = $config->getvalue();
-			}
-		}			
 	}
 	
 	public function setRule($idRule) {
@@ -373,6 +365,8 @@ class rulecore
 					$param['ruleRelationships'] = $this->ruleRelationships;
 					$i = 0;
 					if($this->dataSource['values']) {
+						// Set all config parameters
+						$this->setConfigParam();
 						// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->checkRecordExist
 						if (!empty($this->configParams['migration_mode'])) {
 							$param['ruleDocuments'][$this->ruleId] = $this->getRuleDocuments($this->ruleId);
@@ -644,6 +638,8 @@ class rulecore
 		if(!empty($documents)) {
 			$param['jobId'] = $this->jobId;			
 			$param['ruleRelationships'] = $this->ruleRelationships;
+			// Set all config parameters
+			$this->setConfigParam();
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
 			if (!empty($this->configParams['migration_mode'])) {
 				if (!empty($this->ruleRelationships)) {
@@ -687,6 +683,8 @@ class rulecore
 			$param['ruleRelationships'] = $this->ruleRelationships;
 			$param['jobId'] = $this->jobId;
 			$param['api'] = $this->api;
+			// Set all config parameters
+			$this->setConfigParam();
 			// If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
 			if (!empty($this->configParams['migration_mode'])) {
 				if (!empty($this->ruleRelationships)) {
@@ -1623,6 +1621,19 @@ class rulecore
 		return false;
 	}
 	
+	// Get the content of the table config
+	protected function setConfigParam() {
+		if (empty($this->configParams)) {
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->configParams[$config->getName()] = $config->getvalue();
+				}
+			}
+		}
+	}
+
 	// Parametre de la règle choix utilisateur
 	/* 
 	array(
