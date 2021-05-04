@@ -100,8 +100,6 @@ class MassActionCommand extends Command
             return 0;
         }
 
-        /** @var Job $job */
-         $job = $this->jobManager->getId();
 		$output->writeln( '1;'.$this->jobManager->getId() );  // Do not remove, used for manual job and webservices (display logs)
 //TODO : bugfix - $this->jobManager->getId() is actually empty when running a background job (see JobManager runBackgroundJob()) and so the task isn't launched
         // Récupération des paramètres
@@ -140,7 +138,7 @@ class MassActionCommand extends Command
 		// Clear job message to avoid duplicate messages
 		$this->jobManager->setMessage('');
         // Close job if it has been created
-        $responseCloseJob = $this->jobManager->closeJob($job);
+        $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($this->jobManager->getMessage())) {
             if ($responseCloseJob['success']) {

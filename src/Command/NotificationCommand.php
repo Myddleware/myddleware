@@ -91,15 +91,13 @@ class NotificationCommand extends Command
                     return 0;
                 }
 
-                /** @var Job $job */
-                $job = $data['job'];
                 $this->notificationManager->sendNotification();
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $output->writeln('<error>'.$message.'</error>');
             }
             // Close job if it has been created
-            $this->jobManager->closeJob($job);
+            $this->jobManager->closeJob();
         }
 
         return 1;

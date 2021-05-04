@@ -80,9 +80,6 @@ class ClearDataCommand extends Command
             return 0;
         }
 
-        /** @var Job $job */
-        $job = $data['job'];
-
         $response = $this->jobManager->clearData();
         // Display message on the console
         if (!empty($response['message'])) {
@@ -94,7 +91,7 @@ class ClearDataCommand extends Command
                 $this->logger->error($response['message']);
             }
         }
-        $responseCloseJob = $this->jobManager->closeJob($job);
+        $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($responseCloseJob['message'])) {
             if ($responseCloseJob['success']) {

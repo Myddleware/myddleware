@@ -73,9 +73,7 @@ class UpgradeCommand extends Command
             return 0;
         }
 
-        /** @var Job $job */
-        $job = $data['job'];
-        $output->writeln($job->getId());
+        $output->writeln($this->jobManager->getId());
 
         try {
             // Premier paramètre : limite d'enregistrement traités
@@ -88,7 +86,7 @@ class UpgradeCommand extends Command
             $output->writeln('<error>'.$message.'</error>');
         }
 
-        $responseCloseJob = $this->jobManager->closeJob($job);
+        $responseCloseJob = $this->jobManager->closeJob();
         if (!empty($responseCloseJob['message'])) {
             if ($responseCloseJob['success']) {
                 $output->writeln('<info>'.$responseCloseJob['message'].'</info>');

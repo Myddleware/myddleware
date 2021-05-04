@@ -45,7 +45,6 @@ use App\Repository\RuleRelationShipRepository;
 use Symfony\Component\Routing\RouterInterface;
 use App\Entity\RuleParamAudit as RuleParamAudit;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -999,9 +998,8 @@ class rulecore
 			$guid = uniqid();	
 
 			// Get the php executable 
-			$phpBinaryFinder = new PhpExecutableFinder();
-			$phpBinaryPath = $phpBinaryFinder->find();
-			$php = $phpBinaryPath;			
+			$php = $this->tools->getPhpVersion();
+				
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
 			$fs = new Filesystem();
 			try {

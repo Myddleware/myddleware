@@ -31,6 +31,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 $file = __DIR__.'/../Custom/Manager/ToolsManager.php';
 if (file_exists($file)) {
@@ -148,5 +149,27 @@ if (file_exists($file)) {
             $new_yaml = Yaml::dump($myddlewareParameters, 4);
             file_put_contents($this->projectDir.'/config/packages/public/parameters_public.yml', $new_yaml);
         }
+
+		public function getPhpVersion()
+        {
+			// Get the custom php version first
+			$select = "SELECT * FROM config WHERE name = 'php'";
+			$stmt = $this->connection->prepare($select);
+			$stmt->execute();
+			$config = $stmt->fetch();
+			if (!empty($config['conf_value'])) {
+				$php = $config['conf_value'];
+			}
+
+			// If no php version found, we use the one returned by the php library
+			$phpBinaryFinder = new PhpExecutableFinder();
+			$phpBinaryPath = $phpBinaryFinder->find();
+			$php = $phpBinaryPath;
+
+			// If no executable found we return 'php'
+			if (empty($php)) {
+				return 'php';
+			}
+		}
     }
 }

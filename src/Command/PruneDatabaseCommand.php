@@ -79,12 +79,9 @@ class PruneDatabaseCommand extends Command
             return 0;
         }
 
-        /** @var Job $job */
-        $job = $data['job'];
-
         $this->jobManager->pruneDatabase();
 
-        $responseCloseJob = $this->jobManager->closeJob($job);
+        $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($responseCloseJob['message'])) {
             if ($responseCloseJob['success']) {

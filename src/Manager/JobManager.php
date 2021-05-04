@@ -56,7 +56,6 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
 
 class jobcore  {
 		
@@ -376,9 +375,7 @@ class jobcore  {
 			// Formatage des paramètres
 			$params = implode(' ',$param);
 			// Get the php executable 
-			$phpBinaryFinder = new PhpExecutableFinder();
-			$phpBinaryPath = $phpBinaryFinder->find();
-			$php = $phpBinaryPath;
+			$php = $this->tools->getPhpVersion();
 				
 			//Create your own folder in the cache directory
 			$fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/'.$guid.'.txt';		
@@ -402,7 +399,7 @@ class jobcore  {
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');
 			// Massaction returns "1;" + the job ID
-			$idJob = substr(fread($file, 25), -23); 
+			$idJob = substr(fread($file, 25), -23);
 			fclose($file);
 			while (empty($idJob)) {
 				if($cpt >= 29) {
@@ -723,46 +720,6 @@ class jobcore  {
 	public function setApi($value) {
 		// default value = 0
 		$this->api = (!empty($value) ? $value : 0);
-	}
-	
-	// Permet d'indiquer que le job est lancé manuellement
-	public function setConfigValue($name,$value) {
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
-		// Récupération de la valeur de la config
-		$select = "	SELECT * FROM config WHERE conf_name = '$name'";
-		$stmt = $this->connection->prepare($select);
-		$stmt->execute();	   				
-		$config = $stmt->fetch();
-		try {
-			// S'il n'existe pas on fait un INSERT sinon un UPDATE
-			if (empty($config)) {
-				$sqlParams = "INSERT INTO config (conf_name, conf_value) VALUES (:name, :value)";
-			}
-			else {
-				$sqlParams = "UPDATE config SET conf_value = :value WHERE conf_name = :name";
-			}
-			$stmt = $this->connection->prepare($sqlParams);
-			$stmt->bindValue("value", $value);
-			$stmt->bindValue("name", $name);
-			$stmt->execute();	
-			$this->connection->commit(); // -- COMMIT TRANSACTION
-		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-			$this->logger->error( 'Failed to update the config name '.$name.' whithe the value '.$value.' : '.$e->getMessage() );
-			echo 'Failed to update the config name '.$name.' whithe the value '.$value.' : '.$e->getMessage() ;
-			return false;
-		}		
-		return true;
-	}
-	
-	// Permet d'indiquer que le job est lancé manuellement
-	public function getConfigValue($name) {
-		// Récupération de la valeur de la config
-		$select = "	SELECT * FROM config WHERE conf_name = '$name'";
-		$stmt = $this->connection->prepare($select);
-		$stmt->execute();	   				
-		$config = $stmt->fetch();
-		return $config['conf_value'];
 	}
 	
 	// Myddleware upgrade
