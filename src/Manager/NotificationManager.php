@@ -62,6 +62,10 @@ if (file_exists($file)) {
          * @var LoggerInterface
          */
         private $logger;
+		/**
+         * @var ParameterBagInterface
+         */
+        private $params;
         /**
          * @var Connection
          */
@@ -105,6 +109,7 @@ if (file_exists($file)) {
             RuleRepository $ruleRepository,
             Swift_Mailer $mailer,
             ToolsManager $tools,
+			ParameterBagInterface $params,
             Environment $twig
         ) {
             $this->logger = $logger;
@@ -116,6 +121,7 @@ if (file_exists($file)) {
             $this->ruleRepository = $ruleRepository;
             $this->mailer = $mailer;
             $this->tools = $tools;
+			$this->params = $params;
             $this->twig = $twig;
         }
 

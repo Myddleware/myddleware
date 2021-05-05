@@ -103,14 +103,12 @@ class ReadRecordCommand extends Command
 
             return 0;
         }
-        /** @var Job $job */
-        $job = $data['job'];
 
         $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
         $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
 
         // Close job if it has been created
-        $responseCloseJob = $this->jobManager->closeJob($job);
+        $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($responseCloseJob['message'])) {
             if ($responseCloseJob['success']) {
