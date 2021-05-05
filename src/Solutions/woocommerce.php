@@ -130,8 +130,8 @@ class woocommercecore extends solution {
             $module = $param['module'];
             $result = [];
             $result['count'] = 0;
-            $result['date_ref'] = $param['ruleParams']['datereference'];
-            $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
+            $result['date_ref'] = $param['date_ref'];
+            $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
             if(empty($param['limit'])){
                 $param['limit'] = $this->defaultLimit;
             }
