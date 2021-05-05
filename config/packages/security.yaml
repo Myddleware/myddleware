@@ -29,7 +29,6 @@ security:
             pattern: ^/(_(profiler|wdt))/
             security: false
         main:
-            logout_on_user_change: true
             pattern: .*
             provider: username_provider
             guard:

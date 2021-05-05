@@ -86,7 +86,7 @@
 			<div align="center">
 			{# Hidden dont CSRF #}
 			{{ form_rest(form) }}			
-				<p>{{ form_widget(form.click_filter) }}</p>
+				{# <p>{{ form_widget(form.click_filter) }}</p> #}
 				<p>
 					{% if condition > 0 %}
 						<a class="btn-large-mydinv" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">{{'list_flux.btn.filter_delete'|trans}}</a>
