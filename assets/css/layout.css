@@ -122,8 +122,8 @@ footer {
 
 #tabs ul.ui-widget-header li {
 	height: 80px;
-	min-width: calc( (1200px / 7) + 1.8px );
-	max-width: calc( (1200px / 7) + 1.8px );
+	min-width: 173,2px;
+	max-width: 173,2px;
 	margin: -1px;
 }
 
