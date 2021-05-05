@@ -515,7 +515,7 @@
 	this override is needed to avoid 
 	tabs spreading to whole screen
 */
-.ui-state-default {
+#rule_mapping #tabs .ui-state-default {
 	max-width: 173px!important;
 	min-width: 173px!important;
 }
