@@ -372,7 +372,7 @@ class ConnectorController extends AbstractController
         $solution = $this->getDoctrine()
                             ->getManager()
                             ->getRepository(Solution::class)
-                            ->findOneBy(['name', $this->sessionService->getParamConnectorSourceSolution()]);
+                            ->findOneBy(array('name' => $this->sessionService->getParamConnectorSourceSolution()));
 
         $connector = new Connector();
         $connector->setSolution($solution);
