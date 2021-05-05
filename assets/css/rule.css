@@ -520,3 +520,8 @@
 	min-width: 173px!important;
 }
 
+/* 5 tabs only on View Rule view */
+#rule #tabs .ui-state-default {
+	max-width: 242px!important;
+	min-width: 242px!important;
+}
