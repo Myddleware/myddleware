@@ -52,7 +52,7 @@ $(function() {
 	
 // Paramètres -------------------------------------------------------------	
 	
-	$( "#activerule" ).click(function() {	
+	$( "#activerule" ).on('click', function() {	
 		$.ajax({
 			type: "POST",
 			url: path_fiche_update,						
@@ -166,7 +166,7 @@ function recup_params() {
 	var params = [];	
 	$( '.params','#ruleparams' ).each(function(){
 
-        name = $(this).attr('name');
+        var name = $(this).attr('name');
         
         if(name == 'datereference_txt') {
         	name = 'datereference';

@@ -159,17 +159,20 @@ if (file_exists($file)) {
 			$config = $stmt->fetch();
 			if (!empty($config['conf_value'])) {
 				$php = $config['conf_value'];
-			}
-
-			// If no php version found, we use the one returned by the php library
-			$phpBinaryFinder = new PhpExecutableFinder();
-			$phpBinaryPath = $phpBinaryFinder->find();
-			$php = $phpBinaryPath;
+			} else {
+                // If no php version found, we use the one returned by the php library
+                $phpBinaryFinder = new PhpExecutableFinder();
+                $phpBinaryPath = $phpBinaryFinder->find();
+                $php = $phpBinaryPath;
+            }
 
 			// If no executable found we return 'php'
 			if (empty($php)) {
 				return 'php';
 			}
+
+            return $php;
+
 		}
     }
 }
