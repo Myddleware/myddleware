@@ -16,7 +16,9 @@ class DatabaseSetupType extends AbstractType
     {
         $builder
             ->add('host')
-            ->add('port', IntegerType::class)
+            ->add('port', IntegerType::class, [
+                'required' => false
+            ])
             ->add('name')
             ->add('user')
             ->add('password', PasswordType::class, [
