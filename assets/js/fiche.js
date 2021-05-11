@@ -21,17 +21,18 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
+const $ = require('jquery');
 
 $(function() {
 	// ----------------------------- Fiche rule
 
 	//$( ".mapping p" ).hide();
 
-	$( ".mapping > .title" ).click(function() {
+	$( ".mapping > .title" ).on('click', function() {
 		$('p',$( this ).parent()).toggle( "fadein" );
 	});
 	
-	$( ".mapping > .title" ).click(function(){
+	$( ".mapping > .title" ).on('click', function(){
 		if($(this).parent().attr('class') == 'mapping') {
 			$(this).parent().attr('class','mapping gray');							
 			$(this).each(function(){
@@ -77,19 +78,43 @@ $(function() {
 		firstDay: 1,
 		isRTL: false,
 		showMonthAfterYear: false,
-		yearSuffix: ''};
-		$.datepicker.setDefaults($.datepicker.regional['fr']);	
+		yearSuffix: ''
+	};
 
-	$('#datereference, .calendar').datetimepicker({
-		timeFormat: 'HH:mm:ss',
-		dateFormat: 'yy-mm-dd',
-        timeText: 'Heure',
-        hourText: 'Heure',
-        minuteText: 'Minute',
-        secondText: 'Sconde',
-        currentText: 'Maintenant',
-        closeText: 'Fermer'		
-	});	
+	$.datepicker.setDefaults($.datepicker.regional['fr']);	
+
+	// $.timepicker.regional['fr'] = {
+	// 	timeOnlyTitle: 'Выберите время',
+	// 	timeText: 'Время',
+	// 	hourText: 'Часы',
+	// 	minuteText: 'Минуты',
+	// 	secondText: 'Секунды',
+	// 	millisecText: 'Миллисекунды',
+	// 	timezoneText: 'Часовой пояс',
+	// 	currentText: 'Сейчас',
+	// 	closeText: 'Закрыть',
+	// 	timeFormat: 'HH:mm',
+	// 	amNames: ['AM', 'A'],
+	// 	pmNames: ['PM', 'P'],
+	// 	isRTL: false
+	// };
+	// $.timepicker.setDefaults($.timepicker.regional['fr']);
+
+	$('#datereference, .calendar').datepicker($.timepicker.regional['fr']);
+	// $('#datereference, .calendar').timepicker($.timepicker.regional['fr']);
+
+
+	// $('#datereference, .calendar').datetimepicker({
+	// 	timeFormat: 'HH:mm:ss',
+	// 	dateFormat: 'yy-mm-dd',
+    //     timeText: 'Heure',
+    //     hourText: 'Heure',
+    //     minuteText: 'Minute',
+    //     secondText: 'Seconde',
+    //     currentText: 'Maintenant',
+    //     closeText: 'Fermer'		
+	// });	
+
 	
 	$( '#saveRuleParams' ).on('click', function() {	
 		loading_img = $('#myd_loading_img', '.myd_loading');	
@@ -177,7 +202,6 @@ function recup_params() {
         			
 		params.push( {name: name, value: value, id: id } );
 	});
-	
 	return params;
 }
 

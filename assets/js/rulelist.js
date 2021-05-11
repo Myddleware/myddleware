@@ -6,7 +6,7 @@ $(function(){
         $.ajax({
             type: "POST",
             url: path_fiche_update,						
-                success: function(data){		
+                success: function(data){  
             }			
         });	
     });

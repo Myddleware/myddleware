@@ -27,11 +27,10 @@ require('./js/account.js')
 require('./js/lib/d3.v2.js')
 require('./js/home.js')
 require('./js/jobscheduler.js')
-require('./js/fiche.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
-require('./js/rulelist.js')
+
 
 // start the Stimulus application
 import './bootstrap';
