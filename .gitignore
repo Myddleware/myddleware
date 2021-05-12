@@ -13,6 +13,7 @@
 /var/sessions/*
 !var/cache/.gitkeep
 !var/logs/.gitkeep
+!var/logs/rotate/.gitkeep
 !var/sessions/.gitkeep
 
 # Parameters
@@ -52,5 +53,5 @@
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
 
-# VSCode 
-/.vscode 
+# VSCode
+/.vscode

@@ -282,7 +282,7 @@ class filecore extends solution {
 			$intersectionFields = array_intersect($allRuleField, $header);
 			if($intersectionFields != $allRuleField){
 				$difFields = array_diff($allRuleField, $header);
-				throw new \Exception('File is not compatible. Missing fields : '.implode(';',$difFields)); 
+				throw new \Exception('File is not compatible. Missing fields : '.implode(';',$difFields));
 			}
 			
 			//Control all lines of the file
@@ -399,16 +399,16 @@ class filecore extends solution {
 			}
 			if(
 				(
-						!empty($difFields)
+					!empty($difFields)
 					&& count($difFields) > 1
 				)
 				|| (
-						!empty($difFields)
+					!empty($difFields)
 					&& count($difFields) == 1
 					&& current($difFields) != 'myddleware_generated'
 				)
 			){
-				throw new \Exception('File is not compatible. Missing fields : '.implode(';',$difFields)); 
+				throw new \Exception('File is not compatible. Missing fields : '.implode(';',$difFields));
 			}		
 			//Control all lines of the file
 			$values = array();

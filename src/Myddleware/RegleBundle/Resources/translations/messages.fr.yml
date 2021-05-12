@@ -85,7 +85,7 @@ create_rule:
             search_only: Récupération de données existantes seulement  
         deletion:
             label: Activer la suppression dans l'application cible
-            yes: Oui     
+            yes: Oui
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
@@ -329,7 +329,7 @@ list_flux:
         type: Type
         source_field: Champ lié
         reference: Référence
-        
+
 flux:
     gbl_status:
         open: Ouvert
@@ -361,7 +361,7 @@ flux:
         create: Create
         search: Search
         delete: Delete
- 
+
 view_flux:
     empty: Pas de données
     empty_log: Aucune log
@@ -374,11 +374,11 @@ view_flux:
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des transferts
     nbPostDocuments: Tranferts post
-    direct_link: Lien direct  
+    direct_link: Lien direct
     btn:
         reload: Relancer le transfert
         cancel: Annuler le transfert 
-        readrecord: Lancer la même donnée 
+        readrecord: Lancer la même donnée
     header:
         rule: Règle
         statut: Status
@@ -566,10 +566,10 @@ error:
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
-        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
+        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle
     document:
-        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware. 
-        
+        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware.
+
 title:
     account:
         view: Mon compte

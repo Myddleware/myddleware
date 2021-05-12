@@ -136,7 +136,7 @@ filter:
     gteq: is greater than or equal to 
     lteq: is less than or equal to 
     in: is included in the following table separated by semicolon
-    notin: is not included in the following table separated by semicolon      
+    notin: is not included in the following table separated by semicolon
 
 view_rule:
     action:
@@ -360,7 +360,7 @@ flux:
         create: Create
         search: Search
         delete: Delete
-        
+
 view_flux:
     empty: No data
     empty_log: No log
@@ -373,7 +373,7 @@ view_flux:
     nbParentDocuments: Parent transfers
     nbHistoryDocuments: History transfers
     nbPostDocuments: Post transfers    
-    direct_link: Direct link    
+    direct_link: Direct link
     btn:
         reload: Reload the transfer
         cancel: Cancel the transfer 
@@ -387,7 +387,7 @@ view_flux:
         gblstatut: Global Status
         version: Version
         parent: Parent
-        dateref: Reference        
+        dateref: Reference
         date_created: Creation date
         date_modified: Modification date
     log:
@@ -559,16 +559,16 @@ error:
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document: Failed to delete the rule because there is at least one data transfer not deleted on this rule. Remove these transfers to be able to delete this rule.
         delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  
-        update: Failed to edit the rule.  
+        update: Failed to edit the rule.
     account:
         language_change: Failed to change the language :
     template:
         creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
-        remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
+        remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule
     document:
-        deleted_flag: This data transfer is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
-        
+        deleted_flag: This data transfer is flagged deleted. It isn't used when Myddleware manage relationships and checks.
+
 title:
     account:
         view: My account
@@ -693,10 +693,10 @@ email_notification:
     subject: Myddleware notification
     hello: Hi, 
     introduction: Here the statistics about your data transfer with Myddleware: 
-    transfer_success: - Data tranfers successfully sent: 
-    transfer_error: - Data tranfers in error: 
+    transfer_success: - Data tranfers successfully sent:
+    transfer_error: - Data tranfers in error:
     transfer_open: - Data tranfers open:
-    active_rule: Active rules: 
+    active_rule: Active rules:
     no_active_rule: No active rule in Myddleware.
     100_first_erros: Here the 100 first errors: 
     error_list: Here the errors:

@@ -306,6 +306,12 @@ class oracledbcore extends database {
 
         return " ROWNUM BETWEEN $param[offset] AND " . ($param["limit"] + $param["offset"]);
     }
+
+    // Function to escape characters
+    protected function escape($value)
+    {
+        return str_replace("'", "''", $value);
+    }
     
 }// class oracledbcore
 
