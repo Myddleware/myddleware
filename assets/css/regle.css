@@ -106,7 +106,10 @@
 .listepager td {
 	padding: 5px;
 	color: black; 
-	min-width:150px;
+	min-width: 190px;
+	text-align: center!important;
+	vertical-align: middle;
+	word-break: break-all;
 	
 }
 .solution_block {	

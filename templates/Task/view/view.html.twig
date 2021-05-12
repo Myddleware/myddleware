@@ -110,40 +110,40 @@
 							<th>{{'view_task.log.type'|trans}}</th>
 							<th>{{'view_task.log.msg'|trans}}</th>
 						</tr> 
-					     {% for log in entities %}
-					     <tr class="fd_log_{{ log.getType|lower }}">
-					     	<td class="ctr">
-					     		{{ log.getId }} 
-					     	</td>
-					     	<td>				     		
-					     		{% if log.getRef is not empty %}	
+						{% for log in entities %}
+						<tr class="fd_log_{{ log.getType|lower }}">
+						<td class="ctr">
+							{{ log.getId }} 
+						</td>
+						<td>				     		
+							{% if log.getRef is not empty %}	
 									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
 									    {{ log.getRef }}
 									</a>
-					     		{% else %}
-					     			{{ log.getRef }}
-					     		{% endif %}
-					     	</td>	
-					     	<td>
-					     		{% if log.getDocument is not empty %}
-					     			<a href="{{ path('flux_info', {'id': log.getDocument.id}) }}">{{ log.getDocument.id }}</a>
-					     		{% endif %}
-					     	</td>					     					     			     			     	
-					     	<td>{{ log.getDateCreated|date("d/m/Y H:i:s") }}</td>
-					     	<td class="ctr">
-					     		<div class="log_{{ log.getType|lower }}">{{ log.getType }}
-					     		{% if log.getType|lower == 's' %}
-					     			<span class="glyphicon glyphicon-ok"></span>
-					     		{% elseif log.getType|lower == 'e' %}
+							{% else %}
+								{{ log.getRef }}
+							{% endif %}
+						</td>	
+						<td>
+							{% if log.getDocument is not empty %}
+								<a href="{{ path('flux_info', {'id': log.getDocument.id}) }}">{{ log.getDocument.id }}</a>
+							{% endif %}
+						</td>					     					     			     			     	
+						<td>{{ log.getDateCreated|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">
+							<div class="log_{{ log.getType|lower }}">{{ log.getType }}
+							{% if log.getType|lower == 's' %}
+								<span class="glyphicon glyphicon-ok"></span>
+							{% elseif log.getType|lower == 'e' %}
 									<span class="glyphicon glyphicon-remove"></span>
 								{% elseif log.getType|lower == 'w' %}
 									<span class="glyphicon glyphicon-exclamation-sign"></span>
-					     		{% endif %}
-					     		</div>
-					     	</td>
-					     	<td class="msg">
-					     		{{ log.getMessage }}
-					     	</td>				     	     			     	
+							{% endif %}
+							</div>
+						</td>
+						<td class="msg">
+							{{ log.getMessage }}
+						</td>				     	     			     	
 						</tr>			
 						{% endfor %}			
 						<tr>
