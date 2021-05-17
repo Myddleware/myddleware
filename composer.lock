@@ -218,20 +218,20 @@
         },
         {
             "name": "babdev/pagerfanta-bundle",
-            "version": "v3.1.0",
+            "version": "v3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BabDev/PagerfantaBundle.git",
-                "reference": "a8bbb596de58a373a3e34a5f7edccf1beef45631"
+                "reference": "9e050b86871b5b3aacc23425280f77e19e990eb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BabDev/PagerfantaBundle/zipball/a8bbb596de58a373a3e34a5f7edccf1beef45631",
-                "reference": "a8bbb596de58a373a3e34a5f7edccf1beef45631",
+                "url": "https://api.github.com/repos/BabDev/PagerfantaBundle/zipball/9e050b86871b5b3aacc23425280f77e19e990eb0",
+                "reference": "9e050b86871b5b3aacc23425280f77e19e990eb0",
                 "shasum": ""
             },
             "require": {
-                "pagerfanta/core": "^3.0",
+                "pagerfanta/core": "^3.1",
                 "php": "^7.4 || ^8.0",
                 "symfony/config": "^4.4 || ^5.2",
                 "symfony/dependency-injection": "^4.4 || ^5.2",
@@ -243,6 +243,7 @@
                 "symfony/routing": "^4.4 || ^5.2"
             },
             "conflict": {
+                "pagerfanta/twig": "<3.1",
                 "twig/twig": "<1.35 || >=2.0,<2.5",
                 "white-october/pagerfanta-bundle": "*"
             },
@@ -252,7 +253,7 @@
                 "jms/serializer": "^3.0",
                 "jms/serializer-bundle": "^3.0",
                 "matthiasnoback/symfony-dependency-injection-test": "^4.1",
-                "pagerfanta/twig": "^3.0",
+                "pagerfanta/twig": "^3.1",
                 "phpstan/extension-installer": "^1.1",
                 "phpstan/phpstan": "^0.12.84",
                 "phpstan/phpstan-phpunit": "^0.12.18",
@@ -288,7 +289,7 @@
             ],
             "support": {
                 "issues": "https://github.com/BabDev/PagerfantaBundle/issues",
-                "source": "https://github.com/BabDev/PagerfantaBundle/tree/v3.1.0"
+                "source": "https://github.com/BabDev/PagerfantaBundle/tree/v3.2.0"
             },
             "funding": [
                 {
@@ -296,7 +297,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-04-25T22:10:50+00:00"
+            "time": "2021-05-11T23:46:40+00:00"
         },
         {
             "name": "beberlei/doctrineextensions",
@@ -624,28 +625,30 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "1.12.1",
+            "version": "1.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b"
+                "reference": "e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/b17c5014ef81d212ac539f07a1001832df1b6d3b",
-                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f",
+                "reference": "e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f",
                 "shasum": ""
             },
             "require": {
                 "doctrine/lexer": "1.*",
                 "ext-tokenizer": "*",
-                "php": "^7.1 || ^8.0"
+                "php": "^7.1 || ^8.0",
+                "psr/cache": "^1 || ^2 || ^3"
             },
             "require-dev": {
-                "doctrine/cache": "1.*",
+                "doctrine/cache": "^1.11 || ^2.0",
                 "doctrine/coding-standard": "^6.0 || ^8.1",
                 "phpstan/phpstan": "^0.12.20",
-                "phpunit/phpunit": "^7.5 || ^9.1.5"
+                "phpunit/phpunit": "^7.5 || ^8.0 || ^9.1.5",
+                "symfony/cache": "^4.4 || ^5.2"
             },
             "type": "library",
             "autoload": {
@@ -688,9 +691,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/annotations/issues",
-                "source": "https://github.com/doctrine/annotations/tree/1.12.1"
+                "source": "https://github.com/doctrine/annotations/tree/1.13.1"
             },
-            "time": "2021-02-21T21:00:45+00:00"
+            "time": "2021-05-16T18:07:53+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -1824,35 +1827,37 @@
         },
         {
             "name": "doctrine/persistence",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/persistence.git",
-                "reference": "9899c16934053880876b920a3b8b02ed2337ac1d"
+                "reference": "08d3e6e666de85c7748fa27bfd63bb15ac29eab2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/persistence/zipball/9899c16934053880876b920a3b8b02ed2337ac1d",
-                "reference": "9899c16934053880876b920a3b8b02ed2337ac1d",
+                "url": "https://api.github.com/repos/doctrine/persistence/zipball/08d3e6e666de85c7748fa27bfd63bb15ac29eab2",
+                "reference": "08d3e6e666de85c7748fa27bfd63bb15ac29eab2",
                 "shasum": ""
             },
             "require": {
                 "doctrine/annotations": "^1.0",
-                "doctrine/cache": "^1.0",
+                "doctrine/cache": "^1.11 || ^2.0",
                 "doctrine/collections": "^1.0",
                 "doctrine/event-manager": "^1.0",
-                "php": "^7.1 || ^8.0"
+                "php": "^7.1 || ^8.0",
+                "psr/cache": "^1.0|^2.0|^3.0"
             },
             "conflict": {
                 "doctrine/common": "<2.10@dev"
             },
             "require-dev": {
                 "composer/package-versions-deprecated": "^1.11",
-                "doctrine/coding-standard": "^6.0 || ^8.0",
+                "doctrine/coding-standard": "^6.0 || ^9.0",
                 "doctrine/common": "^3.0",
-                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan": "0.12.84",
                 "phpunit/phpunit": "^7.5.20 || ^8.0 || ^9.0",
-                "vimeo/psalm": "^3.11"
+                "symfony/cache": "^4.4|^5.0",
+                "vimeo/psalm": "4.7.0"
             },
             "type": "library",
             "autoload": {
@@ -1902,9 +1907,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/persistence/issues",
-                "source": "https://github.com/doctrine/persistence/tree/2.1.0"
+                "source": "https://github.com/doctrine/persistence/tree/2.2.0"
             },
-            "time": "2020-10-24T22:13:54+00:00"
+            "time": "2021-05-15T18:37:00+00:00"
         },
         {
             "name": "doctrine/sql-formatter",
@@ -3401,16 +3406,16 @@
         },
         {
             "name": "lexik/jwt-authentication-bundle",
-            "version": "v2.11.2",
+            "version": "v2.11.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lexik/LexikJWTAuthenticationBundle.git",
-                "reference": "f0a91712b4554454e6d28c648567e9381408e2d6"
+                "reference": "9358649d03ba41e1c98effa0a6e39c0317cceeec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/f0a91712b4554454e6d28c648567e9381408e2d6",
-                "reference": "f0a91712b4554454e6d28c648567e9381408e2d6",
+                "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/9358649d03ba41e1c98effa0a6e39c0317cceeec",
+                "reference": "9358649d03ba41e1c98effa0a6e39c0317cceeec",
                 "shasum": ""
             },
             "require": {
@@ -3495,7 +3500,7 @@
             ],
             "support": {
                 "issues": "https://github.com/lexik/LexikJWTAuthenticationBundle/issues",
-                "source": "https://github.com/lexik/LexikJWTAuthenticationBundle/tree/v2.11.2"
+                "source": "https://github.com/lexik/LexikJWTAuthenticationBundle/tree/v2.11.3"
             },
             "funding": [
                 {
@@ -3507,7 +3512,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-17T22:02:40+00:00"
+            "time": "2021-05-12T09:43:57+00:00"
         },
         {
             "name": "mautic/api-library",
@@ -3992,16 +3997,16 @@
         },
         {
             "name": "pagerfanta/pagerfanta",
-            "version": "v3.0.0",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BabDev/Pagerfanta.git",
-                "reference": "8b2ad13923b3a16ed1cb2dc1dea2c1391f863d3e"
+                "reference": "332d6a21ab2ceefb13e008431636b36a196563a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BabDev/Pagerfanta/zipball/8b2ad13923b3a16ed1cb2dc1dea2c1391f863d3e",
-                "reference": "8b2ad13923b3a16ed1cb2dc1dea2c1391f863d3e",
+                "url": "https://api.github.com/repos/BabDev/Pagerfanta/zipball/332d6a21ab2ceefb13e008431636b36a196563a7",
+                "reference": "332d6a21ab2ceefb13e008431636b36a196563a7",
                 "shasum": ""
             },
             "require": {
@@ -4035,11 +4040,11 @@
                 "doctrine/dbal": "^2.12 || ^3.0",
                 "doctrine/orm": "^2.8",
                 "doctrine/phpcr-odm": "^1.5",
-                "friendsofphp/php-cs-fixer": "^2.18.2",
+                "friendsofphp/php-cs-fixer": "^3.0",
                 "jackalope/jackalope-doctrine-dbal": "^1.6",
                 "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan": "^0.12.80",
-                "phpstan/phpstan-phpunit": "^0.12.17",
+                "phpstan/phpstan": "^0.12.83",
+                "phpstan/phpstan-phpunit": "^0.12.18",
                 "phpunit/phpunit": "^9.5",
                 "ruflin/elastica": "^6.0 || ^7.0",
                 "solarium/solarium": "^5.0 || ^6.0",
@@ -4078,7 +4083,7 @@
             ],
             "support": {
                 "issues": "https://github.com/BabDev/Pagerfanta/issues",
-                "source": "https://github.com/BabDev/Pagerfanta/tree/v3.0.0"
+                "source": "https://github.com/BabDev/Pagerfanta/tree/v3.1.0"
             },
             "funding": [
                 {
@@ -4086,7 +4091,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-03-07T15:10:07+00:00"
+            "time": "2021-05-11T23:39:16+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -6663,16 +6668,16 @@
         },
         {
             "name": "twig/extra-bundle",
-            "version": "v3.3.0",
+            "version": "v3.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/twig-extra-bundle.git",
-                "reference": "e2d27a86c3f47859eb07808fa7c8679d30fcbdde"
+                "reference": "e12a8ee63387abb83fb7e4c897663bfb94ac22b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/twig-extra-bundle/zipball/e2d27a86c3f47859eb07808fa7c8679d30fcbdde",
-                "reference": "e2d27a86c3f47859eb07808fa7c8679d30fcbdde",
+                "url": "https://api.github.com/repos/twigphp/twig-extra-bundle/zipball/e12a8ee63387abb83fb7e4c897663bfb94ac22b6",
+                "reference": "e12a8ee63387abb83fb7e4c897663bfb94ac22b6",
                 "shasum": ""
             },
             "require": {
@@ -6725,7 +6730,7 @@
                 "twig"
             ],
             "support": {
-                "source": "https://github.com/twigphp/twig-extra-bundle/tree/v3.3.0"
+                "source": "https://github.com/twigphp/twig-extra-bundle/tree/v3.3.1"
             },
             "funding": [
                 {
@@ -6737,20 +6742,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-06T21:13:17+00:00"
+            "time": "2021-05-12T07:47:40+00:00"
         },
         {
             "name": "twig/twig",
-            "version": "v3.3.0",
+            "version": "v3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "1f3b7e2c06cc05d42936a8ad508ff1db7975cdc5"
+                "reference": "21578f00e83d4a82ecfa3d50752b609f13de6790"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/1f3b7e2c06cc05d42936a8ad508ff1db7975cdc5",
-                "reference": "1f3b7e2c06cc05d42936a8ad508ff1db7975cdc5",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/21578f00e83d4a82ecfa3d50752b609f13de6790",
+                "reference": "21578f00e83d4a82ecfa3d50752b609f13de6790",
                 "shasum": ""
             },
             "require": {
@@ -6801,7 +6806,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.3.0"
+                "source": "https://github.com/twigphp/Twig/tree/v3.3.2"
             },
             "funding": [
                 {
@@ -6813,7 +6818,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-08T09:54:36+00:00"
+            "time": "2021-05-16T12:14:13+00:00"
         },
         {
             "name": "twitter/bootstrap",
@@ -7487,16 +7492,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.86",
+            "version": "0.12.87",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "a84fdc53ecca7643dbc89ef8880d8b393a6c155a"
+                "reference": "d464e00776afb711f419faffa96826dc02e4d145"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a84fdc53ecca7643dbc89ef8880d8b393a6c155a",
-                "reference": "a84fdc53ecca7643dbc89ef8880d8b393a6c155a",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d464e00776afb711f419faffa96826dc02e4d145",
+                "reference": "d464e00776afb711f419faffa96826dc02e4d145",
                 "shasum": ""
             },
             "require": {
@@ -7527,7 +7532,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.86"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.87"
             },
             "funding": [
                 {
@@ -7543,7 +7548,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-08T11:29:01+00:00"
+            "time": "2021-05-12T15:17:52+00:00"
         },
         {
             "name": "phpstan/phpstan-doctrine",
@@ -7685,16 +7690,16 @@
         },
         {
             "name": "symfony/maker-bundle",
-            "version": "v1.31.0",
+            "version": "v1.31.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/maker-bundle.git",
-                "reference": "d01a475fb9a96a46d0c75dbc7fae6eb9a8c85ddb"
+                "reference": "4f57a44cef0b4555043160b8bf223fcde8a7a59a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/d01a475fb9a96a46d0c75dbc7fae6eb9a8c85ddb",
-                "reference": "d01a475fb9a96a46d0c75dbc7fae6eb9a8c85ddb",
+                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/4f57a44cef0b4555043160b8bf223fcde8a7a59a",
+                "reference": "4f57a44cef0b4555043160b8bf223fcde8a7a59a",
                 "shasum": ""
             },
             "require": {
@@ -7753,7 +7758,7 @@
             ],
             "support": {
                 "issues": "https://github.com/symfony/maker-bundle/issues",
-                "source": "https://github.com/symfony/maker-bundle/tree/v1.31.0"
+                "source": "https://github.com/symfony/maker-bundle/tree/v1.31.1"
             },
             "funding": [
                 {
@@ -7769,7 +7774,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-05T18:41:31+00:00"
+            "time": "2021-05-12T14:01:20+00:00"
         },
         {
             "name": "symfony/phpunit-bridge",
