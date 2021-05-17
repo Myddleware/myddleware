@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e2aad5557c463b20326ad113ed2fc78b",
+    "content-hash": "84e84303d9dd8fd2def0a42ff0ad3feb",
     "packages": [
         {
             "name": "api-platform/core",
@@ -4431,6 +4431,50 @@
             "time": "2020-09-17T18:55:26+00:00"
         },
         {
+            "name": "prestashop/prestashop-webservice-lib",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PrestaShop/PrestaShop-webservice-lib.git",
+                "reference": "731e9d3f2c4d48d89ada03e45e098536fb6675c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PrestaShop/PrestaShop-webservice-lib/zipball/731e9d3f2c4d48d89ada03e45e098536fb6675c1",
+                "reference": "731e9d3f2c4d48d89ada03e45e098536fb6675c1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "php": ">= 5.3.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "PSWebServiceLibrary.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "OSL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "PrestaShop SA",
+                    "email": "contact@prestashop.com"
+                }
+            ],
+            "description": "PrestaShop Webservice access library",
+            "support": {
+                "issues": "https://github.com/PrestaShop/PrestaShop-webservice-lib/issues",
+                "source": "https://github.com/PrestaShop/PrestaShop-webservice-lib/tree/master"
+            },
+            "time": "2021-05-11T09:03:45+00:00"
+        },
+        {
             "name": "psr/cache",
             "version": "1.0.1",
             "source": {
@@ -7848,7 +7892,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "illuminate/encryption": 20
+        "illuminate/encryption": 20,
+        "prestashop/prestashop-webservice-lib": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

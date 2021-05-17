@@ -305,6 +305,9 @@
     "phpstan/phpstan-symfony": {
         "version": "0.12.12"
     },
+    "prestashop/prestashop-webservice-lib": {
+        "version": "dev-master"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },

@@ -73,7 +73,8 @@
     "babdev/pagerfanta-bundle": "^3.1",
     "pagerfanta/doctrine-orm-adapter": "^3.0",
     "laminas/laminas-stdlib": "^3.3",
-    "laminas/laminas-hydrator": "^4.1"
+    "laminas/laminas-hydrator": "^4.1",
+    "prestashop/prestashop-webservice-lib": "dev-master"
     },
     "repositories": [
         {
