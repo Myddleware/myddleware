@@ -42,7 +42,6 @@
         "javanile/vtiger-client": "^0.0.13",
         "facebook/graph-sdk" : "~5.0",
         "facebook/php-ads-sdk": "2.8.*",
-        "iadvize/apirestclient": "^1.3.0",
         "sugarcrm/rest-php-client": "^1.4.5",
         "automattic/woocommerce": "^3.0",
         "ext-json": "*",
@@ -72,7 +71,11 @@
     "twig/extra-bundle": "^2.12|^3.0",
     "twig/twig": "^2.12|^3.0",
     "babdev/pagerfanta-bundle": "^3.1",
-    "pagerfanta/doctrine-orm-adapter": "^3.0"
+    "pagerfanta/doctrine-orm-adapter": "^3.0",
+    "zendframework/zend-stdlib": "^3.2",
+    "zendframework/zend-hydrator": "^3.0",
+    "laminas/laminas-stdlib": "^3.3",
+    "laminas/laminas-hydrator": "^4.1"
     },
     "repositories": [
         {
