@@ -115,6 +115,32 @@ class woocommercecore extends solution {
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
+
+            // if (!empty($fieldsRelate[$module])) {
+			// 	$this->fieldsRelate = $fieldsRelate[$module]; 
+			// }	
+			// // Includ relate fields into moduleFields to display them in the field mapping tab
+			// if (!empty($this->fieldsRelate)) {
+			// 	$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+			// }
+            // include custom fields that could have been added with a plugin 
+            // (for instance Checkout Field Editor for WooCommerce allows you to create custom fields for your order forms)
+            // the custom fields need to be added manually in src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
+            if(!empty($this->customFields)){
+                foreach($this->customFields as $customModuleKey => $customModule){
+                    foreach($customModule as $customField){
+                        if($module === $customModuleKey){
+                            $this->moduleFields[$customField] = array(      
+                                                                    'label'=> ucfirst($customField),
+                                                                    'type' => 'varchar(255)',
+                                                                    'type_bdd' => 'varchar(255)',
+                                                                    'required'=> 0
+                                                                );
+                        }
+                    }
+                }
+            }
+
 			return $this->moduleFields;
 
         } catch (\Exception $e) {		
@@ -122,6 +148,7 @@ class woocommercecore extends solution {
 			return false;
 		}	
     }
+
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
@@ -153,7 +180,7 @@ class woocommercecore extends solution {
 					}
                 }  
 		    }   
-  
+
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
@@ -214,7 +241,7 @@ class woocommercecore extends solution {
                             $stop = true;
                         }   
                     } 
-                 } else {
+                } else {
                     $stop = true; 
                 }
                 if(!empty($query)){
@@ -257,7 +284,7 @@ class woocommercecore extends solution {
     }
 
     
-   /**
+    /**
 	 * Function create data
 	 * @param $param
 	 * @return mixed
@@ -283,7 +310,7 @@ class woocommercecore extends solution {
                 $param['method'] = $method;
                 $module = $param['module'];
                 $data = $this->checkDataBeforeCreate($param, $data);
-          
+
                 if($method === 'create'){
                     unset($data['target_id']);
                     $recordResult = $this->woocommerce->post($module, $data);
@@ -296,12 +323,12 @@ class woocommercecore extends solution {
             $response = $recordResult;
             if($response){
                 $record = $response;
-                 if(!empty($record->id)){
+                if(!empty($record->id)){
                     $result[$idDoc] = array(
                                             'id' => $record->id,
                                             'error' => false
                                     );
-                 } else  {
+                } else  {
                     throw new \Exception('Error during '.print_r($response));
                 }
             }
@@ -322,11 +349,6 @@ class woocommercecore extends solution {
 
     // Check data before create 
 	// Add a throw exeption if error
-	protected function checkDataBeforeCreate($param,$data) {
-		// Exception if the job has been stopped manually
-        $this->isJobActive($param);
-		return $data;
-	}
 
 	// Check data before update 
 	// Add a throw exeption if error
@@ -363,11 +385,11 @@ class woocommercecore extends solution {
 }
 
 // Include custom file if it exists : used to redefine Myddleware standard core
-$file = __DIR__. '/../Custom/Solutions/woocommerce.php';
-if(file_exists($file)){
-    require_once($file);
-} else { 
+// $file = __DIR__. '/../Custom/Solutions/woocommerce.php';
+// if(file_exists($file)){
+//     require_once($file);
+// } else { 
     class woocommerce extends woocommercecore {
 
     }
-}
+// }

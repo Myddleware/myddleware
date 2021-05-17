@@ -1,0 +1,12 @@
+
+# services:
+  # App\Custom\Solutions\woocommercecustom2:
+  #     decorates: App\Custom\Solutions\woocommercecustom
+  #     # pass the old service as an argument
+  #     # arguments: ['@App\Solutions\woocommerce.inner']
+  #     decoration_priority: 1
+  # App\Custom\Solutions\woocommercecustom:
+  #   decorates: App\Solutions\woocommerce
+  #   # pass the old service as an argument
+  #   # arguments: ['@App\Solutions\woocommerce.inner']
+  #   decoration_priority: 5
