@@ -72,8 +72,6 @@
     "twig/twig": "^2.12|^3.0",
     "babdev/pagerfanta-bundle": "^3.1",
     "pagerfanta/doctrine-orm-adapter": "^3.0",
-    "zendframework/zend-stdlib": "^3.2",
-    "zendframework/zend-hydrator": "^3.0",
     "laminas/laminas-stdlib": "^3.3",
     "laminas/laminas-hydrator": "^4.1"
     },
