@@ -110,8 +110,14 @@
 	text-align: center!important;
 	vertical-align: middle;
 	word-break: break-all;
-	
 }
+
+/* On single document view, history table, cells are shrinked to fit container*/
+.document-history-table td {
+	min-width: fit-content;
+	width: 175px;
+}
+
 .solution_block {	
 	width: 200px;
 	height: 64px auto;
