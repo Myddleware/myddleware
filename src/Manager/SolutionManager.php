@@ -33,7 +33,6 @@ use App\Solutions\eventbrite;
 use App\Solutions\facebook;
 use App\Solutions\file;
 use App\Solutions\hubspot;
-use App\Solutions\iadvize;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
@@ -76,7 +75,6 @@ class SolutionManager
         woocommerce $woocommerce,
         wooeventmanager $wooeventmanager,
         erpnext $erpnext,
-        iadvize $iadvize,
         facebook $facebook,
         mautic $mautic,
         hubspot $hubspot,
@@ -105,7 +103,6 @@ class SolutionManager
             'wooeventmanager' => $wooeventmanager,
             'woocommerce' => $woocommerce,
             'erpnext' => $erpnext,
-            'iadvize' => $iadvize,
             'facebook' => $facebook,
             'mautic' => $mautic,
             'hubspot' => $hubspot,

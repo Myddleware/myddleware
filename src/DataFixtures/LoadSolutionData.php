@@ -55,7 +55,6 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'erpnext',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mautic',			'active' => 1, 'source' => 0, 'target' => 1],
         ['name' => 'facebook',			'active' => 1, 'source' => 1, 'target' => 0],
-        ['name' => 'iadvize',			'active' => 1, 'source' => 1, 'target' => 0],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'wooeventmanager',	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'wordpress',		    'active' => 1, 'source' => 1, 'target' => 1],
