@@ -42,7 +42,7 @@ class LoadConfigData implements FixtureInterface
 		['name' => 'git_branch', 'value' => 'master', 'update' => false],
 		['name' => 'base_uri', 'value' => '', 'update' => false],
 		['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false],
-		['name' => 'myd_version', 'value' => '3.0.0H', 'update' => true]
+		['name' => 'myd_version', 'value' => '3.0.0', 'update' => true]
     ];
 
     public function load(ObjectManager $manager)
