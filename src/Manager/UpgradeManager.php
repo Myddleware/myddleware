@@ -37,6 +37,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Config;
+use Symfony\Component\Dotenv\Dotenv;
 
 $file = __DIR__.'/../Custom/Manager/UpgradeManager.php';
 if (file_exists($file)) {
@@ -93,7 +94,7 @@ if (file_exists($file)) {
 
         public function processUpgrade($output)
         {
-            try {
+            try {		
                 // Customize update process
                 $this->beforeUpdate($output);
 				// Set all config parameters
@@ -124,19 +125,23 @@ if (file_exists($file)) {
                 $this->message .= 'Clear Symfony cache OK'.chr(10);
 				
 			 	// Yarn action
-				$output->writeln('<comment>Yarn action... Can take several minutes </comment>');
+				$output->writeln('<comment>Yarn action... Can take 1 or 2 minutes </comment>');
                 $this->yarnAction();
                 $output->writeln('<comment>Yarn action OK</comment>');
                 $this->message .= 'Yarn action OK'.chr(10);  
 
                 // Customize update process
                 $this->afterUpdate($output);
+
+				// Get old and new Myddleware version
+				$oldVersion = getEnv('MYDDLEWARE_VERSION');
+				// Refresh variable from env file
+				if (file_exists(__DIR__.'/../../.env')) {
+					(new Dotenv())->load(__DIR__.'/../../.env');
+				}
 				
-				// Get the new version from the database (updated via function updateDatabase)				
-				$this->setConfigParam();
-				
-                $output->writeln('<info>Myddleware has been successfully updated in version '.$this->configParams['myd_version'].'</info>');
-                $this->message .= 'Myddleware has been successfully updated in version '.$this->configParams['myd_version'].chr(10);
+                $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getEnv('MYDDLEWARE_VERSION').'</info>');
+                $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getEnv('MYDDLEWARE_VERSION').chr(10);
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
