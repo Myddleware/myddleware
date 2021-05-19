@@ -98,7 +98,7 @@ if (file_exists($file)) {
                 $this->beforeUpdate($output);
 				// Set all config parameters
 				$this->setConfigParam();
-
+				
                 // Update file
                 $output->writeln('<comment>Update files...</comment>');
                 $this->updateFiles();
@@ -110,28 +110,31 @@ if (file_exists($file)) {
                 $this->updateVendors();
                 $output->writeln('<comment>Update vendors OK</comment>');
                 $this->message .= 'Update vendors OK'.chr(10);
-
+				
                 // Update database
                 $output->writeln('<comment>Update database...</comment>');
                 $this->updateDatabase();
                 $output->writeln('<comment>Update database OK</comment>');
                 $this->message .= 'Update database OK'.chr(10);
 
-                // Change Myddleware version
-                $output->writeln('<comment>Finish install...</comment>');
-                $this->finishInstall();
-                $output->writeln('<comment>Finish install OK</comment>');
-                $this->message .= 'Finish install OK'.chr(10);
-
-                // Clear cache
+                 // Clear cache
                 $output->writeln('<comment>Clear Symfony cache...</comment>');
                 $this->clearSymfonycache();
                 $output->writeln('<comment>Clear Symfony cache OK</comment>');
                 $this->message .= 'Clear Symfony cache OK'.chr(10);
+				
+			 	// Yarn action
+				$output->writeln('<comment>Yarn action... Can take several minutes </comment>');
+                $this->yarnAction();
+                $output->writeln('<comment>Yarn action OK</comment>');
+                $this->message .= 'Yarn action OK'.chr(10);  
 
                 // Customize update process
                 $this->afterUpdate($output);
-
+				
+				// Get the new version from the database (updated via function updateDatabase)				
+				$this->setConfigParam();
+				
                 $output->writeln('<info>Myddleware has been successfully updated in version '.$this->configParams['myd_version'].'</info>');
                 $this->message .= 'Myddleware has been successfully updated in version '.$this->configParams['myd_version'].chr(10);
             } catch (\Exception $e) {
@@ -183,7 +186,25 @@ if (file_exists($file)) {
         // Update vendors via composer
         protected function updateVendors()
         {
-            $process = new Process($this->phpExecutable.' composer.phar install --no-plugins');
+            $process = new Process('composer install');
+            $process->run();
+            // executes after the command finishes
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+        }
+
+        // Execute yarn action
+        protected function yarnAction()
+        {
+            $process = new Process('yarn install');
+            $process->run();
+            // executes after the command finishes
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+			
+			$process = new Process('yarn build');
             $process->run();
             // executes after the command finishes
             if (!$process->isSuccessful()) {
@@ -289,57 +310,13 @@ if (file_exists($file)) {
             }
         }
 
-        // Finish install
-        protected function finishInstall()
-        {
-            // Update schema
-            $application = new Application($this->kernel);
-            $application->setAutoExit(false);
-            $arguments = [
-                'command' => 'assetic:dump',
-                '--env' => $this->env,
-            ];
-
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-            $application->run($input, $output);
-
-            $content = $output->fetch();
-            // Send output to the logfile if debug mode selected
-            if (!empty($content)) {
-                echo $content.chr(10);
-                $this->logger->info($content);
-                $this->message .= $content.chr(10);
-            }
-
-            // Update data
-            $argumentsFixtures = [
-                'command' => 'assets:install',
-                '--env' => $this->env,
-            ];
-
-            $input = new ArrayInput($argumentsFixtures);
-            $output = new BufferedOutput();
-            $application->run($input, $output);
-
-            $content = $output->fetch();
-            // Send output to the logfile if debug mode selected
-            if (!empty($content)) {
-                echo $content.chr(10);
-                $this->logger->info($content);
-                $this->message .= $content.chr(10);
-            }
-        }
-
 		// Get the content of the table config
 		protected function setConfigParam() {
-			if (empty($this->configParams)) {
-				$configRepository = $this->entityManager->getRepository(Config::class);
-				$configs = $configRepository->findAll();
-				if (!empty($configs)) {
-					foreach ($configs as $config) {
-						$this->configParams[$config->getName()] = $config->getvalue();
-					}
+			$configRepository = $this->entityManager->getRepository(Config::class);
+			$configs = $configRepository->findAll();
+			if (!empty($configs)) {
+				foreach ($configs as $config) {
+					$this->configParams[$config->getName()] = $config->getvalue();
 				}
 			}
 		}
