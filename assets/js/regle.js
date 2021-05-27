@@ -23,6 +23,9 @@
 *********************************************************************************/
 
 global.path_img = '../../build/images/';
+
+require('../../vendor/MCDatepicker-master/dist/mc-calendar.min');
+
 // Rev 1.1.0 Upload Files ------------------------------
 // Fermeture de la fancybox
 $(".fancybox_upload").fancybox({
@@ -90,11 +93,11 @@ function htmlentities(value){
 
 // rev 1.08 --------
 var TabSpec = {"à":"a","á":"a","â":"a","ã":"a","ä":"a","å":"a","ò":"o","ó":"o","ô":"o","õ":"o","ö":"o","ø":"o","è":"e","é":"e","ê":"e","ë":"e","ç":"c","ì":"i","í":"i","î":"i","ï":"i","ù":"u","ú":"u","û":"u","ü":"u","ÿ":"y","ñ":"n","-":" ","_":" "}; 
- 
+
 function replaceSpec(Texte){
 	var reg=/[àáäâèéêëçìíîïòóôõöøùúûüÿñ-]/gi; 
 	return Texte.replace(reg,function(){ return TabSpec[arguments[0].toLowerCase()];}).toLowerCase();
- 	}
+}
 
 function removeSpace(string) {
 	string = replaceSpec(string);
@@ -552,7 +555,7 @@ $(function() {
 					});
 					
 					next_step(0);
-				 }
+				}
 			});
 
 		});	
@@ -589,65 +592,12 @@ $(function() {
 			success: function(data){		
 				$( champs ).html(data);
 				verif( champs );
-			 }
+			}
 		});									
 	}	
 	
 	// ----------------------------- Step 3
-	
 
-	
-	if ( typeof lang !== "undefined" && lang) {
-
-			$('#datereference, .calendar').datepicker({
-				dateFormat: 'yy-mm-dd'
-			});
-		
-		if(lang == 'fr') {
-
-			$.datepicker.regional['fr'] = {
-				closeText: 'Fermer',
-				prevText: 'Précédent',
-				nextText: 'Suivant',
-				currentText: 'Aujourd\'hui',
-				monthNames: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-				'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
-				monthNamesShort: ['janv.', 'févr.', 'mars', 'avril', 'mai', 'juin',
-				'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
-				dayNames: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'],
-				dayNamesShort: ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'],
-				dayNamesMin: ['D','L','M','M','J','V','S'],
-				weekHeader: 'Sem.',
-				firstDay: 1,
-				isRTL: false,
-				showMonthAfterYear: false,
-				yearSuffix: ''};
-				$.datepicker.setDefaults($.datepicker.regional['fr']);			
-		}
-		else {
-	        $.datepicker.regional['en-GB'] = {
-	                closeText: 'Done',
-	                prevText: 'Prev',
-	                nextText: 'Next',
-	                currentText: 'Today',
-	                monthNames: ['January','February','March','April','May','June',
-	                'July','August','September','October','November','December'],
-	                monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-	                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-	                dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-	                dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-	                dayNamesMin: ['Su','Mo','Tu','We','Th','Fr','Sa'],
-	                weekHeader: 'Wk',
-	                dateFormat: 'dd/mm/yy',
-	                firstDay: 1,
-	                isRTL: false,
-	                showMonthAfterYear: false,
-	                yearSuffix: ''};
-	        $.datepicker.setDefaults($.datepicker.regional['en-GB']);
-			
-		}
-			
-	}
 
 // ---- PREPARATION DE LA ZONE DRAGGABLE ------------------------------------
 

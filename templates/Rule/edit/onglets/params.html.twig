@@ -21,7 +21,9 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
-
+<head>
+	<link rel="stylesheet" href="../../../vendor/dtsel-master/dtsel.css" />
+</head>
 <div class="link-help-view">
 	<a href="#help-content-param"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
 </div>
@@ -72,13 +74,20 @@
 </div>
 
 <div class="clr"></div>
-{# ------------- PARAMETRES JQUERY ------------- #}
-<script type="text/javascript">	
-var path_img = "{{ asset('build/images/regle/') }}";
-</script>
-{# ------------- PARAMETRES JQUERY ------------- #}
+
+
 
 <div id="help-content-param" class="help-content">
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
 	<p>{{'help.viewrule.param'|trans|raw}}</p>
 </div>
+
+<script src="../../../vendor/dtsel-master/dtsel.js"></script>
+<script type="text/javascript">	
+	var path_img = "{{ asset('build/images/regle/') }}";	
+
+	// DATE & TIME PICKER FOR THE DATEREFERENCE INPUT FIELD 
+	instance = new dtsel.DTS('input[id="datereference"]',  {
+  					showTime: true
+		});
+</script>
