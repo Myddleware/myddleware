@@ -517,7 +517,7 @@ if (file_exists($file)) {
 			} catch(\Exception $e){
 				return $e->getMessage();
 			}
-			 return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
+			return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
 		
 		}
 		
@@ -1322,7 +1322,7 @@ if (file_exists($file)) {
                 if(isset($form['query'])){
                     $this->simulationQueryField = $form['query'];
                 }
-     
+
                 // Avoid sending query on specific record ID if the user didn't actually input something
                 if(empty($this->simulationQueryField)){
 					// Get source data

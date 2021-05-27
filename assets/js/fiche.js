@@ -61,60 +61,6 @@ $(function() {
 			}			
 		});	
 	});
-
-	$.datepicker.regional['fr'] = {
-		closeText: 'Fermer',
-		prevText: 'Précédent',
-		nextText: 'Suivant',
-		currentText: 'Aujourd\'hui',
-		monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-		'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-		monthNamesShort: ['janv.', 'févr.', 'mars', 'avril', 'mai', 'juin',
-		'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
-		dayNames: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'],
-		dayNamesShort: ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'],
-		dayNamesMin: ['D','L','M','M','J','V','S'],
-		weekHeader: 'Sem.',
-		firstDay: 1,
-		isRTL: false,
-		showMonthAfterYear: false,
-		yearSuffix: ''
-	};
-
-	$.datepicker.setDefaults($.datepicker.regional['fr']);	
-
-	// $.timepicker.regional['fr'] = {
-	// 	timeOnlyTitle: 'Выберите время',
-	// 	timeText: 'Время',
-	// 	hourText: 'Часы',
-	// 	minuteText: 'Минуты',
-	// 	secondText: 'Секунды',
-	// 	millisecText: 'Миллисекунды',
-	// 	timezoneText: 'Часовой пояс',
-	// 	currentText: 'Сейчас',
-	// 	closeText: 'Закрыть',
-	// 	timeFormat: 'HH:mm',
-	// 	amNames: ['AM', 'A'],
-	// 	pmNames: ['PM', 'P'],
-	// 	isRTL: false
-	// };
-	// $.timepicker.setDefaults($.timepicker.regional['fr']);
-
-	$('#datereference, .calendar').datepicker($.timepicker.regional['fr']);
-	// $('#datereference, .calendar').timepicker($.timepicker.regional['fr']);
-
-
-	// $('#datereference, .calendar').datetimepicker({
-	// 	timeFormat: 'HH:mm:ss',
-	// 	dateFormat: 'yy-mm-dd',
-    //     timeText: 'Heure',
-    //     hourText: 'Heure',
-    //     minuteText: 'Minute',
-    //     secondText: 'Seconde',
-    //     currentText: 'Maintenant',
-    //     closeText: 'Fermer'		
-	// });	
-
 	
 	$( '#saveRuleParams' ).on('click', function() {	
 		loading_img = $('#myd_loading_img', '.myd_loading');	
@@ -140,9 +86,9 @@ $(function() {
 					$('#saveRuleParams').find('span').attr('class','glyphicon glyphicon-remove-circle');
 				}
 				setTimeout(function() {
-				      $('.myd_loading > span').hide();
-				      $('.myd_loading > span').replaceWith(loading_img);
-				      $('#saveRuleParams').find('span').attr('class','glyphicon glyphicon-edit');
+					$('.myd_loading > span').hide();
+					$('.myd_loading > span').replaceWith(loading_img);
+					$('#saveRuleParams').find('span').attr('class','glyphicon glyphicon-edit');
 				}, 2000);	
 			}			
 		});	
@@ -176,10 +122,10 @@ $(function() {
 					$('#simuleRuleFlux').find('span').attr('class','glyphicon glyphicon-remove-circle');
 				}
 				setTimeout(function() {
-				      $('.simuleRuleFluxLoading > span').hide();
-				      $('.simuleRuleFluxLoading > span').replaceWith(simule_img);
-				      $('#simuleRuleFluxAction').find('span').attr('class','glyphicon glyphicon-play-circle');
-					  $('#simuleRuleFluxResult').val(data);
+					$('.simuleRuleFluxLoading > span').hide();
+					$('.simuleRuleFluxLoading > span').replaceWith(simule_img);
+					$('#simuleRuleFluxAction').find('span').attr('class','glyphicon glyphicon-play-circle');
+					$('#simuleRuleFluxResult').val(data);
 				}, 2000);
 			}			
 		});

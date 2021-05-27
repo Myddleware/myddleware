@@ -15,7 +15,8 @@ global.lang = $('html').attr('lang');
 global.path_img = 'build/images/';
 
 require('./vendors/jquery-ui/jquery-ui.min.js')
-require('./vendors/bootstrap/js/bootstrap.min.js')
+require('bootstrap')
+require('../vendor/MCDatepicker-master/dist/mc-calendar.min.js')
 require('./js/lib/jquery_onoff/jquery.onoff.min.js')
 require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
 require('./js/lib/jquery_scrollbox/jquery.scrollbox.min.js')
