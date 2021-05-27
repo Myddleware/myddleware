@@ -1048,6 +1048,10 @@ class documentcore
 		
 			// Get data in the target solution (if exists) before we update it
 			$history = $this->getDocumentData('H');
+			// No comparaison if history is empty
+			if (empty($history)) {
+				return false;
+			}
 			
 			// For each target fields, we compare the data we want to send and the data already in the target solution
 			// If one is different we stop the function
