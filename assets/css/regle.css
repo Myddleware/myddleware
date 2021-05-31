@@ -89,8 +89,6 @@
 
 /*#cible ul li li::before{ content:"Formule : "; }*/
 
-
-
 #choix fieldset {
 	border: 0px;
 }
@@ -106,7 +104,7 @@
 .listepager td {
 	padding: 5px;
 	color: black; 
-	min-width: 190px;
+	min-width: 155px;
 	text-align: center!important;
 	vertical-align: middle;
 	word-break: break-all;
@@ -137,17 +135,14 @@
 }
 
 .listepagerflux{
-  width: 99%;
+	width: 99%;
 }
 
 .listepagerflux td {
-  padding: 5px;
+	padding: 5px;
 }
 
 /* params */
-
-
-
 
 #fields_duplicate_target li {
     -moz-user-select: none;
@@ -256,10 +251,6 @@ input[type="text"] {
 	background-color: #D6CF49!important;
 	border-color: #D6CF49!important;
 } 
-
-
-
-
 
 
 /*------------------------- Update SF4 -------------------- */

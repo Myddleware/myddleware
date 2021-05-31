@@ -138,16 +138,20 @@ function recup_params() {
 	$( '.params','#ruleparams' ).each(function(){
 
         var name = $(this).attr('name');
-        
+		value = $(this).val();	
+		id = $(this).attr('data-id');
         if(name == 'datereference_txt') {
         	name = 'datereference';
         }
-        
-        value = $(this).val();	
-        id = $(this).attr('data-id');
-        			
+
+		// delete the comma added by dtsel datetimepickere to fit with params format
+		if (name === 'datereference' && value.includes(',')){
+			value = value.replace(',', '');
+		}
+
 		params.push( {name: name, value: value, id: id } );
 	});
+	console.log(params);
 	return params;
 }
 
