@@ -151,7 +151,7 @@ function recup_params() {
 
 		params.push( {name: name, value: value, id: id } );
 	});
-	console.log(params);
+	
 	return params;
 }
 
