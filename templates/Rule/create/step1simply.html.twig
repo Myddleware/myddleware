@@ -50,13 +50,17 @@
                     <ul class="clr">
                         <li>
                             <a class="fancybox_animation" data-fancybox-type="iframe" href="{{ path('regle_connector_create_out',{'type' : 'source' }) }}">
-                                <span class="animation-addbtn glyphicon glyphicon-plus-sign"></span>
+                                <span class="animation-addbtn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                    </svg>
+                                </span>
                             </a>
                         </li>
                         {# Liste des solutions possédant au moins 1 connecteur de type : SOURCE #}
                         {% if source %}
                             {% for s in source %}
-                           <li>
+                            <li>
                                 <img data-id="{{ s.getId }}" data-solution="{{ s.getName }}" class="animation-solution-source gray" src="{{ asset('build/images/solution/' ~ s.getName ~ '.png' ) }}" alt="{{ s.getName }}" />
                             </li>
                             {% endfor %}
@@ -68,7 +72,7 @@
             </div> <!-- .carousel -->
         </div>
         <div class="animation-content animation-workspace">
-          
+
             <div align="center" id="head">
                 <div class="left name_solution">
                     {{'animate.solution.source'|trans}}
@@ -180,7 +184,7 @@
 
                     <div id="connector-cible-error" class="alert alert-danger"></div>
                     <div id="connector-cible-success" class="alert alert-success"></div>
-                   
+
                 </div>
                 <div class="clr"></div>
                 <div id="choice" class="btn-toolbar" role="toolbar">
@@ -214,13 +218,17 @@
                 <div class="window">
                     <ul class="clr">
                         <li><a class="fancybox_animation" data-fancybox-type="iframe" href="{{ path('regle_connector_create_out',{'type' : 'target' }) }}">
-                            <span class="animation-addbtn glyphicon glyphicon-plus-sign"></span>
-                            </a></li>
-
+                            <span class="animation-addbtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                            </span>
+                            </a>
+                        </li>
                         {# Liste des solutions possédant au moins 1 connecteur de type : TARGET #}
                         {% if target %}
                             {% for t in target %}
-                           <li>
+                            <li>
                                 <img data-id="{{ t.getId }}" data-solution="{{ t.getName }}" class="animation-solution-cible gray" src="{{ asset('build/images/solution/' ~ t.getName ~ '.png' ) }}" alt="{{ t.getName }}" />
                             </li>
                             {% endfor %}

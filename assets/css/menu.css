@@ -65,8 +65,8 @@ menu .dropdown-menu > li > a:hover {
 menu li li, #myd_top li li {
 	background: white;
     text-align: left;
-    width: 100px; 
-	max-width: 100px;
+    width: 140px; 
+	max-width: 140px;
     overflow:hidden;  
     height: 25px; 	
 	padding: 0;

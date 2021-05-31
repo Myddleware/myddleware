@@ -342,16 +342,13 @@ function addChoice() {
 
 // Affiche la liste des modules si le connecteur est sélectionné
 function addModule(type) {
-	 $('#animation-Connecteur-' + type).on('change', function() {
-	 	
+	$('#animation-Connecteur-' + type).on('change', function() {
 		$('#connector-' + type +'-error').hide();
 		$('#connector-' + type +'-success').hide();	 	
 		$('#animation-Module-' + type).hide();	
 		$('.loader-' + type).hide();
-
-	 	value = $(this).val();
-	 	if(value != '') {
-	 		
+		value = $(this).val();
+		if(value != '') {
 	 		// Récupère la liste des modules
 			$.ajax({
 				type: "POST",
@@ -372,7 +369,7 @@ function addModule(type) {
 					if ( r.length > 1 ) { // error
 						$('#connector'+type+'-success').hide();
 						id = '#connector-'+type+'-error';
-						$(id).html('<span class="glyphicon glyphicon-exclamation-sign"></span> '+r[0]).fadeIn(1000);
+						$(id).html('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16"><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/></svg> '+r[0]).fadeIn(1000);
 						
 						if( typeof imgCount !== "undefined" ) {
 							
@@ -384,8 +381,7 @@ function addModule(type) {
 						
 						$('img','#animation-'+type).removeAttr('data-send');	
 						addChoice();	
-						
-						  setTimeout(function(){
+						setTimeout(function(){
 				        	arc(type, false);	
 				        }, 4000); 				
 					}
@@ -394,7 +390,7 @@ function addModule(type) {
 						$('#animation-Module-' + type).empty();
 						$('#connector'+type+'-error').hide();
 						id = '#connector-'+type+'-success';
-						$(id).html('<span class="glyphicon glyphicon-transfer"></span> Success').fadeIn(1000);						
+						$(id).html('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/></svg> Success').fadeIn(1000);						
 						$('#animation-Module-' + type).append(data);
 						$('#animation-Module-' + type).fadeIn(1000);	
 
@@ -418,14 +414,13 @@ function addModule(type) {
 					$('.loader-' + type).hide();
 				}
 			});	 		
-	 	}
-	 	else {
+		} else {
 			$('img','#animation-'+type).removeAttr('data-count'); 	
 			$('img','#animation-'+type).removeAttr('data-send');		
-	 		((type == 'source') ? source_toggle() : cible_toggle() );	
-	 		$('#animation-Module-' + type).hide();	
-	 	}	 	
-	 });	
+			((type == 'source') ? source_toggle() : cible_toggle() );	
+			$('#animation-Module-' + type).hide();	
+		}	 	
+	});	
 }
 
 // Ajoute les solutions manquantes
@@ -734,7 +729,6 @@ function cible_toggle() {
         setTimeout(function(){
         	arc('cible', false);	
         }, 4000);
-              
     } else {
         progressBar(100, $('#animation-Bar3'), 2000);
         progressBar(100, $('#animation-Bar4'), 2000);

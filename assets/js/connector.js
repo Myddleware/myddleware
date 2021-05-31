@@ -28,36 +28,6 @@ require('../css/connector.css');
 // AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 
 
 $( function() {
-	// Sauvegarde du connecteur
-	/*$('#connector_save','#connector').click(function(){	
-		params = [];
-		$('.params','#tab_connector').each(function(){
-			id = $.trim( $(this).attr('data-id') );
-			value = $.trim( $(this).val() );
-			
-			params.push( {value: value, id: id} );
-		});	
-		
-		$.ajax({
-		    type: "POST",
-			url: path_connector_save,
-			data:{
-				params : params,
-				nom : $('#label').val()
-			},
-			success: function(data){
-				if(data == 0) {
-					$('#validation').html('<span class="glyphicon glyphicon-remove"></span>');
-				}
-				else {
-					$('#validation').html('<span class="glyphicon glyphicon-ok"></span>');
-					window.location.href = data;
-				}
-			 }
-		});
-					
-	});*/
-
 	// Test connexion
 	$('#connexion').on('click', function(){
 		var datas = '';
@@ -180,7 +150,7 @@ $( function() {
 					}
 				});				
 
-			 }
+			}
 		});		 
 	});
 
