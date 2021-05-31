@@ -103,13 +103,13 @@ $(function()  {
 			direction: 'h',
 			distance: 65
 		});
-		$('#listing-solutions-backward','#panel').click(function () {
-		  $('#listing-solutions','#panel').trigger('backward');
+		$('#listing-solutions-backward','#panel').on('click', function () {
+			$('#listing-solutions','#panel').trigger('backward');
 		});
-		$('#listing-solutions-forward','#panel').click(function () {
-		  $('#listing-solutions','#panel').trigger('forward');
+		$('#listing-solutions-forward','#panel').on('click', function () {
+			$('#listing-solutions','#panel').trigger('forward');
 		});
-		$('#listing-solutions li','#panel').hover(function () {
+		$('#listing-solutions li','#panel').on('hover', function () {
 			string = $("img", this).attr('alt')
 			$("img", this).qtip({
 				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,

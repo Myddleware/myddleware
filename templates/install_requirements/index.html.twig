@@ -21,12 +21,6 @@
                                 </div>
                                 <div class="panel-body requirements-tab">
                                     <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
-                                    {# {% if ini_path %}
-                                        <p>{{'install.php_ini_path_sentence' | trans }} :</p>
-                                        <p id="ini-path" class="alert-success" role="alert">{{ ini_path }} </p>
-                                    {% else %}
-                                        <p class="bg-danger">{{'install.php_ini_error' | trans }}</p>
-                                    {% endif %} #}
                                     {% if php_version %}
                                         <p>PHP version : </p>
                                         <p class="alert-success">{{ php_version }}</p>
@@ -80,8 +74,8 @@
 {% include 'footer.html.twig' %}
 </footer>
 
- {% block javascripts %}
+{% block javascripts %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     {{ encore_entry_script_tags('install') }}
- {% endblock %}
+{% endblock %}
 {% endblock %}

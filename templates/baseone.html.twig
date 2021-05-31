@@ -30,7 +30,7 @@
         {% block stylesheets %}
             {{ encore_entry_link_tags('login') }}
         {% endblock %}
-         {% block css %}{% endblock css %}
+            {% block css %}{% endblock css %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body{% if body_class is defined %} class="{{ body_class }}"{% endif %}>
@@ -41,8 +41,10 @@
         {% block body %}
         	{% block arianne %}Myddleware{% endblock %}
         {% endblock %}
- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        {{ encore_entry_script_tags('login') }}
-        {% block js %}{% endblock js %}
+        
+        {% block javascripts %}
+            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+            {{ encore_entry_script_tags('login') }}
+        {% endblock %}
     </body>
 </html>

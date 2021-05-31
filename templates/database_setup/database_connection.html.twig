@@ -8,7 +8,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-             <p><span id="logo"></span></p>
+            <p><span id="logo"></span></p>
             <div class="row">
                 <div class="col-md-6">
                     <div class="panel panel-primary">
@@ -55,8 +55,8 @@
 <footer>
 {% include 'footer.html.twig' %}
 </footer>
- {% block javascripts %}
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-     {{ encore_entry_script_tags('install') }}
- {% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    {{ encore_entry_script_tags('install') }}
+{% endblock %}
 {% endblock %}
