@@ -32,29 +32,29 @@
 			{% include "Rule/edit/onglets/index.html.twig" %}
 		</ul>
 			<div id="infos">
-				 {# ------------- INFOS ------------- #}
-				 {% include "Rule/edit/onglets/infos.html.twig" %}
-				 {# ------------- /INFOS ------------- #}
+				{# ------------- INFOS ------------- #}
+				{% include "Rule/edit/onglets/infos.html.twig" %}
+				{# ------------- /INFOS ------------- #}
 			</div>
 			<div id="mapping">
-				 {# ------------- MAPPING ------------- #}
-				 {% include "Rule/edit/onglets/mapping.html.twig" %}
-				 {# ------------- /MAPPING ------------- #}
+				{# ------------- MAPPING ------------- #}
+				{% include "Rule/edit/onglets/mapping.html.twig" %}
+				{# ------------- /MAPPING ------------- #}
 			</div>
 			<div id="relation">
-				 {# ------------- RELATIONS ------------- #}
-				 {% include "Rule/edit/onglets/relation.html.twig" %}
-				 {# ------------- /RELATIONS ------------- #}
+				{# ------------- RELATIONS ------------- #}
+				{% include "Rule/edit/onglets/relation.html.twig" %}
+				{# ------------- /RELATIONS ------------- #}
 			</div>
 			<div id="filter">
-				 {# ------------- FILTER ------------- #}
-				 {% include "Rule/edit/onglets/filter.html.twig" %}
-				 {# ------------- /FILTER ------------- #}
+				{# ------------- FILTER ------------- #}
+				{% include "Rule/edit/onglets/filter.html.twig" %}
+				{# ------------- /FILTER ------------- #}
 			</div>						
 			<div id="params">
-				 {# ------------- PARAMS ------------- #}
-				 {% include "Rule/edit/onglets/params.html.twig" %}
-				 {# ------------- /PARAMS ------------- #}
+				{# ------------- PARAMS ------------- #}
+				{% include "Rule/edit/onglets/params.html.twig" %}
+				{# ------------- /PARAMS ------------- #}
 			</div>
 		</div>
     </div>
@@ -71,5 +71,6 @@
 	{#var path_rule_logs = "{{ path('regle_logs', {'id' : rule.getId }) }}";#}
 	var path_rule_exec = "{{ path('regle_exec',{'id' : rule.GetId }) }}";
     </script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

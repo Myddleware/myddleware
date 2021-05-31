@@ -22,8 +22,6 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-
-  
 google.charts.load("visualization", "1", {packages:["corechart"]});
 google.charts.setOnLoadCallback(drawChart);
 

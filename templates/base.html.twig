@@ -31,8 +31,7 @@
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
-  
-         {% block css %}{% endblock css %}
+        {% block css %}{% endblock css %}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     </head>
     <body>
@@ -70,18 +69,10 @@
                 <div class="left">
                     <a href="{{ path('regle_panel')}}"> 
                         <span id="logo"></span>
-                     </a>
+                    </a>
                 </div>
                 <div class="right">
-                    <span id="cloud"></span>
-                  {#  
-                  <form id="search" class="navbar-form navbar-right" role="search">
-                    <div class="form-group">
-                      <input type="text" class="form-control" placeholder="Flux, Job, Règle...">
-                    </div>
-                    <button type="submit" class="btn-small-myd"><span class="glyphicon glyphicon-search"></span></button>
-                  </form> #}                       
-                    
+                    <span id="cloud"></span>                   
                     <menu>
                         <ul class="nav nav-pills">
                             <li><a href="{{ path('regle_panel') }}"><span class="glyphicon glyphicon-home"></span> {{'menu.index'|trans}}</a></li>
@@ -144,7 +135,7 @@
         </header>
         <div id="notification">
             {# Notification #}
-           {% include "Layout/notification.html.twig" %}
+        {% include "Layout/notification.html.twig" %}
         </div>
         <div id="myd_title"><span class="glyphicon glyphicon-chevron-right"></span> {% block titlesm %}{% endblock titlesm %}</div>
         <section>    
@@ -162,11 +153,6 @@
             <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
             {{ encore_entry_script_tags('app') }}
         {% endblock base_js %}
-	    <!--[if lt IE 9]>
-	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	    <![endif]-->
-	                   
         {% block js %}{% endblock js %}
     </body>
 </html>

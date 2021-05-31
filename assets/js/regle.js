@@ -24,7 +24,6 @@
 
 global.path_img = '../../build/images/';
 
-require('../../vendor/MCDatepicker-master/dist/mc-calendar.min');
 
 // Rev 1.1.0 Upload Files ------------------------------
 // Fermeture de la fancybox
@@ -289,9 +288,9 @@ $(function() {
 
 	// ----------------------------- Step 
     if ( typeof onglets !== "undefined" && onglets) {
-          $( "#tabs" ).tabs(onglets);
+        $( "#tabs" ).tabs(onglets);
     }
-		     
+
 	// ----------------------------- Step 1
 
 	// Test si le name de la règle existe ou non
@@ -963,10 +962,10 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			    type: "POST",
 				url: path_simulation,
 				data:{
-					champs : recup_champs(),
-  					formules : recup_formule(),
-  					params : recup_params(),
-  					relations : recup_relation()
+						champs : recup_champs(),
+						formules : recup_formule(),
+						params : recup_params(),
+						relations : recup_relation()
 				},
 				beforeSend:	function() {
 					$('#simulation_tab').html( '<span class="glyphicon glyphicon-info-sign"></span> ' + data_wait );									
@@ -979,7 +978,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 					else {
 						$('#simulation_tab').html(data);	
 					}
-				 }
+				}
 			});					
 		} 
 	});

@@ -22,7 +22,9 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 <head>
-	<link rel="stylesheet" href="../../../vendor/dtsel-master/dtsel.css" />
+	{% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+    {% endblock %}
 </head>
 <div class="link-help-view">
 	<a href="#help-content-param"><span class="glyphicon glyphicon-info-sign"></span> {{'rule.help'|trans}}</a>
@@ -52,7 +54,7 @@
 
 <div id="validRuleParams" class="left">
 	<button id="saveRuleParams" type="button" class="btn-mydinv">
-	  <span class="glyphicon glyphicon-edit"></span> {{'view_rule.params.save'|trans}}
+	<span class="glyphicon glyphicon-edit"></span> {{'view_rule.params.save'|trans}}
 	</button>
 	<div class="myd_loading"><img id="myd_loading_img" src="" /></div>
 </div>
@@ -61,7 +63,7 @@
 	<div id="simuleRuleFluxBtn">
 		<div class="simuleRuleFluxLoading"><img id="simuleRuleFluxLoading_img" src="" /></div>
 		<button id="simuleRuleFluxAction" type="button" class="btn-mydinv">
-		  <span class="glyphicon glyphicon-play-circle"></span> {{'view_rule.params.simule'|trans}}
+		<span class="glyphicon glyphicon-play-circle"></span> {{'view_rule.params.simule'|trans}}
 		</button>
 	</div>
 	<div id="simuleRuleFluxContainer">
@@ -81,13 +83,15 @@
 	<h2>{{'help.title'|trans}} <span class="glyphicon glyphicon-info-sign"></h2>
 	<p>{{'help.viewrule.param'|trans|raw}}</p>
 </div>
-
-<script src="../../../vendor/dtsel-master/dtsel.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
 <script type="text/javascript">	
 	var path_img = "{{ asset('build/images/regle/') }}";	
 
 	// DATE & TIME PICKER FOR THE DATEREFERENCE INPUT FIELD 
 	instance = new dtsel.DTS('input[id="datereference"]',  {
-  					showTime: true
+	showTime: true
 		});
 </script>
