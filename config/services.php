@@ -8,9 +8,6 @@ use App\EventListener\ExceptionListener;
 
 return function(ContainerConfigurator $configurator) {
 
-    if(file_exists('../config/services_custom.php')){
-        $configurator->import('../config/services_custom.php', null, true);
-    }
 
     $configurator->parameters()
     // the parameter name is an arbitrary string (the 'app.' prefix is recommended
@@ -67,5 +64,13 @@ return function(ContainerConfigurator $configurator) {
     $services->load('App\\DataFixtures\\', '../src/DataFixtures')
             ->tag('doctrine.fixture.orm');
 
+	$services->set(woocommerce::class);
+
+    $services->set(woocommercecustom::class)
+            ->decorate(woocommerce::class);
+		
+    // if(file_exists('../config/services_custom.php')){
+        // $configurator->import('../config/services_custom.php', null, true);
+    // }
 };
 
