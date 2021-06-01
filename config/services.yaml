@@ -5,7 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 
 imports: 
-  - { resource: 'services_custom.yaml'}
+  - { resource: 'services_custom.php' }
 
 parameters:
   locale: 'en'
@@ -51,7 +51,7 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
 
-  App\manager\SolutionManager:
+  App\Manager\SolutionManager:
     public: false
     autowire: true
 
@@ -59,8 +59,8 @@ services:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
 
-  # App\Solutions\woocommercecustom:
+  # App\Custom\Solutions\woocommercecustom:
   #     decorates: App\Solutions\woocommerce
   #     # pass the old service as an argument
-  #     # arguments: ['@App\Solutions\woocommerce.inner']
+  #     # arguments: ['@App\Custom\Solutions\woocommercecustom.inner']
   #     decoration_priority: 5
