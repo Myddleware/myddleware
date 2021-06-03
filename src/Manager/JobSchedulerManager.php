@@ -29,100 +29,96 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-$file = __DIR__.'/../Custom/Manager/JobSchedulerManager.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
+/**
+ * Class JobSchedulerManager.
+ *
+ * @package App\Manager
+ *
+ *
+ */
+class JobSchedulerManager
+{
+    protected $env;
+    protected $entityManager;
+    protected $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
+
     /**
-     * Class JobSchedulerManager.
-     *
-     * @package App\Manager
-     *
-     *
+     * @var LoggerInterface
      */
-    class JobSchedulerManager
+    private $logger;
+    /**
+     * @var RuleRepository
+     */
+    private $ruleRepository;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RuleRepository $ruleRepository,
+        LoggerInterface $logger
+    ) {
+        $this->entityManager = $entityManager;
+        $this->ruleRepository = $ruleRepository;
+        $this->logger = $logger;
+    }
+
+    public function getJobsParams()
     {
-        protected $env;
-        protected $entityManager;
-        protected $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
-
-        /**
-         * @var LoggerInterface
-         */
-        private $logger;
-        /**
-         * @var RuleRepository
-         */
-        private $ruleRepository;
-
-        public function __construct(
-            EntityManagerInterface $entityManager,
-            RuleRepository $ruleRepository,
-            LoggerInterface $logger
-        ) {
-            $this->entityManager = $entityManager;
-            $this->ruleRepository = $ruleRepository;
-            $this->logger = $logger;
-        }
-
-        public function getJobsParams()
-        {
-            try {
-                $list = [];
-                if (!empty($this->jobList)) {
-                    foreach ($this->jobList as $job) {
-                        $list[$job]['name'] = $job;
-                        switch ($job) {
-                            case 'synchro':
-                                $list[$job]['param1'] = [
-                                    'rule' => [
-                                        'fieldType' => 'list',
-                                        'option' => $this->getAllActiveRules(),
-                                    ],
-                                ];
-                                break;
-                            case 'notification':
-                                $list[$job]['param1'] = [
-                                    'type' => [
-                                        'fieldType' => 'list',
-                                        'option' => ['alert' => 'alert', 'statistics' => 'statistics'],
-                                    ],
-                                ];
-                                break;
-                            case 'rerunerror':
-                                $list[$job]['param1'] = [
-                                    'limit' => [
-                                        'fieldType' => 'int',
-                                    ],
-                                ];
-                                $list[$job]['param2'] = [
-                                    'attempt' => [
-                                        'fieldType' => 'int',
-                                    ],
-                                ];
-                                break;
-                        }
+        try {
+            $list = [];
+            if (!empty($this->jobList)) {
+                foreach ($this->jobList as $job) {
+                    $list[$job]['name'] = $job;
+                    switch ($job) {
+                        case 'synchro':
+                            $list[$job]['param1'] = [
+                                'rule' => [
+                                    'fieldType' => 'list',
+                                    'option' => $this->getAllActiveRules(),
+                                ],
+                            ];
+                            break;
+                        case 'notification':
+                            $list[$job]['param1'] = [
+                                'type' => [
+                                    'fieldType' => 'list',
+                                    'option' => ['alert' => 'alert', 'statistics' => 'statistics'],
+                                ],
+                            ];
+                            break;
+                        case 'rerunerror':
+                            $list[$job]['param1'] = [
+                                'limit' => [
+                                    'fieldType' => 'int',
+                                ],
+                            ];
+                            $list[$job]['param2'] = [
+                                'attempt' => [
+                                    'fieldType' => 'int',
+                                ],
+                            ];
+                            break;
                     }
                 }
-
-                return $list;
-            } catch (Exception $e) {
-                throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            }
-        }
-
-        // Get all active rules
-        private function getAllActiveRules()
-        {
-            $rules['ALL'] = 'All active rules';
-            $activeRules = $this->ruleRepository->findActiveRules();
-            if (!empty($activeRules)) {
-                foreach ($activeRules as $activeRule) {
-                    $rules[$activeRule['id']] = $activeRule['name'];
-                }
             }
 
-            return $rules;
+            return $list;
+        } catch (Exception $e) {
+            throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
+
+    // Get all active rules
+    private function getAllActiveRules()
+    {
+        $rules['ALL'] = 'All active rules';
+        $activeRules = $this->ruleRepository->findActiveRules();
+        if (!empty($activeRules)) {
+            foreach ($activeRules as $activeRule) {
+                $rules[$activeRule['id']] = $activeRule['name'];
+            }
+        }
+
+        return $rules;
+    }
 }
+

@@ -384,12 +384,6 @@ class woocommercecore extends solution {
 
 }
 
-// Include custom file if it exists : used to redefine Myddleware standard core
-// $file = __DIR__. '/../Custom/Solutions/woocommercecustom.php';
-// if(file_exists($file)){
-//     require_once($file);
-// } else { 
-    class woocommerce extends woocommercecore {
+class woocommerce extends woocommercecore {
 
-    }
-// }
+}

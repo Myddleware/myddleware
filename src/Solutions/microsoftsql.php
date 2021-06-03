@@ -98,16 +98,6 @@ class microsoftsqlcore extends database
         return parent::get_query_select_header($param, $method);
     }
 }// class microsoftsqlcore
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/microsoftsql.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class microsoftsql extends microsoftsqlcore
-    {
-    }
+class microsoftsql extends microsoftsqlcore
+{
 }

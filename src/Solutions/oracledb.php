@@ -184,16 +184,6 @@ class oracledbcore extends database
         return " ROWNUM BETWEEN $param[offset] AND ".($param['limit'] + $param['offset']);
     }
 }// class oracledbcore
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/oracledb.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class oracledb extends oracledbcore
-    {
-    }
+class oracledb extends oracledbcore
+{
 }

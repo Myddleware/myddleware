@@ -310,15 +310,7 @@ class facebookcore extends solution
     }
 }
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    Include custom class if exists
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/facebook.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class facebook extends facebookcore
-    {
-    }
+class facebook extends facebookcore
+{
 }
+

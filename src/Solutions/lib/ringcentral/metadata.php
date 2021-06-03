@@ -167,8 +167,3 @@ $moduleFields = [
     ],
 ];
 
-// Metadata override if needed
-$file = __DIR__.'/../../../Custom/Solutions/lib/ringcentral/metadata.php';
-if (file_exists($file)) {
-    require_once $file;
-}

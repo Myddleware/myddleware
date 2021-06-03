@@ -25,76 +25,72 @@
 
 namespace App\Manager;
 
-$file = __DIR__.'/../Custom/Manager/FormulaFunctionManager.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    /**
-     * Class FormulaFunctionManager.
-     *
-     * @package App\Manager
-     *
-     *
-     */
-    class FormulaFunctionManager
+/**
+ * Class FormulaFunctionManager.
+ *
+ * @package App\Manager
+ *
+ *
+ */
+class FormulaFunctionManager
+{
+    private $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'getValueFromArray'];
+
+    private $path = "App\Manager\FormulaFunctionManager::";
+
+    public function getNamesFunctions()
     {
-        private $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'getValueFromArray'];
+        return $this->names;
+    }
 
-        private $path = "App\Manager\FormulaFunctionManager::";
-
-        public function getNamesFunctions()
-        {
-            return $this->names;
+    public function getPathFunctions()
+    {
+        // Concaténation avant envoi du chemin avec le nom
+        $return = [];
+        foreach ($this->names as $name) {
+            $return[] = $this->path.$name;
         }
 
-        public function getPathFunctions()
-        {
-            // Concaténation avant envoi du chemin avec le nom
-            $return = [];
-            foreach ($this->names as $name) {
-                $return[] = $this->path.$name;
-            }
+        return $return;
+    }
 
-            return $return;
+    public static function changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone)
+    {
+        if (empty($dateToChange)) {
+            return;
         }
+        $date = date_create($dateToChange, timezone_open($oldTimeZone));
+        date_timezone_set($date, timezone_open($newTimeZone));
 
-        public static function changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone)
-        {
-            if (empty($dateToChange)) {
-                return;
-            }
-            $date = date_create($dateToChange, timezone_open($oldTimeZone));
-            date_timezone_set($date, timezone_open($newTimeZone));
+        return date_format($date, 'Y-m-d H:i:s');
+    }
 
-            return date_format($date, 'Y-m-d H:i:s');
+    public static function changeFormatDate($dateToChange, $oldFormat, $newFormat)
+    {
+        if (empty($dateToChange)) {
+            return;
         }
+        $date = \DateTime::createFromFormat($oldFormat, $dateToChange);
 
-        public static function changeFormatDate($dateToChange, $oldFormat, $newFormat)
-        {
-            if (empty($dateToChange)) {
-                return;
-            }
-            $date = \DateTime::createFromFormat($oldFormat, $dateToChange);
+        return date_format($date, $newFormat);
+    }
 
-            return date_format($date, $newFormat);
+    public static function changeValue($var, $arrayKeyToValue)
+    {
+        // Transform string into an array
+        $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
+        if (in_array($var, array_keys($arrayKeyToValue))) {
+            $var = $arrayKeyToValue[$var];
+
+            return $var;
         }
+    }
 
-        public static function changeValue($var, $arrayKeyToValue)
-        {
-            // Transform string into an array
-            $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
-            if (in_array($var, array_keys($arrayKeyToValue))) {
-                $var = $arrayKeyToValue[$var];
-
-                return $var;
-            }
-        }
-
-        public static function getValueFromArray($key, $array)
-        {
-            if (!empty($array[$key])) {
-                return $array[$key];
-            }
+    public static function getValueFromArray($key, $array)
+    {
+        if (!empty($array[$key])) {
+            return $array[$key];
         }
     }
 }
+

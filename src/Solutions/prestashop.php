@@ -1048,16 +1048,7 @@ class prestashopcore extends solution
 
     // call($method, $parameters)
 }// class prestashopcore
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/prestashop.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class prestashop extends prestashopcore
-    {
-    }
+class prestashop extends prestashopcore
+{
 }
+

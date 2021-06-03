@@ -539,15 +539,7 @@ class sapcrmcore extends saproot
     }
 }// class sapcrm
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sapcrm/sapcrm.php';
-if (file_exists($file)) {
-    include $file;
-} else {
-    //Sinon on met la classe suivante
-    class sapcrm extends sapcrmcore
-    {
-    }
+class sapcrm extends sapcrmcore
+{
 }
+

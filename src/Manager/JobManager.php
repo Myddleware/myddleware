@@ -999,19 +999,6 @@ class jobcore  {
 	}
 	
 }
-
-
-/* * * * * * * *  * * * * * *  * * * * * * 
-	if this classe is redefined, the custom file exists
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Manager/JobManager.php';
-if(file_exists($file)){
-	require_once($file);
+class JobManager extends jobcore {
+	
 }
-else {
-	//Sinon on met la classe suivante
-	class JobManager extends jobcore {
-		
-	}
-}
-?>

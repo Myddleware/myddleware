@@ -408,15 +408,6 @@ class sapcore extends saproot
     }
 }// class sap
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sap/sap.php';
-if (file_exists($file)) {
-    include $file;
-} else {
-    //Sinon on met la classe suivante
-    class sap extends sapcore
-    {
-    }
+class sap extends sapcore
+{
 }

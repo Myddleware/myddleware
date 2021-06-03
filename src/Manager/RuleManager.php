@@ -1699,21 +1699,6 @@ class rulecore
 			), 		
 		);
 	}
-
 }
-
-
-/* * * * * * * *  * * * * * *  * * * * * * 
-	si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Manager/RuleManager.php';
-if(file_exists($file)){
-	require_once($file);
+class RuleManager extends rulecore {	
 }
-else {
-	//Sinon on met la classe suivante
-	class RuleManager extends rulecore {
-		
-	}
-}
-?>

@@ -57,15 +57,6 @@ class wooeventmanagercore extends wordpress {
 }
 
 
+class wooeventmanager extends wooeventmanagercore {
 
-
-
-// Include custom file if it exists : used to redefine Myddleware standard core
-$file = __DIR__. '/../Custom/Solutions/wooeventmanager.php';
-if(file_exists($file)){
-    require_once($file);
-} else { 
-    class wooeventmanager extends wooeventmanagercore {
-
-    }
 }

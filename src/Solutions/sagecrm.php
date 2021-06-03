@@ -700,16 +700,6 @@ class sagecrmcore extends solution
     }
 
 }// class sagecrmcore
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sagecrm.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class sagecrm extends sagecrmcore
-    {
-    }
+class sagecrm extends sagecrmcore
+{
 }

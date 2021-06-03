@@ -280,15 +280,6 @@ class sapecccore extends sap
     }
 }// class sapecc
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sapecc/sapecc.php';
-if (file_exists($file)) {
-    include $file;
-} else {
-    //Sinon on met la classe suivante
-    class sapecc extends sapecccore
-    {
-    }
+class sapecc extends sapecccore
+{
 }

@@ -298,16 +298,6 @@ class wordpresscore extends solution {
 
 }
 
+class wordpress extends wordpresscore {
 
-
-
-
-// Include custom file if it exists : used to redefine Myddleware standard core
-$file = __DIR__. '/../Custom/Solutions/wordpress.php';
-if(file_exists($file)){
-    require_once($file);
-} else { 
-    class wordpress extends wordpresscore {
-
-    }
 }

@@ -446,15 +446,6 @@ class mauticcore extends solution
     // dateTimeToMyddleware($dateTime)
 }
 
-/* * * * * * * *  * * * * * *  * * * * * *
-if a custom file exists we include it
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/mautic.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class mautic extends mauticcore
-    {
-    }
+class mautic extends mauticcore
+{
 }

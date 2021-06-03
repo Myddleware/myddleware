@@ -487,15 +487,8 @@ class cirrusshieldcore extends solution
     }
 }
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/cirrusshield.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class cirrusshield extends cirrusshieldcore
-    {
-    }
+class cirrusshield extends cirrusshieldcore
+{
+
 }
+

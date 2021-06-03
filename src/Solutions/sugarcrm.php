@@ -431,16 +431,7 @@ class sugarcrmcore extends solution
         return $response_obj;
     }
 }
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    Include custom file if exists : used to redefine Myddleware standard code
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/sugarcrm.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    // Otherwise, we use the current class (in this file)
-    class sugarcrm extends sugarcrmcore
-    {
-    }
+class sugarcrm extends sugarcrmcore
+{
 }
+

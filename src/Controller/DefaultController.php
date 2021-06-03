@@ -74,14 +74,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Controller/DefaultController.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
+
     /**
      * Class DefaultControllerCore.
      *
@@ -2890,4 +2883,3 @@ if (file_exists($file)) {
             return $encrypter->decrypt($tab_params);
         }
     }
-}

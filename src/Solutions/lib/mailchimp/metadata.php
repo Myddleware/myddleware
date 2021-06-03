@@ -99,9 +99,3 @@ $moduleFields = [
         'list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
     ],
 ];
-
-// Metadata override if needed
-$file = __DIR__.'/../../../Custom/Solutions/lib/mailchimp/metadata.php';
-if (file_exists($file)) {
-    require_once $file;
-}

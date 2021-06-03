@@ -599,16 +599,6 @@ class filecore extends solution
         return ['id'];
     }
 }
-
-/* * * * * * * *  * * * * * *  * * * * * *
-    si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/file.php';
-if (file_exists($file)) {
-    require_once $file;
-} else {
-    //Sinon on met la classe suivante
-    class file extends filecore
-    {
-    }
+class file extends filecore
+{
 }

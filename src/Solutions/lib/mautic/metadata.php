@@ -47,9 +47,3 @@ $moduleFields = [
         'segment' => ['label' => 'Segment', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
     ],
 ];
-
-// Metadata override if needed
-$file = __DIR__.'/../../../Custom/Solutions/lib/mautic/metadata.php';
-if (file_exists($file)) {
-    require_once $file;
-}

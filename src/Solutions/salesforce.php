@@ -845,16 +845,5 @@ class salesforcecore extends solution {
     
 }// class salesforcecore
 
-/* * * * * * * *  * * * * * *  * * * * * * 
-	si custom file exist alors on fait un include de la custom class
- * * * * * *  * * * * * *  * * * * * * * */
-$file = __DIR__.'/../Custom/Solutions/salesforce.php';
-if(file_exists($file)){
-	require_once($file);
+class salesforce extends salesforcecore {	
 }
-else {
-	//Sinon on met la classe suivante
-	class salesforce extends salesforcecore {
-		
-	}
-} 
