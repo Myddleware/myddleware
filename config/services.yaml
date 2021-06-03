@@ -58,9 +58,3 @@ services:
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
-
-  # App\Custom\Solutions\woocommercecustom:
-  #     decorates: App\Solutions\woocommerce
-  #     # pass the old service as an argument
-  #     # arguments: ['@App\Custom\Solutions\woocommercecustom.inner']
-  #     decoration_priority: 5
