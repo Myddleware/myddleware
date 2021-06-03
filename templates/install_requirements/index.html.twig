@@ -12,14 +12,14 @@
             <p> <span id="logo"></span></p>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading"> Install Step 1 : checking Myddleware requirements</div>
-                        <div class="panel-body">
-                            <article class="panel panel-success">
-                                <div class="panel-heading">
-                                    <h1 class="panel-title">{{ 'install.requirements_checker' | trans }}</h1>
+                    <div class="card text-center main-card">
+                        <div class="card-header text-center text-white bg-primary"> Install Step 1 : checking Myddleware requirements</div>
+                        <div class="card-body">
+                            <article class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="card-title">{{ 'install.requirements_checker' | trans }}</h5>
                                 </div>
-                                <div class="panel-body requirements-tab">
+                                <div class="card-body requirements-tab">
                                     <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
                                     {% if php_version %}
                                         <p>PHP version : </p>
@@ -44,11 +44,11 @@
                                             {% endfor %}
                                         </ul>
                                     {% endif %}
-                                    <aside class="panel panel-info">
-                                        <div class="panel-heading">
-                                            <h6 class="panel-title">Note</h6>
+                                    <aside class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="card-title">Note</h6>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="card-body">
                                             <p>{{ 'install.note_message' | trans }} :</p>
                                             <code>php bin/symfony_requirements</code>
                                         </div>

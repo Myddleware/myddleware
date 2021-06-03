@@ -330,7 +330,7 @@ td a {
 	padding: 50px;
 }
 
-.card {
+.mapping-card {
 	border: solid 1px #c3c3c3;
 	min-width: 20vw;
 	max-width: 20vw;
@@ -339,7 +339,7 @@ td a {
 	box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
 }
 
-.card-title {
+.mapping-card-title {
 	background-color: #CCC31C;
 	min-height: 30px;
 	margin: 10px;

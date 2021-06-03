@@ -14,30 +14,28 @@ code {
 }
 
 /* title panel with explanations */
-.panel-primary {
+
+.main-card {
     min-width: 75vw;
     max-width: 75vw;
     border: none;
 }
 
-.panel-primary .panel-body {
+.card .card-body {
     padding: 30px;
 }
 
-.register-container, .panel-success, .panel-default {
-  min-width: 500px;
-  max-width: 500px;
-  margin: auto;
-  box-shadow: rgba(0,0,0,0.03) 4px 4px 4px;
+.register-container, article, aside {
+    min-width: 50vw;
+    max-width: 50vw;
+    margin: auto;
+    box-shadow: rgba(0,0,0,0.03) 4px 4px 4px;
+}
+
+aside {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
 }
 
 
-.panel-heading {
-    text-align: center;
-    font-weight: bold;
-}
-
-.panel-footer {
-    background-color: #fff!important;
-    border: none;
-}
+/* TODO: make required changes to other install pages (db setup, register etc) to fit with new Bootstrap version */

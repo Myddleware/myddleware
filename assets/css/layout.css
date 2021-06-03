@@ -29,7 +29,7 @@
 	background: #444446;
 	border-bottom: 4px solid #C6BD20;
 	min-width: 1200px;
-	width: 100%;
+	width: 100vw;
 }
 
 #myd_title {
@@ -55,8 +55,8 @@
 header {
 	height: auto;
 	min-height: 200px;
-	margin: 0 auto;
-	width: 1200px;    		
+	margin: 0;
+	width: 100vw;    		
 }
 
 section  {
