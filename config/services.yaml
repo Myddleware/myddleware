@@ -5,7 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 
 imports: 
-  - { resource: 'services_custom.php' }
+  - { resource: 'services_custom.yaml' }
 
 parameters:
   locale: 'en'
@@ -27,7 +27,7 @@ services:
   # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/*'
-    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib}'
+    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib,Custom}'
 
   # controllers are imported separately to make sure services can be injected
   # as action arguments even if you don't extend any base controller class

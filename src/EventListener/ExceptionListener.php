@@ -22,7 +22,7 @@ class ExceptionListener
     {	
         
         $exception = $event->getThrowable();
-  
+
         // we intercept exceptions to do with the fact that user hasn't set up his database parameters yet
         if ($exception instanceof ConnectionException || $exception instanceof TableNotFoundException) {
 
@@ -30,8 +30,6 @@ class ExceptionListener
             // redirect to installation page
             $response = new RedirectResponse($urlInstall);
             $event->setResponse($response);
-          
         } 
-
     }
 }
