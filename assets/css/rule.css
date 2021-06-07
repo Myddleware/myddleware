@@ -292,10 +292,6 @@
 	overflow-y: scroll;
 }
 
-#formule #functions .func {
-	width: 25px;
-}
-
 #formule #functions .tooltip {
 	position: relative;
 	opacity: inherit;

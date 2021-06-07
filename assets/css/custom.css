@@ -34,13 +34,13 @@ menu .caret, #myd_top .caret {
     display: flex;
     flex-wrap: wrap-reverse;
     flex-direction: row-reverse;
-    margin: 2em 0;
+    margin-left: -56px;
 }
 
 #fd-title-small {
     background: url('./../images/template/fd-title-small.png') no-repeat;
     height: 71px;
-    width: 179px;
+    width: 180px;
     display: inline-block;
     border: none;
     margin: 20px 20px 20px -13px;
@@ -228,4 +228,10 @@ menu .caret, #myd_top .caret {
     background-size: 15px 22px;
     background-position: 10px 5px;
     background-repeat: no-repeat;
+}
+
+/* Documents list form (with filters) */
+#document-list-form {
+  margin-bottom: 2vh;
+  padding: 2em;
 }

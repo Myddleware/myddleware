@@ -73,23 +73,24 @@
         </div>
         <div class="animation-content animation-workspace">
 
-            <div align="center" id="head">
-                <div class="left name_solution">
-                    {{'animate.solution.source'|trans}}
-                </div> 
-                <div class="right name_solution">
-                    {{'animate.solution.target'|trans}}
+            <div id="head">
+                <div class="d-flex justify-content-between">
+                    <div class=" name_solution">
+                        {{'animate.solution.source'|trans}}
+                    </div> 
+                    <div class=" name_solution">
+                        {{'animate.solution.target'|trans}}
+                    </div>
                 </div>
-                <div class="clr">
-                    <ul>
-                        <li>
+                <div class="clr d-flex justify-content-center">
+                    <ul >
+                        <li class="mb-2">
                             <a href="{{'animate.tutoriel.link'|trans}}" target="_blank">{{'animate.tutoriel.textlink'|trans}}</a>
                         </li>                             
                         <li>
-                            <form class="form-inline" role="form" id="nameverif" onsubmit="return false;">
-                                <div class="form-group has-normal has-feedback">
-                                    <input type="text" class="form-control" id="rulename" placeholder="{{'animate.rulename'|trans}}" maxlength="40">
-                                    <span class="glyphicon form-control-feedback"></span>
+                            <form role="form" id="nameverif" onsubmit="return false;">
+                                <div class="d-flex input-group has-normal has-feedback">
+                                    <input type="text" class="form-control me-4" id="rulename" placeholder="{{'animate.rulename'|trans}}" maxlength="40">
                                 </div>
                             </form>
                         </li>
@@ -150,59 +151,61 @@
                     </div>
                 </li>
             </ul>
-            <div>
-                <div class="left">
-                    <div class="row">
-                        <div class="col-md-12 form-group">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <select class="form-control" id="animation-Connecteur-source" name="animation-Connecteur-source"></select>
-                                </div>
-                                <div class="col-md-3">
-                                    <span class="loader-source"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="connector-source-error" class="alert alert-danger"></div>
-                    <div id="connector-source-success" class="alert alert-success"></div>
-                    
-                </div>
-                <div class="right">
-                    <div class="row">
-                        <div class="col-md-12 form-group">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <span class="loader-cible"></span>
-                                </div>
-                                <div class="col-md-9">
-                                    <select class="form-control" id="animation-Connecteur-cible" name="animation-Connecteur-cible"></select>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="left col">
+                        <div class="row">
+                            <div class="col form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select form-select-lg" id="animation-Connecteur-source" name="animation-Connecteur-source"></select>
+                                    </div>
+                                    <div class="col">
+                                        <span class="loader-source"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div id="connector-source-error" class="alert alert-danger col-6"></div>
+                            <div id="connector-source-success" class="alert alert-success col-6"></div>
+                        </div>
                     </div>
-
-                    <div id="connector-cible-error" class="alert alert-danger"></div>
-                    <div id="connector-cible-success" class="alert alert-success"></div>
-
+                    <div class="right col">
+                        <div class="row">
+                            <div class="col form-group">
+                                <div class="row">
+                                    <div class="col">
+                                        <span class="loader-cible"></span>
+                                    </div>
+                                    <div class="col">
+                                        <select class="form-select form-select-lg" id="animation-Connecteur-cible" name="animation-Connecteur-cible"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="row">
+                        <div id="connector-cible-error" class="alert alert-danger col-6"></div>
+                        <div id="connector-cible-success" class="alert alert-success col-6"></div>
+                    </div>
                 </div>
+            </div>
                 <div class="clr"></div>
-                <div id="choice" class="btn-toolbar" role="toolbar">
-                    <div align="center" text-align="center">
-                        <button class="btn btn-default" id="btn_module" type="button">
+                <div id="choice" class="row" >
+                    <div class="btn-group col" role="group" aria-label="Module or template buttons">
+                        <button class="btn btn-outline-secondary btn-lg" id="btn_module" type="button">
                             <span class="glyphicon glyphicon-hand-right"></span> {{'animate.choice.module'|trans}}</button>
-                        <button class="btn btn-default"id="btn_template" type="button">{{'animate.choice.template'|trans}}
+                        <button class="btn btn-outline-secondary btn-lg"id="btn_template" type="button">{{'animate.choice.template'|trans}}
                             <span class="glyphicon glyphicon-hand-left"></span></button>
                     </div>
                 </div>                      
-                <div id="module">
-                    <div class="left">
-                        <p><select class="form-control" id="animation-Module-source" name="animation-Module-source"></select></p>
+                <div id="module" class="row">
+                    <div class="col">
+                        <select class="form-select form-select-lg" id="animation-Module-source" name="animation-Module-source"></select>
                     </div>
-                    <div class="right">
-                        <p><select class="form-control" id="animation-Module-cible" name="animation-Module-cible"></select></p>
+                    <div class="col" >
+                        <select class="form-select form-select-lg" id="animation-Module-cible" name="animation-Module-cible"></select>
                     </div>
-                    <div class="clr"></div>
                 </div>
                 <div id="template"></div>
                 <div id="submodules"></div>              

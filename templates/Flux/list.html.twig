@@ -31,14 +31,15 @@
 {% block titlesm %}
 	{{'title.flux.list'|trans}}
 {% endblock titlesm %}
+{% block stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+{% endblock %}
 {% block body %}
 	<div id="flux" class="container">
 		{{ form_start(form)}}
-		{# <form action="{{ path('flux_list', {'search': 1}) }}" method="post" enctype="multipart/form-data"> #}
 		{% if nb > 0 %}
 			<div id="fd-title-small" class="left">
-				<p>{{ 'list_flux.total'|trans }}:
-				</p>
+				<p>{{ 'list_flux.total'|trans }}:</p>
 				<p>
 					<span class="nb">{{ nb }}</span>
 				</p>
@@ -54,7 +55,7 @@
 		{% endif %}
 		{# Les erreurs générales du formulaire. #}
 		{{ form_errors(form) }}
-		<div class="form-row">
+		<div class="row" id="document-list-form">
 			<div class="form-group col-md-3">
 				<h4>{{'list_flux.filter.id'|trans}}</h4>
 				{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
@@ -202,7 +203,10 @@
 
 		</div>
 	</div>
-
+	{% block javascript %}
+	    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		{{ encore_entry_script_tags('app') }}
+	{% endblock javascript %}
 	{# ------------- PARAMETRES JQUERY ------------- #}
 	<script type="text/javascript">
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
@@ -211,6 +215,12 @@
 		var lang = "{{ app.request.locale }}";
 		var mass_cancel = "{{ path('flux_mass_cancel') }}";
 		var mass_run = "{{ path('flux_mass_run') }}";
+
+		// DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
+		start = new dtsel.DTS('#form_date_modif_end',  {
+			});
+		end = new dtsel.DTS('#form_date_modif_start',  {
+			});
 	</script>
 	{# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

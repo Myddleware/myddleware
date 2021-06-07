@@ -13,7 +13,6 @@ global.path_img = '/build/images/';
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
 require('./vendors/jquery-ui/jquery-ui.min.js')
-require('./vendors/bootstrap/js/bootstrap.min.js')
 require('./js/lib/jquery_onoff/jquery.onoff.min.js')
 require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
 require('./js/lib/jquery_scrollbox/jquery.scrollbox.min.js')

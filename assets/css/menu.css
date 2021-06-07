@@ -46,13 +46,7 @@ menu .dropdown-menu > li > a, menu .dropdown-menu > li > a:hover {
 	background:transparent;
 }
 
-menu .dropdown-menu .divider {
-    background-color: #e5e5e5;
-    height: 2px;
-    overflow: hidden;
-    padding: 0;
-    width: 100%;
-}
+
 
 menu .dropdown-menu > li > a {
 	color: #444446;
@@ -76,12 +70,11 @@ menu li li, #myd_top li li {
 
 /* Dropdown menu */
 
-.dropdown ul {
-	margin-top: 21px;
-	margin-left: -48px;
-	max-width: 100px;
-}
 
+.dropdown-menu{
+	margin-left: -48px!important;
+	margin-top: 19px!important;
+}
 
 menu li li:hover, #myd_top li li:hover {
 	background: transparent;

@@ -27,6 +27,7 @@ $(function() {
 	$('.rule-create-submit').hide();
 
 
+
 	// Initialisation des progressBar (à leurs positions initiales)
     progressBar(0, $('#animation-Bar1'), 0);
     progressBar(0, $('#animation-Bar2'), 0);
@@ -86,8 +87,8 @@ $(function() {
 	 	
 	 	if(choice == 'btn_module') {
 	 		$('#validation').hide();
-	 		$(this).attr('class','btn btn-primary');
-	 		$('#btn_template').attr('class','btn btn-default');
+	 		$(this).attr('class','btn btn-outline-success btn-lg');
+	 		$('#btn_template').attr('class','btn btn-outline-secondary btn-lg');
 	 		
 	 		$('#module').fadeIn(1000);	
 			$('#template').fadeOut(1000);	 
@@ -96,8 +97,8 @@ $(function() {
 	 	}
 	 	else if(choice == 'btn_template') {
 	 		
-	 		$(this).attr('class','btn btn-primary');
-	 		$('#btn_module').attr('class','btn btn-default');	 		
+	 		$(this).attr('class','btn btn-outline-success btn-lg');
+	 		$('#btn_module').attr('class','btn btn-outline-secondary btn-lg');	 		
 			$('.rule-create-submit').show();
 	 		$('#template').fadeIn(1000);	
 	 		$('#module').fadeOut(1000);	
@@ -329,8 +330,8 @@ function addChoice() {
 		
 		addTemplate();
 
-		$('#btn_module').attr('class','btn btn-default');
-		$('#btn_template').attr('class','btn btn-default');
+		$('#btn_module').attr('class','btn btn-outline-secondary btn-lg');
+		$('#btn_template').attr('class','btn btn-outline-secondary btn-lg');
 		
 		$('#choice').fadeIn(2000);		
 	}
@@ -490,8 +491,8 @@ function addConnector(type,solution) {
 	
 	$('.loader-' + type).hide();
 	$('#animation-Connecteur-'+ type).removeAttr('disabled');
-	$('#btn_module').attr('class','btn btn-default');
-	$('#btn_template').attr('class','btn btn-default');
+	$('#btn_module').attr('class','btn btn-light btn-lg');
+	$('#btn_template').attr('class','btn btn-light btn-lg');
 	hideElements();
 }
 
@@ -509,18 +510,24 @@ function animValidation() {
 	
 	rulename = $('#nameverif').find('div').attr('class');
 	
-	if(rulename == 'form-group has-success has-feedback') {
-		if( $('#btn_module').attr('class') == 'btn btn-primary') {
+	if(rulename == 'd-flex input-group has-success has-feedback') {
+		if( $('#btn_module').attr('class') == 'btn btn-outline-success btn-lg') {
 			if( $('#animation-Module-source').val() != '' && $('#animation-Module-cible').val() != '' ) {
 				animConfirm('module');
 			}		
 		}
-		else if( $('#btn_template').attr('class') == 'btn btn-primary' ) {
+		else if( $('#btn_template').attr('class') == 'btn btn-outline-success btn-lg' ) {
 				animConfirm('template');		
 		}	
 	} else {
-		$('div','#nameverif').attr('class','form-group has-error has-feedback');
-		$('span','#nameverif').attr('class','glyphicon glyphicon-remove form-control-feedback');
+		$('div','#nameverif').attr('class','d-flex input-group has-error has-feedback');
+		// Only display 1 icon
+		if($('#rulename').siblings()){
+			$('#rulename').siblings().each( function(index){
+				$(this).hide();
+			});
+		}
+		$('#rulename').after('<i class="fas fa-times form-control-feedback"></i>');
 		$('#rulename').focus();
 	}
 
@@ -585,20 +592,31 @@ function controleRuleName(nameValue) {
 				
 				// true
 				if( data == 0 ) {
-					$('div','#nameverif').attr('class','form-group has-success has-feedback');
-					$('span','#nameverif').attr('class','glyphicon glyphicon-ok form-control-feedback');
+					$('div','#nameverif').attr('class','d-flex input-group has-success has-feedback');
+					// Only display 1 icon
+					if($('#rulename').siblings()){
+						$('#rulename').siblings().each( function(index){
+							$(this).hide();
+						});
+					}
+					$('#rulename').after('<i class="fas fa-check form-control-feedback"></i>');
 					
 				}
 				else {	// false				
-					$('div','#nameverif').attr('class','form-group has-error has-feedback');
-					$('span','#nameverif').attr('class','glyphicon glyphicon-remove form-control-feedback');
+					$('div','#nameverif').attr('class','d-flex input-group has-error has-feedback');
+					// Only display 1 icon
+					if($('#rulename').siblings()){
+						$('#rulename').siblings().each( function(index){
+							$(this).hide();
+						});
+					}
+					$('#rulename').after('<i class="fas fa-times form-control-feedback"></i>');
 				}		
 			}			
 		});
 	}
 	else {
-		$('div','#nameverif').attr('class','form-group has-normal has-feedback');
-		$('span','#nameverif').attr('class','glyphicon form-control-feedback');		
+		$('div','#nameverif').attr('class','d-flex input-group has-normal has-feedback');
 	}	
 }
 

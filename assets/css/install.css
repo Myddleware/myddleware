@@ -18,6 +18,7 @@ code {
 .main-card {
     min-width: 75vw;
     max-width: 75vw;
+    margin: auto;
     border: none;
 }
 

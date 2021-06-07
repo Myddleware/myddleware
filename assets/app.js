@@ -16,6 +16,7 @@ global.path_img = 'build/images/';
 
 require('./vendors/jquery-ui/jquery-ui.min.js')
 require('bootstrap')
+require('@fortawesome/fontawesome-free/js/all')
 require('./vendors/dtsel/dtsel')
 require('google-charts/dist/googleCharts')
 require('./js/lib/jquery_onoff/jquery.onoff.min.js')

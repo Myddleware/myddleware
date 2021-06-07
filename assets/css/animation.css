@@ -43,19 +43,13 @@
 
 #animation #connector-source-error, #animation #connector-cible-error,
 #animation #connector-source-success, #animation #connector-cible-success {
-	width: 300px;
-	max-width: 300px;
+	width: 410px;
+	max-width: 410px;
+    margin-top: 10px;
 	height: auto;
 	word-wrap: break-word;
 }
 
-#animation #connector-source-error, #animation #connector-source-success  {
-	float: left;
-}
-
-#animation #connector-cible-error, #animation #connector-cible-success  {
-	float: right;
-}
 
 #animation {
     max-width: 1280px;
@@ -333,7 +327,7 @@ h2 { margin-top: 50px;}
 
 /* ---------------------------------------------------------------------- */
 
-#animation #template, #animation #module {
+#animation #template {
 	display:block
 }
 
@@ -393,6 +387,7 @@ h2 { margin-top: 50px;}
 
 #animation #animation-Connecteur-source, #animation #animation-Module-source {
 	color: #0D6AAF;		
+
 }
 
 #animation #animation-Connecteur-cible, #animation-Module-cible {
@@ -452,4 +447,14 @@ h2 { margin-top: 50px;}
 #nameverif {
     margin: 0;
     padding: 0;
+}
+
+/* enlarge input size to maximum to be able to read placeholder */
+#animation-Connecteur-source, #animation-Connecteur-cible {
+    min-width: 250px;
+    max-width: 300px;
+}
+
+#btn_module, #btn_template {
+    width: 10vw;
 }
