@@ -12,6 +12,7 @@ global.Routing = Routing;
 global.path_img = '/build/images/';
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
+require('bootstrap')
 require('./vendors/jquery-ui/jquery-ui.min.js')
 require('./js/lib/jquery_onoff/jquery.onoff.min.js')
 require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
