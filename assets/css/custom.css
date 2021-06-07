@@ -92,7 +92,6 @@ menu .caret, #myd_top .caret {
     min-width: 196px;
     border: none;
     display:inline-block;
-    line-height: 2em;
     text-align: center;
 }
 

@@ -56,11 +56,19 @@
     text-align: right;
 }
 #user_account .onoffswitch-switch {
-    display: block; width: 25px; height: 34px; margin: 0px;
+    display: block;
+    width: 25px; 
+    height: 34px; 
+    margin: 0px;
     background: #444446;
-    position: absolute; top: 0; bottom: 0; right: 145px;
-    -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
-    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    right: 145px;
+    -moz-transition: all 0.3s ease-in 0s; 
+    -webkit-transition: all 0.3s ease-in 0s;
+    -o-transition: all 0.3s ease-in 0s; 
+    transition: all 0.3s ease-in 0s; 
 }
 #user_account .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
     margin-left: 0;
@@ -74,6 +82,7 @@
     padding-top: 25px;
     padding-bottom: 25px;
     margin-left: 5%;
+    height: fit-content;
 }
 #user_account ul, li{
     text-decoration: none;

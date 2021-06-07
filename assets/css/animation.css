@@ -458,3 +458,9 @@ h2 { margin-top: 50px;}
 #btn_module, #btn_template {
     width: 10vw;
 }
+
+
+/* On Account page, otherwise it was going over the div above */
+.password-reset {
+    margin-top: 150px!important;
+}
