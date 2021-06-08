@@ -10,37 +10,36 @@
         <div class="col">
             <p><span id="logo"></span></p>
             <div class="row">
-                <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading"> Install Step 3 : checking Myddleware is connected to the database</div>
-                        <div class="panel-body">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white"> Install Step 3 : checking Myddleware is connected to the database</div>
+                        <div class="card-body d-grid justify-content-center">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
                                     Database connection check
                                 </div>
-                                <div class="panel-body">
+                                <div class="card-body">
                                     {% if connection_failed_message %}
                                         <p class="alert-danger">{{ connection_failed_message }}</p>
                                         <p>Go back to the previous page to reset your database connection</p>
                                     {% elseif connection_success_message %}
                                         <p class="alert-success">{{ connection_success_message }}</p>
                                     {% endif %}
-                                    <div class="buttons">
-                                        <button class="btn btn-default btn-lg" id="previous-btn">
-                                            <a href="{{ path('database_setup') }}" id="previous">
+                                    <div class="btn-group d-flex justify-content-center mt-5">
+                                            <a href="{{ path('database_setup') }}" id="previous" role="button" class="btn btn-outline-secondary btn-lg">
+                                                <i class="fas fa-arrow-left"></i>
                                                 {{ 'install.previous' | trans }}
                                             </a>
-                                        </button>
                                         {% if connection_failed_message %}
-                                            <button class="btn btn-default btn-lg" id="next-btn" disabled>
+                                            <button type="button" class="btn btn-light btn-lg" id="next-btn" disabled>
                                                 {{ 'install.next' | trans }}
+                                                <i class="fas fa-arrow-right"></i>
                                             </button>
                                         {% elseif connection_success_message %}
-                                            <button class="btn btn-default btn-lg" id="next-btn">
-                                                <a href="{{ path('database_fixtures_load') }}" id="next">
-                                                    {{ 'install.next' | trans }}
-                                                </a>
-                                            </button>
+                                            <a href="{{ path('database_fixtures_load') }}" id="next" role="button"  class="btn btn-outline-primary btn-lg">
+                                                {{ 'install.next' | trans }}
+                                                <i class="fas fa-arrow-right"></i>
+                                            </a>
                                         {% endif %}
                                     </div>
                                 </div>

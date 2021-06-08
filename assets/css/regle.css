@@ -216,7 +216,7 @@ input[type="text"] {
 }
 
 #tabs .badge {
-	background: #CCC31C;
+	background: #9E9937;
 	display:inline-block;
 	width: 30px;
 }
@@ -243,13 +243,13 @@ input[type="text"] {
 }
 
 .btn-success {
-	background-color: #CCC31C!important;
-	border-color: #CCC31C!important;
+	background-color: #9E9937!important;
+	border-color: #9E9937!important;
 }
 
 .btn-success:hover {
-	background-color: #D6CF49!important;
-	border-color: #D6CF49!important;
+	background-color: #a8a225!important;
+	border-color: #a8a225!important;
 } 
 
 
@@ -340,7 +340,7 @@ td a {
 }
 
 .mapping-card-title {
-	background-color: #CCC31C;
+	background-color: #9E9937;
 	min-height: 30px;
 	margin: 10px;
 	line-height: 30px;
@@ -348,7 +348,7 @@ td a {
 }
 
 .mapped-fields{
-	color: #CCC31C;
+	color: #9E9937;
 }
 
 .mapped-formula {

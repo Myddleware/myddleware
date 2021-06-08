@@ -730,7 +730,7 @@ if ( typeof style_template !== "undefined" && typeof formula_error !== "undefine
 			$('#area_color').css('color','#444446');
 			$('#area_color .operateur').css('color','#EC8709');		
 			$('#area_color .chaine').css('color','#268bd2');
-			$('#area_color .variable').css('color','#CCC31C');				
+			$('#area_color .variable').css('color','#9E9937');				
 		}			
 	}	
 

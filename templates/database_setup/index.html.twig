@@ -1,50 +1,54 @@
 {% extends 'baseone.html.twig' %}
-
 {% block title %}{% endblock %}
-{% block stylesheets %}
-    {{ encore_entry_link_tags('install') }}
-{% endblock %}
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('install') }}
+    {% endblock %}
 {% block body %}
 <div id="myd_top"></div>
 <div class="container">
-
-
     <div class="row">
         <div class="col">
-
-
-           <p><span id="logo"></span></p>
+            <p><span id="logo"></span></p>
             <div class="row">
-                <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading"> Install Step 2 : setting up your Myddleware database</div>
-                        <div class="panel-body">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
+                <div class="col">
+                    <div class="card ">
+                        <div class="card-header bg-primary text-white"> Install Step 2 : setting up your Myddleware database</div>
+                        <div class="card-body d-grid justify-content-center">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
                                     Database information
                                 </div>
-                                <div class="panel-body">
-                                    {{ form(form) }}
+                                <div class="card-body">
+                                    {{ form_start(form) }}
+                                    {{ form_row(form.host) }}
+                                    {{ form_row(form.port) }}
+                                    {{ form_row(form.name) }}
+                                    {{ form_row(form.user) }}
+                                    {{ form_row(form.password)}}
+                                    <div class="d-grid mt-4">
+                                        {{ form_row(form.Save) }}
+                                    </div>
+                                    {{ form_end(form) }}
                                     {% if submitted %}
-                                    <a href="{{ path('database_connect') }}" id="test">
-                                        <button type="button" class="btn btn-primary btn-block">
-                                            {{'install.next'|trans}} 
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                                            </svg>
-                                        </button>
-                                    </a>
+                                        <div class="d-grid mt-4 mb-4">
+                                            <a href="{{ path('database_connect') }}" id="test" class="btn btn-primary btn-lg">
+                                                    {{'install.next'|trans}} 
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                                    </svg>
+                                            </a>
+                                        </div>
                                     {% else %}
-                                        <button type="button" class="btn btn-default btn-block" disabled> {{'install.next'|trans}} </button>
+                                        <div class="d-grid mt-4 mb-4">
+                                            <button type="button" class="btn btn-light btn-lg" disabled> {{'install.next'|trans}} </button>
+                                        </div>
                                     {% endif %} 
-                                    <div class="panel-footer">
-                                        <a href="{{path('install_requirements')}}">
-                                            <button type="button" class="btn btn-default btn-block">
+                                    <div>
+                                        <a class="card-link" href="{{path('install_requirements')}}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                                                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                                                     </svg>
                                                     Go back to requirements check
-                                            </button>
                                         </a>
                                     </div>
                                 </div>
@@ -59,8 +63,7 @@
 <footer>
     {% include 'footer.html.twig' %}
 </footer>
-
- {% block javascripts %}
-     {{ encore_entry_script_tags('install') }}
- {% endblock %}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('install') }}
+    {% endblock %}
 {% endblock %}

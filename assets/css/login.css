@@ -53,10 +53,6 @@
 	background: white;
 }
 
-#myd_connexion .white .form-inline .form-control {
-	width: 196px;
-}
-
 #myd_connexion .logo {
 	width:160px;
 	height:90px;
@@ -75,41 +71,15 @@
 	display:inline-block;
 }
 
-#myd_connexion .form-inline {
-	display:inline-block;
-}
 
 #myd_connexion .alert {
-    height: 27px;
-    padding: 4px;
-    width: 196px;
-    word-spacing: -0.6em;
+    height: 30px;
+    /* width: 196px; */
 }
 
-#myd_connexion .login_warnig {
+#myd_connexion .login_warning {
     color: red;
 }
-
-.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
-	color: #404042;
-	font-weight: bold;
-	height: 31px;
-	width: 196px;  
-	border: none;  
-    display: inline-block;
-    line-height: 2em;
-    text-align: center;	
-    cursor:pointer;	
-}
-
-.clr {
-	clear: both;
-}  
-
-.ctr {
-	text-align: center;
-}
-
 
 body {
 	background: url('./../images/login/fd.jpg') repeat-y;
@@ -139,28 +109,8 @@ body {
 	background-size: 158px; 
 }
 	
-.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
-	 /* background: url('images/login/btn.png'); */
-}
-	
 #myd_connexion .load {
 	height: 16px;
 	width: 16px;
 	display: inline-block;
-} 
-	
-.btn-myd {
-	background-position: left top;
-}
-	
-.btn-myd:hover {
-	background-position: left bottom;
-}
-	
-.btn-mydinv {
-	background-position: left bottom;
-}
-	
-.btn-mydinv:hover {
-	background-position: left top;
 } 

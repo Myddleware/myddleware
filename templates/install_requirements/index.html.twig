@@ -53,11 +53,11 @@
                                             <code>php bin/symfony_requirements</code>
                                         </div>
                                     </aside>
-                                    <div class="buttons">
+                                    <div class="btn-group">
                                         <button class="btn btn-success btn-lg" onClick="window.location.reload()">{{ 'install.check_button' | trans }}</button>
                                         {% if not error_messages %} 
                                         <a href="{{path('database_setup')}}">
-                                            <button class="btn btn-default btn-lg">{{ 'install.next' | trans }}</button>
+                                            <button class="btn btn-light btn-lg">{{ 'install.next' | trans }}</button>
                                         </a>
                                         {% endif %}
                                     </div>

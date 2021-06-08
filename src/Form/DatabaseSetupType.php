@@ -26,7 +26,7 @@ class DatabaseSetupType extends AbstractType
             ])
             ->add('Save', SubmitType::class,[
                 'attr' => [
-                    'class' => 'btn btn-success btn-block',
+                    'class' => 'btn btn-success btn-lg',
                 ]
             ])
         ;

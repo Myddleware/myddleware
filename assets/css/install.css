@@ -13,7 +13,7 @@ code {
     color: #fff;
 }
 
-/* title panel with explanations */
+/* Readjustments to Bootstrap 5 */
 
 .main-card {
     min-width: 75vw;
@@ -26,7 +26,7 @@ code {
     padding: 30px;
 }
 
-.register-container, article, aside {
+article, aside {
     min-width: 50vw;
     max-width: 50vw;
     margin: auto;
@@ -38,5 +38,7 @@ aside {
     margin-bottom: 2vh;
 }
 
-
-/* TODO: make required changes to other install pages (db setup, register etc) to fit with new Bootstrap version */
+/* spread on whole block width as display grid doesn't seem to do the trick here */
+#database_setup_Save {
+    width: 100%;
+}

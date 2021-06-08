@@ -31,7 +31,7 @@ class DatabaseSetupController extends AbstractController
     private $connectionSuccessMessage;
     private $connectionFailedMessage;
     private $configRepository;
-     /**
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -62,10 +62,10 @@ class DatabaseSetupController extends AbstractController
                   //DO NOTHING HERE, this means that you have a DB but it's still empty
                 }
             }
-          
+
             //to help voter decide whether we allow access to install process again or not
             if(!empty($config)){
-              if($config->getName() === 'allow_install'){
+                if($config->getName() === 'allow_install'){
                     $this->denyAccessUnlessGranted('DATABASE_EDIT', $config); }
             } 
 
@@ -81,7 +81,7 @@ class DatabaseSetupController extends AbstractController
                         continue;
                     }
                 }
-       
+
                 if(!empty($value)){
                     switch($parameter) {
                         case 'database_driver':
@@ -141,11 +141,11 @@ class DatabaseSetupController extends AbstractController
                 ]);
 
         } catch  (Exception $e) {
-
+            
             if($e instanceof ConnectionException | $e instanceof TableNotFoundException){
-          
+
                 $submitted = false;
-              
+
                 //get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
                 $database = new DatabaseParameter();
 
@@ -217,12 +217,12 @@ class DatabaseSetupController extends AbstractController
                     }
                 } 
             }  
-          
+
         }  
         
         //if there's already a database in .env.local but it isn't yet linked to database, then allow access to form
         return $this->redirectToRoute('login');
-       
+
     }
 
     /**
@@ -231,7 +231,6 @@ class DatabaseSetupController extends AbstractController
      */
     public function connectDatabase(Request $request, KernelInterface $kernel): Response
     {
-  
         try {
 
             try {
@@ -324,7 +323,7 @@ class DatabaseSetupController extends AbstractController
      */
     public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response 
     {
-      
+
         try {
 
             $config = $this->configRepository->findOneByAllowInstall('allow_install');
