@@ -37,9 +37,9 @@
 					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
 			
 				{% if error %}
-					<div class="alert alert-danger d-flex justify-content-start" role="alert">
+					<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
 						<i class="fas fa-times"></i>
-						<p>
+						<p class="ms-2">
 							{{ error|trans }} <span> ( {{ attempt }} ) </span>
 						</p>
 					</div>

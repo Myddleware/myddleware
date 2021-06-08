@@ -13,12 +13,12 @@
                 <div class="col">
                     <div class="card">
                         <div class="card-header bg-primary text-white"> Install Step 4 : uploading database tables</div>
-                        <div class="card-body d-grid justify-content-center">
-                            <div class="card ">
+                        <div class="card-body d-flex justify-content-center">
+                            <div class="card col-6">
                                 <div class="card-header bg-success text-white">
                                     Loading database tables
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body ">
                                     {% if connection_failed_message %}
                                         <p class="alert-danger">{{ connection_failed_message }}</p>
                                         <p>Go back to the previous page to reset your database connection</p>
