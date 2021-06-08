@@ -30,7 +30,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ManagementSMTPController extends AbstractController
 {
-    // const PATH = './../config/packages/public/parameters_smtp.yml';
     const PATH = './../config/swiftmailer.yaml';
     protected $tools;
     /**
@@ -204,9 +203,7 @@ class ManagementSMTPController extends AbstractController
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
                 ->setBody($textMail);
             $message->setTo($user_email);
-            // dd($mailer);
             $send = $mailer->send($message);
-       
             if (!$send) {
                 $this->logger->error('Failed to send email : '.$textMail.' to '.$user_email);
                 throw new Exception('Failed to send email : '.$textMail.' to '.$user_email);
