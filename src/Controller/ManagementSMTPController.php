@@ -30,7 +30,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ManagementSMTPController extends AbstractController
 {
-    const PATH = './../config/packages/public/parameters_smtp.yml';
+    // const PATH = './../config/packages/public/parameters_smtp.yml';
+    const PATH = './../config/swiftmailer.yaml';
     protected $tools;
     /**
      * @var LoggerInterface
@@ -54,6 +55,7 @@ class ManagementSMTPController extends AbstractController
      */
     public function indexAction()
     {
+
         $form = $this->createCreateForm();
         $form = $this->getData($form);
 
@@ -96,8 +98,18 @@ class ManagementSMTPController extends AbstractController
         $form = $this->createForm(ManagementSMTPType:: class, null, [
             'action' => $this->generateUrl('management_smtp_create'),
         ]);
-        $form->add('submit', SubmitType::class, ['label' => 'management_smtp.submit']);
-        $form->add('submit_test', SubmitType::class, ['label' => 'management_smtp.sendtestmail']);
+        $form->add('submit', SubmitType::class, [
+                    'label' => 'management_smtp.submit', 
+                    'attr' => [
+                        'class' => 'btn btn-outline-primary mb-2'
+                        ] 
+                    ]);
+        $form->add('submit_test', SubmitType::class, [
+            'label' => 'management_smtp.sendtestmail',
+            'attr' => [
+                'class' => 'btn btn-outline-primary mb-2'
+                ] 
+            ]);
 
         return $form;
     }
@@ -110,13 +122,13 @@ class ManagementSMTPController extends AbstractController
     private function getData($form)
     {
         $value = Yaml::parse(file_get_contents(self::PATH));
-        $form->get('transport')->setData($value['parameters']['mailer_transport']);
-        $form->get('host')->setData($value['parameters']['mailer_host']);
-        $form->get('port')->setData($value['parameters']['mailer_port']);
-        $form->get('auth_mode')->setData($value['parameters']['mailer_auth_mode']);
-        $form->get('encryption')->setData($value['parameters']['mailer_encryption']);
-        $form->get('user')->setData($value['parameters']['mailer_user']);
-        $form->get('password')->setData($value['parameters']['mailer_password']);
+        $form->get('transport')->setData($value['swiftmailer']['transport']);
+        $form->get('host')->setData($value['swiftmailer']['host']);
+        $form->get('port')->setData($value['swiftmailer']['port']);
+        $form->get('auth_mode')->setData($value['swiftmailer']['auth_mode']);
+        $form->get('encryption')->setData($value['swiftmailer']['encryption']);
+        $form->get('user')->setData($value['swiftmailer']['user']);
+        $form->get('password')->setData($value['swiftmailer']['password']);
 
         return $form;
     }
@@ -128,14 +140,14 @@ class ManagementSMTPController extends AbstractController
      */
     private function setData($form)
     {
-        $array = ['parameters' => [
-            'mailer_transport' => $form->get('transport')->getData(),
-            'mailer_host' => $form->get('host')->getData(),
-            'mailer_port' => $form->get('port')->getData(),
-            'mailer_auth_mode' => $form->get('auth_mode')->getData(),
-            'mailer_encryption' => $form->get('encryption')->getData(),
-            'mailer_user' => $form->get('user')->getData(),
-            'mailer_password' => $form->get('password')->getData(),
+        $array = ['swiftmailer' => [
+            'transport' => $form->get('transport')->getData(),
+            'host' => $form->get('host')->getData(),
+            'port' => $form->get('port')->getData(),
+            'auth_mode' => $form->get('auth_mode')->getData(),
+            'encryption' => $form->get('encryption')->getData(),
+            'user' => $form->get('user')->getData(),
+            'password' => $form->get('password')->getData(),
         ]];
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
@@ -192,7 +204,9 @@ class ManagementSMTPController extends AbstractController
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
                 ->setBody($textMail);
             $message->setTo($user_email);
+            // dd($mailer);
             $send = $mailer->send($message);
+       
             if (!$send) {
                 $this->logger->error('Failed to send email : '.$textMail.' to '.$user_email);
                 throw new Exception('Failed to send email : '.$textMail.' to '.$user_email);

@@ -24,7 +24,7 @@
         "symfony/framework-bundle": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
         "doctrine/doctrine-bundle": "^2.3",
-        "symfony/swiftmailer-bundle": "^3.2",
+        "symfony/swiftmailer-bundle": "^3.5",
         "symfony/monolog-bundle": "^3.1.2",
         "symfony/expression-language": "~4.4",
         "incenteev/composer-parameter-handler": "^2.0",
@@ -74,7 +74,8 @@
     "pagerfanta/doctrine-orm-adapter": "^3.0",
     "laminas/laminas-stdlib": "^3.3",
     "laminas/laminas-hydrator": "^4.1",
-    "prestashop/prestashop-webservice-lib": "dev-master"
+    "prestashop/prestashop-webservice-lib": "dev-master",
+    "symfony/mailer": "4.4.*"
     },
     "repositories": [
         {

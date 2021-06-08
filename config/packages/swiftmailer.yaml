@@ -1,4 +1,11 @@
 swiftmailer:
+    transport: sendmail
+    host:      localhost
+    username:  null
+    password:  null
+    port:      null
+    auth_mode: null
+    spool:     { type: memory }
     # transport: "%mailer_transport%"
     # host:      "%mailer_host%"
     # username:  "%mailer_user%"
@@ -6,3 +13,10 @@ swiftmailer:
     # port:      "%mailer_port%"
     # auth_mode: "%mailer_auth_mode%"
     # spool:     { type: memory }
+    # mailer_transport: sendmail
+    # mailer_host: localhost
+    # mailer_port: null
+    # mailer_auth_mode: null
+    # mailer_encryption: null
+    # mailer_user: null
+    # mailer_password: null
