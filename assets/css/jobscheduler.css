@@ -1,6 +1,3 @@
-.myddleware_reglebundle_jobscheduler {
-    padding-top: 20px;
-}
 
 #bloc_paramName1,
 #bloc_paramvalue1, #bloc_paramName2,
@@ -36,8 +33,3 @@
     color: red;
 }
 
-.jobscheduler_form {
-    margin: 100px;
-    padding-left: 150px;
-    max-width: 50vw;
-}

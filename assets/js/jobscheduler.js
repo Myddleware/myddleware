@@ -9,9 +9,7 @@ $(function(){
         url = '../../jobscheduler/getFieldsSelect';
     }
     if(window.location.href.indexOf("jobscheduler") > -1){
-     
         fieldTreatment();
-        
     }
 });
 
@@ -64,7 +62,7 @@ function fieldTreatment($event) {
                 if (fieldType === 'list') { // if input is select option
                     fieldValue.replaceWith(function ($this) {
 
-                        var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-control" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');
+                        var select = $('<select id="myddleware_reglebundle_jobscheduler_' + (field_name) + '" class="form-select" name="myddleware_reglebundle_jobscheduler[' + (field_name) + ']"></select>');
                         fieldValue.append('<option value  selected="selected">> Select ' + $(this).find("option:selected").text() + ' ...</option>');
                         for (var item in option[Object.keys(option)[0]].option) {
                             if (item == fieldValue.val()) {
@@ -84,7 +82,6 @@ function fieldTreatment($event) {
             });
         },
         error: function (err) {
-           console.log('error wrong path');
         }
     });
 

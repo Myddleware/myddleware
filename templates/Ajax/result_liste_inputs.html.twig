@@ -24,7 +24,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 {{form_start(form)}}
 {#<form id="{{ form.vars.id }}" method="{{ form.vars.method }}" name="{{ form.vars.name }}" action="{{ form.vars.action }}"  enctype="multipart/form-data">#}
-<div class="col-md-12 form-group">
+<div class="col-md-12 input-group">
     <div class="col-md-3">
         <label>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
@@ -53,12 +53,12 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         {% endif %}
     </div>
 </div>
-<div class="col-md-12 form-group">           
+<div class="col-md-12 input-group">           
     <div class="col-md-3">{{form_label(form.name)}}</div>
     <div class="col-md-9">{{form_widget(form.name)}}</div>
 </div>		
 {% for key,field in form.connectorParams %}
-    <div class="col-md-12 form-group">  
+    <div class="col-md-12 input-group">  
         <div class="col-md-3">{{ form_label(field.value) }}</div>
         <div class="col-md-9">
                 {{ form_widget(field.name) }}
@@ -72,7 +72,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         </div>
     </div>
 {% endfor %}
-<div class="col-md-12 form-group">
+<div class="col-md-12 input-group">
     <div class="col-md-3">
     </div>
     <div class="col-md-9">
@@ -80,7 +80,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         <span id="{{parent}}_status"class="status"><img src="{{ asset('build/images/status_offline.png') }}" alt="status" /></span>
     </div>
 </div>
-<div class="col-md-12 form-group">
+<div class="col-md-12 input-group">
     <div class="col-md-3">
     </div>
     <div class="col-md-9">

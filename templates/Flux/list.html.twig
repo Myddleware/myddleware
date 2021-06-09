@@ -56,25 +56,25 @@
 		{# Les erreurs générales du formulaire. #}
 		{{ form_errors(form) }}
 		<div class="row" id="document-list-form">
-			<div class="form-group col-md-3">
+			<div class="input-group col-md-3">
 				<h4>{{'list_flux.filter.id'|trans}}</h4>
 				{{ form_label(form.source_id, 'list_flux.filter.source_id'|trans) }}
 				{{ form_widget(form.source_id) }}
 				{{ form_label(form.target_id, 'list_flux.filter.target_id'|trans) }}
 				{{ form_widget(form.target_id) }}
 			</div>
-			<div class="form-group col-md-3">
+			<div class="input-group col-md-3">
 				<h4>{{'list_flux.filter.date_modified'|trans}}</h4>
 				{{ form_label(form.date_modif_start, 'list_flux.start'|trans) }}
 				{{ form_widget(form.date_modif_start) }}
 				{{ form_label(form.date_modif_end, 'list_flux.end'|trans) }}
 				{{ form_widget(form.date_modif_end) }}
 			</div>
-			<div class="form-group col-md-3">
+			<div class="input-group col-md-3">
 				<h4>{{'list_flux.filter.status'|trans}}</h4>
 				{{ form_label(form.status, 'list_flux.filter.status'|trans) }}
 				{{ form_widget(form.status) }}
-				<div class="form-group row">
+				<div class="input-group row">
 					<div class="col-md-6">
 						{{ form_label(form.gblstatus, 'list_flux.filter.global_status'|trans) }}
 						{{ form_widget(form.gblstatus) }}
@@ -85,7 +85,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="form-group col-md-3">
+			<div class="input-group col-md-3">
 				<h4>{{'list_flux.filter.content'|trans}}</h4>
 				{{ form_label(form.source_content, 'list_flux.filter.source_content'|trans) }}
 				{{ form_widget(form.source_content) }}

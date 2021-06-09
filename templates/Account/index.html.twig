@@ -57,13 +57,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             <ul>
                 <li class="user_info_li">
                     {{ form_start(form) }}
-                    <div class="form-group row">
+                    <div class="input-group row">
                         <label for="command" class="col-sm-2 col-form-label"> {{ form_label( form.username) }}</label>
                         <div class="col-sm-10">
                             {{ form_widget( form.username, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.username, { 'attr': {'class': 'form-control'} }) }}
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="input-group row">
                         <label for="command" class="col-sm-2 col-form-label"> {{ form_label( form.email) }}</label>
                         <div class="col-sm-10">
                             {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
@@ -76,7 +76,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         </div>
     </div>
     <div class="row password-reset">
-        <div class="col form-group">
+        <div class="col input-group">
             <h2>{{'password_reset.title'|trans}}</h2>
             <a href="{{ path('my_account_reset_password')}}">
                 <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>

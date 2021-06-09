@@ -23,10 +23,10 @@ class JobSchedulerType extends AbstractType
                     'Rerun Error' => 'rerunerror',
                     'Clear Data' => 'cleardata',
                 ],
-                'placeholder' => '- Choice command -',
+                'placeholder' => '- Choose command -',
             ])
             ->add('paramName1')
-            ->add('paramValue1')
+            ->add('paramValue1', ChoiceType::class)
             ->add('paramValue2')
             ->add('paramName2')
             ->add('period', IntegerType::class, ['required' => true, 'data' => $this->getPeriod($options)])
