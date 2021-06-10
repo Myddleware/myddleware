@@ -421,16 +421,15 @@ $(function() {
 			$('#step_modules_confirme').removeAttr('disabled');
 		}
 		else {
-			$('#step_modules_confirme').attr("disabled","disabled");
+			$('#step_modules_confirme').attr("disabled");
 		}
 	}
 	
 	$('#msg_status').hide(); // message retour	
 		
-	// vérification our la création d'un connecteur
+	// vérification pour la création d'un connecteur
 	function verif(div_clock) {
 		$('.testing', div_clock).on( "click", function() {	
-						
 			var parent = $('#connexion_connector > div').attr( "id" );
 			var datas="";
 			var status = $(div_clock).parent().find('.status img');
@@ -453,12 +452,11 @@ $(function() {
 				},	
 				beforeSend:	function() {
 					$(status).removeAttr("src");
-					$(status).attr("src",path_img+"loader.gif");								
+					$(status).attr("src",path_img+"loader.gif");	
+					console.log('coucou');							
 				},				
 				success: function(json){
-					
-					//r = data.split(';');
-					
+
 					if(!json.success) {							
 						$(status).removeAttr("src");
 						$(status).attr("src",path_img+"status_offline.png");
@@ -501,12 +499,12 @@ $(function() {
 											if(data != 401 && data_error_without_popup[0] != 2 ) {
 												var win = window.open(link, 'Connexion','scrollbars=1,resizable=1,height=560,width=770'); 
 												var timer = setInterval(function() {   
-												    if(win.closed) {  
-												        clearInterval(timer);  									        
-												        if (confirm("Reconnect")) {
-												        	$('#source_test').click();
-												        } 
-												    }  
+													if(win.closed) {  
+														clearInterval(timer);  									        
+														if (confirm("Reconnect")) {
+															$('#source_test').click();
+														} 
+													}  
 												}, 1000); 												
 											}
 

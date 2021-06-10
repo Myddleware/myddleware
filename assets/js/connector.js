@@ -30,6 +30,7 @@ const $ = require('jquery');
 $( function() {
 	// Test connexion
 	$('#connexion').on('click', function(){
+	
 		var datas = '';
 		var parent = 'source';
 		var status = $('#source_status img');
@@ -102,12 +103,12 @@ $( function() {
 										var win = window.open( link, 'Connexion','scrollbars=1,resizable=1,height=560,width=770'); 
 										if(data != 401) {
 											var timer = setInterval(function() {   
-											    if(win.closed) {  
-											        clearInterval(timer);  									        
-											        if (confirm("Reconnect")) {
-											        	$('#connexion').trigger();
-											        } 
-											    }  
+												if(win.closed) {  
+													clearInterval(timer);  									        
+													if (confirm("Reconnect")) {
+														$('#connexion').trigger();
+													} 
+												}  
 											}, 1000); 												
 										} 
 										else {

@@ -981,133 +981,136 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          */
         public function ruleInputsAction(Request $request)
         {
-            $ruleKey = $this->sessionService->getParamRuleLastKey();
-
-            // Retourne la liste des inputs pour la connexion
-            if (1 == $request->request->get('mod')) {
-                if (is_string($request->request->get('solution')) && is_string($request->request->get('parent'))) {
-                    if (preg_match("#[\w]#", $request->request->get('solution')) && preg_match("#[\w]#", $request->request->get('parent'))) {
-                        $classe = strtolower($request->request->get('solution'));
-
-                        $parent = $request->request->get('parent');
-                        $solution = $this->entityManager->getRepository(Solution::class)->findOneBy(['name'=> $classe]);
-                        $connector = new Connector();
-                        $connector->setSolution($solution);
-
-                        $fieldsLogin = [];
-                        if (null !== $connector->getSolution()) {
-                            $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
+            try {
+                $ruleKey = $this->sessionService->getParamRuleLastKey();
+                // Retourne la liste des inputs pour la connexion
+                if (1 == $request->request->get('mod')) {
+                    if (is_string($request->request->get('solution')) && is_string($request->request->get('parent'))) {
+                        if (preg_match("#[\w]#", $request->request->get('solution')) && preg_match("#[\w]#", $request->request->get('parent'))) {
+                            $classe = strtolower($request->request->get('solution'));
+                            $parent = $request->request->get('parent');
+                            $solution = $this->entityManager->getRepository(Solution::class)->findOneBy(['name'=> $classe]);
+                            $connector = new Connector();
+                            $connector->setSolution($solution);
+                            $fieldsLogin = [];
+                            if (null !== $connector->getSolution()) {
+                                $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
+                            }
+    
+                            $form = $this->createForm(ConnectorType::class, $connector, [
+                                'action' => $this->generateUrl('regle_connector_insert'),
+                                'attr' => [
+                                    'fieldsLogin' => $fieldsLogin,
+                                    'secret' => $this->getParameter('secret'),
+                                ],
+                            ]);
+    
+                            return $this->render('Ajax/result_liste_inputs.html.twig', [
+                                'form' => $form->createView(),
+                                'parent' => $parent,
+                            ]
+                            );
                         }
-
-                        $form = $this->createForm(ConnectorType::class, $connector, [
-                            'action' => $this->generateUrl('regle_connector_insert'),
-                            'attr' => [
-                                'fieldsLogin' => $fieldsLogin,
-                                'secret' => $this->getParameter('secret'),
-                            ],
-                        ]);
-
-                        return $this->render('Ajax/result_liste_inputs.html.twig', [
-                            'form' => $form->createView(),
-                            'parent' => $parent,
-                        ]
-                        );
                     }
-                }
-            } // Vérifie si la connexion peut se faire ou non
-            elseif (2 == $request->request->get('mod') || 3 == $request->request->get('mod')) {
-                // Connector
-                if (2 == $request->request->get('mod')) {
-                    if (preg_match("#[\w]#", $request->request->get('champs')) && preg_match("#[\w]#", $request->request->get('parent')) && preg_match("#[\w]#", $request->request->get('solution'))) {
-                        $classe = strtolower($request->request->get('solution'));
-                        $solution = $this->solutionManager->get($classe);
-
-                        // établi un tableau params
-                        $champs = explode(';', $request->request->get('champs'));
-
-                        if ($champs) {
-                            foreach ($champs as $key) {
-                                $input = explode('::', $key);
-                                if (!empty($input[0])) {
-                                    if (!empty($input[1]) || is_numeric($input[1])) {
-                                        $param[$input[0]] = trim($input[1]);
-                                        $this->sessionService->setParamConnectorParentType($request->request->get('parent'), $input[0], trim($input[1]));
+                } // Vérifie si la connexion peut se faire ou non
+                elseif (2 == $request->request->get('mod') || 3 == $request->request->get('mod')) {
+                    // Connector
+                    if (2 == $request->request->get('mod')) {
+                        if (preg_match("#[\w]#", $request->request->get('champs')) && preg_match("#[\w]#", $request->request->get('parent')) && preg_match("#[\w]#", $request->request->get('solution'))) {
+                            $classe = strtolower($request->request->get('solution'));
+                            $solution = $this->solutionManager->get($classe);
+    
+                            // établi un tableau params
+                            $champs = explode(';', $request->request->get('champs'));
+    
+                            if ($champs) {
+                                foreach ($champs as $key) {
+                                    $input = explode('::', $key);
+                                    if (!empty($input[0])) {
+                                        if (!empty($input[1]) || is_numeric($input[1])) {
+                                            $param[$input[0]] = trim($input[1]);
+                                            $this->sessionService->setParamConnectorParentType($request->request->get('parent'), $input[0], trim($input[1]));
+                                        }
                                     }
                                 }
                             }
+                            $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
+    
+                            // Vérification du nombre de champs
+                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
+                                $result = $solution->login($param);
+                                $r = $solution->connexion_valide;
+    
+                                if (!empty($r)) {
+                                    return new JsonResponse(['success' => true]); // Connexion valide
+                                }
+                                $this->sessionService->removeParamRule($ruleKey);
+    
+                                return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
+                            }
+    
+                            return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]); // Erreur pas le même nombre de champs
                         }
-                        $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
-
-                        // Vérification du nombre de champs
-                        if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
-                            $result = $solution->login($param);
+                    } // Rule
+                    elseif (3 == $request->request->get('mod')) {
+                        // 0 : solution
+                        // 1 : id connector
+                        $params = explode('_', $request->request->get('solution'));
+    
+                        // Deux params obligatoires
+                        if (2 == count($params) && intval($params[1]) && is_string($params[0])) {
+                            $this->sessionService->removeParamParentRule($ruleKey, $request->request->get('parent'));
+                            $classe = strtolower($params[0]);
+                            $solution = $this->solutionManager->get($classe);
+    
+                            $connector = $this->getDoctrine()
+                                ->getManager()
+                                ->getRepository(Connector::class)
+                                ->find($params[1]);
+    
+                            $connector_params = $this->getDoctrine()
+                                ->getManager()
+                                ->getRepository(ConnectorParam::class)
+                                ->findBy(['connector' => $connector]);
+    
+                            if ($connector_params) {
+                                foreach ($connector_params as $key) {
+                                    $this->sessionService->setParamConnectorParentType($request->request->get('parent'), $key->getName(), $key->getValue());
+                                }
+                            }
+    
+                            $this->sessionService->setParamRuleName($ruleKey, $request->request->get('name'));
+    
+                            // Affectation id connector
+                            $this->sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
+                            //$myddlewareSession['obj'][$request->request->get('parent')] = $connector_params;
+    
+                            $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($ruleKey, $request->request->get('parent'))));
+                            $this->sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
+    
                             $r = $solution->connexion_valide;
-
                             if (!empty($r)) {
                                 return new JsonResponse(['success' => true]); // Connexion valide
                             }
-                            $this->sessionService->removeParamRule($ruleKey);
-
+    
                             return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
+    
+                            exit;
+    
+                            return $this->render('Ajax/result_connexion.html.twig', []
+                            );
                         }
-
-                        return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]); // Erreur pas le même nombre de champs
+    
+                        return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
                     }
-                } // Rule
-                elseif (3 == $request->request->get('mod')) {
-                    // 0 : solution
-                    // 1 : id connector
-                    $params = explode('_', $request->request->get('solution'));
-
-                    // Deux params obligatoires
-                    if (2 == count($params) && intval($params[1]) && is_string($params[0])) {
-                        $this->sessionService->removeParamParentRule($ruleKey, $request->request->get('parent'));
-                        $classe = strtolower($params[0]);
-                        $solution = $this->solutionManager->get($classe);
-
-                        $connector = $this->getDoctrine()
-                            ->getManager()
-                            ->getRepository(Connector::class)
-                            ->find($params[1]);
-
-                        $connector_params = $this->getDoctrine()
-                            ->getManager()
-                            ->getRepository(ConnectorParam::class)
-                            ->findBy(['connector' => $connector]);
-
-                        if ($connector_params) {
-                            foreach ($connector_params as $key) {
-                                $this->sessionService->setParamConnectorParentType($request->request->get('parent'), $key->getName(), $key->getValue());
-                            }
-                        }
-
-                        $this->sessionService->setParamRuleName($ruleKey, $request->request->get('name'));
-
-                        // Affectation id connector
-                        $this->sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
-                        //$myddlewareSession['obj'][$request->request->get('parent')] = $connector_params;
-
-                        $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($ruleKey, $request->request->get('parent'))));
-                        $this->sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
-
-                        $r = $solution->connexion_valide;
-                        if (!empty($r)) {
-                            return new JsonResponse(['success' => true]); // Connexion valide
-                        }
-
-                        return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
-
-                        exit;
-
-                        return $this->render('Ajax/result_connexion.html.twig', []
-                        );
-                    }
-
-                    return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
+                } else {
+                    throw $this->createNotFoundException('Error');
                 }
-            } else {
-                throw $this->createNotFoundException('Error');
+            } catch(Exception $e){ 
+                dd($e);
             }
+            // TODO WHY DOES CONNECTOR CREATECOMES HERE AND SAYS THAT CONTROLLER DOESNT RETURN RESPONSE
+            // return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
         }
 
         /**

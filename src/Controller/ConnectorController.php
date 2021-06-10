@@ -366,7 +366,7 @@ class ConnectorController extends AbstractController
      * @Route("/connector/insert", name="regle_connector_insert")
      */
     public function connectorInsertAction(Request $request)
-    {
+    { 
         $type = '';
 
         $solution = $this->getDoctrine()

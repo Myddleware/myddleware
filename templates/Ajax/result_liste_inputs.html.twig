@@ -76,7 +76,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         {% endfor %}
         <div class="row justify-content-center mt-5">
             <div class="col">
-                <button type="button"  id="{{parent}}_test" class="testing btn btn-outline-secondary" disabled="disabled">{{'create_connector.test'|trans}}</button>
+                <button type="button"  id="{{parent}}_test" class="testing btn btn-outline-secondary" disabled>{{'create_connector.test'|trans}}</button>
             </div> 
             <div class="col">
                 <span id="{{parent}}_status"class="status"><img src="{{ asset('build/images/status_offline.png') }}" alt="status" /></span>
@@ -84,7 +84,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div class="row mt-2">
             <div class="col">
-                <input class="btn btn-success" id="step_modules_confirme" type="submit" value="{{'create_connector.save'|trans}}" disabled="disabled"/>
+                <input class="btn btn-success" id="step_modules_confirme" type="submit" value="{{'create_connector.save'|trans}}" disabled/>
             </div>
         </div>
     {{form_end(form)}}
