@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 const $ = require('jquery');
-require('../css/connector.css');
+
 
 // WARNING - ALL ROUTING & IMAGES PATHS HAVE BEEN MODIFIED 'MANUALLY', THIS WILL NEED TO BE LOOKED INTO LATER
 // AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 

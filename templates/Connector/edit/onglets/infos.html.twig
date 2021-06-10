@@ -21,12 +21,8 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
- {% block stylesheets %}
-    {{ encore_entry_link_tags('connector') }}
-{% endblock %}
 {% block body  %}
 	{% form_theme form 'form_div_layout.html.twig' %}
-	{# BTN #}
 	<div class="block-btn-infos">
 		<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
 			<button type="button" class="btn-mydinv">
@@ -37,56 +33,38 @@
 			</button> 
 		</a>
 	</div>
-	{# BTN #} 
-
-	<div align="center">
+	<div>
 		{{form_start(form)}}
-	{#<form name="connector" method="POST" action="">#}
-			{% if error is defined %}
-				<div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
-			{% endif %}
+		{% if error is defined %}
+			<div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
+		{% endif %}
 		<table id="tab_connector">
 			<tr>
 				<th colspan="2">{{'view_connector.info.title'|trans}}</th>
 			</tr>	
 			<tr>
-						<td class="title solution"><label>{{'view_connector.info.solution'|trans}}</label></td>
+				<td class="title solution"><label>{{'view_connector.info.solution'|trans}}</label></td>
 				<td class="value"><p><img class="vignette" src="{{ asset('build/images/solution/' ~connector.solution.name~'.png')}}" alt="{{ connector.solution.name }}" /></p></td>
 			</tr>
 			<tr>
-						<td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
-				<td class="value">{{form_widget(form.name)}}
-								{#<input type="text" value="{{ connector_params.label }}" id="label" data-id="{{ connector_params.id }}" />#}
-							</td>
+				<td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
+				<td class="value">{{form_widget(form.name)}}</td>
 			</tr>		
 			{% for key,field in form.connectorParams %}
-					<tr>
-							<td class="title">{{ form_label(field.value) }}</td>
-							<td class="value">
-								{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
-									{{ form_widget(field.value) }}
-								{% else %}
-									<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
-										{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
-									</a>
-								{% endif %}
-
-							</td>
-					</tr>
-			{#<tr>
-				<td class="title">{{ field.vars.value.name }}</td>
-				{% if  field.vars.value.name != 'wsdl' %}
-					<td class="value"><input id="param_{{  field.vars.value.name }}" type="{{ getFieldType(field.vars.value.connector.solution, field.vars.value.name) }}" value="{{ getDecryptValue( field.vars.value.value) }}" data-param="{{  field.vars.value.name }}" data-id="{{  field.vars.value.id }}" class="params" /></td>
-				{% else %}
+				<tr>
+					<td class="title">{{ form_label(field.value) }}</td>
 					<td class="value">
-						<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': connector_params.solution.name }) }}?file={{ field.value }}" data-fancybox-type="iframe">
-						<input id="param_{{ title }}" type="{{ field.type }}" value="{{ field.value }}" data-param="{{ title }}" data-id="{{ field.id }}" class="params" readonly="readonly" placeholder="{{ 'create_connector.upload_placeholder' }}" /></a></td>
-
-				{% endif %}
-			</tr>#}	
+						{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
+							{{ form_widget(field.value) }}
+						{% else %}
+							<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
+								{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+							</a>
+						{% endif %}
+					</td>
+				</tr>
 			{% endfor %}
 		</table>
-			
 		<p><span id="connexion" class="btn-myd">Test</span>
 			<span id="source_status" class="status">
 				<img alt="status" src="{{ asset('build/images/status_offline.png') }}">
@@ -102,7 +80,6 @@
 			</svg>
 			{{'error.connexion'|trans}} : <span class="error"></span>
 		</div>
-	<form>
 	</div>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('connector') }}

@@ -163,16 +163,16 @@
 
 /*  fields mapping */
 
-#source { float:left; margin-right: 2em; overflow:hidden; }
+.source { float:left; margin-right: 2em; overflow:hidden; }
 
-#source, #cible {
+.source, #cible {
 	float:left;
 	padding-top:10px;
 }
 
-#source h1, #cible h1 { padding: .2em; margin: 0; }
+.source h1, #cible h1 { padding: .2em; margin: 0; }
 
-#source li:hover, #cible ol:hover { cursor:move }
+.source li:hover, #cible ol:hover { cursor:move }
 
 #cible {
 	width: 815px;
@@ -218,28 +218,28 @@
 	font-weight: bold;
 }
 
-#source .ui-accordion-content {
+.source .ui-accordion-content {
 	padding:0px;
 	border:none;	
 }
 
-#source ul {
+.source ul {
 	list-style:none;
 	padding-left:0px;
 }
 
 
-#source .ui-state-active, #source .ui-widget-content .ui-state-active, #source .ui-widget-header .ui-state-active,
-#source .ui-state-default, #source .ui-widget-content .ui-state-default, #source .ui-widget-header .ui-state-default {
+.source .ui-state-active, .source .ui-widget-content .ui-state-active, .source .ui-widget-header .ui-state-active,
+.source .ui-state-default, .source .ui-widget-content .ui-state-default, .source .ui-widget-header .ui-state-default {
 	background:#EDEDED;	
 	border:none;	
 }
 /*
-#source .ui-state-active a, #source .ui-state-active a:link, #source .ui-state-active a:visited {
+.source .ui-state-active a, .source .ui-state-active a:link, .source .ui-state-active a:visited {
 	color:#444446;
 } */
 
-#source h2, #source .h2 {
+.source h2, .source .h2 {
 	font-size: 1em;
 }
 

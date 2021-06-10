@@ -487,7 +487,7 @@ class ConnectorController extends AbstractController
 
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $this->entityManager->getRepository(Connector::class)
-                                              ->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId()),
+                                            ->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId()),
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ]);
@@ -540,9 +540,9 @@ class ConnectorController extends AbstractController
 
             // Get the connector using its id
             $connector = $this->getDoctrine()
-                         ->getManager()
-                         ->getRepository(Connector::class)
-                         ->findOneBy($list_fields_sql);
+                        ->getManager()
+                        ->getRepository(Connector::class)
+                        ->findOneBy($list_fields_sql);
 
             if (null === $connector) {
                 return $this->redirect($this->generateUrl('regle_connector_list'));
@@ -782,10 +782,10 @@ class ConnectorController extends AbstractController
             $compact['pager']->setMaxPerPage($params['maxPerPage']);
             try {
                 $compact['entities'] = $compact['pager']
-                       //On indique au pager quelle page on veut
-                       ->setCurrentPage($params['page'])
-                       //On récupère les résultats correspondant
-                       ->getCurrentPageResults();
+                    //On indique au pager quelle page on veut
+                    ->setCurrentPage($params['page'])
+                    //On récupère les résultats correspondant
+                    ->getCurrentPageResults();
 
                 $compact['nb'] = $compact['pager']->getNbResults();
             } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
