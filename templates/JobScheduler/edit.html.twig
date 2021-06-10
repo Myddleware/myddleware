@@ -3,9 +3,9 @@
 {% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
 {% block body %}
 <div class="container">
-    <div class="row">
+    <div class="row justify-content-md-center">
         <div class="col">
-            <div class="mt-5">
+            <div class=" mx-5 mt-5">
                 {{ form_start(edit_form, { 'action': path('jobscheduler_update',{id : entity.id}), 'attr': { 'class': 'myddleware_reglebundle_jobscheduler' ,'novalidate' : ''} }) }}
                 <div class="input-group row">
                     <label for="command" class="col-sm-2 col-form-label"> {{ form_label( edit_form.command) }}</label>
@@ -56,7 +56,7 @@
                         {{ form_label( edit_form.active) }}
                     </label>
                 </div>
-                <div class="input-group row">
+                <div class="input-group row justify-content-center">
                     <div class="col-md-6"> 
                         {{ form_widget( edit_form.submit, { 'attr': {'class': 'btn btn-primary '} }) }}
                     </div>

@@ -218,16 +218,16 @@
         },
         {
             "name": "babdev/pagerfanta-bundle",
-            "version": "v3.2.0",
+            "version": "v3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BabDev/PagerfantaBundle.git",
-                "reference": "9e050b86871b5b3aacc23425280f77e19e990eb0"
+                "reference": "50e59967912aace10b623d1162368c11176b0eed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BabDev/PagerfantaBundle/zipball/9e050b86871b5b3aacc23425280f77e19e990eb0",
-                "reference": "9e050b86871b5b3aacc23425280f77e19e990eb0",
+                "url": "https://api.github.com/repos/BabDev/PagerfantaBundle/zipball/50e59967912aace10b623d1162368c11176b0eed",
+                "reference": "50e59967912aace10b623d1162368c11176b0eed",
                 "shasum": ""
             },
             "require": {
@@ -289,7 +289,7 @@
             ],
             "support": {
                 "issues": "https://github.com/BabDev/PagerfantaBundle/issues",
-                "source": "https://github.com/BabDev/PagerfantaBundle/tree/v3.2.0"
+                "source": "https://github.com/BabDev/PagerfantaBundle/tree/v3.2.1"
             },
             "funding": [
                 {
@@ -297,7 +297,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-05-11T23:46:40+00:00"
+            "time": "2021-06-09T23:45:00+00:00"
         },
         {
             "name": "beberlei/doctrineextensions",
@@ -7463,16 +7463,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.88",
+            "version": "0.12.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "464d1a81af49409c41074aa6640ed0c4cbd9bb68"
+                "reference": "54c0f5a6c30511b77128d58b6369f718df250542"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/464d1a81af49409c41074aa6640ed0c4cbd9bb68",
-                "reference": "464d1a81af49409c41074aa6640ed0c4cbd9bb68",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/54c0f5a6c30511b77128d58b6369f718df250542",
+                "reference": "54c0f5a6c30511b77128d58b6369f718df250542",
                 "shasum": ""
             },
             "require": {
@@ -7503,11 +7503,15 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.88"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.89"
             },
             "funding": [
                 {
                     "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/phpstan",
                     "type": "github"
                 },
                 {
@@ -7519,7 +7523,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-17T12:24:49+00:00"
+            "time": "2021-06-09T20:23:49+00:00"
         },
         {
             "name": "phpstan/phpstan-doctrine",
