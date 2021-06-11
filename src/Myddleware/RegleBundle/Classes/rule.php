@@ -796,7 +796,7 @@ class rulecore {
 	
 	// Get all document of the rule
 	protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false) {
-		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId";
+		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId AND deleted = 0";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->execute();	    
