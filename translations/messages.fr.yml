@@ -257,6 +257,7 @@ create_connector:
     upload_success: Le fichier a bien été transféré
     upload_delete: Suppression du fichier
     params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
+    form_error : Impossible de récupérer les informations du connecteur (solution, champs & parent)
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !

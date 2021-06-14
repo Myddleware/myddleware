@@ -30,7 +30,7 @@ const $ = require('jquery');
 $( function() {
 	// Test connexion
 	$('#connexion').on('click', function(){
-	
+
 		var datas = '';
 		var parent = 'source';
 		var status = $('#source_status img');

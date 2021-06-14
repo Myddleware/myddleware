@@ -294,7 +294,7 @@ $(function() {
 	// ----------------------------- Step 1
 
 	// Test si le name de la règle existe ou non
-	$( '#rulename' , '#connexion').keyup(function() {
+	$( '#rulename' , '#connexion').on('keyup', function() {
 		var error = 1;
 		if($( this ).val().length > 2 ) {
 			$.ajax({
@@ -430,12 +430,11 @@ $(function() {
 	// vérification pour la création d'un connecteur
 	function verif(div_clock) {
 		$('.testing', div_clock).on( "click", function() {	
-			var parent = $('#connexion_connector > div').attr( "id" );
+			var parent = $('#source').attr( "id" );
 			var datas="";
 			var status = $(div_clock).parent().find('.status img');
 			var solution = $(div_clock).parent().find('.liste_solution').val();
-			
-			$('form[name="connector"] input').each(function(){
+			$('input').each(function(){
 				if ($(this).attr('data-param') != undefined) {
 					datas += $(this).attr('data-param') + "::" + $(this).val().replace( /;/g, "" ) + ";";
 				}
@@ -452,8 +451,7 @@ $(function() {
 				},	
 				beforeSend:	function() {
 					$(status).removeAttr("src");
-					$(status).attr("src",path_img+"loader.gif");	
-					console.log('coucou');							
+					$(status).attr("src",path_img+"loader.gif");						
 				},				
 				success: function(json){
 
