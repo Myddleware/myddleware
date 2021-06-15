@@ -32,6 +32,7 @@ require('./js/jobscheduler.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
+require('./js/connector.js')
 
 
 // start the Stimulus application

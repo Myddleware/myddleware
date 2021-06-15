@@ -1001,7 +1001,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                             if (null !== $connector->getSolution()) {
                                 $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
                             }
-    
                             $form = $this->createForm(ConnectorType::class, $connector, [
                                 'action' => $this->generateUrl('regle_connector_insert'),
                                 'attr' => [
@@ -1009,6 +1008,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                                     'secret' => $this->getParameter('secret'),
                                 ],
                             ]);
+
                             return $this->render('Ajax/result_liste_inputs.html.twig', [
                                 'form' => $form->createView(),
                                 'parent' => $parent,

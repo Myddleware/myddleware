@@ -170,7 +170,7 @@ class ConnectorController extends AbstractController
                 }
 
                 // Autorisation de l'application
-                if (!empty($_POST['solutionjs'])) {
+                if (!empty($_POST['solutionjs'])) {     
                     // Déclenche la pop up
                     if (!empty($_POST['detectjs'])) {
                         $callbackUrl = $solution->getCreateAuthUrl((isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$this->generateUrl('connector_callback'));
