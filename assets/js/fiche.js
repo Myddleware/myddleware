@@ -144,7 +144,7 @@ function recup_params() {
         	name = 'datereference';
         }
 
-		// delete the comma added by dtsel datetimepickere to fit with params format
+		// delete the comma added by dtsel datetimepicker to fit with params format
 		if (name === 'datereference' && value.includes(',')){
 			value = value.replace(',', '');
 		}

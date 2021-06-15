@@ -102,8 +102,14 @@
 	</h2>
 	<p>{{'help.viewrule.param'|trans|raw}}</p>
 </div>
-
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
 <script type="text/javascript">	
 	var path_img = "{{ asset('build/images/regle/') }}";	
-
+// DATE & TIME PICKER FOR THE DATEREFERENCE INPUT FIELD 
+	instance = new dtsel.DTS('input[id="datereference"]',  {
+	showTime: true
+		});
 </script>
