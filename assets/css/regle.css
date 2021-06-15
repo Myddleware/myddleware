@@ -229,17 +229,9 @@ input[type="text"] {
 
 /*  Manual rule simulation buttons and input  -- ESTELLE TODO : check whether this is still relevant */
 
-.manual-simulation, .simulation-buttons {
-	margin-top: 3vh;
-	margin-left: 3vw;
-	margin-right: 3vw;
-	display: flex;
-	justify-content: space-around;
-	max-width: 50vw;
-}
 
-.manual-input {
-	max-width: 15vw;
+.manual-simulation, .simulation-buttons {
+	width: 65vw;
 }
 
 .btn-success {
