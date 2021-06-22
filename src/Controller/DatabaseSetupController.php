@@ -309,7 +309,6 @@ class DatabaseSetupController extends AbstractController
             if($e instanceof AccessDeniedException ) {
                 return $this->redirectToRoute('login');
             }
-            //TODO : there is STILL an issue, I end up here when I shouldn't
             return $this->redirectToRoute('database_setup');
         } 
         

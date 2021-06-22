@@ -73,7 +73,7 @@ create_rule:
         data: Simulation simple
         data_manual: Simulation manuelle
         manual_data_simulation_choose_id: Indiquez l'identifiant d'une entrée spécifique pour la simulation
-        manual_data_simulation_help_text: Si vous préférez lancer une simulation sur un enregistrement aléatoire, cliquez sur 'Simulation simple'
+        manual_data_simulation_help_text: Pour lancer une simulation sur un enregistrement aléatoire, cliquez sur 'Simulation simple'
         manual_data_simulation_no_id: Veuillez insérer un identifiant valide ou cliquer sur 'Simulation simple'
         infobulle: Double clic pour effacer
         previous: Etape précédente
@@ -257,6 +257,7 @@ create_connector:
     upload_success: Le fichier a bien été transféré
     upload_delete: Suppression du fichier
     params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
+    form_error : Impossible de récupérer les informations du connecteur (solution, champs & parent)
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !

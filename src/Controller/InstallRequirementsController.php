@@ -134,13 +134,6 @@ class InstallRequirementsController extends AbstractController
             'system_status' => $this->systemStatus
         ]);
         
-        // //allow access if no errors
-        // return $this->render('install_requirements/index.html.twig', [
-        //     'php_version' => $this->phpVersion,
-        //     'error_messages' => $requirementsErrorMesssages,
-        //     'recommendation_messages' => $recommendationMesssages,
-        //     'system_status' => $this->systemStatus
-        // ]);
 
     }
 }

@@ -454,27 +454,32 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         public function ruleExecAction($id)
         {
             try {
+
                 $this->ruleManager->setRule($id);
+
                 if ('ALL' == $id) {
+
                     $this->ruleManager->actionRule('ALL');
-
                     return $this->redirect($this->generateUrl('regle_list'));
+
                 } elseif ('ERROR' == $id) {
+
                     $this->ruleManager->actionRule('ERROR');
-
                     return $this->redirect($this->generateUrl('regle_list'));
-                }
-             
-                $this->ruleManager->actionRule('runMyddlewareJob');
 
+                }
+
+                $this->ruleManager->actionRule('runMyddlewareJob');
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
+
             } catch (Exception $e) {
-           
+
                 return $this->redirect($this->generateUrl('regle_list'));
+                
             }
         }
 		
-         /**
+        /**
          * CANCEL ALL TRANSFERS FOR ONE RULE
          *
          * @param $id
@@ -996,7 +1001,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                             if (null !== $connector->getSolution()) {
                                 $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
                             }
-    
                             $form = $this->createForm(ConnectorType::class, $connector, [
                                 'action' => $this->generateUrl('regle_connector_insert'),
                                 'attr' => [
@@ -1004,7 +1008,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                                     'secret' => $this->getParameter('secret'),
                                 ],
                             ]);
-    
+
                             return $this->render('Ajax/result_liste_inputs.html.twig', [
                                 'form' => $form->createView(),
                                 'parent' => $parent,
@@ -1033,7 +1037,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                                         }
                                     }
                                 }
-                            }
+                            } 
                             $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
     
                             // Vérification du nombre de champs
@@ -1050,6 +1054,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                             }
     
                             return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]); // Erreur pas le même nombre de champs
+                        }  else {
+                            // Either parent, solution or champs is empty (from AJAX request sent in verif(div_clock) function in regle.js)
+                            return new JsonResponse(['success' => false, 'message' => $this->translator->trans('create_connector.form_error')]);
                         }
                     } // Rule
                     elseif (3 == $request->request->get('mod')) {
@@ -1083,7 +1090,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
     
                             // Affectation id connector
                             $this->sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
-                            //$myddlewareSession['obj'][$request->request->get('parent')] = $connector_params;
     
                             $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($ruleKey, $request->request->get('parent'))));
                             $this->sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
@@ -1107,10 +1113,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     throw $this->createNotFoundException('Error');
                 }
             } catch(Exception $e){ 
-                dd($e);
+                return new JsonResponse(['success' => false, 'message' => $e->getMessage().' '.$e->getLine().' '.$e->getFile()]);
             }
-            // TODO WHY DOES CONNECTOR CREATECOMES HERE AND SAYS THAT CONTROLLER DOESNT RETURN RESPONSE
-            // return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
+
         }
 
         /**

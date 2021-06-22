@@ -73,7 +73,7 @@ create_rule:
         data: Simple simulation
         data_manual: Manual simulation
         manual_data_simulation_choose_id: Choose a specific record id to run simulation
-        manual_data_simulation_help_text: If you'd rather run a simulation on a random record, click on the default 'Test rule' button
+        manual_data_simulation_help_text: If you want to run a simulation on a random record, click on 'Simple simulation' below instead
         manual_data_simulation_no_id: Please insert a valid record ID if you want to run a manual simulation
         infobulle: Double click to remove
         previous: Previous step
@@ -256,7 +256,8 @@ create_connector:
     upload_success: The file has been successfully upload
     upload_delete: Deleting file
     params_error: An error occurred while saving the settings
-    
+    form_error : Cannot get connector data (solution, fields & parent) 
+
 list_connector:
     empty: You have no connector yet !
     delete: Do you want to delete this connector?
