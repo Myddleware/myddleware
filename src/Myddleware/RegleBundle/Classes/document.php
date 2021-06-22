@@ -976,6 +976,12 @@ class documentcore {
 			// Get data in the target solution (if exists) before we update it
 			$history = $this->getDocumentData('H');
 			
+			// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
+			// This field can only exist in target data as it is created by Myddleware
+			if (!empty($target['Myddleware_element_id'])) {
+				$target['Myddleware_element_id'] = '';
+			}
+			
 			// For each target fields, we compare the data we want to send and the data already in the target solution
 			// If one is different we stop the function
 			if (!empty($this->ruleFields)) {
