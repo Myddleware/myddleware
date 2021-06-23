@@ -34,7 +34,7 @@ menu .caret, #myd_top .caret {
     display: flex;
     flex-wrap: wrap-reverse;
     flex-direction: row-reverse;
-    margin-left: -56px;
+    margin-left: -47px;
 }
 
 #fd-title-small {
