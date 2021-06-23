@@ -24,13 +24,14 @@
 
 {% if field and name %}
 	<h3>{{ name }} ({{ field.label|raw }})</h3>
-
 	{% if field.option is defined %}
 	<p>{{'create_rule.step3.info_fields'|trans}}</p>	
 		<ul>
-		    {% for key, opt in field.option if opt is not empty %}
-		        <li>{{ key }} ({{ opt }})</li>
-		    {% endfor %}
+		{% for key, opt in field.option %}
+			{% if opt is not empty %}
+				<li>{{ key }} ({{ opt }})</li>
+			{% endif %}
+		{% endfor %}
 		</ul>
 	{% else %}
 	<p>Type : Text</p>	
