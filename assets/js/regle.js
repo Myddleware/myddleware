@@ -610,13 +610,13 @@ $(function () {
 				if ($(this).is(":checked")) {
 					if (remove) {
 						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, true);
+						massAddFlux(id, true, massFluxTab);
 						$(this).prop("checked", false);
 					}
 				} else {
 					if (remove == false) {
 						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, false);
+						massAddFlux(id, false, massFluxTab);
 						$(this).prop("checked", true);
 					}
 				}
@@ -629,9 +629,9 @@ $(function () {
 	$('input', '.listepagerflux td').on('change', function () {
 		id = $(this).parent().parent().attr('data-id');
 		if ($(this).is(":checked")) {
-			massAddFlux(id, false);
+			massAddFlux(id, false, massFluxTab);
 		} else {
-			massAddFlux(id, true);
+			massAddFlux(id, true, massFluxTab);
 		}
 
 		showBtnFlux(massFluxTab);
@@ -1655,7 +1655,7 @@ function showBtnFlux(massFluxTab) {
 	}
 }
 
-function massAddFlux(id, cond) {
+function massAddFlux(id, cond, massFluxTab) {
 	if (id != '') {
 		if (cond == false) {
 			massFluxTab.push(id);
