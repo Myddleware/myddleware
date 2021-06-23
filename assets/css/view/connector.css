@@ -27,15 +27,12 @@
 }
 
 #connector #tab_connector th {
-    background: none repeat scroll 0 0 #ececec;
-    height: 20px;
-    padding: 2px;
     text-align: center;
 }
 
 
 #connector #tab_connector {
-	width: 600px;
+	/* width: 600px; */
 	margin: 0px 0px 20px 0px;
 }
 
