@@ -22,36 +22,10 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#connector #tabs li {
-	width: 50.16%;
-}
-
-#connector #tab_connector th {
-    text-align: center;
-}
-
-
-#connector #tab_connector {
-	/* width: 600px; */
-	margin: 0px 0px 20px 0px;
-}
-
-
-
 #connector #tab_connector td.title {
 	width: 35%;
 	color:#0F66A9;
-	text-align:right;
 	padding-right: 10px;
-}
-
-
-#connector #tab_connector td.solution {
-	height: 80px;
-}
-
-#connector #tab_connector td.value {
-	width: 65%;
 }
 
 #connector #tab_connector td.value input {
