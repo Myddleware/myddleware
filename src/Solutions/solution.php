@@ -555,7 +555,7 @@ class solutioncore
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
-		 } catch (\Exception $e) {
+		} catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
