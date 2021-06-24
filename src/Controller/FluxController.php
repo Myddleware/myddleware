@@ -277,7 +277,7 @@ class FluxController extends AbstractController
 
             ->add('click_filter', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn-mydinv',
+                    'class' => 'btn btn-primary',
                 ],
                 'label' => $this->translator->trans('list_flux.btn.filter'),
             ])
@@ -818,7 +818,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
             } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
                 //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Cette page n'existe pas.");
+                throw $this->createNotFoundException("Page not found. ".$e->getMessage());
             }
 
             return $compact;

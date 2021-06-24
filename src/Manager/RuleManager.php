@@ -1643,7 +1643,7 @@ class rulecore
 		'readonly' => true
 	),	*/		
 	public static function getFieldsParamUpd() {         
-	   return array();
+		return array();
 	}
 	
 	// Parametre de la règle obligation du système par défaut
@@ -1660,7 +1660,7 @@ class rulecore
 
 	// Parametre de la règle en modification dans la fiche
 	public static function getFieldsParamView($idRule = '') { 
-	   return array(	 
+		return array(	 
 			array(
 				'id' 		=> 'datereference',
 				'name' 		=> 'datereference',
