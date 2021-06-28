@@ -36,13 +36,6 @@
 
 /* Updates after SF4 upgrade */
 
-/* Inputs */
-.liste_solution, input, select {
-	box-shadow: 2px 2px 2px rgba(0,0,0,0.1);
-	border: 1px solid #c3c3c3;
-}
-
-
 /* Title 'Creating a connector' */
 #tabs ul.ui-tabs-nav {
 	display: flex;

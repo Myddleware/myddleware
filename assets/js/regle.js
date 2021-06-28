@@ -1409,7 +1409,7 @@ function addFilter(field, path) {
 	// ajoute un champ uniquement s'il n'existe pas
 	if (existeFilter(field) == 0) {
 		if (field != 'my_value') {
-			$('#fieldsfilter').append('<li id="filter_' + field + '" class="d-flex flex-columns"><span class="name">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"><i class="fas fa-question-circle"></i></a> <select class="filter">' + filter_liste + '</select><input type="text" value="" /> </li>');
+			$('#fieldsfilter').append('<li id="filter_' + field + '" class="d-flex flex-wrap g-2 mt-2 justify-content-end"><span class="name me-2 mt-2">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"> <i class="fas fa-question-circle"></i></a> <select class="filter mt-2">' + filter_liste + '</select><input type="text" value=""  class="form-control filter-input my-3" /> </li>');
 		}
 	}
 }
