@@ -50,7 +50,6 @@ class wordpresscore extends solution {
     public function login($paramConnexion){
         parent::login($paramConnexion);
         try  {
-             
             $client = HttpClient::create();
             //we test the connection to the API with a request on pages
             $response = $client->request('GET', $this->paramConnexion['url'].$this->apiSuffix.'pages');
@@ -116,7 +115,6 @@ class wordpresscore extends solution {
 
     public function readData($param){
         try {
-          
             $result = [];
             $module = $param['module'];
             $result['count'] = 0;
@@ -125,7 +123,6 @@ class wordpresscore extends solution {
             if (!in_array($module, $this->moduleWithoutReferenceDate)) {
                 $dateRefWPFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
             }
-          
 
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
@@ -139,9 +136,10 @@ class wordpresscore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
             if(empty($param['limit'])){
-                $param['limit'] = $this->defaultLimit;
+                $param['limit'] = $this->limit;
+            } else {
+                $this->limit = $param['limit'];
             }
-           
             $stop = false;
             $count = 0;
             $page = 1;
@@ -159,7 +157,7 @@ class wordpresscore extends solution {
 					// Add a dimension to fit with the rest of the method
 					$content[] = $content2;
 				} else {
-					$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->defaultLimit.'&page='.$page);
+					$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->limit.'&page='.$page);
 					$statusCode = $response->getStatusCode();
 					$contentType = $response->getHeaders()['content-type'][0];
 					$content = $response->getContent();
@@ -221,7 +219,7 @@ class wordpresscore extends solution {
                 }
                 $page++;
              
-            } while(!$stop && $currentCount === $this->defaultLimit) ;
+            } while(!$stop && $currentCount === $this->limit) ;
         }catch(\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
         }
