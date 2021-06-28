@@ -1406,11 +1406,10 @@ function verifFields(field_id, show) {
 // ---- FILTRES  -------------------------------------------------------------------------
 // Ajoute un champ
 function addFilter(field, path) {
-
 	// ajoute un champ uniquement s'il n'existe pas
 	if (existeFilter(field) == 0) {
 		if (field != 'my_value') {
-			$('#fieldsfilter').append('<li id="filter_' + field + '"><span class="name">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + 'source/' + field + '/"><span class="glyphicon glyphicon-question-sign"></span></a> <select class="filter">' + filter_liste + '</select><input type="text" value="" /> </li>');
+			$('#fieldsfilter').append('<li id="filter_' + field + '" class="d-flex flex-columns"><span class="name">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"><i class="fas fa-question-circle"></i></a> <select class="filter">' + filter_liste + '</select><input type="text" value="" /> </li>');
 		}
 	}
 }

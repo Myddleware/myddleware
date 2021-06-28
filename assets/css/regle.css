@@ -224,6 +224,7 @@ input[type="text"] {
 #champs #catalog {
 	max-height: 870px;
 	overflow: auto;
+	max-width: 300px;
 }
 
 
