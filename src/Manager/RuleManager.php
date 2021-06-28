@@ -502,7 +502,7 @@ class rulecore
 		// si champs vide
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
-			if ($connect === true) {												
+			if ($connect === true) {											
 				$this->dataSource = $this->solutionSource->readData($read);				
 				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (

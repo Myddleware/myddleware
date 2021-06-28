@@ -650,7 +650,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $param['offset'] = '0';
 				$param['call_type'] = 'read';
                 $result = $solution_source->readData($param);
-
                 if (!empty($result['error'])) {
                     throw new Exception('Reading Issue: '.$result['error']);
                 }
