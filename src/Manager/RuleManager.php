@@ -502,7 +502,7 @@ class rulecore
 		// si champs vide
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
-			if ($connect === true) {												
+			if ($connect === true) {											
 				$this->dataSource = $this->solutionSource->readData($read);				
 				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (
@@ -1643,7 +1643,7 @@ class rulecore
 		'readonly' => true
 	),	*/		
 	public static function getFieldsParamUpd() {         
-	   return array();
+		return array();
 	}
 	
 	// Parametre de la règle obligation du système par défaut
@@ -1660,7 +1660,7 @@ class rulecore
 
 	// Parametre de la règle en modification dans la fiche
 	public static function getFieldsParamView($idRule = '') { 
-	   return array(	 
+		return array(	 
 			array(
 				'id' 		=> 'datereference',
 				'name' 		=> 'datereference',

@@ -95,43 +95,49 @@
 		</div>
 
 		<div class="clr"></div>
-		<div align="center">
-			{# Hidden dont CSRF #}
-			{{ form_rest(form) }}
-			{# <p>{{ form_widget(form.click_filter) }}</p> #}
-			<p>
+		<div class="container">
+			<div class="row">
+				<div class="col">
+					<div class="d-flex justify-content-center">
+						{# Hidden dont CSRF #}
+						{{ form_rest(form) }}
+					</div>
+				</div>
 				{% if condition > 0 %}
-					<a class="btn-large-mydinv" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">{{'list_flux.btn.filter_delete'|trans}}</a>
+					<div class="col">
+						<a class="btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+							<i class="fas fa-redo"></i>
+							{{'list_flux.btn.filter_delete'|trans}}
+						</a>
+					</div>
 				{% endif %}
-			</p>
+			</div>
 		</div>
 		{{ form_end(form) }}
-
-		<div class="massbtn">
+		<div class="p-3">
 			<p>
-				<a id="cancelflux" class="btn-mydinv" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
+				<a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
 					(<span></span>)</a>
-				<a id="reloadflux" class="btn-mydinv" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
+				<a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
 					(<span></span>)</a>
 			</p>
 		</div>
-		<div align="center">
-
+		<div>
 			{% if nb > 0 %}
-
-				<table class="listepagerflux">
+				<table class="listepagerflux table">
 					{% if entities is not empty %}
 						<tr>
-							<th><input id="massselectall" type="checkbox" name="massselectall"/>
+							<th scope="col">
+								<input id="massselectall" type="checkbox" name="massselectall"/>
 							</th>
-							<th>{{'list_flux.tab.id'|trans}}</th>
-							<th>{{'list_flux.tab.name'|trans}}</th>
-							<th>{{'list_flux.tab.source_id'|trans}}</th>
-							<th>{{'list_flux.tab.target_id'|trans}}</th>
-							<th>{{'list_flux.tab.reference'|trans}}</th>
-							<th>{{'list_flux.tab.date_modified'|trans}}</th>
-							<th>{{'list_flux.tab.statut'|trans}}</th>
-							<th>{{'list_flux.tab.type'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.id'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.name'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.source_id'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.target_id'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.reference'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.date_modified'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.statut'|trans}}</th>
+							<th scope="col" class="p-2">{{'list_flux.tab.type'|trans}}</th>
 						</tr>
 						{% for flux in entities %}
 							<tr class="fd_{{ flux.global_status|lower }}" data-id="{{ flux.id }}">

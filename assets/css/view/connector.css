@@ -22,39 +22,10 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#connector #tabs li {
-	width: 50.16%;
-}
-
-#connector #tab_connector th {
-    background: none repeat scroll 0 0 #ececec;
-    height: 20px;
-    padding: 2px;
-    text-align: center;
-}
-
-
-#connector #tab_connector {
-	width: 600px;
-	margin: 0px 0px 20px 0px;
-}
-
-
-
 #connector #tab_connector td.title {
 	width: 35%;
 	color:#0F66A9;
-	text-align:right;
 	padding-right: 10px;
-}
-
-
-#connector #tab_connector td.solution {
-	height: 80px;
-}
-
-#connector #tab_connector td.value {
-	width: 65%;
 }
 
 #connector #tab_connector td.value input {
@@ -64,13 +35,6 @@
 
 
 /* Updates after SF4 upgrade */
-
-/* Inputs */
-.liste_solution, input, select {
-	box-shadow: 2px 2px 2px rgba(0,0,0,0.1);
-	border: 1px solid #c3c3c3;
-}
-
 
 /* Title 'Creating a connector' */
 #tabs ul.ui-tabs-nav {

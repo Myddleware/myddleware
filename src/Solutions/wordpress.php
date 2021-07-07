@@ -23,16 +23,17 @@
  * along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************************/
 
- namespace App\Solutions;
+namespace App\Solutions;
 
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class wordpresscore extends solution {
 
     protected $apiSuffix = '/wp-json/wp/v2/';
-    protected $defaultLimit = 100;
+    protected $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
   	// Module without reference date
 	protected $moduleWithoutReferenceDate = array('users', 'categories');
 
@@ -50,7 +51,6 @@ class wordpresscore extends solution {
     public function login($paramConnexion){
         parent::login($paramConnexion);
         try  {
-             
             $client = HttpClient::create();
             //we test the connection to the API with a request on pages
             $response = $client->request('GET', $this->paramConnexion['url'].$this->apiSuffix.'pages');
@@ -116,7 +116,6 @@ class wordpresscore extends solution {
 
     public function readData($param){
         try {
-          
             $result = [];
             $module = $param['module'];
             $result['count'] = 0;
@@ -125,7 +124,6 @@ class wordpresscore extends solution {
             if (!in_array($module, $this->moduleWithoutReferenceDate)) {
                 $dateRefWPFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
             }
-          
 
             //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if(!empty($this->subModules[$param['module']])){
@@ -139,15 +137,18 @@ class wordpresscore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields'],$module);
 
             if(empty($param['limit'])){
-                $param['limit'] = $this->defaultLimit;
+                $param['limit'] = $this->callLimit;
+            } else {
+                // to handle situations in which limit set by user is higher than actual WP API limit (100)
+                if($param['limit'] < $this->callLimit){
+                    $this->callLimit = $param['limit'];
+                }
             }
-           
             $stop = false;
             $count = 0;
             $page = 1;
-            
             do {
-
+                $content = [];
                 $client = HttpClient::create();
                 	// In case a specific record is requested
 				if (!empty($param['query']['id'])) {
@@ -159,19 +160,25 @@ class wordpresscore extends solution {
 					// Add a dimension to fit with the rest of the method
 					$content[] = $content2;
 				} else {
-					$response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->defaultLimit.'&page='.$page);
-					$statusCode = $response->getStatusCode();
-					$contentType = $response->getHeaders()['content-type'][0];
-					$content = $response->getContent();
-					$content = $response->toArray();
+                    try {
+                        $response = $client->request('GET',$this->paramConnexion['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->callLimit.'&page='.$page.'&orderby=modified');
+                        $statusCode = $response->getStatusCode();
+                        $contentType = $response->getHeaders()['content-type'][0];
+                        $content = $response->getContent();
+                        $content = $response->toArray();
+                    } catch(\Exception $e){
+                        if(!($e instanceof ClientException)){
+                            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
+                        } else {
+                        }
+                    }
+				
 				}
-
-              
-                if(!empty($content)){     
+                if(!empty($content)){   
                     $currentCount = 0;        
                     //used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content);
-             
+                    
                     foreach($content as $record){
                         $currentCount++;
                         // If the reference is a date we check the date_modified field otherwise we check the id which is an integer
@@ -220,12 +227,10 @@ class wordpresscore extends solution {
                     $stop = true;
                 }
                 $page++;
-             
-            } while(!$stop && $currentCount === $this->defaultLimit) ;
+            } while(!$stop && $count < $param['limit']) ;
         }catch(\Exception $e){
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		
         }
-
         return $result;
     }
 

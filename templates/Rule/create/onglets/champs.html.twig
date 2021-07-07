@@ -33,7 +33,7 @@
 </div>
 <div class="clr"></div>
 <div id="source" class="source">
-	<div align="center">
+	<div class="d-flex flex-column justify-content-center align-items-center">
 		<p><img src="{{ asset('build/images/solution/' ~ params.source.solution ~'.png') }}" alt="{{params.source.solution }}" /></p>
 		<h1><img src="{{ asset('build/images/template/source.png') }}" alt="{{'rule.source'|trans}}" /> {{'rule.source'|trans}}</h1>
 	</div>
@@ -62,7 +62,7 @@
 </div>
 
 <div id="cible">
-	<div align="center" data-title="true">
+	<div class="d-flex flex-column justify-content-center align-items-center" data-title="true">
 		<p><img src="{{ asset('build/images/solution/'~params.cible.solution~'.png') }}" alt="{{ params.cible.solution }}" /></p>
 		<h1><img src="{{ asset('build/images/template/target.png') }}" alt="{{'rule.target'|trans}}" /> {{'rule.target'|trans}}</h1>
 	</div>

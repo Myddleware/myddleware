@@ -650,7 +650,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $param['offset'] = '0';
 				$param['call_type'] = 'read';
                 $result = $solution_source->readData($param);
-
                 if (!empty($result['error'])) {
                     throw new Exception('Reading Issue: '.$result['error']);
                 }
@@ -1955,18 +1954,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         public function infoFieldAction(Request $request, $field, $type)
         {
             $session = $request->getSession();
-            $myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
+            $myddlewareSession = $session->get('myddlewareSession');
             // We always add data again in session because these data are removed after the call of the get
-            $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
+            $session->set('myddlewareSession', $myddlewareSession);
             if (isset($field) && !empty($field) && isset($myddlewareSession['param']['rule']) && 'my_value' != $field) {
-                if (isset($myddlewareSession['param']['rule'][$type]['fields'][$field])) {
+                if (isset($myddlewareSession['param']['rule'][0][$type]['fields'][$field])) {
                     return $this->render('Rule/create/onglets/info.html.twig', [
-                        'field' => $myddlewareSession['param']['rule'][$type]['fields'][$field],
+                        'field' => $myddlewareSession['param']['rule'][0][$type]['fields'][$field],
                         'name' => htmlentities(trim($field)),
                     ]
                     );
                 }   // Possibilité de Mutlimodules
-                foreach ($myddlewareSession['param']['rule'][$type]['fields'] as $subModule) { // Ce foreach fonctionnera toujours
+                foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) { // Ce foreach fonctionnera toujours
                     if (isset($subModule[$field])) { // On teste si ça existe pour éviter une erreur PHP éventuelle
                         return $this->render('Rule/create/onglets/info.html.twig', [
                             'field' => $subModule[$field],

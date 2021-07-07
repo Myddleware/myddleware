@@ -75,7 +75,8 @@
     "laminas/laminas-stdlib": "^3.3",
     "laminas/laminas-hydrator": "^4.1",
     "prestashop/prestashop-webservice-lib": "dev-master",
-    "symfony/mailer": "4.4.*"
+    "symfony/mailer": "4.4.*",
+    "doctrine/cache": "1.11.3"
     },
     "repositories": [
         {

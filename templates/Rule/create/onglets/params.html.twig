@@ -40,8 +40,8 @@
 			</p>
 		{% else %}
 			<div class="row">
-				<div class="col-md-4 input-group">
-					<label for="{{p.name}}">{{p.label|trans}} : </label>
+				<div class="col-md-4 input-group g-3">
+					<label for="{{p.name}}" class="me-3">{{p.label|trans}} : </label>
 					<select {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
 						{% for opt_value, opt_name in p.option %}
 							<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
@@ -56,7 +56,7 @@
 
 {% if duplicate_target %}
 	<div class="row">
-		<div class="col-md-4 input-group">
+		<div class="col-md-4 input-group mt-3">
 			<label>{{'create_rule.step3.params.duplicate'|trans}} :</label>
 			<ul id="fields_duplicate_target">
 				{% for v in duplicate_target %}

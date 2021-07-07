@@ -224,6 +224,7 @@ input[type="text"] {
 #champs #catalog {
 	max-height: 870px;
 	overflow: auto;
+	max-width: 300px;
 }
 
 
@@ -323,20 +324,13 @@ td a {
 }
 
 .mapping-card {
-	border: solid 1px #c3c3c3;
-	min-width: 20vw;
-	max-width: 20vw;
 	text-align: center;
 	margin-bottom: 10px;
 	box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
 }
 
 .mapping-card-title {
-	background-color: #9E9937;
-	min-height: 30px;
 	margin: 10px;
-	line-height: 30px;
-	font-weight: bold;
 }
 
 .mapped-fields{

@@ -39,13 +39,13 @@ class woocommercecore extends solution {
     protected $consumerSecret;
     protected $woocommerce;
     // protected $FieldsDuplicate = array();
-    protected $defaultLimit = 100;
+    protected $limit = 100;
     protected $delaySearch = '-1 month';
     protected $subModules = array(
                                 'line_items' => array('parent_module' => 'orders',
                                                       'parent_id' => 'order_id')
                             );
-                      
+
     //Log in form parameters
     public function getFieldsLogin()
     {
@@ -72,7 +72,6 @@ class woocommercecore extends solution {
     public function login($paramConnexion) {
         parent::login($paramConnexion);
 		try{	
-       
             $this->woocommerce = new Client(
                 $this->paramConnexion['url'],
                 $this->paramConnexion['consumerkey'],
@@ -160,7 +159,9 @@ class woocommercecore extends solution {
             $result['date_ref'] = $param['date_ref'];
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
             if(empty($param['limit'])){
-                $param['limit'] = $this->defaultLimit;
+                $param['limit'] = $this->limit;
+            } else {
+                $this->limit = $param['limit'];
             }
 
             // adding query parameters into the request
@@ -197,7 +198,7 @@ class woocommercecore extends solution {
             do {
                 //for specific requests (e.g. readrecord with an id)
                 if(!empty($query)){
-                    $response = $this->woocommerce->get($module.$query, array('per_page' => $this->defaultLimit,
+                    $response = $this->woocommerce->get($module.$query, array('per_page' => $this->limit,
                                                                               'page' => $page));   
                     //when reading a specific record only we need to add a layer to the array                                                         
                     $record = $response;
@@ -207,12 +208,12 @@ class woocommercecore extends solution {
                      //orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
                                                                                     'order' => 'desc',
-                                                                                    'per_page' => $this->defaultLimit,
+                                                                                    'per_page' => $this->limit,
                                                                                     'page' => $page));
                 //get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, array('orderby' => 'modified',
-                                                                                'per_page' => $this->defaultLimit,
+                                                                                'per_page' => $this->limit,
                                                                                 'page' => $page));
                 }      
                 if(!empty($response)){

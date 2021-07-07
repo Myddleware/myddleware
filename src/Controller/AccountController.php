@@ -144,7 +144,6 @@ class AccountController extends AbstractController
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
-           
         ]);
     }
 
@@ -155,10 +154,10 @@ class AccountController extends AbstractController
      */
     public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
     {
-    	$em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
-    	$form = $this->createForm(ResetPasswordType::class, $user);
-    	$form->handleRequest($request);
+        $form = $this->createForm(ResetPasswordType::class, $user);
+        $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $oldPassword = $request->request->get('reset_password')['oldPassword'];
             // first we test whether the old password input is correct
@@ -175,10 +174,9 @@ class AccountController extends AbstractController
                 $this->addFlash('error', $failure);
             }
         }
-    	return $this->render('account/resetPassword.html.twig', array(
-    		'form' => $form->createView(),
-    	));
-
+        return $this->render('account/resetPassword.html.twig', array(
+            'form' => $form->createView(),
+        ));
     }
 
 

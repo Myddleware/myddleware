@@ -398,7 +398,7 @@ class solutioncore
 					
 					// Check control before create
 					$record = $this->checkDataBeforeCreate($param, $record);
-					// Call create methode 
+					// Call create method
 					$recordId = $this->create($param, $record);
 					
 					// Exception if no Id retruned
@@ -420,7 +420,7 @@ class solutioncore
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
-		 } catch (\Exception $e) {
+		} catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
@@ -505,7 +505,7 @@ class solutioncore
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
-		 } catch (\Exception $e) {
+		} catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
@@ -555,7 +555,7 @@ class solutioncore
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 			}
-		 } catch (\Exception $e) {
+		} catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',

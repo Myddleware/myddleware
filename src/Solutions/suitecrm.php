@@ -400,7 +400,7 @@ class suitecrmcore extends solution
 						// If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
 						if (
 								$value['id'] == $field
-							 or $value['name'] == $field
+							or $value['name'] == $field
 						) {
 							$link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
 							break;
@@ -409,6 +409,12 @@ class suitecrmcore extends solution
 				}
 			}
 		}
+
+        // add limit to query
+        if(!empty($param['limit'])){
+            $this->limitCall = $param['limit'];
+        }
+        
 		// On lit les données dans le CRM
 		do {
 			$get_entry_list_parameters = [
@@ -452,7 +458,7 @@ class suitecrmcore extends solution
 							foreach ($customRelationshipListFields as $key => $value) {
 								if (
 										$field == $value['id']
-									 or $field == $value['name']
+									or $field == $value['name']
 								) {
 									// Init field even if the relationship is empty. Myddleware needs the field to be set
 									$record[$value['id']] = '';

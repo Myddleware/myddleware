@@ -610,13 +610,13 @@ $(function () {
 				if ($(this).is(":checked")) {
 					if (remove) {
 						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, true);
+						massAddFlux(id, true, massFluxTab);
 						$(this).prop("checked", false);
 					}
 				} else {
 					if (remove == false) {
 						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, false);
+						massAddFlux(id, false, massFluxTab);
 						$(this).prop("checked", true);
 					}
 				}
@@ -629,9 +629,9 @@ $(function () {
 	$('input', '.listepagerflux td').on('change', function () {
 		id = $(this).parent().parent().attr('data-id');
 		if ($(this).is(":checked")) {
-			massAddFlux(id, false);
+			massAddFlux(id, false, massFluxTab);
 		} else {
-			massAddFlux(id, true);
+			massAddFlux(id, true, massFluxTab);
 		}
 
 		showBtnFlux(massFluxTab);
@@ -1406,11 +1406,10 @@ function verifFields(field_id, show) {
 // ---- FILTRES  -------------------------------------------------------------------------
 // Ajoute un champ
 function addFilter(field, path) {
-
 	// ajoute un champ uniquement s'il n'existe pas
 	if (existeFilter(field) == 0) {
 		if (field != 'my_value') {
-			$('#fieldsfilter').append('<li id="filter_' + field + '"><span class="name">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + 'source/' + field + '/"><span class="glyphicon glyphicon-question-sign"></span></a> <select class="filter">' + filter_liste + '</select><input type="text" value="" /> </li>');
+			$('#fieldsfilter').append('<li id="filter_' + field + '" class="d-flex flex-wrap g-2 mt-2 justify-content-end"><span class="name me-2 mt-2">' + field + '</span> <a class="fancybox" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"> <i class="fas fa-question-circle"></i></a> <select class="filter mt-2">' + filter_liste + '</select><input type="text" value=""  class="form-control filter-input my-3" /> </li>');
 		}
 	}
 }
@@ -1655,7 +1654,7 @@ function showBtnFlux(massFluxTab) {
 	}
 }
 
-function massAddFlux(id, cond) {
+function massAddFlux(id, cond, massFluxTab) {
 	if (id != '') {
 		if (cond == false) {
 			massFluxTab.push(id);

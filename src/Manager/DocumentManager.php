@@ -1103,6 +1103,7 @@ class documentcore
 		$read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
 		$dataTarget = $this->solutionTarget->readData($read);
 		// If read method returns no result with no error
+		
 		if (
 				empty($dataTarget['values'])
 			AND empty($dataTarget['error'])	
@@ -1829,7 +1830,7 @@ class documentcore
 									id = :id
 								";
 			if (!$this->api) {
-				echo 'statut '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
+				echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);			
 			}
 			// Suppression de la dernière virgule	
 			$stmt = $this->connection->prepare($query);
