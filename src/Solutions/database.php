@@ -44,6 +44,7 @@ class databasecore extends solution
         try {
             try {
                 $this->pdo = $this->generatePdo();
+				$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING );
                 $this->connexion_valide = true;
             } catch (\PDOException $e) {
                 $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
