@@ -566,6 +566,7 @@ class suitecrmcore  extends solution {
 					} else {
 						$result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
 					}
+					break; // Stop the loop if an error happened
 				}			
 			}
             // On continue si le nombre de résultat du dernier appel est égal à la limite
