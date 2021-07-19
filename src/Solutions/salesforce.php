@@ -340,12 +340,12 @@ class salesforcecore extends solution {
 		$queryLimit = '';
 		$queryOffset = '';
 		if (empty($param['limit'])) {
-			$param['limit'] = 100;
-		}
+			$param['limit'] = $this->limitCall;
+		} 
 		if (!isset($param['offset'])) {
 			$param['offset'] = 0;
 		}
-			 
+
 		try {
 			$param['fields'] = array_unique($param['fields']);
 			$param['fields'] = array_values($param['fields']);
@@ -371,7 +371,6 @@ class salesforcecore extends solution {
 		
 			// Gstion du LIMIT
 			$queryLimit .= "+LIMIT+" . $param['limit']; // Ajout de la limite souhaitée
-			
 			// On lit les données dans Salesforce
 			do {		
 				if(!empty($param['offset'])) {
@@ -438,11 +437,11 @@ class salesforcecore extends solution {
 			// 1.	Le nombre de résultat du dernier appel est égal à la limite
 			// 2.	Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement 
 			while (
-						$currentCount == $param['limit']
+						$currentCount < $param['limit']
 					&& !empty($previousRefDate)
 					&& $previousRefDate == $result['date_ref']	
 			);
-			
+dd($currentCount);
 			// Si on a quitté la boucle while à cause d'un écart de date de référence et que la limite est atteinte 
 			// alors on supprime le dernier enregistrement et on mets à jour la date de référence
 			// Ce dernier enregistrement sera lu la prochaine fois
@@ -453,7 +452,7 @@ class salesforcecore extends solution {
 				unset($result['values'][$record['Id']]);
 				$result['date_ref'] = $previousRefDate;
 				$result['count']--;
-			}				
+			}	
 			return $result;
 		}
 		catch (\Exception $e) {
