@@ -441,7 +441,7 @@ class salesforcecore extends solution {
 					&& !empty($previousRefDate)
 					&& $previousRefDate == $result['date_ref']	
 			);
-dd($currentCount);
+
 			// Si on a quitté la boucle while à cause d'un écart de date de référence et que la limite est atteinte 
 			// alors on supprime le dernier enregistrement et on mets à jour la date de référence
 			// Ce dernier enregistrement sera lu la prochaine fois
