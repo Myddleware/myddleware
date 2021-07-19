@@ -38,8 +38,7 @@ class woocommercecore extends solution {
     protected $consumerKey;
     protected $consumerSecret;
     protected $woocommerce;
-    // protected $FieldsDuplicate = array();
-    protected $limit = 100;
+    protected $callLimit = 100;       // WooCommerce API only allows 100 records per page read
     protected $delaySearch = '-1 month';
     protected $subModules = array(
                                 'line_items' => array('parent_module' => 'orders',
@@ -159,9 +158,12 @@ class woocommercecore extends solution {
             $result['date_ref'] = $param['date_ref'];
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
             if(empty($param['limit'])){
-                $param['limit'] = $this->limit;
+                $param['limit'] = $this->callLimit;
             } else {
-                $this->limit = $param['limit'];
+                // to handle situations in which limit set by the user is higher than actual Woo API limit (100)
+                if($param['limit'] < $this->callLimit){
+                    $this->callLimit = $param['limit'];
+                }
             }
 
             // adding query parameters into the request
@@ -198,7 +200,7 @@ class woocommercecore extends solution {
             do {
                 //for specific requests (e.g. readrecord with an id)
                 if(!empty($query)){
-                    $response = $this->woocommerce->get($module.$query, array('per_page' => $this->limit,
+                    $response = $this->woocommerce->get($module.$query, array('per_page' => $this->callLimit,
                                                                               'page' => $page));   
                     //when reading a specific record only we need to add a layer to the array                                                         
                     $record = $response;
@@ -208,12 +210,12 @@ class woocommercecore extends solution {
                      //orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
                                                                                     'order' => 'desc',
-                                                                                    'per_page' => $this->limit,
+                                                                                    'per_page' => $this->callLimit,
                                                                                     'page' => $page));
                 //get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, array('orderby' => 'modified',
-                                                                                'per_page' => $this->limit,
+                                                                                'per_page' => $this->callLimit,
                                                                                 'page' => $page));
                 }      
                 if(!empty($response)){
