@@ -45,6 +45,8 @@ class magentocore extends solution
 
     protected $required_fields = ['default' => ['updated_at']];
 
+    protected $callLimit = 100;
+
     // Liste des param�tres de connexion
     public function getFieldsLogin()
     {
@@ -66,8 +68,6 @@ class magentocore extends solution
             ],
         ];
     }
-
-    // getFieldsLogin()
 
     // Connexion à Magento
     public function login($paramConnexion)
@@ -96,8 +96,6 @@ class magentocore extends solution
         }
     }
 
-    // login($paramConnexion)*/
-
     public function get_modules($type = 'source')
     {
         if ('source' == $type) {
@@ -113,7 +111,6 @@ class magentocore extends solution
         ];
     }
 
-    // get_modules()
 
     // Renvoie les champs du module passé en paramètre
     public function get_module_fields($module, $type = 'source', $param = null)
@@ -143,8 +140,9 @@ class magentocore extends solution
                         'group_id' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                         'default_shipping' => ['label' => 'Default shipping address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                         'default_billing' => ['label' => 'Default billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'gender' => ['label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
-                    break;
+                        break;
                 case 'customer_address':
                     $moduleFields = [
                         'id' => ['label' => 'ID address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -167,9 +165,10 @@ class magentocore extends solution
                         'street__1' => ['label' => 'Street 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'suffix' => ['label' => 'Customer suffix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'telephone' => ['label' => 'Telephone number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'is_default_billing' => ['label' => 'True if the address is the default one for billing', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'is_default_shipping' => ['label' => 'True if the address is the default one for shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'default_billing' => ['label' => 'True if the address is the default one for billing', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'default_shipping' => ['label' => 'True if the address is the default one for shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_id' => ['label' => 'Customer ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'vat_id' => ['label' => 'VAT ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
                     try {
                         // Get list of countries
@@ -183,74 +182,138 @@ class magentocore extends solution
                     break;
                 case 'orders':
                     $moduleFields = [
-                        'id' => ['label' => 'ID customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'parent_id' => ['label' => 'Parent ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'increment_id' => ['label' => 'Increment ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'store_id' => ['label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'created_at' => ['label' => 'Date of creation', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'updated_at' => ['label' => 'Date of updating', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'is_active' => ['label' => 'Defines whether the order is active', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'tax_amount' => ['label' => 'Tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_amount' => ['label' => 'Shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'discount_amount' => ['label' => 'Discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'subtotal' => ['label' => 'Subtotal sum', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'grand_total' => ['label' => 'Grand total sum', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_paid' => ['label' => 'Total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_refunded' => ['label' => 'Total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_qty_ordered' => ['label' => 'Total quantity ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_canceled' => ['label' => 'Total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_invoiced' => ['label' => 'Total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_online_refunded' => ['label' => 'Total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'total_offline_refunded' => ['label' => 'Total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_tax_amount' => ['label' => 'Base tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_shipping_amount' => ['label' => 'Base shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'adjustment_negative' => ['label' => 'Adjustment negative', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'adjustment_positive' => ['label' => 'Adjustment positive', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'applied_rule_ids' => ['label' => 'Applied rule ids', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_adjustment_negative' => ['label' => 'Base adjustment negative', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_adjustment_positive' => ['label' => 'Base adjustment positive', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_currency_code' => ['label' => 'Base currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_discount_amount' => ['label' => 'Base discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_subtotal' => ['label' => 'Base subtotal', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_canceled' => ['label' => 'Base discount canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_invoiced' => ['label' => 'Base discount invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_refunded' => ['label' => 'Base discount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_grand_total' => ['label' => 'Base grand total', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_total_paid' => ['label' => 'Base total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_total_refunded' => ['label' => 'Base total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_total_qty_ordered' => ['label' => 'Base total quantity ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_tax_compensation_amount' => ['label' => 'Base discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_tax_compensation_invoiced' => ['label' => 'Base discount tax compensation invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_discount_tax_compensation_refunded' => ['label' => 'Base discount tax compensation refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_amount' => ['label' => 'Base shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_canceled' => ['label' => 'Base shipping canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_discount_amount' => ['label' => 'Base shipping discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_discount_tax_compensation_amnt' => ['label' => 'Base shipping discount tax compensation amnt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_incl_tax' => ['label' => 'Base shipping incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_invoiced' => ['label' => 'Base shipping invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_refunded' => ['label' => 'Base shipping refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_tax_amount' => ['label' => 'Base shipping tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_shipping_tax_refunded' => ['label' => 'Base shipping tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_subtotal' => ['label' => 'Base subtotal', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_subtotal_canceled' => ['label' => 'Base subtotal canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_subtotal_incl_tax' => ['label' => 'Base subtotal incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_subtotal_invoiced' => ['label' => 'Base subtotal invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_subtotal_refunded' => ['label' => 'Base subtotal refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_tax_amount' => ['label' => 'Base tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_tax_canceled' => ['label' => 'Base tax canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_tax_invoiced' => ['label' => 'Base tax invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_tax_refunded' => ['label' => 'Base tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_total_canceled' => ['label' => 'Base total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_due' => ['label' => 'Base total due', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_total_invoiced' => ['label' => 'Base total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_total_online_refunded' => ['label' => 'Base total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_invoiced_cost' => ['label' => 'Base total invoiced cost', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_total_offline_refunded' => ['label' => 'Base total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'billing_address_id' => ['label' => 'Billing address ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'billing_firstname' => ['label' => 'First name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'billing_lastname' => ['label' => 'Last name in the billing address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_address_id' => ['label' => 'Shipping address ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_firstname' => ['label' => 'First name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_lastname' => ['label' => 'Last name in the shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'billing_name' => ['label' => 'Billing name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_name' => ['label' => 'Shipping name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'store_to_base_rate' => ['label' => 'Store to base rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'store_to_order_rate' => ['label' => 'Store to order rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_online_refunded' => ['label' => 'Base total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_paid' => ['label' => 'Base total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_qty_ordered' => ['label' => 'Base total qty ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'base_total_refunded' => ['label' => 'Base total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_to_global_rate' => ['label' => 'Base to global rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'base_to_order_rate' => ['label' => 'Base to order rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'weight' => ['label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'store_name' => ['label' => 'Store name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'remote_ip' => ['label' => 'Remote IP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'status' => ['label' => 'Order status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'state' => ['label' => 'Order state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'applied_rule_ids' => ['label' => 'Applied rule IDs', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'global_currency_code' => ['label' => 'Global currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'base_currency_code' => ['label' => 'Base currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'store_currency_code' => ['label' => 'Store currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'order_currency_code' => ['label' => 'Order currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_method' => ['label' => 'Shipping method', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'shipping_description' => ['label' => 'Shipping description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_email' => ['label' => 'Email address of the customer', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_firstname' => ['label' => 'Customer first name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_lastname' => ['label' => 'Customer last name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'quote_id' => ['label' => 'Shopping cart ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'is_virtual' => ['label' => 'Defines whether the product is a virtual one', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_group_id' => ['label' => 'Customer group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_note_notify' => ['label' => 'Customer notification', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_is_guest' => ['label' => 'Defines whether the customer is a guest', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'email_sent' => ['label' => 'Defines whether the email notification is sent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'entity_id' => ['label' => 'Entity ID (order ID)', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'gift_message_id' => ['label' => 'Gift message ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'gift_message' => ['label' => 'Gift message', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'billing_address_id' => ['label' => 'Billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'can_ship_partially' => ['label' => 'Can ship partially', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'can_ship_partially_item' => ['label' => 'Can ship partially item', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'coupon_code' => ['label' => 'Coupon code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'created_at' => ['label' => 'Created at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_dob' => ['label' => 'Customer dob', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_email' => ['label' => 'Customer email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_firstname' => ['label' => 'Customer firstname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_gender' => ['label' => 'Customer gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_group_id' => ['label' => 'Customer group id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_id' => ['label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false],
+                        'customer_is_guest' => ['label' => 'Customer is guest', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_lastname' => ['label' => 'Customer lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_middlename' => ['label' => 'Customer middlename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_note' => ['label' => 'Customer note', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_note_notify' => ['label' => 'Customer note notify', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_prefix' => ['label' => 'Customer prefix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_suffix' => ['label' => 'Customer suffix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'customer_taxvat' => ['label' => 'Customer taxvat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_amount' => ['label' => 'Discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_canceled' => ['label' => 'Discount canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_description' => ['label' => 'Discount description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_invoiced' => ['label' => 'Discount invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_refunded' => ['label' => 'Discount refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'edit_increment' => ['label' => 'Edit increment', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'email_sent' => ['label' => 'Email sent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'entity_id' => ['label' => 'Entity id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'ext_customer_id' => ['label' => 'Ext customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'ext_order_id' => ['label' => 'Ext order id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'forced_shipment_with_invoice' => ['label' => 'Forced shipment with invoice', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'global_currency_code' => ['label' => 'Global currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'grand_total' => ['label' => 'Grand total', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_tax_compensation_amount' => ['label' => 'Discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_tax_compensation_invoiced' => ['label' => 'Discount tax compensation invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'discount_tax_compensation_refunded' => ['label' => 'Discount tax compensation refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'hold_before_state' => ['label' => 'Hold before state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'hold_before_status' => ['label' => 'Hold before status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'increment_id' => ['label' => 'Increment id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'is_virtual' => ['label' => 'Is virtual', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'order_currency_code' => ['label' => 'Order currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'original_increment_id' => ['label' => 'Original increment id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'payment_authorization_amount' => ['label' => 'Payment authorization amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'payment_auth_expiration' => ['label' => 'Payment auth expiration', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'protect_code' => ['label' => 'Protect code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'quote_address_id' => ['label' => 'Quote address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'quote_id' => ['label' => 'Quote id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'relation_child_id' => ['label' => 'Relation child id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'relation_child_real_id' => ['label' => 'Relation child real id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'relation_parent_id' => ['label' => 'Relation parent id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'relation_parent_real_id' => ['label' => 'Relation parent real id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'remote_ip' => ['label' => 'Remote ip', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_amount' => ['label' => 'Shipping amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_canceled' => ['label' => 'Shipping canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_description' => ['label' => 'Shipping description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_discount_amount' => ['label' => 'Shipping discount amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_discount_tax_compensation_amount' => ['label' => 'Shipping discount tax compensation amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_incl_tax' => ['label' => 'Shipping incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_invoiced' => ['label' => 'Shipping invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_refunded' => ['label' => 'Shipping refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_tax_amount' => ['label' => 'Shipping tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'shipping_tax_refunded' => ['label' => 'Shipping tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'state' => ['label' => 'State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'store_currency_code' => ['label' => 'Store currency code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'store_id' => ['label' => 'Store id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'store_name' => ['label' => 'Store name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'store_to_base_rate' => ['label' => 'Store to base rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'store_to_order_rate' => ['label' => 'Store to order rate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'subtotal' => ['label' => 'Subtotal', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'subtotal_canceled' => ['label' => 'Subtotal canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'subtotal_incl_tax' => ['label' => 'Subtotal incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'subtotal_invoiced' => ['label' => 'Subtotal invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'subtotal_refunded' => ['label' => 'Subtotal refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'tax_amount' => ['label' => 'Tax amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'tax_canceled' => ['label' => 'Tax canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'tax_invoiced' => ['label' => 'Tax invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'tax_refunded' => ['label' => 'Tax refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_canceled' => ['label' => 'Total canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_due' => ['label' => 'Total due', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_invoiced' => ['label' => 'Total invoiced', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_item_count' => ['label' => 'Total item count', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_offline_refunded' => ['label' => 'Total offline refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_online_refunded' => ['label' => 'Total online refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_paid' => ['label' => 'Total paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_qty_ordered' => ['label' => 'Total qty ordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'total_refunded' => ['label' => 'Total refunded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'weight' => ['label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'x_forwarded_for' => ['label' => 'X forwarded for', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
                     break;
                 default:
@@ -278,7 +341,6 @@ class magentocore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
@@ -315,9 +377,13 @@ class magentocore extends solution
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
-
+            
+            // Limit = pageSize 
+            if(!empty($param['limit'])){
+                $this->callLimit = $param['limit'];
+            }
             // Get all data after the reference date
-            $searchCriteria = 'searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
+            $searchCriteria = 'searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
             // order by type de reference date
             $searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
             $searchCriteria .= 'searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
@@ -372,7 +438,7 @@ class magentocore extends solution
                                     // Sauvegarde de la date de référence
                                     if (
                                             empty($result['date_ref'])
-                                         || $value > $result['date_ref']
+                                        || $value > $result['date_ref']
                                     ) {
                                         $result['date_ref'] = $value;
                                     }
@@ -392,9 +458,9 @@ class magentocore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-
         return $result;
     }
+
     // Permet de créer un enregistrement
     public function createData($param)
     {
@@ -593,7 +659,7 @@ class magentocore extends solution
         }
         throw new \Exception('curl extension is missing!');
     }
-}// class magentocore
+}
 
 class magento extends magentocore
 {
