@@ -38,11 +38,10 @@ $( function() {
 		$( '.title' ).each(function(){
 						
 			if( $(this).text() != 'solution' && $(this).text() != 'nom') {				
-				input = $('.params', $(this).parent());
-                                
-                                if(input.attr('data-param') != undefined){
-                                    datas += input.attr('data-param') + "::" + input.val().replace( /;/g, "" )+ ";";
-                                }
+				input = $('.params', $(this).parent());                
+				if(input.attr('data-param') != undefined){
+					datas += input.attr('data-param') + "::" + input.val().replace( /;/g, "" )+ ";";
+				}
 			}			
 		});		
 		

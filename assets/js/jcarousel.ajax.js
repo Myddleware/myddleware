@@ -2,8 +2,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-!function ($) {
+$(function () {
 
     var is,
         transition;
@@ -538,17 +538,19 @@
         }
     };
 
-    $.fn.carousel = function (options) {
+    // changed the name of function as otherwise if it's called carousel it conflicts with Bootstrap carousel
+    $.fn.newCarousel = function (options) {
         return new Carousel(this.first(), options);
     };
-}(window.ender || window.jQuery || window.Zepto);
+});
 
 window.onload = function () {
-    $("#animation-cleft").carousel({
+
+    $("#animation-cleft").newCarousel({
         vertical: true,
         duration: 1000
     });
-    $("#animation-cright").carousel({
+    $("#animation-cright").newCarousel({
         vertical: true,
         duration: 1000
     });
