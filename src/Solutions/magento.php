@@ -75,6 +75,10 @@ class magentocore extends solution
         parent::login($paramConnexion);
         try {
             $userData = ['username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']];
+            // Check whether the URL input ends with /, if yes, remove it before making the call
+            if(substr($this->paramConnexion['url'], -1) === '/'){
+                $this->paramConnexion['url'] = substr($this->paramConnexion['url'], 0, -1);
+            }
             $result = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
