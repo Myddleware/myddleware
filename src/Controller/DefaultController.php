@@ -1964,14 +1964,24 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                         'name' => htmlentities(trim($field)),
                     ]
                     );
-                }   // Possibilité de Mutlimodules
-                foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) { // Ce foreach fonctionnera toujours
-                    if (isset($subModule[$field])) { // On teste si ça existe pour éviter une erreur PHP éventuelle
-                        return $this->render('Rule/create/onglets/info.html.twig', [
-                            'field' => $subModule[$field],
-                            'name' => htmlentities(trim($field)),
-                        ]
-                        );
+                // SuiteCRM connector uses this structure instead
+                } else if ( isset($myddlewareSession['param']['rule']['key'])){
+                    $ruleKey = $myddlewareSession['param']['rule']['key'];
+                    return $this->render('Rule/create/onglets/info.html.twig', [
+                        'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
+                        'name' => htmlentities(trim($field)),
+                    ]
+                    );
+                } else {
+                    // Possibilité de Mutlimodules
+                    foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) { // Ce foreach fonctionnera toujours
+                        if (isset($subModule[$field])) { // On teste si ça existe pour éviter une erreur PHP éventuelle
+                            return $this->render('Rule/create/onglets/info.html.twig', [
+                                'field' => $subModule[$field],
+                                'name' => htmlentities(trim($field)),
+                            ]
+                            );
+                        }
                     }
                 }
                 // On retourne vide si on l'a pas trouvé précédemment
