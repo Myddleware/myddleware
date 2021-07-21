@@ -157,7 +157,7 @@ class moodlecore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
+
 
 
     // Read data in Moodle
@@ -183,7 +183,6 @@ class moodlecore extends solution
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
-
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
             }
@@ -198,7 +197,7 @@ class moodlecore extends solution
                                     $field->attributes()->__toString() == $dateRefField
                                 and $result['date_ref'] < $field->VALUE->__toString()
                                 )
-                             or (
+                            or (
                                     'date_ref_override' == $field->attributes()->__toString() // The webservice could return a date to override the date_ref
                                 and $field->VALUE->__toString() > 0
                                 )
@@ -462,8 +461,6 @@ class moodlecore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
-
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
     {
@@ -471,8 +468,6 @@ class moodlecore extends solution
 
         return $date->format('U');
     }
-
-    // dateTimeFromMyddleware($dateTime)
 
     // Format webservice result if needed
     protected function formatResponse($method, $response, $param)
