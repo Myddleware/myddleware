@@ -416,6 +416,27 @@ class magentocore extends solution
                         // 'is_virtual' => ['label' => 'Is virtual', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
                     break;
+                case 'products':
+                    $moduleFields = [
+                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'sku' => ['label' => 'SKU', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'attribute_set_id' => ['label' => 'Attribute set ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'visibility' => ['label' => 'Visibility', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'type_id' => ['label' => 'Type ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'created_at' => ['label' => 'Created at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						'weight' => ['label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'extension_attributes' => ['label' => 'Extension_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'product_links' => ['label' => 'Product_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'options' => ['label' => 'Options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'media_gallery_entries' => ['label' => 'Media_gallery_entries', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'tier_prices' => ['label' => 'Tier_prices', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+						// 'custom_attributes' => ['label' => 'Custom_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    ];
+                    break;
                 default:
                     throw new \Exception('Fields unreadable');
                     break;
@@ -473,6 +494,9 @@ class magentocore extends solution
                 case 'orders_items':
                     $function = 'orders';
                     $subModule = 'items';
+                    break;
+                case 'products':
+                    $function = 'products';
                     break;
                 default:
                     throw new \Exception('Module unknown. ');
