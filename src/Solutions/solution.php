@@ -130,6 +130,11 @@ class solutioncore
                 }
             }
         }
+        // Check whether the URL input ends with /, if yes, remove it before making the call
+        if(isset($paramConnexion['url']) && substr($paramConnexion['url'], -1) === '/'){
+            $paramConnexion['url'] = substr($paramConnexion['url'], 0, -1);
+        }
+
         $this->paramConnexion = $paramConnexion;
     }
 
