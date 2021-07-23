@@ -126,12 +126,12 @@ class MassActionCommand extends Command
         // Mass action
         $response = $this->jobManager->massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus);
         if (!empty($this->jobManager->getMessage())) {
-            if ($response['success']) {
+            if ($response) {
                 $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
-                $this->logger->info($response['message']);
+                $this->logger->info($this->jobManager->getMessage());
             } else {
                 $output->writeln('<error>'.$this->jobManager->getMessage().'</error>');
-                $this->logger->error($response['message']);
+                $this->logger->error($this->jobManager->getMessage());
             }
         }
 		

@@ -350,7 +350,7 @@ class erpnextcore extends solution
      */
     public function createUpdate($method, $param)
     {
-        try {
+        try {			
             $result = [];
             $subDocIdArray = [];
             $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']);
@@ -427,6 +427,7 @@ class erpnextcore extends solution
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {
                         $this->updateDocumentStatus($idSubDoc, $valueSubDoc, $param);
                     }
+					$subDocIdArray = array();
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }

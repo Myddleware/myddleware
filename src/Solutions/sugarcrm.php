@@ -230,7 +230,7 @@ class sugarcrmcore extends solution
                 foreach ($param['query'] as $key => $value) {
                     $filterArgs['filter'][] = [$key => ['$equals' => $value]];
                 }
-                // Search By reference
+			// Search By reference
             } else {
                 $filterArgs['filter'] = [
                     [

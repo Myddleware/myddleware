@@ -395,7 +395,7 @@ class jobcore  {
 				sleep(1);
 				$cpt++;
 			}
-//TODO : bugfix - the job ID is not sent to the document, hence the error no task id given' is always thrown 
+
 			// Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
 			$file = fopen($fileTmp, 'r');
 			// Massaction returns "1;" + the job ID
@@ -489,18 +489,19 @@ class jobcore  {
 					}
 					$errorActionDocument = $this->ruleManager->actionDocument($document['id'],$action, $toStatus);
 					if (!empty($errorActionDocument)) {
-						$this->message .= print_r($errorActionDocument,true);
+						throw new \Exception (print_r($errorActionDocument,true));
 					}
 				}			
 			}	
 			else {
-				$this->message .=  'No document found corresponding to the input parameters. No action done in the job massAction. ';		
-				return false;
+				throw new \Exception ('No document found corresponding to the input parameters. No action done in the job massAction. ');
 			}
-		} catch (\Exception $e) {
+		} catch (\Exception $e) {			
 			$this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+			return false;
 		}
+		return true;
 	}
 	
 	
