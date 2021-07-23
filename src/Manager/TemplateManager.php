@@ -178,7 +178,7 @@ class TemplateManager
                 if (!empty($this->ruleNameSlugArray[$ruleRelationShip->getFieldId()])) {
                     $relationship['fieldId'] = $this->ruleNameSlugArray[$ruleRelationShip->getFieldId()];
                 } else {
-                    throw new Exception('Failed to generate relationship for the rule '.$rule->getId());
+                    throw new Exception('Failed to generate relationship between the rule '.$rule->getId().' and '.$ruleRelationShip->getFieldId());
                 }
                 $relationship['parent'] = $ruleRelationShip->getParent();
                 $data['relationships'][] = $relationship;

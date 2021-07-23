@@ -1,0 +1,88 @@
+name: magento_erpnext_customer_order
+description: 'Customer, orders and products from Prestashop to ERPNext'
+rules:
+    -
+        name: 'Products to ERPNext'
+        nameSlug: products_to_erpnext
+        sourceSolution: magento
+        targetSolution: erpnext
+        sourceModule: products
+        targetModule: Item
+        fields:
+            - { target: item_code, source: sku, formula: null }
+            - { target: item_name, source: name, formula: null }
+            - { target: standard_rate, source: price, formula: null }
+            - { target: item_group, source: my_value, formula: '"Consumable"' }
+        params:
+            - { name: limit, value: '250' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: description, value: '' }
+    -
+        name: 'Customer to ERPNExt'
+        nameSlug: customer_to_erpnext
+        sourceSolution: magento
+        targetSolution: erpnext
+        sourceModule: customers
+        targetModule: Customer
+        fields:
+            - { target: customer_name, source: lastname;firstname, formula: '{firstname}." ".{lastname}' }
+            - { target: email_id, source: email, formula: null }
+            - { target: customer_type, source: my_value, formula: '"Individual"' }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: description, value: '' }
+    -
+        name: 'OrderItem to ERPNExt'
+        nameSlug: orderitem_to_erpnext
+        sourceSolution: magento
+        targetSolution: erpnext
+        sourceModule: orders_items
+        targetModule: 'Sales Order Item'
+        fields:
+            - { target: actual_qty, source: qty_invoiced, formula: null }
+            - { target: amount, source: row_total_incl_tax, formula: null }
+            - { target: delivered_qty, source: qty_shipped, formula: null }
+            - { target: description, source: name, formula: null }
+            - { target: discount_amount, source: discount_amount, formula: null }
+            - { target: discount_percentage, source: discount_percent, formula: null }
+            - { target: ordered_qty, source: qty_ordered, formula: null }
+            - { target: qty, source: qty_invoiced, formula: null }
+            - { target: rate, source: base_row_total_incl_tax, formula: null }
+            - { target: returned_qty, source: qty_refunded, formula: null }
+        relationships:
+            - { fieldNameSource: product_id, fieldNameTarget: item_code, fieldId: products_to_erpnext, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: 'Order to ERPNExt'
+        nameSlug: order_to_erpnext
+        sourceSolution: magento
+        targetSolution: erpnext
+        sourceModule: orders
+        targetModule: 'Sales Order'
+        fields:
+            - { target: base_grand_total, source: base_total_paid, formula: null }
+            - { target: base_total, source: base_total_paid, formula: null }
+            - { target: base_total_taxes_and_charges, source: base_tax_amount, formula: null }
+            - { target: delivery_date, source: updated_at, formula: null }
+            - { target: discount_amount, source: discount_amount, formula: null }
+            - { target: grand_total, source: grand_total, formula: null }
+            - { target: total, source: total_paid, formula: null }
+            - { target: total_taxes_and_charges, source: tax_amount, formula: null }
+        relationships:
+            - { fieldNameSource: customer_id, fieldNameTarget: customer, fieldId: customer_to_erpnext, parent: false }
+            - { fieldNameSource: Myddleware_element_id, fieldNameTarget: order_id, fieldId: orderitem_to_erpnext, parent: true }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
