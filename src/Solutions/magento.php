@@ -269,7 +269,7 @@ class magentocore extends solution
                         'payment_authorization_amount' => ['label' => 'Payment authorization amount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'payment_auth_expiration' => ['label' => 'Payment auth expiration', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'protect_code' => ['label' => 'Protect code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'quote_address_id' => ['label' => 'Quote address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'quote_address_id' => ['label' => 'Quote address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'quote_id' => ['label' => 'Quote id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'relation_child_id' => ['label' => 'Relation child id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'relation_child_real_id' => ['label' => 'Relation child real id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

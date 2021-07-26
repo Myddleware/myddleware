@@ -251,7 +251,7 @@ class woocommercecore extends solution {
                     $stop = true;
                 }
                 $page++;	
-            } while(!$stop);
+            } while(!$stop && $count < $param['limit']);
             //As the records sent from the API are ordered by date_modified, 
             // we pass date_modified from the first record as the date_ref
             if(!empty($result['values'])){

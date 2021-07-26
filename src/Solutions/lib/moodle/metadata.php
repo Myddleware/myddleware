@@ -93,6 +93,7 @@ $moduleFields = [
         'fullname' => ['label' => 'Full name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'shortname' => ['label' => 'Short name  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'categoryid' => ['label' => 'Category ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+        'categoryname' => ['label' => 'Category name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'idnumber' => ['label' => 'ID number  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'summary' => ['label' => 'Summary', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'summaryformat' => ['label' => 'Summary format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => [
@@ -136,7 +137,18 @@ $moduleFields = [
         'enablecompletion' => ['label' => 'Enable completion', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0],
         'completionnotify' => ['label' => 'Completion notify', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0],
         'lang' => ['label' => 'Language', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'theme' => ['label' => 'Theme', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'legacyfiles' => ['label' => 'Legacy files', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'calendartype' => ['label' => 'Calendar type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'forcetheme' => ['label' => 'Force theme', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'sortorder' => ['label' => 'Category Sort Order', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'displayname' => ['label' => 'Display name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'enddate' => ['label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'timecreated' => ['label' => 'Time created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'requested' => ['label' => 'Requested', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'cacherev' => ['label' => 'Cache rev', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        // 'courseformatoptions' => ['label' => 'Course format options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0], 
     ],
 
     'groups' => [
