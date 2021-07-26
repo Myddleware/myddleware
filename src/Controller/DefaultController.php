@@ -473,7 +473,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
 
             } catch (Exception $e) {
-
                 return $this->redirect($this->generateUrl('regle_list'));
                 
             }

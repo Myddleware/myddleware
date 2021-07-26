@@ -1195,7 +1195,7 @@ class documentcore
 						// Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
 						if (
 								!array_key_exists($ruleField['target_field_name'], $data)
-							 AND $type == 'H'	
+							AND $type == 'H'	
 						) { 				
 							continue;
 						}				
@@ -1215,8 +1215,8 @@ class documentcore
 				}
 			}		
 			$documentEntity = $this->entityManager
-							  ->getRepository(Document::class)
-	                          ->find( $this->id );	
+									->getRepository(Document::class)
+	                        		->find( $this->id );	
 			$documentData = new DocumentDataEntity();
 			$documentData->setDocId($documentEntity);
 			$documentData->setType($type); // Source		
@@ -1331,7 +1331,7 @@ class documentcore
 				$r = explode(';', $ruleField['source_field_name']);	
 				if(count($r) > 1) {
 					foreach ( $r as $listFields ) {
-						// We skip my_value because it is a constante
+						// We skip my_value because it is a constant
 						if ($listFields != 'my_value') {
 							$fieldNameDyn = $listFields; // value : variable name
 							if (array_key_exists($listFields, $source)) {
@@ -1602,7 +1602,7 @@ class documentcore
 									document.rule_id IN (:ruleId)	
 								AND (
 										document.global_status = 'Close'
-									 OR (
+									OR (
 											document.global_status = 'Cancel'	
 										AND document.status = 'No_send'
 									)
@@ -1623,7 +1623,7 @@ class documentcore
 									document.rule_id IN (:ruleId)	
 								AND (
 										document.global_status = 'Close'
-									 OR (
+									OR (
 											document.global_status = 'Cancel'	
 										AND document.status = 'No_send'
 									)
@@ -1648,10 +1648,10 @@ class documentcore
 						// S'il s'agit de Myddleware_element_id on teste id
 						if (
 								!empty($this->data[$ruleRelationship['field_name_source']])
-							 || (
+							|| (
 									$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
 								&& !empty($this->data['id'])	
-							 )
+							)
 						) {					
 							// On recherche l'id target dans la règle liée
 							$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
@@ -1682,7 +1682,7 @@ class documentcore
 							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 							if (
 									empty($result['id']) 
-								 || $result['global_status'] == 'Cancel'
+								|| $result['global_status'] == 'Cancel'
 							) {
 								return 'C';
 							} else {
@@ -1703,7 +1703,7 @@ class documentcore
 						if (
 							(
 								$document['global_status'] != 'Cancel'
-							 OR (
+							OR (
 										$document['global_status'] == 'Cancel'	
 									AND $document['status'] == 'No_send'
 								)
@@ -1718,7 +1718,7 @@ class documentcore
 							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 							if (
 									empty($result['id']) 
-								 || $result['global_status'] == 'Cancel'
+								|| $result['global_status'] == 'Cancel'
 							) {
 								return 'C';
 							} else {
@@ -2022,7 +2022,7 @@ class documentcore
 									AND document.target_id = :record_id 
 									AND (
 											document.global_status = 'Close' 
-										 OR document.status = 'No_send'
+										OR document.status = 'No_send'
 									)	 
 								LIMIT 1";	
 			}
@@ -2038,7 +2038,7 @@ class documentcore
 									AND document.target_id != '' 
 									AND (
 											document.global_status = 'Close' 
-										 OR document.status = 'No_send'
+										OR document.status = 'No_send'
 									)	
 								LIMIT 1";	
 			}
@@ -2055,7 +2055,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									 OR $document['status'] == 'No_send'	
+									OR $document['status'] == 'No_send'	
 								)	
 								AND $document['target_id'] != '' 
 							) {
@@ -2071,7 +2071,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									 OR $document['status'] == 'No_send'	
+									OR $document['status'] == 'No_send'	
 								)	
 								AND $document['source_id'] != '' 
 							) {

@@ -42,7 +42,8 @@ class erpnextcore extends solution
 
     protected $FieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
-    ];
+        'Item' => ['item_code']
+    ]; 
 
     // Module list that allows to make parent relationships
     protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];

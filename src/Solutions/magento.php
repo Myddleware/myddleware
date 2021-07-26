@@ -607,7 +607,7 @@ class magentocore extends solution
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }			
+        }
         return $result;
     }
 
