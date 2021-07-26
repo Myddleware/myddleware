@@ -584,9 +584,9 @@ class documentcore
 			if (!empty($result['id'])) {
 				throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
 			}
-			
+		
 			// Check predecessor in the opposite bidirectional rule
-			if (!empty($this->ruleParams['bidirectional'])) {
+			if (!empty($this->ruleParams['bidirectional'])) {				
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->bindValue(":rule_id", $this->ruleParams['bidirectional']);
 				$stmt->bindValue(":source_id", $this->document_data['source_id']);
@@ -596,26 +596,26 @@ class documentcore
 				if (!empty($result['id'])) {
 					throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$this->ruleParams['bidirectional'].'. This document is not closed. This document is queued. ');
 				}				
-			}
+			}			
 			
 			// Check predecessor in the child rule
 			// Get all child rules 
 			$sqlGetChildRules = "	SELECT DISTINCT
 										rulerelationship.rule_id 											
-									FROM document
+									FROM rule childRule
 										INNER JOIN rulerelationship
-											ON rulerelationship.field_id = document.rule_id
+											ON rulerelationship.field_id = childRule.id
 											AND rulerelationship.parent = 1
-										INNER JOIN rule
-											ON rule.id = rulerelationship.rule_id 									
+										INNER JOIN rule parentRule
+											ON parentRule.id = rulerelationship.rule_id 									
 									WHERE 
-											document.rule_id = :rule_id 
-										AND document.deleted = 0 
-										AND	rule.deleted = 0";					
+											parentRule.id = :rule_id 
+										AND parentRule.deleted = 0 
+										AND	childRule.deleted = 0";					
 			$stmt = $this->connection->prepare($sqlGetChildRules);
 			$stmt->bindValue(":rule_id", $this->document_data['rule_id']);
 			$stmt->execute();	    
-			$childRules = $stmt->fetchAll();	
+			$childRules = $stmt->fetchAll();		
 			if($childRules) {
 				// If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
 				$sqlParamsChild = "	SELECT 
@@ -645,13 +645,12 @@ class documentcore
 					$stmt->bindValue(":date_created", $this->document_data['date_created']);
 					$stmt->execute();	   				
 					$result = $stmt->fetch();
-
-					if (!empty($result['id'])) {
-						throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
+					if (!empty($result['id'])) {				
+						throw new \Exception('The document '.$result['id'].' is on the same record on the rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
 					}	
 				}			
 			}	
-
+	
 			// Get the target id and the type of the document
 			$type_document = $this->checkRecordExist($this->sourceId);			
 			// Don't change the document type if the type is deletion
@@ -884,8 +883,8 @@ class documentcore
 		$history = false;
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
-			// Check if the rule is a parent and run the child data.
-			$this->runChildRule();
+			// Check if the rule is a parent and run the child data.		
+			$this->runChildRule();		
 			
 			// If the document type is a modification or a deletion we get target data for the record using its ID
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)

@@ -134,10 +134,10 @@ class magentocore extends solution
                         'dob' => ['label' => 'Birthdate', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'taxvat' => ['label' => 'Taxvat value', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'confirmation' => ['label' => 'Confirmation flag', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                        'increment_id' => ['label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
-                        'store_id' => ['label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
-                        'website_id' => ['label' => 'Website ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
-                        'group_id' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'increment_id' => ['label' => 'Increment ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
+                        'store_id' => ['label' => 'Store ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
+                        'website_id' => ['label' => 'Website ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
+                        'group_id' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
                         'default_shipping' => ['label' => 'Default shipping address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                         'default_billing' => ['label' => 'Default billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                         'gender' => ['label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -167,7 +167,7 @@ class magentocore extends solution
                         'telephone' => ['label' => 'Telephone number', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'default_billing' => ['label' => 'True if the address is the default one for billing', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'default_shipping' => ['label' => 'True if the address is the default one for shipping', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_id' => ['label' => 'Customer ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
+                        'customer_id' => ['label' => 'Customer ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
                         'vat_id' => ['label' => 'VAT ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
                     try {
@@ -235,7 +235,7 @@ class magentocore extends solution
                         'customer_firstname' => ['label' => 'Customer firstname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_gender' => ['label' => 'Customer gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_group_id' => ['label' => 'Customer group id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'customer_id' => ['label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false],
+                        'customer_id' => ['label' => 'Customer ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true],
                         'customer_is_guest' => ['label' => 'Customer is guest', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_lastname' => ['label' => 'Customer lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'customer_middlename' => ['label' => 'Customer middlename', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -372,11 +372,11 @@ class magentocore extends solution
                         // 'locked_do_ship' => ['label' => 'Locked do ship', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'no_discount' => ['label' => 'No discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'order_id' => ['label' => 'Order id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'order_id' => ['label' => 'Order id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true],
                         'original_price' => ['label' => 'Original price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'price_incl_tax' => ['label' => 'Price incl tax', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'product_id' => ['label' => 'Product id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'product_id' => ['label' => 'Product id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true],
                         'product_type' => ['label' => 'Product type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         // 'qty_backordered' => ['label' => 'Qty backordered', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                         'qty_canceled' => ['label' => 'Qty canceled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -468,6 +468,7 @@ class magentocore extends solution
     public function readData($param)
     {
         $result = [];
+		$result['count'] = 0;
         try {
             // Ajout du champ id, obligatoire mais spécifique au module
             if (!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
@@ -510,11 +511,32 @@ class magentocore extends solution
             if(!empty($param['limit'])){
                 $this->callLimit = $param['limit'];
             }
+			
             // Get all data after the reference date
-            $searchCriteria = 'searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
-            // order by type de reference date
-            $searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
-            $searchCriteria .= 'searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
+			// Search by fields (id or duplicate fields)
+			$searchCriteria = '';
+            if (!empty($param['query'])) {
+				$i = 0;
+                // Add every filter (AND operator by default)
+                foreach ($param['query'] as $key => $value) {
+                    // Workaround for a Magento bug, if we keep order_id then we get the Magento error : Column 'order_id' in where clause is ambiguous
+					// So we change the where condition to make it work on Magento side
+					if (
+							$key = 'order_id' 
+						AND in_array($param['module'],array('orders_items','orders')) 
+					) {
+						$key = 'main_table.entity_id';
+					}
+					// Create search criteria
+					$searchCriteria .= 'searchCriteria[filter_groups][0][filters]['.$i.'][field]='.$key.'&searchCriteria[filter_groups][0][filters]['.$i.'][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters]['.$i.'][condition_type]=eq';
+					$i++;
+				}
+            } else {
+				// Search By reference
+				$searchCriteria = 'searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
+				// order by reference
+				$searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
+            }
 
             // Call to Magento
             $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.'?'.$searchCriteria, 'GET');
@@ -546,6 +568,7 @@ class magentocore extends solution
                     }
 
                     // remove one dimension by replacing the dimension by __
+					$subRecordsNoDimension = array();
                     foreach ($subRecords as $subRecord) {
                         $subRecordsNoDimension[] = $this->removeDimension($subRecord);
                     }
@@ -577,15 +600,14 @@ class magentocore extends solution
                                 }
                             }
                             $result['values'][$row['id']] = $row;
-                            ++$cpt;
-                            $result['count'] = $cpt;
+                            $result['count']++;
                         }
                     }
                 }
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }
+        }			
         return $result;
     }
 
