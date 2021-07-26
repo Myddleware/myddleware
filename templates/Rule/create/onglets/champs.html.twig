@@ -97,7 +97,10 @@
 	{% endif %}
 	{# ----------- BLOCK ADD FILTER ---------- #}
 
-	<p>{{'create_rule.step3.filter'|trans}} : <input id="hidefields" type="text" placeholder="{{'create_rule.step3.filter_fields'|trans}}" /></p>
+	<div class="input-group mb-2">
+		<span class="input-group-text" id="filter-text">{{'create_rule.step3.filter'|trans}} : </span>
+		<input id="hidefields" type="text" class="form-control" placeholder="{{'create_rule.step3.filter_fields'|trans}}" aria-label="{{'create_rule.step3.filter_fields'|trans}}" aria-describedby="filter-text" />
+	</div>
 
 
 	{% if cible %}	
