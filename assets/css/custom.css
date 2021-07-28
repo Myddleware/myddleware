@@ -34,7 +34,6 @@ menu .caret, #myd_top .caret {
     display: flex;
     flex-wrap: wrap-reverse;
     flex-direction: row-reverse;
-    margin-left: -47px;
 }
 
 #fd-title-small {
@@ -82,7 +81,7 @@ menu .caret, #myd_top .caret {
     text-align: left;
 }
 
-/* boutons */
+/* buttons */
 
 .btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
     color: #404042;
@@ -231,6 +230,13 @@ menu .caret, #myd_top .caret {
 
 /* Documents list form (with filters) */
 #document-list-form {
-  margin-bottom: 2vh;
-  padding: 2em;
+    margin-bottom: 2vh;
+    padding: 2em;
 }
+
+/* Nav menu */
+#navigation-container{
+    max-width: 80vw;
+    margin: auto;
+}
+

@@ -26,142 +26,140 @@
 {% block title %}{{parent()}} | {{'list_rule.title'|trans}}{% endblock %}
 {% block titlesm %}{{'list_rule.title'|trans}}{% endblock titlesm %} 
 {% block body %}
-    <div id="rule" align="center">
+    <div id="rule">
 		{% if nb_rule > 0 %}
-
 		<div id="fd-title-small" class="left">
 			<p>{{'list_rule.total'|trans}}<p><span class="nb">{{ nb_rule }}</span>
 		</div>
 		<div class="clr"></div>
-
-		{# BTN #}
-
-		<div class="block-btn-infos">
-			<a id="exec_all" class="btn-mydinv" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="">
-				<button type="button" class="btn-mydinv">
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-					<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+		<div class="row justify-content-center my-4">
+			<div class="col text-center">
+				<a id="exec_all" class="btn btn-primary" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+						<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+						</svg>
+						{{'view_rule.action.exec_all'|trans}}
+				</a>
+			</div>
+			<div class="col text-center">
+				<a id="exec_error" class="btn btn-warning" href="{{ path('regle_exec',{'id' : 'ERROR' }) }}" title="" role="button">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+						<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+						<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+						</svg>
+						{{'view_rule.action.exec_error'|trans}}
+				</a>
+			</div>
+			<div class="col text-center">
+				<a id="new_rule" class="btn btn-outline-success" href="{{ path('regle_stepone_animation') }}" title="" role="button">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+					<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
 					</svg>
-					{{'view_rule.action.exec_all'|trans}}
-				</button>
-			</a>
-			<a id="exec_error" class="btn-mydinv" href="{{ path('regle_exec',{'id' : 'ERROR' }) }}" title="">
-				<button type="button" class="btn-mydinv">
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-					<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-					<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-					</svg>
-					{{'view_rule.action.exec_error'|trans}}
-				</button>
-			</a>
-			<a id="new_rule" href="{{ path('regle_stepone_animation') }}" title="">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-				<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-				</svg>
-				{{'view_rule.action.new_rule'|trans}}
-			</a>
+					{{'view_rule.action.new_rule'|trans}}
+				</a>
+			</div>
 		</div>
 		<p></p>
-		{# BTN #}
-
-		<table class="listepager">
-		{% if entities is not empty %}	
-			<tr>
-				<th>{{'rule.source'|trans}}</th>
-				<th>{{'rule.target'|trans}}</th>
-				<th>{{'list_rule.th.name'|trans}}</th>
-				<th>{{'list_rule.th.active'|trans}}</th>
-				<th>{{'list_rule.th.date_created'|trans}}</th>
-				<th>{{'list_rule.th.option'|trans}}</th>
-			</tr> 
-			{% for rule in entities %}
-			<tr>
-				<td class="solution_block">
-					<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}" /></p>
-					{{rule.lbl_source }}
-				</td>
-				<td class="solution_block">
-					<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}" /></p>
-					{{rule.lbl_target }}
-				</td>
-				<td class="lft">
-					<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">{{rule.name }}</a>
-				</td>
-				<td>
-					<div class="onoffswitch">
-					<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
-						<label class="onoffswitch-label" for="{{ rule.nameSlug }}">
-							<span class="onoffswitch-inner">
-							<span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
-							<span class="onoffswitch-inactive"><span class="onoffswitch-switch">OFF</span></span>
-							</span>
-						</label>
-					</div> 
-					</p>
-				</td>
-				<td>{{rule.dateCreated|date("d/m/Y") }} 
-					{% if app.user.getUsername == 'support' %}
-					<p><span class="label label-default">{{ rule.createdBy.username }}</span></p>
-					{% endif %}
-				</td>
-				<td>
-					<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}">
-						<span class="btn-opt">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-							<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-							<path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-							</svg>
-						</span>
-					</a>		     		
-					<a class="delete" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
-						<span class="btn-opt">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-							<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-							<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-							</svg>
-						</span>
-					</a>
-					<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">
-						<span class="btn-opt">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
-							<path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
-							</svg>
-						</span>
-					</a>
-				</td>
-			</tr>			
-			{% endfor %}
-			<tr>
-				<th>{{'rule.source'|trans}}</th>
-				<th>{{'rule.target'|trans}}</th>
-				<th>{{'list_rule.th.name'|trans}}</th>
-				<th>{{'list_rule.th.active'|trans}}</th>
-				<th>{{'list_rule.th.date_created'|trans}}</th>
-				<th>{{'list_rule.th.option'|trans}}</th>
-			</tr>			
-		{% endif %}
-		</table>
-		<div align="center">
+		<div class="row justify-content-center">
+			<div class="col" id="rule-list">
+				<table class="table table-hover align-middle">
+				{% if entities is not empty %}
+					<thead>	
+						<tr>
+							<th>{{'rule.source'|trans}}</th>
+							<th>{{'rule.target'|trans}}</th>
+							<th>{{'list_rule.th.name'|trans}}</th>
+							<th>{{'list_rule.th.active'|trans}}</th>
+							<th>{{'list_rule.th.date_created'|trans}}</th>
+							<th>{{'list_rule.th.option'|trans}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for rule in entities %}
+						<tr>
+							<td class="solution_block">
+								<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}" /></p>
+								{{rule.lbl_source }}
+							</td>
+							<td class="solution_block">
+								<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}" /></p>
+								{{rule.lbl_target }}
+							</td>
+							<td class="lft">
+								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">{{rule.name }}</a>
+							</td>
+							<td>
+								<div class="onoffswitch">
+								<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
+									<label class="onoffswitch-label" for="{{ rule.nameSlug }}">
+										<span class="onoffswitch-inner">
+										<span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
+										<span class="onoffswitch-inactive"><span class="onoffswitch-switch">OFF</span></span>
+										</span>
+									</label>
+								</div> 
+								</p>
+							</td>
+							<td>{{rule.dateCreated|date("d/m/Y") }} 
+								{% if app.user.getUsername == 'support' %}
+								<p><span class="label label-default">{{ rule.createdBy.username }}</span></p>
+								{% endif %}
+							</td>
+							<td>
+								<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}">
+									<span class="btn-opt">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+										<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+										<path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+										</svg>
+									</span>
+								</a>		     		
+								<a class="delete" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
+									<span class="btn-opt">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+										<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+										<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+										</svg>
+									</span>
+								</a>
+								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">
+									<span class="btn-opt">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
+										<path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+										</svg>
+									</span>
+								</a>
+							</td>
+						</tr>			
+						{% endfor %}
+						<tr>
+							<th>{{'rule.source'|trans}}</th>
+							<th>{{'rule.target'|trans}}</th>
+							<th>{{'list_rule.th.name'|trans}}</th>
+							<th>{{'list_rule.th.active'|trans}}</th>
+							<th>{{'list_rule.th.date_created'|trans}}</th>
+							<th>{{'list_rule.th.option'|trans}}</th>
+						</tr>	
+					</tbody>		
+				{% endif %}
+				</table>
+			</div>
+		</div>
+		<div class="d-flex justify-content-center mt-4">
 			{% if pager.haveToPaginate %}
-			    {{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'regle_list_page'}) }}
+				{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'regle_list_page'}) }}
 			{% endif %}
 		</div>
-
 		{% else %}
 		<p><h2>{{'list_rule.empty'|trans}}</h2> <a href="{{ path('regle_stepone_animation') }}" title="">{{'list_rule.create_first_rule'|trans}}</a></p>
 		{% endif %}
-
     </div>
-
-    {# ------------- PARAMETRES JQUERY ------------- #}
     <script type="text/javascript">   
 		var chemin_img = "{{ asset('build/images/regle/') }}";
 		var question = "Désirez-vous supprimer cette règle ?";
 		var confirm_exec_all = "{{'view_rule.action.confirm_exec_all'|trans}}";
-		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";
-		
+		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";	
     </script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}
 	{% endblock %}

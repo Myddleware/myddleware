@@ -25,16 +25,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Document;
+use DateTime;
+use Exception;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
+use App\Entity\Document;
 use App\Manager\HomeManager;
-use DateTime;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * DocumentRepository.
@@ -195,21 +196,20 @@ class DocumentRepository extends ServiceEntityRepository
 
     public function countTransferHisto(User $user = null)
     {
-        $qb = $this->createQueryBuilder('d')
-            ->select('DATE_FORMAT(d.dateModified, %Y-%m-%d) as date')
-            ->addSelect('d.globalStatus')
-            ->addSelect('COUNT(d) as nb')
-            ->andWhere('d.deleted = 0')
-            ->andWhere('d.dateModified >= :days ')
-            ->setParameter('days', new DateTime('-'.HomeManager::nbHistoricJobs.' days'))
-            ->groupBy('date')
-            ->addGroupBy('d.globalStatus');
+            $qb = $this->createQueryBuilder('d')
+                ->select("DATE_FORMAT(d.dateModified, '%Y-%m-%d') AS date")
+                ->addSelect('d.globalStatus')
+                ->addSelect('COUNT(d.id) AS nb')
+                ->andWhere('d.deleted = 0')
+                ->andWhere('d.dateModified >= :days ')
+                ->setParameter('days', new DateTime('-'.HomeManager::nbHistoricJobs.' day'))
+                ->groupBy('date')
+                ->addGroupBy('d.globalStatus');
 
-        if ($user && !$user->isAdmin()) {
-            $qb->andWhere('d.createdBy = :user')
-                ->setParameter('user', $user);
-        }
-
+            if ($user && !$user->isAdmin()) {
+                $qb->andWhere('d.createdBy = :user')
+                    ->setParameter('user', $user);
+            }
         return $qb->getQuery()->getResult();
     }
 
@@ -340,7 +340,7 @@ class DocumentRepository extends ServiceEntityRepository
 
 		if (
 				(!empty($data['rule']) && is_string($data['rule']))
-			 OR (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
+			OR (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
 		) {
 			$ruleFilter = (!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']);
 			$qb

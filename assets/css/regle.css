@@ -348,4 +348,11 @@ td a {
 	text-align: center!important;
 }
 
+#rule-list {
+	max-width: 75vw;
+}
 
+/* Connectors list page */
+#connector-list {
+	max-width: 40vw;
+}

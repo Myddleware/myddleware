@@ -35,7 +35,7 @@
 	height: 46px;
 	background: #0F66A9;
 	margin: 0 auto;
-	width: 1200px;
+	width: 80vw;
 	color: white;
 	padding: 14px;		
 	font-weight: bold;	
@@ -59,7 +59,7 @@ header {
 
 section  {
 	margin: 0 auto;
-	width: 1200px;
+	width: 80vw;
 	min-height: 500px;
 	background: white;
 }
@@ -171,12 +171,6 @@ footer {
 	color: #343436;
 }
 
-#tabs a.ui-tabs-anchor {
-	/* width: 100%;
-	height: 100%;	
-	text-align: center; */
-}
-
 #tabs ul.ui-tabs-nav {
 	width: 1200px;
 }
@@ -236,11 +230,6 @@ footer {
 #notification #zone_notification .success {
 	color: #9aa932;
 	background: white;
-}
-
-/* Block de boutons pour les fiches info */
-.block-btn-infos > a {
-	text-decoration: none;
 }
 
 /* help content */

@@ -2504,7 +2504,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     ];
                 }
             }
-
             return $this->json($countTransferRule);
         }
 

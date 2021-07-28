@@ -22,9 +22,6 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#panel #info-blocks{
-	padding-left: 9%;
-}
 #panel .onoffswitch {
     position: relative; width: 170px;
     -webkit-user-select:none;
@@ -98,38 +95,6 @@
     right: 0px; 
 }
 
-#panel .info, #panel .infob {
-    display: inline-block;
-    float: left;
-    margin: 20px;
-    width: 450px;
-    text-align:center;
-}
-
-#panel .info .list-group {
-	text-align: left;	
-}
-
-#panel .info #periods span {
-	color: #0F66A9;
-	font-weight:bold;
-}
-
-#panel .infob {
-	border: 1px solid #ccc;
-	min-height: 360px;
-	border-radius: 4px;
-}
-
-#panel #info {
-    font-size: 1.2em;
-    margin: 5px;
-}
-
-#panel #info .value {
-	color: #0F66A9;
-	font-weight:bold;
-}
 #panel #listing-solutions-container {
 	height: 75px;
 }

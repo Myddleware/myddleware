@@ -27,7 +27,7 @@ panel:
         title: Start by connecting these applications
         click: Click to see how to create this connector.
     graph_tranfer_rule:
-        desc: document sent by rule
+        desc: Documents sent by rule
     graph_error:
         title: Number of documents by status
     list_error:
@@ -37,9 +37,9 @@ panel:
         duration: second(s)
         nb : Documents with error
     graph_histo:
-        title: document historic
+        title: Documents history
     graph_job_histo:
-        title: Job historic
+        title: Jobs history
 create_rule:
     tabs:
         one: Connection
@@ -335,7 +335,7 @@ flux:
     gbl_status:
         open: Opened
         close: Closed
-        cancel: cancelled
+        cancel: Cancelled
         error: Error
     status:
         new: New

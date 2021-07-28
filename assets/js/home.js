@@ -63,11 +63,14 @@ function drawChart() {
 			type: "POST",
 			url: 'graph/type/transfer/histo',
 			success: function (dataServ) {
-				
+				// console.log(dataServ);
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
 					isStacked: true,
+					legend: { position: 'bottom'},
+					height: 400,
+					width: 575
 				};
 
 				var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_histo'));
@@ -86,6 +89,9 @@ function drawChart() {
 				var options = {
 					is3D: true,
 					isStacked: true,
+					legend: { position: 'bottom'},
+					height: 400,
+					width: 575,
 				};
 
 				var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_job_histo'));

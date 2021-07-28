@@ -82,11 +82,11 @@ class HomeManager
                 $historic[$startDate] = ['date' => $startDateFromat, 'open' => 0, 'error' => 0, 'cancel' => 0, 'close' => 0];
             }
 
-            // Select the number of transfert per day
+            // Select the number of transfers per day
             $result = $this->documentRepository->countTransferHisto($user);
             if (!empty($result)) {
                 foreach ($result as $row) {
-                    $historic[$row['date']][strtolower($row['global_status'])] = $row['nb'];
+                    $historic[$row['date']][strtolower($row['globalStatus'])] = $row['nb'];
                 }
             }
         } catch (\Exception $e) {

@@ -107,8 +107,6 @@ class erpnextcore extends solution
         }
     }
 
-    // login($paramConnexion)
-
     // Get the modules available
     public function get_modules($type = 'source')
     {
@@ -243,11 +241,9 @@ class erpnextcore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
 
     /**
-     * Function read data.
      *
      * @param $param
      *
@@ -318,17 +314,12 @@ class erpnextcore extends solution
         return $result;
     }
 
-    // end function read
-
     public function createData($param)
     {
         return $this->createUpdate('create', $param);
     }
 
-    // end function create
-
     /**
-     * Function update data.
      *
      * @param $param
      *
@@ -339,10 +330,9 @@ class erpnextcore extends solution
         return $this->createUpdate('update', $param);
     }
 
-    // end function create
+
 
     /**
-     * Function for create or update data.
      *
      * @param $method
      * @param $param
@@ -440,7 +430,7 @@ class erpnextcore extends solution
         return $result;
     }
 
-    // retrun the reference date field name
+    // return the reference date field name
     public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
@@ -461,7 +451,6 @@ class erpnextcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
@@ -471,7 +460,6 @@ class erpnextcore extends solution
         return $date->format('Y-m-d H:i:s.u');
     }
 
-    // dateTimeFromMyddleware($dateTime)
 
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type)
@@ -492,7 +480,6 @@ class erpnextcore extends solution
     }
 
     /**
-     * Function call.
      *
      * @param $url
      * @param string $method
