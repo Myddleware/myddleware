@@ -84,6 +84,7 @@ menu li li:hover, #myd_top li li:hover {
 
 #myd_top li a {
 	color: white;
+	text-decoration: none;
 }
 
 #myd_top li li a {
@@ -116,4 +117,8 @@ menu li:hover {
 
 #search {
 	padding-top: 25px;	
+}
+
+menu li a {
+	text-decoration: none;
 }

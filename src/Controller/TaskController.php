@@ -149,7 +149,6 @@ class TaskController extends AbstractController
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
-
             return $this->render('Task/view/view.html.twig', [
                 'task' => $task,
                 'nb' => $compact['nb'],

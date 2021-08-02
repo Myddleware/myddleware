@@ -63,7 +63,6 @@ function drawChart() {
 			type: "POST",
 			url: 'graph/type/transfer/histo',
 			success: function (dataServ) {
-				// console.log(dataServ);
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
 					is3D: true,
