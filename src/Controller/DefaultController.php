@@ -871,7 +871,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             /** @var Rule $rule */
             $rule = $this->entityManager->getRepository(Rule::class)->findOneBy($list_fields_sql);
             if (!$rule) {
-                throw $this->createNotFoundException('La fiche n existe pas dans la base de donnees');
+                throw $this->createNotFoundException('Couldn\'t find specified rule in database');
             }
 
             // Liste des relations

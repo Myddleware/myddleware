@@ -32,40 +32,33 @@
 	{{'title.rule.view'|trans}} {{rule.getName}} 
 {% endblock titlesm %}  
 {% block body %}
-    <div id="rule">
-		<div id="tabs">	
-		<ul>
-			{% include "Rule/edit/onglets/index.html.twig" %}
-		</ul>
-			<div id="infos">
+	<div id="rule">
+			<ul class="nav nav-tabs justify-content-center" id="ruleInfoTabs" role="tablist">
+				{% include "Rule/edit/onglets/index.html.twig" %}
+			</ul>
+		<div id="ruleInfoTabContent" class="tab-content my-4">
+			<div id="infos" class="tab-pane fade show active mx-4 pb-4" role="tabpanel" aria-labelledby="infos-tab">
 				{# ------------- INFOS ------------- #}
 				{% include "Rule/edit/onglets/infos.html.twig" %}
-				{# ------------- /INFOS ------------- #}
 			</div>
-			<div id="mapping">
+			<div id="mapping" class="tab-pane fade pb-4" role="tabpanel" aria-labelledby="mapping-tab">
 				{# ------------- MAPPING ------------- #}
 				{% include "Rule/edit/onglets/mapping.html.twig" %}
-				{# ------------- /MAPPING ------------- #}
 			</div>
-			<div id="relation">
+			<div id="relation" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="relation-tab">
 				{# ------------- RELATIONS ------------- #}
 				{% include "Rule/edit/onglets/relation.html.twig" %}
-				{# ------------- /RELATIONS ------------- #}
 			</div>
-			<div id="filter">
+			<div id="filter" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="filter-tab">
 				{# ------------- FILTER ------------- #}
 				{% include "Rule/edit/onglets/filter.html.twig" %}
-				{# ------------- /FILTER ------------- #}
 			</div>						
-			<div id="params">
+			<div id="params" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="params-tab">
 				{# ------------- PARAMS ------------- #}
 				{% include "Rule/edit/onglets/params.html.twig" %}
-				{# ------------- /PARAMS ------------- #}
 			</div>
 		</div>
-    </div>
-
-    {# ------------- PARAMETRES JQUERY ------------- #}
+	</div>
     <script type="text/javascript">   	
 	var path_img = "{{ asset('build/images/') }}";
 	var path_fiche_update = "{{ path('regle_update',{'id' : rule.getId }) }}";
@@ -74,9 +67,7 @@
 	var onglets = {
 		active: 0
 	};
-	{#var path_rule_logs = "{{ path('regle_logs', {'id' : rule.getId }) }}";#}
 	var path_rule_exec = "{{ path('regle_exec',{'id' : rule.GetId }) }}";
     </script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

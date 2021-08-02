@@ -234,10 +234,7 @@
 	background:#EDEDED;	
 	border:none;	
 }
-/*
-.source .ui-state-active a, .source .ui-state-active a:link, .source .ui-state-active a:visited {
-	color:#444446;
-} */
+
 
 .source h2, .source .h2 {
 	font-size: 1em;
@@ -496,27 +493,15 @@
 	cursor: pointer;
 }
 
-/* Update SF4 */
-
-/* Connector list page */
-
-#rule{
-	padding-bottom: 50px;
+/* Rule edit / view nav menu */
+.nav-link {
+	color: #0F66A9!important;
 }
 
-
-/*
-	7 Tabs on Edit Rule view -
-	this override is needed to avoid 
-	tabs spreading to whole screen
-*/
-#rule_mapping #tabs .ui-state-default {
-	max-width: 173px!important;
-	min-width: 173px!important;
+.nav-link.active {
+color: #495057!important; 
 }
 
-/* 5 tabs only on View Rule view */
-#rule #tabs .ui-state-default {
-	max-width: 242px!important;
-	min-width: 242px!important;
+#ruleInfoTabs {
+	background-color: #ecedee;
 }
