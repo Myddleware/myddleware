@@ -40,7 +40,7 @@
 			</p>
 		{% else %}
 			<div class="row">
-				<div class="col-md-4 input-group g-3">
+				<div class="col-md-4 input-group g-3 mb-4">
 					<label for="{{p.name}}" class="me-3">{{p.label|trans}} : </label>
 					<select {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
 						{% for opt_value, opt_name in p.option %}

@@ -1363,7 +1363,8 @@ function hideFields() {
 
 	if (value != '') {
 		var show = [];
-		$('#targetfields').children('div').each(function () {
+		$('.targetfield').each(function () {
+			
 			if ($(this).attr('id').toLowerCase().indexOf(value.toLowerCase()) >= 0) {
 				show.push($(this).attr('id'));
 			}
@@ -1381,7 +1382,7 @@ function hideFields() {
 
 		});
 	} else {
-		$('#targetfields').children('div').each(function () {
+		$('.targetfield').each(function () {
 			if ($(this).attr('data-show') != '') {
 				$(this).attr('data-show', 'true');
 				$(this).show();
