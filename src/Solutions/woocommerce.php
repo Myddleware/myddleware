@@ -95,13 +95,14 @@ class woocommercecore extends solution {
             'customers' => 'Customers',
             'orders' => 'Orders',
             'products' => 'Products',
-            'reports' => 'Reports',
-            'settings' => 'Settings',
+            // 'reports' => 'Reports',
+            // 'settings' => 'Settings',
             // 'shipping' => 'Shipping',  shipping/zones
             // 'taxes' => 'Taxes',
             // 'webhooks' => 'Webhooks',
-            'shipping-methods' => 'Shipping Methods',
-            'line_items' => 'Line Items'
+            // 'shipping-methods' => 'Shipping Methods',
+            'line_items' => 'Line Items',
+            // 'payment_gateways' => 'Payment Gateways'
         );
     }
 

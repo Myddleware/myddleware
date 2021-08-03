@@ -27,8 +27,8 @@ $moduleFields = [
     'users' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'username' => ['label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-        // 'password' => ['label' => 'Password', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
-        // 'createpassword' => ['label' => 'Create password', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0],
+        'password' => ['label' => 'Password', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'createpassword' => ['label' => 'Create password', 'type' => 'bool', 'type_bdd' => 'bool', 'required' => 0],
         'firstname' => ['label' => 'Firstname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'lastname' => ['label' => 'Lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'email' => ['label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
@@ -148,7 +148,7 @@ $moduleFields = [
         'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'requested' => ['label' => 'Requested', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'cacherev' => ['label' => 'Cache rev', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        // 'courseformatoptions' => ['label' => 'Course format options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0], 
+        'courseformatoptions' => ['label' => 'Course format options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0], 
     ],
 
     'groups' => [
@@ -188,7 +188,7 @@ $moduleFields = [
     ],
 
     'manual_unenrol_users' => [
-        'roleid' => ['label' => 'Role ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+        'roleid' => ['label' => 'Role ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
 		'courseid' => ['label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
         'userid' => ['label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
 
