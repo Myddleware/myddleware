@@ -834,10 +834,10 @@ function previous_next(tab) {
 	// tab 0 : default
 	// tab 1 : plus
 	// tab 2 : manual tab 		
-	name_current = $('.ui-state-active').attr('aria-labelledby');
+	name_current = $('.active').attr('aria-controls');
 	number = 0;
 	number = name_current.split('-');
-	number = parseInt(number[2]);
+	number = parseInt(number[1]);
 
 	$('#rule_previous').show();
 	$('#rule_next').show();
@@ -854,10 +854,10 @@ function previous_next(tab) {
 
 	if (tab == 1) {
 		number_next = number + 1;
-		$('#ui-id-' + number_next).click();
+		$('.tab-' + number_next).trigger("click");
 	} else if (tab == 0) {
 		number_previous = number - 1;
-		$('#ui-id-' + number_previous).click();
+		$('.tab-' + number_previous).trigger("click");
 	}
 
 }

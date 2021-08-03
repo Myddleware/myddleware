@@ -41,28 +41,30 @@
 {% block body %}
     <div id="rule_mapping">
 		{# ------------- ONGLETS ------------- #}
-		<div id="tabs">	
-			<ul>
+		<div>	
+			<ul class="nav nav-tabs justify-content-center" id="ruleConfigTabs" role="tablist">
 				{% include "Rule/create/onglets/index.html.twig" %}
 			</ul>
-			{% include "Rule/create/onglets/note.html.twig" %}	{# Note #}	
-			<div id="connexion"></div>
-			<div id="choix"></div>
-			<div id="champs">
-				{% include "Rule/create/onglets/champs.html.twig" %}
-			</div>
-			<div id="simulation">
-				{% include "Rule/create/onglets/simulation.html.twig" %}
-			</div>		
-			<div id="relation">
-				{% include "Rule/create/onglets/relation.html.twig" %}
-			</div>		
-			<div id="filtertab">
-				{% include "Rule/create/onglets/filter.html.twig" %}
-			</div>				
-			<div id="params">
-				{% include "Rule/create/onglets/params.html.twig" %}
-			</div>
+			<div id="ruleConfigTabContent" 	class="tab-content my-4">
+				{% include "Rule/create/onglets/note.html.twig" %}	{# Note #}	
+				<div id="connexion" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="connection-tab"></div>
+				<div id="choix" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="select-modules-tab"></div>
+				<div id="champs" class="tab-pane  mx-4 pb-4 active" role="tabpanel" aria-labelledby="fields-tab">
+					{% include "Rule/create/onglets/champs.html.twig" %}
+				</div>
+				<div id="simulation" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="simulation-tab">
+					{% include "Rule/create/onglets/simulation.html.twig" %}
+				</div>		
+				<div id="relation" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="relation-tab">
+					{% include "Rule/create/onglets/relation.html.twig" %}
+				</div>		
+				<div id="filtertab" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="filter-tab">
+					{% include "Rule/create/onglets/filter.html.twig" %}
+				</div>				
+				<div id="params" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="params-tab">
+					{% include "Rule/create/onglets/params.html.twig" %}
+				</div>
+			</div>	
 		</div>
     </div>
     {# ------------- PARAMETRES JQUERY ------------- #}

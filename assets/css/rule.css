@@ -502,6 +502,6 @@
 color: #495057!important; 
 }
 
-#ruleInfoTabs {
+#ruleInfoTabs, #ruleConfigTabs {
 	background-color: #ecedee;
 }
