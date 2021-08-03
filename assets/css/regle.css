@@ -215,16 +215,16 @@ input[type="text"] {
 	margin-left: 50px;
 }
 
- .badge {
+.badge {
 	background: #9E9937;
 	display:inline-block;
 	width: 30px;
 }
 
 #champs #catalog {
-	max-height: 870px;
+	/* max-height: 870px; */
 	overflow: auto;
-	max-width: 300px;
+	/* max-width: 300px; */
 }
 
 

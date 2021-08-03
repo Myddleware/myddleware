@@ -32,108 +32,113 @@
 	</a>
 </div>
 <div class="clr"></div>
-<div id="source" class="source">
-	<div class="d-flex flex-column justify-content-center align-items-center">
-		<p><img src="{{ asset('build/images/solution/' ~ params.source.solution ~'.png') }}" alt="{{params.source.solution }}" /></p>
-		<h1><img src="{{ asset('build/images/template/source.png') }}" alt="{{'rule.source'|trans}}" /> {{'rule.source'|trans}}</h1>
-	</div>
-	<div id="catalog">
-		{% if source %}
-			{% for module_name, fields in source %}
+<div class="d-flex justify-content-start">
+	<div id="source" class="source">
+		<div class="d-flex flex-column justify-content-center align-items-center">
+			<p><img src="{{ asset('build/images/solution/' ~ params.source.solution ~'.png') }}" alt="{{params.source.solution }}" /></p>
+			<h1><img src="{{ asset('build/images/template/source.png') }}" alt="{{'rule.source'|trans}}" /> {{'rule.source'|trans}}</h1>
+		</div>
+		<div id="catalog">
+			{% if source %}
+				{% for module_name, fields in source %}
 
-				<h2><a href="#">{{ module_name }}</a></h2>
-				<div>
-					<ul>
-					{% for fieldid, fieldname in fields %}
-						<li>
-							<a class="fancybox" data-fancybox-type="iframe" id="{{ fieldid }}" href="{{ path('path_info_field',{'field' : fieldid, 'type' : 'source' }) }}">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
-								<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
-								</svg>
-							</a> 
-							{{ fieldid }}
-						</li>		
-					{% endfor %}
-					</ul>	
+					<h2><a href="#">{{ module_name }}</a></h2>
+					<div class="catalog-list">
+						<ul>
+						{% for fieldid, fieldname in fields %}
+							<li>
+								<a class="fancybox" data-fancybox-type="iframe" id="{{ fieldid }}" href="{{ path('path_info_field',{'field' : fieldid, 'type' : 'source' }) }}">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+									<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+									</svg>
+								</a> 
+								{{ fieldid }}
+							</li>		
+						{% endfor %}
+						</ul>	
+					</div>
+				{% endfor %}
+			{% endif %}
+		</div>
+	</div>
+
+	<div id="cible" class="flex-shrink-1">
+		<div class="d-flex flex-column justify-content-center align-items-center" data-title="true">
+			<p><img src="{{ asset('build/images/solution/'~params.cible.solution~'.png') }}" alt="{{ params.cible.solution }}" /></p>
+			<h1><img src="{{ asset('build/images/template/target.png') }}" alt="{{'rule.target'|trans}}" /> {{'rule.target'|trans}}</h1>
+		</div>
+
+		<div class="clr"></div>
+
+		{# ----------- BLOCK ADD FILTER ---------- #}
+		{% if fieldMappingAddListType %}	
+			<div id="blockaddfield" data-title="true">
+				<button id="addField" class="btn btn-default btn-lg" type="button">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+					<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+					</svg>
+				{{'create_rule.step3.addfield.custom'|trans}}
+				</button> 
+				<div id="formatfield" style="display:none;">
+					<p>
+						<input type="text" />
+						<select>
+							{% for name, type_field in fieldMappingAddListType %}
+								<option value="{{name}}">{{ type_field }}</option> 
+							{% endfor %}
+						</select>
+						<button id="saveBtnField" type="button" class="btn btn-default" aria-label="Left Align">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save-fill" viewBox="0 0 16 16">
+							<path d="M8.5 1.5A1.5 1.5 0 0 1 10 0h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h6c-.314.418-.5.937-.5 1.5v7.793L4.854 6.646a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l3.5-3.5a.5.5 0 0 0-.708-.708L8.5 9.293V1.5z"/>
+							</svg>
+						</button>				
+					</p>
+				</div>
+			</div>
+		{% endif %}
+		{# ----------- BLOCK ADD FILTER ---------- #}
+
+		<div class="input-group mb-2">
+			<span class="input-group-text" id="filter-text">{{'create_rule.step3.filter'|trans}} : </span>
+			<input id="hidefields" type="text" class="form-control" placeholder="{{'create_rule.step3.filter_fields'|trans}}" aria-label="{{'create_rule.step3.filter_fields'|trans}}" aria-describedby="filter-text" />
+		</div>
+
+
+		{% if cible %}	
+			{% for module_name, fields in cible %}
+				<h4 class="titre">{{ module_name }}</h4>
+				<div id="targetfields" data-title="true">
+					<div class="row justify-content-start">
+						{% for field, value in fields %}
+							<div class="col">
+								<div data-show="true" class="champs{{ value ? ' require' : '' }}" id="{{ field }}">
+									<h1 class="nom ui-widget-header">{{ value ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>' : '' }} {{ field }} 
+										<a class="fancybox" data-fancybox-type="iframe" href="{{ path('path_info_field',{'field' : field, 'type' : 'target' }) }}">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+											<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+											</svg>
+										</a>
+									</h1>
+									<div data-show="" class="ui-widget-content">
+										<ol>	
+											<li class="placeholder">{{'create_rule.step3.placeholder'|trans}}</li>	
+										</ol>
+										<ul>
+											<li class="formule_text" id="formule_{{ field }}"></li>
+										</ul>				
+										<p>							
+											<input class="formule btn-mydinv" type="button" value="{{'create_rule.step3.formula.create'|trans}}"/>
+										</p>
+									</div>
+								</div>	
+							</div>
+						{% endfor %}	
+					</div>
 				</div>
 			{% endfor %}
 		{% endif %}
 	</div>
 </div>
-
-<div id="cible">
-	<div class="d-flex flex-column justify-content-center align-items-center" data-title="true">
-		<p><img src="{{ asset('build/images/solution/'~params.cible.solution~'.png') }}" alt="{{ params.cible.solution }}" /></p>
-		<h1><img src="{{ asset('build/images/template/target.png') }}" alt="{{'rule.target'|trans}}" /> {{'rule.target'|trans}}</h1>
-	</div>
-
-	<div class="clr"></div>
-
-	{# ----------- BLOCK ADD FILTER ---------- #}
-	{% if fieldMappingAddListType %}	
-		<div id="blockaddfield" data-title="true">
-			<button id="addField" class="btn btn-default btn-lg" type="button">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-				<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-				</svg>
-			{{'create_rule.step3.addfield.custom'|trans}}
-			</button> 
-			<div id="formatfield" style="display:none;">
-				<p>
-					<input type="text" />
-					<select>
-						{% for name, type_field in fieldMappingAddListType %}
-							<option value="{{name}}">{{ type_field }}</option> 
-						{% endfor %}
-					</select>
-					<button id="saveBtnField" type="button" class="btn btn-default" aria-label="Left Align">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save-fill" viewBox="0 0 16 16">
-						<path d="M8.5 1.5A1.5 1.5 0 0 1 10 0h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h6c-.314.418-.5.937-.5 1.5v7.793L4.854 6.646a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l3.5-3.5a.5.5 0 0 0-.708-.708L8.5 9.293V1.5z"/>
-						</svg>
-					</button>				
-				</p>
-			</div>
-		</div>
-	{% endif %}
-	{# ----------- BLOCK ADD FILTER ---------- #}
-
-	<div class="input-group mb-2">
-		<span class="input-group-text" id="filter-text">{{'create_rule.step3.filter'|trans}} : </span>
-		<input id="hidefields" type="text" class="form-control" placeholder="{{'create_rule.step3.filter_fields'|trans}}" aria-label="{{'create_rule.step3.filter_fields'|trans}}" aria-describedby="filter-text" />
-	</div>
-
-
-	{% if cible %}	
-		{% for module_name, fields in cible %}
-			<h4 class="titre">{{ module_name }}</h4>
-			<div id="targetfields" data-title="true">
-				{% for field, value in fields %}
-					<div data-show="true" class="champs{{ value ? ' require' : '' }}" id="{{ field }}">
-						<h1 class="nom ui-widget-header">{{ value ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>' : '' }} {{ field }} 
-							<a class="fancybox" data-fancybox-type="iframe" href="{{ path('path_info_field',{'field' : field, 'type' : 'target' }) }}">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
-								<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
-								</svg>
-							</a>
-						</h1>
-						<div data-show="" class="ui-widget-content">
-							<ol>	
-								<li class="placeholder">{{'create_rule.step3.placeholder'|trans}}</li>	
-							</ol>
-							<ul>
-								<li class="formule_text" id="formule_{{ field }}"></li>
-							</ul>				
-							<p>							
-								<input class="formule btn-mydinv" type="button" value="{{'create_rule.step3.formula.create'|trans}}"/>
-							</p>
-						</div>
-					</div>	
-				{% endfor %}	
-			</div>
-		{% endfor %}
-	{% endif %}
-</div>
-
 <div class="clr"></div>
 
 <div id="help-content-fields" class="help-content">

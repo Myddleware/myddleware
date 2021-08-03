@@ -163,10 +163,14 @@
 
 /*  fields mapping */
 
-.source { float:left; margin-right: 2em; overflow:hidden; }
+.source { 
+	min-width: 10vw;
+	width: 15vw;
+	margin-right: 2em; 
+	overflow:hidden; 
+}
 
 .source, #cible {
-	float:left;
 	padding-top:10px;
 }
 
@@ -175,14 +179,13 @@
 .source li:hover, #cible ol:hover { cursor:move }
 
 #cible {
-	width: 815px;
-	max-width: 815px;
+	min-width: 600px;
+	max-width: 60vw;
 	overflow: auto;
 }
 
 #cible .champs {
 	width: 260px;
-	float: left;
 	padding:5px;
 }
 
@@ -249,16 +252,14 @@
 	overflow: auto;	
 }
 
-#rule #catalog {
-	height: 680px;
-	overflow:auto;
+.catalog-list {
+	max-height: 80vh;
 }
 
 #targetfields {
-	height: 800px;
+	max-height: 80vh;
 	overflow:auto;
 	background: #C7C7C7;
-	clear: both;
 }
 
 #targetfields ol, #targetfields ul {
