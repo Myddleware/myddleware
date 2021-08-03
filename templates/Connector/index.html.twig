@@ -27,11 +27,11 @@
 {% block titlesm %}{{'title.connector.create'|trans}}{% endblock titlesm %} 
 {% block body %}
     <div>
-		<div id="tabs">	
-		<ul>
+		<div>	
+		<ul class="nav nav-tabs" role="tablist" id="connectorCreateTabs">
 			{% include "Connector/create.html.twig" %}
 		</ul>
-			<div id="connexion_connector">
+			<div id="connexion_connector" class="tab-content pt-4">
 				{% include "Connector/connexion.html.twig" with{'solutions':solutions} only %}
 			</div>
 		</div>

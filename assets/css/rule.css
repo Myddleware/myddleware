@@ -503,6 +503,10 @@
 color: #495057!important; 
 }
 
-#ruleInfoTabs, #ruleConfigTabs {
+#ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs {
 	background-color: #ecedee;
+}
+
+.fancybox {
+	text-decoration: none!important;
 }
