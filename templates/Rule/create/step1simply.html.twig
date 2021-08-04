@@ -166,7 +166,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row justify-content-center">
                             <div id="connector-source-error" class="alert alert-danger col-6"></div>
                             <div id="connector-source-success" class="alert alert-success col-6"></div>
                         </div>
@@ -210,7 +210,7 @@
                 <div id="template"></div>
                 <div id="submodules"></div>              
                 <div id="validation" align="center" text-align="center">
-                    <button id="btn_validation" type="button" class="btn-large-mydinv rule-create-submit"></button>
+                    <button id="btn_validation" type="button" class="btn btn-success rule-create-submit"></button>
                 </div>                                 
             </div>
         </div>
@@ -228,7 +228,7 @@
                             </span>
                             </a>
                         </li>
-                        {# Liste des solutions possédant au moins 1 connecteur de type : TARGET #}
+                        {# List of solutions that have at least one TARGET connector available #}
                         {% if target %}
                             {% for t in target %}
                             <li>
@@ -236,8 +236,6 @@
                             </li>
                             {% endfor %}
                         {% endif %} 
-                        {# Liste des solutions possédant au moins 1 connecteur de type : TARGET #}
-
                     </ul>
                 </div> <!-- .window -->
                 <a class="next">{{'animate.carousel.next'|trans}}</a>
@@ -245,7 +243,6 @@
         </div>
     </div>
 
-    {# ------------- PARAMETRES JQUERY ------------- #}   
     <script type="text/javascript">
         var path_new_solution = "{{ path('regle_connector_insert_solution') }}";
         var path_img = "{{ asset('build/images/regle/') }}";
@@ -261,5 +258,4 @@
         var trans_btn_mapping = "{{'create_rule.step1.btn_mapping'|trans}}"
         var trans_btn_confirm = "{{'create_rule.step1.btn_confirm'|trans}}"
     </script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

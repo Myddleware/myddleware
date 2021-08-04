@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 
-<div class="link-help right">
+<div class="link-help d-flex justify-content-end">
 	<a href="#help-content-params">
 		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
 		<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
@@ -32,44 +32,46 @@
 	</a>
 </div>
 <div class="clr"></div>
-{% if rule_params %}
-	{% for c, p in rule_params %}
-		{% if p.type != 'option' %}
-			<p>{{p.label|trans}} : 
-				<input {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" />
-			</p>
-		{% else %}
-			<div class="row">
-				<div class="col-md-4 input-group g-3 mb-4">
-					<label for="{{p.name}}" class="me-3">{{p.label|trans}} : </label>
-					<select {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
-						{% for opt_value, opt_name in p.option %}
-							<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
-						{% endfor %}
-					</select>
+<div class="container">
+	{% if rule_params %}
+		{% for c, p in rule_params %}
+			{% if p.type != 'option' %}
+				<p>{{p.label|trans}} : 
+					<input {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" />
+				</p>
+			{% else %}
+				<div class="row">
+					<div class="col-md-4 input-group g-3 mb-4">
+						<label for="{{p.name}}" class="me-3">{{p.label|trans}} : </label>
+						<select {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
+							{% for opt_value, opt_name in p.option %}
+								<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
+							{% endfor %}
+						</select>
+					</div>
 				</div>
+			{% endif %}
+		{% endfor %}
+		<input class="params" type="hidden" name="regleId" id="regleId" value="{{ regleId }}" />
+	{% endif %}
+
+	{% if duplicate_target %}
+		<div class="row">
+			<div class="col-md-4 input-group mt-3">
+				<label>{{'create_rule.step3.params.duplicate'|trans}} :</label>
+				<ul id="fields_duplicate_target">
+					{% for v in duplicate_target %}
+					<li data-active="false" >{{ v }}</li>
+					{% endfor %}
+				</ul>
 			</div>
-		{% endif %}
-	{% endfor %}
-	<input class="params" type="hidden" name="regleId" id="regleId" value="{{ regleId }}" />
-{% endif %}
-
-{% if duplicate_target %}
-	<div class="row">
-		<div class="col-md-4 input-group mt-3">
-			<label>{{'create_rule.step3.params.duplicate'|trans}} :</label>
-			<ul id="fields_duplicate_target">
-				{% for v in duplicate_target %}
-				<li data-active="false" >{{ v }}</li>
-				{% endfor %}
-			</ul>
 		</div>
-	</div>
-{% endif %}
+	{% endif %}
 
-<p>
-	<input class="btn-mydinv" id="validation" type="button" value="{{'create_rule.step3.confirm.valid'|trans}}"/>
-</p>
+	<div>
+		<input class="btn btn-primary" id="validation" type="button" value="{{'create_rule.step3.confirm.valid'|trans}}"/>
+	</div>
+</div>
 <div id="help-content-params" class="help-content">
 	<h2>
 		{{'help.title'|trans}}
@@ -81,9 +83,7 @@
 	<p>{{'help.rule.validate'|trans}}</p>
 </div>
 
-{# ------------- PARAMETRES JQUERY ------------- #}
 <script type="text/javascript">
-
     var path_validation = "{{ path('regle_validation') }}";
     var path_formula = "{{ path('regle_formula') }}";
 </script>
