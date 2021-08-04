@@ -25,13 +25,13 @@
 
 namespace App\Solutions;
 
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class facebookcore extends solution
 {
     protected $baseUrl = 'https://graph.facebook.com';
-    protected $apiVersion = 'v6.0';
+    protected $apiVersion = 'v11.0';
     protected $facebook;
     protected $readLast = false;
 
@@ -83,9 +83,9 @@ class facebookcore extends solution
             $this->connexion_valide = true;
 
             return;
-        } catch (Facebook\Exceptions\FacebookResponseException $e) {
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
             $error = 'Graph returned an error: '.$e->getMessage();
-        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
             $error = 'Facebook SDK returned an error: '.$e->getMessage();
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -280,9 +280,9 @@ class facebookcore extends solution
                 }
                 $result['count'] = count($result['values']);
             }
-        } catch (Facebook\Exceptions\FacebookResponseException $e) {
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
             $result['error'] = 'Graph returned an error: '.$e->getMessage();
-        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
             $result['error'] = 'Facebook SDK returned an error: '.$e->getMessage();
         } catch (\Exception $e) {
             $result['error'] = $e->getMessage();

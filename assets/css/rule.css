@@ -433,10 +433,7 @@
 	color: #404042;
 }
 
-/* Button saveParam et loading en display inline block */
-#validRuleParams > * {
-	display: inline-block;
-}
+
 
 #rule #mapping .fields {
 	word-wrap: break-word;
@@ -458,7 +455,6 @@
 }
 
 .link-help-view {
-	float: right;
 	font-size: 1.2em;
 }
 

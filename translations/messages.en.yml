@@ -225,8 +225,8 @@ animate:
     rulename: Name of your rule 
     wait: Please wait...
     solution:
-        source: source
-        target: target
+        source: Source
+        target: Target
     carousel:
         next: Next
         previous: Previous

@@ -287,19 +287,17 @@ td a {
     color: white;
     margin-bottom: 20px;
     padding: 30px;
-	width: 500px;
-	
+	max-width: 30vw;
 }
 
 #simuleRuleFluxContainer {
 	background: #444446;
     color: white;
-    margin-top: 20px;
     margin-bottom: 20px;
-    padding: 20px;
-    width: 500px;
+    padding: 30px;
 	min-height: 100px;
 	text-align: justify;
+	max-width: 30vw;
 }
 
 #simuleRuleFluxError {
@@ -355,4 +353,8 @@ td a {
 /* Connectors list page */
 #connector-list {
 	max-width: 40vw;
+}
+
+#validRuleParams {
+	margin-left: -12px;
 }

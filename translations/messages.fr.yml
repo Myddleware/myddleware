@@ -226,8 +226,8 @@ animate:
     rulename: Nom de votre règle 
     wait: Veuillez patienter...
     solution:
-        source: source
-        target: cible
+        source: Source
+        target: Cible
     carousel:
         next: Suivant
         previous: Précèdent
