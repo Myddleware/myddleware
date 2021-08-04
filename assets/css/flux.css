@@ -35,10 +35,6 @@
 	border-right: 1px solid #ccc;
 }
 
-#flux {
-	padding: 20px 0px;
-}
-
 #flux fieldset label {
 	display:block;	
 }
@@ -118,7 +114,6 @@
 }
 
 #flux .zone {
-	float:left; 
 	padding-top:30px; 
 	padding-left:50px;
 	width: 380px;

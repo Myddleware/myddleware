@@ -35,7 +35,7 @@
     {{ encore_entry_link_tags('app') }}
 {% endblock %}
 {% block body %}
-	<div id="flux" class="container">
+	<div id="flux" class="row">
 		{{ form_start(form)}}
 		{% if nb > 0 %}
 			<div id="fd-title-small" class="left">
@@ -94,8 +94,8 @@
 		</div>
 
 		<div class="clr"></div>
-		<div class="container">
-			<div class="row">
+		<div>
+			<div class="row justify-content-around">
 				<div class="col">
 					<div class="d-flex justify-content-center">
 						{{ form_rest(form) }}
@@ -112,7 +112,7 @@
 			</div>
 		</div>
 		{{ form_end(form) }}
-		<div class="p-3">
+		<div class="p-3 row">
 			<p>
 				<a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
 					(<span></span>)</a>
@@ -124,19 +124,22 @@
 			{% if nb > 0 %}
 				<table class="listepagerflux table">
 					{% if entities is not empty %}
-						<tr>
-							<th scope="col">
-								<input id="massselectall" type="checkbox" name="massselectall"/>
-							</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.id'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.name'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.source_id'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.target_id'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.reference'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.date_modified'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.statut'|trans}}</th>
-							<th scope="col" class="p-2">{{'list_flux.tab.type'|trans}}</th>
-						</tr>
+						<thead>
+							<tr>
+								<th scope="col">
+									<input id="massselectall" type="checkbox" name="massselectall"/>
+								</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.id'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.name'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.source_id'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.target_id'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.reference'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.date_modified'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.statut'|trans}}</th>
+								<th scope="col" class="p-2">{{'list_flux.tab.type'|trans}}</th>
+							</tr>
+						</thead>
+						<tbody>
 						{% for flux in entities %}
 							<tr class="fd_{{ flux.global_status|lower }}" data-id="{{ flux.id }}">
 								<td>
@@ -181,6 +184,7 @@
 								<td>{{ flux.type }}</td>
 							</tr>
 						{% endfor %}
+						</tbody>
 						<tr>
 							<th><input id="massselectall" type="checkbox" name="massselectall"/>
 							</th>
@@ -195,7 +199,7 @@
 						</tr>
 					{% endif %}
 				</table>
-				<div align="center">
+				<div class="d-flex justify-content-center">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'flux_list_page'}) }}
 					{% endif %}

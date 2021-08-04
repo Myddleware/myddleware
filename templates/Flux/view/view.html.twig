@@ -38,15 +38,14 @@
 	{{ doc.getId }}
 {% endblock titlesm %}
 {% block body %}
-	<div id="flux">
+	<div id="flux" class="pt-4">
 		{# ------------- FLUX ------------- #}
-		<div align="center">
-			<div class="block-btn-infos">
-				{# BTN #}
+		<div>
+			<div class="block-btn-infos d-flex justify-content-around">
 				{% if ctm_btn %}
 					{% for btn in ctm_btn %}
 						<a href="{{ path('flux_btn_dyn',{'id' : doc.getId,'method' : btn.action,'solution' : btn.solution }) }}">
-							<button type="button" class="btn-mydinv">
+							<button type="button" class="btn btn-primary">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
 								<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
 								<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
@@ -57,10 +56,10 @@
 					{% endfor %}
 				{% endif %}
 				{% if doc %}
-					{# si le flux n'est pas au statut Cancel ou Close #}
+					{# If the record has a different status than Cancel or Close #}
 					{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) %}
 						<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}" title="{{'view_flux.btn.reload'|trans}}">
-							<button type="button" class="btn-mydinv">
+							<button type="button" class="btn btn-success">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
 								<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
 								<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
@@ -71,18 +70,17 @@
 					{% endif %}
 					{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) or is_granted('ROLE_SUPER_ADMIN') %}
 						<a class="btn_action_loading" href="{{ path('flux_cancel',{'id' : doc.getId }) }}" title="{{'view_flux.btn.cancel'|trans}}">
-							<button type="button" class="btn-mydinv">
+							<button type="button" class="btn btn-warning">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
 								<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
 								</svg>
 								{{'view_flux.btn.cancel'|trans}}
 							</button>
 						</a>
-						{# BTN #}
 					{% endif %}
 					{% if read_record_btn %}
 						<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
-							<button type="button" class="btn-mydinv">
+							<button type="button" class="btn btn-primary">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
 								<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
 								</svg>
@@ -91,7 +89,7 @@
 						</a>
 					{% endif %}
 				</div>
-				<table id="headertab" class="listepager  document-history-table">
+				<table id="headertab" class="listepager table document-history-table">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>
 						<th>{{'view_flux.header.statut'|trans}}</th>
@@ -161,7 +159,7 @@
 		<div class="clr"></div>
 
 		{# ------------- SOURCE ------------- #}
-		<div align="center">
+		<div class="row justify-content-around">
 			<div class="zone">
 				<p class="ctr"><img src="{{ asset('build/images/template/source.png') }}" alt="{{'view_rule.relate.solution_source'|trans}}"/></p>
 				<p class="ctr">{{'view_flux.source'|trans}}</p>
@@ -265,9 +263,9 @@
 					<div class="clr"></div>
 				{% endif %}
 				{# ------------- POST DOCUMENTS ------------- #}
-				<div id="message" align="center">
+				<div id="message">
 					{% if nb_post_documents > 0 %}
-						<table class="listepager">
+						<table class="listepager table">
 							{% if entities is not empty %}
 								<tr>
 									<th>{{'list_flux.tab.id'|trans}}</th>
@@ -451,7 +449,7 @@
 					{# ------------- PARENT RELATE DOCUMENTS ------------- #}
 					<div id="message" align="center">
 						{% if nb_parent_documents > 0 %}
-							<table class="listepager">
+							<table class="listepager table">
 								{% if entities is not empty %}
 									<tr>
 										<th>{{'list_flux.tab.id'|trans}}</th>
@@ -536,9 +534,9 @@
 						<div class="clr"></div>
 					{% endif %}
 					{# ------------- CHILD RELATE DOCUMENTS ------------- #}
-					<div id="message" align="center">
+					<div id="message">
 						{% if nb_child_documents > 0 %}
-							<table class="listepager">
+							<table class="listepager table">
 								{% if entities is not empty %}
 									<tr>
 										<th>{{'list_flux.tab.id'|trans}}</th>
@@ -622,11 +620,11 @@
 						</div>
 						<div class="clr"></div>
 					{% endif %}
-					<div id="message" align="center">
+					<div id="message">
 
 						{% if nb > 0 %}
 
-							<table class="listepager">
+							<table class="listepager table">
 								{% if entities is not empty %}
 									<tr>
 										<th>{{'view_flux.log.id'|trans}}</th>

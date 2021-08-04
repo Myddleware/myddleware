@@ -32,50 +32,50 @@
 	</a>
 </div>
 
-<div align="center"> 
-{% if relate %}
-<table id="relate">
-	<tr>
-		<th><img src="{{ asset('build/images/template/') }}source.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></th>
-		<th colspan="3"></th>
-		<th><img src="{{ asset('build/images/template/') }}target.png" alt="{{'view_rule.relate.solution_target'|trans}}" /></th>
-	</tr>	
-	<tr>
-		<td class="title">{{'view_rule.relate.solution_source'|trans}}</td>
-		<td class="title" colspan="3">{{'view_rule.relate.rule'|trans}}</td>
-		<td class="title">{{'view_rule.relate.solution_target'|trans}}</td>
-		{% if parentRelationships %}
-			<td class="title" colspan="3">{{'create_rule.step3.relation.parent_detail_view'|trans}}</td>
-		{% endif %}	
-	</tr>
-	{% for r in relate %}
-	<tr>
-		<td>{{ r.getFieldNameSource }}</td>
-		<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
-		<td>
-			<a href="{{ path('regle_open',{'id' : r.getFieldId }) }}" title="{{ r.getName }}">
-				{{ r.getName }} 
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
-				<path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-				<path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-				</svg>
-			</a>
-		</td>
-		<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
-		<td>{{ r.getFieldNameTarget }}</td>
-		{% if parentRelationships %}
+<div class="row justify-content-center text-center"> 
+	{% if relate %}
+	<table id="relate">
+		<tr>
+			<th><img src="{{ asset('build/images/template/') }}source.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></th>
+			<th colspan="3"></th>
+			<th><img src="{{ asset('build/images/template/') }}target.png" alt="{{'view_rule.relate.solution_target'|trans}}" /></th>
+		</tr>	
+		<tr>
+			<td class="title">{{'view_rule.relate.solution_source'|trans}}</td>
+			<td class="title" colspan="3">{{'view_rule.relate.rule'|trans}}</td>
+			<td class="title">{{'view_rule.relate.solution_target'|trans}}</td>
+			{% if parentRelationships %}
+				<td class="title" colspan="3">{{'create_rule.step3.relation.parent_detail_view'|trans}}</td>
+			{% endif %}	
+		</tr>
+		{% for r in relate %}
+		<tr>
+			<td>{{ r.getFieldNameSource }}</td>
+			<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
 			<td>
-				{% if r.getParent %}
-					{{'create_rule.step3.relation.yes'|trans}}
-				{% endif %}	
+				<a href="{{ path('regle_open',{'id' : r.getFieldId }) }}" title="{{ r.getName }}">
+					{{ r.getName }} 
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+					<path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+					</svg>
+				</a>
 			</td>
-		{% endif %}
-	</tr>
-	{% endfor %}
-</table>
-{% else %}
-	<p>{{'view_rule.relate.empty'|trans}}</p>
-{% endif %}
+			<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
+			<td>{{ r.getFieldNameTarget }}</td>
+			{% if parentRelationships %}
+				<td>
+					{% if r.getParent %}
+						{{'create_rule.step3.relation.yes'|trans}}
+					{% endif %}	
+				</td>
+			{% endif %}
+		</tr>
+		{% endfor %}
+	</table>
+	{% else %}
+		<p>{{'view_rule.relate.empty'|trans}}</p>
+	{% endif %}
 </div>
 
 <div id="help-content-relate" class="help-content">

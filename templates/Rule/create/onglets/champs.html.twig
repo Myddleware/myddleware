@@ -108,7 +108,7 @@
 			{% for module_name, fields in cible %}
 				<h4 class="titre">{{ module_name }}</h4>
 				<div id="targetfields" data-title="true">
-					<div class="row justify-content-start">
+					<div class="row justify-content-around">
 						{% for field, value in fields %}
 							<div class="col">
 								<div data-show="true" class="champs{{ value ? ' require' : '' }} targetfield" id="{{ field }}">

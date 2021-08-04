@@ -258,7 +258,7 @@
 
 #targetfields {
 	max-height: 80vh;
-	overflow:auto;
+	overflow-y:auto;
 	background: #C7C7C7;
 }
 
@@ -373,6 +373,7 @@
 }
 
 #fieldsfilter li, #viewfilters li {
+	padding-bottom: 20px;
 	border-bottom: 1px solid #ccc;	
 	list-style:none;
 }

@@ -21,17 +21,18 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
-
-<ul id="viewfilters">
-{% if filters is empty %}	
-	<li>{{ 'view_rule.filters.empty'|trans }}</li>	
-{% else %}
-	{% for c, p in filters %}
-		<li>
-			<span class="target">{{ p.getTarget }}</span>
-			<span class="type">{{ ('filter.' ~ p.getType)|trans }}</span>
-			<span class="value">{{ p.getValue }}</span>
-		</li>
-	{% endfor %}
-{% endif %}
-</ul>
+<div class="row justify-content-center text-center">
+	<ul id="viewfilters">
+	{% if filters is empty %}	
+		<li>{{ 'view_rule.filters.empty'|trans }}</li>	
+	{% else %}
+		{% for c, p in filters %}
+			<li>
+				<span class="target">{{ p.getTarget }}</span>
+				<span class="type">{{ ('filter.' ~ p.getType)|trans }}</span>
+				<span class="value">{{ p.getValue }}</span>
+			</li>
+		{% endfor %}
+	{% endif %}
+	</ul>
+</div>

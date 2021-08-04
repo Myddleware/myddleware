@@ -98,9 +98,8 @@
     margin-top: 10px;
 }
 .user_info_li > label{
-    height: 100%;
-    color: #0065AB;
     font-weight: bold;
+    height: 100%;
     margin-right: 20px;
 }
 .user_info_li > input{

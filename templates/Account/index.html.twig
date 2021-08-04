@@ -27,21 +27,21 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 {% block body %}
 <div id="user_account" class="container">
-    <div class="row">
-        <div class="col">
-            <h2>{{ 'view_account.user_info'|trans }}</h2>
-            <ul>
+    <div class="row justify-content-center">
+        <div class="col text-center">
+            <h2 class="display-4">{{ 'view_account.user_info'|trans }}</h2>
+            <ul class="mt-4">
                 <li class="user_info_li">
                     <label>{{ 'view_account.label.language'|trans }}</label>
                     <div class="btn-group" role="group" aria-label="...">
                         <button class="btn btn-light btn-lg">
-                            <a href="#" data-locale="{{ locales|languages['default'] }}">
+                            <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
                                 {{ locales|languages['default']|trans }}
                             </a>
                         </button>
                         {% for locale in locales|languages['other'] %}
                         <button class="btn btn-primary btn-lg">
-                            <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;">
+                            <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
                                 {{ locale|trans }}
                             </a>
                         </button>
@@ -51,36 +51,38 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             </ul>
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <h2>{{ 'view_account.profile_edit'|trans }}</h2>
-            <ul>
-                <li class="user_info_li">
-                    {{ form_start(form) }}
-                    <div class="input-group row">
-                        <label for="command" class="col-sm-2 col-form-label"> {{ form_label( form.username) }}</label>
-                        <div class="col-sm-10">
-                            {{ form_widget( form.username, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.username, { 'attr': {'class': 'form-control'} }) }}
+    <div class="d-flex justify-content-around mt-4">
+        <div class="row">
+            <div class="col">
+                <h2 class="display-6">{{ 'view_account.profile_edit'|trans }}</h2>
+                <ul class="mt-4">
+                    <li class="user_info_li">
+                        {{ form_start(form) }}
+                        <div class="input-group mb-4">
+                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.username) }}</label>
+                            <div>
+                                {{ form_widget( form.username, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.username, { 'attr': {'class': 'form-control'} }) }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="input-group row">
-                        <label for="command" class="col-sm-2 col-form-label"> {{ form_label( form.email) }}</label>
-                        <div class="col-sm-10">
-                            {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
+                        <div class="input-group mb-4">
+                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.email) }}</label>
+                            <div>
+                                {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" id="save-account-details" class="btn-myd mt-4">{{ 'view_connector.btn.save'|trans }}</button>
-                    {{ form_end(form) }}
-                </li>
-            </ul>
+                        <button type="submit" id="save-account-details" class="btn btn-success mt-4">{{ 'view_connector.btn.save'|trans }}</button>
+                        {{ form_end(form) }}
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-    <div class="row password-reset">
-        <div class="col">
-            <h2>{{'password_reset.title'|trans}}</h2>
-            <a href="{{ path('my_account_reset_password')}}">
-                <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>
-            </a>
+        <div class="row password-reset">
+            <div class="col">
+                <h2 class="display-6">{{'password_reset.title'|trans}}</h2>
+                <a href="{{ path('my_account_reset_password')}}">
+                    <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>
+                </a>
+            </div>
         </div>
     </div>
 </div>

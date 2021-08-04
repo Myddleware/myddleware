@@ -3,25 +3,23 @@
 {% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
 
 {% block body %}
-    <div id="rule" align="center">
+    <div id="rule">
         <div id="fd-title-small" class="left">
             <p>{{ 'jobscheduler.total'|trans }}<p><span class="nb">{{ entities | length }}</span>
         </div>
         <div class="clr"></div>
-        <div>
-            <h3>{{ 'jobscheduler.title'|trans }}</h3>
+        <div class="text-center">
+            <h3 class="display-4">{{ 'jobscheduler.title'|trans }}</h3>
             <p class="jobscheduler_text">{{'jobscheduler.description.top'|trans|raw}}</p>
         </div>
-        <div class="block-btn-infos">
-            <a id="new_jobscheduler" href="{{ path('jobscheduler_new') }}" title="">
+        <div class="block-btn-infos mx-4">
+            <a id="new_jobscheduler" href="{{ path('jobscheduler_new') }}" title="" role="button" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                 </svg>
                 {{ 'jobscheduler.action.new_jobscheduler'|trans }}</a>
         </div>
-        <p></p>
-        {# BTN #}
-        <table class="listepager">
+        <table class="listepager table mt-4">
             {% if entities is not empty %}
                 <tr>
                     <th>{{ 'jobscheduler.command'|trans }}</th>
@@ -52,7 +50,7 @@
                         <td>
                             {% if entity.active %} true {% else %} false {% endif %}
                         </td>
-                        <td>
+                        <td class="CRUD-icons">
                             <a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
                                 <span class="btn-opt">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -91,6 +89,7 @@
             {% endif %}
         </table>
     </div>
-    <p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
-
+    <div class="row text-center">
+        <p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
+    </div>
 {% endblock %}
