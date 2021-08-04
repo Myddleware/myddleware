@@ -48,13 +48,15 @@ class erpnextcore extends solution
     // Module list that allows to make parent relationships
     protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
 
-    protected $childModuleKey = ['Sales Invoice Item' => 'items',
+    protected $childModuleKey = [
+        'Sales Invoice Item' => 'items',
         'Sales Order Item' => 'items',
         'Payment Entry Reference' => 'references',
         'Item Attribute Value' => 'item_attribute_values',
         'Item Variant Attribute' => 'attributes',
         'Sales Invoice Payment' => 'payments',
         'Assessment Result Detail' => 'details',
+        'Sales Taxes and Charges' => 'taxes',
     ];
 
     // Get isTable parameter for each module
