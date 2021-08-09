@@ -208,11 +208,6 @@
     margin-right: 5px;	
 }
 
-#cible .placeholder {
-	color: #CCCCCC;
-	font-weight: bold;
-}
-
 .source .ui-accordion-content {
 	padding:0px;
 	border:none;	
