@@ -77,18 +77,18 @@
 					<tbody>
 						{% for rule in entities %}
 						<tr>
-							<td class="solution_block">
+							<td class="solution_block text-center">
 								<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}" /></p>
 								{{rule.lbl_source }}
 							</td>
-							<td class="solution_block">
+							<td class="solution_bloc text-center">
 								<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}" /></p>
 								{{rule.lbl_target }}
 							</td>
-							<td class="lft">
+							<td class="text-center">
 								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">{{rule.name }}</a>
 							</td>
-							<td>
+							<td class="text-center">
 								<div class="onoffswitch">
 								<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
 									<label class="onoffswitch-label" for="{{ rule.nameSlug }}">
@@ -100,13 +100,14 @@
 								</div> 
 								</p>
 							</td>
-							<td>{{rule.dateCreated|date("d/m/Y") }} 
+							<td class="text-center">
+							{{rule.dateCreated|date("d/m/Y") }} 
 								{% if app.user.getUsername == 'support' %}
 								<p><span class="label label-default">{{ rule.createdBy.username }}</span></p>
 								{% endif %}
 							</td>
-							<td>
-								<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}">
+							<td class="text-center">
+								<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="text-decoration-none">
 									<span class="btn-opt">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
 										<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
@@ -114,7 +115,7 @@
 										</svg>
 									</span>
 								</a>		     		
-								<a class="delete" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
+								<a class="delete text-decoration-none" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
 									<span class="btn-opt">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
 										<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
@@ -122,7 +123,7 @@
 										</svg>
 									</span>
 								</a>
-								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">
+								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="text-decoration-none">
 									<span class="btn-opt">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
 										<path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>

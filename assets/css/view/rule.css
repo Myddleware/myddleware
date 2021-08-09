@@ -38,13 +38,6 @@
 	color: #C6BD20;
 }
 
-/* #rule #tab_rule {
-	width: 400px;
-} */
-/* 
-#rule #tab_connector {
-	width: 500px;
-} */
 
 #rule .title, #rule .title_target, #rule .title_source, #rule .title_target_ctr, #rule .title_source_ctr {
 	text-align: left;
@@ -59,9 +52,6 @@
 	font-size:1.2em;
 }
 
-/* #rule .onoffswitch {
-	margin-left: 55px;	
-} */
 
 #rule .mapping {
     float: left;

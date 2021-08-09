@@ -29,6 +29,11 @@
 	background: #444446;
 	border-bottom: 4px solid #C6BD20;
 	min-width: 1200px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 99;
 }
 
 #myd_title {
@@ -53,28 +58,31 @@
 
 header {
 	height: auto;
-	min-height: 200px;
 	margin: 0;  		
 }
 
 section  {
-	margin: 0 auto;
+	margin-bottom: 15vh!important;
 	width: 80vw;
 	min-height: 500px;
 	background: white;
 }
 
 footer {
-	margin-top: 100px;
 	padding: 10px;
 	height: 100px;
 	min-height: 100px;
 	max-height: 100px;
 	background: #444446;
+	position: fixed;
+	right:0;
+	bottom: 0;
+	left: 0;
 	min-width: 1200px;
 	width: 100% auto;
 	color: white;
 	text-align: center;
+	z-index: 99;
 }
 
 .clr {

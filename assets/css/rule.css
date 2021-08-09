@@ -137,14 +137,6 @@
 	border-bottom: 1px solid #ccc;	
 }
 
-#rule td {
-	text-align: center;
-}
-
-#rule td.lft {
-	text-align: center;
-}
-
 #rule td.lft > a{
 	color: black;
 }
@@ -378,9 +370,6 @@
 	list-style:none;
 }
 
-#fieldsfilter select {
-	border: solid 1px #c3c3c3;
-}
 
 .filter-input {
 	width: 545px;
