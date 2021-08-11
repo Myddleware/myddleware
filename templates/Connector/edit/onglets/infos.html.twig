@@ -33,34 +33,38 @@
 				{% if error is defined %}
 					<div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
 				{% endif %}
-				<table id="tab_connector" class="table table-hover">
+				<table id="tab_connector" class="table table-hover pt-5">
 					<thead>
 						<tr class="">
-							<th colspan="2">{{'view_connector.info.title'|trans}}</th>
+							<th colspan="2" class="display-6">{{'view_connector.info.title'|trans}}</th>
 						</tr>
 					</thead>
-					<tr>
-						<td class="title solution"><label>{{'view_connector.info.solution'|trans}}</label></td>
-						<td class="value"><p><img class="vignette" src="{{ asset('build/images/solution/' ~connector.solution.name~'.png')}}" alt="{{ connector.solution.name }}" /></p></td>
-					</tr>
-					<tr>
-						<td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
-						<td class="value">{{form_widget(form.name)}}</td>
-					</tr>		
-					{% for key,field in form.connectorParams %}
+					<tbody>
 						<tr>
-							<td class="title">{{ form_label(field.value) }}</td>
-							<td class="value">
-								{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
-									{{ form_widget(field.value) }}
-								{% else %}
-									<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
-										{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
-									</a>
-								{% endif %}
+							<td class="title solution">
+								<label>{{'view_connector.info.solution'|trans}}</label>
 							</td>
+							<td class="value"><p><img class="vignette" src="{{ asset('build/images/solution/' ~connector.solution.name~'.png')}}" alt="{{ connector.solution.name }}" /></p></td>
 						</tr>
-					{% endfor %}
+						<tr>
+							<td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
+							<td class="value">{{form_widget(form.name)}}</td>
+						</tr>		
+						{% for key,field in form.connectorParams %}
+							<tr>
+								<td class="title">{{ form_label(field.value) }}</td>
+								<td class="value">
+									{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
+										{{ form_widget(field.value) }}
+									{% else %}
+										<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
+											{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+										</a>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
 				</table>
 				<div class="row">
 					<div class="col">

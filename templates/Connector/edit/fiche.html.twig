@@ -31,16 +31,16 @@
 	{{'title.connector.edit'|trans}} {{ connector_name }} {% endblock titlesm %} 
 {% block body %}
     <div id="connector">
-		<div id="tabs">	
-			<ul>
-				{% include "Connector/edit/onglets/index.html.twig" %}
-			</ul>
-			<div id="infos">
+		<ul class="nav nav-tabs" role="tablist" id="connectorTabs">
+			{% include "Connector/edit/onglets/index.html.twig" %}
+		</ul>
+		<div class="tab-content" id="connectorTabsContent">	 
+			<div id="infos" class="tab-pane fade show active mt-4"  role="tabpanel" aria-labelledby="infos-tab">
 				{# ------------- INFOS ------------- #}
 				{% include "Connector/edit/onglets/infos.html.twig" %}
 				{# ------------- /INFOS ------------- #}
 			</div>
-			<div id="help">
+			<div id="help" class="tab-pane fade mt-4  text-center" role="tabpanel" aria-labelledby="help-tab">
 				{# ------------- HELP ------------- #}
 				{% include "Connector/edit/onglets/help.html.twig" %}
 				{# ------------- /HELP ------------- #}

@@ -484,7 +484,7 @@
 color: #495057!important; 
 }
 
-#ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs {
+#ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
 	background-color: #ecedee;
 }
 
