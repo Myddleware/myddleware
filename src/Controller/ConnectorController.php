@@ -451,7 +451,7 @@ class ConnectorController extends AbstractController
                 return $this->redirect($this->generateUrl('regle_connector_list'));
                 //-----------
             } catch (Exception $e) {
-                throw $this->createNotFoundException('Error');
+                throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             }
         } else {
             throw $this->createNotFoundException('Error');
@@ -466,7 +466,7 @@ class ConnectorController extends AbstractController
      * @return Response
      *
      * @Route("/connector/list", name="regle_connector_list", defaults={"page"=1})
-     * @Route("/connector/list/page-{page}", name="regle_connector_list", requirements={"page"="\d+"})
+     * @Route("/connector/list/page-{page}", name="regle_connector_page", requirements={"page"="\d+"})
      */
     public function connectorListAction($page = 1)
     {

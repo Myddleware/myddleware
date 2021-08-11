@@ -57,7 +57,7 @@ $( function() {
 			},	
 			beforeSend:	function() {				
 				status.removeAttr("src");
-				status.attr("src", "../" +path_img + "loader.gif");							
+				status.attr("src", "../" +path_img + "loader.gif");				
 			},				
 			success: function(json){
 				

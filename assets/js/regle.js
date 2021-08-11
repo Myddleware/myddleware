@@ -156,7 +156,14 @@ $(function () {
 			$(this).parent().find('.picture img').remove();
 			$(this).parent().find('.help').empty();
 			var solution = ((val2[0]) ? val2[0] : val);
-			$(this).parent().find('.picture').append('<img src="' + path_img + 'solution/' + solution + '.png" alt="' + solution + '" />');
+			// if we're creating the connector from the '+' button modal in rule creation view
+			if(window.location.pathname.includes('createout')){
+				path_img_modal = '../../../build/images/';
+				$(this).parent().find('.picture').append('<img src="' + path_img_modal + 'solution/' + solution + '.png" alt="' + solution + '" />');
+			} else {
+				$(this).parent().find('.picture').append('<img src="' + path_img + 'solution/' + solution + '.png" alt="' + solution + '" />');
+			}
+		
 
 			$(this).parent().find('.help').append('<i class="fas fa-info-circle"></i> <a href="' + path_link_fr + solution + '" target="_blank"> ' + help_connector + '</a>');
 
@@ -961,9 +968,18 @@ function verif(div_clock) {
 			}
 		});
 
+		var path_img_modal = '../../../build/images/';
+		if(window.location.pathname.includes('createout')){
+			var urlInputs = '../../inputs';
+			var urlCallback = '../../connector/callback/';
+		} else {
+			var urlInputs = '../inputs';
+			var urlCallback = '../connector/callback/';
+		}
+
 		$.ajax({
 			type: "POST",
-			url: '../inputs',
+			url: urlInputs,
 			data: {
 				champs: datas,
 				parent: parent,
@@ -972,13 +988,21 @@ function verif(div_clock) {
 			},
 			beforeSend: function () {
 				$(status).removeAttr("src");
-				$(status).attr("src", path_img + "loader.gif");
+				if(window.location.pathname.includes('createout')){
+					$(status).attr("src", path_img_modal + "loader.gif");
+				} else {
+					$(status).attr("src", path_img + "loader.gif");
+				}
 			},
 			success: function (json) {
 
 				if (!json.success) {
 					$(status).removeAttr("src");
-					$(status).attr("src", path_img + "status_offline.png");
+					if(window.location.pathname.includes('createout')){
+						$(status).attr("src", path_img_modal + "status_offline.png");
+					} else {
+						$(status).attr("src", path_img + "status_offline.png");
+					}
 					$('#msg_status span.error').html(json.message);
 					$('#msg_status').show();
 					return false;
@@ -991,7 +1015,7 @@ function verif(div_clock) {
 						detectjs: true
 					},
 					// url: Routing.generate('connector_callback'),
-					url: '../connector/callback/',
+					url: urlCallback,
 					success: function (data) {
 
 						param = data.split(';');
@@ -1007,7 +1031,7 @@ function verif(div_clock) {
 									solutionjs: true
 								},
 								// url: Routing.generate('connector_callback'),
-								url: '../connector/callback/',
+								url: urlCallback,
 								success: function (data) {
 
 									// if 1ere fois
@@ -1055,12 +1079,20 @@ function verif(div_clock) {
 						else {
 							if (!json.success) {
 								$(status).removeAttr("src");
-								$(status).attr("src", path_img + "status_offline.png");
+								if(window.location.pathname.includes('createout')){
+									$(status).attr("src", path_img_modal + "status_offline.png");
+								} else {
+									$(status).attr("src", path_img + "status_offline.png");
+								}
 								$('#msg_status span.error').html(json.message);
 								$('#msg_status').show();
 							} else {
 								$(status).removeAttr("src");
-								$(status).attr("src", path_img + "status_online.png");
+								if(window.location.pathname.includes('createout')){
+									$(status).attr("src", path_img_modal + "status_online.png");
+								} else {
+									$(status).attr("src", path_img + "status_online.png");
+								}
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
 								$('#step_modules_confirme').removeAttr('disabled');
@@ -1098,9 +1130,16 @@ function verif(div_clock) {
 
 
 function champs(solution, champs, parent) {
+	// if we're creating a connector in the modal from the '+' button in rule creation view
+	if(window.location.pathname.includes('createout')){
+		var url = '../../inputs';
+	// we're creating a connector from the connector create page
+	} else {
+		var url = '../inputs';
+	}
 	$.ajax({
 		type: "POST",
-		url: '../inputs',
+		url: url,
 		data: {
 			solution: solution,
 			parent: parent,

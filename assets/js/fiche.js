@@ -63,6 +63,7 @@ $(function() {
 	});
 	
 	$( '#saveRuleParams' ).on('click', function() {	
+
 		loading_img = $('#myd_loading_img', '.myd_loading');	
 		$.ajax({
 			type: "POST",

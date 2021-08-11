@@ -62,8 +62,7 @@ class SessionService
     public function getSolutionType($type)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-
-        return $myddlewareSession['param']['myddleware']['connector']['solution'][$type];
+        return $myddlewareSession['param']['myddleware']['connector'][0]['solution'][$type];
     }
 
     //############ SOLUTION ###################
