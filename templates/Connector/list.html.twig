@@ -32,11 +32,11 @@
 	{{'title.connector.list'|trans}}
 {% endblock titlesm %}
 {% block body %}
-	<div class="container">
+	{# <div class=""> #}
 		<div id="rule" class="row justify-content-center pb-4">
-			<div class="col">
+			<div class="col ">
 				{% if nb > 0 %}
-					<div id="fd-title-small" class="left">
+					<div id="fd-title-small" class="">
 						<p>{{'list_connector.total'|trans}}</p>
 						<p>
 							<span class="nb">{{ nb }}</span>
@@ -104,14 +104,14 @@
 						{% endif %}
 					</div>
 				{% else %}
-					<p>
-						<h2>{{'list_connector.empty'|trans}}</h2>
-						<a href="{{ path('regle_connector_create') }}" title="">{{'list_connector.create_first_connector'|trans}}</a>
-					</p>
+					<div class="d-grid justify-content-center pt-4">
+						<h2 class="display-6">{{'list_connector.empty'|trans}}</h2>
+						<a href="{{ path('regle_connector_create') }}" title="" class="mt-4 btn btn-success">{{'list_connector.create_first_connector'|trans}}</a>
+					</div>
 				{% endif %}
 			</div>
 		</div>
-	</div>
+	{# </div> #}
 	<script type="text/javascript">
 		var chemin_img = "{{ asset('build/images/regle/') }}";
 		var question = "{{ 'list_connector.delete'|trans }}";

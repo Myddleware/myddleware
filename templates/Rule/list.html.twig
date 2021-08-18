@@ -152,7 +152,10 @@
 			{% endif %}
 		</div>
 		{% else %}
-		<p><h2>{{'list_rule.empty'|trans}}</h2> <a href="{{ path('regle_stepone_animation') }}" title="">{{'list_rule.create_first_rule'|trans}}</a></p>
+		<div class="d-grid justify-content-center pt-4">
+			<h2 class="display-6">{{'list_rule.empty'|trans}}</h2> 
+			<a href="{{ path('regle_stepone_animation') }}" title="" class="mt-4 btn btn-success">{{'list_rule.create_first_rule'|trans}}</a>
+		</div>
 		{% endif %}
     </div>
     <script type="text/javascript">   

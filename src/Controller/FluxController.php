@@ -275,13 +275,6 @@ class FluxController extends AbstractController
                 'required' => false,
             ])
 
-            ->add('click_filter', SubmitType::class, [
-                'attr' => [
-                    'class' => 'btn btn-primary',
-                ],
-                'label' => $this->translator->trans('list_flux.btn.filter'),
-            ])
-
             ->add('source_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCSourceIdExist() ? $this->sessionService->getFluxFilterSourceId() : false),
                 'required' => false,	])
@@ -289,6 +282,13 @@ class FluxController extends AbstractController
             ->add('target_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCTargetIdExist() ? $this->sessionService->getFluxFilterTargetId() : false),
                 'required' => false,	])
+
+            ->add('click_filter', SubmitType::class, [
+                'attr' => [
+                    'class' => 'btn btn-primary ms-4 mt-4',
+                ],
+                'label' => $this->translator->trans('list_flux.btn.filter'),
+            ])
 
             ->getForm();
 

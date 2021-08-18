@@ -95,14 +95,14 @@
 
 		<div class="clr"></div>
 		<div>
-			<div class="row justify-content-around">
+			<div class="row justify-content-around mx-auto">
 				<div class="col">
 					<div class="d-flex justify-content-center">
 						{{ form_rest(form) }}
 					</div>
 				</div>
 				{% if condition > 0 %}
-					<div class="col">
+					<div class="col mt-4">
 						<a class="btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
 							<i class="fas fa-redo"></i>
 							{{'list_flux.btn.filter_delete'|trans}}
@@ -120,7 +120,7 @@
 					(<span></span>)</a>
 			</p>
 		</div>
-		<div>
+		<div class="row">
 			{% if nb > 0 %}
 				<table class="listepagerflux table">
 					{% if entities is not empty %}
@@ -206,7 +206,9 @@
 				</div>
 
 			{% else %}
-				<p>{{ 'list_flux.empty'|trans }}</p>
+				<div class="col d-flex justify-content-center">
+					<p class="display-6">{{ 'list_flux.empty'|trans }}</p>
+				</div>
 			{% endif %}
 
 		</div>
