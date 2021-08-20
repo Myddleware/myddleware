@@ -759,7 +759,7 @@ login:
     pwd: Password
     connexion: Sign in
     error_session: Error of session
-    text_up_right: More information about myddleware
+    text_up_right: More information about Myddleware
     text_bottom_right: You will be redirected towards our site
     invalid_credentials: Invalid credentials
     disabled_account: Your account has been disabled
