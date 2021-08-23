@@ -1,7 +1,7 @@
 const $ = require('jquery');
 
 $(function(){
-    $( ".onoffswitch-label" ).on('click', function(e) {
+    $( ".onoffswitch" ).on('change', function(e) { 
         path_fiche_update = $(this).parent().children('input').attr('title');
         $.ajax({
             type: "POST",

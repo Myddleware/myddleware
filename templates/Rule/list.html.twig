@@ -90,7 +90,7 @@
 							</td>
 							<td class="text-center">
 								<div class="onoffswitch">
-								<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
+									<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
 									<label class="onoffswitch-label" for="{{ rule.nameSlug }}">
 										<span class="onoffswitch-inner">
 										<span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
@@ -98,7 +98,6 @@
 										</span>
 									</label>
 								</div> 
-								</p>
 							</td>
 							<td class="text-center">
 							{{rule.dateCreated|date("d/m/Y") }} 
