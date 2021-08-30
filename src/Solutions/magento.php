@@ -519,27 +519,32 @@ class magentocore extends solution
 				$i = 0;
                 // Add every filter (AND operator by default)
                 foreach ($param['query'] as $key => $value) {
+					// We change id to entity_id whe we serach a specific record with an id. In this case we use only the id filter even if other filters are set.
+					if ($key == 'id') {
+						$searchCriteria = '?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters][0][condition_type]=eq';
+						break;
+					}
                     // Workaround for a Magento bug, if we keep order_id then we get the Magento error : Column 'order_id' in where clause is ambiguous
 					// So we change the where condition to make it work on Magento side
 					if (
-							$key = 'order_id' 
+							$key == 'order_id'
 						AND in_array($param['module'],array('orders_items','orders')) 
 					) {
 						$key = 'main_table.entity_id';
 					}
 					// Create search criteria
-					$searchCriteria .= 'searchCriteria[filter_groups][0][filters]['.$i.'][field]='.$key.'&searchCriteria[filter_groups][0][filters]['.$i.'][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters]['.$i.'][condition_type]=eq';
+					$searchCriteria .= '?searchCriteria[filter_groups][0][filters]['.$i.'][field]='.$key.'&searchCriteria[filter_groups][0][filters]['.$i.'][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters]['.$i.'][condition_type]=eq';
 					$i++;
 				}
             } else {
 				// Search By reference
-				$searchCriteria = 'searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
+				$searchCriteria = '?searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
 				// order by reference
 				$searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
             }
 
             // Call to Magento
-            $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.'?'.$searchCriteria, 'GET');
+            $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.$searchCriteria, 'GET');
             if (!empty($resultList['message'])) {
                 throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
             }
