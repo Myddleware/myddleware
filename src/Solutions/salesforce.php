@@ -328,7 +328,7 @@ class salesforcecore extends solution {
 	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function readData($param) {
+	public function readData($param) {	
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -377,7 +377,7 @@ class salesforcecore extends solution {
 					$queryOffset = "+OFFSET+".$param['offset'];
 				}
 				// Appel de la requête
-				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;			
+				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
 			
@@ -441,18 +441,6 @@ class salesforcecore extends solution {
 					&& !empty($previousRefDate)
 					&& $previousRefDate == $result['date_ref']	
 			);
-
-			// Si on a quitté la boucle while à cause d'un écart de date de référence et que la limite est atteinte 
-			// alors on supprime le dernier enregistrement et on mets à jour la date de référence
-			// Ce dernier enregistrement sera lu la prochaine fois
-			if (
-					$currentCount == $param['limit']	
-				&& !empty($result['values'][$record['Id']]) // $record['Id'] contient le dernier id lu	
-			) {
-				unset($result['values'][$record['Id']]);
-				$result['date_ref'] = $previousRefDate;
-				$result['count']--;
-			}	
 			return $result;
 		}
 		catch (\Exception $e) {
