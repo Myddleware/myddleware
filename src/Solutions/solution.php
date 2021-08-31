@@ -288,6 +288,7 @@ class solutioncore
     public function readData($param)
     {
 		try { // try-catch Myddleware
+			$result['count'] = 0;
 			if (empty($param['limit'])) {
 				$param['limit'] = 100;
 			}
@@ -332,10 +333,14 @@ class solutioncore
 						$record['date_modified'] = $this->getModifiedDate($param, $record, $dateRefField);
 					}
 					$result['values'][$record['id']] = $record;
+					// Return the number of result
+					$result['count']++;
+					// Stop the loop when the limit is reached
+					if ($result['count'] >=	$param['limit']) {
+						break;
+					}
 				}
 				
-				// Return the number of result
-				$result['count'] = count($result['values']);
 				// Calculate the reference call
 				$result['date_ref'] = $this->getReferenceCall($param,$result);
 				if (empty($result['date_ref'])) {
@@ -348,7 +353,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }		
+        }
 		return $result;
     }
 

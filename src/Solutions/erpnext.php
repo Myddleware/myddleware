@@ -251,20 +251,19 @@ class erpnextcore extends solution
      *
      * @return mixed
      */
-    public function readData($param)
+    public function read($param)
     {
         try {
-            // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
+			$result = array();
+            $data = array();
             // Get the reference date field name
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
-            $fields = $param['fields'];
-            $result['date_ref'] = $param['date_ref'];
-            $result['count'] = 0;
-            $filters_result = [];
+			// Add 1 second to the date ref because the call to ERPNExt includes the date ref.. Otherwise we will always read the last record
+			$date = new \DateTime($param['date_ref']);
+			$date = date_modify($date, '+1 seconde');
+			$param['date_ref'] = $date->format('Y-m-d H:i:s');
+
             // Build the query for ERPNext
             if (!empty($param['query'])) {
                 foreach ($param['query'] as $key => $value) {
@@ -293,26 +292,17 @@ class erpnextcore extends solution
                 $resultQuery = $resultQuery->data;
                 foreach ($resultQuery as $key => $recordList) {
                     $record = null;
-                    foreach ($fields as $field) {
-                        if ($field == $dateRefField) {
-                            $record['date_modified'] = $this->dateTimeToMyddleware($recordList->$field);
-                            if ($recordList->$field > $result['date_ref']) {
-                                $result['date_ref'] = $recordList->$field;
-                            }
-                        }
-                        if ('id' != $field) {
-                            $record[$field] = $recordList->$field;
-                        }
+                    foreach ($param['fields'] as $field) {
+						$record[$field] = $recordList->$field;
                     }
+					// The name is the id in ERPNExt
                     $record['id'] = $recordList->name;
-                    $result['values'][$recordList->name] = $record; // last record
+                    $result[] = $record; // last record
                 }
-                $result['count'] = count($resultQuery);
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }
-
         return $result;
     }
 
