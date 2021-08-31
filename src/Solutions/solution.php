@@ -296,7 +296,7 @@ class solutioncore
                 $param['offset'] = 0;
             }
 			// Add requiered fields based on attribute $required_fields
-			$param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 			$param['fields'] = array_unique($param['fields']);
 			// Remove Myddleware specific fields (not existing in the solution)
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
@@ -314,7 +314,7 @@ class solutioncore
 				// Sort data with the reference field
 				$modified  = array_column($readResult, $dateRefField);
 				array_multisort($modified, SORT_ASC, $readResult);
-				
+
 				// Add id and date_modified values into the read call result
 				foreach ($readResult as $record) {
 					// If the id column hasn't been defined in the read method we calculate it.
@@ -353,7 +353,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }
+        }			
 		return $result;
     }
 
@@ -671,7 +671,7 @@ class solutioncore
     }
 
     // Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible
-    protected function addRequiredField($fields, $module = 'default')
+    protected function addRequiredField($fields, $module = 'default', $mode = null)
     {
         // If no entry for the module we put default
         if (empty($this->required_fields[$module])) {
@@ -693,7 +693,16 @@ class solutioncore
                 }
             }
         }
-
+		
+		// Add the ref field if it isn't already in the array
+		$dateRefField = $this->getRefFieldName($module, $mode);
+		if (
+				!empty($dateRefField)
+			AND array_search($dateRefField, $fields) === false
+		) {
+			$fields[] = $dateRefField;
+		}
+		
         return $fields;
     }
 

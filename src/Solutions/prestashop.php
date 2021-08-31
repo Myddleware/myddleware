@@ -613,7 +613,7 @@ class prestashopcore extends solution
                 $subDataId = (!empty($this->module_relationship_many_to_many[$param['module']]['subDataId']) ? $this->module_relationship_many_to_many[$param['module']]['subDataId'] : 'id');
 
                 // Ajout des champs obligatoires
-                $param['fields'] = $this->addRequiredField($param['fields'], $searchModule);
+                $param['fields'] = $this->addRequiredField($param['fields'], $searchModule, $param['ruleParams']['mode']);
                 $opt['limit'] = $param['limit'];
                 $opt['resource'] = $searchModule.'&date=1';
                 $opt['display'] = 'full';

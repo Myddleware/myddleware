@@ -251,7 +251,7 @@ class databasecore extends solution
                 $param['fields'] = [];
             }
             $param['fields'] = array_unique($param['fields']);
-            $param['fields'] = $this->addRequiredField($param['fields']);
+            $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
             $param['fields'] = array_values($param['fields']);
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 

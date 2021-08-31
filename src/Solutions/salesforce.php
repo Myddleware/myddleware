@@ -352,7 +352,7 @@ class salesforcecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 			
 			// Ajout des champs obligatoires
-			$param['fields'] = $this->addRequiredField($param['fields']);
+			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 			
 			// Récupération du nom du champ date
 			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);

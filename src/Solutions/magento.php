@@ -476,7 +476,7 @@ class magentocore extends solution
             }
 
             // Add requiered fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
+            $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
             // Init parameters for modules or submodules
             $function = '';

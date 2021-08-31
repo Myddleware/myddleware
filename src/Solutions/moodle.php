@@ -161,21 +161,17 @@ class moodlecore extends solution
 
 
     // Read data in Moodle
-    public function readData($param)
+    // public function readData($param)
+    public function read($param)
     {
         try {
-            $result['count'] = 0;
+            // $result['count'] = 0;
+            $result = array();
 
             // Put date ref in Moodle format
-            $result['date_ref'] = $this->dateTimeFromMyddleware($param['date_ref']);
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
-
-            // Add requiered fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
-
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
-
             // Get function to call Moodle
             $functionName = $this->getFunctionName($param);
 
@@ -191,40 +187,17 @@ class moodlecore extends solution
             if (!empty($xml->MULTIPLE->SINGLE)) {
                 foreach ($xml->MULTIPLE->SINGLE as $data) {
                     foreach ($data as $field) {
-                        // Save the new date ref
-                        if (
-                                (
-                                    $field->attributes()->__toString() == $dateRefField
-                                and $result['date_ref'] < $field->VALUE->__toString()
-                                )
-                            or (
-                                    'date_ref_override' == $field->attributes()->__toString() // The webservice could return a date to override the date_ref
-                                and $field->VALUE->__toString() > 0
-                                )
-                        ) {
-                            $result['date_ref'] = $field->VALUE->__toString();
-                        }
-                        // Get the date modified
-                        if (
-                                $field->attributes()->__toString() == $dateRefField
-                        ) {
-                            $row['date_modified'] = $this->dateTimeToMyddleware($field->VALUE->__toString());
-                        }
                         // Get all the requested fields
                         if (false !== array_search($field->attributes()->__toString(), $param['fields'])) {
                             $row[$field->attributes()->__toString()] = $field->VALUE->__toString();
                         }
                     }
-                    $result['values'][$row['id']] = $row;
-                    ++$result['count'];
+                    $result[] = $row;
                 }
             }
-            // Put date ref in Myddleware format
-            $result['date_ref'] = $this->dateTimeToMyddleware($result['date_ref']);
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-
         return $result;
     }
 

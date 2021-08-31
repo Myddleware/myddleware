@@ -317,7 +317,7 @@ class eventbritecore extends solution
         if (!isset($param['fields'])) {
             $param['fields'] = [];
         }
-        $param['fields'] = $this->addRequiredField($param['fields']);
+        $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
         // Le read est différent en fonction de la référence de lecture,
         // s'il s'agit d'un type user alors la lecture est directe

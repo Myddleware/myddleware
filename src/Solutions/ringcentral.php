@@ -191,7 +191,7 @@ class ringcentralcore extends solution
                     $dateRefExt[$extensionId] = $param['date_ref'];
                 }
                 // Add required fields
-                $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+                $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
                 // Remove Myddleware 's system fields
                 $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 

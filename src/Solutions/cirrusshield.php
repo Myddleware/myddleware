@@ -162,7 +162,7 @@ class cirrusshieldcore extends solution
             $result['date_ref'] = $param['date_ref'];
             $result['count'] = 0;
             // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
+            $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
             // Remove Myddleware 's system fields
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 

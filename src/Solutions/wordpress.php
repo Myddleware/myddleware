@@ -134,7 +134,7 @@ class wordpresscore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
 			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module);
+			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
             if(empty($param['limit'])){
                 $param['limit'] = $this->callLimit;

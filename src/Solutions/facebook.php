@@ -189,7 +189,7 @@ class facebookcore extends solution
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields']);
+            $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
             // Check the lead form id is filled when the module is leadform
             if ('leadform' == $param['module']) {

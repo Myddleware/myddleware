@@ -190,7 +190,7 @@ class sapecccore extends sap
                 }
 
                 // Ajout des champs obligatoires
-                $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+                $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
                 // Permet de supprimer l'élement Myddleware_element_id ajouter artificiellement dans un tableau de champ
                 $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
                 // Tri des champs pour optimiser la performance dans la recherche des données

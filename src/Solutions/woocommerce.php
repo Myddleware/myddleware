@@ -193,7 +193,7 @@ class woocommercecore extends solution {
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
 			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module);
+			$param['fields'] = $this->addRequiredField($param['fields'],$module, $param['ruleParams']['mode']);
 
             $stop = false;
             $count = 0;

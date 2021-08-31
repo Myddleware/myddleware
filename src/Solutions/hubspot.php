@@ -361,7 +361,7 @@ class hubspotcore extends solution
             // Format the module name
             $module = $this->formatModuleName($param['module']);
             // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields'], $module);
+            $param['fields'] = $this->addRequiredField($param['fields'], $module, $param['ruleParams']['mode']);
 
             // Get the id field label
             $id = $this->getIdField($param, $module);
