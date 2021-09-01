@@ -373,7 +373,7 @@ view_flux:
     nblogs: Number of logs
     nbChildDocuments: Child documents
     nbParentDocuments: Parent documents
-    nbHistoryDocuments: History documents
+    nbHistoryDocuments: Documents history
     nbPostDocuments: Post documents    
     direct_link: Direct link    
     btn:
