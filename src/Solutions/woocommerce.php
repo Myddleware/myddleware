@@ -151,21 +151,17 @@ class woocommercecore extends solution {
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
-    public function readData($param) {
+    // public function readData($param) {
+    public function read($param) {
         try {
             $module = $param['module'];
             $result = [];
-            $result['count'] = 0;
-            $result['date_ref'] = $param['date_ref'];
+			// format the reference date
             $dateRefWooFormat  = $this->dateTimeFromMyddleware($param['date_ref']);
+			// Set the limit
             if(empty($param['limit'])){
                 $param['limit'] = $this->callLimit;
-            } else {
-                // to handle situations in which limit set by the user is higher than actual Woo API limit (100)
-                if($param['limit'] < $this->callLimit){
-                    $this->callLimit = $param['limit'];
-                }
-            }
+            } 
 
             // adding query parameters into the request
 		    if (!empty($param['query'])) {
@@ -189,11 +185,6 @@ class woocommercecore extends solution {
             if(!empty($this->subModules[$param['module']])){
                 $module = $this->subModules[$param['module']]['parent_module'];
             } 
-            // Remove Myddleware's system fields
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-
-			// Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module, $param['ruleParams']['mode']);
 
             $stop = false;
             $count = 0;
@@ -204,13 +195,13 @@ class woocommercecore extends solution {
                     $response = $this->woocommerce->get($module.$query, array('per_page' => $this->callLimit,
                                                                               'page' => $page));   
                     //when reading a specific record only we need to add a layer to the array                                                         
-                    $record = $response;
+                    $records = $response;
                     $response = array();
-                    $response[]= $record;
+                    $response[]= $records;
                 } elseif($module === 'customers') {
                      //orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, array('orderby' => 'registered_date',
-                                                                                    'order' => 'desc',
+                                                                                    'order' => 'asc',
                                                                                     'per_page' => $this->callLimit,
                                                                                     'page' => $page));
                 //get all data, sorted by date_modified
@@ -223,8 +214,9 @@ class woocommercecore extends solution {
                     //used for submodules (e.g. line_items)
                     $response = $this->convertResponse($param, $response);
                     foreach($response as $record){
+						$row = array();
                         //either we read all from a date_ref or we read based on a query (readrecord)
-                        if($dateRefWooFormat < $record->date_modified || (!empty($query))){
+                        if($dateRefWooFormat < $record->date_modified || (!empty($query))){					
                             foreach($param['fields'] as $field){
                                 // If we have a 2 dimensional array we break it down  
                                 $fieldStructure = explode('__',$field);
@@ -233,17 +225,20 @@ class woocommercecore extends solution {
                                 if (!empty($fieldStructure[1])) {
                                     $fieldGroup = $fieldStructure[0];
                                     $fieldName = $fieldStructure[1];
-                                    $result['values'][$record->id][$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
+                                    $row[$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
                                 } else {
-                                    $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+                                    $row[$field] = (!empty($record->$field) ? $record->$field : '');
                                 }
+								if ($field == 'date_modified') {
+									$row[$field] = $this->dateTimeToMyddleware($record->$field);
+								}
                             }
-                            $result['values'][$record->id]['date_modified'] = $record->date_modified;
-                            $result['values'][$record->id]['id'] = $record->id;
+                            $row['id'] = $record->id;
                             $count++;
+							$result[] = $row;
                         } else {
                             $stop = true;
-                        }   
+                        }  
                     } 
                 } else {
                     $stop = true; 
@@ -253,16 +248,9 @@ class woocommercecore extends solution {
                 }
                 $page++;	
             } while(!$stop && $count < $param['limit']);
-            //As the records sent from the API are ordered by date_modified, 
-            // we pass date_modified from the first record as the date_ref
-            if(!empty($result['values'])){
-                $latestModification = $result['values'][array_key_first($result['values'])]['date_modified'];
-                $result['date_ref'] = $this->dateTimeToMyddleware($latestModification);
-            }
-            $result['count'] = $count; 
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';		  
-        }
+        }		
         return $result;
     }
 
@@ -369,13 +357,11 @@ class woocommercecore extends solution {
 		$this->isJobActive($param);
 		return $data;
 	}
-
-
+	
     // Convert date to Myddleware format 
 	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
-	protected function dateTimeToMyddleware($dateTime) {
-		$dto = new \DateTime($dateTime);
-		// We save the UTC date in Myddleware
+	protected function dateTimeToMyddleware($dateTime) {	
+		$dto = new \DateTime($dateTime);	
 		return $dto->format("Y-m-d H:i:s");
 	}
 	
@@ -385,7 +371,11 @@ class woocommercecore extends solution {
 		// Return date to UTC timezone
 		return $dto->format('Y-m-d\TH:i:s');
 	}
-
+	
+    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+    public function getRefFieldName($moduleSource, $RuleMode) {
+        return 'date_modified';
+    }
 }
 
 class woocommerce extends woocommercecore {
