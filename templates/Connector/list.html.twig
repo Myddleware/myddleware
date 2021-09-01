@@ -32,7 +32,6 @@
 	{{'title.connector.list'|trans}}
 {% endblock titlesm %}
 {% block body %}
-	{# <div class=""> #}
 		<div id="rule" class="row justify-content-center pb-4">
 			<div class="col ">
 				{% if nb > 0 %}
@@ -111,7 +110,6 @@
 				{% endif %}
 			</div>
 		</div>
-	{# </div> #}
 	<script type="text/javascript">
 		var chemin_img = "{{ asset('build/images/regle/') }}";
 		var question = "{{ 'list_connector.delete'|trans }}";

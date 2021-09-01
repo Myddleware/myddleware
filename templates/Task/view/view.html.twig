@@ -172,9 +172,9 @@
 						</tr>			
 					{% endif %}
 				</table>
-				<div align="center">
+				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
-						<div align="center">
+						<div class="d-flex justify-content-center mt-4">
 							{% if pager.haveToPaginate %}
 								{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': task.getId }, 'routeName': 'task_view_page' } ) }}
 							{% endif %}

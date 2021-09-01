@@ -88,7 +88,7 @@
 							</button>
 						</a>
 					{% endif %}
-				</div>
+			</div>
 				<table id="headertab" class="listepager table document-history-table">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>
@@ -272,7 +272,6 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 									<th>{{'list_flux.tab.date_modified'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
@@ -287,7 +286,6 @@
 										</td>
 										<td class="ctr">{{ flux.source }}</td>
 										<td class="ctr">{{ flux.target }}</td>
-										{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
 										<td class="ctr">{{ flux.type }}</td>
 										<td class="ctr">
@@ -319,16 +317,15 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 									<th>{{'list_flux.tab.date_modified'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
 								</tr>
 							{% endif %}
 						</table>
-						<div align="center">
+						<div class="d-flex justify-content-center">
 							{% if pager.haveToPaginate %}
-								<div align="center">
+								<div class="d-flex">
 									{% if pager.haveToPaginate %}
 										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
 									{% endif %}
@@ -350,7 +347,7 @@
 					<div class="clr"></div>
 				{% endif %}
 				{# ------------- HISTORY DOCUMENTS ------------- #}
-				<div id="message" align="center">
+				<div id="message" class="d-grid">
 					{% if nb_history_documents > 0 %}
 						<table class="listepager document-history-table">
 							{% if entities is not empty %}
@@ -359,7 +356,6 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 									<th>{{'list_flux.tab.date_modified'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
@@ -383,7 +379,6 @@
 												</td>
 												<td class="ctr">{{ flux.source }}</td>
 												<td class="ctr">{{ flux.target }}</td>
-												{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 												<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
 												<td class="ctr">{{ flux.type }}</td>
 												<td class="ctr">
@@ -416,16 +411,15 @@
 										<th>{{'list_flux.tab.name'|trans}}</th>
 										<th>{{'list_flux.tab.source_id'|trans}}</th>
 										<th>{{'list_flux.tab.target_id'|trans}}</th>
-										{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 										<th>{{'list_flux.tab.date_modified'|trans}}</th>
 										<th>{{'list_flux.tab.type'|trans}}</th>
 										<th>{{'list_flux.tab.statut'|trans}}</th>
 									</tr>
 								{% endif %}
 							</table>
-							<div align="center">
+							<div class="d-flex justify-content-center">
 								{% if pager.haveToPaginate %}
-									<div align="center">
+									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
@@ -447,7 +441,7 @@
 						<div class="clr"></div>
 					{% endif %}
 					{# ------------- PARENT RELATE DOCUMENTS ------------- #}
-					<div id="message" align="center">
+					<div id="message" class="d-grid">
 						{% if nb_parent_documents > 0 %}
 							<table class="listepager table">
 								{% if entities is not empty %}
@@ -456,7 +450,6 @@
 										<th>{{'list_flux.tab.name'|trans}}</th>
 										<th>{{'list_flux.tab.source_field'|trans}}</th>
 										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 										<th>{{'list_flux.tab.date_modified'|trans}}</th>
 										<th>{{'list_flux.tab.type'|trans}}</th>
 										<th>{{'list_flux.tab.statut'|trans}}</th>
@@ -471,7 +464,6 @@
 											</td>
 											<td class="ctr">{{ flux.sourceField }}</td>
 											<td class="ctr">{{ flux.source }}</td>
-											{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 											<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
 											<td class="ctr">{{ flux.type }}</td>
 											<td class="ctr">
@@ -503,16 +495,15 @@
 										<th>{{'list_flux.tab.name'|trans}}</th>
 										<th>{{'list_flux.tab.source_field'|trans}}</th>
 										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 										<th>{{'list_flux.tab.date_modified'|trans}}</th>
 										<th>{{'list_flux.tab.type'|trans}}</th>
 										<th>{{'list_flux.tab.statut'|trans}}</th>
 									</tr>
 								{% endif %}
 							</table>
-							<div align="center">
+							<div class="d-flex justify-content-center">
 								{% if pager.haveToPaginate %}
-									<div align="center">
+									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
@@ -543,7 +534,6 @@
 										<th>{{'list_flux.tab.name'|trans}}</th>
 										<th>{{'list_flux.tab.source_field'|trans}}</th>
 										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 										<th>{{'list_flux.tab.date_modified'|trans}}</th>
 										<th>{{'list_flux.tab.type'|trans}}</th>
 										<th>{{'list_flux.tab.statut'|trans}}</th>
@@ -558,7 +548,6 @@
 											</td>
 											<td class="ctr">id</td>
 											<td class="ctr">{{ flux.source }}</td>
-											{# 	<td class="ctr">{{ flux.dateCreated|date("d/m/Y H:i:s") }}</td>	#}
 											<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
 											<td class="ctr">{{ flux.type }}</td>
 											<td class="ctr">
@@ -590,16 +579,15 @@
 										<th>{{'list_flux.tab.name'|trans}}</th>
 										<th>{{'list_flux.tab.source_field'|trans}}</th>
 										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										{#  <th>{{'list_flux.tab.date_created'|trans}}</th> #}
 										<th>{{'list_flux.tab.date_modified'|trans}}</th>
 										<th>{{'list_flux.tab.type'|trans}}</th>
 										<th>{{'list_flux.tab.statut'|trans}}</th>
 									</tr>
 								{% endif %}
 							</table>
-							<div align="center">
+							<div class="d-flex justify-content-center">
 								{% if pager.haveToPaginate %}
-									<div align="center">
+									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
@@ -687,9 +675,9 @@
 									</tr>
 								{% endif %}
 							</table>
-							<div align="center">
+							<div class="d-flex justify-content-center">
 								{% if pager.haveToPaginate %}
-									<div align="center">
+									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
@@ -699,16 +687,12 @@
 						{% else %}
 							<p>{{'view_flux.empty_log'|trans}}</p>
 						{% endif %}
-
 					</div>
 					{# ------------- MESSAGE ------------- #}
 				</div>
-
-				{# ------------- PARAMETRES JQUERY ------------- #}
-				<script type="text/javascript">
-					var path_img = "{{ asset('build/images/regle/') }}";
-					var chemin_img = "{{ asset('build/images/regle/') }}";
-					var inputs_flux = "{{ path('flux_save') }}";
-				</script>
-				{# ------------- PARAMETRES JQUERY ------------- #}
-			{% endblock %}
+	<script type="text/javascript">
+		var path_img = "{{ asset('build/images/regle/') }}";
+		var chemin_img = "{{ asset('build/images/regle/') }}";
+		var inputs_flux = "{{ path('flux_save') }}";
+	</script>
+{% endblock %}
