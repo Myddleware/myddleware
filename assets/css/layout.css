@@ -69,10 +69,10 @@ section  {
 }
 
 footer {
-	padding: 10px;
-	height: 50px;
-	min-height: 50px;
-	max-height: 50px;
+	padding: 5px;
+	height: 35px;
+	min-height: 35px;
+	max-height: 35px;
 	background: #444446;
 	position: fixed;
 	right:0;

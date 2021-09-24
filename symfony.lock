@@ -209,9 +209,6 @@
     "laminas/laminas-code": {
         "version": "3.5.1"
     },
-    "laminas/laminas-eventmanager": {
-        "version": "3.3.1"
-    },
     "laminas/laminas-hydrator": {
         "version": "4.1.0"
     },
