@@ -29,11 +29,8 @@ menu .caret, #myd_top .caret {
     border: none;
 }
 
-/* Cloud image goes on top right end of the nav menu */
-#nav-menu-cloud {
-    display: flex;
-    flex-wrap: wrap-reverse;
-    flex-direction: row-reverse;
+.negative-margin-menu{
+    margin-right: -0.77rem;
 }
 
 #fd-title-small {
