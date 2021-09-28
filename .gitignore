@@ -67,7 +67,7 @@ yarn-error.log
 
 
 ###> lexik/jwt-authentication-bundle ###
-/config/jwt/*.pem
+/config/packages/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ##
 
 ###> symfony/phpunit-bridge ###
