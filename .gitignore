@@ -80,6 +80,12 @@ yarn-error.log
 .env.local
 ###> env file ###
 
-## vscode parameters ## 
+## vscode and other IDE parameters ## 
 .vscode
+/.idea/*
 ## vscode parameters ##
+
+## old files & folders ##
+/.platform/*
+composer.phar
+## olf files & folders ##
