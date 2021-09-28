@@ -78,14 +78,15 @@ yarn-error.log
 
 ###> local env file ###
 .env.local
-###> env file ###
+###< env file ###
 
-## vscode and other IDE parameters ## 
+##> vscode and other IDE parameters ## 
 .vscode
 /.idea/*
-## vscode parameters ##
+##< vscode parameters ##
 
-## old files & folders ##
+##> old files & folders ##
 /.platform/*
+.platform.app.yaml
 composer.phar
-## olf files & folders ##
+##< old files & folders ##
