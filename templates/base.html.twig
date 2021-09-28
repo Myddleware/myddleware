@@ -83,17 +83,16 @@
                     </ul>                   
                 </nav>
             </div>
-            <div id="navigation-container" class="mt-5">      
-                <div class="d-flex justify-content-end  mt-4">
-                    <div class="row ">
+            <div id="navigation-container" class="mt-5 container-fluid">
+                <div class="d-flex row mt-4">
                         <div class="col-2">
                             <a href="{{ path('regle_panel')}}"> 
                                 <span id="logo"></span>
                             </a>
                         </div>
                         <div class="col-10">
-                            <div class="row">
-                                <div id="nav-menu-cloud" class="col">
+                            <div class="d-flex align-items-end flex-column-reverse negative-margin-menu">
+                                <div>
                                     <menu>  
                                         <ul class="nav nav-pills">
                                             <li>
@@ -190,11 +189,13 @@
                                             <li><a href="http://www.myddleware.com/pricing/support"  target="_blank">{{'menu.support'|trans}}</a></li>
                                         </ul>                   
                                     </menu>
+                                </div>
+                                <div>
                                     <span id="cloud"></span> 
                                 </div>
                             </div>
-                        </div> 
-                    </div>
+                        </div>
+                    </div> 
                 </div>  
             </div>                 
         </header>
