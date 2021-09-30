@@ -3296,16 +3296,16 @@
         },
         {
             "name": "lcobucci/jwt",
-            "version": "4.1.4",
+            "version": "4.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "71cf170102c8371ccd933fa4df6252086d144de6"
+                "reference": "fe2d89f2eaa7087af4aa166c6f480ef04e000582"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/71cf170102c8371ccd933fa4df6252086d144de6",
-                "reference": "71cf170102c8371ccd933fa4df6252086d144de6",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/fe2d89f2eaa7087af4aa166c6f480ef04e000582",
+                "reference": "fe2d89f2eaa7087af4aa166c6f480ef04e000582",
                 "shasum": ""
             },
             "require": {
@@ -3321,7 +3321,7 @@
                 "infection/infection": "^0.21",
                 "lcobucci/coding-standard": "^6.0",
                 "mikey179/vfsstream": "^1.6.7",
-                "phpbench/phpbench": "^1.0@alpha",
+                "phpbench/phpbench": "^1.0",
                 "phpstan/extension-installer": "^1.0",
                 "phpstan/phpstan": "^0.12",
                 "phpstan/phpstan-deprecation-rules": "^0.12",
@@ -3354,7 +3354,7 @@
             ],
             "support": {
                 "issues": "https://github.com/lcobucci/jwt/issues",
-                "source": "https://github.com/lcobucci/jwt/tree/4.1.4"
+                "source": "https://github.com/lcobucci/jwt/tree/4.1.5"
             },
             "funding": [
                 {
@@ -3366,7 +3366,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2021-03-23T23:53:08+00:00"
+            "time": "2021-09-28T19:34:56+00:00"
         },
         {
             "name": "leafo/lessphp",
@@ -5293,16 +5293,16 @@
         },
         {
             "name": "symfony/flex",
-            "version": "v1.16.2",
+            "version": "v1.16.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/flex.git",
-                "reference": "f1e77e62bcb068bf094f4781eca1436ef818ff72"
+                "reference": "f05406b33681409b83285f4d2ff4efbca7c55b03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/flex/zipball/f1e77e62bcb068bf094f4781eca1436ef818ff72",
-                "reference": "f1e77e62bcb068bf094f4781eca1436ef818ff72",
+                "url": "https://api.github.com/repos/symfony/flex/zipball/f05406b33681409b83285f4d2ff4efbca7c55b03",
+                "reference": "f05406b33681409b83285f4d2ff4efbca7c55b03",
                 "shasum": ""
             },
             "require": {
@@ -5341,7 +5341,7 @@
             "description": "Composer plugin for Symfony",
             "support": {
                 "issues": "https://github.com/symfony/flex/issues",
-                "source": "https://github.com/symfony/flex/tree/v1.16.2"
+                "source": "https://github.com/symfony/flex/tree/v1.16.3"
             },
             "funding": [
                 {
@@ -5357,7 +5357,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-09-24T08:45:18+00:00"
+            "time": "2021-09-28T17:00:52+00:00"
         },
         {
             "name": "symfony/monolog-bundle",
