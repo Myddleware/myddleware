@@ -39,7 +39,7 @@ class LoadConfigData implements FixtureInterface
 		['name' => 'migration_mode', 'value' => false, 'update' => false],
 		['name' => 'alert_time_limit', 'value' => 60, 'update' => false],
 		['name' => 'search_limit', 'value' => 1000, 'update' => false],
-		['name' => 'git_branch', 'value' => 'master', 'update' => false],
+		['name' => 'git_branch', 'value' => 'main', 'update' => false],
 		['name' => 'base_uri', 'value' => '', 'update' => false],
 		['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false]
     ];
