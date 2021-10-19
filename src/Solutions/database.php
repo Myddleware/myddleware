@@ -611,7 +611,7 @@ class databasecore extends solution
                 // Remove the last coma
                 $sql = substr($sql, 0, -1);
                 $sql .= ')';
-                $stmt = $this->conn->prepare($sql);
+                $stmt = $this->connection->prepare($sql);
                 $stmt->execute();
                 $fields = $stmt->fetchAll();
                 if (!empty($fields)) {

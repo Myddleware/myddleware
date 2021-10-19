@@ -165,11 +165,8 @@ class moodlecore extends solution
     public function read($param)
     {
         try {
-            // $result['count'] = 0;
             $result = array();
 
-            // Put date ref in Moodle format
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
             // Get function to call Moodle
