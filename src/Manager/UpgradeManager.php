@@ -150,7 +150,7 @@ class UpgradeManager
 
     protected function updateFiles()
     {
-        // Update master if git_branch is empty otherwise we update the specific branch
+        // Update Main if git_branch is empty otherwise we update the specific branch
         $command = (!empty($this->configParams['git_branch'])) ? 'git pull origin '.$this->configParams['git_branch'] : 'git pull';
         $process = new Process($command);
         $process->run();
