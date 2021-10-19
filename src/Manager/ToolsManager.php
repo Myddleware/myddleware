@@ -63,7 +63,7 @@ class ToolsManager
         $this->connection = $connection;
         $this->projectDir = $kernel->getProjectDir();
         $request = $requestStack->getCurrentRequest();
-        $language = $request ? $request->getLocale() : 'EN';
+        $language = $request ? $request->getLocale() : 'en';
         $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.'.$language.'.yml'));
     }
 

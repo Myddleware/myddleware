@@ -31,6 +31,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class sugarcrmcore extends solution
 {
     protected $sugarAPI;
+    protected $sugarAPIVersion = 'v11';
+    protected $sugarPlatform = 'base';
     protected $defaultLimit = 100;
     protected $delaySearch = '-1 month';
 
@@ -70,10 +72,11 @@ class sugarcrmcore extends solution
     {
         parent::login($paramConnexion);
         try {
-            $server = $this->paramConnexion['url'].'/rest/v10/';
+            $server = $this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/';
             $credentials = [
                 'username' => $this->paramConnexion['login'],
                 'password' => $this->paramConnexion['password'],
+                'platform' => $this->sugarPlatform,
             ];
 
             // Log into Sugar
@@ -200,80 +203,63 @@ class sugarcrmcore extends solution
      *
      * @return mixed
      */
-    public function readData($param)
+    // public function readData($param)
+    public function read($param)
     {
-        try {
-            $result = [];
-            $result['count'] = 0;
-            $result['date_ref'] = $param['date_ref'];
+		$result = [];
 
-            // Set default limit
-            if (empty($param['limit'])) {
-                $param['limit'] = $this->defaultLimit;
-            }
-            // Remove Myddleware 's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-            // Add required fields
-            $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+		// Init search parameters
+		$filterArgs = [
+			'max_num' => $param['limit'],
+			'offset' => 0,
+			'fields' => implode($param['fields'], ','),
+			'order_by' => 'date_modified',
+		];
+		// Init search filters
+		// Search by fields (id or duplicate fields)
+		if (!empty($param['query'])) {
+			// Add every filter (AND operator by default)
+			foreach ($param['query'] as $key => $value) {
+				$filterArgs['filter'][] = [$key => ['$equals' => $value]];
+			}
+		// Search By reference
+		} else {
+			$filterArgs['filter'] = [
+				[
+					'date_modified' => [
+						'$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
+					],
+				],
+			];
+		}
 
-            // Init search parameters
-            $filterArgs = [
-                'max_num' => $param['limit'],
-                'offset' => 0,
-                'fields' => implode($param['fields'], ','),
-                'order_by' => 'date_modified',
-            ];
-            // Init search filters
-            // Search by fields (id or duplicate fields)
-            if (!empty($param['query'])) {
-                // Add every filter (AND operator by default)
-                foreach ($param['query'] as $key => $value) {
-                    $filterArgs['filter'][] = [$key => ['$equals' => $value]];
-                }
-			// Search By reference
-            } else {
-                $filterArgs['filter'] = [
-                    [
-                        'date_modified' => [
-                            '$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
-                        ],
-                    ],
-                ];
-            }
+		// Get the records
+		$getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+		$response = $getRecords->getResponse();
+		// Format response if http return = 200
+		if ('200' == $response->getStatus()) {
+			$body = $getRecords->getResponse()->getBody(false);
+			if (!empty($body->records)) {
+				$records = $body->records;
+			}
+		} else {
+			throw new \Exception(print_r($response->getBody(), true));
+		}
 
-            // Get the records
-            $getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
-            $response = $getRecords->getResponse();
-            // Format response if http return = 200
-            if ('200' == $response->getStatus()) {
-                $body = $getRecords->getResponse()->getBody(false);
-                if (!empty($body->records)) {
-                    $records = $body->records;
-                }
-            } else {
-                throw new \Exception(print_r($response->getBody(), true));
-            }
-
-            // Format records to result format
-            if (!empty($records)) {
-                foreach ($records as $record) {
-                    foreach ($param['fields'] as $field) {
-                        $result['values'][$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
-                    }
-                    $result['values'][$record->id]['id'] = $record->id;
-                    $result['values'][$record->id]['date_modified'] = $record->date_modified;
-                }
-                // We get the date_modified of the last records because SugarCRM webservice returns record sorted by date_modified
-                $result['date_ref'] = $this->dateTimeToMyddleware($record->date_modified);
-                $result['count'] = count($records);
-            }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
-        }
-
+		// Format records to result format
+		if (!empty($records)) {
+			foreach ($records as $record) {
+				foreach ($param['fields'] as $field) {
+					$result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+				}
+			}
+		}
         return $result;
     }
 
+	public function getRefFieldName($moduleSource, $RuleMode) {
+		return 'date_modified';
+    }
     // end function read
 
     /**
@@ -348,7 +334,6 @@ class sugarcrmcore extends solution
 
         return $result;
     }
-
     // end function create
 
     // Convert date to Myddleware format
@@ -361,7 +346,6 @@ class sugarcrmcore extends solution
 
         return $dto->format('Y-m-d H:i:s');
     }
-
     // dateTimeToMyddleware($dateTime)
 
     // Convert date to SugarCRM format

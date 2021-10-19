@@ -442,7 +442,6 @@ class prestashopcore extends solution
 		// traitement spécial pour module de relation Customers / Groupe
 		if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 			$result = $this->readManyToMany($param);
-
 			return $result;
 		}
 

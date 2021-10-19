@@ -229,9 +229,6 @@ class woocommercecore extends solution {
                                 } else {
                                     $row[$field] = (!empty($record->$field) ? $record->$field : '');
                                 }
-								if ($field == 'date_modified') {
-									$row[$field] = $this->dateTimeToMyddleware($record->$field);
-								}
                             }
                             $row['id'] = $record->id;
                             $count++;
