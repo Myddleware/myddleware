@@ -234,7 +234,6 @@ $(function () {
 		// Filtre des fonctions pour les formules
 		$('#filter').on('change', function () {
 			var cat = $("select[name='filter_functions'] > option:selected").attr("data-type");
-console.log(cat)
 			if (cat >= 1) {
 				$('.func', '#functions').each(function () {
 					if ($(this).attr("data-type") != cat) {
@@ -249,7 +248,6 @@ console.log(cat)
 		});
 
 		$("#test").on("click", function () {
-			console.log('click test')
 			recup_formule();
 		});
 
