@@ -54,3 +54,6 @@
 
 # VSCode 
 /.vscode 
+
+# JavaScript libraries
+/node_modules
