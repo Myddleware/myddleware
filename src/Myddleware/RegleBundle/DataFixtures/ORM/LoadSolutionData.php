@@ -24,11 +24,11 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\DataFixtures\ORM;
- 
-use Doctrine\Common\DataFixtures\FixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+
+use Doctrine\Persistence\ObjectManager;
 use Myddleware\RegleBundle\Entity\Solution;
- 
+use Doctrine\Common\DataFixtures\FixtureInterface;
+
 class LoadSolutionData implements FixtureInterface
 {
     private $manager; 
@@ -64,10 +64,10 @@ class LoadSolutionData implements FixtureInterface
 									array('name' => 'iadvize',			'active' => 1,'source' => 1,'target' => 0),
 									array('name' => 'woocommerce',		'active' => 1,'source' => 1,'target' => 1),
 									array('name' => 'wooeventmanager',	'active' => 1,'source' => 1,'target' => 1),
-									array('name' => 'wordpress',		'active' => 1,'source' => 1,'target' => 1)
-
+									array('name' => 'wordpress',		'active' => 1,'source' => 1,'target' => 1),
+									array('name' => 'airtable',			'active' => 1,'source' => 1,'target' => 1)
 							);
- 
+
     public function load(ObjectManager $manager){
         $this->manager = $manager; 
         $this->generateEntities(); 
@@ -78,11 +78,11 @@ class LoadSolutionData implements FixtureInterface
         foreach($this->solutionData as $solution) {
 			// Check if the solution doesn't exist in Myddleware we create it else we update it
 			$sol = $this->manager
-						 ->getRepository('RegleBundle:Solution')
-						 ->findOneByName($solution['name']);
+						->getRepository('RegleBundle:Solution')
+						->findOneByName($solution['name']);
 			if (
 					empty($sol)
-				 || empty($sol->getId()	)
+				|| empty($sol->getId()	)
 			) {	
 				$sol = new Solution();
 			}

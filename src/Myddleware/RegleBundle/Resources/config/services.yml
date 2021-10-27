@@ -2,160 +2,162 @@ parameters:
 #    regle.example.class: Myddleware\RegleBundle\Example
 
 services:  
-             
-     kernel.listener.request_listener:
+
+    kernel.listener.request_listener:
         class: Myddleware\RegleBundle\EventListener\RequestListener
         tags:
-           - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-     myddleware_session.service:  
-         class: Myddleware\RegleBundle\Service\SessionService
-         arguments: ["@session"]
-         
-     formula.myddleware:  
-         class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
-     myddleware_job.job:  
-         class: Myddleware\RegleBundle\Classes\job
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.home:  
-         class: Myddleware\RegleBundle\Classes\home
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_tools.tools:  
-         class: Myddleware\RegleBundle\Classes\tools
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.document:  
-         class: Myddleware\RegleBundle\Classes\document
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", %param%]
-     myddleware.template:  
-         class: Myddleware\RegleBundle\Classes\template
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.jobScheduler:  
-         class: Myddleware\RegleBundle\Classes\jobScheduler
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.upgrade:  
-         class: Myddleware\RegleBundle\Classes\upgrade
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.notification:  
-         class: Myddleware\RegleBundle\Classes\notification
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.permission:  
-         class: Myddleware\RegleBundle\Classes\permission
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware.twig.user_extension:
-        class: Myddleware\RegleBundle\Twig\UserExtension
-        arguments: ["@doctrine.dbal.default_connection"]
-        tags:
-            - { name: twig.extension }
-     myddleware.twig.regle_extension:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+    myddleware_session.service:  
+        class: Myddleware\RegleBundle\Service\SessionService
+        arguments: ["@session"]
+
+    formula.myddleware:  
+        class: Myddleware\RegleBundle\Classes\myddlewareFormulaV1
+    myddleware_job.job:  
+        class: Myddleware\RegleBundle\Classes\job
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.home:  
+        class: Myddleware\RegleBundle\Classes\home
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_tools.tools:  
+        class: Myddleware\RegleBundle\Classes\tools
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.document:  
+        class: Myddleware\RegleBundle\Classes\document
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", %param%]
+    myddleware.template:  
+        class: Myddleware\RegleBundle\Classes\template
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.jobScheduler:  
+        class: Myddleware\RegleBundle\Classes\jobScheduler
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.upgrade:  
+        class: Myddleware\RegleBundle\Classes\upgrade
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.notification:  
+        class: Myddleware\RegleBundle\Classes\notification
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.permission:  
+        class: Myddleware\RegleBundle\Classes\permission
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware.twig.user_extension:
+    class: Myddleware\RegleBundle\Twig\UserExtension
+    arguments: ["@doctrine.dbal.default_connection"]
+    tags:
+        - { name: twig.extension }
+    myddleware.twig.regle_extension:
         class: Myddleware\RegleBundle\Twig\RegleExtension
         tags:
             - { name: twig.extension }
-     
-     # Rule services
-     myddleware_rule.salesforce:
-         class: Myddleware\RegleBundle\Solutions\salesforce
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sugarcrm:
-         class: Myddleware\RegleBundle\Solutions\sugarcrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.prestashop:
-         class: Myddleware\RegleBundle\Solutions\prestashop
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.dolist:
-         class: Myddleware\RegleBundle\Solutions\dolist
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.mailchimp:
-         class: Myddleware\RegleBundle\Solutions\mailchimp
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.eventbrite:
-         class: Myddleware\RegleBundle\Solutions\eventbrite
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.suitecrm:
-         class: Myddleware\RegleBundle\Solutions\suitecrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.vtigercrm:
-         class: Myddleware\RegleBundle\Solutions\vtigercrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.bittle:
-         class: Myddleware\RegleBundle\Solutions\bittle
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sagecrm:
-         class: Myddleware\RegleBundle\Solutions\sagecrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sapcrm:
-         class: Myddleware\RegleBundle\Solutions\sapcrm
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sap:
-         class: Myddleware\RegleBundle\Solutions\sap
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.mysql:
+            
+    # Rule services
+    myddleware_rule.salesforce:
+        class: Myddleware\RegleBundle\Solutions\salesforce
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.sugarcrm:
+        class: Myddleware\RegleBundle\Solutions\sugarcrm
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.prestashop:
+        class: Myddleware\RegleBundle\Solutions\prestashop
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.dolist:
+        class: Myddleware\RegleBundle\Solutions\dolist
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.mailchimp:
+        class: Myddleware\RegleBundle\Solutions\mailchimp
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.eventbrite:
+        class: Myddleware\RegleBundle\Solutions\eventbrite
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.suitecrm:
+        class: Myddleware\RegleBundle\Solutions\suitecrm
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.vtigercrm:
+        class: Myddleware\RegleBundle\Solutions\vtigercrm
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.bittle:
+        class: Myddleware\RegleBundle\Solutions\bittle
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.sagecrm:
+        class: Myddleware\RegleBundle\Solutions\sagecrm
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.sapcrm:
+        class: Myddleware\RegleBundle\Solutions\sapcrm
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.sap:
+        class: Myddleware\RegleBundle\Solutions\sap
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.mysql:
         class: Myddleware\RegleBundle\Solutions\mysql
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.oracledb:
+    myddleware_rule.oracledb:
         class: Myddleware\RegleBundle\Solutions\oracledb
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.microsoftsql:
+    myddleware_rule.microsoftsql:
         class: Myddleware\RegleBundle\Solutions\microsoftsql
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.magento:
+    myddleware_rule.magento:
         class: Myddleware\RegleBundle\Solutions\magento
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.moodle:
+    myddleware_rule.moodle:
         class: Myddleware\RegleBundle\Solutions\moodle
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.file:
+    myddleware_rule.file:
         class: Myddleware\RegleBundle\Solutions\file
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.shopapplication:
+    myddleware_rule.shopapplication:
         class: Myddleware\RegleBundle\Solutions\shopapplication
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sagelive:
+    myddleware_rule.sagelive:
         class: Myddleware\RegleBundle\Solutions\sagelive
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.sage50:
+    myddleware_rule.sage50:
         class: Myddleware\RegleBundle\Solutions\sage50
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.ringcentral:
+    myddleware_rule.ringcentral:
         class: Myddleware\RegleBundle\Solutions\ringcentral
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.cirrusshield:
+    myddleware_rule.cirrusshield:
         class: Myddleware\RegleBundle\Solutions\cirrusshield
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.zuora:
+    myddleware_rule.zuora:
         class: Myddleware\RegleBundle\Solutions\zuora
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.hubspot:
+    myddleware_rule.hubspot:
         class: Myddleware\RegleBundle\Solutions\hubspot
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.erpnext:
+    myddleware_rule.erpnext:
         class: Myddleware\RegleBundle\Solutions\erpnext
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.mautic:
+    myddleware_rule.mautic:
         class: Myddleware\RegleBundle\Solutions\mautic
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.medialogistique:
+    myddleware_rule.medialogistique:
         class: Myddleware\RegleBundle\Solutions\medialogistique
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.facebook:
+    myddleware_rule.facebook:
         class: Myddleware\RegleBundle\Solutions\facebook
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.iadvize:
+    myddleware_rule.iadvize:
         class: Myddleware\RegleBundle\Solutions\iadvize
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.woocommerce:
+    myddleware_rule.woocommerce:
         class: Myddleware\RegleBundle\Solutions\woocommerce
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.wooeventmanager:
+    myddleware_rule.wooeventmanager:
         class: Myddleware\RegleBundle\Solutions\wooeventmanager
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
-     myddleware_rule.wordpress:
+    myddleware_rule.wordpress:
         class: Myddleware\RegleBundle\Solutions\wordpress
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+    myddleware_rule.airtable:
+        class: Myddleware\RegleBundle\Solutions\airtable
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
 
-     myddleware_rule.rule:  
-         class: Myddleware\RegleBundle\Classes\rule
-         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", 'rule']
-     app.profile.form.type:
-         class: Myddleware\RegleBundle\Form\Type\ProfileFormType
-         tags:
-             - { name: form.type, alias: regle_user_profile }
-  
+    myddleware_rule.rule:  
+        class: Myddleware\RegleBundle\Classes\rule
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection", 'rule']
+    app.profile.form.type:
+        class: Myddleware\RegleBundle\Form\Type\ProfileFormType
+        tags:
+            - { name: form.type, alias: regle_user_profile }
