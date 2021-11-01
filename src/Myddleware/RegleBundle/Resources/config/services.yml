@@ -150,6 +150,9 @@ services:
      myddleware_rule.wordpress:
         class: Myddleware\RegleBundle\Solutions\wordpress
         arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
+     myddleware_rule.airtable:
+        class: Myddleware\RegleBundle\Solutions\airtable
+        arguments: ["@logger", "@service_container", "@doctrine.dbal.default_connection"]
 
      myddleware_rule.rule:  
          class: Myddleware\RegleBundle\Classes\rule
