@@ -980,12 +980,18 @@ class rulecore
 	}
 	
 	// Remove a document 
-	protected function changeStatus($id_document,$toStatus) {	
+	protected function changeStatus($id_document,$toStatus,$message = null,$docIdRefError = null) {
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
 		// Set the param values and clear all document attributes
 		$this->documentManager->setParam($param, true);
+		if (!empty($message)) {
+			$this->documentManager->setMessage($message);
+		}
+		if (!empty($docIdRefError)) {
+			$this->documentManager->setDocIdRefError($docIdRefError);
+		}
 		$this->documentManager->updateStatus($toStatus);
 	}
 	
@@ -1273,8 +1279,9 @@ class rulecore
 						$response = $this->solutionTarget->updateData($send);						
 					}
 					// Delete data from target application
-					elseif ($type == 'D') {			
-						$send['data'] = $this->beforeDelete($send['data']);;
+					elseif ($type == 'D') {
+						$this->checkBeforeDelete($send);						
+						$send['data'] = $this->beforeDelete($send['data']);
 						$response = $this->solutionTarget->deleteData($send);
 					}
 					else {
@@ -1295,6 +1302,73 @@ class rulecore
 			$this->logger->error( $response['error'] );
 		}				
 		return $response;
+	}
+	
+	// Check before we send a record deletion
+	protected function checkBeforeDelete($send) {
+		// Check in case of several source records data point to the same target record
+		// In this case we can't send the deletion as the record still exists in the source application
+		// A merge action in the source application could have generated the deletion action but the deletion can't be sent.
+		if (!empty($send['data'])) {
+			foreach ($send['data'] as $docId => $record) {
+				try {
+					// Should never be empty
+					if (empty($record['target_id'])) {
+						throw new \Exception ('Failed to send deletion because there is no target id in the document');
+					}
+					// First step, we get all the document with the same target module, connector and record id and a source id different
+					// We exclude the cancel document except the one no_send
+					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
+					$query = "	SELECT rule.conn_id_target, rule.module_target, document.target_id, document.source_id, 
+									GROUP_CONCAT(DISTINCT document.type) types,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.date_created DESC) documents
+								FROM document 
+									INNER JOIN rule
+										ON document.rule_id = rule.id
+								WHERE 
+										rule.conn_id_target = :conn_id_target
+									AND rule.module_target = :module_target
+									AND document.target_id = :target_id
+									AND document.source_id <> (SELECT source_id from document WHERE id = :docId)
+									AND document.deleted = 0
+									AND (
+												document.global_status <> 'Cancel'
+										OR (
+												document.global_status = 'Cancel'
+											AND document.status = 'No_send'
+										)
+									)
+								GROUP BY rule.conn_id_target, rule.module_target, document.target_id, document.source_id
+								HAVING types NOT LIKE '%D%'";
+					$stmt = $this->connection->prepare($query);
+					$stmt->bindValue(":conn_id_target", $this->rule['conn_id_target']);
+					$stmt->bindValue(":module_target", $this->rule['module_target']);
+					$stmt->bindValue(":target_id", $record['target_id']);
+					$stmt->bindValue(":docId", $docId);
+					$stmt->execute();	   				
+					$results = $stmt->fetchAll();
+					if(!empty($results)) {
+						foreach ($results as $result) {
+							// Get the last reference document created to add it into the log
+							$documents = explode(',',$result['documents']);							
+							if (!empty($documents[0])) {
+								$docIdRefError = $documents[0];
+							}
+							throw new \Exception ('A duplicate source record not deleted exists for the target record.');			
+						}
+					}
+				} catch (\Exception $e) {
+					// Remove the document in the list to be sent
+					unset($send['data'][$docId]);
+					// Change document status
+					$this->changeStatus($docId,'No_send', $e->getMessage(), (!empty($docIdRefError) ? $docIdRefError : ''));
+				}	
+			}
+			// Exception if all documents has been removed from data
+			if (empty($send['data'])) {
+				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
+			}
+		}
 	}
 	
 	protected function checkDuplicate($transformedData) {
