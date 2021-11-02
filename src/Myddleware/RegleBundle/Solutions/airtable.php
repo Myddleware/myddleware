@@ -280,7 +280,7 @@ class airtablecore extends solution {
     }
 
     /**
-     * Undocumented function
+     * Insert or update data depending on method's value
      *
      * @param string $method create|update
      * @param array $param
@@ -302,14 +302,14 @@ class airtablecore extends solution {
                     unset($data['target_id']);
                 }
                 // unset($data['createdTime']);
-                $body['records'][]['fields'] = $data;
+                $body['records'][0]['fields'] = $data;
                 $client = HttpClient::create();
-                $options = [
-                    'auth_bearer' => $this->token,
-                    'json' => $body,
-                    'headers' => ['Content-Type' => 'application/json']
-                ];
                 if($method === 'create'){
+                    $options = [
+                        'auth_bearer' => $this->token,
+                        'json' => $body,
+                        'headers' => ['Content-Type' => 'application/json']
+                    ];
                     $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
@@ -319,24 +319,29 @@ class airtablecore extends solution {
                     // UPDATE => checking => appel airtable ac ID & READ avec Query !  
                     // TODO: bugfix update (issue with target ID ) : right now duplicates are sent without checking whether there's already a record or not
                     $targetId = $data['target_id'];
-                    $body['records'][]['id'] = $targetId;
                     unset($data['target_id']);
+                    unset($body['records'][0]['fields']['target_id']);
+                    $body['records'][0]['id'] = $targetId;
+                    $options = [
+                        'auth_bearer' => $this->token,
+                        'json' => $body,
+                        'headers' => ['Content-Type' => 'application/json']
+                    ];
                     $response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
-            $response = $content;
-            if($response){
-                $record = $response['records'][0];
+            if(!empty($content)){
+                $record = $content['records'][0];
                 if(!empty($record['id'])){
                     $result[$idDoc] = array(
                                             'id' => $record['id'],
                                             'error' => false
                                     );
                 } else {
-                    throw new \Exception('Error during '.print_r($response));
+                    throw new \Exception('Error during '.print_r($content));
                 }
             }
             }catch(\Exception $e){
