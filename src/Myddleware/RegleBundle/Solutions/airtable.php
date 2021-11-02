@@ -37,6 +37,8 @@ class airtablecore extends solution {
     protected $projectID;
     protected $token;
     protected $delaySearch = '-1 month';
+    protected $FieldsDuplicate = array('Contacts' => array('email'));
+
     /**
      * From AirTable API doc : 
      * pageSize = 100 
@@ -111,6 +113,7 @@ class airtablecore extends solution {
         // we should be able to use this endpoint to list all modules & fields
         // $metadataTables = "https://api.airtable.com/v0/meta/bases/$this->projectID/tables";
         // return $this->getMetadata();
+        // THESE MODULES ARE JUST EXAMPLES, NEED TO BE MODIFIED
         return array(
             'Accounts' =>	'Accounts',
             'Contacts' =>	'Contacts',
@@ -126,7 +129,7 @@ class airtablecore extends solution {
      */
     public function get_module_fields($module, $type = 'source') {
         parent::get_module_fields($module, $type);
-                // TODO: once we get access to the metadata API key, 
+        // TODO: once we get access to the metadata API key, 
         // we should be able to use this endpoint to list all modules & fields
         // $metadataTables = "https://api.airtable.com/v0/meta/bases/$this->projectID/tables";
         try {
@@ -179,15 +182,28 @@ class airtablecore extends solution {
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
                 //specific record requested
-                if (!empty($param['query']['id'])) {
-                    $id = $param['query']['id'];
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content2 = $response->getContent();
-					$content2 = $response->toArray();
-					// Add a dimension to fit with the rest of the method
-					$content[] = $content2;
+                if(!empty($param['query'])){
+                    if (!empty($param['query']['id'])) {
+                        $id = $param['query']['id'];
+                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
+                        $statusCode = $response->getStatusCode();
+                        $contentType = $response->getHeaders()['content-type'][0];
+                        $content2 = $response->getContent();
+                        $content2 = $response->toArray();
+                        // Add a dimension to fit with the rest of the method
+                        $content[] = $content2;
+                        //TODO: query non vide mais PAS query ID
+                    } else {
+                        foreach($param['query'] as $key => $queryParam){
+                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?sort%5B0%5D%5Bfield%5D='.$key, $options);
+                            $statusCode = $response->getStatusCode();
+                            $contentType = $response->getHeaders()['content-type'][0];
+                            $content2 = $response->getContent();
+                            $content2 = $response->toArray();
+                            // Add a dimension to fit with the rest of the method
+                            $content[] = $content2;
+                        }
+                    }
                 } else {
                     // all records
                     $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module, $options);
@@ -210,7 +226,6 @@ class airtablecore extends solution {
                 
                         // TODO: FIND AN ALTERNATIVE TO THIS => for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
                         $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : new DateTime();
-                        var_dump($dateModif);
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
                         $result['values'][$record['id']]['id'] = $record['id'];
                     }
@@ -301,7 +316,6 @@ class airtablecore extends solution {
                 if($method === 'create'){
                     unset($data['target_id']);
                 }
-                // unset($data['createdTime']);
                 $body['records'][0]['fields'] = $data;
                 $client = HttpClient::create();
                 if($method === 'create'){
@@ -316,8 +330,6 @@ class airtablecore extends solution {
                     $content = $response->getContent();
                     $content = $response->toArray();
                 } else {
-                    // UPDATE => checking => appel airtable ac ID & READ avec Query !  
-                    // TODO: bugfix update (issue with target ID ) : right now duplicates are sent without checking whether there's already a record or not
                     $targetId = $data['target_id'];
                     unset($data['target_id']);
                     unset($body['records'][0]['fields']['target_id']);
@@ -346,7 +358,6 @@ class airtablecore extends solution {
             }
             }catch(\Exception $e){
                 $error = $e->getMessage();
-                // var_dump($error);
                 $result[$idDoc] = array(
                                         'id' => '-1',
                                         'error' => $error

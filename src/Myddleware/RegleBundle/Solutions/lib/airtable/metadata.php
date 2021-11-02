@@ -18,3 +18,13 @@ $moduleFields = array (
         'date_modified' => array( 'label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
     ),
 );
+
+
+$fieldsRelate = array (
+    'Contacts' => array(
+        'id (from Accounts)' => array( 'label' => 'Accounts Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    ),
+    // 'Accounts' => array(
+    //      'Contacts'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+    // )
+);
