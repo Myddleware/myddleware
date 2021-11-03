@@ -38,6 +38,7 @@ class airtablecore extends solution {
     protected $token;
     protected $delaySearch = '-1 month';
     protected $FieldsDuplicate = array('Contacts' => array('email'));
+    protected $required_relationships = array('Contacts' => array());
 
     /**
      * From AirTable API doc : 
@@ -128,12 +129,12 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_module_fields($module, $type = 'source') {
+        require_once('lib/airtable/metadata.php');
         parent::get_module_fields($module, $type);
         // TODO: once we get access to the metadata API key, 
         // we should be able to use this endpoint to list all modules & fields
         // $metadataTables = "https://api.airtable.com/v0/meta/bases/$this->projectID/tables";
         try {
-            require_once('lib/airtable/metadata.php');
             // $this->loginMetadataAPI();
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = $moduleFields[$module];
@@ -192,16 +193,20 @@ class airtablecore extends solution {
                         $content2 = $response->toArray();
                         // Add a dimension to fit with the rest of the method
                         $content[] = $content2;
-                        //TODO: query non vide mais PAS query ID
                     } else {
+                        // Filter by specific field (for example to avoid duplicate records)
                         foreach($param['query'] as $key => $queryParam){
-                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?sort%5B0%5D%5Bfield%5D='.$key, $options);
+                            // TODO: improve this, for now we can only filter with ONE key, 
+                            // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
+                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
                             $statusCode = $response->getStatusCode();
                             $contentType = $response->getHeaders()['content-type'][0];
                             $content2 = $response->getContent();
                             $content2 = $response->toArray();
                             // Add a dimension to fit with the rest of the method
                             $content[] = $content2;
+                            // TODO: POURQUOI est-ce que même lorsqu'on a un résultat positif ici (donc des records de lus), 
+                            // l'écriture a quand même lieu en target ???????
                         }
                     }
                 } else {
@@ -212,7 +217,6 @@ class airtablecore extends solution {
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
-                // TODO: relationships !!!! 
                 // TODO: records DO NOT HAVE A DATE MODIFIED ATTRIBUTE
                 if(!empty($content['records'])){
                     $currentCount = 0;
@@ -223,7 +227,6 @@ class airtablecore extends solution {
                         foreach($param['fields'] as $field){
                             $result['values'][$record['id']][$field] = (!empty($record['fields'][$field]) ? $record['fields'][$field] : '');
                         }
-                
                         // TODO: FIND AN ALTERNATIVE TO THIS => for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
                         $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : new DateTime();
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);

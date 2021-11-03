@@ -19,10 +19,11 @@ $moduleFields = array (
     ),
 );
 
+// TODO: bugfix 'undefined index required_relationship DefaultController.php line 1512' !!! 
 
 $fieldsRelate = array (
     'Contacts' => array(
-        'id (from Accounts)' => array( 'label' => 'Accounts Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
+        'id (from Accounts)' => array( 'label' => 'Accounts Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0),
     ),
     // 'Accounts' => array(
     //      'Contacts'	=> array( 'label' => 'Customer id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
