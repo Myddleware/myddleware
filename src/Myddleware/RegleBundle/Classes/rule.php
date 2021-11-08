@@ -1123,8 +1123,12 @@ class rulecore {
 	protected function clearSendData($sendData) {
 		if (!empty($sendData)) {
 			foreach($sendData as $key => $value){
-				unset($value['source_date_modified']);
-				unset($value['id_doc_myddleware']);
+				if (isset($value['source_date_modified'])) {
+					unset($value['source_date_modified']);
+				}
+				if (isset($value['id_doc_myddleware'])) {
+					unset($value['id_doc_myddleware']);
+				}
 				$sendData[$key] = $value;
 			}
 			return $sendData;
@@ -1205,11 +1209,11 @@ class rulecore {
 						$response = $this->solutionTarget->create($send);
 					}
 					// Modification des données dans la cible
-					elseif ($type == 'U') {			
+					elseif ($type == 'U') {
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
+						$send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+						$send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
 						$response = $this->solutionTarget->update($send);
 					}
 					// Delete data from target application
