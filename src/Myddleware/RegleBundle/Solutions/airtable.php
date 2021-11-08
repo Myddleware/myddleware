@@ -29,14 +29,31 @@ use DateTime;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-
 class airtablecore extends solution {
 
     protected $airtableURL = 'https://api.airtable.com/v0/';
     protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
-    protected $projectID;
+    /**
+     * Airtable base
+     *
+     * @var string
+     */
+    protected $projectID; 
+    /**
+     * API key (provided by Airtable)
+     *
+     * @var string
+     */
     protected $token;
     protected $delaySearch = '-1 month';
+    /**
+     * Name of the table / module that will be used as the default table to access the login() method
+     * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
+     * However, this can of course be changed to any table value already present in your Airtable base
+     * @var string
+     */
+    protected $tableName = 'Contacts';
+
     /**
      * From AirTable API doc : 
      * pageSize = 100 
@@ -48,6 +65,9 @@ class airtablecore extends solution {
     //Log in form parameters
     public function getFieldsLogin()
     {
+        // QUESTION: could we possibly pass a MODULE here ? 
+        // This would allow us to then only resort to variable in login etc
+        // However it will obviously mean 1 connector per module/table, which is of course not ideal.
         return array(
             array(
                 'name' => 'projectid',
@@ -73,20 +93,14 @@ class airtablecore extends solution {
         try {
             $this->projectID = $this->paramConnexion['projectid'];
             $this->token =  $this->paramConnexion['apikey'];
+            // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
-            // we test the connection to the API with a request on Contacts
-            // TODO: this needs to be changed as I assume that each customer might've different modules
-            // request sent to Airtable.com to get metadata API access keys, awaiting response
-            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/Contacts', $options);
-            // $response = $client->request('GET', $this->metadataApiEndpoint.$this->projectID.'/Accounts', $options);
-            // $response = $client->request('GET', $this->metadataApiEndpoint, $options);
-            // $response = $client->request('GET', "https://api.airtable.com/v0/meta/bases", $options);
+            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName, $options);
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
             $content = $response->toArray();
-    
             if(!empty($content) && $statusCode === 200){
                 $this->connexion_valide = true;
             }
@@ -97,9 +111,6 @@ class airtablecore extends solution {
         }
     }
 
-    // BIG ISSUE: Modules & Fields are ENTIRELY CUSTOM, therefore, 
-    //how can we access these fields from Myd without API Meta ??
-
     /**
      * Retrieve the list of modules available to be read or sent
      *
@@ -107,13 +118,12 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_modules($type = 'source') {
-        // TODO: once we get access to the metadata API key, 
-        // we should be able to use this endpoint to list all modules & fields
-        // $metadataTables = "https://api.airtable.com/v0/meta/bases/$this->projectID/tables";
-        // return $this->getMetadata();
+        /**
+         * These modules MUST BE HARDCODED in order for the connector to work as Airtable modules are 100% custom
+         */
         return array(
-            'Accounts' =>	'Accounts',
-            'Contacts' =>	'Contacts',
+            // 'Accounts' =>	'Accounts',
+            // 'Contacts' =>	'Contacts',
             );
     }
 
@@ -125,13 +135,9 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_module_fields($module, $type = 'source') {
+        require_once('lib/airtable/metadata.php');
         parent::get_module_fields($module, $type);
-                // TODO: once we get access to the metadata API key, 
-        // we should be able to use this endpoint to list all modules & fields
-        // $metadataTables = "https://api.airtable.com/v0/meta/bases/$this->projectID/tables";
         try {
-            require_once('lib/airtable/metadata.php');
-            // $this->loginMetadataAPI();
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = $moduleFields[$module];
             }
@@ -179,15 +185,28 @@ class airtablecore extends solution {
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
                 //specific record requested
-                if (!empty($param['query']['id'])) {
-                    $id = $param['query']['id'];
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content2 = $response->getContent();
-					$content2 = $response->toArray();
-					// Add a dimension to fit with the rest of the method
-					$content[] = $content2;
+                if(!empty($param['query'])){
+                    if (!empty($param['query']['id'])) {
+                        $id = $param['query']['id'];
+                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
+                        $statusCode = $response->getStatusCode();
+                        $contentType = $response->getHeaders()['content-type'][0];
+                        $content2 = $response->getContent();
+                        $content2 = $response->toArray();
+                        // Add a dimension to fit with the rest of the method
+                        $content[] = $content2;
+                    } else {
+                        // Filter by specific field (for example to avoid duplicate records)
+                        foreach($param['query'] as $key => $queryParam){
+                            // TODO: improve this, for now we can only filter with ONE key, 
+                            // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
+                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
+                            $statusCode = $response->getStatusCode();
+                            $contentType = $response->getHeaders()['content-type'][0];
+                            $content = $response->getContent();
+                            $content = $response->toArray();        
+                        }
+                    }
                 } else {
                     // all records
                     $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module, $options);
@@ -196,8 +215,6 @@ class airtablecore extends solution {
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
-                // TODO: relationships !!!! 
-                // TODO: records DO NOT HAVE A DATE MODIFIED ATTRIBUTE
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -207,10 +224,8 @@ class airtablecore extends solution {
                         foreach($param['fields'] as $field){
                             $result['values'][$record['id']][$field] = (!empty($record['fields'][$field]) ? $record['fields'][$field] : '');
                         }
-                
-                        // TODO: FIND AN ALTERNATIVE TO THIS => for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
+                        // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
                         $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : new DateTime();
-                        var_dump($dateModif);
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
                         $result['values'][$record['id']]['id'] = $record['id'];
                     }
@@ -240,7 +255,6 @@ class airtablecore extends solution {
             $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
             //get all instances of the module
             $read = $this->read($param);
-
             if (!empty($read['error'])) {
                 $result['error'] = $read['error'];
             } else {
@@ -262,7 +276,7 @@ class airtablecore extends solution {
     /**
      * Create data into target app
      *
-     * @param [type] $param
+     * @param array $param
      * @return void
      */
     public function create($param){
@@ -280,7 +294,7 @@ class airtablecore extends solution {
     }
 
     /**
-     * Undocumented function
+     * Insert or update data depending on method's value
      *
      * @param string $method create|update
      * @param array $param
@@ -290,7 +304,6 @@ class airtablecore extends solution {
         // Airtable expects data to come in a 'records' array
         $body = [];
         $body['records']= [];
-        // TODO: paquets de 10 plutot que 1 requet 1 par 1
         foreach($param['data'] as $idDoc => $data){
             try{
                 $baseID = $this->paramConnexion['projectid'];
@@ -301,47 +314,48 @@ class airtablecore extends solution {
                 if($method === 'create'){
                     unset($data['target_id']);
                 }
-                // unset($data['createdTime']);
-                $body['records'][]['fields'] = $data;
+                $body['records'][0]['fields'] = $data;
                 $client = HttpClient::create();
-                $options = [
-                    'auth_bearer' => $this->token,
-                    'json' => $body,
-                    'headers' => ['Content-Type' => 'application/json']
-                ];
                 if($method === 'create'){
+                    $options = [
+                        'auth_bearer' => $this->token,
+                        'json' => $body,
+                        'headers' => ['Content-Type' => 'application/json']
+                    ];
                     $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 } else {
-                    // UPDATE => checking => appel airtable ac ID & READ avec Query !  
-                    // TODO: bugfix update (issue with target ID ) : right now duplicates are sent without checking whether there's already a record or not
                     $targetId = $data['target_id'];
-                    $body['records'][]['id'] = $targetId;
                     unset($data['target_id']);
+                    unset($body['records'][0]['fields']['target_id']);
+                    $body['records'][0]['id'] = $targetId;
+                    $options = [
+                        'auth_bearer' => $this->token,
+                        'json' => $body,
+                        'headers' => ['Content-Type' => 'application/json']
+                    ];
                     $response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
-            $response = $content;
-            if($response){
-                $record = $response['records'][0];
+            if(!empty($content)){
+                $record = $content['records'][0];
                 if(!empty($record['id'])){
                     $result[$idDoc] = array(
                                             'id' => $record['id'],
                                             'error' => false
                                     );
                 } else {
-                    throw new \Exception('Error during '.print_r($response));
+                    throw new \Exception('Error during '.print_r($content));
                 }
             }
             }catch(\Exception $e){
                 $error = $e->getMessage();
-                // var_dump($error);
                 $result[$idDoc] = array(
                                         'id' => '-1',
                                         'error' => $error
@@ -352,30 +366,6 @@ class airtablecore extends solution {
         }
         return $result;
     }
-
-    // Check data before create 
-	// Add a throw exeption if error
-	protected function checkDataBeforeCreate($param,$data) {
-		// Exception if the job has been stopped manually
-        $this->isJobActive($param);
-		return $data;
-	}
-
-	// Check data before update 
-	// Add a throw exeption if error
-	protected function checkDataBeforeUpdate($param,$data) {
-		// Exception if the job has been stopped manually
-		$this->isJobActive($param);
-		return $data;
-	}
-	
-	// Check data before update 
-	// Add a throw exeption if error
-	protected function checkDataBeforeDelete($param,$data) {
-		// Exception if the job has been stopped manually
-		$this->isJobActive($param);
-		return $data;
-	}
 
 
     protected function convertResponse($param, $response) {
