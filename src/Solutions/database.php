@@ -458,7 +458,7 @@ class databasecore extends solution
 		}
 		// No modification
 		if ($q->rowCount() == 0) {
-			throw new \Exception('Update query hasn\'t modified any record. Please make sure this record still exists in your database. Query : '.$sql);
+			$this->message = 'There is no error but the query hasn\'t modified any record.';
 		}
 		// Several modifications
 		if ($q->rowCount() > 1) {

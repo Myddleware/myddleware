@@ -1189,8 +1189,12 @@ class rulecore
 	protected function clearSendData($sendData) {
 		if (!empty($sendData)) {
 			foreach($sendData as $key => $value){
-				unset($value['source_date_modified']);
-				unset($value['id_doc_myddleware']);
+				if (isset($value['source_date_modified'])) {
+					unset($value['source_date_modified']);
+				}
+				if (isset($value['id_doc_myddleware'])) {
+					unset($value['id_doc_myddleware']);
+				}
 				$sendData[$key] = $value;
 			}
 			return $sendData;
@@ -1271,11 +1275,11 @@ class rulecore
 						$response = $this->solutionTarget->createData($send);
 					}
 					// Modification des données dans la cible
-					elseif ($type == 'U') {						
+					elseif ($type == 'U') {
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);		
+						$send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+						$send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
 						$response = $this->solutionTarget->updateData($send);						
 					}
 					// Delete data from target application
@@ -1319,26 +1323,26 @@ class rulecore
 					// First step, we get all the document with the same target module, connector and record id and a source id different
 					// We exclude the cancel document except the one no_send
 					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
-					$query = "	SELECT rule.conn_id_target, rule.module_target, document.target_id, document.source_id, 
-									GROUP_CONCAT(DISTINCT document.type) types,
-									GROUP_CONCAT(DISTINCT document.id ORDER BY document.date_created DESC) documents
-								FROM document 
-									INNER JOIN rule
-										ON document.rule_id = rule.id
+					$query = "	SELECT Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id, 
+									GROUP_CONCAT(DISTINCT Document.type) types,
+									GROUP_CONCAT(DISTINCT Document.id ORDER BY Document.date_created DESC) documents
+								FROM Document 
+									INNER JOIN Rule
+										ON Document.rule_id = Rule.id
 								WHERE 
-										rule.conn_id_target = :conn_id_target
-									AND rule.module_target = :module_target
-									AND document.target_id = :target_id
-									AND document.source_id <> (SELECT source_id from document WHERE id = :docId)
-									AND document.deleted = 0
+										Rule.conn_id_target = :conn_id_target
+									AND Rule.module_target = :module_target
+									AND Document.target_id = :target_id
+									AND Document.source_id <> (SELECT source_id from Document WHERE id = :docId)
+									AND Document.deleted = 0
 									AND (
-												document.global_status <> 'Cancel'
+												Document.global_status <> 'Cancel'
 										OR (
-												document.global_status = 'Cancel'
-											AND document.status = 'No_send'
+												Document.global_status = 'Cancel'
+											AND Document.status = 'No_send'
 										)
 									)
-								GROUP BY rule.conn_id_target, rule.module_target, document.target_id, document.source_id
+								GROUP BY Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id
 								HAVING types NOT LIKE '%D%'";
 					$stmt = $this->connection->prepare($query);
 					$stmt->bindValue(":conn_id_target", $this->rule['conn_id_target']);
