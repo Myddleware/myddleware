@@ -33,6 +33,7 @@ class airtablecore extends solution {
 
     protected $airtableURL = 'https://api.airtable.com/v0/';
     protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
+
     /**
      * Airtable base
      *
@@ -119,12 +120,11 @@ class airtablecore extends solution {
      */
     public function get_modules($type = 'source') {
         /**
-         * These modules MUST BE HARDCODED in order for the connector to work as Airtable modules are 100% custom
+         * These modules MUST BE HARDCODED in order for the connector to work as 
+         * Airtable modules are 100% custom
+         * e.g. return array('Contacts' => 'Contacts');
          */
-        return array(
-            // 'Accounts' =>	'Accounts',
-            // 'Contacts' =>	'Contacts',
-            );
+        return array();
     }
 
     /**
@@ -151,7 +151,6 @@ class airtablecore extends solution {
 			}
 
             return $this->moduleFields;
-
         }catch(\Exception $e){
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
 			return false;
@@ -225,7 +224,8 @@ class airtablecore extends solution {
                             $result['values'][$record['id']][$field] = (!empty($record['fields'][$field]) ? $record['fields'][$field] : '');
                         }
                         // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
-                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : new DateTime();
+                        $dateTime = new DateTime();
+                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : $dateTime->date;
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
                         $result['values'][$record['id']]['id'] = $record['id'];
                     }
@@ -238,6 +238,7 @@ class airtablecore extends solution {
             } while(!$stop && $currentCount === $this->defaultLimit) ;
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
         return $result;
     }
@@ -268,7 +269,8 @@ class airtablecore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;		
+			$result['done'] = -1;
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());	
         }
         return $result;
     }
@@ -304,6 +306,11 @@ class airtablecore extends solution {
         // Airtable expects data to come in a 'records' array
         $body = [];
         $body['records']= [];
+        /**
+         * In order to load relationships, we MUST first load all fields
+         */
+        $allFields = $this->get_module_fields($param['module'], 'source');
+        $relationships = $this->get_module_fields_relate($param['module'], 'source');
         foreach($param['data'] as $idDoc => $data){
             try{
                 $baseID = $this->paramConnexion['projectid'];
@@ -315,6 +322,16 @@ class airtablecore extends solution {
                     unset($data['target_id']);
                 }
                 $body['records'][0]['fields'] = $data;
+                /**
+                 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
+                 */
+                foreach($body['records'][0]['fields'] as $fieldName => $fieldVal){
+                    if(array_key_exists($fieldName, $relationships)){
+                        $arrayVal = [];
+                        $arrayVal[] = $fieldVal;
+                        $body['records'][0]['fields'][$fieldName] = $arrayVal;
+                    }
+                }
                 $client = HttpClient::create();
                 if($method === 'create'){
                     $options = [
@@ -357,9 +374,11 @@ class airtablecore extends solution {
             }catch(\Exception $e){
                 $error = $e->getMessage();
                 $result[$idDoc] = array(
-                                        'id' => '-1',
-                                        'error' => $error
-                                        );
+                    'id' => '-1',
+                    'error' => $error
+                );
+                $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
             } 
             // Modification du statut du flux
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
