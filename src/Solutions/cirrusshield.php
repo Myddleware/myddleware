@@ -292,7 +292,7 @@ class cirrusshieldcore extends solution
             foreach ($param['data'] as $idDoc => $data) {
                 ++$i;
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $xmlData .= '<'.$param['module'].'>';
 
                 // Save the idoc to manage result in case of mass upsert

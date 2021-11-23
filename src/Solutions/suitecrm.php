@@ -602,7 +602,7 @@ class suitecrmcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataSugar = [];
                 foreach ($data as $key => $value) {
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
@@ -649,7 +649,7 @@ class suitecrmcore extends solution
         foreach ($param['data'] as $key => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataSugar = [];
                 if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
                     foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
