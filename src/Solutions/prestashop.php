@@ -744,7 +744,7 @@ class prestashopcore extends solution
 
         foreach ($param['data'] as $idDoc => $data) {
             // Check control before create
-            $data = $this->checkDataBeforeCreate($param, $data);
+            $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
             // on ajoute le token pour le module customer_threads
             if ('customer_threads' == $param['module']) {
                 $data['token'] = 'token';

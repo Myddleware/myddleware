@@ -262,7 +262,7 @@ class mauticcore extends solution
                 }
 
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 // update the record to Mautic
                 if ('update' == $action) {
                     $record = $moduleApi->edit($targetId, $data, true);
@@ -308,7 +308,7 @@ class mauticcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 if (empty($data[$module1])) {
                     throw new \Exception('Failed to manage the '.$module2.' to the '.$module1.' to Mautic because '.$module1.' is empty.');
                 }
@@ -425,7 +425,7 @@ class mauticcore extends solution
         }
     }
 
-    protected function checkDataBeforeCreate($param, $data)
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
         // Remove target_id field as it is a Myddleware field
         if (array_key_exists('target_id', $data)) {

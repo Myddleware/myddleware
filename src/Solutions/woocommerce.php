@@ -298,7 +298,7 @@ class woocommercecore extends solution {
                 $result= array();
                 $param['method'] = $method;
                 $module = $param['module'];
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
 
                 if($method === 'create'){
                     unset($data['target_id']);

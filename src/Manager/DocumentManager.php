@@ -309,6 +309,8 @@ class documentcore
 		if (!empty($param['ruleRelationships'])) {
 			$this->ruleRelationships = $param['ruleRelationships'];
 		}
+		// Init type error for each new document 
+		$this->typeError = 'S';
 	}
 	
 	// Clear all class attributes

@@ -409,7 +409,7 @@ class solutioncore
 					$record = $this->cleanMyddlewareRecord($record);
 					
 					// Check control before create
-					$record = $this->checkDataBeforeCreate($param, $record);
+					$record = $this->checkDataBeforeCreate($param, $record, $idDoc);
 					// Call create method
 					$recordId = $this->create($param, $record);
 					
@@ -868,7 +868,7 @@ class solutioncore
 
     // Check data before create
     // Add a throw exeption if error
-    protected function checkDataBeforeCreate($param, $data)
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
