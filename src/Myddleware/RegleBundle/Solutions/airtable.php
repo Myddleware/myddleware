@@ -305,6 +305,7 @@ class airtablecore extends solution {
     public function upsert($method, $param){
         // Airtable expects data to come in a 'records' array
         $body = [];
+        $body['typecast'] = true;
         $body['records']= [];
         /**
          * In order to load relationships, we MUST first load all fields
