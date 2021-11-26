@@ -296,7 +296,7 @@ class sugarcrmcore extends solution
             try {
                 // Check control before create/update
                 $param['method'] = $method;
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
 
                 if ('create' == $method) {
                     // Myddleware field empty when data transfer type is create

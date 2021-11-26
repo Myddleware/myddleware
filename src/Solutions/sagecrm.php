@@ -497,7 +497,7 @@ class sagecrmcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $record = [];
                 $object = [];
                 foreach ($data as $key => $value) {
