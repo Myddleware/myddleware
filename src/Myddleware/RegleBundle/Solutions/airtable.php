@@ -62,6 +62,13 @@ class airtablecore extends solution {
      * @var integer
      */
     protected $defaultLimit = 100; 
+	
+    /**
+     * Max number of records posted by call
+     *
+     * @var string
+     */
+    protected $callPostLimit = 10; 
 
     //Log in form parameters
     public function getFieldsLogin()
@@ -303,87 +310,106 @@ class airtablecore extends solution {
      * @return void
      */ 
     public function upsert($method, $param){
-        // Airtable expects data to come in a 'records' array
-        $body = [];
-        $body['typecast'] = true;
-        $body['records']= [];
+		// Init parameters
+		$baseID = $this->paramConnexion['projectid'];
+		$result= array();
+		$param['method'] = $method;
+		$module = ucfirst($param['module']);
+		
+		// trigger to add custom code if needed
+		$data = $this->checkDataBeforeCreate($param, $param['data']);
+		
         /**
          * In order to load relationships, we MUST first load all fields
          */
         $allFields = $this->get_module_fields($param['module'], 'source');
         $relationships = $this->get_module_fields_relate($param['module'], 'source');
-        foreach($param['data'] as $idDoc => $data){
-            try{
-                $baseID = $this->paramConnexion['projectid'];
-                $result= array();
-                $param['method'] = $method;
-                $module = ucfirst($param['module']);
-                $data = $this->checkDataBeforeCreate($param, $data);
-                if($method === 'create'){
-                    unset($data['target_id']);
-                }
-                $body['records'][0]['fields'] = $data;
-                /**
-                 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
-                 */
-                foreach($body['records'][0]['fields'] as $fieldName => $fieldVal){
-                    if(array_key_exists($fieldName, $relationships)){
-                        $arrayVal = [];
-                        $arrayVal[] = $fieldVal;
-                        $body['records'][0]['fields'][$fieldName] = $arrayVal;
-                    }
-                }
-                $client = HttpClient::create();
-                if($method === 'create'){
-                    $options = [
-                        'auth_bearer' => $this->token,
-                        'json' => $body,
-                        'headers' => ['Content-Type' => 'application/json']
-                    ];
-                    $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content = $response->getContent();
-                    $content = $response->toArray();
-                } else {
-                    $targetId = $data['target_id'];
-                    unset($data['target_id']);
-                    unset($body['records'][0]['fields']['target_id']);
-                    $body['records'][0]['id'] = $targetId;
-                    $options = [
-                        'auth_bearer' => $this->token,
-                        'json' => $body,
-                        'headers' => ['Content-Type' => 'application/json']
-                    ];
-                    $response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content = $response->getContent();
-                    $content = $response->toArray();
-                }
-            if(!empty($content)){
-                $record = $content['records'][0];
-                if(!empty($record['id'])){
-                    $result[$idDoc] = array(
-                                            'id' => $record['id'],
-                                            'error' => false
-                                    );
-                } else {
-                    throw new \Exception('Error during '.print_r($content));
-                }
-            }
-            }catch(\Exception $e){
-                $error = $e->getMessage();
-                $result[$idDoc] = array(
-                    'id' => '-1',
-                    'error' => $error
-                );
-                $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
-            } 
-            // Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-        }
+		
+		
+		// Group records for each calls
+		// Split the data into several array using the limite size
+		$recordsArray = array_chunk($param['data'], $this->callPostLimit, true);	
+		foreach($recordsArray as $records) {			
+			// Airtable expects data to come in a 'records' array
+			$body = [];
+			$body['typecast'] = true;
+			$body['records']= array();
+			$i = 0;
+			try{
+				foreach($records as $idDoc => $data){
+					if($method === 'create'){
+						unset($data['target_id']);
+					}
+					$body['records'][$i]['fields'] = $data;
+					/**
+					 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
+					 */
+					foreach($body['records'][$i]['fields'] as $fieldName => $fieldVal){
+						if(array_key_exists($fieldName, $relationships)){
+							$arrayVal = [];
+							$arrayVal[] = $fieldVal;
+							$body['records'][$i]['fields'][$fieldName] = $arrayVal;
+						}
+					}
+					// Add the record id in the body if update 
+					if($method === 'update'){
+						$body['records'][$i]['id'] = $data['target_id'];
+						unset($body['records'][$i]['fields']['target_id']);
+					}
+					$i++;
+				}
+			
+				// Send records to Airtable
+				$client = HttpClient::create();
+				$options = [
+					'auth_bearer' => $this->token,
+					'json' => $body,
+					'headers' => ['Content-Type' => 'application/json']
+				];
+				// POST or PATCH depending on the method
+				if($method === 'create'){
+					$response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
+				} else {
+					$response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
+				}
+				$statusCode = $response->getStatusCode();
+				$contentType = $response->getHeaders()['content-type'][0];
+				$content = $response->getContent();
+				$content = $response->toArray();						
+				if(!empty($content)){
+					$i = 0;
+					foreach($records as $idDoc => $data){
+						$record = $content['records'][$i];
+						if(!empty($record['id'])){
+							$result[$idDoc] = array(
+													'id' => $record['id'],
+													'error' => false
+											);
+						} else {
+							$result[$idDoc] = array(
+								'id' => '-1',
+								'error' => 'Failed to send data. Message from Airtable : '.print_r($content['records'][$i],true)
+							);
+						}
+						$i++;
+						// Modification du statut du flux
+						$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+					}
+				} else {
+					throw new \Exception('Failed to send the record but no error returned by Airtable. ');
+				}
+				
+			}catch(\Exception $e){
+				$error = $e->getMessage();
+				foreach($records as $idDoc => $data){
+					$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+					);
+				}
+				$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+			} 
+		}	
         return $result;
     }
 
