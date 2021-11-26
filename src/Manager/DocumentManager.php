@@ -432,6 +432,10 @@ class documentcore
 	public function setTypeError($typeError) {
 		$this->typeError = $typeError;
 	}
+
+	public function setDocIdRefError($docIdRefError) {
+		$this->docIdRefError = $docIdRefError;
+	}
 	
 	// Permet d'indiquer si le filtreest rempli ou pas
 	protected function checkFilter($fieldValue,$operator,$filterValue){
