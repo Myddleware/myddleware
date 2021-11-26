@@ -132,8 +132,8 @@ class rulecore
 		EntityManagerInterface $entityManager,
 		ParameterBagInterface $parameterBagInterface,
 		FormulaManager $formulaManager,
-		SolutionManager $solutionManager,
-		DocumentManager $documentManager,
+		SolutionManager $solutionManager = null,
+		DocumentManager $documentManager = null,
 		RuleRepository $ruleRepository = null,
 		RuleRelationShipRepository $ruleRelationShipRepository = null,
 		RuleOrderRepository $ruleOrderRepository = null,
@@ -373,8 +373,7 @@ class rulecore
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
 							if ($i >= $this->limitReadCommit){
-								$this->connection->commit(); // -- COMMIT TRANSACTION
-								$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+								$this->commit(true); // -- COMMIT TRANSACTION
 								$i = 0;
 							}
 							$i++;
@@ -399,7 +398,7 @@ class rulecore
 				if ($this->getJobStatus() != 'Start') {
 					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
 				}
-				$this->connection->commit(); // -- COMMIT TRANSACTION
+				$this->commit(false); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
@@ -585,15 +584,29 @@ class rulecore
 
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) {
-			$this->setRuleFilter();
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;				
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$this->setRuleFilter();
+				$i = 0;
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;				
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
+				}	
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}	
 		}
 		return $response;
 	}
@@ -610,15 +623,29 @@ class rulecore
 		}
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) { 
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
+				}	
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}	
 		}
 		return $response;
 	}
@@ -651,16 +678,30 @@ class rulecore
 					}
 				}
 			}				
-			// Pour tous les docuements sélectionnés on vérifie les parents
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->ckeckParentDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Pour tous les docuements sélectionnés on vérifie les parents
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->ckeckParentDocument();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}			
 		return $response;
 	}
@@ -695,14 +736,28 @@ class rulecore
 						}
 					}
 				}
-			}		
-			// Transformation de tous les docuements sélectionnés
-			foreach ($documents as $document) { 			
-				$param['id_doc_myddleware'] = $document['id'];
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->transformDocument();
-			}	
+			}
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Transformation de tous les docuements sélectionnés
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;				
+					$param['id_doc_myddleware'] = $document['id'];
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->transformDocument();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}	
 		return $response;		
 	}
@@ -726,20 +781,33 @@ class rulecore
 		if(!empty($documents)) {				
 			// Connexion à la solution cible pour rechercher les données
 			$this->connexionSolution('target');
-			
-			// Récupération de toutes les données dans la cible pour chaque document
-			foreach ($documents as $document) {
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['solutionTarget'] = $this->solutionTarget;
-				$param['ruleFields'] = $this->ruleFields;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->getTargetDataDocument();
-				$response['doc_status'] = $this->documentManager->getStatus();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Récupération de toutes les données dans la cible pour chaque document
+				foreach ($documents as $document) {
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['solutionTarget'] = $this->solutionTarget;
+					$param['ruleFields'] = $this->ruleFields;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->getTargetDataDocument();
+					$response['doc_status'] = $this->documentManager->getStatus();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}	
 		return $response;			
 	}
@@ -1629,6 +1697,18 @@ class rulecore
 					$this->configParams[$config->getName()] = $config->getvalue();
 				}
 			}
+		}
+	}
+	
+	// Commit function with check if job is still active 
+	protected function commit($newTransaction) {
+		// Rollback if the job has been manually stopped
+		if ($this->getJobStatus() != 'Start') {
+			throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+		}
+		$this->connection->commit(); // -- COMMIT TRANSACTION
+		if ($newTransaction) {
+			$this->connection->beginTransaction();
 		}
 	}
 
