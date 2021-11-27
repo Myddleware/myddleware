@@ -248,9 +248,9 @@ class documentcore
 
 	// Set the document param
 	// Clear parameter is used when we call the same instance of the Document to manage several documents (from RuleManager class)
-	public function setParam($param, $clear = false) {
+	public function setParam($param, $clear = false, $clearRule = true) {
 		if ($clear) {
-			$this->clearAttributes();
+			$this->clearAttributes($clearRule);
 		}
 		// Chargement des solution si elles sont présentent dans les paramètres de construction
 		if (!empty($param['solutionTarget'])) {
@@ -293,10 +293,11 @@ class documentcore
 			if (!empty($this->data['myddleware_deletion'])) {
 				$this->documentType = 'D';
 			}
-		} 
+		} 				
 		// Ajout des paramètre de la règle
-		$this->setRuleParam();
-
+		if (empty($this->ruleParams)) {
+			$this->setRuleParam();
+		}	
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
 			$this->ruleFields = $param['ruleFields'];
@@ -309,16 +310,19 @@ class documentcore
 	}
 	
 	// Clear all class attributes
-	protected function clearAttributes() {
+	protected function clearAttributes($clearRule = true) {
+		// Clear rule parameter only if requested
+		if ($clearRule){
+			$this->ruleName = '';
+			$this->ruleMode = '';
+			$this->ruleId = '';
+			$this->ruleFields = array();
+			$this->ruleRelationships = array();
+			$this->ruleParams = array();
+		}
 		$this->id = '';
 		$this->message = '';
 		$this->dateCreated = '';
-		$this->ruleName = '';
-		$this->ruleMode = '';
-		$this->ruleId = '';
-		$this->ruleFields = array();
-		$this->ruleRelationships = array();
-		$this->ruleParams = array();
 		$this->sourceId = '';
 		$this->targetId = '';
 		$this->parentId = '';
@@ -432,11 +436,15 @@ class documentcore
 	public function setTypeError($typeError) {
 		$this->typeError = $typeError;
 	}
-
+	
+	public function setRuleId($ruleId) {
+		$this->ruleId = $ruleId;
+	}
+	
 	public function setDocIdRefError($docIdRefError) {
 		$this->docIdRefError = $docIdRefError;
 	}
-	
+
 	// Permet d'indiquer si le filtreest rempli ou pas
 	protected function checkFilter($fieldValue,$operator,$filterValue){
 		switch ($operator) {
@@ -1203,10 +1211,6 @@ class documentcore
 			$documentData->setType($type); // Source		
 			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->entityManager->persist($documentData);
-			$this->entityManager->flush();		
-			if (empty($documentData->getId())) {
-				throw new \Exception( 'Failed to insert data source in table Document Data.' );
-			}
 		} 
 		catch (\Exception $e) {
 			$this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1547,8 +1551,8 @@ class documentcore
 	}
 	
 	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParam() {	
-		try {
+	public function setRuleParam() {	
+		try {			
 			$sqlParams = "SELECT * 
 							FROM ruleparam 
 							WHERE rule_id = :ruleId";
@@ -1560,7 +1564,7 @@ class documentcore
 				foreach ($ruleParams as $ruleParam) {
 					$this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
 				}			
-			}			
+			}	
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
@@ -1875,8 +1879,7 @@ class documentcore
 			$documentRelationship->setDateCreated(new \DateTime);
 			$documentRelationship->setCreatedBy((int)$this->userId);
 			$documentRelationship->setSourceField($ruleRelationship['field_name_source']);				
-			$this->entityManager->persist($documentRelationship);
-			$this->entityManager->flush();	
+			$this->entityManager->persist($documentRelationship);	
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to save the document relationship for the field '.$ruleRelationship['field_name_source'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'W';

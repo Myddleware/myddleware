@@ -357,11 +357,13 @@ class rulecore
 			}		
 			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 			try {
-				if ($readSource['count'] > 0) {					
-					// include_once 'document.php';		
+				if ($readSource['count'] > 0) {						
 					$param['rule'] = $this->rule;
 					$param['ruleFields'] = $this->ruleFields;
 					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param of the rule one time for all					
+					$this->documentManager->setRuleId($this->ruleId);
+					$this->documentManager->setRuleParam();						
 					$i = 0;
 					if($this->dataSource['values']) {
 						// Set all config parameters
@@ -372,7 +374,7 @@ class rulecore
 						}				
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
-							if ($i >= $this->limitReadCommit){
+							if ($i >= $this->limitReadCommit){	
 								$this->commit(true); // -- COMMIT TRANSACTION
 								$i = 0;
 							}
@@ -380,8 +382,8 @@ class rulecore
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
 							$param['api'] = $this->api;		
-							// Set the param values and clear all document attributes
-							$this->documentManager->setParam($param, true);
+							// Set the param values and clear all document attributes but not rule attributes
+							$this->documentManager->setParam($param, true, false);
 							$createDocument = $this->documentManager->createDocument();
 							if (!$createDocument) {
 								$readSource['error'] .= $this->documentManager->getMessage();
@@ -1343,7 +1345,7 @@ class rulecore
 						$response = $this->solutionTarget->createData($send);
 					}
 					// Modification des données dans la cible
-					elseif ($type == 'U') {
+					elseif ($type == 'U') {						
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
 						$send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
@@ -1442,7 +1444,7 @@ class rulecore
 			}
 		}
 	}
-	
+		
 	protected function checkDuplicate($transformedData) {
 		// Traitement si présence de champ duplicate
 		if (empty($this->ruleParams['duplicate_fields'])) {
@@ -1785,6 +1787,7 @@ class rulecore
 			throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
 		}
 		$this->connection->commit(); // -- COMMIT TRANSACTION
+		$this->entityManager->flush();
 		if ($newTransaction) {
 			$this->connection->beginTransaction();
 		}
