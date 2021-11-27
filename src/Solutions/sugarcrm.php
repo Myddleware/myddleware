@@ -130,24 +130,6 @@ class sugarcrmcore extends solution
 						continue;
 					}
                     $modules['link_'.$relationship] = $value->name;
-
-            // [s7_catalogues_accounts_1] => stdClass Object
-                // (
-                    // [from_studio] => 1
-                    // [join_key_lhs] => s7_catalogues_accounts_1s7_catalogues_ida
-                    // [join_key_rhs] => s7_catalogues_accounts_1accounts_idb
-                    // [join_table] => s7_catalogues_accounts_1_c
-                    // [lhs_key] => id
-                    // [lhs_module] => S7_Catalogues
-                    // [lhs_table] => s7_catalogues
-                    // [name] => s7_catalogues_accounts_1
-                    // [relationship_type] => many-to-many
-                    // [rhs_key] => id
-                    // [rhs_module] => Accounts
-                    // [rhs_table] => accounts
-                    // [true_relationship_type] => many-to-many
-                // )
-					
                 }
             }
             return $modules;
@@ -322,8 +304,8 @@ class sugarcrmcore extends solution
 			if (!empty($body->records)) {
 				$records = $body->records;
 			}
-		} else {
-			throw new \Exception(print_r($response->getBody(), true));
+		} else {	
+			throw new \Exception(print_r($response, true));
 		}
 
 		// Format records to result format
@@ -331,7 +313,10 @@ class sugarcrmcore extends solution
 			foreach ($records as $record) {
 				foreach ($param['fields'] as $field) {
 					// Sugar returns multilist value as array
-					if (is_array($record->$field)) {
+					if (
+							!empty($record->$field)
+						AND	is_array($record->$field)		
+					) {
 						$record->$field = implode(',', $record->$field);
 					}
 					$result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
