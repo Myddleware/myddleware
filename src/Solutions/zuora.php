@@ -186,7 +186,7 @@ class zuoracore extends solution
                 // Save all idoc in the right order
                 $idDocArray[] = $idDoc;
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $obj = 'Zuora_'.$param['module'];
                 $zObject = new $obj();
 
@@ -278,7 +278,7 @@ class zuoracore extends solution
         try {
             foreach ($param['data'] as $idDoc => $data) {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $obj = 'Zuora_'.$param['module'];
                 $amendment = new $obj();
                 foreach ($data as $key => $value) {
@@ -324,7 +324,7 @@ class zuoracore extends solution
         try {
             foreach ($param['data'] as $idDoc => $data) {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $obj = 'Zuora_'.$param['module'];
                 $zObject = new $obj();
 

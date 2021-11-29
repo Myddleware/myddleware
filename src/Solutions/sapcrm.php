@@ -292,7 +292,7 @@ class sapcrmcore extends saproot
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataSugar = [];
                 foreach ($data as $key => $value) {
                     $tabValue = explode('__', $key);

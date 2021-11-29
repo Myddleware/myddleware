@@ -132,8 +132,8 @@ class rulecore
 		EntityManagerInterface $entityManager,
 		ParameterBagInterface $parameterBagInterface,
 		FormulaManager $formulaManager,
-		SolutionManager $solutionManager,
-		DocumentManager $documentManager,
+		SolutionManager $solutionManager = null,
+		DocumentManager $documentManager = null,
 		RuleRepository $ruleRepository = null,
 		RuleRelationShipRepository $ruleRelationShipRepository = null,
 		RuleOrderRepository $ruleOrderRepository = null,
@@ -357,11 +357,13 @@ class rulecore
 			}		
 			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 			try {
-				if ($readSource['count'] > 0) {					
-					// include_once 'document.php';		
+				if ($readSource['count'] > 0) {						
 					$param['rule'] = $this->rule;
 					$param['ruleFields'] = $this->ruleFields;
 					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param of the rule one time for all					
+					$this->documentManager->setRuleId($this->ruleId);
+					$this->documentManager->setRuleParam();						
 					$i = 0;
 					if($this->dataSource['values']) {
 						// Set all config parameters
@@ -372,17 +374,16 @@ class rulecore
 						}				
 						// Boucle sur chaque document
 						foreach ($this->dataSource['values'] as $row) {
-							if ($i >= $this->limitReadCommit){
-								$this->connection->commit(); // -- COMMIT TRANSACTION
-								$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+							if ($i >= $this->limitReadCommit){	
+								$this->commit(true); // -- COMMIT TRANSACTION
 								$i = 0;
 							}
 							$i++;
 							$param['data'] = $row;
 							$param['jobId'] = $this->jobId;
 							$param['api'] = $this->api;		
-							// Set the param values and clear all document attributes
-							$this->documentManager->setParam($param, true);
+							// Set the param values and clear all document attributes but not rule attributes
+							$this->documentManager->setParam($param, true, false);
 							$createDocument = $this->documentManager->createDocument();
 							if (!$createDocument) {
 								$readSource['error'] .= $this->documentManager->getMessage();
@@ -399,7 +400,7 @@ class rulecore
 				if ($this->getJobStatus() != 'Start') {
 					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
 				}
-				$this->connection->commit(); // -- COMMIT TRANSACTION
+				$this->commit(false); // -- COMMIT TRANSACTION
 			} catch (\Exception $e) {
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
@@ -585,15 +586,29 @@ class rulecore
 
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) {
-			$this->setRuleFilter();
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;				
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$this->setRuleFilter();
+				$i = 0;
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;				
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
+				}	
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}	
 		}
 		return $response;
 	}
@@ -610,15 +625,29 @@ class rulecore
 		}
 		// Pour tous les docuements sélectionnés on vérifie les prédécesseurs
 		if(!empty($documents)) { 
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
+				}	
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}	
 		}
 		return $response;
 	}
@@ -651,16 +680,30 @@ class rulecore
 					}
 				}
 			}				
-			// Pour tous les docuements sélectionnés on vérifie les parents
-			foreach ($documents as $document) { 
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->ckeckParentDocument();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Pour tous les docuements sélectionnés on vérifie les parents
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->ckeckParentDocument();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}			
 		return $response;
 	}
@@ -695,14 +738,28 @@ class rulecore
 						}
 					}
 				}
-			}		
-			// Transformation de tous les docuements sélectionnés
-			foreach ($documents as $document) { 			
-				$param['id_doc_myddleware'] = $document['id'];
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->transformDocument();
-			}	
+			}
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Transformation de tous les docuements sélectionnés
+				foreach ($documents as $document) { 
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;				
+					$param['id_doc_myddleware'] = $document['id'];
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->transformDocument();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}	
 		return $response;		
 	}
@@ -726,20 +783,33 @@ class rulecore
 		if(!empty($documents)) {				
 			// Connexion à la solution cible pour rechercher les données
 			$this->connexionSolution('target');
-			
-			// Récupération de toutes les données dans la cible pour chaque document
-			foreach ($documents as $document) {
-				$param['id_doc_myddleware'] = $document['id'];
-				$param['solutionTarget'] = $this->solutionTarget;
-				$param['ruleFields'] = $this->ruleFields;
-				$param['ruleRelationships'] = $this->ruleRelationships;
-				$param['jobId'] = $this->jobId;
-				$param['api'] = $this->api;
-				// Set the param values and clear all document attributes
-				$this->documentManager->setParam($param, true);
-				$response[$document['id']] = $this->documentManager->getTargetDataDocument();
-				$response['doc_status'] = $this->documentManager->getStatus();
-			}			
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+			try {
+				$i = 0;
+				// Récupération de toutes les données dans la cible pour chaque document
+				foreach ($documents as $document) {
+					if ($i >= $this->limitReadCommit){
+						$this->commit(true); // -- COMMIT TRANSACTION
+						$i = 0;
+					}
+					$i++;
+					$param['id_doc_myddleware'] = $document['id'];
+					$param['solutionTarget'] = $this->solutionTarget;
+					$param['ruleFields'] = $this->ruleFields;
+					$param['ruleRelationships'] = $this->ruleRelationships;
+					$param['jobId'] = $this->jobId;
+					$param['api'] = $this->api;
+					// Set the param values and clear all document attributes
+					$this->documentManager->setParam($param, true);
+					$response[$document['id']] = $this->documentManager->getTargetDataDocument();
+					$response['doc_status'] = $this->documentManager->getStatus();
+				}
+				$this->commit(false); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$this->logger->error( 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
+				$readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}					
 		}	
 		return $response;			
 	}
@@ -980,12 +1050,18 @@ class rulecore
 	}
 	
 	// Remove a document 
-	protected function changeStatus($id_document,$toStatus) {	
+	protected function changeStatus($id_document,$toStatus,$message = null,$docIdRefError = null) {
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
 		// Set the param values and clear all document attributes
 		$this->documentManager->setParam($param, true);
+		if (!empty($message)) {
+			$this->documentManager->setMessage($message);
+		}
+		if (!empty($docIdRefError)) {
+			$this->documentManager->setDocIdRefError($docIdRefError);
+		}
 		$this->documentManager->updateStatus($toStatus);
 	}
 	
@@ -1183,8 +1259,12 @@ class rulecore
 	protected function clearSendData($sendData) {
 		if (!empty($sendData)) {
 			foreach($sendData as $key => $value){
-				unset($value['source_date_modified']);
-				unset($value['id_doc_myddleware']);
+				if (isset($value['source_date_modified'])) {
+					unset($value['source_date_modified']);
+				}
+				if (isset($value['id_doc_myddleware'])) {
+					unset($value['id_doc_myddleware']);
+				}
 				$sendData[$key] = $value;
 			}
 			return $sendData;
@@ -1268,13 +1348,14 @@ class rulecore
 					elseif ($type == 'U') {						
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);		
+						$send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+						$send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
 						$response = $this->solutionTarget->updateData($send);						
 					}
 					// Delete data from target application
-					elseif ($type == 'D') {			
-						$send['data'] = $this->beforeDelete($send['data']);;
+					elseif ($type == 'D') {
+						$this->checkBeforeDelete($send);						
+						$send['data'] = $this->beforeDelete($send['data']);
 						$response = $this->solutionTarget->deleteData($send);
 					}
 					else {
@@ -1297,6 +1378,73 @@ class rulecore
 		return $response;
 	}
 	
+	// Check before we send a record deletion
+	protected function checkBeforeDelete($send) {
+		// Check in case of several source records data point to the same target record
+		// In this case we can't send the deletion as the record still exists in the source application
+		// A merge action in the source application could have generated the deletion action but the deletion can't be sent.
+		if (!empty($send['data'])) {
+			foreach ($send['data'] as $docId => $record) {
+				try {
+					// Should never be empty
+					if (empty($record['target_id'])) {
+						throw new \Exception ('Failed to send deletion because there is no target id in the document');
+					}
+					// First step, we get all the document with the same target module, connector and record id and a source id different
+					// We exclude the cancel document except the one no_send
+					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
+					$query = "	SELECT Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id, 
+									GROUP_CONCAT(DISTINCT Document.type) types,
+									GROUP_CONCAT(DISTINCT Document.id ORDER BY Document.date_created DESC) documents
+								FROM Document 
+									INNER JOIN Rule
+										ON Document.rule_id = Rule.id
+								WHERE 
+										Rule.conn_id_target = :conn_id_target
+									AND Rule.module_target = :module_target
+									AND Document.target_id = :target_id
+									AND Document.source_id <> (SELECT source_id from Document WHERE id = :docId)
+									AND Document.deleted = 0
+									AND (
+												Document.global_status <> 'Cancel'
+										OR (
+												Document.global_status = 'Cancel'
+											AND Document.status = 'No_send'
+										)
+									)
+								GROUP BY Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id
+								HAVING types NOT LIKE '%D%'";
+					$stmt = $this->connection->prepare($query);
+					$stmt->bindValue(":conn_id_target", $this->rule['conn_id_target']);
+					$stmt->bindValue(":module_target", $this->rule['module_target']);
+					$stmt->bindValue(":target_id", $record['target_id']);
+					$stmt->bindValue(":docId", $docId);
+					$stmt->execute();	   				
+					$results = $stmt->fetchAll();
+					if(!empty($results)) {
+						foreach ($results as $result) {
+							// Get the last reference document created to add it into the log
+							$documents = explode(',',$result['documents']);							
+							if (!empty($documents[0])) {
+								$docIdRefError = $documents[0];
+							}
+							throw new \Exception ('A duplicate source record not deleted exists for the target record.');			
+						}
+					}
+				} catch (\Exception $e) {
+					// Remove the document in the list to be sent
+					unset($send['data'][$docId]);
+					// Change document status
+					$this->changeStatus($docId,'No_send', $e->getMessage(), (!empty($docIdRefError) ? $docIdRefError : ''));
+				}	
+			}
+			// Exception if all documents has been removed from data
+			if (empty($send['data'])) {
+				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
+			}
+		}
+	}
+		
 	protected function checkDuplicate($transformedData) {
 		// Traitement si présence de champ duplicate
 		if (empty($this->ruleParams['duplicate_fields'])) {
@@ -1629,6 +1777,19 @@ class rulecore
 					$this->configParams[$config->getName()] = $config->getvalue();
 				}
 			}
+		}
+	}
+	
+	// Commit function with check if job is still active 
+	protected function commit($newTransaction) {
+		// Rollback if the job has been manually stopped
+		if ($this->getJobStatus() != 'Start') {
+			throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+		}
+		$this->connection->commit(); // -- COMMIT TRANSACTION
+		$this->entityManager->flush();
+		if ($newTransaction) {
+			$this->connection->beginTransaction();
 		}
 	}
 

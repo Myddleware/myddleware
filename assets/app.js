@@ -14,7 +14,14 @@ global.Routing = Routing;
 global.lang = $('html').attr('lang');
 global.path_img = 'build/images/';
 
-require('./vendors/jquery-ui/jquery-ui.min.js')
+require('jquery-ui')
+require('jquery-ui/ui/widgets/tabs')
+require('jquery-ui/ui/widgets/accordion')
+require('jquery-ui/ui/widgets/draggable')
+require('jquery-ui/ui/widgets/droppable')
+require('jquery-ui/ui/widgets/sortable')
+require('jquery-ui/ui/widgets/dialog')
+require('jquery-ui/ui/tabbable')
 require('bootstrap')
 require('@fortawesome/fontawesome-free/js/all')
 require('./vendors/dtsel/dtsel')

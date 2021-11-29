@@ -839,7 +839,16 @@ class FluxController extends AbstractController
                 ]
                 );
             if (!empty($documentDataEntity)) {
-                return json_decode($documentDataEntity->getData(), true);
+				$data = json_decode($documentDataEntity->getData(), true);
+				// Boolean values aren't displayed properly, we convert them into string	
+				if (!empty($data)) {
+					foreach ($data as $key => $value) {
+						if (is_bool($value)) {
+							$data[$key] = (string)$value;
+						}
+					}
+				}
+                return $data;
             }
 
             return;
