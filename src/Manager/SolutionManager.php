@@ -57,6 +57,7 @@ use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\zuora;
+use App\Solutions\sendinblue;
 use Exception;
 
 /**
@@ -96,7 +97,8 @@ class SolutionManager
         mailchimp $mailchimp,
         prestashop $prestashop,
         sugarcrm $sugarcrm,
-        salesforce $salesforce
+        salesforce $salesforce,
+        sendinblue $sendinblue
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -125,6 +127,7 @@ class SolutionManager
             'prestashop' => $prestashop,
             'sugarcrm' => $sugarcrm,
             'salesforce' => $salesforce,
+            'sendinblue' => $sendinblue,
         ];
     }
 
