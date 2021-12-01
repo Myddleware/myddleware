@@ -76,7 +76,8 @@
     "laminas/laminas-hydrator": "^4.1",
     "prestashop/prestashop-webservice-lib": "dev-master",
     "symfony/mailer": "4.4.*",
-    "doctrine/cache": "1.11.3"
+    "doctrine/cache": "1.11.3",
+    "sendinblue/api-v3-sdk": "7.4.3"
     },
     "repositories": [
         {
