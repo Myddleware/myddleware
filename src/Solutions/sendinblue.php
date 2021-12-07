@@ -25,13 +25,18 @@
 
 namespace App\Solutions;
 
+use ApiPlatform\Core\OpenApi\Model\Contact;
+use DateTime;
+use DoctrineExtensions\Query\Mysql\Field;
 use PhpParser\Node\Name;
+use SendinBlue\Client\Model\GetContacts;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sendinbluecore extends solution
 {
     protected $config;
+    protected $required_fields = ['default' => ['id', 'modifiedAt']];
 
     
     public function getFieldsLogin()
@@ -72,7 +77,6 @@ class sendinbluecore extends solution
             } else {
                 return ['error' => 'Failed to connect to Sendinblue: '. $result->message];
             }
-            throw new \Exception(print_r($result->getEmail(), true));
 
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -106,81 +110,106 @@ class sendinbluecore extends solution
             $apiInstance = new \SendinBlue\Client\Api\AttributesApi( new \GuzzleHttp\Client(), $this->config );
             $results = $apiInstance->getAttributes();
             $attributes = $results->getAttributes();
-            echo '<pre>';
-           // $this->moduleFields = [];
-           
+                       
             foreach ($attributes as $attribute) {
        
                 $this->moduleFields [$attribute->getName()] = [
                     'label' => $attribute->getName(),
                     'required' => false,
-                    'type' => 'varchar(255)', // ? Settare il type giusto?
+                    'type' => 'varchar(255)', // Define the correct type
                     'type_bdd' => 'varchar(255)',
                     'required_relationship' => false,
                     'relate' => false
-                ];
-                
-              //$this->moduleFields = array_merge($this->moduleFields, $attributes);
-             
-           
+                ];  
             }   
-          //  print_r($this->moduleFields);
-               // die();
-            return $this->moduleFields;     
-            
-   /*
-            if ($module == "contacts") {
-                $moduleFiels = [
-                    'BLACKLIST'  => ['label' => 'Blacklist', 'type' => 'float', 'type_bdd' => 'float','required' => 0],
-                    'READERS'    => ['label' => 'Readers', 'type' => 'float', 'type_bdd' => 'float','required' => 0],
-                    'CLICKERS'   => ['label' => 'Clickers', 'type' => 'float', 'type_bdd' => 'float','required' => 0],
-                    'NOM'        => ['label' => 'Name', 'type' => 'text', 'type_bdd' => 'varchar(255)','required' => 0],
-                    'PRENOM'     => ['label' => 'First name', 'type' => 'text', 'type_bdd' => 'varchar(255)','required' => 0],
-                    'SMS'        => ['label' => 'Sms', 'type' => 'text', 'type_bdd' => 'varchar(255)','required' => 0]
-                ];                    
-                /*echo '<pre>';                
-                var_dump($moduleFiels);
-                die();*/
-               /* if (!empty($moduleFiels)) {
-                    foreach ($moduleFiels as $moduleFiel) {
-                        print_r($moduleFiels);
-                        $label = $moduleFiel['label'];
-                        echo $label;
-                        die();
-                    }
-                    
-                    die();
-                }
-            }else{
-                echo "no";
-                die();
-            }*/
-            
+            return $this->moduleFields;  
 
         } catch (\Exception $e) {
             $error = $e->getMessage();
-
             return false;
+        }      
+    }
+
+    public function read($param){
+        //Recover date and other... 
+       $filterArgs = [
+			$limit = $param['limit'],
+            $offset = $param['offset'],
+            $modifiedSince = $param['date_ref'],
+            $sort = "desc",
+		];
+        
+        //Recover all contact sendinblue 
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
+        //$resultApi = $apiInstance->getContacts();
+        //$contacts = $resultApi->getContacts();
+
+        if(!empty($contacts)){
+            foreach($contacts as $contact){
+                foreach ($param['fields'] as $field) {
+                   //echo $field.chr(10);   
+                    if (!empty($contact[$field])) {
+                        $contact['modifiedAt'] = date('Y-m-d H:i:s', strtotime($contact['modifiedAt']));
+                        //echo $contact[$field].chr(10);
+                        $result[$contact['id']][$field] = $contact[$field];
+                    } elseif(!empty($contact['attributes']->$field)) {
+                        //echo $contact['attributes']->$field.chr(10);
+                        $result[$contact['id']][$field] = $contact['attributes']->$field;                    
+                    } else {
+                        $result[$contact['id']][$field] = '';
+                    }                    
+                }
+            } 
         }
 
-   /*     try {              
-        $this->moduleFields = [
-            'user_id' => 'user_id',
-            'login'   => 'login',
-            'email'   => 'email'
-        ];
+        // Read with a specific id                   
+        
+            try {
+                $identifier = 'test1@gmail.com';
+                if(!empty($identifier)){
+                $resultApiContactInfos = $apiInstance->getContactInfo($identifier);
+                $contactInfos = $resultApiContactInfos->getContactInfo($identifier);
+                
+                //sprint_r($resultApiContactInfos);
 
-        //$this->paramConnexion.$this->apiInstance
-        return $this->moduleFields;
-            
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
+                if(!empty($contactInfos)){
+                    foreach($contactInfos as $contactInfo){
+                        print_r($contactInfo);
+                        /*foreach ($param['fields'] as $field) {        
+                           echo $field.chr(10);   
+                            if (!empty($contactInfo[$field])) {
+                                $contactInfo['modifiedAt'] = date('Y-m-d H:i:s', strtotime($contactInfo['modifiedAt']));
+                                echo $contactInfo[$field].chr(10);
+                                $result[$contactInfo['id']][$field] = $contactInfo[$field];
+                            } elseif(!empty($contactInfo['attributes']->$field)) {
+                                echo $contactInfo['attributes']->$field.chr(10);
+                                $result[$contactInfo['id']][$field] = $contactInfo['attributes']->$field;                    
+                            } else {
+                                $result[$contactInfo['id']][$field] = '';
+                            }                    
+                        }*/
+                    } 
+                }
+            }
 
-            return false;
-        }*/
-      
-   }
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+            }        
+        return null;
+        //return $result;
+    }
 
+    // Convert date to Myddleware format 
+	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+	protected function dateTimeToMyddleware($dateTime) {	
+		$dto = new \DateTime($dateTime);	
+		return $dto->format("Y-m-d H:i:s");
+	}
+
+    // Returns the name of the reference date field according to the module and mode of the rule
+    public function getRefFieldName($moduleSource, $RuleMode) {
+    return 'modifiedAt';
+    }
 }
 
 class sendinblue extends sendinbluecore
