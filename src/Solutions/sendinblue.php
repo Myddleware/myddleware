@@ -131,30 +131,63 @@ class sendinbluecore extends solution
     }
 
     public function read($param){
-        //Recover date and other... 
+          //Recover date and other...
+          print_r($param);
+          
+          $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
+          
        $filterArgs = [
 			$limit = $param['limit'],
             $offset = $param['offset'],
-            $modifiedSince = $param['date_ref'],
             $sort = "desc",
 		];
+
+        if (!empty($param['query']['id'])) {
+            $resultApi = $apiInstance->getContactInfo($param['query']['id']);
+            if (!empty(current($resultApi))) {
+               $contacts[] = current($resultApi);
+               //print_r($contacts);
+            }
+            
+            
+           /* print_r(current($result));
+            return null;
+
+            $contactInfos = $result[$param['query']['id']];
+            foreach ($contactInfos as $contactInfo) {
+                if(!empty($contactInfo)){
+                    echo $result = $contactInfo.chr(10);  
+                }
+            }    */                
+        }else {
+            $filterArgs[$modifiedSince] = $param['date_ref'];
+            $resultApi = $apiInstance->getContacts();
+            $contacts = $resultApi->getContacts();
+        }
+      
         
         //Recover all contact sendinblue 
-        $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
-        //$resultApi = $apiInstance->getContacts();
-        //$contacts = $resultApi->getContacts();
+        /*$apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
+        $resultApi = $apiInstance->getContacts();
+        $contacts = $resultApi->getContacts();*/
 
         if(!empty($contacts)){
             foreach($contacts as $contact){
+               // print_r($contact);
+                //print_r($param['fields']);
                 foreach ($param['fields'] as $field) {
-                   //echo $field.chr(10);   
+                    //echo $field.chr(10);   
                     if (!empty($contact[$field])) {
-                        $contact['modifiedAt'] = date('Y-m-d H:i:s', strtotime($contact['modifiedAt']));
                         //echo $contact[$field].chr(10);
                         $result[$contact['id']][$field] = $contact[$field];
+                    // Result attribute can be an object (example function getContacts())
                     } elseif(!empty($contact['attributes']->$field)) {
                         //echo $contact['attributes']->$field.chr(10);
-                        $result[$contact['id']][$field] = $contact['attributes']->$field;                    
+                        $result[$contact['id']][$field] = $contact['attributes']->$field;  
+                    // Result attribute can be an array (example function getContactInfo())                    
+                    }elseif(!empty($contact['attributes'][$field])) {
+                        //echo $contact['attributes'][$field].chr(10);
+                        $result[$contact['id']][$field] = $contact['attributes'][$field];                    
                     } else {
                         $result[$contact['id']][$field] = '';
                     }                    
@@ -162,49 +195,43 @@ class sendinbluecore extends solution
             } 
         }
 
-        // Read with a specific id                   
-        
-            try {
-                $identifier = 'test1@gmail.com';
-                if(!empty($identifier)){
-                $resultApiContactInfos = $apiInstance->getContactInfo($identifier);
-                $contactInfos = $resultApiContactInfos->getContactInfo($identifier);
-                
-                //sprint_r($resultApiContactInfos);
+        // Read with a specific id   
 
-                if(!empty($contactInfos)){
-                    foreach($contactInfos as $contactInfo){
-                        print_r($contactInfo);
-                        /*foreach ($param['fields'] as $field) {        
-                           echo $field.chr(10);   
-                            if (!empty($contactInfo[$field])) {
-                                $contactInfo['modifiedAt'] = date('Y-m-d H:i:s', strtotime($contactInfo['modifiedAt']));
-                                echo $contactInfo[$field].chr(10);
-                                $result[$contactInfo['id']][$field] = $contactInfo[$field];
-                            } elseif(!empty($contactInfo['attributes']->$field)) {
-                                echo $contactInfo['attributes']->$field.chr(10);
-                                $result[$contactInfo['id']][$field] = $contactInfo['attributes']->$field;                    
-                            } else {
-                                $result[$contactInfo['id']][$field] = '';
-                            }                    
-                        }*/
-                    } 
+        /*if (!empty($param['query']['id'])) {
+                    $contactInfos = $result[$param['query']['id']];
+                    foreach ($contactInfos as $contactInfo) {
+                        if(!empty($contactInfo)){
+                            echo $result = $contactInfo.chr(10);  
+                        }
+                    }                    
+                }else {
+                    $contactInfo = '';
                 }
-            }
-
+            try {
+                if (!empty($param['query']['id'])) {
+                    $contactInfos = $result[$param['query']['id']];
+                    foreach ($contactInfos as $contactInfo) {
+                        if(!empty($contactInfo)){
+                            echo $result = $contactInfo.chr(10);  
+                        }
+                    }                    
+                }else {
+                    $contactInfo = '';
+                }
             } catch (\Exception $e) {
                 $error = $e->getMessage();
-            }        
-        return null;
-        //return $result;
+            }    */
+            //print_r($result);
+        //return null;
+        return $result;
     }
 
     // Convert date to Myddleware format 
-	// 2020-07-08T12:33:06 to 2020-07-08 10:33:06
-	protected function dateTimeToMyddleware($dateTime) {	
-		$dto = new \DateTime($dateTime);	
-		return $dto->format("Y-m-d H:i:s");
-	}
+    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    protected function dateTimeToMyddleware($dateTime) {	
+        $dto = new \DateTime($dateTime);	
+        return $dto->format("Y-m-d H:i:s");
+    }
 
     // Returns the name of the reference date field according to the module and mode of the rule
     public function getRefFieldName($moduleSource, $RuleMode) {
