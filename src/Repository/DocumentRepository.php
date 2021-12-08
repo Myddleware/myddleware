@@ -310,6 +310,11 @@ class DocumentRepository extends ServiceEntityRepository
             ->join('document.createdBy', 'user')
 			->andWhere('document.deleted = 0');
 		
+		// No search if no parameter set
+		if (empty($data)) {
+			$qb->andWhere('document.deleted < 0');
+		}
+		
 		if (!empty($data['source_content']) && is_string($data['source_content'])) {
 			$qb->innerJoin('document.datas', 'document_data_source')
 				->andWhere('document_data_source.data LIKE :source_content')
@@ -396,7 +401,6 @@ class DocumentRepository extends ServiceEntityRepository
 		if (!empty($data['limit'])) {
 			$qb->setMaxResults($data['limit']);
 		}
-
         $qb->orderBy('document.dateModified', 'DESC');
         return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
