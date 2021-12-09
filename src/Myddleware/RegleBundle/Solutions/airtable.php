@@ -31,6 +31,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class airtablecore extends solution {
 
+	protected $sendDeletion = true;	
+	
     protected $airtableURL = 'https://api.airtable.com/v0/';
     protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
 
@@ -171,7 +173,7 @@ class airtablecore extends solution {
      * @return array
      */
     public function read($param){
-        try {
+        try {			
             $baseID = $this->paramConnexion['projectid'];
             $module = $param['module'];
             $result = [];
@@ -193,14 +195,14 @@ class airtablecore extends solution {
                 //specific record requested
                 if(!empty($param['query'])){
                     if (!empty($param['query']['id'])) {
-                        $id = $param['query']['id'];
+                        $id = $param['query']['id'];			
                         $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content2 = $response->getContent();
                         $content2 = $response->toArray();
                         // Add a dimension to fit with the rest of the method
-                        $content[] = $content2;
+                        $content['records'][] = $content2;
                     } else {
                         // Filter by specific field (for example to avoid duplicate records)
                         foreach($param['query'] as $key => $queryParam){
@@ -210,7 +212,7 @@ class airtablecore extends solution {
                             $statusCode = $response->getStatusCode();
                             $contentType = $response->getHeaders()['content-type'][0];
                             $content = $response->getContent();
-                            $content = $response->toArray();        
+                            $content = $response->toArray();        				
                         }
                     }
                 } else {
@@ -220,7 +222,7 @@ class airtablecore extends solution {
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
-                }
+                }							
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -228,11 +230,18 @@ class airtablecore extends solution {
                     foreach($content as $record){
                         $currentCount++;
                         foreach($param['fields'] as $field){
-                            $result['values'][$record['id']][$field] = (!empty($record['fields'][$field]) ? $record['fields'][$field] : '');
+							if (!empty($record['fields'][$field])) {
+								// Depending on the field type, the result can be an array, in this case we take the first result
+								if (is_array($record['fields'][$field])) {
+									$result['values'][$record['id']][$field] = current($record['fields'][$field]);
+								} else {
+									$result['values'][$record['id']][$field] = $record['fields'][$field];
+								}
+							}
                         }
                         // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
-                        $dateTime = new DateTime();
-                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : $dateTime->date;
+                        // $dateTime = new DateTime();
+                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : $record['createdTime'];
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
                         $result['values'][$record['id']]['id'] = $record['id'];
                     }
@@ -246,7 +255,7 @@ class airtablecore extends solution {
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-        }
+        }			
         return $result;
     }
 
@@ -309,7 +318,7 @@ class airtablecore extends solution {
      * @param array $param
      * @return void
      */ 
-    public function upsert($method, $param){
+    public function upsert($method, $param){		
 		// Init parameters
 		$baseID = $this->paramConnexion['projectid'];
 		$result= array();
@@ -340,6 +349,10 @@ class airtablecore extends solution {
 					if($method === 'create'){
 						unset($data['target_id']);
 					}
+					// Myddleware_element_id is a field only used by Myddleware. Not sent to the target application
+					if (!empty($data['Myddleware_element_id'])) {
+						unset($data['Myddleware_element_id']);
+					}
 					$body['records'][$i]['fields'] = $data;
 					/**
 					 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
@@ -357,25 +370,24 @@ class airtablecore extends solution {
 						unset($body['records'][$i]['fields']['target_id']);
 					}
 					$i++;
-				}
-			
+				}			
 				// Send records to Airtable
 				$client = HttpClient::create();
 				$options = [
 					'auth_bearer' => $this->token,
 					'json' => $body,
 					'headers' => ['Content-Type' => 'application/json']
-				];
+				];					
 				// POST or PATCH depending on the method
 				if($method === 'create'){
 					$response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
 				} else {
 					$response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
-				}
+				}				
 				$statusCode = $response->getStatusCode();
 				$contentType = $response->getHeaders()['content-type'][0];
 				$content = $response->getContent();
-				$content = $response->toArray();						
+				$content = $response->toArray();										
 				if(!empty($content)){
 					$i = 0;
 					foreach($records as $idDoc => $data){
@@ -406,10 +418,11 @@ class airtablecore extends solution {
 						'id' => '-1',
 						'error' => $error
 					);
+					$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 				}
 				$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 			} 
-		}	
+		}			
         return $result;
     }
 
