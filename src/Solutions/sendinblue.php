@@ -26,9 +26,11 @@
 namespace App\Solutions;
 
 use ApiPlatform\Core\OpenApi\Model\Contact;
+use ArrayObject;
 use DateTime;
 use DoctrineExtensions\Query\Mysql\Field;
 use PhpParser\Node\Name;
+use SendinBlue\Client\Model\CreateContact;
 use SendinBlue\Client\Model\GetContacts;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -62,13 +64,7 @@ class sendinbluecore extends solution
 
         // Configure API key authorization: api-key
         $this->config = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->paramConnexion['apikey']);
-
-        $apiInstance = new \SendinBlue\Client\Api\AccountApi(
-            // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
-            // This is optional, `GuzzleHttp\Client` will be used as default.
-            new \GuzzleHttp\Client(),
-            $this->config
-        );
+        $apiInstance = new \SendinBlue\Client\Api\AccountApi( new \GuzzleHttp\Client(), $this->config);
 
         try {
             $result = $apiInstance->getAccount();
@@ -77,14 +73,12 @@ class sendinbluecore extends solution
             } else {
                 return ['error' => 'Failed to connect to Sendinblue: '. $result->message];
             }
-
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
             
             return ['error' => $error];
-        }
-        
+        }        
     }
     
     //Get module list
@@ -95,7 +89,6 @@ class sendinbluecore extends solution
                'contacts' => 'contacts'
             ];
         }
-
         return [
             'contacts' => 'contacts',
         ];
@@ -111,8 +104,7 @@ class sendinbluecore extends solution
             $results = $apiInstance->getAttributes();
             $attributes = $results->getAttributes();
                        
-            foreach ($attributes as $attribute) {
-       
+            foreach ($attributes as $attribute) {       
                 $this->moduleFields [$attribute->getName()] = [
                     'label' => $attribute->getName(),
                     'required' => false,
@@ -122,6 +114,14 @@ class sendinbluecore extends solution
                     'relate' => false
                 ];  
             }   
+            $this->moduleFields ['email'] = [
+                'label' => 'email',
+                'required' => false,
+                'type' => 'varchar(255)', // Define the correct type
+                'type_bdd' => 'varchar(255)',
+                'required_relationship' => false,
+                'relate' => false
+            ];  
             return $this->moduleFields;  
 
         } catch (\Exception $e) {
@@ -130,100 +130,139 @@ class sendinbluecore extends solution
         }      
     }
 
+     // Read all fields
     public function read($param){
-          //Recover date and other...
-          print_r($param);
-          
-          $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
-          
-       $filterArgs = [
-			$limit = $param['limit'],
-            $offset = $param['offset'],
-            $sort = "desc",
-		];
-
-        if (!empty($param['query']['id'])) {
-            $resultApi = $apiInstance->getContactInfo($param['query']['id']);
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config ); 
+        $result = array();
+        // Read with a specific id or email
+        if (
+                !empty($param['query']['id']) 
+             OR !empty($param['query']['email'])
+        ) {
+            $shearchKey = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
+            $resultApi = $apiInstance->getContactInfo($shearchKey);
             if (!empty(current($resultApi))) {
-               $contacts[] = current($resultApi);
-               //print_r($contacts);
-            }
-            
-            
-           /* print_r(current($result));
-            return null;
-
-            $contactInfos = $result[$param['query']['id']];
-            foreach ($contactInfos as $contactInfo) {
-                if(!empty($contactInfo)){
-                    echo $result = $contactInfo.chr(10);  
-                }
-            }    */                
+               $records[] = current($resultApi);
+            }             
         }else {
-            $filterArgs[$modifiedSince] = $param['date_ref'];
+            $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+            echo $dateRef;
+            $modifiedSince = new \DateTime('2011-12-08T14:25:04.848+01:00');
+            //$resultApi = $apiInstance->getContacts(100, 0, $modifiedSince);
             $resultApi = $apiInstance->getContacts();
-            $contacts = $resultApi->getContacts();
-        }
-      
-        
+            $records = $resultApi->getContacts();
+        }      
+    
         //Recover all contact sendinblue 
-        /*$apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
-        $resultApi = $apiInstance->getContacts();
-        $contacts = $resultApi->getContacts();*/
-
-        if(!empty($contacts)){
-            foreach($contacts as $contact){
-               // print_r($contact);
-                //print_r($param['fields']);
+        if(!empty($records)){
+            foreach($records as $record){
                 foreach ($param['fields'] as $field) {
-                    //echo $field.chr(10);   
-                    if (!empty($contact[$field])) {
-                        //echo $contact[$field].chr(10);
-                        $result[$contact['id']][$field] = $contact[$field];
+                    echo $field.chr(10);   
+                    if (!empty($record[$field])) {
+                        echo $record[$field].chr(10);
+                        $result[$record['id']][$field] = $record[$field];
                     // Result attribute can be an object (example function getContacts())
-                    } elseif(!empty($contact['attributes']->$field)) {
-                        //echo $contact['attributes']->$field.chr(10);
-                        $result[$contact['id']][$field] = $contact['attributes']->$field;  
+                    } elseif(!empty($record['attributes']->$field)) {
+                        echo $record['attributes']->$field.chr(10);
+                        $result[$record['id']][$field] = $record['attributes']->$field;  
                     // Result attribute can be an array (example function getContactInfo())                    
-                    }elseif(!empty($contact['attributes'][$field])) {
-                        //echo $contact['attributes'][$field].chr(10);
-                        $result[$contact['id']][$field] = $contact['attributes'][$field];                    
+                    }elseif(
+                            !empty($param['query'])
+                        AND !empty($record['attributes'][$field])
+                    ) {
+                        echo $record['attributes'][$field].chr(10);
+                        $result[$record['id']][$field] = $record['attributes'][$field];                    
                     } else {
-                        $result[$contact['id']][$field] = '';
+                        $result[$record['id']][$field] = '';
                     }                    
                 }
             } 
         }
-
-        // Read with a specific id   
-
-        /*if (!empty($param['query']['id'])) {
-                    $contactInfos = $result[$param['query']['id']];
-                    foreach ($contactInfos as $contactInfo) {
-                        if(!empty($contactInfo)){
-                            echo $result = $contactInfo.chr(10);  
-                        }
-                    }                    
-                }else {
-                    $contactInfo = '';
-                }
-            try {
-                if (!empty($param['query']['id'])) {
-                    $contactInfos = $result[$param['query']['id']];
-                    foreach ($contactInfos as $contactInfo) {
-                        if(!empty($contactInfo)){
-                            echo $result = $contactInfo.chr(10);  
-                        }
-                    }                    
-                }else {
-                    $contactInfo = '';
-                }
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-            }    */
-            //print_r($result);
-        //return null;
         return $result;
+    }
+
+     // Create the record 
+     protected function create($param, $record)
+     {
+        // Import or create new contact for sendinblue 
+        print_r($param);    
+        //print_r($record);    
+        //try {
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+        //$record['email'] $record["NOM"] $record["PRENOM"]
+        $createContact['email'] = 'exemple10@gmail.com';
+        $createContact['attributes']['NOM'] = 'test6';
+        $createContact['attributes']['PRENOM'] = 'test6';
+
+        print_r($createContact);
+        
+       /* $data = '{"
+                "attributes": {
+                    "NOM": "tototo",
+                    "PRENOM": "tototo"
+            }
+        }';
+        $obj = json_decode($data);*/
+       
+
+        //$createContact['listIds'] = [1];
+            
+            $result = $apiInstance->createContact($createContact);
+            print_r($result);
+            if(!empty($result->getId())){
+                print_r($obj->FNAME);
+            }
+            $result->getId();
+            echo $result->getId();
+            
+       /* } catch (\Exception $e) {
+            $error = $e->getMessage();
+            return false;
+        }    */
+        return null;
+        //return $result->getId();
+     }
+
+    // Update the record 
+    protected function update($param, $record)
+    {
+        // Import or create new contact for sendinblue 
+        //print_r($param);    
+        //print_r($record);    
+        //try {
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+        //$record['email'] $record["NOM"] $record["PRENOM"]
+        $createContact['email'] = 'exemple10@gmail.com';
+        
+        //$createContact['attributes']['PRENOM'] = 'test6';
+
+        //print_r($createContact);
+        //---Ne fonctionne pas => array_merge/array_push/array_map/créer une fonction autre pour array_map
+        $attributes = [
+            "NOM" => "tototo",
+            "PRENOM" => "tototo"               
+            ];
+        echo $createContact['email'];
+        echo $attributes['NOM'];
+        //$createContact->attributes;
+        //echo json_encode();
+            
+            echo $createContact;
+        //$createContact['listIds'] = [1];
+            
+            $result = $apiInstance->createContact($createContact);
+            //print_r($result);
+            $result->getId();
+            echo $result->getId();
+            
+        /* } catch (\Exception $e) {
+            $error = $e->getMessage();
+            return false;
+        }    */
+        return null;
+        //return $result->getId();
     }
 
     // Convert date to Myddleware format 
@@ -232,6 +271,12 @@ class sendinbluecore extends solution
         $dto = new \DateTime($dateTime);	
         return $dto->format("Y-m-d H:i:s");
     }
+     //convert from Myddleware format to Woocommerce format
+	protected function dateTimeFromMyddleware($dateTime) {
+		$dto = new \DateTime($dateTime);
+		// Return date to UTC timezone
+		return $dto->format('Y-m-d\TH:i:sP');
+	}
 
     // Returns the name of the reference date field according to the module and mode of the rule
     public function getRefFieldName($moduleSource, $RuleMode) {
