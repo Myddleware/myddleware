@@ -144,7 +144,7 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_module_fields($module, $type = 'source') {
-        require_once('lib/airtable/metadata.php');
+        require('lib/airtable/metadata.php');
         parent::get_module_fields($module, $type);
         try {
             if(!empty($moduleFields[$module])){
@@ -310,6 +310,11 @@ class airtablecore extends solution {
     public function update($param){
         return $this->upsert('update', $param);
     }
+	
+	// Delete a record
+	public function delete($param) {
+		 return $this->upsert('delete', $param);
+	}
 
     /**
      * Insert or update data depending on method's value
@@ -318,7 +323,7 @@ class airtablecore extends solution {
      * @param array $param
      * @return void
      */ 
-    public function upsert($method, $param){		
+    public function upsert($method, $param){
 		// Init parameters
 		$baseID = $this->paramConnexion['projectid'];
 		$result= array();
@@ -343,11 +348,18 @@ class airtablecore extends solution {
 			$body = [];
 			$body['typecast'] = true;
 			$body['records']= array();
+			$urlParamDelete = '';
 			$i = 0;
 			try{
 				foreach($records as $idDoc => $data){
 					if($method === 'create'){
 						unset($data['target_id']);
+					}
+					// Recard are stored in the URL for a deletionj
+					if($method === 'delete'){
+						$urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
+						$i++;
+						continue;
 					}
 					// Myddleware_element_id is a field only used by Myddleware. Not sent to the target application
 					if (!empty($data['Myddleware_element_id'])) {
@@ -378,16 +390,19 @@ class airtablecore extends solution {
 					'json' => $body,
 					'headers' => ['Content-Type' => 'application/json']
 				];					
-				// POST or PATCH depending on the method
-				if($method === 'create'){
-					$response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
-				} else {
+				// POST, DELETE or PATCH depending on the method
+				if($method === 'delete'){				
+					// Parameters are directly in the URL for a deletion
+					$response = $client->request('DELETE', $this->airtableURL.$baseID.'/'.$module.'?'.$urlParamDelete, $options);				
+				} elseif($method === 'update'){
 					$response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
+				} else { // Create
+					$response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
 				}				
 				$statusCode = $response->getStatusCode();
 				$contentType = $response->getHeaders()['content-type'][0];
 				$content = $response->getContent();
-				$content = $response->toArray();										
+				$content = $response->toArray();				
 				if(!empty($content)){
 					$i = 0;
 					foreach($records as $idDoc => $data){
