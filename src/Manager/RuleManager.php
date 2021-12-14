@@ -1357,7 +1357,7 @@ class rulecore
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {
-						$this->checkBeforeDelete($send);						
+						$send = $this->checkBeforeDelete($send);						
 						$send['data'] = $this->beforeDelete($send['data']);
 						$response = $this->solutionTarget->deleteData($send);
 					}
@@ -1446,6 +1446,7 @@ class rulecore
 				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
 			}
 		}
+		return $send;
 	}
 		
 	protected function checkDuplicate($transformedData) {

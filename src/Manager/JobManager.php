@@ -407,7 +407,7 @@ class jobcore  {
 				}
 				sleep(1);
 				$file = fopen($fileTmp, 'r');
-				$idJob = fread($file, 23);
+				$idJob = substr(fread($file, 25), -23);
 				fclose($file);
 				$cpt++;
 			}

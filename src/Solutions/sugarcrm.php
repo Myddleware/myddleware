@@ -30,6 +30,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sugarcrmcore extends solution
 {
+	// Enable to read deletion and to delete data
+    protected $readDeletion = true;
+    protected $sendDeletion = true;
+	
     protected $sugarAPI;
     protected $sugarAPIVersion = 'v11';
     protected $sugarPlatform = 'base';
@@ -181,11 +185,13 @@ class sugarcrmcore extends solution
 			}			
             // Call teh detail of all Sugar fields for the module
             $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
-
             // Browse fields
             if (!empty($fieldsSugar->modules->$module->fields)) {
-                foreach ($fieldsSugar->modules->$module->fields as $field) {
-                    if (empty($field->type)) {
+                foreach ($fieldsSugar->modules->$module->fields as $field) {	
+                    if (
+							empty($field->type)
+						 OR $field->type == 'link' // Module linked not just a related fields (example : module bigs for contact)
+					) {
                         continue;
                     }
 
@@ -265,8 +271,15 @@ class sugarcrmcore extends solution
      */
     // public function readData($param)
     public function read($param)
-    {
+    {	
 		$result = [];
+		
+		// Manage delete option to enable
+		$deleted = false;
+		if (!empty($param['ruleParams']['deletion'])) {
+			$deleted = true;
+			$param['fields'][] = 'deleted';
+		}
 
 		// Init search parameters
 		$filterArgs = [
@@ -274,6 +287,7 @@ class sugarcrmcore extends solution
 			'offset' => 0,
 			'fields' => implode($param['fields'], ','),
 			'order_by' => 'date_modified',
+			'deleted' => $deleted,
 		];
 		// Init search filters
 		// Search by fields (id or duplicate fields)
@@ -293,11 +307,10 @@ class sugarcrmcore extends solution
 			];
 		}
 		// Add function to odify filter id needed
-		$filterArgs = $this->changeReadFilterArgs($param, $filterArgs);
-		
+		$filterArgs = $this->changeReadFilterArgs($param, $filterArgs);	
 		// Get the records
 		$getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
-		$response = $getRecords->getResponse();
+		$response = $getRecords->getResponse();	
 		// Format response if http return = 200
 		if ('200' == $response->getStatus()) {
 			$body = $getRecords->getResponse()->getBody(false);
@@ -305,24 +318,40 @@ class sugarcrmcore extends solution
 				$records = $body->records;
 			}
 		} else {	
-			throw new \Exception(print_r($response, true));
-		}
-
+			$bodyError = $response->getBody();
+			throw new \Exception('Status '.$response->getStatus(). ' : '.$bodyError['error'].', '.$bodyError['error_message']);
+		}	
 		// Format records to result format
 		if (!empty($records)) {
 			foreach ($records as $record) {
+				// Manage deletion by adding the flag Myddleware_deletion to the record
+				if (
+						$deleted == true
+					and !empty($record->deleted)
+				) {
+					$result[$record->id]['myddleware_deletion'] = true;
+				}
 				foreach ($param['fields'] as $field) {
 					// Sugar returns multilist value as array
 					if (
 							!empty($record->$field)
 						AND	is_array($record->$field)		
-					) {
-						$record->$field = implode(',', $record->$field);
+					) {				
+						// Some fields can be an object like teamname field
+						if (is_object($record->$field[0])) {
+							$record->$field = $record->$field[0]->name;
+						} else {
+							$record->$field = implode(',', $record->$field);
+						}
 					}
 					$result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
 				}
+				// No data returned if record deleted, we set a default date
+				if (!empty($result[$record->id]['myddleware_deletion'])) {
+					$result[$record->id]['date_modified'] = gmdate('Y-m-d H:i:s');
+				}			
 			}
-		}
+		}			
         return $result;
     }
 	
@@ -364,7 +393,6 @@ class sugarcrmcore extends solution
 		$result['error'] = $error;		
         return $result;
     }
-
     // end function create
 
     /**
@@ -396,9 +424,39 @@ class sugarcrmcore extends solution
 		$result['error'] = $error;
 		return $result;
     }
+    // end function update
 
-    // end function create
-
+    /**
+     * Function delete data.
+     *
+     * @param $param
+     *
+     * @return mixed
+     */
+    public function deleteData($param)
+    {
+		$result = array();
+		$error = '';
+		// Limit each call using the bulk limit
+		// Split the data into several array using the bulk limite size
+		$paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
+		// Call several time SugarCRM API bulk
+		foreach ($paramDataBulkArray as $paramDataBulk) {
+			// Change the data fo teh call	
+			$param['data'] = $paramDataBulk;		
+			$resultBulk = $this->upsert('delete', $param);
+			// Manage result
+			if (!empty($resultBulk['error'])) {
+				$error .= $resultBulk['error'];
+			}
+			$result = array_merge($result,$resultBulk);
+		}
+		// get the concatenation of all bulk calls
+		$result['error'] = $error;
+		return $result;
+    }
+    // end function update
+	
     public function upsert($method, $param)
     {
 		try {
@@ -432,14 +490,17 @@ class sugarcrmcore extends solution
                     unset($data['target_id']);
 					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'], 'method' => 'POST', 'data' => $data);
                 // Update record
-				} else {
+				} elseif ('delete' == $method) { 
+                    // The record id is stored in $data['target_id']
+                    $targetId = $data['target_id'];			
+					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'DELETE');
+                } else {
                     // The record id is stored in $data['target_id']
                     $targetId = $data['target_id'];
                     unset($data['target_id']);				
 					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'PUT', 'data' => $data);
                 }
-			}
-			
+			}	
 			// Send all data in 1 call
 			$recordResult = $this->sugarAPI->bulk()->execute($bulkData);
 			$response = $recordResult->getResponse();
@@ -496,7 +557,7 @@ class sugarcrmcore extends solution
 			// Modification du statut du flux
 		} catch (\Exception $e) {
 			$result['error'] = $e->getMessage();
-		}
+		}		
         return $result;
     }
     // end function create
