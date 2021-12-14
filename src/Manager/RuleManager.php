@@ -197,9 +197,7 @@ class rulecore
 	// Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
 	// If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application 
 	public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id') {
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
 		try {
-			$documents = array();
 			if ($readSource) {
 				// Connection to source application
 				$connexionSolution = $this->connexionSolution('source');
@@ -253,11 +251,10 @@ class rulecore
 					}
 					$documents[] = $childDocument;
 				}
+				return $documents;
 			}
-			$this->commit(false); // -- COMMIT TRANSACTION
-			return $documents;
+			return null;
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->logger->error($error);
 			$errorObj = new \stdClass();
@@ -1357,7 +1354,7 @@ class rulecore
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {
-						$this->checkBeforeDelete($send);						
+						$send = $this->checkBeforeDelete($send);						
 						$send['data'] = $this->beforeDelete($send['data']);
 						$response = $this->solutionTarget->deleteData($send);
 					}
@@ -1446,6 +1443,7 @@ class rulecore
 				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
 			}
 		}
+		return $send;
 	}
 		
 	protected function checkDuplicate($transformedData) {
