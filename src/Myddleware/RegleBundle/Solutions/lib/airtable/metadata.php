@@ -8,5 +8,5 @@ $fieldsRelate = array ();
 // Metadata override if needed
 $file = __DIR__.'/../../../Custom/Solutions/lib/airtable/metadata.php';
 if(file_exists($file)){
-	require_once($file);
+	require($file);
 }						

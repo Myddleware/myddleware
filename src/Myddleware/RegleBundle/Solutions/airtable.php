@@ -173,7 +173,7 @@ class airtablecore extends solution {
      * @return array
      */
     public function read($param){
-        try {			
+        try {
             $baseID = $this->paramConnexion['projectid'];
             $module = $param['module'];
             $result = [];
@@ -222,7 +222,7 @@ class airtablecore extends solution {
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
-                }							
+                }
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -230,13 +230,15 @@ class airtablecore extends solution {
                     foreach($content as $record){
                         $currentCount++;
                         foreach($param['fields'] as $field){
-							if (!empty($record['fields'][$field])) {
+							if (isset($record['fields'][$field])) {
 								// Depending on the field type, the result can be an array, in this case we take the first result
 								if (is_array($record['fields'][$field])) {
 									$result['values'][$record['id']][$field] = current($record['fields'][$field]);
 								} else {
 									$result['values'][$record['id']][$field] = $record['fields'][$field];
 								}
+							} else {
+								$result['values'][$record['id']][$field] = '';
 							}
                         }
                         // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
@@ -255,7 +257,7 @@ class airtablecore extends solution {
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-        }			
+        }		
         return $result;
     }
 
