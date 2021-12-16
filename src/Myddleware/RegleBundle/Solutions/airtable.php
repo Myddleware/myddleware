@@ -36,6 +36,7 @@ class airtablecore extends solution {
     protected $airtableURL = 'https://api.airtable.com/v0/';
     protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
 
+	protected $required_fields = array('default' => array('createdTime', 'Last Modified'));
     /**
      * Airtable base
      *
@@ -58,9 +59,7 @@ class airtablecore extends solution {
     protected $tableName;
 
     /**
-     * From AirTable API doc : 
-     * pageSize = 100 
-     * maxRecords => if higher than pageSize, multiple pages must be loaded in request
+     * Can't be greater than 100
      * @var integer
      */
     protected $defaultLimit = 100; 
@@ -128,11 +127,9 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_modules($type = 'source') {
-        /**
-         * These modules MUST BE HARDCODED in order for the connector to work as 
-         * Airtable modules are 100% custom
-         * e.g. return array('Contacts' => 'Contacts');
-         */
+        if (!empty($this->modules[$this->projectID])) {
+			return $this->modules[$this->projectID];
+		}	
         return array();
     }
 
@@ -175,7 +172,6 @@ class airtablecore extends solution {
     public function read($param){
         try {
             $baseID = $this->paramConnexion['projectid'];
-            $module = $param['module'];
             $result = [];
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
@@ -185,10 +181,12 @@ class airtablecore extends solution {
             // Remove Myddleware's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module);
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+			// Get the reference date field name
+			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
             $stop = false;
-            $count = 0;
             $page = 1;
+			$offset = '';
             do {
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
@@ -196,7 +194,7 @@ class airtablecore extends solution {
                 if(!empty($param['query'])){
                     if (!empty($param['query']['id'])) {
                         $id = $param['query']['id'];			
-                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
+                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id, $options);
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content2 = $response->getContent();
@@ -208,7 +206,7 @@ class airtablecore extends solution {
                         foreach($param['query'] as $key => $queryParam){
                             // TODO: improve this, for now we can only filter with ONE key, 
                             // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
-                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
+                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
                             $statusCode = $response->getStatusCode();
                             $contentType = $response->getHeaders()['content-type'][0];
                             $content = $response->getContent();
@@ -217,12 +215,14 @@ class airtablecore extends solution {
                     }
                 } else {
                     // all records
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module, $options);
+					$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&pageSize=".$this->defaultLimit.$offset, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
+	
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -241,23 +241,39 @@ class airtablecore extends solution {
 								$result['values'][$record['id']][$field] = '';
 							}
                         }
-                        // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
-                        // $dateTime = new DateTime();
-                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : $record['createdTime'];
-                        $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
+				
+						// Get the reference date
+						if (!empty($record['fields'][$dateRefField])) {
+							$dateModified = $record['fields'][$dateRefField];
+						// createdTime not allowed for reading action, only to get an history or a duplicate field		
+						} elseif (
+								!empty($record['createdTime']) 
+							AND !empty($param['query'])  
+						) {
+							$dateModified = $record['createdTime'];
+						} else {
+							throw new \Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
+						}
+                        $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModified);
                         $result['values'][$record['id']]['id'] = $record['id'];
+						$result['count']++;
+						// Set the last date ref into the result date ref 
+						$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
                     }
-                    $result['count']++;
-                    $count++;
                 } else {
                     $stop = true;
                 }
-                $page++;
-            } while(!$stop && $currentCount === $this->defaultLimit) ;
+                $page++;			
+            } while(
+					!$stop 
+				AND $currentCount === $this->defaultLimit
+				AND $result['count']  < $param['limit'] // count < rule limit
+				AND !empty($offset) // Only if there is more data to be read
+			) ;
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-        }		
+        }	
         return $result;
     }
 
@@ -448,6 +464,11 @@ class airtablecore extends solution {
 
         return $response;
     }
+	
+	// retrun the reference date field name
+	public function getDateRefName($moduleSource, $ruleMode) {
+		return 'Last Modified';
+	}
 
     // Convert date to Myddleware format 
 	// 2020-07-08T12:33:06 to 2020-07-08 12:33:06
@@ -456,7 +477,7 @@ class airtablecore extends solution {
 		return $dto->format("Y-m-d H:i:s");  //TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
 	}
 	
-    //convert from Myddleware format to Woocommerce format
+    //convert from Myddleware format to Airtable format
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		return $dto->format('Y-m-d\TH:i:s');
