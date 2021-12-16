@@ -55,7 +55,7 @@ class airtablecore extends solution {
      * However, this can of course be changed to any table value already present in your Airtable base
      * @var string
      */
-    protected $tableName = 'Contacts';
+    protected $tableName;
 
     /**
      * From AirTable API doc : 
@@ -106,7 +106,7 @@ class airtablecore extends solution {
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
-            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName, $options);
+            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
