@@ -144,7 +144,8 @@ class rulecore {
 				}	
 				$read['query'] = array($idFiledName => $idSource);	
 				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
-				$read['date_ref'] = '1970-01-02 00:00:00';			
+				$read['date_ref'] = '1970-01-01 00:00:00';
+				$read['jobId'] = $this->jobId;				
 			
 				$dataSource = $this->solutionSource->read($read);			;				
 				if (!empty($dataSource['error'])) {
