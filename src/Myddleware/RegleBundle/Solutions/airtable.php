@@ -169,7 +169,7 @@ class airtablecore extends solution {
      * @param array $param
      * @return array
      */
-    public function read($param){
+    public function read($param){		
         try {
             $baseID = $this->paramConnexion['projectid'];
             $result = [];
@@ -183,17 +183,18 @@ class airtablecore extends solution {
             // Add required fields
 			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
 			// Get the reference date field name
-			$dateRefField = $this->getDateRefName($param['module'], $param['rule']['mode']);
+			$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             $stop = false;
             $page = 1;
 			$offset = '';
+			
             do {
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
                 //specific record requested
                 if(!empty($param['query'])){
                     if (!empty($param['query']['id'])) {
-                        $id = $param['query']['id'];			
+                        $id = $param['query']['id'];							
                         $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id, $options);
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
@@ -216,13 +217,13 @@ class airtablecore extends solution {
                 } else {
                     // all records
 					$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&pageSize=".$this->defaultLimit.$offset, $options);
+                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&pageSize=".$this->defaultLimit.'&maxRecords='.$param['limit'].$offset, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
-	
+				
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -273,7 +274,7 @@ class airtablecore extends solution {
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-        }	
+        }		
         return $result;
     }
 
