@@ -219,7 +219,8 @@ class rulecore
 				$read['query'] = array($idFiledName => $idSource);	
 				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
 				$read['date_ref'] = '1970-01-01 00:00:00';	
-				$read['call_type'] = 'read';				
+				$read['call_type'] = 'read';
+				$read['jobId'] = $this->jobId;					
 			
 				$dataSource = $this->solutionSource->readData($read);			;							
 				if (!empty($dataSource['error'])) {
@@ -1395,18 +1396,23 @@ class rulecore
 					}
 					// First step, we get all the document with the same target module, connector and record id and a source id different
 					// We exclude the cancel document except the one no_send
-					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
+					// We exclude document from a rule linked with Myddleware_element_id (when 2 source modules update one target module) 
+ 					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
 					$query = "	SELECT Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id, 
 									GROUP_CONCAT(DISTINCT Document.type) types,
 									GROUP_CONCAT(DISTINCT Document.id ORDER BY Document.date_created DESC) documents
 								FROM Document 
 									INNER JOIN Rule
 										ON Document.rule_id = Rule.id
+									LEFT OUTER JOIN RuleRelationShip
++										 ON Rule.id = RuleRelationShip.field_id
++										AND RuleRelationShip.field_name_target = 'Myddleware_element_id'
 								WHERE 
 										Rule.conn_id_target = :conn_id_target
 									AND Rule.module_target = :module_target
 									AND Document.target_id = :target_id
 									AND Document.source_id <> (SELECT source_id from Document WHERE id = :docId)
+									AND RuleRelationShip.rule_id <> Rule.id
 									AND Document.deleted = 0
 									AND (
 												Document.global_status <> 'Cancel'
