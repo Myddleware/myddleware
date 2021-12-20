@@ -169,7 +169,7 @@ class airtablecore extends solution {
      * @param array $param
      * @return array
      */
-    public function read($param){		
+    public function read($param){
         try {
             $baseID = $this->paramConnexion['projectid'];
             $result = [];
@@ -188,7 +188,7 @@ class airtablecore extends solution {
             $page = 1;
 			$offset = '';
 			
-            do {
+            do {			
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
                 //specific record requested
@@ -224,6 +224,8 @@ class airtablecore extends solution {
                     $content = $response->toArray();
                 }
 				
+				// Get the offset id
+				$offset = (!empty($content['offset']) ? $content['offset'] : '');				
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -260,10 +262,15 @@ class airtablecore extends solution {
 						$result['count']++;
 						// Set the last date ref into the result date ref 
 						$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
+						// Stop the read action if we reached the limit
+						if ($result['count'] >= $param['limit']) {
+							break;
+						}
                     }
                 } else {
                     $stop = true;
                 }
+			
                 $page++;			
             } while(
 					!$stop 
@@ -274,7 +281,7 @@ class airtablecore extends solution {
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-        }		
+        }
         return $result;
     }
 
