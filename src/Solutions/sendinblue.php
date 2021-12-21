@@ -31,6 +31,7 @@ use DateTime;
 use DoctrineExtensions\Query\Mysql\Field;
 use PhpParser\Node\Name;
 use SendinBlue\Client\Model\CreateContact;
+use SendinBlue\Client\Model\UpdateContact;
 use SendinBlue\Client\Model\GetContacts;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -86,11 +87,15 @@ class sendinbluecore extends solution
     {
         if ('source' == $type) {
             return [
-               'contacts' => 'contacts'
+               'contacts' => 'Contacts',
+               'campaign_stat' => 'Campaign statistics',
+               'transactional_stat' => 'Transactional statistics'
             ];
         }
         return [
-            'contacts' => 'contacts',
+            'contacts' => 'Contacts',
+            'campaign_stat' => 'Campaign statistics',
+            'transactional_stat' => 'Transactional statistics'
         ];
     }
 
@@ -98,12 +103,20 @@ class sendinbluecore extends solution
     public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
-        
+
+        //Use Sendinblue metadata
+        require 'lib/sendinblue/metadata.php';
+        if (!empty($moduleFields[$module])) {
+            $this->moduleFields = $moduleFields[$module];
+            return $this->moduleFields;
+        }
         try {
+            //Add of the different fields according to the modules
+            //Use Sendinblue Api
             $apiInstance = new \SendinBlue\Client\Api\AttributesApi( new \GuzzleHttp\Client(), $this->config );
             $results = $apiInstance->getAttributes();
             $attributes = $results->getAttributes();
-                       
+            $this->moduleFields = $moduleFields['transactional_stat'];  //add attributes for transaction             
             foreach ($attributes as $attribute) {       
                 $this->moduleFields [$attribute->getName()] = [
                     'label' => $attribute->getName(),
@@ -123,60 +136,101 @@ class sendinbluecore extends solution
                 'relate' => false
             ];  
             return $this->moduleFields;  
-
         } catch (\Exception $e) {
             $error = $e->getMessage();
             return false;
-        }      
+        }
     }
 
      // Read all fields
     public function read($param){
-        $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config ); 
-        $result = array();
-        // Read with a specific id or email
-        if (
-                !empty($param['query']['id']) 
-             OR !empty($param['query']['email'])
-        ) {
-            $shearchKey = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
-            $resultApi = $apiInstance->getContactInfo($shearchKey);
-            if (!empty(current($resultApi))) {
-               $records[] = current($resultApi);
-            }             
-        }else {
-            $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
-            echo $dateRef;
-            $modifiedSince = new \DateTime('2011-12-08T14:25:04.848+01:00');
-            //$resultApi = $apiInstance->getContacts(100, 0, $modifiedSince);
-            $resultApi = $apiInstance->getContacts();
-            $records = $resultApi->getContacts();
-        }      
-    
-        //Recover all contact sendinblue 
-        if(!empty($records)){
-            foreach($records as $record){
-                foreach ($param['fields'] as $field) {
-                    echo $field.chr(10);   
-                    if (!empty($record[$field])) {
-                        echo $record[$field].chr(10);
-                        $result[$record['id']][$field] = $record[$field];
-                    // Result attribute can be an object (example function getContacts())
-                    } elseif(!empty($record['attributes']->$field)) {
-                        echo $record['attributes']->$field.chr(10);
-                        $result[$record['id']][$field] = $record['attributes']->$field;  
-                    // Result attribute can be an array (example function getContactInfo())                    
-                    }elseif(
-                            !empty($param['query'])
-                        AND !empty($record['attributes'][$field])
+        //transactional stats
+        //filter email soft/hard bounce and update status
+        //$identifier = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
+        //$resultStats = $apiInstance->getContactInfo($identifier);
+        switch ($param['module']) {
+            case 'transactional_stat':
+                //Get your transactional email activity aggregated per day
+                $dateTest = explode(" ", $param['date_ref'],2);
+                $day      = explode("/", $dateTest[0],3);
+                $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi( new \GuzzleHttp\Client(), $this->config);        
+                $limit = 10;
+                $offset = 0;
+                /*$startDate = $day;
+                $endDate = date('Y-m-d');*/      
+                try {
+                    $result = $apiInstance->getSmtpReport($limit, $offset);
+                } catch (\Exception $e) {
+                    $error = $e->getMessage();
+                    $this->logger->error($error);
+                    var_dump($error);
+                }         
+                break;
+            case 'contacts':
+                $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config ); 
+                // Read with a specific id or email
+                if (
+                    !empty($param['query']['id']) 
+                 OR !empty($param['query']['email'])
                     ) {
-                        echo $record['attributes'][$field].chr(10);
-                        $result[$record['id']][$field] = $record['attributes'][$field];                    
-                    } else {
-                        $result[$record['id']][$field] = '';
-                    }                    
-                }
-            } 
+                    $shearchKey = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
+                    //Use getContactInfo            
+                    $resultApi = $apiInstance->getContactInfo($shearchKey);
+                    var_dump($resultApi);
+                    if (!empty(current($resultApi))) {
+                    $records[] = current($resultApi);
+                    }                     
+                }else {
+                    $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+                    $modifiedSince = new \DateTime('2011-12-08T14:25:04.848+01:00');
+                    $resultApi = $apiInstance->getContacts();
+                    $records = $resultApi->getContacts();            
+                } 
+                break;
+            default:             
+                break;
+        }
+         $result = array();                  
+            //Recover all contact sendinblue 
+            if(!empty($records)){
+                foreach($records as $record){
+                    foreach ($param['fields'] as $field) { 
+                        if (!empty($record[$field])) {
+                            $result[$record['id']][$field] = $record[$field];
+                        // Result attribute can be an object (example function getContacts())
+                        } elseif(!empty($record['attributes']->$field)) {
+                            $result[$record['id']][$field] = $record['attributes']->$field;  
+                        // Result attribute can be an array (example function getContactInfo())                    
+                        }elseif(
+                                !empty($param['query'])
+                            AND !empty($record['attributes'][$field])
+                        ) {
+                            $result[$record['id']][$field] = $record['attributes'][$field];                    
+                        }
+                        else {
+                            $result[$record['id']][$field] = '';
+                        }                    
+                    }
+                } 
+            }        
+        return $result;
+    }
+
+    //fonction for get all your transactional email activity
+    public function EmailTransactional($param){
+        $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi( new \GuzzleHttp\Client(), $this->config ); 
+        $limit = 50;
+        $offset = 0;
+        $startDate = '2020-01-01'; 
+        $endDate = '2020-01-01';
+        $messageId= "<202112150919.44488315490@smtp-relay.mailin.fr>";
+        $templateId= 2;
+        
+        try {
+            $result = $apiInstance->getEmailEventReport($limit, $offset, $startDate, $endDate, $messageId, $templateId);
+            print_r($result);
+        } catch (\Exception $e) {
+            echo 'Exception when calling TransactionalEmailsApi->getEmailEventReport: ', $e->getMessage();
         }
         return $result;
     }
@@ -185,84 +239,35 @@ class sendinbluecore extends solution
      protected function create($param, $record)
      {
         // Import or create new contact for sendinblue 
-        print_r($param);    
-        //print_r($record);    
-        //try {
-        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
-        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
-        //$record['email'] $record["NOM"] $record["PRENOM"]
-        $createContact['email'] = 'exemple10@gmail.com';
-        $createContact['attributes']['NOM'] = 'test6';
-        $createContact['attributes']['PRENOM'] = 'test6';
-
-        print_r($createContact);
-        
-       /* $data = '{"
-                "attributes": {
-                    "NOM": "tototo",
-                    "PRENOM": "tototo"
-            }
-        }';
-        $obj = json_decode($data);*/
-       
-
-        //$createContact['listIds'] = [1];
-            
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+            $createContact['email'] = $record['email'];
+            // Add attributes
+            $createContact['attributes'] = $record; 
             $result = $apiInstance->createContact($createContact);
-            print_r($result);
-            if(!empty($result->getId())){
-                print_r($obj->FNAME);
-            }
-            $result->getId();
-            echo $result->getId();
-            
-       /* } catch (\Exception $e) {
+        } catch (\Exception $e) {
             $error = $e->getMessage();
             return false;
-        }    */
-        return null;
-        //return $result->getId();
+        }          
+        return $result->getId();
      }
 
     // Update the record 
     protected function update($param, $record)
-    {
-        // Import or create new contact for sendinblue 
-        //print_r($param);    
-        //print_r($record);    
-        //try {
-        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
-        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
-        //$record['email'] $record["NOM"] $record["PRENOM"]
-        $createContact['email'] = 'exemple10@gmail.com';
-        
-        //$createContact['attributes']['PRENOM'] = 'test6';
-
-        //print_r($createContact);
-        //---Ne fonctionne pas => array_merge/array_push/array_map/créer une fonction autre pour array_map
-        $attributes = [
-            "NOM" => "tototo",
-            "PRENOM" => "tototo"               
-            ];
-        echo $createContact['email'];
-        echo $attributes['NOM'];
-        //$createContact->attributes;
-        //echo json_encode();
-            
-            echo $createContact;
-        //$createContact['listIds'] = [1];
-            
-            $result = $apiInstance->createContact($createContact);
-            //print_r($result);
-            $result->getId();
-            echo $result->getId();
-            
-        /* } catch (\Exception $e) {
+    {       
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
+            // target_id contains the id of the record to be modified        
+            $identifier = $record['target_id'];                                 
+            $updateContact['attributes'] = $record;            
+            $result = $apiInstance->updateContact($identifier, $updateContact);
+         } catch (\Exception $e) {
             $error = $e->getMessage();
             return false;
-        }    */
-        return null;
-        //return $result->getId();
+        }    
+        return $identifier;
     }
 
     // Convert date to Myddleware format 
@@ -271,7 +276,7 @@ class sendinbluecore extends solution
         $dto = new \DateTime($dateTime);	
         return $dto->format("Y-m-d H:i:s");
     }
-     //convert from Myddleware format to Woocommerce format
+     //convert from Myddleware format to Sendinble format
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// Return date to UTC timezone
