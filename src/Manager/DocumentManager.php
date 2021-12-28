@@ -701,10 +701,13 @@ class documentcore
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
-				AND $this->documentType == 'U'
+				AND (
+						$this->documentType == 'U'
+					 OR $this->documentType == 'D'
+				)
 				AND !$this->isChild()
 			) {	
-				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+				$this->message .= 'Rule mode only allows to create data. Filter because this document updates or deletes data.';
 				$this->updateStatus('Filter');
 				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 				return false;
