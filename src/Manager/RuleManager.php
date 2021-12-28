@@ -1150,7 +1150,7 @@ class rulecore
 		$param['api'] = $this->api;	
 		// Set the param values and clear all document attributes
 		$this->documentManager->setParam($param, true);
-		$status = $this->documentManager->getStatus();
+		$status = $this->documentManager->getStatus();		
 		// Si la règle n'est pas chargée alors on l'initialise.
 		if (empty($this->ruleId)) {
 			$this->ruleId = $this->documentManager->getRuleId();
@@ -1163,7 +1163,7 @@ class rulecore
 		$response[$id_document] = false;
 		// On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
 		if (in_array($status,array('New','Filter_KO'))) {
-			$response = $this->filterDocuments(array(array('id' => $id_document)));
+			$response = $this->filterDocuments(array(array('id' => $id_document)));		
 			if ($response[$id_document] === true) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
 			}
@@ -1173,8 +1173,10 @@ class rulecore
 			else {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
 			}
-		}
-		if ($response[$id_document] === true || in_array($status,array('Filter_OK','Predecessor_KO'))) {
+			// Update status if an action has been executed
+			$status = $this->documentManager->getStatus();
+		}			
+		if (in_array($status,array('Filter_OK','Predecessor_KO'))) {
 			$response = $this->ckeckPredecessorDocuments(array(array('id' => $id_document)));
 			if ($response[$id_document] === true) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
@@ -1182,8 +1184,10 @@ class rulecore
 			else {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
 			}
+			// Update status if an action has been executed
+			$status = $this->documentManager->getStatus();
 		}
-		if ($response[$id_document] === true || in_array($status,array('Predecessor_OK','Relate_KO'))) {
+		if (in_array($status,array('Predecessor_OK','Relate_KO'))) {
 			$response = $this->ckeckParentDocuments(array(array('id' => $id_document)));
 			if ($response[$id_document] === true) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
@@ -1191,8 +1195,10 @@ class rulecore
 			else {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
 			}
+			// Update status if an action has been executed
+			$status = $this->documentManager->getStatus();			
 		}
-		if ($response[$id_document] === true || in_array($status,array('Relate_OK','Error_transformed'))) {
+		if (in_array($status,array('Relate_OK','Error_transformed'))) {
 			$response = $this->transformDocuments(array(array('id' => $id_document)));
 			if ($response[$id_document] === true) {
 				$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
@@ -1200,8 +1206,10 @@ class rulecore
 			else {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
 			}
+			// Update status if an action has been executed
+			$status = $this->documentManager->getStatus();			
 		}
-		if ($response[$id_document] === true || in_array($status,array('Transformed','Error_checking','Not_found'))) {
+		if (in_array($status,array('Transformed','Error_checking','Not_found'))) {
 			$response = $this->getTargetDataDocuments(array(array('id' => $id_document)));			
 			if ($response[$id_document] === true) {
 				if ($this->rule['mode'] == 'S') {
@@ -1214,6 +1222,8 @@ class rulecore
 			else {
 				$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
 			}
+			// Update status if an action has been executed
+			$status = $this->documentManager->getStatus();			
 		}
 		// Si la règle est en mode recherche alors on n'envoie pas de données
 		// Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
