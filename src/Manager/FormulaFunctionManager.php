@@ -75,7 +75,7 @@ class FormulaFunctionManager
         return date_format($date, $newFormat);
     }
 
-    public static function changeValue($var, $arrayKeyToValue)
+    public static function changeValue($var, $arrayKeyToValue, $acceptNull = null)
     {
         // Transform string into an array
         $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
@@ -83,6 +83,9 @@ class FormulaFunctionManager
             $var = $arrayKeyToValue[$var];
             return $var;
         }
+		if (!empty($acceptNull)) {
+			return '';
+		}
     }
 
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
