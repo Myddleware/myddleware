@@ -31,8 +31,12 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class airtablecore extends solution {
 
+	protected $sendDeletion = true;	
+	
     protected $airtableURL = 'https://api.airtable.com/v0/';
     protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
+
+	protected $required_fields = array('default' => array('createdTime', 'Last Modified'));
     /**
      * Airtable base
      *
@@ -52,15 +56,20 @@ class airtablecore extends solution {
      * However, this can of course be changed to any table value already present in your Airtable base
      * @var string
      */
-    protected $tableName = 'Contacts';
+    protected $tableName;
 
     /**
-     * From AirTable API doc : 
-     * pageSize = 100 
-     * maxRecords => if higher than pageSize, multiple pages must be loaded in request
+     * Can't be greater than 100
      * @var integer
      */
     protected $defaultLimit = 100; 
+	
+    /**
+     * Max number of records posted by call
+     *
+     * @var string
+     */
+    protected $callPostLimit = 10; 
 
     //Log in form parameters
     public function getFieldsLogin()
@@ -96,7 +105,7 @@ class airtablecore extends solution {
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
-            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName, $options);
+            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
@@ -118,13 +127,10 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_modules($type = 'source') {
-        /**
-         * These modules MUST BE HARDCODED in order for the connector to work as Airtable modules are 100% custom
-         */
-        return array(
-            // 'Accounts' =>	'Accounts',
-            // 'Contacts' =>	'Contacts',
-            );
+        if (!empty($this->modules[$this->projectID])) {
+			return $this->modules[$this->projectID];
+		}	
+        return array();
     }
 
     /**
@@ -135,7 +141,7 @@ class airtablecore extends solution {
      * @return array
      */
     public function get_module_fields($module, $type = 'source') {
-        require_once('lib/airtable/metadata.php');
+        require('lib/airtable/metadata.php');
         parent::get_module_fields($module, $type);
         try {
             if(!empty($moduleFields[$module])){
@@ -151,7 +157,6 @@ class airtablecore extends solution {
 			}
 
             return $this->moduleFields;
-
         }catch(\Exception $e){
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
 			return false;
@@ -167,7 +172,6 @@ class airtablecore extends solution {
     public function read($param){
         try {
             $baseID = $this->paramConnexion['projectid'];
-            $module = $param['module'];
             $result = [];
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
@@ -177,44 +181,51 @@ class airtablecore extends solution {
             // Remove Myddleware's system fields
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
-			$param['fields'] = $this->addRequiredField($param['fields'],$module);
+			$param['fields'] = $this->addRequiredField($param['fields'],$param['module']);
+			// Get the reference date field name
+			$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             $stop = false;
-            $count = 0;
             $page = 1;
-            do {
+			$offset = '';
+			
+            do {			
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
                 //specific record requested
                 if(!empty($param['query'])){
                     if (!empty($param['query']['id'])) {
-                        $id = $param['query']['id'];
-                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'/'.$id, $options);
+                        $id = $param['query']['id'];							
+                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id, $options);
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content2 = $response->getContent();
                         $content2 = $response->toArray();
                         // Add a dimension to fit with the rest of the method
-                        $content[] = $content2;
+                        $content['records'][] = $content2;
                     } else {
                         // Filter by specific field (for example to avoid duplicate records)
                         foreach($param['query'] as $key => $queryParam){
                             // TODO: improve this, for now we can only filter with ONE key, 
                             // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
-                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module.'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
+                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
                             $statusCode = $response->getStatusCode();
                             $contentType = $response->getHeaders()['content-type'][0];
                             $content = $response->getContent();
-                            $content = $response->toArray();        
+                            $content = $response->toArray();        				
                         }
                     }
                 } else {
                     // all records
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$module, $options);
+					$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&pageSize=".$this->defaultLimit.'&maxRecords='.$param['limit'].$offset, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
                 }
+				
+				// Get the offset id
+				$offset = (!empty($content['offset']) ? $content['offset'] : '');				
                 if(!empty($content['records'])){
                     $currentCount = 0;
                     //used for complex fields that contain arrays
@@ -222,22 +233,54 @@ class airtablecore extends solution {
                     foreach($content as $record){
                         $currentCount++;
                         foreach($param['fields'] as $field){
-                            $result['values'][$record['id']][$field] = (!empty($record['fields'][$field]) ? $record['fields'][$field] : '');
+							if (isset($record['fields'][$field])) {
+								// Depending on the field type, the result can be an array, in this case we take the first result
+								if (is_array($record['fields'][$field])) {
+									$result['values'][$record['id']][$field] = current($record['fields'][$field]);
+								} else {
+									$result['values'][$record['id']][$field] = $record['fields'][$field];
+								}
+							} else {
+								$result['values'][$record['id']][$field] = '';
+							}
                         }
-                        // TODO: FIND AN ALTERNATIVE TO THIS => records DO NOT HAVE A DATE MODIFIED ATTRIBUTE for now if date_modified doesn't exist, we set it to NOW (which ofc isn't viable)
-                        $dateModif = (!empty($record['fields']['date_modified'])) ? $record['fields']['date_modified'] : new DateTime();
-                        $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModif);
+				
+						// Get the reference date
+						if (!empty($record['fields'][$dateRefField])) {
+							$dateModified = $record['fields'][$dateRefField];
+						// createdTime not allowed for reading action, only to get an history or a duplicate field		
+						} elseif (
+								!empty($record['createdTime']) 
+							AND !empty($param['query'])  
+						) {
+							$dateModified = $record['createdTime'];
+						} else {
+							throw new \Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
+						}
+                        $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModified);
                         $result['values'][$record['id']]['id'] = $record['id'];
+						$result['count']++;
+						// Set the last date ref into the result date ref 
+						$result['date_ref'] = $result['values'][$record['id']]['date_modified'];
+						// Stop the read action if we reached the limit
+						if ($result['count'] >= $param['limit']) {
+							break;
+						}
                     }
-                    $result['count']++;
-                    $count++;
                 } else {
                     $stop = true;
                 }
-                $page++;
-            } while(!$stop && $currentCount === $this->defaultLimit) ;
+			
+                $page++;			
+            } while(
+					!$stop 
+				AND $currentCount === $this->defaultLimit
+				AND $result['count']  < $param['limit'] // count < rule limit
+				AND !empty($offset) // Only if there is more data to be read
+			) ;
         } catch (\Exception $e){
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';	  
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
         return $result;
     }
@@ -268,7 +311,8 @@ class airtablecore extends solution {
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['done'] = -1;		
+			$result['done'] = -1;
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());	
         }
         return $result;
     }
@@ -292,6 +336,11 @@ class airtablecore extends solution {
     public function update($param){
         return $this->upsert('update', $param);
     }
+	
+	// Delete a record
+	public function delete($param) {
+		 return $this->upsert('delete', $param);
+	}
 
     /**
      * Insert or update data depending on method's value
@@ -301,69 +350,120 @@ class airtablecore extends solution {
      * @return void
      */ 
     public function upsert($method, $param){
-        // Airtable expects data to come in a 'records' array
-        $body = [];
-        $body['records']= [];
-        foreach($param['data'] as $idDoc => $data){
-            try{
-                $baseID = $this->paramConnexion['projectid'];
-                $result= array();
-                $param['method'] = $method;
-                $module = ucfirst($param['module']);
-                $data = $this->checkDataBeforeCreate($param, $data);
-                if($method === 'create'){
-                    unset($data['target_id']);
-                }
-                $body['records'][0]['fields'] = $data;
-                $client = HttpClient::create();
-                if($method === 'create'){
-                    $options = [
-                        'auth_bearer' => $this->token,
-                        'json' => $body,
-                        'headers' => ['Content-Type' => 'application/json']
-                    ];
-                    $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content = $response->getContent();
-                    $content = $response->toArray();
-                } else {
-                    $targetId = $data['target_id'];
-                    unset($data['target_id']);
-                    unset($body['records'][0]['fields']['target_id']);
-                    $body['records'][0]['id'] = $targetId;
-                    $options = [
-                        'auth_bearer' => $this->token,
-                        'json' => $body,
-                        'headers' => ['Content-Type' => 'application/json']
-                    ];
-                    $response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
-                    $statusCode = $response->getStatusCode();
-                    $contentType = $response->getHeaders()['content-type'][0];
-                    $content = $response->getContent();
-                    $content = $response->toArray();
-                }
-            if(!empty($content)){
-                $record = $content['records'][0];
-                if(!empty($record['id'])){
-                    $result[$idDoc] = array(
-                                            'id' => $record['id'],
-                                            'error' => false
-                                    );
-                } else {
-                    throw new \Exception('Error during '.print_r($content));
-                }
-            }
-            }catch(\Exception $e){
-                $error = $e->getMessage();
-                $result[$idDoc] = array(
-                                        'id' => '-1',
-                                        'error' => $error
-                                        );
-            } 
-            // Modification du statut du flux
-			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
-        }
+		// Init parameters
+		$baseID = $this->paramConnexion['projectid'];
+		$result= array();
+		$param['method'] = $method;
+		$module = ucfirst($param['module']);
+		
+		// trigger to add custom code if needed
+		$data = $this->checkDataBeforeCreate($param, $param['data']);
+		
+        /**
+         * In order to load relationships, we MUST first load all fields
+         */
+        $allFields = $this->get_module_fields($param['module'], 'source');
+        $relationships = $this->get_module_fields_relate($param['module'], 'source');
+		
+		
+		// Group records for each calls
+		// Split the data into several array using the limite size
+		$recordsArray = array_chunk($param['data'], $this->callPostLimit, true);	
+		foreach($recordsArray as $records) {			
+			// Airtable expects data to come in a 'records' array
+			$body = [];
+			$body['typecast'] = true;
+			$body['records']= array();
+			$urlParamDelete = '';
+			$i = 0;
+			try{
+				foreach($records as $idDoc => $data){
+					if($method === 'create'){
+						unset($data['target_id']);
+					}
+					// Recard are stored in the URL for a deletionj
+					if($method === 'delete'){
+						$urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
+						$i++;
+						continue;
+					}
+					// Myddleware_element_id is a field only used by Myddleware. Not sent to the target application
+					if (!empty($data['Myddleware_element_id'])) {
+						unset($data['Myddleware_element_id']);
+					}
+					$body['records'][$i]['fields'] = $data;
+					/**
+					 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
+					 */
+					foreach($body['records'][$i]['fields'] as $fieldName => $fieldVal){
+						if(array_key_exists($fieldName, $relationships)){
+							$arrayVal = [];
+							$arrayVal[] = $fieldVal;
+							$body['records'][$i]['fields'][$fieldName] = $arrayVal;
+						}
+					}
+					// Add the record id in the body if update 
+					if($method === 'update'){
+						$body['records'][$i]['id'] = $data['target_id'];
+						unset($body['records'][$i]['fields']['target_id']);
+					}
+					$i++;
+				}			
+				// Send records to Airtable
+				$client = HttpClient::create();
+				$options = [
+					'auth_bearer' => $this->token,
+					'json' => $body,
+					'headers' => ['Content-Type' => 'application/json']
+				];					
+				// POST, DELETE or PATCH depending on the method
+				if($method === 'delete'){				
+					// Parameters are directly in the URL for a deletion
+					$response = $client->request('DELETE', $this->airtableURL.$baseID.'/'.$module.'?'.$urlParamDelete, $options);				
+				} elseif($method === 'update'){
+					$response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
+				} else { // Create
+					$response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
+				}				
+				$statusCode = $response->getStatusCode();
+				$contentType = $response->getHeaders()['content-type'][0];
+				$content = $response->getContent();
+				$content = $response->toArray();				
+				if(!empty($content)){
+					$i = 0;
+					foreach($records as $idDoc => $data){
+						$record = $content['records'][$i];
+						if(!empty($record['id'])){
+							$result[$idDoc] = array(
+													'id' => $record['id'],
+													'error' => false
+											);
+						} else {
+							$result[$idDoc] = array(
+								'id' => '-1',
+								'error' => 'Failed to send data. Message from Airtable : '.print_r($content['records'][$i],true)
+							);
+						}
+						$i++;
+						// Modification du statut du flux
+						$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+					}
+				} else {
+					throw new \Exception('Failed to send the record but no error returned by Airtable. ');
+				}
+				
+			}catch(\Exception $e){
+				$error = $e->getMessage();
+				foreach($records as $idDoc => $data){
+					$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+					);
+					$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
+				}
+				$this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+			} 
+		}			
         return $result;
     }
 
@@ -372,6 +472,11 @@ class airtablecore extends solution {
 
         return $response;
     }
+	
+	// retrun the reference date field name
+	public function getDateRefName($moduleSource, $ruleMode) {
+		return 'Last Modified';
+	}
 
     // Convert date to Myddleware format 
 	// 2020-07-08T12:33:06 to 2020-07-08 12:33:06
@@ -380,7 +485,7 @@ class airtablecore extends solution {
 		return $dto->format("Y-m-d H:i:s");  //TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
 	}
 	
-    //convert from Myddleware format to Woocommerce format
+    //convert from Myddleware format to Airtable format
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		return $dto->format('Y-m-d\TH:i:s');
