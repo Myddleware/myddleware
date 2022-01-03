@@ -187,7 +187,12 @@ class UpgradeManager
     // Update vendors via composer
     protected function updateVendors()
     {
-        $process = new Process('composer install');
+        // Change the command composer if php isn't the default php version
+		if ($this->phpExecutable != 'php') {
+			$process = new Process($this->phpExecutable.' composer.phar install');
+		} else {
+			$process = new Process('composer install');
+		}
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
