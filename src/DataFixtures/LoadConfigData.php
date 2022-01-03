@@ -41,6 +41,7 @@ class LoadConfigData implements FixtureInterface
 		['name' => 'search_limit', 'value' => 1000, 'update' => false],
 		['name' => 'git_branch', 'value' => 'main', 'update' => false],
 		['name' => 'base_uri', 'value' => '', 'update' => false],
+		['name' => 'php', 'value' => 'php', 'update' => false],
 		['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false]
     ];
 
