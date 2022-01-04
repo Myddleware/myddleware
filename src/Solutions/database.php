@@ -451,13 +451,18 @@ class databasecore extends solution
 		// Execute the query
 		$q = $this->pdo->prepare($sql);
 		$exec = $q->execute();
+		// Query error
 		if (!$exec) {
 			$errorInfo = $this->pdo->errorInfo();
 			throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
 		}
-		// Warning in case there is not only 1 change in the target database
-		if ($q->rowCount() != 1) {
-			$this->message = 'There is no error but '.$q->rowCount().' row has been updated.';
+		// No modification
+		if ($q->rowCount() == 0) {
+			$this->message = 'There is no error but the query hasn\'t modified any record.';
+		}
+		// Several modifications
+		if ($q->rowCount() > 1) {
+			throw new \Exception('Update query has modified several records. It shoudl never happens. Please check that your id in your database is unique. Query : '.$sql);
 		}
         return $record['target_id'];
     }
@@ -611,7 +616,7 @@ class databasecore extends solution
                 // Remove the last coma
                 $sql = substr($sql, 0, -1);
                 $sql .= ')';
-                $stmt = $this->conn->prepare($sql);
+                $stmt = $this->connection->prepare($sql);
                 $stmt->execute();
                 $fields = $stmt->fetchAll();
                 if (!empty($fields)) {

@@ -630,7 +630,7 @@ class magentocore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataMagento = [];
                 foreach ($data as $key => $value) {
                     // Target id isn't a field for Magento (it is used for Myddleware)

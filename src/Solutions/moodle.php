@@ -165,11 +165,8 @@ class moodlecore extends solution
     public function read($param)
     {
         try {
-            // $result['count'] = 0;
             $result = array();
 
-            // Put date ref in Moodle format
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
             // Get function to call Moodle
@@ -208,7 +205,7 @@ class moodlecore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {

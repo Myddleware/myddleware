@@ -229,9 +229,6 @@ class woocommercecore extends solution {
                                 } else {
                                     $row[$field] = (!empty($record->$field) ? $record->$field : '');
                                 }
-								if ($field == 'date_modified') {
-									$row[$field] = $this->dateTimeToMyddleware($record->$field);
-								}
                             }
                             $row['id'] = $record->id;
                             $count++;
@@ -301,7 +298,7 @@ class woocommercecore extends solution {
                 $result= array();
                 $param['method'] = $method;
                 $module = $param['module'];
-                $data = $this->checkDataBeforeCreate($param, $data);
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
 
                 if($method === 'create'){
                     unset($data['target_id']);

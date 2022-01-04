@@ -442,7 +442,6 @@ class prestashopcore extends solution
 		// traitement spécial pour module de relation Customers / Groupe
 		if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
 			$result = $this->readManyToMany($param);
-
 			return $result;
 		}
 
@@ -745,7 +744,7 @@ class prestashopcore extends solution
 
         foreach ($param['data'] as $idDoc => $data) {
             // Check control before create
-            $data = $this->checkDataBeforeCreate($param, $data);
+            $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
             // on ajoute le token pour le module customer_threads
             if ('customer_threads' == $param['module']) {
                 $data['token'] = 'token';

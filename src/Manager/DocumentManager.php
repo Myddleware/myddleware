@@ -248,9 +248,9 @@ class documentcore
 
 	// Set the document param
 	// Clear parameter is used when we call the same instance of the Document to manage several documents (from RuleManager class)
-	public function setParam($param, $clear = false) {
+	public function setParam($param, $clear = false, $clearRule = true) {
 		if ($clear) {
-			$this->clearAttributes();
+			$this->clearAttributes($clearRule);
 		}
 		// Chargement des solution si elles sont présentent dans les paramètres de construction
 		if (!empty($param['solutionTarget'])) {
@@ -270,11 +270,6 @@ class documentcore
 		}
 		if (!empty($param['ruleDocuments'])) {
 			$this->ruleDocuments = $param['ruleDocuments'];
-		}	
-
-		// Stop the processus if the job has been manually stopped
-		if ($this->getJobStatus() != 'Start') {
-			$this->jobActive = false;
 		}		
 
 		// Init attribut of the class Document
@@ -298,10 +293,11 @@ class documentcore
 			if (!empty($this->data['myddleware_deletion'])) {
 				$this->documentType = 'D';
 			}
-		} 
+		} 				
 		// Ajout des paramètre de la règle
-		$this->setRuleParam();
-
+		if (empty($this->ruleParams)) {
+			$this->setRuleParam();
+		}	
 		// Mise à jour des tableaux s'ils existent.
 		if (!empty($param['ruleFields'])) {
 			$this->ruleFields = $param['ruleFields'];
@@ -309,19 +305,24 @@ class documentcore
 		if (!empty($param['ruleRelationships'])) {
 			$this->ruleRelationships = $param['ruleRelationships'];
 		}
+		// Init type error for each new document 
+		$this->typeError = 'S';
 	}
 	
 	// Clear all class attributes
-	protected function clearAttributes() {
+	protected function clearAttributes($clearRule = true) {
+		// Clear rule parameter only if requested
+		if ($clearRule){
+			$this->ruleName = '';
+			$this->ruleMode = '';
+			$this->ruleId = '';
+			$this->ruleFields = array();
+			$this->ruleRelationships = array();
+			$this->ruleParams = array();
+		}
 		$this->id = '';
 		$this->message = '';
 		$this->dateCreated = '';
-		$this->ruleName = '';
-		$this->ruleMode = '';
-		$this->ruleId = '';
-		$this->ruleFields = array();
-		$this->ruleRelationships = array();
-		$this->ruleParams = array();
 		$this->sourceId = '';
 		$this->targetId = '';
 		$this->parentId = '';
@@ -376,7 +377,6 @@ class documentcore
 			$this->message .= 'Job is not active. ';					
 			return false;
 		}
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			$filterOK = true;
 			// Si des filtres sont présents 
@@ -395,10 +395,8 @@ class documentcore
 			if ($filterOK === true) {
 				$this->updateStatus('Filter_OK');
 			}
-			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return $filterOK;
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Failed to filter document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Filter_KO');
@@ -439,6 +437,14 @@ class documentcore
 		$this->typeError = $typeError;
 	}
 	
+	public function setRuleId($ruleId) {
+		$this->ruleId = $ruleId;
+	}
+	
+	public function setDocIdRefError($docIdRefError) {
+		$this->docIdRefError = $docIdRefError;
+	}
+
 	// Permet d'indiquer si le filtreest rempli ou pas
 	protected function checkFilter($fieldValue,$operator,$filterValue){
 		switch ($operator) {
@@ -556,7 +562,6 @@ class documentcore
 			$this->message .= 'Job is not active. ';					
 			return false;
 		}
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Check predecessor in the current rule
 			$sqlParams = "	SELECT 
@@ -680,7 +685,6 @@ class documentcore
 					if ($this->documentType == 'D') {
 						$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
 						$this->updateStatus('Cancel');
-						$this->connection->commit(); // -- COMMIT TRANSACTION
 						return false;
 					}
 					throw new \Exception('No target id found for a document with the type Update. ');
@@ -703,13 +707,10 @@ class documentcore
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
 				$this->updateStatus('Filter');
 				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
-				$this->connection->commit(); // -- COMMIT TRANSACTION
 				return false;
 			}
-			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			// Reference document id is used to show which document is blocking the current document in Myddleware
 			$this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
 			$this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -727,7 +728,6 @@ class documentcore
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {		
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
@@ -758,7 +758,6 @@ class documentcore
 							$this->typeError = 'W';
 							$this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
 							$this->updateStatus('Filter');
-							$this->connection->commit(); // -- COMMIT TRANSACTION	
 							return false;
 						} 
 						$error = true;
@@ -799,11 +798,8 @@ class documentcore
 			}
 			
 			$this->updateStatus('Relate_OK');
-					
-			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Relate_KO');
@@ -819,7 +815,6 @@ class documentcore
 			$this->message .= 'Job is not active. ';				
 			return false;
 		}	
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Transformation des données et insertion dans la table target
 			$transformed = $this->updateTargetTable();
@@ -861,10 +856,8 @@ class documentcore
 				throw new \Exception( 'Failed to transformed data. This document is queued. ' );
 			}			
 			$this->updateStatus('Transformed');
-			$this->connection->commit(); // -- COMMIT TRANSACTION	
 			return true;
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Error_transformed');
@@ -881,7 +874,6 @@ class documentcore
 			return false;
 		}	
 		$history = false;
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Check if the rule is a parent and run the child data.		
 			$this->runChildRule();		
@@ -905,8 +897,7 @@ class documentcore
 					AND	$history === false
 				) {
 					$this->message .= 'This document type is D (delete) and no record have been found in the target application. It means that the record has already been deleted in the target application. This document is cancelled.';
-					$this->updateStatus('Cancel');
-					$this->connection->commit(); // -- COMMIT TRANSACTION	
+					$this->updateStatus('Cancel');	
 					return false;
 				}
 				
@@ -980,10 +971,8 @@ class documentcore
 				AND	!$this->isParent()
 			) {
 				$this->checkNoChange();
-			}		
-			$this->connection->commit(); // -- COMMIT TRANSACTION	
+			}			
 		} catch (\Exception $e) {
-			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			if ($this->documentType == 'S') {
@@ -1100,6 +1089,7 @@ class documentcore
 		$read['rule'] = $rule;
 		$read['call_type'] = 'history';
 		$read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
+		$read['document']['type'] = $this->documentType;
 		$dataTarget = $this->solutionTarget->readData($read);
 		// If read method returns no result with no error
 		
@@ -1222,10 +1212,6 @@ class documentcore
 			$documentData->setType($type); // Source		
 			$documentData->setData(json_encode($dataInsert)); // Encode in JSON
 			$this->entityManager->persist($documentData);
-			$this->entityManager->flush();		
-			if (empty($documentData->getId())) {
-				throw new \Exception( 'Failed to insert data source in table Document Data.' );
-			}
 		} 
 		catch (\Exception $e) {
 			$this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1566,8 +1552,8 @@ class documentcore
 	}
 	
 	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParam() {	
-		try {
+	public function setRuleParam() {	
+		try {			
 			$sqlParams = "SELECT * 
 							FROM ruleparam 
 							WHERE rule_id = :ruleId";
@@ -1579,7 +1565,7 @@ class documentcore
 				foreach ($ruleParams as $ruleParam) {
 					$this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
 				}			
-			}			
+			}	
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
@@ -1894,8 +1880,7 @@ class documentcore
 			$documentRelationship->setDateCreated(new \DateTime);
 			$documentRelationship->setCreatedBy((int)$this->userId);
 			$documentRelationship->setSourceField($ruleRelationship['field_name_source']);				
-			$this->entityManager->persist($documentRelationship);
-			$this->entityManager->flush();	
+			$this->entityManager->persist($documentRelationship);	
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to save the document relationship for the field '.$ruleRelationship['field_name_source'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'W';

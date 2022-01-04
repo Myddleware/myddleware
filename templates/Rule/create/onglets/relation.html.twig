@@ -33,7 +33,7 @@
 <div class="clr"></div>
 <div> 
 	{% if lst_relation_target %}
-	<table id="relate" class="table table-borderless">
+	<table id="relate" class="table table-borderless rel">
 		<thead>
 			<tr>
 				<th class="ctr"><img src="{{ asset('build/images/template/source.png') }}" alt="{{'view_rule.relate.solution_source'|trans}}" /></th>
@@ -75,7 +75,7 @@
 	</table>
 	{% if parentRelationships %}
 		<h1 class="display-6">{{'create_rule.step3.relation.parent'|trans}}</h1>
-		<table id="parent_relate" class="table table-borderless">
+		<table id="parent_relate" class="table table-borderless rel">
 			<tr>
 				<th class="ctr"><img src="{{ asset('build/images/template/') }}source.png" alt="{{'view_rule.relate.solution_source'|trans}}" /></th>
 				<th colspan="3"></th>

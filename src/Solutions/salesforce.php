@@ -464,7 +464,7 @@ class salesforcecore extends solution {
 			$nb_record = count($param['data']);			
 			foreach($param['data'] as $idDoc => $data) {
 				// Check control before create
-				$data = $this->checkDataBeforeCreate($param, $data);
+				$data = $this->checkDataBeforeCreate($param, $data, $idDoc);
 				// Generate a reference and store it in an array
 				$i++;	
 				$idDocReference['Ref'.$i] = $idDoc;

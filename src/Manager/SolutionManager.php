@@ -41,6 +41,7 @@ use App\Solutions\microsoftsql;
 use App\Solutions\moodle;
 use App\Solutions\mysql;
 use App\Solutions\oracledb;
+use App\Solutions\postgresql;
 use App\Solutions\prestashop;
 use App\Solutions\ringcentral;
 use App\Solutions\sage50;
@@ -95,6 +96,7 @@ class SolutionManager
         eventbrite $eventbrite,
         mailchimp $mailchimp,
         prestashop $prestashop,
+        postgresql $postgresql,
         sugarcrm $sugarcrm,
         salesforce $salesforce
     ) {
@@ -123,6 +125,7 @@ class SolutionManager
             'eventbrite' => $eventbrite,
             'mailchimp' => $mailchimp,
             'prestashop' => $prestashop,
+            'postgresql' => $postgresql,
             'sugarcrm' => $sugarcrm,
             'salesforce' => $salesforce,
         ];

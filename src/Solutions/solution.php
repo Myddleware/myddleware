@@ -307,7 +307,7 @@ class solutioncore
 			// Format data
 			if (!empty($readResult)) {
 				// Get the name of the field used for the reference
-				$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+				$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);	
 				// Get the name of the field used as id
 				$idField = $this->getIdName($param['module']);
 				
@@ -329,8 +329,10 @@ class solutioncore
 						if (empty($record[$dateRefField])) {
 							throw new \Exception('Reference field '.$dateRefField.' is missing in this record '. print_r($record, true).'.');
 						}
-						// Convert date ref into Myddleware format
+						// Convert date ref into Myddleware format					
 						$record['date_modified'] = $this->getModifiedDate($param, $record, $dateRefField);
+					} else {
+						$record['date_modified'] = $this->dateTimeToMyddleware($record['date_modified']);
 					}
 					$result['values'][$record['id']] = $record;
 					// Return the number of result
@@ -353,7 +355,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }			
+        }
 		return $result;
     }
 
@@ -407,7 +409,7 @@ class solutioncore
 					$record = $this->cleanMyddlewareRecord($record);
 					
 					// Check control before create
-					$record = $this->checkDataBeforeCreate($param, $record);
+					$record = $this->checkDataBeforeCreate($param, $record, $idDoc);
 					// Call create method
 					$recordId = $this->create($param, $record);
 					
@@ -866,11 +868,13 @@ class solutioncore
 
     // Check data before create
     // Add a throw exeption if error
-    protected function checkDataBeforeCreate($param, $data)
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
-
+		// Target_id isn't used in create method
+		unset($data['target_id']);
+		
         return $data;
     }
 

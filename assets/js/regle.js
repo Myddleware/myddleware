@@ -226,18 +226,14 @@ $(function () {
 	// ---- FORMULE ------------------------------------------------------------
 	if (typeof style_template !== "undefined" && typeof formula_error !== "undefined") {
 
-
 		$('#area_insert').on('keyup', function () {
 			colorationSyntax();
 			theme(style_template);
 		});
 
-
-
 		// Filtre des fonctions pour les formules
 		$('#filter').on('change', function () {
 			var cat = $("select[name='filter_functions'] > option:selected").attr("data-type");
-
 			if (cat >= 1) {
 				$('.func', '#functions').each(function () {
 					if ($(this).attr("data-type") != cat) {
@@ -255,8 +251,6 @@ $(function () {
 			recup_formule();
 		});
 
-
-	
 		openFormula();
 
 		// Ajouter un champ dans la zone de formule
@@ -319,8 +313,6 @@ $(function () {
 
 		});
 
-
-		// 
 		$("button", "#source_info").on("click", function () {
 			var position = $("#area_insert").getCursorPosition();
 			var content = $('#area_insert').val();
@@ -330,7 +322,6 @@ $(function () {
 			theme(style_template);
 		});
 
-		// 
 		$("button", "#target_info").on("click", function () {
 			var position = $("#area_insert").getCursorPosition();
 			var content = $('#area_insert').val();
@@ -871,8 +862,6 @@ function previous_next(tab) {
 
 function btn_action_fct() {
 	// IMPORTANT
-	//e.preventDefault();
-
 	$(window).scrollTop(0);
 	$('body').css('overflow', 'hidden');
 	var ww = $(window).width() / 2 - 33 + "px";
@@ -1293,8 +1282,6 @@ function openFormula() {
 		// récupération de la formule existante si rééouverture
 		var formuleExistante = $('#formule_' + $.trim(champ_nom)).text();
 		$('#area_insert').val(formuleExistante);
-		//colorationSyntax();
-		//theme(style_template);	
 		$('#formule_table').empty();
 		$('#formule_table').append(champ_nom); // nom du champ en titre	
 
@@ -1464,9 +1451,8 @@ function existeFilter(field) {
 
 	return view;
 }
-// Supprime un champ
+// Delete a field from the Filters tab list 
 function removeFilter(field) {
-
 	view = 0;
 	$('#cible').find("li.ch").each(function () {
 
@@ -1474,7 +1460,6 @@ function removeFilter(field) {
 			view++;
 		}
 	});
-
 	if (view < 2) {
 		$('#filter_' + field).remove();
 	}
