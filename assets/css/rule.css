@@ -198,6 +198,9 @@
 
 #cible .ch, #cible .placeholder {
 	list-style:none;
+	font-weight: bold!important;
+	background-color: #FFFFFF!important; 
+	cursor: pointer!important;
 }
 
 #cible .ch {
