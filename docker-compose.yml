@@ -25,11 +25,15 @@ services:
     build:
       context: ./docker/db
       dockerfile: Dockerfile.mysql
+    container_name: ${APP_NAME}_database
     volumes:
       - ./fixtures:/docker-entrypoint-initdb.d
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
       - "3320:3306"
 
@@ -40,8 +44,10 @@ services:
     depends_on:
       - database
     environment:
-      - PMA_HOST=database
-      - PMA_PORT=3306
+      PMA_HOST: ${DB_HOST}
+      PMA_PORT: ${DB_PORT}
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   app_log:

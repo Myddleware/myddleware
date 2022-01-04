@@ -22,4 +22,4 @@ RESULT=$?
 rm composer-setup.php
 exit $RESULT
 
-# TODO: update to a newer version of Composer !!!! (verify that commands above are correct : https://getcomposer.org/download/)
+# TODO: verify that commands above are correct since COmposer version has been upgraded: https://getcomposer.org/download/)

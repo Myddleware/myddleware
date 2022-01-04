@@ -123,7 +123,7 @@ class DatabaseSetupController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()){    
                 $envLocal = __DIR__.'/../../.env.local';
                 // we edit the database connection parameters with form input
-                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'"';
                 $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
                 // add Symfony secret to .env.local 
                 $appSecret = 'APP_SECRET='.$database->getSecret();
@@ -195,7 +195,7 @@ class DatabaseSetupController extends AbstractController
 
                                 $envLocal = __DIR__.'/../../.env.local';
                                 // we edit the database connection parameters with form input
-                                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
+                                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'"';
                                 $prodString = 'APP_ENV=prod'. PHP_EOL. 'APP_DEBUG=false';
                                 $appSecret = 'APP_SECRET='.$database->getSecret();
                                 // write new URL into the .env.local file (EOL ensures it's written on a new line)
