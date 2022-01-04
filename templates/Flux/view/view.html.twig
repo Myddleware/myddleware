@@ -144,8 +144,8 @@
 							</div>
 						</td>
 						<td class="ctr">{{ doc.getSourceDateModified|date("d/m/Y H:i:s") }}</td>
-						<td class="ctr">{{ doc.getDateCreated|date("d/m/Y H:i:s") }}</td>
-						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s") }}</td>
+						<td class="ctr">{{ doc.getDateCreated|date("d/m/Y H:i:s", timezone) }}</td>
+						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 						{% if doc.getParentId %}
 							<td>
 								<a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a>
@@ -379,7 +379,7 @@
 												</td>
 												<td class="ctr">{{ flux.source }}</td>
 												<td class="ctr">{{ flux.target }}</td>
-												<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+												<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s", timezone) }}</td>
 												<td class="ctr">{{ flux.type }}</td>
 												<td class="ctr">
 													<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
@@ -642,7 +642,7 @@
 													<a href="{{ path('task_view', {'id':log.getJob.id}) }}">{{ log.getJob.id }}</a>
 												{% endif %}
 											</td>
-											<td>{{ log.getDateCreated|date("d/m/Y H:i:s") }}</td>
+											<td>{{ log.getDateCreated|date("d/m/Y H:i:s", timezone) }}</td>
 											<td class="ctr">
 												<div class="log_{{ log.getType|lower }}">{{ log.getType }}
 													{% if log.getType|lower == 's' %}

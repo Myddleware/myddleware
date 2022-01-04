@@ -399,12 +399,19 @@ class FluxController extends AbstractController
                 $conditions = 1;
             }
 
+            //Check the user timezone
+            if ($timezone = '') {
+                $timezone = 'UTC';
+            }else {
+                $timezone = $this->getUser()->getTimezone();
+            }
             return $this->render('Flux/list.html.twig', [
                 'nb' => $compact['nb'],
                 'entities' => $compact['entities'],
                 'pager' => $compact['pager'],
                 'form' => $form->createView(),
                 'condition' => $conditions,
+                'timezone' => $timezone,
             ]
             );
         }
@@ -572,7 +579,12 @@ class FluxController extends AbstractController
                     $targetData = $targetLink;
                 }
             }
-
+            //Check the user timezone
+            if ($timezone = '') {
+                $timezone = 'UTC';
+            }else {
+                $timezone = $this->getUser()->getTimezone();
+            }
             // Call the view
             return $this->render('Flux/view/view.html.twig', [
                 'current_document' => $id,
@@ -597,6 +609,7 @@ class FluxController extends AbstractController
                 'nb_history_documents' => count($historyDocuments),
                 'ctm_btn' => $list_btn,
                 'read_record_btn' => $solution_source->getReadRecord(),
+                'timezone' => $timezone,
             ]
             );
         } catch (Exception $e) {

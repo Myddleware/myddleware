@@ -30,6 +30,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Serializable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User
@@ -125,6 +126,12 @@ class User implements UserInterface, Serializable
     protected $roles;
 
     /**
+     * @Assert\Timezone
+     * @ORM\Column(name="timezone", type="string")
+     */
+    protected $timezone;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -179,6 +186,7 @@ class User implements UserInterface, Serializable
             $this->id,
             $this->email,
             $this->emailCanonical,
+            $this->timezone,
         ]);
     }
 
@@ -207,7 +215,8 @@ class User implements UserInterface, Serializable
             $this->enabled,
             $this->id,
             $this->email,
-            $this->emailCanonical
+            $this->emailCanonical,
+            $this->timezone
             ] = $data;
     }
 
@@ -306,6 +315,14 @@ class User implements UserInterface, Serializable
         return array_unique($roles);
     }
 
+     /**
+     * {@inheritdoc}
+     */
+    public function getTimezone()
+    {
+
+        return $this->timezone;
+    }
     /**
      * {@inheritdoc}
      */
@@ -520,6 +537,15 @@ class User implements UserInterface, Serializable
 
         return $this;
     }
+       /**
+     * {@inheritdoc}
+     */
+    public function setTimezone(String $timezone = null)
+    {
+        $this->timezone = $timezone;
+
+        return $this;
+    }
 
     /**
      * @return string
@@ -527,5 +553,5 @@ class User implements UserInterface, Serializable
     public function __toString()
     {
         return (string) $this->getUsername();
-    }
+    }  
 }
