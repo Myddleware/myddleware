@@ -25,6 +25,9 @@ services:
     build:
       context: ./docker/db
       dockerfile: Dockerfile.mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: myddleware
     command: mysqld --sql_mode=""
     volumes:
       - ./fixtures:/docker-entrypoint-initdb.d
