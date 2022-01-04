@@ -25,11 +25,11 @@ services:
     build:
       context: ./docker/db
       dockerfile: Dockerfile.mysql
-    command: mysqld --sql_mode=""
     volumes:
       - ./fixtures:/docker-entrypoint-initdb.d
-    env_file:
-      - .env
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3320:3306"
 

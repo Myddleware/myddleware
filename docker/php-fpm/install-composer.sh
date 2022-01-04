@@ -17,7 +17,9 @@ fi
 
 echo "Installer signature is correct: $ACTUAL_SIGNATURE"
 
-php composer-setup.php --version=1.10.8 && mv composer.phar /usr/local/bin/composer
+php composer-setup.php --version=2.2.3 && mv composer.phar /usr/local/bin/composer
 RESULT=$?
 rm composer-setup.php
 exit $RESULT
+
+# TODO: update to a newer version of Composer !!!! (verify that commands above are correct : https://getcomposer.org/download/)
