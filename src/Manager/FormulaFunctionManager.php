@@ -75,7 +75,7 @@ class FormulaFunctionManager
         return date_format($date, $newFormat);
     }
 
-    public static function changeValue($var, $arrayKeyToValue)
+    public static function changeValue($var, $arrayKeyToValue, $acceptNull = null)
     {
         // Transform string into an array
         $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
@@ -83,6 +83,28 @@ class FormulaFunctionManager
             $var = $arrayKeyToValue[$var];
             return $var;
         }
+		if (!empty($acceptNull)) {
+			return '';
+		}
+    }
+
+    public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
+    {			
+		// Transform $var into array
+		$return = '';
+		$arrayVar = explode($delimiter, $var);
+		if (!empty($arrayVar)) {
+			$arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
+			foreach($arrayVar as $varValue) {
+				// Transform string into an array					
+				if (!empty($arrayKeyToValue[$varValue])) {
+					// Prepare return value
+					$return .= $arrayKeyToValue[$varValue].$delimiter;						
+				}
+			}		
+			$return = rtrim($return, $delimiter);			
+			return $return;
+		}
     }
 
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)

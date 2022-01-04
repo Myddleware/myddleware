@@ -701,10 +701,13 @@ class documentcore
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
-				AND $this->documentType == 'U'
+				AND (
+						$this->documentType == 'U'
+					 OR $this->documentType == 'D'
+				)
 				AND !$this->isChild()
 			) {	
-				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+				$this->message .= 'Rule mode only allows to create data. Filter because this document updates or deletes data.';
 				$this->updateStatus('Filter');
 				// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 				return false;
@@ -1577,47 +1580,52 @@ class documentcore
 	protected function checkRecordExist($id) {	
 		try {	
 			// Query used in the method several times
-			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
-			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
+			// Sort : targetOrder to get the target id non empty first; on global_status to get Cancel last 
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			// Then we take the last document created to know if the last action sent was a deletion
 			$sqlParamsSoure = "	SELECT 
-								document.id, 
-								document.target_id, 
-								document.global_status 
-							FROM document 
+								Document.id, 
+								Document.target_id, 
+								Document.type, 
+								Document.global_status,
+								if(Document.target_id = '', 0, 1) targetOrder
+							FROM Document 
 							WHERE 
-									document.rule_id IN (:ruleId)	
+									Document.rule_id IN (:ruleId)	
 								AND (
-										document.global_status = 'Close'
-									OR (
-											document.global_status = 'Cancel'	
-										AND document.status = 'No_send'
+										Document.global_status = 'Close'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
 									)
 								)
-								AND	document.source_id = :id
-								AND document.id != :id_doc
-								AND document.deleted = 0 
-							ORDER BY target_id DESC, global_status DESC
+								AND	Document.source_id = :id
+								AND Document.id != :id_doc
+								AND Document.deleted = 0 
+							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";
 							
 			// On prépare la requête pour rechercher dans la partie target
 			$sqlParamsTarget = "SELECT 
-								document.id, 
-								document.source_id target_id, 
-								document.global_status 
-							FROM document 
+								Document.id, 
+								Document.source_id target_id, 
+								Document.type,
+								Document.global_status,
+								if(Document.target_id = '', 0, 1) targetOrder
+							FROM Document 
 							WHERE 
-									document.rule_id IN (:ruleId)	
+									Document.rule_id IN (:ruleId)	
 								AND (
-										document.global_status = 'Close'
-									OR (
-											document.global_status = 'Cancel'	
-										AND document.status = 'No_send'
+										Document.global_status = 'Close'
+									 OR (
+											Document.global_status = 'Cancel'	
+										AND Document.status = 'No_send'
 									)
 								)
-								AND	document.target_id = :id
-								AND document.id != :id_doc
-								AND document.deleted = 0 
-							ORDER BY target_id DESC, global_status DESC
+								AND	Document.target_id = :id
+								AND Document.id != :id_doc
+								AND Document.deleted = 0 
+							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";	
 					
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
@@ -1634,10 +1642,10 @@ class documentcore
 						// S'il s'agit de Myddleware_element_id on teste id
 						if (
 								!empty($this->data[$ruleRelationship['field_name_source']])
-							|| (
+							 || (
 									$ruleRelationship['field_name_source'] == 'Myddleware_element_id'
 								&& !empty($this->data['id'])	
-							)
+							 )
 						) {					
 							// On recherche l'id target dans la règle liée
 							$this->sourceId = ($ruleRelationship['field_name_source'] == 'Myddleware_element_id' ? $this->data['id'] : $this->data[$ruleRelationship['field_name_source']]);
@@ -1654,7 +1662,6 @@ class documentcore
 							$stmt->bindValue(":id_doc", $this->id);
 							$stmt->execute();	   				
 							$result = $stmt->fetch();
-				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 							if (!empty($result['target_id'])) {							
 								$this->targetId = $result['target_id'];
@@ -1668,7 +1675,7 @@ class documentcore
 							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 							if (
 									empty($result['id']) 
-								|| $result['global_status'] == 'Cancel'
+								 || $result['global_status'] == 'Cancel'
 							) {
 								return 'C';
 							} else {
@@ -1689,7 +1696,7 @@ class documentcore
 						if (
 							(
 								$document['global_status'] != 'Cancel'
-							OR (
+							 OR (
 										$document['global_status'] == 'Cancel'	
 									AND $document['status'] == 'No_send'
 								)
@@ -1704,7 +1711,7 @@ class documentcore
 							// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 							if (
 									empty($result['id']) 
-								|| $result['global_status'] == 'Cancel'
+								 || $result['global_status'] == 'Cancel'
 							) {
 								return 'C';
 							} else {
@@ -1737,7 +1744,7 @@ class documentcore
 				$stmt->bindValue(":id", $id);
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();				
+				$result = $stmt->fetch();
 			}
 			
 			// If we found a record
@@ -1745,9 +1752,13 @@ class documentcore
 				$this->targetId = $result['target_id'];
 				// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 				// Except if the rule is bidirectional, in this case, a no send document in the opposite rule means that the data really exists in the target application
+				// OR if the last document sent is a deletion, we will create a new record because the record doesn't exist anymore in the target application
 				if (
-						$result['global_status'] == 'Cancel' 
-					&& empty($this->ruleParams['bidirectional'])
+						$result['type'] == 'D'
+					 OR (
+							$result['global_status'] == 'Cancel' 
+						&& empty($this->ruleParams['bidirectional'])
+					)
 				) {
 					return 'C';
 				} else {

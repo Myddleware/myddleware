@@ -713,13 +713,12 @@ class ConnectorController extends AbstractController
      * @Route("/connector/createout/{type}", name="regle_connector_create_out")
      */
     public function createOutAction($type)
-    {
+    {  
         $solution = $this->entityManager->getRepository(Solution::class)->solutionConnectorType($type);
-
-        $lstArray = [];
+        $lstArray = [];        
         if ($solution) {
             foreach ($solution as $s) {
-                $lstArray[$s->getName()] = ucfirst($s->getName());
+                $lstArray[$s['name']] = ucfirst($s['name']);
             }
         }
 

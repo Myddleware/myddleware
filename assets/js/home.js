@@ -85,12 +85,13 @@ function drawChart() {
 			success: function (dataServ) {
 				
 				var data = google.visualization.arrayToDataTable(dataServ);
+				
 				var options = {
 					is3D: true,
 					isStacked: true,
 					legend: { position: 'bottom'},
 					height: 400,
-					width: 575,
+					width: 600,
 				};
 
 				var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_job_histo'));
