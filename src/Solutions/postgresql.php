@@ -29,16 +29,12 @@ class postgresqlcore extends database
 {
     protected $driver = 'pgsql';
 
-    protected $fieldName = 'Field';
-    protected $fieldLabel = 'Field';
-    protected $fieldType = 'Type';
-
     // Enable to delete data
     protected $sendDeletion = true;
     protected $readDeletion = true;
 	
-	protected $stringSeparatorOpen = '\'';
-    protected $stringSeparatorClose = '\'';
+	protected $stringSeparatorOpen = '';
+    protected $stringSeparatorClose = '';
 
     protected function generatePdo()
     {
@@ -81,7 +77,6 @@ class postgresqlcore extends database
             return $error;
         }
     }
-	
 
 	
 	 // Get all fields from the table selected
@@ -163,9 +158,7 @@ class postgresqlcore extends database
         }
     }
     // get_module_fields($module)
-	
-	
-	
+		
     // Query to get all the flieds of the table
     protected function get_query_describe_table($table)
     {
@@ -174,18 +167,31 @@ class postgresqlcore extends database
 		return 	"	SELECT column_name, data_type
 					FROM information_schema.columns
 					WHERE
-							table_catalog = ".$this->stringSeparatorOpen.$this->paramConnexion['database_name'].$this->stringSeparatorClose."
-						AND table_schema = ".$this->stringSeparatorOpen.$tableParam[0].$this->stringSeparatorClose."
-						AND table_name = ".$this->stringSeparatorOpen.$tableParam[1].$this->stringSeparatorClose;
+							table_catalog = '".$this->paramConnexion['database_name']."'
+						AND table_schema = '".$tableParam[0]."'
+						AND table_name = '".$tableParam[1]."'";
     }
+	
+	protected function create($param, $record)
+    {		
+		// Change separator for PostgreSQL
+		$record = array_map( 'pg_escape_string', $record );
+		return parent::create($param, $record);
+	}
 
+	protected function update($param, $record)
+    {
+		// Change separator for PostgreSQL
+		$record = array_map( 'pg_escape_string', $record );
+		return parent::update($param, $record);
+	}
+	
 	// Get the limit operator of the select query in the read last function
     protected function get_query_select_limit_offset($param, $method)
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;
         }
-
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
 	

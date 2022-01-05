@@ -90,8 +90,8 @@
 							</td>
 							<td class="text-center">
 								<div class="onoffswitch">
-									<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="{{ rule.nameSlug }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
-									<label class="onoffswitch-label" for="{{ rule.nameSlug }}">
+									<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox toggle-switch-rule" id="{{ rule.id }}" {{ (rule.active == true) ? 'checked="checked"' : '' }} />
+									<label class="onoffswitch-label" for="{{ rule.id }}">
 										<span class="onoffswitch-inner">
 										<span class="onoffswitch-active"><span class="onoffswitch-switch">ON</span></span>
 										<span class="onoffswitch-inactive"><span class="onoffswitch-switch">OFF</span></span>
@@ -156,13 +156,15 @@
 			<a href="{{ path('regle_stepone_animation') }}" title="" class="mt-4 btn btn-success">{{'list_rule.create_first_rule'|trans}}</a>
 		</div>
 		{% endif %}
+		
     </div>
-    <script type="text/javascript">   
+    <script type="text/javascript">  
+
 		var chemin_img = "{{ asset('build/images/regle/') }}";
 		var question = "Désirez-vous supprimer cette règle ?";
 		var confirm_exec_all = "{{'view_rule.action.confirm_exec_all'|trans}}";
 		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";	
-    </script>
+	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}
 	{% endblock %}

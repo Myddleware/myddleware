@@ -53,11 +53,11 @@ $(function() {
 	
 // Paramètres -------------------------------------------------------------	
 	
-	$( "#activerule" ).on('click', function() {	
+	$( "#activerule").on('click', function() {	
 		$.ajax({
 			type: "POST",
 			url: path_fiche_update,						
-				success: function(data){				
+				success: function(data){			
 			}			
 		});	
 	});

@@ -487,10 +487,7 @@ class jobcore  {
 						$this->ruleManager->setJobId($this->id);
 						$this->ruleManager->setRule($document['rule_id']);
 					}
-					$errorActionDocument = $this->ruleManager->actionDocument($document['id'],$action, $toStatus);
-					if (!empty($errorActionDocument)) {
-						throw new \Exception (print_r($errorActionDocument,true));
-					}
+					$this->ruleManager->actionDocument($document['id'],$action, $toStatus);
 				}			
 			}	
 			else {

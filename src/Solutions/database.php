@@ -44,7 +44,7 @@ class databasecore extends solution
         try {
             try {
                 $this->pdo = $this->generatePdo();
-				$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING );
+				$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
                 $this->connexion_valide = true;
             } catch (\PDOException $e) {
                 $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -411,9 +411,9 @@ class databasecore extends solution
 		$sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
 		// Query validation
 		$sql = $this->queryValidation($param, 'create', $sql);
-
 		$q = $this->pdo->prepare($sql);
 		$exec = $q->execute();
+
 		if (!$exec) {
 			$errorInfo = $this->pdo->errorInfo();
 			throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
@@ -450,6 +450,7 @@ class databasecore extends solution
 		$sql = $this->queryValidation($param, 'update', $sql);
 		// Execute the query
 		$q = $this->pdo->prepare($sql);
+
 		$exec = $q->execute();
 		// Query error
 		if (!$exec) {
