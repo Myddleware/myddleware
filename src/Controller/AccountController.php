@@ -25,6 +25,8 @@
 namespace App\Controller;
 
 use Exception;
+use DateTime;
+use DateTimeZone;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Model\ResetPassword;
@@ -131,16 +133,16 @@ class AccountController extends AbstractController
      */
     public function myAccountAction(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
     {
-
         $user = $this->getUser();
         $em = $this->entityManager;
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
+        $timezone = $user->getTimezone();
         if ($form->isSubmitted() && $form->isValid()) {
+            $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
             return $this->redirectToRoute('my_account'); 
         }
-
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
@@ -177,14 +179,5 @@ class AccountController extends AbstractController
         return $this->render('account/resetPassword.html.twig', array(
             'form' => $form->createView(),
         ));
-    }
-
-
-
-
-
-
-
-
-
+    }    
 }

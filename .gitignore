@@ -67,7 +67,7 @@ yarn-error.log
 
 
 ###> lexik/jwt-authentication-bundle ###
-/config/jwt/*.pem
+/config/packages/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ##
 
 ###> symfony/phpunit-bridge ###
@@ -78,8 +78,15 @@ yarn-error.log
 
 ###> local env file ###
 .env.local
-###> env file ###
+###< env file ###
 
-## vscode parameters ## 
+##> vscode and other IDE parameters ## 
 .vscode
-## vscode parameters ##
+/.idea/*
+##< vscode parameters ##
+
+##> old files & folders ##
+/.platform/*
+.platform.app.yaml
+composer.phar
+##< old files & folders ##

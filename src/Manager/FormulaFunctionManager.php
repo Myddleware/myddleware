@@ -107,25 +107,6 @@ class FormulaFunctionManager
 		}
     }
 
-    public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
-    {			
-		// Transform $var into array
-		$return = '';
-		$arrayVar = explode($delimiter, $var);
-		if (!empty($arrayVar)) {
-			$arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
-			foreach($arrayVar as $varValue) {
-				// Transform string into an array					
-				if (!empty($arrayKeyToValue[$varValue])) {
-					// Prepare return value
-					$return .= $arrayKeyToValue[$varValue].$delimiter;						
-				}
-			}		
-			$return = rtrim($return, $delimiter);			
-			return $return;
-		}
-    }
-
     public static function getValueFromArray($key, $array)
     {
         if (!empty($array[$key])) {

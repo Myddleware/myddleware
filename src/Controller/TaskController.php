@@ -120,10 +120,17 @@ class TaskController extends AbstractController
             'page' => $page,
         ], false);
 
+         //Check the user timezone
+         if ($timezone = '') {
+            $timezone = 'UTC';
+        }else {
+            $timezone = $this->getUser()->getTimezone();
+        }
         return $this->render('Task/list.html.twig', [
             'nb' => $compact['nb'],
             'entities' => $compact['entities'],
             'pager' => $compact['pager'],
+            'timezone' => $timezone,
         ]
         );
     }
@@ -149,11 +156,18 @@ class TaskController extends AbstractController
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
+            //Check the user timezone
+            if ($timezone = '') {
+                $timezone = 'UTC';
+            }else {
+                $timezone = $this->getUser()->getTimezone();
+            }
             return $this->render('Task/view/view.html.twig', [
                 'task' => $task,
                 'nb' => $compact['nb'],
                 'entities' => $compact['entities'],
                 'pager' => $compact['pager'],
+                'timezone' => $timezone,
             ]
             );
         } catch (Exception $e) {
