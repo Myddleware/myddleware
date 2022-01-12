@@ -517,6 +517,7 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        projectid: Base ID
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)

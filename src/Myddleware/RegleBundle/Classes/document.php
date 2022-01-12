@@ -362,6 +362,10 @@ class documentcore {
 		$this->typeError = $typeError;
 	}
 	
+	public function setDocIdRefError($docIdRefError) {
+		$this->docIdRefError = $docIdRefError;
+	}
+
 	// Permet d'indiquer si le filtreest rempli ou pas
 	protected function checkFilter($fieldValue,$operator,$filterValue){
 		switch ($operator) {
@@ -621,7 +625,10 @@ class documentcore {
 			// A rule in create mode can't update data excpt for a child rule
 			if (
 					$this->ruleMode == 'C' 
-				AND $this->documentType == 'U'
+				AND (
+						$this->documentType == 'U'
+					 OR $this->documentType == 'D'
+				)
 				AND !$this->isChild()
 			) {
 				$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
@@ -977,6 +984,12 @@ class documentcore {
 		
 			// Get data in the target solution (if exists) before we update it
 			$history = $this->getDocumentData('H');
+			
+			// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
+			// This field can only exist in target data as it is created by Myddleware
+			if (!empty($target['Myddleware_element_id'])) {
+				$target['Myddleware_element_id'] = '';
+			}
 			
 			// For each target fields, we compare the data we want to send and the data already in the target solution
 			// If one is different we stop the function
@@ -1503,12 +1516,15 @@ class documentcore {
 	protected function checkRecordExist($id) {	
 		try {	
 			// Query used in the method several times
-			// Sort : target_id to get the target id non empty first; on global_status to get Cancel last 
-			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)		
+			// Sort : targetOrder to get the target id non empty first; on global_status to get Cancel last 
+			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
+			// Then we take the last document created to know if the last action sent was a deletion
 			$sqlParamsSoure = "	SELECT 
 								Document.id, 
 								Document.target_id, 
-								Document.global_status 
+								Document.type, 
+								Document.global_status,
+								if(Document.target_id = '', 0, 1) targetOrder
 							FROM Document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
@@ -1522,14 +1538,16 @@ class documentcore {
 								AND	Document.source_id = :id
 								AND Document.id != :id_doc
 								AND Document.deleted = 0 
-							ORDER BY target_id DESC, global_status DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";
 							
 			// On prépare la requête pour rechercher dans la partie target
 			$sqlParamsTarget = "SELECT 
 								Document.id, 
 								Document.source_id target_id, 
-								Document.global_status 
+								Document.type,
+								Document.global_status,
+								if(Document.target_id = '', 0, 1) targetOrder
 							FROM Document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
@@ -1543,7 +1561,7 @@ class documentcore {
 								AND	Document.target_id = :id
 								AND Document.id != :id_doc
 								AND Document.deleted = 0 
-							ORDER BY target_id DESC, global_status DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";	
 					
 			// Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
@@ -1580,7 +1598,6 @@ class documentcore {
 							$stmt->bindValue(":id_doc", $this->id);
 							$stmt->execute();	   				
 							$result = $stmt->fetch();
-				
 							// Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
 							if (!empty($result['target_id'])) {							
 								$this->targetId = $result['target_id'];
@@ -1663,7 +1680,7 @@ class documentcore {
 				$stmt->bindValue(":id", $id);
 				$stmt->bindValue(":id_doc", $this->id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();				
+				$result = $stmt->fetch();
 			}
 			
 			// If we found a record
@@ -1671,9 +1688,13 @@ class documentcore {
 				$this->targetId = $result['target_id'];
 				// If the document found is Cancel, there is only Cancel documents (see query order) so we return C and not U
 				// Except if the rule is bidirectional, in this case, a no send document in the opposite rule means that the data really exists in the target application
+				// OR if the last document sent is a deletion, we will create a new record because the record doesn't exist anymore in the target application
 				if (
-						$result['global_status'] == 'Cancel' 
-					&& empty($this->ruleParams['bidirectional'])
+						$result['type'] == 'D'
+					 OR (
+							$result['global_status'] == 'Cancel' 
+						&& empty($this->ruleParams['bidirectional'])
+					)
 				) {
 					return 'C';
 				} else {

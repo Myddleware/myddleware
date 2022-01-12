@@ -3,8 +3,8 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @copyright Copyright (C) 2013 - 2015  Stï¿½phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stï¿½phane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
  
  This file is part of Myddleware.
@@ -24,12 +24,12 @@
 *********************************************************************************/
 
 namespace Myddleware\RegleBundle\DataFixtures\ORM;
- 
-use Doctrine\Common\DataFixtures\FixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+
+use Doctrine\Persistence\ObjectManager;
 use Myddleware\RegleBundle\Entity\FuncCat;
 use Myddleware\RegleBundle\Entity\Functions;
- 
+use Doctrine\Common\DataFixtures\FixtureInterface;
+
 class LoadFunctionData implements FixtureInterface
 {
     private $manager; 
@@ -38,32 +38,32 @@ class LoadFunctionData implements FixtureInterface
 									'text'			=> array('trim','ltrim','rtrim','lower','upper','substr','striptags','changeValue','htmlEntityDecode','replace','utf8encode','utf8decode','htmlentities','htmlspecialchars','strlen','urlencode','chr','json_decode','json_encode','getValueFromArray'),
 									'date'			=> array('date','microtime','changeTimeZone','changeFormatDate')
 								);
- 
+
     public function load(ObjectManager $manager){
         $this->manager = $manager; 
         $this->generateEntities(); 
         $this->manager->flush();
     }
- 
+
     public function getOrder() {
         return 1; 
     }
- 
+
     private function generateEntities() {
         foreach($this->functionData as $cat => $functions) {
             $this->newEntity($cat,$functions);
         }
     }
- 
+
     private function newEntity($cat,$functions) {
 	
 		// Check if the function category doesn't exist in Myddleware we create it
 		$funcCat = $this->manager
-					 ->getRepository('RegleBundle:FuncCat')
-					 ->findOneByName($cat);
+					->getRepository('RegleBundle:FuncCat')
+					->findOneByName($cat);
 		if (
 				empty($funcCat)
-			 || empty($funcCat->getId()	)
+			|| empty($funcCat->getId()	)
 		) {	
 			$funcCat = new FuncCat();
 			$funcCat->setName($cat);
@@ -72,11 +72,11 @@ class LoadFunctionData implements FixtureInterface
 		foreach($functions as $function) {
 			// Check if the function  doesn't exist in Myddleware we create it else we update it
 			$func = $this->manager
-						 ->getRepository('RegleBundle:Functions')
-						 ->findOneByName($function);
+						->getRepository('RegleBundle:Functions')
+						->findOneByName($function);
 			if (
 					empty($func)
-				 || empty($func->getId()	)
+				|| empty($func->getId()	)
 			) {	
 				$func = new Functions();
 			}

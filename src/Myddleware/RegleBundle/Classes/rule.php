@@ -144,7 +144,8 @@ class rulecore {
 				}	
 				$read['query'] = array($idFiledName => $idSource);	
 				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
-				$read['date_ref'] = '1970-01-02 00:00:00';			
+				$read['date_ref'] = '1970-01-01 00:00:00';			
+				$read['jobId'] = $this->jobId;;			
 			
 				$dataSource = $this->solutionSource->read($read);			;				
 				if (!empty($dataSource['error'])) {
@@ -170,7 +171,7 @@ class rulecore {
 					}
 					$document = new document($this->logger, $this->container, $this->connection, $doc);
 					$createDocument = $document->createDocument();		
-					if (!$createDocument) {
+					if (!$createDocument) {					
 						throw new \Exception ('Failed to create document : '.$document->getMessage());
 					}
 					$documents[] = $document;
@@ -799,7 +800,7 @@ class rulecore {
 	
 	// Get all document of the rule
 	protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false) {
-		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId";
+		$sql = "SELECT id, source_id, target_id, status, global_status FROM Document WHERE rule_id = :ruleId AND deleted = 0";
 		$stmt = $this->connection->prepare($sql);
 		$stmt->bindValue(":ruleId", $ruleId);
 		$stmt->execute();	    
@@ -914,11 +915,17 @@ class rulecore {
 	}
 	
 	// Remove a document 
-	protected function changeStatus($id_document,$toStatus) {	
+	protected function changeStatus($id_document,$toStatus,$message = null, $docIdRefError = null) {
 		$param['id_doc_myddleware'] = $id_document;
 		$param['jobId'] = $this->jobId;
 		$param['api'] = $this->api;
 		$doc = new document($this->logger, $this->container, $this->connection, $param);
+		if (!empty($message)) {
+			$doc->setMessage($message);
+		}
+		if (!empty($docIdRefError)) {
+			$doc->setDocIdRefError($docIdRefError);
+		}
 		$doc->updateStatus($toStatus);
 	}
 	
@@ -1120,8 +1127,12 @@ class rulecore {
 	protected function clearSendData($sendData) {
 		if (!empty($sendData)) {
 			foreach($sendData as $key => $value){
-				unset($value['source_date_modified']);
-				unset($value['id_doc_myddleware']);
+				if (isset($value['source_date_modified'])) {
+					unset($value['source_date_modified']);
+				}
+				if (isset($value['id_doc_myddleware'])) {
+					unset($value['id_doc_myddleware']);
+				}
 				$sendData[$key] = $value;
 			}
 			return $sendData;
@@ -1202,15 +1213,16 @@ class rulecore {
 						$response = $this->solutionTarget->create($send);
 					}
 					// Modification des données dans la cible
-					elseif ($type == 'U') {			
+					elseif ($type == 'U') {
 						$send['data'] = $this->clearSendData($send['data']);
 						// permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-						$send['dataHistory'] = $this->getSendDocuments($type, $documentId, 'history');
-						$send['dataHistory'] = $this->clearSendData($send['dataHistory']);
+						$send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+						$send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
 						$response = $this->solutionTarget->update($send);
 					}
 					// Delete data from target application
-					elseif ($type == 'D') {			
+					elseif ($type == 'D') {	
+						$send = $this->checkBeforeDelete($send);
 						$send['data'] = $this->beforeDelete($send['data']);;
 						$response = $this->solutionTarget->delete($send);
 					}
@@ -1232,6 +1244,79 @@ class rulecore {
 			$this->logger->error( $response['error'] );
 		}	
 		return $response;
+	}
+	
+	// Check before we send a record deletion
+	protected function checkBeforeDelete($send) {
+		// Check in case of several source records data point to the same target record
+		// In this case we can't send the deletion as the record still exists in the source application
+		// A merge action in the source application could have generated the deletion action but the deletion can't be sent.
+		if (!empty($send['data'])) {
+			foreach ($send['data'] as $docId => $record) {
+				try {
+					// Should never be empty
+					if (empty($record['target_id'])) {
+						throw new \Exception ('Failed to send deletion because there is no target id in the document');
+					}
+					// First step, we get all the document with the same target module, connector and record id and a source id different
+					// We exclude the cancel document except the one no_send
+					// We exclude document from a rule linked with Myddleware_element_id (when 2 source modules update one target module) 
+					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
+					$query = "	SELECT Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id, 
+									GROUP_CONCAT(DISTINCT Document.type) types,
+									GROUP_CONCAT(DISTINCT Document.id ORDER BY Document.date_created DESC) documents
+								FROM Document 
+									INNER JOIN Rule
+										ON Document.rule_id = Rule.id
+									LEFT OUTER JOIN RuleRelationShip
+										 ON Rule.id = RuleRelationShip.field_id
+										AND RuleRelationShip.field_name_target = 'Myddleware_element_id'
+								WHERE 
+										Rule.conn_id_target = :conn_id_target
+									AND Rule.module_target = :module_target
+									AND Document.target_id = :target_id
+									AND Document.source_id <> (SELECT source_id from Document WHERE id = :docId)
+									AND RuleRelationShip.rule_id <> Rule.id
+									AND Document.deleted = 0
+									AND (
+												Document.global_status <> 'Cancel'
+										OR (
+												Document.global_status = 'Cancel'
+											AND Document.status = 'No_send'
+										)
+									)
+								GROUP BY Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id
+								HAVING types NOT LIKE '%D%'";
+					$stmt = $this->connection->prepare($query);
+					$stmt->bindValue(":conn_id_target", $this->rule['conn_id_target']);
+					$stmt->bindValue(":module_target", $this->rule['module_target']);
+					$stmt->bindValue(":target_id", $record['target_id']);
+					$stmt->bindValue(":docId", $docId);
+					$stmt->execute();	   				
+					$results = $stmt->fetchAll();
+					if(!empty($results)) {
+						foreach ($results as $result) {
+							// Get the last reference document created to add it into the log
+							$documents = explode(',',$result['documents']);							
+							if (!empty($documents[0])) {
+								$docIdRefError = $documents[0];
+							}
+							throw new \Exception ('A duplicate source record not deleted exists for the target record.');			
+						}
+					}
+				} catch (\Exception $e) {
+					// Remove the document in the list to be sent
+					unset($send['data'][$docId]);
+					// Change document status
+					$this->changeStatus($docId,'No_send', $e->getMessage(), (!empty($docIdRefError) ? $docIdRefError : ''));
+				}	
+			}
+			// Exception if all documents has been removed from data
+			if (empty($send['data'])) {
+				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
+			}
+		}
+		return $send;
 	}
 	
 	protected function checkDuplicate($transformedData) {

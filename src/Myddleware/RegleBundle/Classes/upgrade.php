@@ -167,7 +167,7 @@ class upgradecore  {
 	
 	protected function updateFiles() {		
 		// Update master if git_branch is empty otherwise we update the specific branch
-		$command = (!empty($this->container->getParameter('git_branch'))) ? 'git pull origin '.$this->container->getParameter('git_branch') : 'git pull';
+		$command = (!empty($this->container->getParameter('git_branch'))) ? 'git pull origin '.$this->container->getParameter('git_branch') : 'git pull master';
 		$process = new Process($command);
 		$process->run();
 		// executes after the command finishes

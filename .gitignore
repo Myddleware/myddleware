@@ -53,5 +53,8 @@
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
 
-# VSCode
-/.vscode
+# VSCode 
+/.vscode 
+
+# JavaScript libraries
+/node_modules

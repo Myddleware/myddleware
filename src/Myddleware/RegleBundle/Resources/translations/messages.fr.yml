@@ -518,6 +518,7 @@ solution:
         applicationName: Nom de l'application
         hashkey: Clé de hachage
         authid: Id auth
+        projectid: Base ID
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
