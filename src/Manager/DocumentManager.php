@@ -2000,7 +2000,7 @@ class documentcore
 		}
 	}
 	
-	// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
+		// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
 	protected function getTargetId($ruleRelationship,$record_id) {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
@@ -2009,34 +2009,38 @@ class documentcore
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT 
 									source_id record_id,
-									document.id document_id								
-								FROM document
+									Document.id document_id,
+									Document.type document_type
+								FROM Document
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id != '' 
-									AND document.deleted = 0 
-									AND document.target_id = :record_id 
+										Document.rule_id = :ruleRelateId
+									AND Document.source_id != ''
+									AND Document.deleted = 0
+									AND Document.target_id = :record_id
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	 
+											Document.global_status = 'Close'
+										 OR Document.status = 'No_send'
+									)
+								ORDER BY source_date_modified DESC
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT 
 									target_id record_id,
-									document.id document_id
-								FROM document 
+									Document.id document_id,
+									Document.type document_type
+								FROM Document 
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id = :record_id 
-									AND document.deleted = 0 
-									AND document.target_id != '' 
+										Document.rule_id = :ruleRelateId
+									AND Document.source_id = :record_id
+									AND Document.deleted = 0
+									AND Document.target_id != ''
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	
-								LIMIT 1";	
+											Document.global_status = 'Close'
+										 OR Document.status = 'No_send'
+									)
+								ORDER BY source_date_modified DESC
+								LIMIT 1";
 			}
 			else {
 				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
@@ -2051,7 +2055,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['target_id'] != '' 
 							) {
@@ -2067,7 +2071,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['source_id'] != '' 
 							) {
@@ -2078,14 +2082,18 @@ class documentcore
 						}
 					}
 				}
-			} else {	
+			} else {
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
 				$stmt->bindValue(":record_id", $record_id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();		
+				$result = $stmt->fetch();					
 			}
 			if (!empty($result['record_id'])) {
+				// If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
+				if ($result['document_type'] == 'D') {
+					return null;
+				}
 				return $result;
 			}
 			return null;
