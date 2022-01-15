@@ -260,7 +260,7 @@ class FormulaManager
     {
         if (count($tabListe) > 0) {
             foreach ($tabListe as $l) {
-                if (preg_match('#[^[:alnum:]_]#u', $l) || $this->accent($l)) {
+                if (preg_match('#[^[:alnum:]_.]#u', $l) || $this->accent($l)) {
                     ++$error;
                 }
             }
