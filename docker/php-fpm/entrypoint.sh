@@ -38,7 +38,7 @@ composer install
 yarn install
 
 # Create / update database  
-# Comment faire pour lancer l'une ou l'autre de ces 2 commandes (genre si la 1 fail alors fais la 2)
+# Comment faire pour lancer l'une ou l'autre de ces 2 commandes (par ex si la 1 fail alors fais la 2)
 php bin/console doctrine:database:create --if-not-exist
 php bin/console doctrine:schema:update --force
 # Load fixtures 
