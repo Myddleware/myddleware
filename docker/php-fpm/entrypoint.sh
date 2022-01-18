@@ -30,3 +30,25 @@ else
         php-fpm
     fi
 fi
+
+# Composer install
+composer install
+# Composer update (optional?)
+# Yarn install assets (node_modules)
+yarn install
+
+# Create / update database  
+# Comment faire pour lancer l'une ou l'autre de ces 2 commandes (genre si la 1 fail alors fais la 2)
+php bin/console doctrine:database:create --if-not-exist
+php bin/console doctrine:schema:update --force
+# Load fixtures 
+# php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+# php bin/console doctrine:fixtures:load --no-interaction --append
+
+# Generate doctrine migrations
+
+# Validate Doctrine ORM mapping
+
+# Run Webpack Encore to compile assets (dev)
+# Run Webpack Encore to compile assets (prod)
+

@@ -87,7 +87,7 @@ class AccountController extends AbstractController
      */
     private $env;
 
-     /**
+    /**
      * @var AlertBootstrapInterface 
      */
     private $alert;
@@ -140,7 +140,6 @@ class AccountController extends AbstractController
             $this->entityManager->flush();
             return $this->redirectToRoute('my_account'); 
         }
-
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
@@ -178,13 +177,4 @@ class AccountController extends AbstractController
             'form' => $form->createView(),
         ));
     }
-
-
-
-
-
-
-
-
-
 }
