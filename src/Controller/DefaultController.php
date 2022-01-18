@@ -24,55 +24,56 @@
 
 namespace App\Controller;
 
-use App\Entity\Connector;
-use App\Entity\ConnectorParam;
-use App\Entity\Document;
-use App\Entity\FuncCat;
-use App\Entity\Functions;
+use Exception;
 use App\Entity\Rule;
+use App\Entity\User;
+use App\Manager\job;
+use App\Entity\Config;
+use App\Entity\FuncCat;
+use App\Entity\Document;
+use App\Entity\Solution;
+use App\Entity\Connector;
+use App\Entity\Functions;
 use App\Entity\RuleAudit;
 use App\Entity\RuleField;
-use App\Entity\RuleFilter;
 use App\Entity\RuleParam;
-use App\Entity\RuleParamAudit;
-use App\Entity\RuleRelationShip;
-use App\Entity\Solution;
-use App\Entity\User;
-use App\Entity\Config;
-use App\Form\ConnectorType;
-use App\Manager\DocumentManager;
-use App\Manager\FormulaManager;
-use App\Manager\HomeManager;
-use App\Manager\job;
-use App\Manager\JobManager;
-use App\Manager\rule as RuleClass;
-use App\Manager\RuleManager;
-use App\Manager\SolutionManager;
 use App\Manager\template;
-use App\Manager\TemplateManager;
+use App\Entity\RuleFilter;
+use Pagerfanta\Pagerfanta;
+use App\Form\ConnectorType;
+use App\Manager\JobManager;
+use App\Manager\HomeManager;
+use App\Manager\RuleManager;
+use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
-use App\Repository\DocumentRepository;
-use App\Repository\JobRepository;
-use App\Repository\RuleRepository;
+use App\Entity\ConnectorParam;
+use App\Entity\RuleParamAudit;
+use App\Manager\FormulaManager;
 use App\Service\SessionService;
+use App\Entity\RuleRelationShip;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
+use App\Manager\TemplateManager;
+use App\Repository\JobRepository;
+use App\Manager\rule as RuleClass;
+use App\Repository\RuleRepository;
+use App\Form\DuplicateRuleFormType;
 use Doctrine\DBAL\Driver\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Pagerfanta;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 
     /**
@@ -405,6 +406,84 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
 
+        // Duplicate a rule
+          /**
+         * @param $id
+         *
+         * @return RedirectResponse
+         *
+         * @Route("/duplic_rule/{id}", name="duplic_rule")
+         */
+        public function duplicRule($id, Request $request){  
+
+            $rule = $this->getDoctrine()
+            ->getManager()
+            ->getRepository(Rule::class)
+            ->findOneBy([
+                'id' => $id,
+            ]);   
+            // get the data from the rule
+            $connectorRepo    = $this->entityManager->getRepository(Connector::class);
+            $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
+            $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
+            $connectorSource = $rule->getconnectorSource()->getName();
+            $connectorTarget = $rule->getconnectorTarget()->getName();
+            $newRule = new Rule();
+
+            $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
+            $form->handleRequest($request);
+            //Sends new data if validated and submit
+            if ($form->isSubmitted() && $form->isValid()) {
+                $now = new \DateTime();
+                $user = $this->getUser();
+                $newRuleName = $form->get('name')->getData();
+                $newRuleSource = $form->get('connectorSource')->getData();
+                $newRuleTarget = $form->get('connectorTarget')->getData();
+                $newRule->setName($newRuleName)
+                    ->setCreatedBy($user)
+                    ->setConnectorSource($newRuleSource)
+                    ->setConnectorTarget($newRuleTarget)
+                    ->setDateCreated($now)
+                    ->setDateModified($now)
+                    ->setModifiedBy($user)
+                    ->setModuleSource($rule->getModuleSource())
+                    ->setModuleTarget($rule->getModuleTarget())
+                    ->setDeleted(false)
+                    ->setActive(false)
+                    ->setNameSlug($newRuleName);
+                    foreach($rule->getParams() as $param){
+                        $newRule->addParam($param);   
+                    }      
+                    foreach($rule->getRelationsShip() as $relationsShip){
+                        $newRule->addRelationsShip($relationsShip);   
+                    }
+                    foreach($rule->getOrders() as $order){
+                        $newRule->addOrder($order);   
+                    }
+                    foreach($rule->getFilters() as $filter){
+                        $newRule->addFilter($filter);   
+                    }
+                    foreach($rule->getFields() as $field){
+                        $newRule->addField($field);   
+                    }  
+                    foreach($rule->getAudits() as $audit){
+                        $newRule->addAudit($audit);   
+                    }            
+                    $this->entityManager->persist($newRule);
+                    $this->entityManager->flush();
+                    $this->addFlash('success', 'Your rule has been well duplicated ');
+                    return $this->redirect($this->generateURL('regle_list'));
+            }
+            return $this->render('Rule/create/duplic.html.twig', [
+                'rule' => $rule,
+                'connectorSourceUser' => $connectorSource,
+                'connectorTarget' => $connectorTarget,
+                'solutionTarget'  => $solutionTarget,
+                'solutionSource'  => $solutionSource,
+                'form' => $form->createView()
+            ]);
+        }
+        
         /**
          * ACTIVE UNE REGLE.
          *
