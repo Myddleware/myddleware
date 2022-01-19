@@ -414,74 +414,80 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
          *
          * @Route("/duplic_rule/{id}", name="duplic_rule")
          */
-        public function duplicRule($id, Request $request){  
+        public function duplicRule($id, Request $request, TranslatorInterface $translator){  
+            try {
+                $rule = $this->getDoctrine()
+                ->getManager()
+                ->getRepository(Rule::class)
+                ->findOneBy([
+                    'id' => $id,
+                ]);   
+                // get the data from the rule
+                $connectorRepo    = $this->entityManager->getRepository(Connector::class);
+                $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
+                $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
+                $connectorSource = $rule->getconnectorSource()->getName();
+                $connectorTarget = $rule->getconnectorTarget()->getName();
+                $newRule = new Rule();
 
-            $rule = $this->getDoctrine()
-            ->getManager()
-            ->getRepository(Rule::class)
-            ->findOneBy([
-                'id' => $id,
-            ]);   
-            // get the data from the rule
-            $connectorRepo    = $this->entityManager->getRepository(Connector::class);
-            $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
-            $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
-            $connectorSource = $rule->getconnectorSource()->getName();
-            $connectorTarget = $rule->getconnectorTarget()->getName();
-            $newRule = new Rule();
-
-            $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
-            $form->handleRequest($request);
-            //Sends new data if validated and submit
-            if ($form->isSubmitted() && $form->isValid()) {
-                $now = new \DateTime();
-                $user = $this->getUser();
-                $newRuleName = $form->get('name')->getData();
-                $newRuleSource = $form->get('connectorSource')->getData();
-                $newRuleTarget = $form->get('connectorTarget')->getData();
-                $newRule->setName($newRuleName)
-                    ->setCreatedBy($user)
-                    ->setConnectorSource($newRuleSource)
-                    ->setConnectorTarget($newRuleTarget)
-                    ->setDateCreated($now)
-                    ->setDateModified($now)
-                    ->setModifiedBy($user)
-                    ->setModuleSource($rule->getModuleSource())
-                    ->setModuleTarget($rule->getModuleTarget())
-                    ->setDeleted(false)
-                    ->setActive(false)
-                    ->setNameSlug($newRuleName);
-                    foreach($rule->getParams() as $param){
-                        $newRule->addParam($param);   
-                    }      
-                    foreach($rule->getRelationsShip() as $relationsShip){
-                        $newRule->addRelationsShip($relationsShip);   
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
+                $form->handleRequest($request);
+                //Sends new data if validated and submit
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $now = new \DateTime();
+                    $user = $this->getUser();
+                    $newRuleName = $form->get('name')->getData();
+                    $newRuleSource = $form->get('connectorSource')->getData();
+                    $newRuleTarget = $form->get('connectorTarget')->getData();
+                    if (isset($newRuleName)) {
+                        $newRule->setName($newRuleName)
+                            ->setCreatedBy($user)
+                            ->setConnectorSource($newRuleSource)
+                            ->setConnectorTarget($newRuleTarget)
+                            ->setDateCreated($now)
+                            ->setDateModified($now)
+                            ->setModifiedBy($user)
+                            ->setModuleSource($rule->getModuleSource())
+                            ->setModuleTarget($rule->getModuleTarget())
+                            ->setDeleted(false)
+                            ->setActive(false)
+                            ->setNameSlug($newRuleName);
+                            foreach($rule->getParams() as $param){
+                                $newRule->addParam($param);   
+                            }      
+                            foreach($rule->getRelationsShip() as $relationsShip){
+                                $newRule->addRelationsShip($relationsShip);   
+                            }
+                            foreach($rule->getOrders() as $order){
+                                $newRule->addOrder($order);   
+                            }
+                            foreach($rule->getFilters() as $filter){
+                                $newRule->addFilter($filter);   
+                            }
+                            foreach($rule->getFields() as $field){
+                                $newRule->addField($field);   
+                            }  
+                            foreach($rule->getAudits() as $audit){
+                                $newRule->addAudit($audit);   
+                            }            
+                            $this->entityManager->persist($newRule);
+                            $this->entityManager->flush();
+                            $success =$translator->trans('duplicate_rule.success_duplicate');
+                            $this->addFlash('success', $success);
                     }
-                    foreach($rule->getOrders() as $order){
-                        $newRule->addOrder($order);   
-                    }
-                    foreach($rule->getFilters() as $filter){
-                        $newRule->addFilter($filter);   
-                    }
-                    foreach($rule->getFields() as $field){
-                        $newRule->addField($field);   
-                    }  
-                    foreach($rule->getAudits() as $audit){
-                        $newRule->addAudit($audit);   
-                    }            
-                    $this->entityManager->persist($newRule);
-                    $this->entityManager->flush();
-                    $this->addFlash('success', 'Your rule has been well duplicated ');
-                    return $this->redirect($this->generateURL('regle_list'));
+                        return $this->redirect($this->generateURL('regle_list'));
+                }
+                return $this->render('Rule/create/duplic.html.twig', [
+                    'rule' => $rule,
+                    'connectorSourceUser' => $connectorSource,
+                    'connectorTarget' => $connectorTarget,
+                    'solutionTarget'  => $solutionTarget,
+                    'solutionSource'  => $solutionSource,
+                    'form' => $form->createView()
+                ]);
+            } catch (Exception $e) {
+                return new JsonResponse($e->getMessage());
             }
-            return $this->render('Rule/create/duplic.html.twig', [
-                'rule' => $rule,
-                'connectorSourceUser' => $connectorSource,
-                'connectorTarget' => $connectorTarget,
-                'solutionTarget'  => $solutionTarget,
-                'solutionSource'  => $solutionSource,
-                'form' => $form->createView()
-            ]);
         }
         
         /**

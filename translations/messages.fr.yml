@@ -152,7 +152,7 @@ view_rule:
         confirm_exec_error: Souhaitez-vous relancer tous les documents en erreur ?
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
-        duplic_rule: Dupliquer une règle
+        duplic_rule: Dupliquer la règle
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
@@ -844,3 +844,4 @@ duplicate_rule:
     field: Champs
     current_rule: règle actuelle
     new_rule: Nouvelle règle
+    success_duplicate: Votre règle a été bien dupliquée
