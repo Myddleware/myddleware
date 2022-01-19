@@ -1851,6 +1851,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'notin' => $this->translator->trans('filter.notin'),
                 ];
 
+                //Behavior filters
+                $behaviorFilters =[
+                    'Error if missing' => $this->translator->trans('behavior_filters.error_messing'),
+                    'Skip if empty'    => $this->translator->trans('behavior_filters.skip_empty'),
+                    'Skip if empty or wrong' => $this->translator->trans('behavior_filters.skip_empty_wrong'),
+                ];
+
                 // paramètres de la règle
                 $rule_params = array_merge($ruleParamsSource, $ruleParamsTarget);
 
@@ -1983,6 +1990,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
+                    'behaviorFilters' => $behaviorFilters,
                     'params' => $this->sessionService->getParamRule($ruleKey),
                     'duplicate_target' => $fieldsDuplicateTarget,
                     'opt_target' => $html_list_target,
@@ -2001,6 +2009,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
+                $result['behaviorFilters'] = ToolsManager::composeListHtml($result['behaviorFilters']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
