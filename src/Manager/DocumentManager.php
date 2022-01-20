@@ -107,7 +107,7 @@ class documentcore
 	/**
 	 * @var formulaManager
 	 */
-	private $formulaManager;
+	protected $formulaManager;
 	/**
 	 * @var DocumentRepository
 	 */
@@ -119,7 +119,7 @@ class documentcore
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $parameterBagInterface;
+	protected $parameterBagInterface;
 	/**
 	 * @var SolutionManager
 	 */
@@ -957,7 +957,7 @@ class documentcore
 						$this->updateStatus('Ready_to_send');
 						$this->updateType('U');
 					}
-					$this->updateTargetId($history);
+					$this->updateTargetId($history['id']);
 				}
 			}
 			// Sinon on mets directement le document en ready to send (example child rule)
@@ -972,8 +972,8 @@ class documentcore
 					$this->documentType != 'S' 
 				AND	$this->documentType != 'D' 
 				AND	!$this->isParent()
-			) {
-				$this->checkNoChange();
+			) {				
+				$this->checkNoChange($history);
 			}			
 		} catch (\Exception $e) {
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1031,19 +1031,22 @@ class documentcore
 		return true;
 	}
 	
-	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
-	protected function checkNoChange() {
+// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
+	protected function checkNoChange($history) {
 		try {
 			// Get target data 
 			$target = $this->getDocumentData('T');
-		
-			// Get data in the target solution (if exists) before we update it
-			$history = $this->getDocumentData('H');
+
+			// get history from the database if it isn't in the input parameter
+			if (empty($history)) {
+				// Get data in the target solution (if exists) before we update it
+				$history = $this->getDocumentData('H');
+			}
+
 			// No comparaison if history is empty
 			if (empty($history)) {
 				return false;
 			}
-
 			// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
 			// This field can only exist in target data as it is created by Myddleware
 			if (!empty($target['Myddleware_element_id'])) {
@@ -1113,7 +1116,7 @@ class documentcore
 			$record = current($dataTarget['values']);	
 			$updateHistory = $this->updateHistoryTable($record);		
 			if ($updateHistory === true) {
-				return $record['id'];
+				return $record;
 			}
 			// Erreur dans la mise à jour de la table historique
 			else {
