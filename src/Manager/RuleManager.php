@@ -1689,10 +1689,10 @@ class rulecore
 		
 	}
 	
-	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParam() {
-			
+	// Set rule param from the database
+	protected function setRuleParam() {		
 		try {
+			$this->ruleParams = array();
 			$sqlParams = "SELECT * 
 							FROM ruleparam 
 							WHERE rule_id = :ruleId";
@@ -1708,9 +1708,8 @@ class rulecore
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
-	}	
+	}
 
-	
 	
 	// Permet de charger toutes les relations de la règle
 	protected function setRuleRelationships() {
