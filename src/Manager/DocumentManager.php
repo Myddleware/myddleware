@@ -1255,7 +1255,7 @@ class documentcore
 				foreach ($this->ruleFields as $ruleField) {
 					$value = $this->getTransformValue($this->sourceData,$ruleField);
 					if (!empty($this->transformError)) {
-						throw new \Exception( 'Failed to transform data.' );
+						throw new \Exception( 'Failed to transform the field '.$ruleField['target_field_name'].'.' );
 					}
 					$targetField[$ruleField['target_field_name']] = $value;
 				}
