@@ -5,9 +5,12 @@ namespace App\Controller;
 use App\Entity\JobScheduler;
 use App\Entity\User;
 use App\Form\JobSchedulerType;
+use App\Form\JobSchedulerCronType;
 use App\Manager\JobSchedulerManager;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+//use Cron\CronBundle\Entity\CronJob;
+use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -95,6 +98,60 @@ class JobSchedulerController extends AbstractController
         return $this->render('JobScheduler/new.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
+        ]);
+    }
+
+       /**
+     * New creates job scheduler with cron
+     * @Route("/crontab", name="jobscheduler_cron")
+     */
+    public function createActionWithCron()
+    {
+        $command ='';
+        $period =' */5 * * * *';
+        $entity = new CronJob($command, $period);
+        $form = $this->createForm(JobSchedulerCronType::class, $entity);
+
+         if ($form->isSubmitted() && $form->isValid()) {      
+            $description = $form->get('description');
+            $test = $entity->setDescription($form->getData()->getDescription());
+            // if (isset($description)) {
+
+            dump($form->getData()->getDescription());
+            // $entity->setEnable($form->getData()->getEnable());
+            //$entity->setDescription($description);
+            // $entity->setArguments($form->getData()->getArguments());
+            // $entity->setMaxInstances($form->getData()->getMaxInstances());
+            // $entity->setNumber($form->getData()->getNumber());
+            // $entity->setPeriod($form->getData()->getNumber());
+
+            // $this->entityManager->persist($entity);
+            // $this->entityManager->flush();
+            //}
+        //     return $this->render('JobScheduler/crontab.html.twig');
+         }
+
+        return $this->render('JobScheduler/crontab.html.twig', [
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ]);
+    }
+    /**
+     * @Route("/crontab_list", name="jobscheduler_cron_list")
+     *
+     */
+    public function crontabList()
+    {
+        $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find CronJob entity.');
+        }
+        foreach($entity as $crontab){
+            
+        }
+        return $this->render('JobScheduler/crontab_list.html.twig', [
+            'entity' => $entity,
+            'crontab'=> $crontab,
         ]);
     }
 

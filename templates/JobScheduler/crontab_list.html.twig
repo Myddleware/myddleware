@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+     <div id="info">
+        <div id="jobsceduler_table">
+            <table align="center">
+                <tbody>
+                {% for v in crontab %}
+                <tr>
+                    <td class="title"><label>command</label></td>
+                    <td class="value">{{ crontab.arguments }}</td>
+                </tr>
+                {# <tr>
+                    <td class="title"><label>Period</label></td>
+                    <td class="value">{{ crontab.period }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>Arguments</label></td>
+                    <td class="value">{{ crontab.arguments  }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>Description</label></td>
+                    <td class="value">{{ crontab.description  }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>Running</label></td>
+                    <td class="value">{{ crontab.runningInstances }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>Max instance</label></td>
+                    <td class="value">{{ crontab.maxInstances }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>Number</label></td>
+                    <td class="value">{{ crontab.number }}</td>
+                </tr> #}
+                {% endfor %}
+                {#<tr>
+                    <td class="title"><label>{{ 'jobscheduler.job_order'|trans }}</label></td>
+                    <td class="value">{{ entity.jobOrder }}</td>
+                </tr> #}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
