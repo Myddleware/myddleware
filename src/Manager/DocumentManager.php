@@ -731,7 +731,14 @@ class documentcore
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
-		try {		
+		try {
+			// No relate check for deletion document. The document linked could be also deleted.
+			if ($this->documentType == 'D') {			
+				$this->updateStatus('Relate_OK');
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return true;
+			}
+			
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
