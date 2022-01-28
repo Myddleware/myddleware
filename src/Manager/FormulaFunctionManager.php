@@ -26,13 +26,13 @@
 namespace App\Manager;
 
 /**
- * Class FormulaFunctionManager.
+ * Class formulafunctioncore.
  *
  * @package App\Manager
  *
  *
  */
-class FormulaFunctionManager
+class formulafunctioncore
 {
     private $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
 
@@ -134,3 +134,6 @@ class FormulaFunctionManager
     }
 }
 
+class FormulaFunctionManager extends formulafunctioncore {
+	
+}
