@@ -479,7 +479,7 @@ function:
         date:
             date: Formate une date/heure locale
             microtime: Retourne le timestamp UNIX actuel avec les microsecondes
-            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le timezone de la date passée en premier paramètre
+            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le fuseau horaire de la date passée en premier paramètre
             changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convertit la date passée en premier paramètre dans le format passé en deuxième paramètre
 
 solution:

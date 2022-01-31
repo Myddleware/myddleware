@@ -64,7 +64,6 @@ class AddUserCommand extends Command
         $this->validator = $validator;
         $this->users = $users;
         $this->configRepository = $configRepository;
-  
     }
 
     /**
@@ -148,8 +147,6 @@ class AddUserCommand extends Command
             $email = $this->io->ask('Email', null, [$this->validator, 'validateEmail']);
             $input->setArgument('email', $email);
         }
-
-      
     }
 
     /**
@@ -172,17 +169,16 @@ class AddUserCommand extends Command
 
         // create the user and encode its password
         $user = new User();
-       
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setRoles($isSuperAdmin ? ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] : ['ROLE_ADMIN']);
         $user->setEnabled(true);
         $user->setUsernameCanonical($username);
         $user->setEmailCanonical($email);
+        $user->setTimezone('UTC');
         
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
         $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
-      
         $user->setPassword($encodedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)
