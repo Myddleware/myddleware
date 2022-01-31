@@ -1,44 +1,41 @@
 {% extends 'base.html.twig' %}
-
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
 {% block body %}
-     <div id="info">
+     <div class="container-fluid">
         <div id="jobsceduler_table">
-            <table align="center">
+            {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <table class="table table-sm table-striped mt-5">
+                <thead>
+                    <th scope="col" class="title"><label>{{ 'crontab.command'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.period'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.arguments'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.description'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.running'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.max_instance'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.number'|trans }}</label></th>
+                </thead>
                 <tbody>
-                {% for v in crontab %}
-                <tr>
-                    <td class="title"><label>command</label></td>
-                    <td class="value">{{ crontab.arguments }}</td>
-                </tr>
-                {# <tr>
-                    <td class="title"><label>Period</label></td>
-                    <td class="value">{{ crontab.period }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>Arguments</label></td>
-                    <td class="value">{{ crontab.arguments  }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>Description</label></td>
-                    <td class="value">{{ crontab.description  }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>Running</label></td>
-                    <td class="value">{{ crontab.runningInstances }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>Max instance</label></td>
-                    <td class="value">{{ crontab.maxInstances }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>Number</label></td>
-                    <td class="value">{{ crontab.number }}</td>
-                </tr> #}
+                {% for value in entity %}
+                <tr>                    
+                    <td class="value">{{ value.command }}</td>
+                    <td class="value">{{ value.period }}</td>
+                    <td class="value">{{ value.arguments }}</td>
+                    <td class="value">{{ value.description  }}</td>
+                    <td class="value">{{ value.runningInstances }}</td>
+                    <td class="value">{{ value.maxInstances }}</td>
+                    <td class="value">{{ value.number }}</td>
+                </tr> 
                 {% endfor %}
-                {#<tr>
-                    <td class="title"><label>{{ 'jobscheduler.job_order'|trans }}</label></td>
-                    <td class="value">{{ entity.jobOrder }}</td>
-                </tr> #}
+                <a href="{{path('crontab')}}" class="btn btn-success mt-3">Create crontab</a>
                 </tbody>
             </table>
         </div>

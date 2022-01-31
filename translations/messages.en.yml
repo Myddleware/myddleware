@@ -822,4 +822,15 @@ install:
     php_version_not_found: WARNING ! Could not find your PHP version
     errors_to_do_message: You need to do the following before continuing
     recommendations_to_do_message: Optional recommendations to improve your setup
-    note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory 
+    note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
+crontab:
+    title: Jobscheduler with crontab
+    command: Commands
+    period: Period
+    arguments: Arguments
+    description: Descriptions
+    running: Running instance
+    max_instance: Max instance
+    number: Number
+    success: Your task schedule has been created
+    incorrect: An error occurred while creating your task schedule

@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
 {% block body %}
  <div class="container">
         <div class="row">
@@ -7,24 +7,22 @@
                 <div class="mt-5 p-5">
                 <table class="table">
                     <thead class="table-light">
-                    {{ form_start(form) }}
+                    {{ form_start(form) }} 
                         <tr>
-                            <th scope="col">Active</th>
-                            <th scope="col">Arguments</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Max instances</th>
-                            <th scope="col">Number</th>
-                            <th scope="col">Period</th>
+                            <th scope="col">{{ 'crontab.arguments'|trans }}</th>
+                            <th scope="col">{{ 'crontab.description'|trans }}</th>
+                            <th scope="col">{{ 'crontab.max_instance'|trans }}</th>
+                            <th scope="col">{{ 'crontab.number'|trans }}</th>
+                            <th scope="col">{{ 'crontab.period'|trans }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ form_widget(form.enable) }}</td>
-                            <td>{{ form_widget(form.arguments) }}</td>
-                            <td>{{ form_widget(form.description) }}</td>
+                            <td>{{ form_widget(form.arguments, { 'attr': {'placeholder': 'Your arguments'} }) }}</td>
+                            <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
                             <td>{{ form_widget(form.maxInstances) }}</td>
                             <td>{{ form_widget(form.number) }}</td>
-                            <td>{{ form_widget(form.period) }}</td>
+                            <td>{{ form_widget(form.period, { 'attr': {'placeholder': '*/5****'} }) }}</td>
                         </tr>
                     </tbody>
                     </table>
