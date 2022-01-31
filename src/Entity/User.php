@@ -541,7 +541,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setTimezone(string $timezone)
+    public function setTimezone(string $timezone='UTC')
     {
         $this->timezone = $timezone;
 
