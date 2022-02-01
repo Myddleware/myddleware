@@ -198,19 +198,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
         protected $connection;
-        // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-        protected $standardRuleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
-
+       
 		// To allow sending a specific record ID to rule simulation
 		protected $simulationQueryField;
 	
         protected function getInstanceBdd()
         {
         }
-		
-		protected function getStandardRuleParam() {
-			return $this->standardRuleParam;
-		}
 
         /* ******************************************************
          * RULE
@@ -2008,7 +2002,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 					'simulationQueryField' => $this->simulationQueryField
                 ];
 
-                $result = $this->beforeRender($result);
+                $result = $this->tools->beforeRuleEditViewRender($result);
 
                 // Formatage des listes déroulantes :
                 $result['lst_relation_source'] = ToolsManager::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
@@ -2027,12 +2021,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 exit;
             }
         }
-
-        protected function beforeRender($result)
-        {
-            return $result;
-        }
-
+		
         /**
          * Indique des informations concernant le champ envoyé en paramètre.
          *
@@ -2257,7 +2246,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if ('datereference' == $ruleParam->getName()) {
                             $date_reference = $ruleParam->getValue();
                         }
-                        if (in_array($ruleParam->getName(), $this->getStandardRuleParam())) {
+					
+                        if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
                         }

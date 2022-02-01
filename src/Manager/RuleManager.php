@@ -571,7 +571,15 @@ class rulecore
 				$this->dataSource['date_ref'] = $value['date_modified'];			
 				break;
 			}
-			if (empty($this->dataSource['values'])) {
+			
+			// If no result => it means that all value have the same reference date
+			// If reference date hasn't changed => it means that we reached the read limit and there are only 2 reference dates in the records, 
+			//									=> we removed the most recent ones (to be sure to miss no records) and only one reference date remain
+			//									=> If we don't stop the process, Myddleware will always read the same records
+			if (
+					empty($this->dataSource['values'])
+				OR $this->ruleParams['datereference'] == $this->dataSource['date_ref']
+			) {
 				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.');
 			}
 			return true;
@@ -1681,10 +1689,10 @@ class rulecore
 		
 	}
 	
-	// Permet de charger tous les paramètres de la règle
-	protected function setRuleParam() {
-			
+	// Set rule param from the database
+	protected function setRuleParam() {		
 		try {
+			$this->ruleParams = array();
 			$sqlParams = "SELECT * 
 							FROM ruleparam 
 							WHERE rule_id = :ruleId";
@@ -1700,9 +1708,8 @@ class rulecore
 		} catch (\Exception $e) {
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );
 		}
-	}	
+	}
 
-	
 	
 	// Permet de charger toutes les relations de la règle
 	protected function setRuleRelationships() {
