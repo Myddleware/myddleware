@@ -326,14 +326,6 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function getTimezone()
-    {
-
-        return $this->timezone;
-    }
-    /**
-     * {@inheritdoc}
-     */
     public function hasRole($role)
     {
         return in_array(strtoupper($role), $this->getRoles(), true);
