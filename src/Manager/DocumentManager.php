@@ -1608,7 +1608,7 @@ class documentcore
 								if(document.target_id = '', 0, 1) targetOrder
 							FROM document 
 							WHERE 
-									document.rule_id IN (:ruleId)	
+									Document.rule_id IN (:ruleId)	
 								AND (
 										document.global_status = 'Close'
 									 OR (
@@ -1631,7 +1631,7 @@ class documentcore
 								if(document.target_id = '', 0, 1) targetOrder
 							FROM document 
 							WHERE 
-									document.rule_id IN (:ruleId)	
+									Document.rule_id IN (:ruleId)	
 								AND (
 										document.global_status = 'Close'
 									 OR (

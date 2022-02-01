@@ -1631,7 +1631,7 @@ class rulecore
 					}
 				}
 			}	
-			$data = $this->getDocumentData($document['id_doc_myddleware'], 'T');
+			$data = $this->getDocumentData($document['id_doc_myddleware'], strtoupper(substr($table,0,1)));
 			if (!empty($data)) {
 				$return[$document['id_doc_myddleware']] = array_merge($document,$data);
 			} else {
