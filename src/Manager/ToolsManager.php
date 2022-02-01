@@ -40,7 +40,7 @@ use Symfony\Component\Process\PhpExecutableFinder;
  *
  *
  */
-class ToolsManager
+class toolscore
 {
     protected $connection;
     protected $container;
@@ -52,6 +52,9 @@ class ToolsManager
      * @var string
      */
     private $projectDir;
+	
+	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+	protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -89,6 +92,15 @@ class ToolsManager
 
         return $r;
     }
+	
+    public function beforeRuleEditViewRender($data) {
+		return $data;
+	}
+	
+	public function getRuleParam() {
+		return $this->ruleParam;
+	}
+	
 
     // Allow translation from php classes
     public function getTranslation($textArray)
@@ -171,3 +183,9 @@ class ToolsManager
 
     }
 }
+
+class ToolsManager extends toolscore {
+	
+}
+
+

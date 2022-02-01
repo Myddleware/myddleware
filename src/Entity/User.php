@@ -315,6 +315,14 @@ class User implements UserInterface, Serializable
         return array_unique($roles);
     }
 
+     /**
+     * {@inheritdoc}
+     */
+    public function getTimezone()
+    {
+
+        return $this->timezone;
+    }
     /**
      * {@inheritdoc}
      */

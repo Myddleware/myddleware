@@ -26,6 +26,17 @@
 {% block title %}{{parent()}} | {{'list_rule.title'|trans}}{% endblock %}
 {% block titlesm %}{{'list_rule.title'|trans}}{% endblock titlesm %} 
 {% block body %}
+	{# success message if the rule has been duplicated  #}
+	{% for label, flashes in app.session.flashbag.all %}
+		{% for flash in flashes %}
+			{% if ( label == 'success' ) %}
+				<div class="alert alert-success alert-dismissible fade show">
+					{{ flash }}
+				</div>
+			{% endif %}
+		{% endfor %}
+	{% endfor %}
+	
     <div id="rule">
 		{% if nb_rule > 0 %}
 		<div id="fd-title-small" class="left">

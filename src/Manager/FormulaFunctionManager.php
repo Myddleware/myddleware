@@ -26,20 +26,20 @@
 namespace App\Manager;
 
 /**
- * Class FormulaFunctionManager.
+ * Class formulafunctioncore.
  *
  * @package App\Manager
  *
  *
  */
-class FormulaFunctionManager
+class formulafunctioncore
 {
-    private $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
+    protected $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
 
-    private $path = "App\Manager\FormulaFunctionManager::";
+    protected $path = "App\Manager\FormulaFunctionManager::";
 
     public function getNamesFunctions()
-    {
+    {	
         return $this->names;
     }
 
@@ -50,9 +50,19 @@ class FormulaFunctionManager
         foreach ($this->names as $name) {
             $return[] = $this->path.$name;
         }
-
         return $return;
     }
+
+	public function addPathFunctions($formula)
+    {
+        if (!empty($this->names)) {
+            foreach ($this->names as $name) {
+                $formula = str_replace($name, $this->path.$name, $formula);
+            }
+        }
+        return $formula;
+    }
+
 
     public static function changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone)
     {
@@ -115,3 +125,6 @@ class FormulaFunctionManager
     }
 }
 
+class FormulaFunctionManager extends formulafunctioncore {
+	
+}

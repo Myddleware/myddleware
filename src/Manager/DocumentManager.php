@@ -107,7 +107,7 @@ class documentcore
 	/**
 	 * @var formulaManager
 	 */
-	private $formulaManager;
+	protected $formulaManager;
 	/**
 	 * @var DocumentRepository
 	 */
@@ -119,11 +119,11 @@ class documentcore
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $parameterBagInterface;
+	protected $parameterBagInterface;
 	/**
 	 * @var SolutionManager
 	 */
-	private $solutionManager;
+	protected $solutionManager;
 
 	// Instanciation de la classe de génération de log Symfony
 	public function __construct(
@@ -731,7 +731,14 @@ class documentcore
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
-		try {		
+		try {
+			// No relate check for deletion document. The document linked could be also deleted.
+			if ($this->documentType == 'D') {			
+				$this->updateStatus('Relate_OK');
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return true;
+			}
+			
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
@@ -957,7 +964,7 @@ class documentcore
 						$this->updateStatus('Ready_to_send');
 						$this->updateType('U');
 					}
-					$this->updateTargetId($history);
+					$this->updateTargetId($history['id']);
 				}
 			}
 			// Sinon on mets directement le document en ready to send (example child rule)
@@ -972,8 +979,8 @@ class documentcore
 					$this->documentType != 'S' 
 				AND	$this->documentType != 'D' 
 				AND	!$this->isParent()
-			) {
-				$this->checkNoChange();
+			) {				
+				$this->checkNoChange($history);
 			}			
 		} catch (\Exception $e) {
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1031,19 +1038,22 @@ class documentcore
 		return true;
 	}
 	
-	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
-	protected function checkNoChange() {
+// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
+	protected function checkNoChange($history) {
 		try {
 			// Get target data 
 			$target = $this->getDocumentData('T');
-		
-			// Get data in the target solution (if exists) before we update it
-			$history = $this->getDocumentData('H');
+
+			// get history from the database if it isn't in the input parameter
+			if (empty($history)) {
+				// Get data in the target solution (if exists) before we update it
+				$history = $this->getDocumentData('H');
+			}
+
 			// No comparaison if history is empty
 			if (empty($history)) {
 				return false;
 			}
-
 			// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
 			// This field can only exist in target data as it is created by Myddleware
 			if (!empty($target['Myddleware_element_id'])) {
@@ -1113,7 +1123,7 @@ class documentcore
 			$record = current($dataTarget['values']);	
 			$updateHistory = $this->updateHistoryTable($record);		
 			if ($updateHistory === true) {
-				return $record['id'];
+				return $record;
 			}
 			// Erreur dans la mise à jour de la table historique
 			else {
@@ -1252,7 +1262,7 @@ class documentcore
 				foreach ($this->ruleFields as $ruleField) {
 					$value = $this->getTransformValue($this->sourceData,$ruleField);
 					if (!empty($this->transformError)) {
-						throw new \Exception( 'Failed to transform data.' );
+						throw new \Exception( 'Failed to transform the field '.$ruleField['target_field_name'].'.' );
 					}
 					$targetField[$ruleField['target_field_name']] = $value;
 				}
@@ -1350,6 +1360,8 @@ class documentcore
 				) {
 					// Try the formula first
 					try {
+						// Trigger to redefine formula		
+						$f = $this->changeFormula($f);					
 						eval($f.';'); // exec
 					} catch (\ParseError $e) {
 						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
@@ -1416,6 +1428,11 @@ class documentcore
 			$this->transformError = true;
 			return null;
 		}
+	}
+	
+	// Trigger to be able to redefine formula
+	protected function changeFormula($f) {	
+		return $f;
 	}
 	
 	// Fonction permettant de contrôle les données. 
@@ -1584,47 +1601,47 @@ class documentcore
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
 			// Then we take the last document created to know if the last action sent was a deletion
 			$sqlParamsSoure = "	SELECT 
-								Document.id, 
-								Document.target_id, 
-								Document.type, 
-								Document.global_status,
-								if(Document.target_id = '', 0, 1) targetOrder
-							FROM Document 
+								document.id, 
+								document.target_id, 
+								document.type, 
+								document.global_status,
+								if(document.target_id = '', 0, 1) targetOrder
+							FROM document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.source_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.source_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";
 							
 			// On prépare la requête pour rechercher dans la partie target
 			$sqlParamsTarget = "SELECT 
-								Document.id, 
-								Document.source_id target_id, 
-								Document.type,
-								Document.global_status,
-								if(Document.target_id = '', 0, 1) targetOrder
-							FROM Document 
+								document.id, 
+								document.source_id target_id, 
+								document.type,
+								document.global_status,
+								if(document.target_id = '', 0, 1) targetOrder
+							FROM document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.target_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.target_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";	
 					
@@ -2000,7 +2017,7 @@ class documentcore
 		}
 	}
 	
-	// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
+		// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
 	protected function getTargetId($ruleRelationship,$record_id) {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
@@ -2009,34 +2026,38 @@ class documentcore
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT 
 									source_id record_id,
-									document.id document_id								
+									document.id document_id,
+									document.type document_type
 								FROM document
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id != '' 
-									AND document.deleted = 0 
-									AND document.target_id = :record_id 
+										document.rule_id = :ruleRelateId
+									AND document.source_id != ''
+									AND document.deleted = 0
+									AND document.target_id = :record_id
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	 
+											document.global_status = 'Close'
+										 OR document.status = 'No_send'
+									)
+								ORDER BY date_created DESC
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT 
 									target_id record_id,
-									document.id document_id
+									document.id document_id,
+									document.type document_type
 								FROM document 
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id = :record_id 
-									AND document.deleted = 0 
-									AND document.target_id != '' 
+										document.rule_id = :ruleRelateId
+									AND document.source_id = :record_id
+									AND document.deleted = 0
+									AND document.target_id != ''
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	
-								LIMIT 1";	
+											document.global_status = 'Close'
+										 OR document.status = 'No_send'
+									)
+								ORDER BY date_created DESC
+								LIMIT 1";
 			}
 			else {
 				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
@@ -2051,7 +2072,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['target_id'] != '' 
 							) {
@@ -2067,7 +2088,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['source_id'] != '' 
 							) {
@@ -2078,14 +2099,18 @@ class documentcore
 						}
 					}
 				}
-			} else {	
+			} else {
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
 				$stmt->bindValue(":record_id", $record_id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();		
+				$result = $stmt->fetch();					
 			}
 			if (!empty($result['record_id'])) {
+				// If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
+				if ($result['document_type'] == 'D') {
+					return null;
+				}
 				return $result;
 			}
 			return null;
