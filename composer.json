@@ -14,7 +14,7 @@
   "prefer-stable": true,
     "require": {
         "php": ">=7.4",
-        "symfony/symfony": "^4.4.30",
+        "symfony/symfony": "^4.4.37",
         "symfony/yaml": "4.4.*",
         "symfony/form": "4.4.*",
         "symfony/console": "4.4.*",
@@ -125,11 +125,8 @@
     },
     "config": {
     "allow-plugins": {
-      "composer/package-versions-deprecated": true,
-      "symfony/flex": true
-    },
-    "platform": {
-      "php": "7.4"
+      "composer/package-versions-deprecated": false,
+      "symfony/flex": false
     }
 
 
