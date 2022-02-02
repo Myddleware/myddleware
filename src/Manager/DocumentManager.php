@@ -123,7 +123,7 @@ class documentcore
 	/**
 	 * @var SolutionManager
 	 */
-	private $solutionManager;
+	protected $solutionManager;
 
 	// Instanciation de la classe de génération de log Symfony
 	public function __construct(
@@ -731,7 +731,14 @@ class documentcore
 			$this->message .= 'Job is not active. ';
 			return false;
 		}	
-		try {		
+		try {
+			// No relate check for deletion document. The document linked could be also deleted.
+			if ($this->documentType == 'D') {			
+				$this->updateStatus('Relate_OK');
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return true;
+			}
+			
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
@@ -1255,7 +1262,7 @@ class documentcore
 				foreach ($this->ruleFields as $ruleField) {
 					$value = $this->getTransformValue($this->sourceData,$ruleField);
 					if (!empty($this->transformError)) {
-						throw new \Exception( 'Failed to transform data.' );
+						throw new \Exception( 'Failed to transform the field '.$ruleField['target_field_name'].'.' );
 					}
 					$targetField[$ruleField['target_field_name']] = $value;
 				}
@@ -1353,6 +1360,8 @@ class documentcore
 				) {
 					// Try the formula first
 					try {
+						// Trigger to redefine formula		
+						$f = $this->changeFormula($f);					
 						eval($f.';'); // exec
 					} catch (\ParseError $e) {
 						throw new \Exception( 'FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());	
@@ -1419,6 +1428,11 @@ class documentcore
 			$this->transformError = true;
 			return null;
 		}
+	}
+	
+	// Trigger to be able to redefine formula
+	protected function changeFormula($f) {	
+		return $f;
 	}
 	
 	// Fonction permettant de contrôle les données. 
@@ -1587,47 +1601,47 @@ class documentcore
 			// We dont take cancel document excpet if it is a no_send document (data really exists in this case)
 			// Then we take the last document created to know if the last action sent was a deletion
 			$sqlParamsSoure = "	SELECT 
-								Document.id, 
-								Document.target_id, 
-								Document.type, 
-								Document.global_status,
-								if(Document.target_id = '', 0, 1) targetOrder
-							FROM Document 
+								document.id, 
+								document.target_id, 
+								document.type, 
+								document.global_status,
+								if(document.target_id = '', 0, 1) targetOrder
+							FROM document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.source_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.source_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";
 							
 			// On prépare la requête pour rechercher dans la partie target
 			$sqlParamsTarget = "SELECT 
-								Document.id, 
-								Document.source_id target_id, 
-								Document.type,
-								Document.global_status,
-								if(Document.target_id = '', 0, 1) targetOrder
-							FROM Document 
+								document.id, 
+								document.source_id target_id, 
+								document.type,
+								document.global_status,
+								if(document.target_id = '', 0, 1) targetOrder
+							FROM document 
 							WHERE 
 									Document.rule_id IN (:ruleId)	
 								AND (
-										Document.global_status = 'Close'
+										document.global_status = 'Close'
 									 OR (
-											Document.global_status = 'Cancel'	
-										AND Document.status = 'No_send'
+											document.global_status = 'Cancel'	
+										AND document.status = 'No_send'
 									)
 								)
-								AND	Document.target_id = :id
-								AND Document.id != :id_doc
-								AND Document.deleted = 0 
+								AND	document.target_id = :id
+								AND document.id != :id_doc
+								AND document.deleted = 0 
 							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
 							LIMIT 1";	
 					
@@ -2012,37 +2026,37 @@ class documentcore
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT 
 									source_id record_id,
-									Document.id document_id,
-									Document.type document_type
-								FROM Document
+									document.id document_id,
+									document.type document_type
+								FROM document
 								WHERE  
-										Document.rule_id = :ruleRelateId
-									AND Document.source_id != ''
-									AND Document.deleted = 0
-									AND Document.target_id = :record_id
+										document.rule_id = :ruleRelateId
+									AND document.source_id != ''
+									AND document.deleted = 0
+									AND document.target_id = :record_id
 									AND (
-											Document.global_status = 'Close'
-										 OR Document.status = 'No_send'
+											document.global_status = 'Close'
+										 OR document.status = 'No_send'
 									)
-								ORDER BY source_date_modified DESC
+								ORDER BY date_created DESC
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT 
 									target_id record_id,
-									Document.id document_id,
-									Document.type document_type
-								FROM Document 
+									document.id document_id,
+									document.type document_type
+								FROM document 
 								WHERE  
-										Document.rule_id = :ruleRelateId
-									AND Document.source_id = :record_id
-									AND Document.deleted = 0
-									AND Document.target_id != ''
+										document.rule_id = :ruleRelateId
+									AND document.source_id = :record_id
+									AND document.deleted = 0
+									AND document.target_id != ''
 									AND (
-											Document.global_status = 'Close'
-										 OR Document.status = 'No_send'
+											document.global_status = 'Close'
+										 OR document.status = 'No_send'
 									)
-								ORDER BY source_date_modified DESC
+								ORDER BY date_created DESC
 								LIMIT 1";
 			}
 			else {

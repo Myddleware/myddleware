@@ -89,7 +89,7 @@ class AccountController extends AbstractController
      */
     private $env;
 
-     /**
+    /**
      * @var AlertBootstrapInterface 
      */
     private $alert;

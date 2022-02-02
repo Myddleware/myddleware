@@ -224,6 +224,7 @@ class databasecore extends solution
                     !empty($param['ruleParams']['deletion'])
                 and !empty($param['ruleParams']['deletionField'])
 				and	$param['ruleParams']['deletionField'] != 'compareTable'	// Not a physical field, only used to compare table and Myddleware
+				and $param['call_type'] != 'history' 	// Deletion flag is requireed only for read action, this field belongs to the source not the target application
             ) {
                 $param['fields'][] = $param['ruleParams']['deletionField'];
             }

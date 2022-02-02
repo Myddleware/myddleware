@@ -89,6 +89,11 @@ class RuleRelationShip
     private $deleted;
 
     /**
+     * @ORM\Column(name="behavior", type="string")
+     */
+    private $behavior;
+
+    /**
      * Get id.
      *
      * @return int
@@ -226,6 +231,18 @@ class RuleRelationShip
     public function setRule(?Rule $rule): self
     {
         $this->rule = $rule;
+
+        return $this;
+    }
+
+    public function getBehavior(): ?string
+    {
+        return $this->behavior;
+    }
+
+    public function setBehavior(string $behavior): self
+    {
+        $this->behavior = $behavior;
 
         return $this;
     }

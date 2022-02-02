@@ -386,7 +386,6 @@ class prestashopcore extends solution
         $opt = [
             'resource' => $fields,
         ];
-
         // Call
         $xml = $this->webService->get($opt);
 
@@ -408,11 +407,10 @@ class prestashopcore extends solution
             $xml = $xml->asXML();
             $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
             $state = json_decode(json_encode((array) $simplexml->children()->children()), true);
-
             // S'il y a une langue on prends la liste dans le bon language
             if (!empty($state['name']['language'])) {
                 // We don't know the language here because the user doesn't chose it yet. So we take the first one.
-                $list[$record[$attributeId]] = (is_array($state['name']['language']) ? current($state['name']['language']) : $state['name']['language']);
+                $list[$state['id']] = (is_array($state['name']['language']) ? current($state['name']['language']) : $state['name']['language']);
             }
             // Sinon on prend sans la langue (utile pour la liste language par exemple)
             elseif (!empty($state['name'])) {
