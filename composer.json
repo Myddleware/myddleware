@@ -126,6 +126,13 @@
     }
     },
     "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true,
+      "symfony/flex": true
+    },
+    "platform": {
+      "php": "7.4"
+    }
 
 
     },

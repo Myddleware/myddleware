@@ -107,7 +107,7 @@ class documentcore
 	/**
 	 * @var formulaManager
 	 */
-	private $formulaManager;
+	protected $formulaManager;
 	/**
 	 * @var DocumentRepository
 	 */
@@ -119,7 +119,7 @@ class documentcore
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $parameterBagInterface;
+	protected $parameterBagInterface;
 	/**
 	 * @var SolutionManager
 	 */
@@ -957,7 +957,7 @@ class documentcore
 						$this->updateStatus('Ready_to_send');
 						$this->updateType('U');
 					}
-					$this->updateTargetId($history);
+					$this->updateTargetId($history['id']);
 				}
 			}
 			// Sinon on mets directement le document en ready to send (example child rule)
@@ -972,8 +972,8 @@ class documentcore
 					$this->documentType != 'S' 
 				AND	$this->documentType != 'D' 
 				AND	!$this->isParent()
-			) {
-				$this->checkNoChange();
+			) {				
+				$this->checkNoChange($history);
 			}			
 		} catch (\Exception $e) {
 			$this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1031,19 +1031,22 @@ class documentcore
 		return true;
 	}
 	
-	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
-	protected function checkNoChange() {
+// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
+	protected function checkNoChange($history) {
 		try {
 			// Get target data 
 			$target = $this->getDocumentData('T');
-		
-			// Get data in the target solution (if exists) before we update it
-			$history = $this->getDocumentData('H');
+
+			// get history from the database if it isn't in the input parameter
+			if (empty($history)) {
+				// Get data in the target solution (if exists) before we update it
+				$history = $this->getDocumentData('H');
+			}
+
 			// No comparaison if history is empty
 			if (empty($history)) {
 				return false;
 			}
-
 			// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
 			// This field can only exist in target data as it is created by Myddleware
 			if (!empty($target['Myddleware_element_id'])) {
@@ -1113,7 +1116,7 @@ class documentcore
 			$record = current($dataTarget['values']);	
 			$updateHistory = $this->updateHistoryTable($record);		
 			if ($updateHistory === true) {
-				return $record['id'];
+				return $record;
 			}
 			// Erreur dans la mise à jour de la table historique
 			else {
@@ -2000,7 +2003,7 @@ class documentcore
 		}
 	}
 	
-	// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
+		// Permet de récupérer l'id target pour une règle et un id source ou l'inverse
 	protected function getTargetId($ruleRelationship,$record_id) {
 		try {
 			$direction = $this->getRelationshipDirection($ruleRelationship);
@@ -2009,34 +2012,38 @@ class documentcore
 			if ($direction == '-1') {
 				$sqlParams = "	SELECT 
 									source_id record_id,
-									document.id document_id								
-								FROM document
+									Document.id document_id,
+									Document.type document_type
+								FROM Document
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id != '' 
-									AND document.deleted = 0 
-									AND document.target_id = :record_id 
+										Document.rule_id = :ruleRelateId
+									AND Document.source_id != ''
+									AND Document.deleted = 0
+									AND Document.target_id = :record_id
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	 
+											Document.global_status = 'Close'
+										 OR Document.status = 'No_send'
+									)
+								ORDER BY source_date_modified DESC
 								LIMIT 1";	
 			}
 			elseif ($direction == '1') {
 				$sqlParams = "	SELECT 
 									target_id record_id,
-									document.id document_id
-								FROM document 
+									Document.id document_id,
+									Document.type document_type
+								FROM Document 
 								WHERE  
-										document.rule_id = :ruleRelateId 
-									AND document.source_id = :record_id 
-									AND document.deleted = 0 
-									AND document.target_id != '' 
+										Document.rule_id = :ruleRelateId
+									AND Document.source_id = :record_id
+									AND Document.deleted = 0
+									AND Document.target_id != ''
 									AND (
-											document.global_status = 'Close' 
-										OR document.status = 'No_send'
-									)	
-								LIMIT 1";	
+											Document.global_status = 'Close'
+										 OR Document.status = 'No_send'
+									)
+								ORDER BY source_date_modified DESC
+								LIMIT 1";
 			}
 			else {
 				throw new \Exception( 'Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ' );
@@ -2051,7 +2058,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['target_id'] != '' 
 							) {
@@ -2067,7 +2074,7 @@ class documentcore
 							if (
 								(
 										$document['global_status'] == 'Close'	
-									OR $document['status'] == 'No_send'	
+									 OR $document['status'] == 'No_send'	
 								)	
 								AND $document['source_id'] != '' 
 							) {
@@ -2078,14 +2085,18 @@ class documentcore
 						}
 					}
 				}
-			} else {	
+			} else {
 				$stmt = $this->connection->prepare($sqlParams);
 				$stmt->bindValue(":ruleRelateId", $ruleRelationship['field_id']);
 				$stmt->bindValue(":record_id", $record_id);
 				$stmt->execute();	   				
-				$result = $stmt->fetch();		
+				$result = $stmt->fetch();					
 			}
 			if (!empty($result['record_id'])) {
+				// If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
+				if ($result['document_type'] == 'D') {
+					return null;
+				}
 				return $result;
 			}
 			return null;
