@@ -633,6 +633,7 @@ breadcrumb:
 menu_user:
     account: Mon compte.
     jobscheduler: Planificateur de tâche
+    crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration smtp
     logout: Déconnexion
     
@@ -836,6 +837,22 @@ install:
     php_version_not_found: ATTENTION ! Impossible de trouver votre version de PHP
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
+    note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
+
+crontab:
+    title: Planificateur de travaux avec crontab
+    title_cron: Crontab
+    description_cron: Planifiez vos tâches Myddleware en créant votre crontab
+    command: Commandes
+    period: Périodes
+    arguments: Arguments
+    description: Descriptions
+    running: Instance en cours
+    max_instance: Instance max
+    number: Nombres
+    success: Votre calendrier des tâches a bien été créé 
+    incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
+    create: Créer crontab
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware 
 
 duplicate_rule:

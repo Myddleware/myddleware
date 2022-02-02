@@ -76,7 +76,9 @@
     "laminas/laminas-hydrator": "^4.1",
     "prestashop/prestashop-webservice-lib": "dev-master",
     "symfony/mailer": "4.4.*",
-    "doctrine/cache": "1.11.3"
+    "doctrine/cache": "1.11.3",
+    "cron/cron-bundle": "^2.10",
+    "shapecode/cron-bundle": "^5.0"
     },
     "repositories": [
         {

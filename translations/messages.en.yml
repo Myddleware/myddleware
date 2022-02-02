@@ -632,6 +632,7 @@ breadcrumb:
 menu_user:
     account: My account
     jobscheduler: Job scheduler
+    crontab: Crontab
     management_smtp: Configuration smtp
     logout: Logout
 
@@ -832,7 +833,20 @@ install:
     errors_to_do_message: You need to do the following before continuing
     recommendations_to_do_message: Optional recommendations to improve your setup
     note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
-
+crontab:
+    title: Jobscheduler with crontab
+    title_cron: Crontab
+    description_cron: Schedule your Myddleware tasks by creating your crontab
+    command: Commands
+    period: Period
+    arguments: Arguments
+    description: Descriptions
+    running: Running instance
+    max_instance: Max instance
+    number: Number
+    success: Your task schedule has been created
+    incorrect: An error occurred while creating your task schedule
+    create: Create crontab
 duplicate_rule:
     duplicate: Duplicate
     cancel: Cancel
