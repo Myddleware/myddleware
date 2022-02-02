@@ -625,6 +625,7 @@ breadcrumb:
 menu_user:
     account: My account
     jobscheduler: Job scheduler
+    crontab: Crontab
     management_smtp: Configuration smtp
     logout: Logout
 
