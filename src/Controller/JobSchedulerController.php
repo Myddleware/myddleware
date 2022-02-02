@@ -95,7 +95,6 @@ class JobSchedulerController extends AbstractController
 
             return $this->redirect($this->generateUrl('jobscheduler', ['id' => $entity->getId()]));
         }
-
         return $this->render('JobScheduler/new.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
@@ -111,7 +110,7 @@ class JobSchedulerController extends AbstractController
           try {
             $command ='';
             $period =' */5 * * * *';
-            $entityCrontab = new CronJob($command, $period);
+            $entityCrontab = new CronJob($command, $period, $translator);
             $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
             $form = $this->createForm(JobSchedulerCronType::class, $entityCrontab);
             $form->handleRequest($request);
@@ -121,15 +120,13 @@ class JobSchedulerController extends AbstractController
                     $entityCrontab->setMaxInstances($form->getData()->getMaxInstances());
                     $entityCrontab->setNumber($form->getData()->getNumber());
                     $entityCrontab->setPeriod($form->getData()->getPeriod());
-
                     $this->entityManager->persist($entityCrontab);
                     $this->entityManager->flush();
                     $success = $translator->trans('crontab.success');
                     $this->addFlash('success', $success);
                     return $this->redirectToRoute('jobscheduler_cron_list');
                 } 
-                else {  
-                                      
+                else {                         
                     return $this->render('JobScheduler/crontab.html.twig', [
                         'entity' => $entity,
                         'form' => $form->createView(),

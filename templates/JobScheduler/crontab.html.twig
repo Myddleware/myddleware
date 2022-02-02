@@ -22,12 +22,26 @@
                             <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
                             <td>{{ form_widget(form.maxInstances) }}</td>
                             <td>{{ form_widget(form.number) }}</td>
-                            <td>{{ form_widget(form.period, { 'attr': {'placeholder': '*/5****'} }) }}</td>
+                            <td>
+                                {{ form_widget(form.period, { 'attr': {'placeholder': '* /5 * * * *'} }) }}
+                                {{ form_errors(form.period)}}
+                            </td>
+
                         </tr>
                     </tbody>
                     </table>
+                    {{ form_widget(form.enable) }}
+                    <div class="col-md-6 m-3">
                     {{ form_widget(form.save) }}
+                    </div>
                     {{ form_end(form) }}
+                    <div class="col-md-6 m-3">
+                        <a id="link_button" href="{{ path('jobscheduler_cron_list') }}">
+                            <button type="button" class="btn btn-secondary">
+                            {{ 'jobscheduler.cancel' | trans }}
+                            </button>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div> 
