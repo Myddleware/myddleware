@@ -726,7 +726,7 @@ email_alert:
 
         Bien cordialement,
 jobscheduler:
-    command: Comamande
+    command: Commande
     date_created: Date création
     active: Active
     list: Liste
@@ -734,7 +734,7 @@ jobscheduler:
     period: Période
     job_order: Ordre job
     date_modified: Date modifié
-    create_by : crée par
+    create_by : créé par
     modified_by : modifié par
     paramName1 : Paramètre 1
     paramValue1 : Paramètre valeur 1
@@ -843,10 +843,10 @@ crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
-    command: Commandes
+    command: Commande
     period: Périodes
     arguments: Arguments
-    description: Descriptions
+    description: Description
     running: Instance en cours
     max_instance: Instance max
     number: Nombres

@@ -146,9 +146,6 @@ class JobSchedulerController extends AbstractController
     public function crontabList()
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find CronJob entity.');
-        }
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,        
         ]);
