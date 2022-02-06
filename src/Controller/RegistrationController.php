@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\User;
+use Psr\Log\LoggerInterface;
 use App\Form\RegistrationFormType;
 use App\Repository\ConfigRepository;
 use App\Security\SecurityAuthenticator;
@@ -17,11 +18,15 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class RegistrationController extends AbstractController
 {
 
-
     private $configRepository;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
-    public function __construct(ConfigRepository $configRepository)
+    public function __construct(ConfigRepository $configRepository, LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $this->configRepository = $configRepository;
     }
 
@@ -32,13 +37,11 @@ class RegistrationController extends AbstractController
     {
 
         try {
-
-     
         //to help voter decide whether we allow access to install process again or not
         $configs = $this->configRepository->findAll();
         if(!empty($configs)){
             foreach($configs as $config) {
-                if($config->getName() === 'allow_install'){
+                if($config->getName() === 'allow_install') {
                     $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
                 }
             }
@@ -63,23 +66,20 @@ class RegistrationController extends AbstractController
             $user->setEnabled(true);
             $user->setUsernameCanonical($user->getUsername());
             $user->setEmailCanonical($user->getEmail());
+            $user->setTimezone('UTC');
             $entityManager = $this->getDoctrine()->getManager();
 
-
-         // block install from here as user has successfully installed Myddleware now
-            foreach($configs as $config){
-                if($config->getName() === 'allow_install'){
+            // block install from here as user has successfully installed Myddleware now
+            foreach($configs as $config) {
+                if($config->getName() === 'allow_install') {
                     $config->setValue('false');
                     $entityManager->persist($config);
                 }
-               
             }
-
             $entityManager->persist($user);
             $entityManager->flush();
 
             // do anything else you need here, like send an email
-
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
                 $request,
@@ -87,8 +87,8 @@ class RegistrationController extends AbstractController
                 'main' // firewall name in security.yaml
             );
         }
-    } catch (Exception $e ){
-
+    } catch (Exception $e){
+        $this->logger->error($e->getMessage());
         return $this->redirectToRoute('login');
     }
         return $this->render('registration/register.html.twig', [

@@ -34,6 +34,12 @@
     "composer/xdebug-handler": {
         "version": "1.4.5"
     },
+    "cron/cron": {
+        "version": "1.6.0"
+    },
+    "cron/cron-bundle": {
+        "version": "2.10.2"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -127,6 +133,9 @@
     },
     "doctrine/sql-formatter": {
         "version": "1.1.1"
+    },
+    "dragonmantank/cron-expression": {
+        "version": "v3.3.1"
     },
     "egulias/email-validator": {
         "version": "2.1.25"
@@ -343,6 +352,9 @@
         "files": [
             "config/packages/sensio_framework_extra.yaml"
         ]
+    },
+    "shapecode/cron-bundle": {
+        "version": "5.0.0"
     },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",
