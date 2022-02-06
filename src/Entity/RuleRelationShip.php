@@ -89,7 +89,7 @@ class RuleRelationShip
     private $deleted;
 
     /**
-     * @ORM\Column(name="behavior", type="string")
+     * @ORM\Column(name="behavior", type="string", nullable=true)
      */
     private $behavior;
 
