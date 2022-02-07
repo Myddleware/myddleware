@@ -128,11 +128,11 @@ install: init up
 ## JavaScript
 ## ----------
 js-install: init up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm install
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn install
 	@echo "Install done."
 
 js-build: init up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm run build
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn run build
 	@echo "Build done."
 
 ## ------
@@ -173,11 +173,13 @@ dev-clean:
 	@docker-compose run --rm myddleware bash -c "cd var/logs; rm -f vtigercrm.log; touch vtigercrm.log; chmod 777 vtigercrm.log"
 
 dev-install: dev-up
+	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr vendor
 	@docker-compose -f docker-compose.yml run --rm myddleware composer install
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R vendor
 
 dev-js-install: dev-up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm install
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm audit fix --force
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn install
+	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R node_modules yarn.lock
 
 dev-prepare-vtiger:
 	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh
