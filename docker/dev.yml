@@ -7,3 +7,5 @@ services:
 
   js:
     build: ./docker/dev/js
+    volumes:
+      - ./:/usr/src/app
