@@ -177,6 +177,7 @@ dev-install: dev-up
 
 dev-js-install: dev-up
 	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm install
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm audit fix --force
 
 dev-prepare-vtiger:
 	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh

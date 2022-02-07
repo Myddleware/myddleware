@@ -15,6 +15,6 @@ RUN apt-get update && apt-get upgrade -y && \
 
 ## Intall NodeJS
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
-    apt-get update && apt-get install -y nodejs build-essential && \
+    apt-get update && apt-get install -y nodejs build-essential && npm install -g npm && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
