@@ -5,4 +5,5 @@ services:
   myddleware:
     build: .
 
-    
+  js:
+    build: ./docker/dev/js

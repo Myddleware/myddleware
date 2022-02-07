@@ -124,6 +124,13 @@ install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware composer install
 	@echo "Install done."
 
+## ----------
+## JavaScript
+## ----------
+js-install: init up
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm js npm install
+	@echo "Install done."
+
 ## ------
 ## Docker
 ## ------
