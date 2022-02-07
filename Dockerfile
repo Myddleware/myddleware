@@ -11,5 +11,10 @@ RUN apt-get update && apt-get upgrade -y && \
     sed -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!' -ri /etc/apache2/sites-available/000-default.conf && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
-
 #RUN pecl install -f ssh2-1.1.2 && docker-php-ext-enable ssh2
+
+## Intall NodeJS
+RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
+    apt-get update && apt-get install -y nodejs build-essential && \
+    apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
+

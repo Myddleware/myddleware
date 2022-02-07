@@ -128,8 +128,12 @@ install: init up
 ## JavaScript
 ## ----------
 js-install: init up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm js npm install
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm install
 	@echo "Install done."
+
+js-build: init up
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm run build
+	@echo "Build done."
 
 ## ------
 ## Docker
@@ -144,7 +148,7 @@ down:
 	@docker-compose down --remove-orphans
 
 build:
-	@docker-compose -f docker-compose.yml -f docker/dev.yml build myddleware js
+	@docker-compose -f docker-compose.yml -f docker/dev.yml build myddleware
 
 push:
 	@docker login
@@ -172,7 +176,7 @@ dev-install: dev-up
 	@docker-compose -f docker-compose.yml run --rm myddleware composer install
 
 dev-js-install: dev-up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm js npm install
+	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware npm install
 
 dev-prepare-vtiger:
 	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh

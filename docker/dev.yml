@@ -4,8 +4,3 @@ services:
 
   myddleware:
     build: .
-
-  js:
-    build: ./docker/dev/js
-    volumes:
-      - ./:/usr/src/app
