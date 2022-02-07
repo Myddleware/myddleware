@@ -1,21 +1,21 @@
 #!make
 
 init:
-	@[ -f hosts ] || touch hosts
-	@[ -f .env ] || cp .env.example .env
-	@[ -f scheduler.sh ] || touch scheduler.sh
-	@[ -f crontab.client ] || touch crontab.client
-	@cd app/config/public/ && [ -f parameters_smtp.yml ] || cp parameters_smtp.yml.default parameters_smtp.yml
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f database.client.php ] || cp  ../../../../../var/solutions/database.client.php database.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f file.client.php ] || cp  ../../../../../var/solutions/file.client.php file.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mautic.client.php ] || cp  ../../../../../var/solutions/mautic.client.php mautic.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f microsoftsql.client.php ] || cp  ../../../../../var/solutions/microsoftsql.client.php microsoftsql.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mysql.client.php ] || cp  ../../../../../var/solutions/mysql.client.php mysql.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f oracledb.client.php ] || cp  ../../../../../var/solutions/oracledb.client.php oracledb.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f vtigercrm.client.php ] || cp  ../../../../../var/solutions/vtigercrm.client.php vtigercrm.client.php
-	@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f woocommerce.client.php ] || cp  ../../../../../var/solutions/woocommerce.client.php woocommerce.client.php
-	@cd src/Myddleware/RegleBundle/Custom && [ -f Custom.json ] || cp  ../../../../var/custom/Custom.json Custom.json
-	@cd var/databases && [ -d filebrowser.db ] && rm -fr filebrowser.db || true; touch filebrowser.db
+	#@[ -f hosts ] || touch hosts
+	#@[ -f .env ] || cp .env.example .env
+	#@[ -f scheduler.sh ] || touch scheduler.sh
+	#@[ -f crontab.client ] || touch crontab.client
+	#@cd app/config/public/ && [ -f parameters_smtp.yml ] || cp parameters_smtp.yml.default parameters_smtp.yml
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f database.client.php ] || cp  ../../../../../var/solutions/database.client.php database.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f file.client.php ] || cp  ../../../../../var/solutions/file.client.php file.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mautic.client.php ] || cp  ../../../../../var/solutions/mautic.client.php mautic.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f microsoftsql.client.php ] || cp  ../../../../../var/solutions/microsoftsql.client.php microsoftsql.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f mysql.client.php ] || cp  ../../../../../var/solutions/mysql.client.php mysql.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f oracledb.client.php ] || cp  ../../../../../var/solutions/oracledb.client.php oracledb.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f vtigercrm.client.php ] || cp  ../../../../../var/solutions/vtigercrm.client.php vtigercrm.client.php
+	#@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f woocommerce.client.php ] || cp  ../../../../../var/solutions/woocommerce.client.php woocommerce.client.php
+	#@cd src/Myddleware/RegleBundle/Custom && [ -f Custom.json ] || cp  ../../../../var/custom/Custom.json Custom.json
+	#@cd var/databases && [ -d filebrowser.db ] && rm -fr filebrowser.db || true; touch filebrowser.db
 	@chmod 777 -R var/logs || true
 
 clean: init
@@ -26,22 +26,6 @@ clean: init
 
 sleep:
 	@sleep 5
-
-ps: init
-	@docker-compose ps
-
-up: init
-	@docker-compose -f docker-compose.yml up -d
-
-down:
-	@docker-compose down --remove-orphans
-
-build:
-	@docker-compose build myddleware
-
-install: init up
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar install --ignore-platform-reqs --no-scripts
-	@echo "Install done."
 
 clean-cache:
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
@@ -133,13 +117,32 @@ reset: clean
 	@echo "===> Stai per cancellare tutto (digita: YES)?: " && \
 		read AGREE && [ "$${AGREE}" = "YES" ] && docker-compose down -v --remove-orphans
 
-## ----------
-## Docker Hub
-## ----------
+## ------
+## Vendor
+## ------
+install: init up
+	@docker-compose -f docker-compose.yml run --rm myddleware composer install
+	@echo "Install done."
+
+## ------
+## Docker
+## ------
+ps: init
+	@docker-compose ps
+
+up: init
+	@docker-compose -f docker-compose.yml up -d
+
+down:
+	@docker-compose down --remove-orphans
+
+build:
+	@docker-compose -f docker-compose.yml -f docker/dev.yml build myddleware
+
 push:
 	@docker login
-	@docker build -t opencrmitalia/myddleware:v1 .
-	@docker push opencrmitalia/myddleware:v1
+	@docker build -t opencrmitalia/myddleware:v3 .
+	@docker push opencrmitalia/myddleware:v3
 
 ## -------
 ## Develop
@@ -152,11 +155,14 @@ dev: \
 	dev-prepare-vtiger \
 	dev-prepare-mssql
 
-dev-up:
-	@docker-compose up -d
+dev-up: build
+	@docker-compose -f docker-compose.yml -f docker/dev.yml up --force-recreate -d
 
 dev-clean:
 	@docker-compose run --rm myddleware bash -c "cd var/logs; rm -f vtigercrm.log; touch vtigercrm.log; chmod 777 vtigercrm.log"
+
+dev-install: dev-up
+	@docker-compose -f docker-compose.yml run --rm myddleware composer install
 
 dev-prepare-vtiger:
 	@docker-compose exec vtiger1 bash dev/script/vtiger-install.sh
