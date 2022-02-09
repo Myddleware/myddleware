@@ -10,13 +10,39 @@ And here is a test json piece of code
 
 ```json
     {
-        "name": "Roman",
-        "age": 25,
+        "name": "Mark",
+        "age": 15,
         "hobbies": {
             "videogames": "BOII",
             "books": "Dune- Franck Herbert",
             "films": "Whiplash",
-            "sports": "Boxe"
+            "sports": "Tennis"
         }
     }
+```
+
+This is a test PHP code sample
+
+```php
+    class TestClass extends TestClassInterface {
+        
+        private $property;
+        private $property2;
+        public __construct()
+        {
+            $this->property = $property;
+            $this->property2 = $property2;
+        }
+
+        public function awesomeFunction(int $age, string $name): void
+        {
+            return echo "My name is $name and I am $age years old";
+        }    
+    }
+```
+
+We can also use SQL syntax
+
+```sql
+    SELECT * FROM users WHERE id=? 
 ```
