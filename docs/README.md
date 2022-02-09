@@ -1,7 +1,10 @@
 # Myddleware
 
 > Welcome to Myddleware community and thanks for joining us!
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6cc7e5a9f80662fdcbd241be5beabb4cd34e0cf6
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications
 
 ![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
@@ -18,5 +21,9 @@ Find us here : [www.myddleware.com](https://www.myddleware.com)
 
 *We created it, you own it!*
 
+<<<<<<< HEAD
+![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
+=======
 ![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
 
+>>>>>>> 6cc7e5a9f80662fdcbd241be5beabb4cd34e0cf6
