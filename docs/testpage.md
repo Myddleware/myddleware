@@ -10,13 +10,13 @@ And here is a test json piece of code
 
 ```json
     {
-        "name": "Mark",
-        "age": 15,
+        "name": "Roman",
+        "age": 25,
         "hobbies": {
             "videogames": "BOII",
             "books": "Dune- Franck Herbert",
             "films": "Whiplash",
-            "sports": "Tennis"
+            "sports": "Boxe"
         }
     }
 ```
