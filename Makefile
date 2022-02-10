@@ -64,7 +64,7 @@ debug: init
 	@docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --remove-orphans
 
 prod: init fix
-	@docker-compose -f docker-compose.yml up -d --remove-orphans
+	@docker-compose up -d --remove-orphans
 
 start: prod
 	@echo ">>> Myddleware is ready."
@@ -76,8 +76,7 @@ restart: recreate
 	@echo ">>> Myddleware is ready."
 
 fix:
-	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 app/config/public/parameters_smtp.yml || true
-	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/ var/logs/ || true
+	@docker-compose run --rm myddleware bash docker/script/fix.sh || true
 
 bash:
 	@docker-compose -f docker-compose.yml exec myddleware bash
@@ -97,21 +96,20 @@ reset: clean
 install: php-install js-install
 	@echo "Myddleware installation complete."
 
-## ------
-## Vendor
-## ------
-php-install: init up
-	@docker-compose -f docker-compose.yml run --rm myddleware composer install
+## ---
+## PHP
+## ---
+php-install: up
+	@docker-compose run --rm --no-deps myddleware composer install
 
 ## ----------
 ## JavaScript
 ## ----------
-js-install: init up
-	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm myddleware yarn install
+js-install: up
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm --no-deps myddleware yarn install
 
-js-build: init up
-	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm myddleware yarn run build
-	@echo "Build done."
+js-build: up
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm --no-deps myddleware yarn run build
 
 ## ------
 ## Docker

@@ -17,6 +17,7 @@
 #@cd var/databases && [ -d filebrowser.db ] && rm -fr filebrowser.db || true; touch filebrowser.db
 
 ## Initialize environment
+echo "Initialize environment"
 [ ! -f .env.local ] && cp docker/env/local.init .env.local
 chmod 777 .env.local
 
