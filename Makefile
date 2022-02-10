@@ -35,15 +35,8 @@ require-vtiger-client:
 require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
 
-setup-files:
-	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar run-script post-install-cmd
-	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/ var/logs/ || true
-
-setup-database: up sleep
-	@docker-compose -f docker-compose.yml exec myddleware bash prepare-database.sh
-
-setup: setup-files setup-database fix
-	@echo "Setup Myddleware files and database: OK!"
+setup: js-build
+	@echo "Myddleware files and database setup completed."
 
 schedule:
 	@docker-compose -f docker-compose.yml exec myddleware php -f /var/www/html/bin/console myddleware:resetScheduler --env=background
@@ -101,22 +94,23 @@ docker-stop-all:
 reset: clean
 	@bash docker/script/reset.sh
 
+install: php-install js-install
+	@echo "Myddleware installation complete."
+
 ## ------
 ## Vendor
 ## ------
-install: init up
+php-install: init up
 	@docker-compose -f docker-compose.yml run --rm myddleware composer install
-	@echo "Install done."
 
 ## ----------
 ## JavaScript
 ## ----------
 js-install: init up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn install
-	@echo "Install done."
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm myddleware yarn install
 
 js-build: init up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn run build
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm myddleware yarn run build
 	@echo "Build done."
 
 ## ------
