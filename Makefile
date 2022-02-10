@@ -3,13 +3,10 @@
 init:
 	@docker-compose run --rm --no-deps myddleware bash docker/script/init.sh
 
-clean: init
-	@rm -fr .git/.idea >/dev/null 2>/dev/null || true
-	@mv .idea .git/.idea >/dev/null 2>/dev/null || true
-	@git clean -dfx >/dev/null 2>/dev/null || true
-	@mv .git/.idea .idea >/dev/null 2>/dev/null || true
+clean:
+	@docker-compose run --rm --no-deps myddleware bash docker/script/clean.sh
 
-sleep:
+wait:
 	@sleep 5
 
 clean-cache:
@@ -114,10 +111,10 @@ js-build: up
 ## ------
 ## Docker
 ## ------
-ps: init
+ps:
 	@docker-compose ps
 
-up: init
+up:
 	@docker-compose -f docker-compose.yml up -d
 
 down:
