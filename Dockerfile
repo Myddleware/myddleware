@@ -3,7 +3,7 @@ LABEL maintainer="Francesco Bianco <francescobianco@opencrmitalia.com>"
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install -qq --force-yes mysql-client libzip-dev libicu-dev git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 alien libaio1 nano vim net-tools iputils-ping telnet && \
+    apt-get -y install -qq --force-yes rsync mysql-client libzip-dev libicu-dev git zlib1g-dev libc-client-dev libkrb5-dev cron rsyslog unzip libssh2-1-dev gnupg2 alien libaio1 nano vim net-tools iputils-ping telnet && \
     docker-php-ext-configure intl && docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install imap exif mysqli pdo pdo_mysql zip intl && \
     echo "short_open_tag=off" >> /usr/local/etc/php/conf.d/syntax.ini && \

@@ -111,6 +111,7 @@ js-install: up
 
 js-build: up
 	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm --no-deps myddleware yarn run build
+	@docker-compose run --rm --no-deps -w /var/www/html/public myddleware rsync -Rr ./build/ ./build/
 
 ## ------
 ## Docker
@@ -125,7 +126,7 @@ down:
 	@docker-compose down --remove-orphans
 
 build:
-	@docker-compose -f docker-compose.yml -f docker/dev.yml build myddleware
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml build myddleware
 
 push:
 	@docker login
@@ -144,7 +145,7 @@ dev: \
 	dev-prepare-mssql
 
 dev-up: build
-	@docker-compose -f docker-compose.yml -f docker/dev.yml up --force-recreate -d
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml up --force-recreate -d
 
 dev-clean:
 	@docker-compose run --rm myddleware bash -c "cd var/logs; rm -f vtigercrm.log; touch vtigercrm.log; chmod 777 vtigercrm.log"
@@ -155,7 +156,7 @@ dev-install: dev-up
 	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R vendor
 
 dev-js-install: dev-up
-	@docker-compose -f docker-compose.yml -f docker/dev.yml run --rm myddleware yarn install
+	@docker-compose -f docker-compose.yml -f docker/env/dev.yml run --rm myddleware yarn install
 	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R node_modules yarn.lock
 
 dev-prepare-vtiger:
