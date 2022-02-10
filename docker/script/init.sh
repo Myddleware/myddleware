@@ -15,5 +15,13 @@
 #@cd src/Myddleware/RegleBundle/Custom/Solutions && [ -f woocommerce.client.php ] || cp  ../../../../../var/solutions/woocommerce.client.php woocommerce.client.php
 #@cd src/Myddleware/RegleBundle/Custom && [ -f Custom.json ] || cp  ../../../../var/custom/Custom.json Custom.json
 #@cd var/databases && [ -d filebrowser.db ] && rm -fr filebrowser.db || true; touch filebrowser.db
+
+## Initialize environment
+[ ! -f .env.local ] && cp docker/env/local.init .env.local
+chmod 777 .env.local
+
+#APP_SECRET=069d068b2f7ff586bc30f3d35e4a8596
+
+## Fix files permissions
 [ -d var/log ] && chmod 777 -R var/log || true
 [ -d var/logs ] && chmod 777 -R var/logs || true
