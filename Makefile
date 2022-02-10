@@ -7,7 +7,8 @@ clean:
 	@docker-compose run --rm --no-deps myddleware bash docker/script/clean.sh
 
 wait:
-	@sleep 5
+	@docker-compose up -d mysql
+	@docker-compose exec mysql sh -c "while ! (mysqladmin ping -uroot > /dev/null 2>&1); do sleep 1; done"
 
 clean-cache:
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
@@ -32,8 +33,11 @@ require-vtiger-client:
 require-woocommerce-client:
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar require automattic/woocommerce:^3.0.0 -vvvv --ignore-platform-reqs --no-scripts
 
-setup: js-build
+setup: js-build setup-database
 	@echo "Myddleware files and database setup completed."
+
+setup-database: wait init
+	@docker-compose run --rm myddleware bash docker/script/setup-database.sh
 
 schedule:
 	@docker-compose -f docker-compose.yml exec myddleware php -f /var/www/html/bin/console myddleware:resetScheduler --env=background

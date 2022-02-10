@@ -14,6 +14,8 @@ make setup
 make prod
 ```
 
-Visit the following page and follow instruction
+Visit the following page and follow the instructions
+
+- <http://localhost:30080>
 
 
