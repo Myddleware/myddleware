@@ -121,6 +121,7 @@ class TaskController extends AbstractController
         ], false);
 
          //Check the user timezone
+         $timezone = $this->getUser()->getTimezone();
          if ($timezone == '') {
             $timezone = 'UTC';
         }else {
