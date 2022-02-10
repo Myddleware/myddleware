@@ -466,7 +466,7 @@ $(function () {
 
 	// Validation et vérification de l'ensemble du formulaire			
 	$("#validation", '#rule_mapping').on("click", function () {
-
+		console.log("clic");
 		before = $("#validation").attr('value'); // rev 1.08
 
 		if (require() && require_params() && require_relate() && duplicate_fields_error()) {

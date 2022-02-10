@@ -1,5 +1,8 @@
-* Tutoriels
-    * [Installation Guide](installationGuide.md)
 * [Home](/)
-* [Test](testpage.md)
-* [Another Test](anotherpage.md)
+* **Requirements**
+  * [Test](testpage.md)
+* **Install Myddleware**
+  * [Another Test](anotherpage.md)
+  * [Setting up Database](database_install.md)
+  * [Register User](register.md)
+* **Creating a connector**
