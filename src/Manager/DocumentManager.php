@@ -735,7 +735,6 @@ class documentcore
 			// No relate check for deletion document. The document linked could be also deleted.
 			if ($this->documentType == 'D') {			
 				$this->updateStatus('Relate_OK');
-				$this->connection->commit(); // -- COMMIT TRANSACTION
 				return true;
 			}
 			
@@ -755,8 +754,7 @@ class documentcore
 					// If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
 					if (!empty($ruleRelationship['parent'])) {
 						continue;
-					}	
-					
+					}				
 
 					// Select previous document in the same rule with the same id and status different than closed
 					$targetId = $this->getTargetId($ruleRelationship,$this->sourceData[$ruleRelationship['field_name_source']]);
@@ -806,11 +804,10 @@ class documentcore
 					$this->updateType('U');
 				}
 			}
-			
 			$this->updateStatus('Relate_OK');
 			return true;
 		} catch (\Exception $e) {
-			$this->message .= 'No data for the field '.$ruleRelationship['field_name_source'].' in the rule '.$this->ruleName.'. Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 			$this->typeError = 'E';
 			$this->updateStatus('Relate_KO');
 			$this->logger->error($this->message);
