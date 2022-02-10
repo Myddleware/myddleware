@@ -1,3 +1,11 @@
 # Myddleware with Docker
 
-This is work in progress documentation. Ignore this Pull-request at this moment, it is just to test branch synchronization.
+> This is work in progress documentation. Ignore this Pull-request at this moment, it is just to test branch synchronization.
+
+## Use Docker a stand-alone production environment
+
+```shell
+git clone https://github.com/myddleware/myddleware.git
+cd myddleware
+make install
+```
