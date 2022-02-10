@@ -94,6 +94,6 @@ composer.phar
 ##> Docker ##
 /docker/tmp/
 !/docker/tmp/.gitkeep
-/docker/volumes/
-!/docker/volumes/*/.gitkeep
+/docker/var/
+!/docker/var/*/.gitkeep
 ##< Docker ##

@@ -12,8 +12,6 @@ services:
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
     volumes:
       - ./:/var/www/html:cached
-      #- ./app/config/parameters.yml.docker:/var/www/html/app/config/parameters.yml
-      #- ./app/config/public/parameters_public.yml.docker:/var/www/html/app/config/public/parameters_public.yml
       - ./docker/tmp/composer:/root/.composer:cached
     links:
       - mysql
@@ -29,7 +27,7 @@ services:
       - max_allowed_packet=524288000
       - wait_timeout=100
     volumes:
-      - ./var/lib/mysql:/var/lib/mysql:rw
+      - ./docker/var/mysql:/var/lib/mysql:rw
     restart: always
 
   phpmyadmin:
