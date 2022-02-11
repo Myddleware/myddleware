@@ -47,12 +47,12 @@ services:
       - DB_USER=root
       - DB_PASS=secret
       - DB_NAMES=myddleware
-      - DB_DUMP_TARGET=${backup_target}
+      - DB_DUMP_TARGET=${backup_target:-}
       - DB_DUMP_FREQ=1440
       - DB_DUMP_BEGIN=2300
       - AWS_DEFAULT_REGION=eu-west-1
-      - AWS_ACCESS_KEY_ID=${aws_access_key_id}
-      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+      - AWS_ACCESS_KEY_ID=${aws_access_key_id:-}
+      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key:-}
     volumes:
       - ./.temp/mysql-backup:/tmp
     restart: always

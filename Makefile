@@ -56,7 +56,7 @@ debug: init
 	@docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --remove-orphans
 
 prod: init fix
-	@docker-compose up -d --remove-orphans
+	@docker-compose --env-file .env.docker up -d --remove-orphans
 
 start: prod
 	@echo ">>> Myddleware is ready."

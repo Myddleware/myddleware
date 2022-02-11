@@ -17,7 +17,6 @@
 #@cd var/databases && [ -d filebrowser.db ] && rm -fr filebrowser.db || true; touch filebrowser.db
 
 ## Initialize environment
-echo "Initialize environment"
 if [ ! -f .env.local ]; then
   cp docker/env/local.init .env.local
   php -r 'echo "APP_SECRET=".md5(microtime());' >> .env.local
