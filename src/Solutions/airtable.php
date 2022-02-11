@@ -23,12 +23,13 @@
  * along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************************/
 
-namespace Myddleware\RegleBundle\Solutions;
+namespace App\Solutions;
 
 use DateTime;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+
 class airtablecore extends solution {
 
 	protected $sendDeletion = true;	
@@ -97,9 +98,9 @@ class airtablecore extends solution {
      * @param array $paramConnexion
      * @return void
      */
-    public function login($paramConnexion) {
+    public function login($paramConnexion) {		
         parent::login($paramConnexion);
-        try {
+        try {			
             $this->projectID = $this->paramConnexion['projectid'];
             $this->token =  $this->paramConnexion['apikey'];
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
@@ -138,24 +139,16 @@ class airtablecore extends solution {
      *
      * @param string $module
      * @param string $type
+     * @param array $param
      * @return array
      */
-    public function get_module_fields($module, $type = 'source') {
+	public function get_module_fields($module, $type = 'source', $param = null) {		
         require('lib/airtable/metadata.php');
         parent::get_module_fields($module, $type);
         try {
             if(!empty($moduleFields[$module])){
                 $this->moduleFields = $moduleFields[$module];
             }
-
-            if (!empty($fieldsRelate[$module])) {
-				$this->fieldsRelate = $fieldsRelate[$module]; 
-			}	
-
-            if (!empty($this->fieldsRelate)) {
-				$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-			}
-
             return $this->moduleFields;
         }catch(\Exception $e){
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());		
@@ -169,7 +162,7 @@ class airtablecore extends solution {
      * @param array $param
      * @return array
      */
-    public function read($param){
+    public function readData($param){	
         try {
             $baseID = $this->paramConnexion['projectid'];
             $result = [];
@@ -285,13 +278,13 @@ class airtablecore extends solution {
         return $result;
     }
 
-    /**
+     /**
      * Reads the last inserted record (latest) from the source application
      *
      * @param array $param
      * @return array
      */
-    public function read_last($param){
+/*    public function read_last($param){
         $result = array();
         try{
             //for simulation purposes, we create a new date_ref in the past
@@ -316,14 +309,14 @@ class airtablecore extends solution {
         }
         return $result;
     }
-
+ */
     /**
      * Create data into target app
      *
      * @param array $param
      * @return void
      */
-    public function create($param){
+    public function createData($param){
         return $this->upsert('create', $param);
     }
 
@@ -333,12 +326,12 @@ class airtablecore extends solution {
      * @param [type] $param
      * @return void
      */
-    public function update($param){
+    public function updateData($param){
         return $this->upsert('update', $param);
     }
 	
 	// Delete a record
-	public function delete($param) {
+	public function deleteData($param) {
 		 return $this->upsert('delete', $param);
 	}
 
@@ -356,20 +349,16 @@ class airtablecore extends solution {
 		$param['method'] = $method;
 		$module = ucfirst($param['module']);
 		
-		// trigger to add custom code if needed
-		$data = $this->checkDataBeforeCreate($param, $param['data']);
-		
         /**
          * In order to load relationships, we MUST first load all fields
          */
         $allFields = $this->get_module_fields($param['module'], 'source');
-        $relationships = $this->get_module_fields_relate($param['module'], 'source');
-		
+        // $relationships = $this->get_module_fields_relate($param['module'], 'source');
 		
 		// Group records for each calls
 		// Split the data into several array using the limite size
 		$recordsArray = array_chunk($param['data'], $this->callPostLimit, true);	
-		foreach($recordsArray as $records) {			
+		foreach($recordsArray as $records) {					
 			// Airtable expects data to come in a 'records' array
 			$body = [];
 			$body['typecast'] = true;
@@ -379,10 +368,14 @@ class airtablecore extends solution {
 			try{
 				foreach($records as $idDoc => $data){
 					if($method === 'create'){
-						unset($data['target_id']);
+						// trigger to add custom code if needed
+						$data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+					} elseif($method === 'update'){
+						$data = $this->checkDataBeforeUpdate($param, $data);
 					}
 					// Recard are stored in the URL for a deletionj
-					if($method === 'delete'){
+					elseif($method === 'delete'){
+						$data = $this->checkDataBeforeDelete($param, $data);
 						$urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
 						$i++;
 						continue;
@@ -391,24 +384,32 @@ class airtablecore extends solution {
 					if (!empty($data['Myddleware_element_id'])) {
 						unset($data['Myddleware_element_id']);
 					}
+					
 					$body['records'][$i]['fields'] = $data;
+						
 					/**
 					 * Add dimensional array for relationships fields as Airtable expects arrays of IDs
-					 */
+					 */			 
 					foreach($body['records'][$i]['fields'] as $fieldName => $fieldVal){
-						if(array_key_exists($fieldName, $relationships)){
+						// Target id isn't an array but the id of the record in Airtable (exist on update and delete)
+						if ($fieldName == 'target_id') {
+							continue;
+						}
+
+						if ($allFields[$fieldName]['relate'] === true) {
 							$arrayVal = [];
 							$arrayVal[] = $fieldVal;
 							$body['records'][$i]['fields'][$fieldName] = $arrayVal;
 						}
 					}
+			
 					// Add the record id in the body if update 
-					if($method === 'update'){
+					if($method == 'update'){
 						$body['records'][$i]['id'] = $data['target_id'];
 						unset($body['records'][$i]['fields']['target_id']);
 					}
 					$i++;
-				}			
+				}
 				// Send records to Airtable
 				$client = HttpClient::create();
 				$options = [
@@ -493,12 +494,6 @@ class airtablecore extends solution {
 
 }
 
-// Include custom file if it exists : used to redefine Myddleware standard core
-$file = __DIR__. '/../Custom/Solutions/airtable.php';
-if(file_exists($file)){
-    require_once($file);
-} else { 
-    class airtable extends airtablecore {
-
-    }
+class airtable extends airtablecore
+{
 }

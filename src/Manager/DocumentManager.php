@@ -1070,7 +1070,10 @@ class documentcore
 			// We check relationship fields as well
 			if (!empty($this->ruleRelationships)) {
 				foreach ($this->ruleRelationships as $ruleRelationship) {
-					if ($history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]){
+					if (
+							$ruleRelationship['field_name_target'] != 'Myddleware_element_id'	// No check change on field Myddleware_element_id
+						AND $history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
+					){
 						return false;
 					}
 				}
