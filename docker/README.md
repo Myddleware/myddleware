@@ -22,8 +22,8 @@ make setup
 make prod
 ```
 
-Visit the following page and follow the instructions
+Visit the following page than login with username `admin` and password `secret`
 
 - <http://localhost:30080>
 
-If you run Myddleware in a remote machine use instad of `localhost` the public IP address.
+If you run Myddleware in a remote machine use instead of `localhost` use the public IP address.
