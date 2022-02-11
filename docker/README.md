@@ -2,7 +2,15 @@
 
 > This is work in progress documentation. Ignore this Pull-request at this moment, it is just to test branch synchronization.
 
-## Use Docker a stand-alone production environment
+## Requirements
+
+To work with Docker on this project you need to have the following:
+
+- GNU Make (to process Makefile)
+- Docker (at least version 20)
+- Docker Compose (at least version 1.27)
+
+## Use Docker as stand-alone production environment
 
 Run the following commands
 
@@ -18,4 +26,4 @@ Visit the following page and follow the instructions
 
 - <http://localhost:30080>
 
-
+If you run Myddleware in a remote machine use instad of `localhost` the public IP address.
