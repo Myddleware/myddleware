@@ -1,4 +1,6 @@
 /.idea/
 /.vscode/
 /docker/
+!/docker/etc/crontab
+!/docker/script/myddleware-*.sh
 /var/
