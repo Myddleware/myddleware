@@ -10,7 +10,7 @@ To work with Docker on this project you need to have the following:
 - Docker (at least version 20)
 - Docker Compose (at least version 1.27)
 
-## Use Docker as stand-alone production environment
+## Use Docker as a stand-alone production environment
 
 Run the following commands
 
