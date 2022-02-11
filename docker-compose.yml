@@ -40,22 +40,22 @@ services:
       - mysql
     restart: always
 
-#  backup:
-#    image: databack/mysql-backup
-#    environment:
-#      - DB_SERVER=mysql
-#      - DB_USER=root
-#      - DB_PASS=secret
-#      - DB_NAMES=myddleware
-#      - DB_DUMP_TARGET=${backup_target}
-#      - DB_DUMP_FREQ=1440
-#      - DB_DUMP_BEGIN=2300
-#      - AWS_DEFAULT_REGION=eu-west-1
-#      - AWS_ACCESS_KEY_ID=${aws_access_key_id}
-#      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
-#    volumes:
-#      - ./.temp/mysql-backup:/tmp
-#    restart: always
+  backup:
+    image: databack/mysql-backup
+    environment:
+      - DB_SERVER=mysql
+      - DB_USER=root
+      - DB_PASS=secret
+      - DB_NAMES=myddleware
+      - DB_DUMP_TARGET=${backup_target}
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=2300
+      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+    volumes:
+      - ./.temp/mysql-backup:/tmp
+    restart: always
 
 #  filebrowser:
 #    image: filebrowser/filebrowser
@@ -70,18 +70,18 @@ services:
 #      - ./.filebrowser.json:/.filebrowser.json
 #    restart: always
 
-#  vpn:
-#    image: javanile/openvpn:2.4
-#    tty: true
-#    stdin_open: true
-#    environment:
-#      - EXTERNAL_PORT=${openvpn_port:-1194}
-#      - EXTERNAL_ADDRESS=${external_address}
-#      - CLIENT_FORWARD=${vpn_client_forward}
-#    ports:
-#      - ${openvpn_port:-1194}:1194/udp
-#    cap_add:
-#      - NET_ADMIN
-#    volumes:
-#      - ./var/openvpn:/etc/openvpn
-#    restart: always
+  vpn:
+    image: javanile/openvpn:2.4
+    tty: true
+    stdin_open: true
+    environment:
+      - EXTERNAL_PORT=${openvpn_port:-1194}
+      - EXTERNAL_ADDRESS=${external_address:-}
+      - CLIENT_FORWARD=${vpn_client_forward:-}
+    ports:
+      - ${openvpn_port:-1194}:1194/udp
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./docker/etc/openvpn:/etc/openvpn
+    restart: always

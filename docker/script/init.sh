@@ -18,10 +18,14 @@
 
 ## Initialize environment
 echo "Initialize environment"
-[ ! -f .env.local ] && cp docker/env/local.init .env.local
-chmod 777 .env.local
-
-#APP_SECRET=069d068b2f7ff586bc30f3d35e4a8596
+if [ ! -f .env.local ]; then
+  cp docker/env/local.init .env.local
+  php -r 'echo "APP_SECRET=".md5(microtime());' >> .env.local
+fi
+if [ ! -f .env.docker ]; then
+  cp docker/env/docker.init .env.docker
+fi
+chmod 777 .env.local .env.docker
 
 ## Fix files permissions
 [ -d var/log ] && chmod 777 -R var/log || true
