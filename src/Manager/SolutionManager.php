@@ -25,6 +25,7 @@
 
 namespace App\Manager;
 
+use App\Solutions\airtable;
 use App\Solutions\bittle;
 use App\Solutions\cirrusshield;
 use App\Solutions\dolist;
@@ -98,7 +99,8 @@ class SolutionManager
         prestashop $prestashop,
         postgresql $postgresql,
         sugarcrm $sugarcrm,
-        salesforce $salesforce
+        salesforce $salesforce,
+        airtable $airtable
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -128,6 +130,7 @@ class SolutionManager
             'postgresql' => $postgresql,
             'sugarcrm' => $sugarcrm,
             'salesforce' => $salesforce,
+            'airtable' => $airtable,
         ];
     }
 
