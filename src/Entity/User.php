@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
@@ -30,6 +30,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Serializable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User
@@ -125,6 +126,12 @@ class User implements UserInterface, Serializable
     protected $roles;
 
     /**
+     * @Assert\Timezone
+     * @ORM\Column(name="timezone", type="string")
+     */
+    protected $timezone;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -179,6 +186,7 @@ class User implements UserInterface, Serializable
             $this->id,
             $this->email,
             $this->emailCanonical,
+            $this->timezone,
         ]);
     }
 
@@ -207,7 +215,8 @@ class User implements UserInterface, Serializable
             $this->enabled,
             $this->id,
             $this->email,
-            $this->emailCanonical
+            $this->emailCanonical,
+            $this->timezone
             ] = $data;
     }
 
@@ -306,6 +315,14 @@ class User implements UserInterface, Serializable
         return array_unique($roles);
     }
 
+     /**
+     * {@inheritdoc}
+     */
+    public function getTimezone()
+    {
+
+        return $this->timezone;
+    }
     /**
      * {@inheritdoc}
      */
@@ -520,6 +537,16 @@ class User implements UserInterface, Serializable
 
         return $this;
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function setTimezone(string $timezone='UTC')
+    {
+        $this->timezone = $timezone;
+
+        return $this;
+    }
 
     /**
      * @return string
@@ -527,5 +554,5 @@ class User implements UserInterface, Serializable
     public function __toString()
     {
         return (string) $this->getUsername();
-    }
+    }  
 }

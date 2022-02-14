@@ -51,13 +51,15 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'ringcentral',		'active' => 0, 'source' => 1, 'target' => 0],
         ['name' => 'cirrusshield',		'active' => 0, 'source' => 1, 'target' => 1],
         ['name' => 'zuora',			    'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'hubspot',			'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'hubspot',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'erpnext',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mautic',			'active' => 0, 'source' => 0, 'target' => 1],
         ['name' => 'facebook',			'active' => 0, 'source' => 1, 'target' => 0],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'wooeventmanager',	'active' => 0, 'source' => 1, 'target' => 1],
         ['name' => 'wordpress',		    'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'postgresql',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
     ];
 

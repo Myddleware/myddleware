@@ -119,6 +119,7 @@ create_rule:
             parent: "Relation parent : fusion de plusieurs documents"
             record_id: ID enregistrement
             yes: Oui
+            behavior: Comportement
         params:
             duplicate: Champs pour éviter les doublons
             sync: Synchronisation bidirectionnelle
@@ -137,6 +138,11 @@ filter:
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules
     notin: n’est pas compris dans le tableau suivant séparé par des points virgules
+
+behavior_filters:
+    error_messing: Erreur si manquant
+    skip_empty: Ignorer si vide
+    skip_empty_wrong: Ignorer si vide ou faux
             
 view_rule:
     action:
@@ -146,6 +152,7 @@ view_rule:
         confirm_exec_error: Souhaitez-vous relancer tous les documents en erreur ?
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
+        duplic_rule: Dupliquer la règle
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
@@ -479,7 +486,7 @@ function:
         date:
             date: Formate une date/heure locale
             microtime: Retourne le timestamp UNIX actuel avec les microsecondes
-            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le timezone de la date passée en premier paramètre
+            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le fuseau horaire de la date passée en premier paramètre
             changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convertit la date passée en premier paramètre dans le format passé en deuxième paramètre
 
 solution:
@@ -626,6 +633,7 @@ breadcrumb:
 menu_user:
     account: Mon compte.
     jobscheduler: Planificateur de tâche
+    crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration smtp
     logout: Déconnexion
     
@@ -668,7 +676,8 @@ help:
                 Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle. 
                 Par exemple, pour une application CRM, vous pouvez dé-doublonner tous les contacts par leur mail. Ainsi Myddleware ira vérifier si l'enregistrement existe déjà dans votre solution cible avant de le créer. S'il n'existe pas, Myddleware le créera sinon il ne fera que le mettre à jour.
                 Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.                     
-
+        duplicate: >
+                Sur cette page, vous avez la possibilité de dupliquer une de vos règles en modifiant le nom et les connecteurs.
 session:
     task:
         msglink: Vous venez de lancer une nouvelle tâche. Vous pouvez vous rendre sur la page de cette tâche en cliquant sur ce lien
@@ -717,7 +726,7 @@ email_alert:
 
         Bien cordialement,
 jobscheduler:
-    command: Comamande
+    command: Commande
     date_created: Date création
     active: Active
     list: Liste
@@ -725,7 +734,7 @@ jobscheduler:
     period: Période
     job_order: Ordre job
     date_modified: Date modifié
-    create_by : crée par
+    create_by : créé par
     modified_by : modifié par
     paramName1 : Paramètre 1
     paramValue1 : Paramètre valeur 1
@@ -828,4 +837,28 @@ install:
     php_version_not_found: ATTENTION ! Impossible de trouver votre version de PHP
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
+    note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
+
+crontab:
+    title: Planificateur de travaux avec crontab
+    title_cron: Crontab
+    description_cron: Planifiez vos tâches Myddleware en créant votre crontab
+    command: Commande
+    period: Périodes
+    arguments: Arguments
+    description: Description
+    running: Instance en cours
+    max_instance: Instance max
+    number: Nombres
+    success: Votre calendrier des tâches a bien été créé 
+    incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
+    create: Créer crontab
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware 
+
+duplicate_rule:
+    duplicate: Dupliquer
+    cancel: Annuler
+    field: Champs
+    current_rule: règle actuelle
+    new_rule: Nouvelle règle
+    success_duplicate: Votre règle a été bien dupliquée

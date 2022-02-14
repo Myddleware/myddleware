@@ -44,6 +44,7 @@
 				<td class="title">{{'create_rule.step3.relation.source'|trans}}</td>
 				<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 				<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
+				<td class="title">{{'create_rule.step3.relation.behavior'|trans}}</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -68,6 +69,11 @@
 							</svg>
 						{% endif %}		
 						<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
+					</td>
+					<td>
+						<select class="form-control"  name="">
+			 				{{ behaviorFilters | raw }}
+						</select>
 					</td>
 				</tr>
 			{% endfor %}
@@ -102,11 +108,17 @@
 					<td class="arrow"><img width="20px" src="{{ asset('build/images/template/') }}arrow-mapping.png" alt="mapping" /></td>
 					<td>
 						<select class="parent_search_field" id="parent_search_field_{{ i }}" name="">
-							{{ lst_parent_fields | raw }}
+			 				{{ lst_parent_fields | raw }}
+						</select>
+					</td>
+					<td>
+						<select class="form-control" name="">
+			 				{{ behaviorFilters | raw }}
 						</select>
 					</td>
 				</tr>
 			{% endfor %}
+				
 		</table>
 	{% endif %}
 

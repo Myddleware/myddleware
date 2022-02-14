@@ -11,9 +11,13 @@
 
 namespace App\Form\Type;
 
+use DateTimeZone;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeZoneToStringTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\IntlTimeZoneToStringTransformer;
 
 class ProfileFormType extends AbstractType
 {
@@ -23,7 +27,8 @@ class ProfileFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('username', null, ['label' => 'form.username'])
-            ->add('email', EmailType::class, ['label' => 'form.email']);
+            ->add('email', EmailType::class, ['label' => 'form.email'])
+            ->add('timezone', TimezoneType::class);
     }
 
     /**

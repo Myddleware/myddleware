@@ -37,12 +37,12 @@ class FormulaManager
     private $path = "App\Manager\FormulaFunctionManager::";
 
     public $parse = [];
-    public $functions;
+    public $formulaFunctionManager;
 
     public function __construct(FormulaFunctionManager $formulaFunctionManager)
     {
         $this->parse['error'] = 0; // Erreur par défaut
-        $this->functions = $formulaFunctionManager;
+        $this->formulaFunctionManager = $formulaFunctionManager;
     }
 
     public function getNamespace()
@@ -154,7 +154,7 @@ class FormulaManager
     private function secureFunction()
     {
         // Récupère le chemin des fonctions de myddlewareFormulaFunctions.php
-        $pathFunctions = $this->functions->getPathFunctions();
+        $pathFunctions = $this->formulaFunctionManager->getPathFunctions();
 
         // array("pow","exp","abs","sin","cos","tan"); MATHS
         $array = ['mb_strtolower', 'trim', 'ltrim', 'rtrim', 'mb_strtoupper', 'round', 'ceil', 'abs', 'mb_substr', 'str_replace', 'preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode', 'html_entity_decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'json_decode', 'json_encode'];
@@ -219,13 +219,7 @@ class FormulaManager
         }
 
         // str_replace sur toutes les fonctions de myddlewareFormulaFunctions.php
-        $names = $this->functions->getNamesFunctions();
-        if (count($names) > 0) {
-            foreach ($names as $name) {
-                $string = str_replace($name, $this->path.$name, $string);
-            }
-        }
-
+        $string = $this->formulaFunctionManager->addPathFunctions($string);
         $this->parse['formuleConvert'] = $string;
     }
 
@@ -260,7 +254,7 @@ class FormulaManager
     {
         if (count($tabListe) > 0) {
             foreach ($tabListe as $l) {
-                if (preg_match('#[^[:alnum:]_]#u', $l) || $this->accent($l)) {
+                if (preg_match('#[^[:alnum:]_.]#u', $l) || $this->accent($l)) {
                     ++$error;
                 }
             }

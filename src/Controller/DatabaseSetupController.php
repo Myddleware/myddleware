@@ -128,8 +128,10 @@ class DatabaseSetupController extends AbstractController
                 // add Symfony secret to .env.local 
                 $appSecret = 'APP_SECRET='.$database->getSecret();
                 // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
-    
+
+                $ok = file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+
+
                 // allow to proceed to next step
                 $submitted = true;
 

@@ -25,6 +25,7 @@
 
 namespace App\Manager;
 
+use App\Solutions\airtable;
 use App\Solutions\bittle;
 use App\Solutions\cirrusshield;
 use App\Solutions\dolist;
@@ -41,6 +42,7 @@ use App\Solutions\microsoftsql;
 use App\Solutions\moodle;
 use App\Solutions\mysql;
 use App\Solutions\oracledb;
+use App\Solutions\postgresql;
 use App\Solutions\prestashop;
 use App\Solutions\ringcentral;
 use App\Solutions\sage50;
@@ -96,8 +98,10 @@ class SolutionManager
         eventbrite $eventbrite,
         mailchimp $mailchimp,
         prestashop $prestashop,
+        postgresql $postgresql,
         sugarcrm $sugarcrm,
         salesforce $salesforce,
+        airtable $airtable,
         sendinblue $sendinblue
     ) {
         $this->classes = [
@@ -125,8 +129,10 @@ class SolutionManager
             'eventbrite' => $eventbrite,
             'mailchimp' => $mailchimp,
             'prestashop' => $prestashop,
+            'postgresql' => $postgresql,
             'sugarcrm' => $sugarcrm,
             'salesforce' => $salesforce,
+            'airtable' => $airtable,
             'sendinblue' => $sendinblue,
         ];
     }

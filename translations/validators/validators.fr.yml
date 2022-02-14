@@ -1,0 +1,3 @@
+cronjob:
+    period:
+        not_blank: Votre période contient une ou plusieurs erreurs de syntaxe

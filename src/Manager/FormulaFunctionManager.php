@@ -26,20 +26,20 @@
 namespace App\Manager;
 
 /**
- * Class FormulaFunctionManager.
+ * Class formulafunctioncore.
  *
  * @package App\Manager
  *
  *
  */
-class FormulaFunctionManager
+class formulafunctioncore
 {
-    private $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'getValueFromArray'];
+    protected $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
 
-    private $path = "App\Manager\FormulaFunctionManager::";
+    protected $path = "App\Manager\FormulaFunctionManager::";
 
     public function getNamesFunctions()
-    {
+    {	
         return $this->names;
     }
 
@@ -50,9 +50,19 @@ class FormulaFunctionManager
         foreach ($this->names as $name) {
             $return[] = $this->path.$name;
         }
-
         return $return;
     }
+
+	public function addPathFunctions($formula)
+    {
+        if (!empty($this->names)) {
+            foreach ($this->names as $name) {
+                $formula = str_replace($name, $this->path.$name, $formula);
+            }
+        }
+        return $formula;
+    }
+
 
     public static function changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone)
     {
@@ -75,15 +85,36 @@ class FormulaFunctionManager
         return date_format($date, $newFormat);
     }
 
-    public static function changeValue($var, $arrayKeyToValue)
+    public static function changeValue($var, $arrayKeyToValue, $acceptNull = null)
     {
         // Transform string into an array
         $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
         if (in_array($var, array_keys($arrayKeyToValue))) {
             $var = $arrayKeyToValue[$var];
-
             return $var;
         }
+		if (!empty($acceptNull)) {
+			return '';
+		}
+    }
+
+    public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
+    {			
+		// Transform $var into array
+		$return = '';
+		$arrayVar = explode($delimiter, $var);
+		if (!empty($arrayVar)) {
+			$arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
+			foreach($arrayVar as $varValue) {
+				// Transform string into an array					
+				if (!empty($arrayKeyToValue[$varValue])) {
+					// Prepare return value
+					$return .= $arrayKeyToValue[$varValue].$delimiter;						
+				}
+			}		
+			$return = rtrim($return, $delimiter);			
+			return $return;
+		}
     }
 
     public static function getValueFromArray($key, $array)
@@ -94,3 +125,6 @@ class FormulaFunctionManager
     }
 }
 
+class FormulaFunctionManager extends formulafunctioncore {
+	
+}

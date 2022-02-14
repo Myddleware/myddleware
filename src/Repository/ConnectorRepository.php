@@ -46,10 +46,12 @@ class ConnectorRepository extends ServiceEntityRepository
     public function findAllConnectorByUser($id, $type)
     {
         $qb = $this->createQueryBuilder('c');
-        $qb->select('c.id as id_connector, c.label,s.name')
+        $qb->select('c.id as id_connector, c.name')
          ->leftJoin('c.solution', 's')
-         ->where('c.createdBy = :user_id AND c.deleted AND s.active = 1 AND s.'.$type.' = 1 ');
-        // ->setParameter('user_id', $id);
+         ->where('c.createdBy = :user_id')
+         ->andWhere('s.'.$type.' = 1')
+         ->andWhere('s.active = 1')
+         ->setParameter('user_id', $id);
 
         return $qb->getQuery()
                   ->getResult();

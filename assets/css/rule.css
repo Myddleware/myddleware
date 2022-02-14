@@ -190,14 +190,16 @@
     border: 0px;
     color: #454539;
     font-weight: bold;
-    text-align: center;		
-    height: 40px;
+    text-align: center;
     line-height: 2.5em;
     word-wrap: break-word;
 }
 
 #cible .ch, #cible .placeholder {
 	list-style:none;
+	font-weight: bold!important;
+	background-color: #FFFFFF!important; 
+	cursor: pointer!important;
 }
 
 #cible .ch {

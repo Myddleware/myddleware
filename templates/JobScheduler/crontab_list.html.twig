@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block body %}
+    <div id="fd-title-small" class="left">
+        <p>{{ 'jobscheduler.total'|trans }}<p><span class="nb">{{ entity | length }}</span>
+    </div>
+    <div class="clr"></div>
+    <div class="text-center">
+        <h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
+        <p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
+    </div>
+
+     <div class="container-fluid p-3">
+        <div id="jobsceduler_table">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %} 
+            <table class="table table-sm table-striped mt-5">
+                <thead>
+                    <th scope="col" class="title"><label>{{ 'crontab.command'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.period'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.arguments'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.description'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.running'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.max_instance'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.number'|trans }}</label></th>
+                </thead>
+                <tbody>
+                {% for value in entity %}
+                <tr>                    
+                    <td class="value">{{ value.command }}</td>
+                    <td class="value">{{ value.period }}</td>
+                    <td class="value">{{ value.arguments }}</td>
+                    <td class="value">{{ value.description  }}</td>
+                    <td class="value">{{ value.runningInstances }}</td>
+                    <td class="value">{{ value.maxInstances }}</td>
+                    <td class="value">{{ value.number }}</td>
+                </tr> 
+                {% endfor %}
+                 <div class="col-md-6">
+                    <a href="{{path('crontab')}}" class="btn btn-primary m-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>{{ 'crontab.create'|trans }}
+                    </a>
+                </div>
+                </tbody>
+            </table>
+        </div>
+        <div class="row text-center">
+            <p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
+        </div>
+    </div>
+{% endblock %}

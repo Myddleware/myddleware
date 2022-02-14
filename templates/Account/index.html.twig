@@ -70,6 +70,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                                 {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
                             </div>
                         </div>
+                         
+                        <div class="input-group mb-4">
+                        <label for="command" class="col-form-label input-group-text">Time zone</label>
+                            <div>
+                                {{ form_widget( form.timezone, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.timezone, { 'attr': {'class': 'form-control'} }) }}
+                            </div>
+                        </div>
                         <button type="submit" id="save-account-details" class="btn btn-success mt-4">{{ 'view_connector.btn.save'|trans }}</button>
                         {{ form_end(form) }}
                     </li>

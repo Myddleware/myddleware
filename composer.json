@@ -14,13 +14,13 @@
   "prefer-stable": true,
     "require": {
         "php": ">=7.4",
-        "symfony/symfony": "^4.4.30",
+        "symfony/symfony": "^4.4.37",
         "symfony/yaml": "4.4.*",
         "symfony/form": "4.4.*",
         "symfony/console": "4.4.*",
         "symfony/debug-bundle": "4.4.*",
         "symfony/dotenv": "4.4.*",
-        "symfony/flex": "^1.1",
+        "symfony/flex": "^1.18",
         "symfony/framework-bundle": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
         "doctrine/doctrine-bundle": "^2.3",
@@ -40,8 +40,6 @@
         "lexik/jwt-authentication-bundle": "^2.6",
         "mautic/api-library": "^2.15",
         "javanile/vtiger-client": "^0.0.13",
-        "facebook/graph-sdk" : "^5.7",
-        "facebook/php-ads-sdk": "2.8.*",
         "sugarcrm/rest-php-client": "^1.4.5",
         "automattic/woocommerce": "^3.0",
         "ext-json": "*",
@@ -77,6 +75,8 @@
     "prestashop/prestashop-webservice-lib": "dev-master",
     "symfony/mailer": "4.4.*",
     "doctrine/cache": "1.11.3",
+    "cron/cron-bundle": "^2.10",
+    "shapecode/cron-bundle": "^5.0"
     "sendinblue/api-v3-sdk": "7.4.3"
     },
     "repositories": [
@@ -125,6 +125,10 @@
     }
     },
     "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": false,
+      "symfony/flex": false
+    }
 
 
     },
