@@ -77,6 +77,7 @@
     "doctrine/cache": "1.11.3",
     "cron/cron-bundle": "^2.10",
     "shapecode/cron-bundle": "^5.0"
+    "sendinblue/api-v3-sdk": "7.4.3"
     },
     "repositories": [
         {
