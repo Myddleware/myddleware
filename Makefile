@@ -7,8 +7,7 @@ clean:
 	@docker-compose run --rm --no-deps myddleware bash docker/script/clean.sh
 
 wait:
-	@docker-compose up -d mysql
-	@docker-compose exec mysql sh -c "while ! (mysqladmin ping -uroot > /dev/null 2>&1); do sleep 1; done"
+	@docker-compose run --rm myddleware bash -c "while ! (mysqladmin ping -uroot -hmysql > /dev/null 2>&1); do sleep 1; done"
 
 clean-cache:
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
