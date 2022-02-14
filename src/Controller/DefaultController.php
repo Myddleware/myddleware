@@ -677,11 +677,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 // Get the rule reference
                 $param['date_ref'] = $rule->getParamByName('datereference')->getValue();
                 // Get the rule limit
-                $limitParam = $rule->getParamByName('limit')->getValue;
+                $limitParam = $rule->getParamByName('limit');
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
-                }
-
+                }                
                 // Get the other rule params
                 $connectorParams = $rule->getParams();
                 foreach ($connectorParams as $connectorParam) {
@@ -1852,9 +1851,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 //Behavior filters
                 $behaviorFilters =[
-                    'Error if missing' => $this->translator->trans('behavior_filters.error_messing'),
-                    'Skip if empty'    => $this->translator->trans('behavior_filters.skip_empty'),
-                    'Skip if empty or wrong' => $this->translator->trans('behavior_filters.skip_empty_wrong'),
+                    'Error if missing' => $this->translator->trans('behavior_filters.error_missing'),
+                    'Error if empty' => $this->translator->trans('behavior_filters.error_empty'),
                 ];
 
                 // paramètres de la règle
@@ -2008,7 +2006,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['behaviorFilters'] = ToolsManager::composeListHtml($result['behaviorFilters']);
+                $result['behaviorFilters'] = ToolsManager::composeListHtmlCheckbox($result['behaviorFilters']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2290,9 +2288,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                 // date de référence change en fonction create ou update
                                 $oneRuleParam->setValue($date_reference);  
                                 // Limit change according to create or update   
-                            } else if('limit' == $key){
+                            } 
+                            else if('limit' == $key){
                                 $oneRuleParam->setValue($limit);
-                            }else {
+                            }
+                            else {
                                 $oneRuleParam->setValue($value);
                             }
                         }

@@ -71,9 +71,7 @@
 						<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 					</td>
 					<td>
-						<select class="form-control"  name="">
-			 				{{ behaviorFilters | raw }}
-						</select>
+						{{ behaviorFilters | raw }}
 					</td>
 				</tr>
 			{% endfor %}
@@ -112,9 +110,7 @@
 						</select>
 					</td>
 					<td>
-						<select class="form-control" name="">
-			 				{{ behaviorFilters | raw }}
-						</select>
+						{{ behaviorFilters | raw }}
 					</td>
 				</tr>
 			{% endfor %}

@@ -140,9 +140,8 @@ filter:
     notin: n’est pas compris dans le tableau suivant séparé par des points virgules
 
 behavior_filters:
-    error_messing: Erreur si manquant
-    skip_empty: Ignorer si vide
-    skip_empty_wrong: Ignorer si vide ou faux
+    error_missing: Erreur si manquant
+    error_empty: Erreur si vide
             
 view_rule:
     action:
