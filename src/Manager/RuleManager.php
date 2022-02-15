@@ -79,15 +79,15 @@ class rulecore
 	/**
 	 * @var EntityManagerInterface
 	 */
-	private $entityManager;
+	protected $entityManager;
 	/**
 	 * @var ParameterBagInterface
 	 */
-	private $parameterBagInterface;
+	protected $parameterBagInterface;
 	/**
 	 * @var documentManager
 	 */
-	private $documentManager;
+	protected $documentManager;
 	/**
 	 * @var string
 	 */
@@ -107,7 +107,7 @@ class rulecore
 	/**
 	 * @var SolutionManager
 	 */
-	private $solutionManager;
+	protected $solutionManager;
 	/**
 	 * @var DocumentRepository
 	 */
@@ -124,7 +124,7 @@ class rulecore
 	/**
 	 * @var FormulaManager
 	 */
-	private $formulaManager;
+	protected $formulaManager;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -220,8 +220,7 @@ class rulecore
 				// In case we search a specific record, we set an default value in date_ref because it is a requiered parameter in the read function
 				$read['date_ref'] = '1970-01-01 00:00:00';	
 				$read['call_type'] = 'read';
-				$read['jobId'] = $this->jobId;					
-			
+				$read['jobId'] = $this->jobId;
 				$dataSource = $this->solutionSource->readData($read);			;							
 				if (!empty($dataSource['error'])) {
 					throw new \Exception ('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
@@ -507,7 +506,7 @@ class rulecore
 		// si champs vide
 		if(!empty($read['fields'])) {
 			$connect = $this->connexionSolution('source');
-			if ($connect === true) {											
+			if ($connect === true) {
 				$this->dataSource = $this->solutionSource->readData($read);				
 				// If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
 				if (
@@ -1648,6 +1647,7 @@ class rulecore
 	// Permet de charger tous les champs de la règle
 	protected function setRuleField() {	
 		try {	
+			$this->sourceFields = array();
 			// Lecture des champs de la règle
 			$sqlFields = "SELECT * 
 							FROM rulefield 
@@ -1655,8 +1655,7 @@ class rulecore
 			$stmt = $this->connection->prepare($sqlFields);
 			$stmt->bindValue(":ruleId", $this->ruleId);
 		    $stmt->execute();	   				
-			$this->ruleFields = $stmt->fetchAll();
-		
+			$this->ruleFields = $stmt->fetchAll();	
 			if($this->ruleFields) {
 				foreach ($this->ruleFields as $RuleField) { 
 					// Plusieurs champs source peuvent être utilisé pour un seul champ cible

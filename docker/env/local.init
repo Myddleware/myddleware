@@ -1,0 +1,3 @@
+DATABASE_URL="mysql://myddleware:secret@mysql:3306/myddleware?serverVersion=5.7"
+APP_ENV=prod
+APP_DEBUG=false
