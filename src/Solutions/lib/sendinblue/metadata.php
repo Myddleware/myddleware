@@ -38,6 +38,14 @@ $moduleFields = [
         'blocked'      => ['label' => 'Blocked', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'invalid'      => ['label' => 'Invalid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'unsubscribed' => ['label' => 'Unsubscribed', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0] 
+    ],
+    'transactionalEmails'=>[
+        'email'        => ['label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'subject'      => ['label' => 'Subject', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'templateId'   => ['label' => 'TemplateId', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'messageId'    => ['label' => 'MessageId', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'uuid'         => ['label' => 'Uuid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'date'         => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ]
 ];
 
