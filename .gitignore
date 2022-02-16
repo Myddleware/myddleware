@@ -4,6 +4,7 @@
 # Cache, session files and logs (Symfony3)
 /var/cache/*
 /var/log/*
+/var/logs/*
 /var/sessions/*
 !var/cache/.gitkeep
 !var/logs/.gitkeep
@@ -97,4 +98,5 @@ composer.phar
 /docker/var/
 !/docker/var/*/.gitkeep
 .env.docker
+/docker/etc/openvpn/*
 ##< Docker ##
