@@ -2,7 +2,6 @@
 
 > Welcome to the Myddleware community and thank you for joining us!
 
-
 ![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
 
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
