@@ -59,6 +59,7 @@ use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\zuora;
+use App\Solutions\sendinblue;
 use Exception;
 
 /**
@@ -100,6 +101,8 @@ class SolutionManager
         postgresql $postgresql,
         sugarcrm $sugarcrm,
         salesforce $salesforce,
+        airtable $airtable,
+        sendinblue $sendinblue,
         airtable $airtable
     ) {
         $this->classes = [
@@ -131,6 +134,7 @@ class SolutionManager
             'sugarcrm' => $sugarcrm,
             'salesforce' => $salesforce,
             'airtable' => $airtable,
+            'sendinblue' => $sendinblue,
         ];
     }
 

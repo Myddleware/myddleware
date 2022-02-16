@@ -341,6 +341,9 @@
     "sabre/event": {
         "version": "5.1.2"
     },
+    "sendinblue/api-v3-sdk": {
+        "version": "v7.4.3"
+    },
     "sensio/framework-extra-bundle": {
         "version": "5.2",
         "recipe": {
