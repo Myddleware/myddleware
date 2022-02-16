@@ -873,8 +873,9 @@ class solutioncore
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
 		// Target_id isn't used in create method
-		unset($data['target_id']);
-		
+		if (array_key_exists('target_id', $data)) {
+			unset($data['target_id']);
+		}
         return $data;
     }
 
