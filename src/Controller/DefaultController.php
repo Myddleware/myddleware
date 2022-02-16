@@ -2110,7 +2110,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->getInstanceBdd();
             $this->entityManager->getConnection()->beginTransaction();
             try {
-
                 /*
                  * get rule id in the params in regle.js. In creation, regleId = 0
                  */
@@ -2427,6 +2426,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'ruleName' => $nameRule,
                         'limit' => $limit,
                         'datereference' => $date_reference,
+                        'limit' => $limit,
                         'content' => $tab_new_rule,
                         'filters' => $request->request->get('filter'),
                         'relationships' => $relationshipsBeforeSave,

@@ -122,7 +122,7 @@ class TaskController extends AbstractController
 
          //Check the user timezone
          $timezone = $this->getUser()->getTimezone();
-         if ($timezone == '') {
+        if (empty($timezone)) {
             $timezone = 'UTC';
         }
         return $this->render('Task/list.html.twig', [

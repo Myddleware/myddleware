@@ -102,8 +102,7 @@ class SolutionManager
         sugarcrm $sugarcrm,
         salesforce $salesforce,
         airtable $airtable,
-        sendinblue $sendinblue,
-        airtable $airtable
+        sendinblue $sendinblue
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
