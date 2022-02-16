@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <div class=" mx-5 mt-5">
+                {{ form_start(edit_form, { 'action': path('crontab_update',{id : entity.id}) }) }}
+                <div class="input-group row">
+                    <label for="arguments" class="col-sm-2 col-form-label"> {{ form_label( edit_form.arguments) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.arguments) }}
+                    </div>
+                </div>
+                <div class="input-group row">
+                    <label for="description" class="col-sm-2 col-form-label"> {{ form_label( edit_form.description) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.description) }}
+                    </div>
+                </div>
+                <div class="input-group row">
+                    <label for="maxInstances" class="col-sm-2 col-form-label"> {{ form_label( edit_form.maxInstances) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.maxInstances) }}
+                    </div>
+                </div>
+                <div class="input-group row">
+                    <label for="number" class="col-sm-2 col-form-label"> {{ form_label( edit_form.number) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.number) }}
+                    </div>
+                </div>
+                <div class="input-group row">
+                    <label for="period" class="col-sm-2 col-form-label"> {{ form_label( edit_form.period) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.period) }}
+                        {{ form_errors(edit_form.period)}}
+                    </div>
+                </div>
+                <div class="input-group row">
+                    <label for="enable" class="col-sm-2 col-form-label"> {{ form_label( edit_form.enable) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.enable) }}
+                    </div>
+                </div>
+                {{ form_rest(edit_form) }}
+                {{ form_end(edit_form) }}
+                <div class="mt-3">
+                    <a id="link_button" href="{{ path('jobscheduler_cron_list') }}">
+                        <button type="button" class="btn btn-secondary">
+                        {{ 'jobscheduler.cancel' | trans }}
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

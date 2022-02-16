@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block body %}
+<div class="p-5">
+    <div id="info" class='container'>
+        <div id="jobsceduler_table">
+            <table class="table table-light table-hover">
+                <tbody>
+                <tr>
+                    <td class="title"><label>Id</label></td>
+                    <td class="value">{{ entity.id }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'jobscheduler.date_created'|trans }}</label></td>
+                    <td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'jobscheduler.date_modified'|trans }}</label></td>
+                    <td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'crontab.command'|trans }}</label></td>
+                    <td class="value">{{ entity.command }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'crontab.arguments'|trans }}</label></td>
+                    <td class="value">{{ entity.arguments }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'crontab.description'|trans }}</label></td>
+                    <td class="value">{{ entity.description }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'crontab.running'|trans }}</label></td>>
+                    <td class="value">{{ entity.runningInstances }}</td>
+                </tr>                
+                <tr>
+                    <td class="title"><label>{{ 'crontab.max_instance'|trans }}</label></td>
+                    <td class="value">{{ entity.maxInstances }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'crontab.number'|trans }}</label></td>
+                    <td class="value">{{ entity.number }}</td>
+                </tr>
+                <tr>
+                    <td class="title"><label>{{ 'jobscheduler.active'|trans }}</label></td>
+                    <td class="value">{% if entity.enable %} true {% else %} false {% endif %}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
