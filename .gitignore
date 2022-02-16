@@ -90,3 +90,11 @@ yarn-error.log
 .platform.app.yaml
 composer.phar
 ##< old files & folders ##
+
+##> Docker ##
+/docker/tmp/
+!/docker/tmp/.gitkeep
+/docker/var/
+!/docker/var/*/.gitkeep
+.env.docker
+##< Docker ##
