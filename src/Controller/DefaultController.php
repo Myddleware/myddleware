@@ -2290,6 +2290,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                 $oneRuleParam->setValue($date_reference);  
                                 // Limit change according to create or update   
                             } else if('limit' == $key){
+								// Set default value 100 for limit
+								if (empty($limit)) {
+									$limit = 100;
+								}
                                 $oneRuleParam->setValue($limit);
                             }else {
                                 $oneRuleParam->setValue($value);
