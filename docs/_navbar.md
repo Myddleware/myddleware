@@ -1,5 +1,8 @@
 * [Home](/)
-* **Tests**
+* **Requirements**
   * [Test](testpage.md)
-* [Basic Usage](basic_usage.md)
-* [Developer's guide](dev_guide.md)
+* **Install Myddleware**
+  * [Another Test](anotherpage.md)
+  * [Setting up Database](database_install.md)
+  * [Register User](register.md)
+* **Creating a connector**

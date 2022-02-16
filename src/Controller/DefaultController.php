@@ -676,9 +676,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 // Get the rule reference
                 $param['date_ref'] = $rule->getParamByName('datereference')->getValue();
-
                 // Get the rule limit
-                $limitParam = $rule->getParamByName('limit');
+                $limitParam = $rule->getParamByName('limit')->getValue;
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
                 }
@@ -2245,9 +2244,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if ('datereference' == $ruleParam->getName()) {
                             $date_reference = $ruleParam->getValue();
                         }
-                        if ('limit' === $ruleParam->getName()){
+                        if('limit' === $ruleParam->getName()){
                             $limit = $ruleParam->getValue();
                         }
+					
                         if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
@@ -2287,17 +2287,18 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleParam->setName($key);
                             if ('datereference' == $key) {
                                 // date de référence change en fonction create ou update
-                                $oneRuleParam->setValue($date_reference);
-                            } else {
+                                $oneRuleParam->setValue($date_reference);  
+                                // Limit change according to create or update   
+                            } else if('limit' == $key){
+                                $oneRuleParam->setValue($limit);
+                            }else {
                                 $oneRuleParam->setValue($value);
                             }
                         }
-
                         // Save the parameter
                         if ('bidirectional' == $key) {
                             $bidirectional = $value;
                         }
-
                         $this->entityManager->persist($oneRuleParam);
                         $this->entityManager->flush();
                     }
@@ -2423,6 +2424,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $ruledata = json_encode(
                     [
                         'ruleName' => $nameRule,
+                        'limit' => $limit,
                         'datereference' => $date_reference,
                         'limit' => $limit,
                         'content' => $tab_new_rule,
@@ -2457,7 +2459,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                                     'ruleName' => $nameRule,
                                                     'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
                                                     'datereference' => $date_reference,
-                                                    'limit' => $limit,
+                                                    'limit' =>$limit,
                                                     'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
                                                     'content' => $tab_new_rule,
                                                     'relationships' => $relationshipsBeforeSave,

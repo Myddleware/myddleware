@@ -101,56 +101,6 @@ class JobSchedulerController extends AbstractController
         ]);
     }
 
-       /**
-     * New creates job scheduler with cron
-     * @Route("/crontab", name="crontab")
-     */
-    public function createActionWithCron(Request $request, TranslatorInterface $translator)
-    {
-          try {
-            $command ='';
-            $period =' */5 * * * *';
-            $entityCrontab = new CronJob($command, $period, $translator);
-            $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
-            $form = $this->createForm(JobSchedulerCronType::class, $entityCrontab);
-            $form->handleRequest($request);
-                if ($form->isSubmitted() && $form->isValid()) {      
-                    $entityCrontab->setDescription($form->getData()->getDescription());
-                    $entityCrontab->setArguments($form->getData()->getArguments());
-                    $entityCrontab->setMaxInstances($form->getData()->getMaxInstances());
-                    $entityCrontab->setNumber($form->getData()->getNumber());
-                    $entityCrontab->setPeriod($form->getData()->getPeriod());
-                    $this->entityManager->persist($entityCrontab);
-                    $this->entityManager->flush();
-                    $success = $translator->trans('crontab.success');
-                    $this->addFlash('success', $success);
-                    return $this->redirectToRoute('jobscheduler_cron_list');
-                } 
-                else {                         
-                    return $this->render('JobScheduler/crontab.html.twig', [
-                        'entity' => $entity,
-                        'form' => $form->createView(),
-                    ]);
-                }
-        } catch (Exception $e) {
-            $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
-            return $this->redirectToRoute('jobscheduler_cron_list');
-        }
-    }
-    
-    /**
-     * @Route("/crontab_list", name="jobscheduler_cron_list")
-     *
-     */
-    public function crontabList()
-    {
-        $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
-        return $this->render('JobScheduler/crontab_list.html.twig', [
-            'entity' => $entity,        
-        ]);
-    }
-
     /**
      * Creates a form to create a JobScheduler entity.
      *
@@ -349,5 +299,184 @@ class JobSchedulerController extends AbstractController
         }
 
         return $paramsCommand;
+    }
+
+    /**
+     * New creates job scheduler with cron
+     * @Route("/crontab", name="crontab")
+     */
+    public function createActionWithCron(Request $request, TranslatorInterface $translator)
+    {
+          try {
+            $command ='';
+            $period =' */5 * * * *';
+            $entityCrontab = new CronJob($command, $period, $translator);
+            $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+            $form = $this->createForm(JobSchedulerCronType::class, $entityCrontab);
+            $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {      
+                    $entityCrontab->setDescription($form->getData()->getDescription());
+                    $entityCrontab->setArguments($form->getData()->getArguments());
+                    $entityCrontab->setMaxInstances($form->getData()->getMaxInstances());
+                    $entityCrontab->setNumber($form->getData()->getNumber());
+                    $entityCrontab->setPeriod($form->getData()->getPeriod());
+                    $this->entityManager->persist($entityCrontab);
+                    $this->entityManager->flush();
+                    $success = $translator->trans('crontab.success');
+                    $this->addFlash('success', $success);
+                    return $this->redirectToRoute('jobscheduler_cron_list');
+                } 
+                else {                         
+                    return $this->render('JobScheduler/crontab.html.twig', [
+                        'entity' => $entity,
+                        'form' => $form->createView(),
+                    ]);
+                }
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
+    
+    /**
+     * @Route("/crontab_list", name="jobscheduler_cron_list")
+     *
+     */
+    public function crontabList()
+    {
+        $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+        return $this->render('JobScheduler/crontab_list.html.twig', [
+            'entity' => $entity,        
+        ]);
+    }
+
+    /**
+     * Deletes a Crontab entity.
+     *
+     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"GET", "DELETE"})
+     *
+     * @param mixed $id
+     */
+    public function deleteActionCrontab(Request $request, $id)
+    {
+        $id = $request->get('id');
+        $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+;
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Crontab entity.');
+        }
+
+        $this->entityManager->remove($entity);
+        $this->entityManager->flush();
+
+        return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+    }
+
+    /**
+     * Creates a form to delete a Crontab entity by id.
+     *
+     * @param mixed $id The entity id
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteFormCrontab($id)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('crontab_delete', ['id' => $id]))
+            ->setMethod('DELETE')
+            ->add('submit', SubmitType::class, ['label' => 'Delete'])
+            ->getForm();
+    }
+    
+     /**
+     * Displays a form to edit an existing Crontab entity.
+     *
+     * @Route("/{id}/edit_crontab", name="crontab_edit")
+     *
+     * @param mixed $id
+     */
+    public function editActionCrontab($id)
+    {
+        $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+
+        
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Crontab entity.');
+        }
+
+        $editForm = $this->createEditFormCrontab($entity);
+        $deleteFormCrontab = $this->createDeleteFormCrontab($id);
+
+        return $this->render('JobScheduler/edit_crontab.html.twig', [
+            'entity' => $entity,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteFormCrontab->createView(),
+        ]);
+    }
+     /**
+     * Creates a form to edit a Crontab entity.
+     *
+     * @param Cronjob $entity The entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditFormCrontab(CronJob $entity)
+    {
+        $form = $this->createForm(JobSchedulerCronType::class, $entity, [
+            'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
+            'method' => 'PUT',
+        ]);
+
+        return $form;
+    }
+
+    /**
+     * Edits an existing Crontab entity.
+     *
+     * @Route("/{id}/update_crontab", name="crontab_update", methods={"POST", "PUT"})
+     *
+     * @param mixed $id
+     */
+    public function updateActionCronatb(Request $request, $id)
+    {
+        $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Crontab entity.');
+        }
+        $editForm = $this->createEditFormCrontab($entity);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isValid()) {
+            $this->entityManager->flush();
+
+            return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+        }
+        return $this->render('JobScheduler/edit_crontab.html.twig', [
+            'entity' => $entity,
+            'edit_form' => $editForm->createView(),
+        ]);
+    }
+
+    /**
+     * Finds and displays a crontab entity.
+     *
+     * @Route("/{id}/show_crontab", name="crontab_show")
+     *
+     * @param mixed $id
+     */
+    public function showActionCrontab($id)
+    {
+        $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find crontab entity.');
+        }
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->entityManager->getRepository(User::class);
+
+        return $this->render('JobScheduler/show_crontab.html.twig', [
+            'entity' => $entity,
+        ]);
     }
 }
