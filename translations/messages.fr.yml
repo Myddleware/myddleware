@@ -712,9 +712,15 @@ email_notification:
     active_rule: "Vos règles actives dans Myddleware sont: "
     no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
     100_first_erros: "Voici les 100 premières erreurs: "
+    error_list: "Voici la liste des erreurs: "
     best_regards: Bien cordialement, 
     signature: L'équipe Myddleware
 email_alert:
+    introduction: "Une tâche a excédé la limite que vous avez défini : "
+    minute: minutes. 
+    job_start: La tâche a démarré à 
+    job_id: ". ID de cette tâche : "
+    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".
     subject: Alerte Myddleware
     body: |
         Bonjour,

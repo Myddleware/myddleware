@@ -700,7 +700,6 @@ messages:
     template:
         nb_rule: "Number of generated rules: "
         help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
-  
 email_notification:
     subject: Myddleware notification
     hello: Hi, 
@@ -710,17 +709,26 @@ email_notification:
     transfer_open: "- Documents still open:"
     active_rule: "Active rules: "
     no_active_rule: No active rule in Myddleware.
-    100_first_erros: "Here the 100 first errors: "
-    error_list: "Here the errors:"
+    100_first_erros: "Here are the 100 first errors: "
+    error_list: "Here are the errors:"
     best_regards: Best regards, 
-    signature: Myddleware team
+    signature: The Myddleware team
 email_alert:
     subject: Myddleware alert
     introduction: "A job is running beyond the limit you have set up : "
     minute: minutes. 
-    job_start: The job has begun at 
+    job_start: The job started at 
     job_id: ". ID of this job : "
-    recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
+    recommandation: Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".
+    body: |
+        Hello,
+        <p>A job is running beyond the limit you have set up : %min% minutes<br/>
+        The job started at  %begin%.<br/>
+        ID of this job : %id%<br/>
+        Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".<br/>
+        %base_uri%</p>
+
+        Kind regards,
 jobscheduler:
     command: Command
     date_created: Date created

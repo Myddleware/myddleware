@@ -197,7 +197,7 @@ class ManagementSMTPController extends AbstractController
                 throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
             }
             $textMail = $this->translator->trans('management_smtp_sendmail.textMail').chr(10);
-            $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification0signature');
+            $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification.signature');
             $message = (new \Swift_Message($subject));
             $message
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
