@@ -100,3 +100,8 @@ composer.phar
 .env.docker
 /docker/etc/openvpn/*
 ##< Docker ##
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
