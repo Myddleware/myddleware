@@ -76,8 +76,7 @@
     "symfony/mailer": "4.4.*",
     "doctrine/cache": "1.11.3",
     "cron/cron-bundle": "^2.10",
-    "shapecode/cron-bundle": "^5.0",
-    "phpunit/phpunit": "^9.5"
+    "shapecode/cron-bundle": "^5.0"
     },
     "repositories": [
         {
@@ -110,7 +109,9 @@
         "friendsofphp/php-cs-fixer": "^2.17",
         "phpstan/phpstan": "^0.12.64",
         "phpstan/phpstan-doctrine": "^0.12.26",
-        "phpstan/phpstan-symfony": "^0.12.12"
+        "phpstan/phpstan-symfony": "^0.12.12",
+    "phpunit/phpunit": "^9.5",
+    "symfony/test-pack": "^1.0"
     },
     "scripts": {
         "post-root-package-install": [
