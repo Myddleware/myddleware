@@ -633,7 +633,7 @@ menu_user:
     account: My account
     jobscheduler: Job scheduler
     crontab: Crontab
-    management_smtp: Configuration smtp
+    management_smtp: SMTP config
     logout: Logout
 
 help:
@@ -736,10 +736,10 @@ jobscheduler:
     list: List
     title: Jobscheduler
     period: Period
-    job_order: Order job
+    job_order: Job order
     date_modified: Date update
     total : Total
-    create_by : create by
+    create_by : created by
     modified_by : modified by
     paramName1 : Parameter 1
     paramValue1 : Parameter value 1
@@ -760,10 +760,10 @@ jobscheduler:
                 For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
                    */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
 management_smtp:
-    submit :  Save configuration SMTP
+    submit :  Save SMTP config
     cancel: Cancel
-    title : Management SMTP
-    description : 'You can configure email parameters here. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
+    title : SMTP Management
+    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
     sendtestmail: Send test mail
 
 management_smtp_sendmail:
@@ -776,7 +776,7 @@ login:
     user: Login
     pwd: Password
     connexion: Sign in
-    error_session: Error of session
+    error_session: Session error
     text_up_right: More information about Myddleware
     text_bottom_right: You will be redirected towards our site
     invalid_credentials: Invalid credentials
