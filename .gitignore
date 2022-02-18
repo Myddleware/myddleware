@@ -19,10 +19,6 @@
 # Parameters for Custom code
 /config/services_custom.yaml
 
-
-# Custom directory
-/src/Custom/*
-
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
