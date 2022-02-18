@@ -4,3 +4,7 @@
 !/docker/etc/crontab
 !/docker/script/myddleware-*.sh
 /var/
+Dockerfile
+docs/
+LICENSE
+README.md
