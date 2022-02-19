@@ -553,11 +553,15 @@ class rulecore
 			array_multisort($modified, SORT_DESC, $dataSourceValues);		
 			foreach ($dataSourceValues as $value) {
 				// Check if the previous record has the same date_modified than the current record
+				// Check only if offset isn't managed into the source application connector
 				if (
-						empty($previousValue)   // first call
-					OR (
-							!empty($previousValue['date_modified'])
-						AND $previousValue['date_modified'] == $value['date_modified']
+						empty($this->dataSource['ruleParams']['offset'])
+					AND (
+							empty($previousValue)   // first call
+						OR (
+								!empty($previousValue['date_modified'])
+							AND $previousValue['date_modified'] == $value['date_modified']
+						)
 					)
 				) {
 					// Remove the current item, it will be read in the next call
@@ -575,9 +579,13 @@ class rulecore
 			// If reference date hasn't changed => it means that we reached the read limit and there are only 2 reference dates in the records, 
 			//									=> we removed the most recent ones (to be sure to miss no records) and only one reference date remain
 			//									=> If we don't stop the process, Myddleware will always read the same records
+			// Check only if offset isn't managed into the source application connector
 			if (
-					empty($this->dataSource['values'])
-				OR $this->ruleParams['datereference'] == $this->dataSource['date_ref']
+					empty($this->dataSource['ruleParams']['offset'])
+				AND (	
+						empty($this->dataSource['values'])
+					OR $this->ruleParams['datereference'] == $this->dataSource['date_ref']
+				)
 			) {
 				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.');
 			}
