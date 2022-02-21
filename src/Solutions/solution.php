@@ -305,8 +305,8 @@ class solutioncore
 			$readResult = $this->read($param);
 			
 			// Save the new rule params into attribut dataSource
-			if (empty($readResult['ruleParams'])) {
-				$result['ruleParams'] = $readSource['ruleParams'];
+			if (!empty($readResult['ruleParams'])) {
+				$result['ruleParams'] = $readResult['ruleParams'];
 				unset($readResult['ruleParams']);
 			}
 			
@@ -361,7 +361,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }
+        }			
 		return $result;
     }
 
