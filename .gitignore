@@ -79,6 +79,7 @@ yarn-error.log
 
 ###> local env file ###
 .env.local
+.env.local.php
 ###< env file ###
 
 ##> vscode and other IDE parameters ## 

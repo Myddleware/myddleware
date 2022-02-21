@@ -6,16 +6,21 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class MailControllerTest extends WebTestCase
 {
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+    }
+
     public function testMailIsSentAndContentIsOk()
     {
-        $client = static::createClient();
 
         // enables the profiler for the next request (it does nothing if the profiler is not available)
-        $client->enableProfiler();
+        $this->client->enableProfiler();
 
-        $crawler = $client->request('POST', '/path/to/above/action');
+        $crawler = $this->client->request('POST', '/managementsmtp/readConfig');
 
-        $mailCollector = $client->getProfile()->getCollector('swiftmailer');
+        $mailCollector = $this->client->getProfile()->getCollector('swiftmailer');
 
         // checks that an email was sent
         $this->assertSame(1, $mailCollector->getMessageCount());
