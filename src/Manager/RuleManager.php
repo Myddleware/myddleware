@@ -1383,9 +1383,13 @@ class rulecore
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {
-						$send = $this->checkBeforeDelete($send);						
-						$send['data'] = $this->beforeDelete($send['data']);
-						$response = $this->solutionTarget->deleteData($send);
+						$send = $this->checkBeforeDelete($send);		
+						if (empty($send['error'])) {
+							$send['data'] = $this->beforeDelete($send['data']);
+							$response = $this->solutionTarget->deleteData($send);
+						} else {
+							$response['error'] = $send['error'];
+						}
 					}
 					else {
 						$response[$documentId] = false;
@@ -1474,7 +1478,7 @@ class rulecore
 			}
 			// Exception if all documents has been removed from data
 			if (empty($send['data'])) {
-				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
+				$send['error'] = 'Every deletion record haven been cancelled for the rule '.$this->ruleId.'. Nothing to send.';
 			}
 		}
 		return $send;
