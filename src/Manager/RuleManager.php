@@ -462,7 +462,7 @@ class rulecore
 	// Update/create rule parameter
 	protected function updateParams() {
 		if (!empty($this->dataSource['ruleParams'])) {
-			foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
+			foreach ($this->dataSource['ruleParams'] as $ruleParam) {		
 				// Search to check if the param already exists
 				 $paramEntity = $this->entityManager->getRepository(RuleParam::class)
 					   ->findOneBy( array(
@@ -472,10 +472,25 @@ class rulecore
 						);	
 				// Update or create the new param		
 				if (!empty($paramEntity)) {
+					if ($ruleParam['value'] != $paramEntity->getValue()) {
+						$paramAudit = new RuleParamAudit();
+						$paramAudit->setRuleParamId($paramEntity->getId());
+						$paramAudit->setDateModified(new \DateTime());
+						$paramAudit->setBefore($paramEntity->getValue());
+						$paramAudit->setAfter($ruleParam['value']);
+						$paramAudit->setJob($this->jobId);
+						$this->entityManager->persist($paramAudit);
+					}
 					$paramEntity->setValue( $ruleParam['value'] );
 				} else {
+					$rule = $this->entityManager->getRepository(Rule::class)
+											->findOneBy([
+												'id' => $this->ruleId,
+											]
+											);
+					
 					$paramEntity = new RuleParam();		
-					$paramEntity->setRule($this->ruleId);
+					$paramEntity->setRule($rule);
 					$paramEntity->setName($ruleParam['name']);
 					$paramEntity->setValue($ruleParam['value']); 						
 				}
