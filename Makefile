@@ -51,7 +51,7 @@ logs-rotate:
 debug:
 	@docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --remove-orphans
 
-prod: fix
+prod:
 	@docker-compose --env-file .env.docker up -d --remove-orphans
 
 start: prod
