@@ -9,3 +9,5 @@ framework:
     default_locale:  "%locale%"
     session:         ~
     fragments:       ~
+    php_errors:
+        log: true
