@@ -304,6 +304,12 @@ class solutioncore
 			// Read data
 			$readResult = $this->read($param);
 			
+			// Save the new rule params into attribut dataSource
+			if (!empty($readResult['ruleParams'])) {
+				$result['ruleParams'] = $readResult['ruleParams'];
+				unset($readResult['ruleParams']);
+			}
+			
 			// Format data
 			if (!empty($readResult)) {
 				// Get the name of the field used for the reference
@@ -355,7 +361,7 @@ class solutioncore
 			}
 		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }
+        }			
 		return $result;
     }
 
