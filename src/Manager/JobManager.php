@@ -368,12 +368,18 @@ class jobcore  {
 			// Création d'un fichier temporaire
 			$guid = uniqid();
 			$php = 'php';
+			$params = '';
+			
 			// If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
 			if ($param[0] == 'cancel') {
 				$param[] = 'Y';
 			}	
 			// Formatage des paramètres
-			$params = implode(' ',$param);
+			if (!empty($param)) {
+				foreach ($param as $valueParam) {
+					$params .= "'".$valueParam."' ";
+				}
+			}
 			// Get the php executable 
 			$php = $this->tools->getPhpVersion();
 				
@@ -384,7 +390,7 @@ class jobcore  {
 				$fs->mkdir(dirname($fileTmp));
 			} catch (IOException $e) {
 				throw new \Exception ("An error occured while creating your directory");
-			}
+			}		
 			exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &', $output);
 			$cpt = 0;
 			// Boucle tant que le fichier n'existe pas
