@@ -910,7 +910,7 @@ function btn_action_fct() {
 }
 
 function notification() {
-	notification = $.trim($('#zone_notification', '#notification').html());
+	var notification = $.trim($('#zone_notification', '#notification').html());
 
 	if (notification != '') {
 		$('#notification').fadeIn();

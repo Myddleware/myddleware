@@ -31,6 +31,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ManagementSMTPController extends AbstractController
 {
     const PATH = './../config/swiftmailer.yaml';
+    const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
+
     protected $tools;
     /**
      * @var LoggerInterface
@@ -128,7 +130,6 @@ class ManagementSMTPController extends AbstractController
         $form->get('encryption')->setData($value['swiftmailer']['encryption']);
         $form->get('user')->setData($value['swiftmailer']['user']);
         $form->get('password')->setData($value['swiftmailer']['password']);
-
         return $form;
     }
 
@@ -150,6 +151,33 @@ class ManagementSMTPController extends AbstractController
         ]];
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
+        $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
+    }
+
+    /**
+     * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file
+     *
+     * @return void
+     */
+    protected function parseYamlConfigToLocalEnv(array $swiftParams)
+    {
+        try {
+            $transport = isset($swiftParams['transport']) ?  $swiftParams['transport'] : null;
+            $host = isset($swiftParams['host']) ?  $swiftParams['host'] : null;
+            $port = isset($swiftParams['port'])  ?  $swiftParams['port'] : null;
+            $auth_mode =  isset($swiftParams['auth_mode'])   ?  $swiftParams['auth_mode']: null;
+            $encryption = isset( $swiftParams['encryption'])  ? $swiftParams['encryption'] : null;
+            $user =  isset($swiftParams['user'])  ?  $swiftParams['user'] : null;
+            $password =  isset($swiftParams['password'])  ?  $swiftParams['password'] : null;
+            $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
+            // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
+            // TODO: find a way to check whether the variable is already set & if so overwrite it
+            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND|LOCK_EX);
+        } catch (Exception $e) {
+            $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
+            $session = new Session();
+            $session->set('error', [$e]);
+        }
     }
 
     /**
@@ -197,7 +225,7 @@ class ManagementSMTPController extends AbstractController
                 throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
             }
             $textMail = $this->translator->trans('management_smtp_sendmail.textMail').chr(10);
-            $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification0signature');
+            $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification.signature');
             $message = (new \Swift_Message($subject));
             $message
                 ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
@@ -213,5 +241,24 @@ class ManagementSMTPController extends AbstractController
             $session = new Session();
             $session->set('error', [$error]);
         }
+    }
+
+    /**
+     * TODO: refactor so that the sendmail code from the above function
+     *  is decoupled from the config part 
+     *
+     * @return void
+     */
+    public function sendEmail($name, \Swift_Mailer $mailer)
+    {
+        $message = (new \Swift_Message('Hello Email'))
+            ->setFrom('send@example.com')
+            ->setTo('recipient@example.com')
+            ->setBody('You should see me from the profiler!')
+        ;
+    
+        $mailer->send($message);
+    
+        // ...
     }
 }
