@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Rule;
+use App\Entity\Solution;
 use App\Entity\Connector;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,7 +18,6 @@ class DuplicateRuleFormType extends AbstractType
 {
 
     private $entityManager;
-    private $rule;
 
     public function __construct(EntityManagerInterface $entityManager)
     {
@@ -26,36 +26,32 @@ class DuplicateRuleFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $solutionSource = $options['solutionSource'];
+        $solutionTarget = $options['solutionTarget'];
         $builder
             ->add('name', TextType::class)
             ->add('connectorSource', EntityType::class,[
                 'class' => Connector::class,
                 'choice_label'=> 'name',
                 'label' => 'Connector source',
-                //'required' => $options['require_due_date']
+                'query_builder' => function (EntityRepository $er) use($solutionTarget) {
+					return $er->createQueryBuilder('c')
+                        ->leftJoin('c.solution', 's')
+						 ->where('s.id = :solution_id')
+						 ->setParameter('solution_id', $solutionTarget);
+                },
             ])
              ->add('connectorTarget', EntityType::class,[
                  'class' => Connector::class,
                  'choice_label'=> 'name',
-                 'label' => 'Connector source',  
-                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('c')
-                        ->orderBy('c.name', 'ASC');
-
-                        // dump( $er->createQueryBuilder('c')
-                        // ->select('c.name')
-                        // ->innerJoin('c.solution','solution')
-                        // ->where('solution.id = 13')
-                        // ->getQuery()
-                        // ->getResult());  
+                 'label' => 'Connector source',                   
+                 'query_builder' => function (EntityRepository $er) use($solutionSource) {
+					return $er->createQueryBuilder('c')
+                        ->leftJoin('c.solution', 's')
+						 ->where('s.id = :solution_id')
+						 ->setParameter('solution_id', $solutionSource);
                 },
-                 //'options' => $options['require_due_date']
              ])
-            // ->add('connectorTarget', ('choices', ChoiceType::class, [
-            // 'choice_attr' => ChoiceList::attr($this, function (?Category $category) {
-            //     return $category ? ['data-uuid' => $category->getUuid()] : [];
-            // })
-
             ->add('save', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-outline-success mb-2'
@@ -65,9 +61,11 @@ class DuplicateRuleFormType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $resolver->setRequired('solutionTarget');
+        $resolver->setRequired('solutionSource');
+        $resolver->setAllowedTypes('solution', array(Solution::class, 'int'));
         $resolver->setDefaults([
             'data_class' => Rule::class,
-            //'require_due_date' => false,
         ]);
     }
 }
