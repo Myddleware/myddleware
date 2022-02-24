@@ -417,14 +417,46 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'id' => $id,
                 ]);   
                 // get the data from the rule
-                $connectorRepo    = $this->entityManager->getRepository(Connector::class);
+                $connectorRepo   = $this->entityManager->getRepository(Connector::class);
                 $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
                 $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
                 $connectorSource = $rule->getconnectorSource()->getName();
                 $connectorTarget = $rule->getconnectorTarget()->getName();
                 $newRule = new Rule();
+                //dump($solutionSource);
 
-                $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
+                //solution name current rule 
+                $currentRuleSolutionSource = $rule->getConnectorSource()->getSolution()->getName();
+                $currentRuleSolutionTarget = $rule->getConnectorTarget()->getSolution()->getName();
+
+                //liste des connector 
+
+                $connectorRepoSource  = $this->entityManager->getRepository(Connector::class);  
+                $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['name' => $currentRuleSolutionTarget]);
+
+                $newRuleSolutionTarget = [];
+
+                foreach ($solutions as $solution) {
+                   
+                    $idSolution = $solution->getId();
+                    $newRuleSolutionTarget[]  = $connectorRepoSource->findBy(['solution' => $idSolution]);    
+                                    
+                }
+                $newRuleSolutionTarget = $newRuleSolutionTarget[0];
+                foreach ($newRuleSolutionTarget as $solution) {
+                 //dump($solution);
+                }
+               
+                $test = ['toto'=> 'titi', 'toto2'=> 'titi2'];
+                //    echo '<pre>';
+                //    dump();
+                //    die();
+         
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule
+                // , [
+                //     'data' => $test,
+                // ]
+            );
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -433,6 +465,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleName = $form->get('name')->getData();
                     $newRuleSource = $form->get('connectorSource')->getData();
                     $newRuleTarget = $form->get('connectorTarget')->getData();
+                    
+
                     if (isset($newRuleName)) {
                         $newRule->setName($newRuleName)
                             ->setCreatedBy($user)
@@ -468,15 +502,23 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $this->entityManager->flush();
                             $success =$translator->trans('duplicate_rule.success_duplicate');
                             $this->addFlash('success', $success);
+                            
                     }
+                    
+                
                         return $this->redirect($this->generateURL('regle_list'));
-                }
+                }               
+               
+               // dump($newRuleSolutionTarget);
                 return $this->render('Rule/create/duplic.html.twig', [
                     'rule' => $rule,
                     'connectorSourceUser' => $connectorSource,
                     'connectorTarget' => $connectorTarget,
                     'solutionTarget'  => $solutionTarget,
                     'solutionSource'  => $solutionSource,
+                    'currentRuleSolutionSource'=> $currentRuleSolutionSource,
+                    'newRuleSolutionTarget' => $newRuleSolutionTarget,
+                    //'connectorSourceByConnectorId' => $connectorSourceByConnectorId,
                     'form' => $form->createView()
                 ]);
             } catch (Exception $e) {

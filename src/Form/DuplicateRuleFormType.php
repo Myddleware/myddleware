@@ -2,8 +2,10 @@
 
 namespace App\Form;
 
-use App\Entity\Connector;
 use App\Entity\Rule;
+use App\Entity\Connector;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -13,6 +15,15 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class DuplicateRuleFormType extends AbstractType
 {
+
+    private $entityManager;
+    private $rule;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -20,13 +31,31 @@ class DuplicateRuleFormType extends AbstractType
             ->add('connectorSource', EntityType::class,[
                 'class' => Connector::class,
                 'choice_label'=> 'name',
-                'label' => 'Connector source' 
+                'label' => 'Connector source',
+                //'required' => $options['require_due_date']
             ])
-            ->add('connectorTarget', EntityType::class,[
-                'class' => Connector::class,
-                'choice_label'=> 'name',
-                'label' => 'Connector source' 
-            ])
+             ->add('connectorTarget', EntityType::class,[
+                 'class' => Connector::class,
+                 'choice_label'=> 'name',
+                 'label' => 'Connector source',  
+                 'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('c')
+                        ->orderBy('c.name', 'ASC');
+
+                        // dump( $er->createQueryBuilder('c')
+                        // ->select('c.name')
+                        // ->innerJoin('c.solution','solution')
+                        // ->where('solution.id = 13')
+                        // ->getQuery()
+                        // ->getResult());  
+                },
+                 //'options' => $options['require_due_date']
+             ])
+            // ->add('connectorTarget', ('choices', ChoiceType::class, [
+            // 'choice_attr' => ChoiceList::attr($this, function (?Category $category) {
+            //     return $category ? ['data-uuid' => $category->getUuid()] : [];
+            // })
+
             ->add('save', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-outline-success mb-2'
@@ -38,6 +67,7 @@ class DuplicateRuleFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Rule::class,
+            //'require_due_date' => false,
         ]);
     }
 }

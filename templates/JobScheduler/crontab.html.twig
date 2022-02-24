@@ -20,9 +20,9 @@
                         <tr>
                             <td>{{ form_widget(form.arguments, { 'attr': {'placeholder': 'Your arguments'} }) }}</td>
                             <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
-                            <td>{{ form_widget(form.maxInstances) }}</td>
+                            <td data-bs-toggle="tooltip" data-bs-placement="left" title="{{ 'crontab.max_instance_help'|trans }}">{{ form_widget(form.maxInstances) }}</td>
                             <td>{{ form_widget(form.number) }}</td>
-                            <td>
+                            <td data-bs-toggle="tooltip" data-bs-placement="left" title="{{ 'crontab.period_help'|trans }}">
                                 {{ form_widget(form.period, { 'attr': {'placeholder': '* /5 * * * *'} }) }}
                                 {{ form_errors(form.period)}}
                             </td>

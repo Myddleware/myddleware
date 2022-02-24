@@ -771,7 +771,7 @@ login:
     index: Accueil
     user: Identifiant
     pwd: Mot de passe
-    connexion: Se Connecter
+    connexion: Se connecter
     error_session: Erreur de session
     text_up_right: Pour en savoir plus sur myddleware
     text_bottom_right: Vous serez redirigé vers notre site explicatif
@@ -853,8 +853,8 @@ crontab:
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     create: Créer crontab
-    note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware 
-
+    period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
+    max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
 duplicate_rule:
     duplicate: Dupliquer
     cancel: Annuler
