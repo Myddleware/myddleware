@@ -39,8 +39,13 @@ class DuplicateRuleFormType extends AbstractType
                  'choice_label'=> 'name',
                  'label' => 'Connector source',  
                  'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('c')
-                        ->orderBy('c.name', 'ASC');
+                    // return $er->createQueryBuilder('c')
+                        // ->orderBy('c.name', 'ASC');
+					return $er->createQueryBuilder('c')
+                        ->leftJoin('c.solution', 's')
+						 ->where('s.id = :solution_id')
+						 ->setParameter('solution_id', 13);
+					// return $er->findAllConnectorBySolution(13);
 
                         // dump( $er->createQueryBuilder('c')
                         // ->select('c.name')
