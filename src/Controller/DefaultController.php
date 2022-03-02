@@ -418,42 +418,40 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ]);   
                 // get the data from the rule
                 $connectorRepo   = $this->entityManager->getRepository(Connector::class);
-                $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
-                $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
+                $solutionTargets  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
+                $solutionSources  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
                 $connectorSource = $rule->getconnectorSource()->getName();
                 $connectorTarget = $rule->getconnectorTarget()->getName();
                 $newRule = new Rule();
-                //dump($solutionSource);
 
                 //solution id current rule 
                 $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
-                $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
+                //$currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
 
                 //liste des connector 
                 $connectorRepoSource  = $this->entityManager->getRepository(Connector::class);  
                 $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['id' => $currentRuleSolutionTargetId]);
 
                 $newRuleSolutionTarget = [];
-
-                foreach ($solutions as $solution) {
-                   
+                foreach ($solutions as $solution) {                   
                     $idSolution = $solution->getId();
-                    $newRuleSolutionTarget[]  = $connectorRepoSource->findBy(['solution' => $idSolution]);    
-                                    
+                    $newRuleSolutionTarget[]  = $connectorRepoSource->findBy(['solution' => $idSolution]);                   
                 }
                 $newRuleSolutionTarget = $newRuleSolutionTarget[0];
-                //dump($currentRuleSolutionSource);
+              //  dump($currentRuleSolutionSource);
                 // foreach ($newRuleSolutionTarget as $solution) {
                 //     foreach ($solution as $v){
                 //         dd($v->getSolution());
 
                 //     }
                 // }
+               //dd($currentRuleSolutionTargetId);
                 $form = $this->createForm(DuplicateRuleFormType::class, $newRule, 
-                ['solutionTarget' => $currentRuleSolutionTargetId],
-                ['solutionSource' => $currentRuleSolutionSourceId]
+                ['solution' => $currentRuleSolutionTargetId]
+                //,['solutionSource' => $currentRuleSolutionSourceId]
 
             );
+
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -511,10 +509,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'rule' => $rule,
                     'connectorSourceUser' => $connectorSource,
                     'connectorTarget' => $connectorTarget,
-                    'solutionTarget'  => $solutionTarget,
-                    'solutionSource'  => $solutionSource,
-                    'currentRuleSolutionSource'=> $currentRuleSolutionSource,
-                    'newRuleSolutionTarget' => $newRuleSolutionTarget,
+                    //'solutionTarget'  => $solutionTarget,
+                    //'solutionSource'  => $solutionSource,
+                    //'currentRuleSolutionSource'=> $currentRuleSolutionSource,
+                   // 'newRuleSolutionTarget' => $newRuleSolutionTarget,
                     //'connectorSourceByConnectorId' => $connectorSourceByConnectorId,
                     'form' => $form->createView()
                 ]);
