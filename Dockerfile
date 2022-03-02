@@ -35,7 +35,7 @@ COPY --chown=www-data:www-data . .
 RUN yarn install
 RUN yarn run build
 
-RUN rsync -Rr ./public/build/ ./public/build/
+RUN cd ./public && rsync -Rr ./build/ ./build/ && cd - 
 ## Setup Cronjob
 # RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
 # COPY docker/etc/crontab /etc/
@@ -46,5 +46,6 @@ COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foregrou
 
 
 RUN chown www-data:www-data ./var ./var/cache ./var/cache/*
+RUN chown www-data:www-data ./var/log
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 CMD ["myddleware-foreground.sh"]

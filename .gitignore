@@ -75,6 +75,7 @@ yarn-error.log
 
 ###> local env file ###
 .env.local
+.env.local.php
 ###< env file ###
 
 ##> vscode and other IDE parameters ## 
@@ -96,3 +97,10 @@ composer.phar
 .env.docker
 /docker/etc/openvpn/*
 ##< Docker ##
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
+
+.ssh/*
