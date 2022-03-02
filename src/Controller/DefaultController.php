@@ -425,14 +425,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $newRule = new Rule();
                 //dump($solutionSource);
 
-                //solution name current rule 
-                $currentRuleSolutionSource = $rule->getConnectorSource()->getSolution()->getName();
-                $currentRuleSolutionTarget = $rule->getConnectorTarget()->getSolution()->getName();
+                //solution id current rule 
+                $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
+                $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
 
                 //liste des connector 
-
                 $connectorRepoSource  = $this->entityManager->getRepository(Connector::class);  
-                $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['name' => $currentRuleSolutionTarget]);
+                $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['id' => $currentRuleSolutionTargetId]);
 
                 $newRuleSolutionTarget = [];
 
@@ -443,19 +442,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                     
                 }
                 $newRuleSolutionTarget = $newRuleSolutionTarget[0];
-                foreach ($newRuleSolutionTarget as $solution) {
-                 //dump($solution);
-                }
-               
-                $test = ['toto'=> 'titi', 'toto2'=> 'titi2'];
-                //    echo '<pre>';
-                //    dump();
-                //    die();
-         
-                $form = $this->createForm(DuplicateRuleFormType::class, $newRule
-                // , [
-                //     'data' => $test,
-                // ]
+                //dump($currentRuleSolutionSource);
+                // foreach ($newRuleSolutionTarget as $solution) {
+                //     foreach ($solution as $v){
+                //         dd($v->getSolution());
+
+                //     }
+                // }
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule, 
+                ['solutionTarget' => $currentRuleSolutionTargetId],
+                ['solutionSource' => $currentRuleSolutionSourceId]
+
             );
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
