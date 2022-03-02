@@ -27,40 +27,31 @@ class DuplicateRuleFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-       // $solutionSources = $options['solutionSource'];
-        $solutionTargets = $options['solution'];
+		$solutionSources = $options['solution']['source'];
+        $solutionTargets = $options['solution']['target'];
         $builder
             ->add('name', TextType::class)
             ->add('connectorSource', EntityType::class,[
                 'class' => Connector::class,
                 'choice_label'=> 'name',
                 'label' => 'Connector source',
-                'query_builder' => function (EntityRepository $er) use($solutionTargets) {
+                'query_builder' => function (EntityRepository $er) use($solutionSources) {
 					return $er->createQueryBuilder('c')
                         ->leftJoin('c.solution', 's')
 						 ->where('s.id = :solution_id')
-						 ->setParameter('solution_id', $solutionTargets);
+						 ->setParameter('solution_id', $solutionSources);
                 },
             ])
              ->add('connectorTarget', EntityType::class,[
                  'class' => Connector::class,
                  'choice_label'=> 'name',
-                 'label' => 'Connector source',                   
-<<<<<<< HEAD
-                //  'query_builder' => function (EntityRepository $er) use($solutionSources) {
-				// 	return $er->createQueryBuilder('c')
-                //         ->leftJoin('c.solution', 's')
-				// 		 ->where('s.id = :solution_id')
-				// 		 ->setParameter('solution_id', $solutionSources);
-                // },
-=======
-                 'query_builder' => function (EntityRepository $er) use($solutionSource) {
+                 'label' => 'Connector source',
+                 'query_builder' => function (EntityRepository $er) use($solutionTargets) {
 					return $er->createQueryBuilder('c')
 						 ->leftJoin('c.solution', 's')
 						 ->where('s.id = :solution_id')
-						 ->setParameter('solution_id', $solutionSource);
+						 ->setParameter('solution_id', $solutionTargets);
                 },
->>>>>>> 5ab7a2f25924945aaf2582710530acc250a633c8
              ])
             ->add('save', SubmitType::class, [
                 'attr' => [
@@ -73,7 +64,7 @@ class DuplicateRuleFormType extends AbstractType
     {
         $resolver->setRequired('solution');
         //$resolver->setRequired('solutionSource');        
-        $resolver->setAllowedTypes('solution', array(Solution::class, 'int'));
+        // $resolver->setAllowedTypes('solution', array(Solution::class, 'int'));
         // $resolver->setAllowedTypes('solutionTarget', [Solution::class, 'int']);        
         // $resolver->setAllowedTypes('solutionSource', [Solution::class, 'int']);
         $resolver->setDefaults([
