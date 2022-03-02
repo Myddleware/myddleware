@@ -46,12 +46,21 @@ class DuplicateRuleFormType extends AbstractType
                  'class' => Connector::class,
                  'choice_label'=> 'name',
                  'label' => 'Connector source',                   
+<<<<<<< HEAD
                 //  'query_builder' => function (EntityRepository $er) use($solutionSources) {
 				// 	return $er->createQueryBuilder('c')
                 //         ->leftJoin('c.solution', 's')
 				// 		 ->where('s.id = :solution_id')
 				// 		 ->setParameter('solution_id', $solutionSources);
                 // },
+=======
+                 'query_builder' => function (EntityRepository $er) use($solutionSource) {
+					return $er->createQueryBuilder('c')
+						 ->leftJoin('c.solution', 's')
+						 ->where('s.id = :solution_id')
+						 ->setParameter('solution_id', $solutionSource);
+                },
+>>>>>>> 5ab7a2f25924945aaf2582710530acc250a633c8
              ])
             ->add('save', SubmitType::class, [
                 'attr' => [
