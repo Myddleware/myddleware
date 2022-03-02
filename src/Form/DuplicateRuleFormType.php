@@ -42,7 +42,7 @@ class DuplicateRuleFormType extends AbstractType
                     // return $er->createQueryBuilder('c')
                         // ->orderBy('c.name', 'ASC');
 					return $er->createQueryBuilder('c')
-                        ->leftJoin('c.solution', 's')
+						 ->leftJoin('c.solution', 's')
 						 ->where('s.id = :solution_id')
 						 ->setParameter('solution_id', 13);
 					// return $er->findAllConnectorBySolution(13);
