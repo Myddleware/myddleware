@@ -416,10 +416,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ->findOneBy([
                     'id' => $id,
                 ]);   
-                // get the data from the rule
-                // $connectorRepo   = $this->entityManager->getRepository(Connector::class);
-                // $connectorSource = $rule->getconnectorSource()->getName();
-                // $connectorTarget = $rule->getconnectorTarget()->getName();
                 $newRule = new Rule();
 
                 //solution id current rule 
