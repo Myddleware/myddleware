@@ -99,7 +99,7 @@ class AccountController extends AbstractController
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
         ParameterBagInterface $params,
-        TranslatorInterface $translator,
+        // TranslatorInterface $translator,
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert
     ) {
@@ -108,7 +108,7 @@ class AccountController extends AbstractController
         $this->logger = $logger;
         $this->entityManager = $entityManager;
         $this->params = $params;
-        $this->translator = $translator;
+        // $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
     }
@@ -154,7 +154,10 @@ class AccountController extends AbstractController
      *
      * @Route("/account/reset-password", name="my_account_reset_password")
      */
-    public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
+    public function resetPasswordAction(Request $request, 
+    UserPasswordEncoderInterface $encoder
+    //  TranslatorInterface $translator
+     )
     {
         $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
@@ -168,11 +171,13 @@ class AccountController extends AbstractController
                 $user->setPassword($newEncodedPassword);
                 $em->persist($user);
                 $em->flush();
-                $success = $translator->trans('password_reset.success');
+                $success = "BLABLA";
+                // $success = $translator->trans('password_reset.success');
                 $this->addFlash('success', $success);
                 return $this->redirectToRoute('my_account');
             } else {
-                $failure = $translator->trans('password_reset.incorrect_password');
+                // $failure = $translator->trans('password_reset.incorrect_password');
+                $failure = "BHLALA";
                 $this->addFlash('error', $failure);
             }
         }

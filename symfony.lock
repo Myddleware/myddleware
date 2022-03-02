@@ -342,6 +342,9 @@
     "psr/container": {
         "version": "1.1.2"
     },
+    "psr/event-dispatcher": {
+        "version": "1.0.0"
+    },
     "psr/http-message": {
         "version": "1.0.1"
     },
@@ -447,9 +450,6 @@
     "symfony/contracts": {
         "version": "v1.1.11"
     },
-    "symfony/deprecation-contracts": {
-        "version": "v2.5.0"
-    },
     "symfony/flex": {
         "version": "1.18",
         "recipe": {
@@ -504,6 +504,9 @@
     "symfony/polyfill-iconv": {
         "version": "v1.24.0"
     },
+    "symfony/polyfill-intl-grapheme": {
+        "version": "v1.24.0"
+    },
     "symfony/polyfill-intl-icu": {
         "version": "v1.24.0"
     },
@@ -532,6 +535,9 @@
         "version": "v1.24.0"
     },
     "symfony/polyfill-php81": {
+        "version": "v1.24.0"
+    },
+    "symfony/polyfill-uuid": {
         "version": "v1.24.0"
     },
     "symfony/requirements-checker": {
