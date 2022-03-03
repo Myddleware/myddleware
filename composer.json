@@ -61,6 +61,7 @@
     "symfony/form": "5.4.*",
     "symfony/framework-bundle": "5.4.*",
     "symfony/http-foundation": "5.4.*",
+    "symfony/mailer": "5.4.*",
     "symfony/monolog-bundle": "^3.1.2",
     "symfony/property-access": "5.4.*",
     "symfony/property-info": "5.4.*",
@@ -69,7 +70,7 @@
     "symfony/security-bundle": "5.4.*",
     "symfony/serializer": "5.4.*",
     "symfony/stopwatch": "5.4.*",
-    "symfony/symfony": "5.4.*",
+    "symfony/translation": "5.4.*",
     "symfony/twig-bundle": "5.4.*",
     "symfony/validator": "5.4.*",
     "symfony/web-profiler-bundle": "5.4.*",
@@ -123,7 +124,9 @@
         "post-update-cmd": [
         ],
         "auto-scripts": {
-      "requirements-checker": "script"
+      "requirements-checker": "script",
+      "cache:clear": "symfony-cmd",
+      "assets:install %PUBLIC_DIR%": "symfony-cmd"
     }
     },
     "config": {

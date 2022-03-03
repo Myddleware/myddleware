@@ -25,21 +25,19 @@
 
 namespace App\Manager;
 
-use App\Entity\Config;
+use DateTime;
+use Exception;
 use App\Entity\User;
+use Twig\Environment;
+use App\Entity\Config;
+use Psr\Log\LoggerInterface;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
-use DateTime;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Swift_Mailer;
-use Swift_Message;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class NotificationManager
 {
@@ -59,10 +57,6 @@ class NotificationManager
      * @var Connection
      */
     private $connection;
-    /**
-     * @var Swift_Mailer
-     */
-    private $mailer;
     /**
      * @var UserRepository
      */
@@ -96,7 +90,6 @@ class NotificationManager
         UserRepository $userRepository,
         JobRepository $jobRepository,
         RuleRepository $ruleRepository,
-        Swift_Mailer $mailer,
         ToolsManager $tools,
         ParameterBagInterface $params,
         Environment $twig
@@ -108,7 +101,6 @@ class NotificationManager
         $this->userRepository = $userRepository;
         $this->jobRepository = $jobRepository;
         $this->ruleRepository = $ruleRepository;
-        $this->mailer = $mailer;
         $this->tools = $tools;
         $this->params = $params;
         $this->twig = $twig;
