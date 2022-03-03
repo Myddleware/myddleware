@@ -25,20 +25,12 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class PruneDatabaseCommand.
- *
- * @package App\Command
- *
- *
- */
 class PruneDatabaseCommand extends Command
 {
     /**

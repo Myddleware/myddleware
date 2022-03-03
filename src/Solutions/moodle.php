@@ -27,10 +27,7 @@ namespace App\Solutions;
 
 use App\Solutions\lib\curl;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-//use Psr\LoggerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-
-//require_once('lib/lib_moodle.php');
 
 class moodlecore extends solution
 {
@@ -152,20 +149,19 @@ class moodlecore extends solution
                 } catch (\Exception $e) {
                 }
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
 
-
-
     // Read data in Moodle
     // public function readData($param)
     public function read($param)
     {
         try {
-            $result = array();
+            $result = [];
 
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
@@ -195,6 +191,7 @@ class moodlecore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
+
         return $result;
     }
 

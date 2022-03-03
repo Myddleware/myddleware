@@ -1,7 +1,5 @@
 <?php
 /**
- * cURL class.
- *
  * This is a wrapper class for curl, it is quite easy to use:
  * <code>
  * $c = new curl;
@@ -10,7 +8,7 @@
  * // enable cookie
  * $c = new curl(array('cookie'=>true));
  * // enable proxy
- * $c = new curl(array('proxy'=>true));
+ * $c = new curl(array('proxy'=>true));.
  *
  * // HTTP GET Method
  * $html = $c->get('http://example.com');

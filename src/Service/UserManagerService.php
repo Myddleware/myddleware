@@ -6,10 +6,6 @@ use Exception;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class UserManagerService
- * @package App\Service
- */
 class UserManagerService implements UserManagerInterface
 {
     private $encoder;
@@ -30,8 +26,6 @@ class UserManagerService implements UserManagerInterface
     }
 
     /**
-     * Génération de token
-     * @return string
      * @throws Exception
      */
     public function generateToken(): string

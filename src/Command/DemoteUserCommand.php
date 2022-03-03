@@ -5,27 +5,23 @@ namespace App\Command;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class DemoteUserCommand extends Command
 {
     protected static $defaultName = 'myddleware:demote-user';
     protected static $defaultDescription = 'Demote an Myddleware existing user by removing a role';
 
-
     /**
-     *
      * @var EntityManagerInterface
      */
     private $em;
-    
+
     /**
-     *
      * @var UserRepository
      */
     private $userRepository;
@@ -35,14 +31,12 @@ class DemoteUserCommand extends Command
      */
     private $io;
 
-
     public function __construct(EntityManagerInterface $em, UserRepository $userRepository)
     {
         parent::__construct();
         $this->em = $em;
         $this->userRepository = $userRepository;
     }
-
 
     protected function configure()
     {
@@ -62,7 +56,6 @@ class DemoteUserCommand extends Command
     {
         $this->io = new SymfonyStyle($input, $output);
     }
-
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
@@ -92,7 +85,6 @@ class DemoteUserCommand extends Command
             $questions['email'] = $question;
         }
 
-
         if (!$input->getArgument('role')) {
             $question = new Question('Please enter the role to remove:');
             $question->setValidator(function ($role) {
@@ -104,13 +96,12 @@ class DemoteUserCommand extends Command
             });
             $questions['role'] = $question;
         }
-        
+
         foreach ($questions as $name => $question) {
             $answer = $this->getHelper('question')->ask($input, $output, $question);
             $input->setArgument($name, $answer);
         }
     }
-
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -118,17 +109,19 @@ class DemoteUserCommand extends Command
         $email = $input->getArgument('email');
         $role = $input->getArgument('role');
         $user = $this->userRepository->findOneByEmail($email);
-        
+
         $roles = $user->getRoles();
-        
+
         if (!in_array($role, $roles)) {
-            $io->error(sprintf("The user %s has not role %s.", $email, $role));
+            $io->error(sprintf('The user %s has not role %s.', $email, $role));
+
             return 1;
         } else {
             array_splice($roles, array_search($role, $roles), 1);
             $user->setRoles($roles);
             $this->em->flush();
             $io->success(sprintf('The role %s has been removed from user %s.', $role, $email));
+
             return 0;
         }
     }

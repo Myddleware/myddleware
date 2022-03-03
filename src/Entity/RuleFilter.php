@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleFilter.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleFilterRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="rulefilter", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})

@@ -4,7 +4,7 @@ namespace App\Solutions\lib\zuora;
 
 class Zuora_SubscriptionData extends Zuora_Object
 {
-    const TYPE_NAMESPACE = 'http://api.zuora.com/';
+    public const TYPE_NAMESPACE = 'http://api.zuora.com/';
 
     protected $zType = 'SubscriptionData';
 

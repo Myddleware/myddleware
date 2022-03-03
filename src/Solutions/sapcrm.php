@@ -27,8 +27,6 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//use Psr\LoggerInterface;
-
 class sapcrmcore extends saproot
 {
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
@@ -200,7 +198,6 @@ class sapcrmcore extends saproot
 
         return parent::get_module_fields($module, $type);
     }
-
 
     // Permet de modifier les nom des champs pour le read_last
     // Dans SAP les champs en lecture et en écriture ne sont pas toujours identiques pour le même module, les structures peuvent être différentes
@@ -542,4 +539,3 @@ class sapcrmcore extends saproot
 class sapcrm extends sapcrmcore
 {
 }
-

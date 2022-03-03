@@ -4,7 +4,7 @@ namespace App\Solutions\lib\zuora;
 
 abstract class Zuora_Object
 {
-    const TYPE_NAMESPACE = 'http://object.api.zuora.com/';
+    public const TYPE_NAMESPACE = 'http://object.api.zuora.com/';
 
     protected $zType = 'zObject';
 

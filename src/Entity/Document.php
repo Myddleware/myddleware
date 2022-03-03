@@ -26,14 +26,11 @@
 namespace App\Entity;
 
 use DateTime;
-use DateTimezone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Document.
- *
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
  * @ORM\Table(name="document", indexes={
  *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
@@ -180,7 +177,7 @@ class Document
     public function __construct()
     {
         $this->datas = new ArrayCollection();
-        $this->logs = new ArrayCollection();   
+        $this->logs = new ArrayCollection();
     }
 
     /**

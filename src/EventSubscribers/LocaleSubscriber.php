@@ -1,12 +1,13 @@
 <?php
+
 namespace App\EventSubscribers;
 
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
-class LocaleSubscriber implements EventSubscriberInterface {
-
+class LocaleSubscriber implements EventSubscriberInterface
+{
     private $defaultLocale;
 
     public function __construct(string $defaultLocale = 'en')
@@ -14,15 +15,15 @@ class LocaleSubscriber implements EventSubscriberInterface {
         $this->defaultLocale = $defaultLocale;
     }
 
-    public function onKernelRequest(RequestEvent $event){
-
+    public function onKernelRequest(RequestEvent $event)
+    {
         $request = $event->getRequest();
 
-        if(!$request->hasPreviousSession()){
+        if (!$request->hasPreviousSession()) {
             return;
         }
 
-        if($locale = $request->attributes->get('_locale')) {
+        if ($locale = $request->attributes->get('_locale')) {
             $request->getSession()->set('_locale', $locale);
         } else {
             $request->setLocale($request->getSession()->get('_locale', $this->defaultLocale));
@@ -31,8 +32,8 @@ class LocaleSubscriber implements EventSubscriberInterface {
 
     public static function getSubscribedEvents()
     {
-        return  [
-            KernelEvents::REQUEST => [['onKernelRequest', 17]]
+        return [
+            KernelEvents::REQUEST => [['onKernelRequest', 17]],
         ];
     }
 }

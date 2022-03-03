@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Connector_params.
- *
  * @ORM\Table(name="connectorparam")
  * @ORM\Entity(repositoryClass="App\Repository\ConnectorParamRepository")
  */

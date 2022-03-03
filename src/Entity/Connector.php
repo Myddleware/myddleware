@@ -32,8 +32,6 @@ use Doctrine\ORM\Mapping as ORM; // slug
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Connector.
- *
  * @ORM\Table(name="connector")
  * @ORM\Entity(repositoryClass="App\Repository\ConnectorRepository")
  */
@@ -363,7 +361,7 @@ class Connector
      *
      * @return Collection
      *
-     * @param null|mixed $connectorParams
+     * @param mixed|null $connectorParams
      */
     public function setConnectorParams($connectorParams = null)
     {

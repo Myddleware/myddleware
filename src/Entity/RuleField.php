@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleField.
- *
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="App\Repository\RuleFieldRepository")
  * @ORM\Table(name="rulefield", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})

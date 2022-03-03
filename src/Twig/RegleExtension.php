@@ -28,11 +28,6 @@ namespace App\Twig;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * Class RegleExtension.
- *
- * @package App\Twig
- */
 class RegleExtension extends AbstractExtension
 {
     public function getFilters()

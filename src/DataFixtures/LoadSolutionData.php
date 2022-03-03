@@ -72,24 +72,24 @@ class LoadSolutionData implements FixtureInterface
 
     private function generateEntities()
     {
-		// Get all solutions already in the database
-		$solutions = $this->manager->getRepository(Solution::class)->findAll();
+        // Get all solutions already in the database
+        $solutions = $this->manager->getRepository(Solution::class)->findAll();
         foreach ($this->solutionData as $solutionData) {
-			$foundSolution = false;
-			if (!empty($solutions)) {
-				foreach ($solutions as $solution) {
-					if ($solution->getName() == $solutionData['name']) {
-						$foundSolution = true;
-						$sol = $solution;					
-						break;
-					}
-				}
-			}
+            $foundSolution = false;
+            if (!empty($solutions)) {
+                foreach ($solutions as $solution) {
+                    if ($solution->getName() == $solutionData['name']) {
+                        $foundSolution = true;
+                        $sol = $solution;
+                        break;
+                    }
+                }
+            }
 
             // If we didn't found the solution we create a new one, otherwise we update it
-			if (!$foundSolution) {
-                $sol = new Solution();			
-            }		
+            if (!$foundSolution) {
+                $sol = new Solution();
+            }
             $sol->setName($solutionData['name']);
             $sol->setActive($solutionData['active']);
             $sol->setSource($solutionData['source']);

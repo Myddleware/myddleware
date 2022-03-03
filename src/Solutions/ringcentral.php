@@ -30,15 +30,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class ringcentralcore extends solution
 {
     // const VERSION = '2.0.0';
-    const SERVER_PRODUCTION = 'https://platform.ringcentral.com';
-    const SERVER_SANDBOX = 'https://platform.devtest.ringcentral.com';
+    public const SERVER_PRODUCTION = 'https://platform.ringcentral.com';
+    public const SERVER_SANDBOX = 'https://platform.devtest.ringcentral.com';
 
-    const ACCESS_TOKEN_TTL = 3600; // 60 minutes
-    const REFRESH_TOKEN_TTL = 604800; // 1 week
-    const TOKEN_ENDPOINT = '/restapi/oauth/token';
-    const REVOKE_ENDPOINT = '/restapi/oauth/revoke';
-    const AUTHORIZE_ENDPOINT = '/restapi/oauth/authorize';
-    const API_VERSION = '/v1.0';
+    public const ACCESS_TOKEN_TTL = 3600; // 60 minutes
+    public const REFRESH_TOKEN_TTL = 604800; // 1 week
+    public const TOKEN_ENDPOINT = '/restapi/oauth/token';
+    public const REVOKE_ENDPOINT = '/restapi/oauth/revoke';
+    public const AUTHORIZE_ENDPOINT = '/restapi/oauth/authorize';
+    public const API_VERSION = '/v1.0';
 
     protected $apiKey;
     protected $token;
@@ -143,15 +143,15 @@ class ringcentralcore extends solution
         try {
             require 'lib/ringcentral/metadata.php';
             if (!empty($moduleFields[$module])) {
-				$this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
     // get_module_fields($module)
-	
 
     public function readData($param)
     {

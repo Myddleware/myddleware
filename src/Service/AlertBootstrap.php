@@ -7,14 +7,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AlertBootstrap implements AlertBootstrapInterface
 {
-    const ALERT_PRIMARY = "primary";
-    const ALERT_SECONDARY = "secondary";
-    const ALERT_SUCCESS = "success";
-    const ALERT_DANGER = "danger";
-    const ALERT_WARNING = "warning";
-    const ALERT_INFO = "info";
-    const ALERT_LIGHT = "light";
-    const ALERT_DARK = "dark";
+    public const ALERT_PRIMARY = 'primary';
+    public const ALERT_SECONDARY = 'secondary';
+    public const ALERT_SUCCESS = 'success';
+    public const ALERT_DANGER = 'danger';
+    public const ALERT_WARNING = 'warning';
+    public const ALERT_INFO = 'info';
+    public const ALERT_LIGHT = 'light';
+    public const ALERT_DARK = 'dark';
 
     private $flashBag;
     private $translator;

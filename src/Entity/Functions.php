@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Functions.
- *
  * @ORM\Table(name="functions")
  * @ORM\Entity(repositoryClass="App\Repository\FunctionsRepository")
  */

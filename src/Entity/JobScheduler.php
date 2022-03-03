@@ -30,8 +30,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * JobScheduler.
- *
  * @ORM\Table(name="jobscheduler")
  * @ORM\Entity(repositoryClass="App\Repository\JobSchedulerRepository")
  */

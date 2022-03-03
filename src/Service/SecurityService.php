@@ -12,9 +12,6 @@ class SecurityService
      */
     private $roleHierarchy;
 
-    /**
-     * SecurityService constructor.
-     */
     public function __construct(RoleHierarchyInterface $roleHierarchy)
     {
         $this->roleHierarchy = $roleHierarchy;

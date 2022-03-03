@@ -31,11 +31,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo; // slug
 
-// unique
-
 /**
- * Rule.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleRepository")
  * @ORM\HasLifecycleCallbacks()
  *
@@ -187,7 +183,6 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
-
 
     public function __construct()
     {
@@ -809,8 +804,8 @@ class Rule
         return $this;
     }
 
-
-    public function __toString(){
-        return  $this->id; 
+    public function __toString()
+    {
+        return $this->id;
     }
 }

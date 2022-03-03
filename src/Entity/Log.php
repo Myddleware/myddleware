@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Log.
- *
  * @ORM\Entity(repositoryClass="App\Repository\LogRepository")
  * @ORM\Table(name="log", indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),

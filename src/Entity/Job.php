@@ -31,8 +31,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Job.
- *
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
  * @ORM\Table(name="job", indexes={
  *  @ORM\Index(name="index_status", columns={"status"})

@@ -4,11 +4,6 @@ namespace App\EventListener;
 
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-/**
- * Class ResponseListener.
- *
- * @package App\EventListener
- */
 class ResponseListener
 {
     public function onKernelResponse(ResponseEvent $event)

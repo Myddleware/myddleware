@@ -28,18 +28,11 @@ namespace App\Manager;
 use Doctrine\DBAL\Driver\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Yaml\Yaml;
 
-/**
- * Class ToolsManager.
- *
- * @package App\Manager
- *
- *
- */
 class toolscore
 {
     protected $connection;
@@ -52,9 +45,9 @@ class toolscore
      * @var string
      */
     private $projectDir;
-	
-	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
+
+    // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+    protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -92,15 +85,16 @@ class toolscore
 
         return $r;
     }
-	
-    public function beforeRuleEditViewRender($data) {
-		return $data;
-	}
-	
-	public function getRuleParam() {
-		return $this->ruleParam;
-	}
-	
+
+    public function beforeRuleEditViewRender($data)
+    {
+        return $data;
+    }
+
+    public function getRuleParam()
+    {
+        return $this->ruleParam;
+    }
 
     // Allow translation from php classes
     public function getTranslation($textArray)
@@ -180,12 +174,9 @@ class toolscore
         }
 
         return $php;
-
     }
 }
 
-class ToolsManager extends toolscore {
-	
+class ToolsManager extends toolscore
+{
 }
-
-

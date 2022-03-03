@@ -26,12 +26,6 @@
 $moduleFields = [
     'segment' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        // 'dateAdded' => array('label' => 'Date added', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'createdBy' => array('label' => 'Created by', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'createdByUser' => array('label' => 'Created by user', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'dateModified' => array('label' => 'Date  modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'modifiedBy' => array('label' => 'Modified by', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-        // 'modifiedByUser' => array('label' => 'Modified by user', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
         'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'alias' => ['label' => 'Alias', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'description' => ['label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

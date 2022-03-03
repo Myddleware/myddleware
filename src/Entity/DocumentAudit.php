@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentAudit.
- *
  * @ORM\Table(name="documentaudit")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="App\Repository\DocumentAuditRepository")

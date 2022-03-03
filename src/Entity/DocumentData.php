@@ -30,8 +30,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentData.
- *
  * @ORM\Entity(repositoryClass="App\Repository\DocumentDataRepository")
  * @ORM\Table(name="documentdata", indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),

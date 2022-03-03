@@ -29,8 +29,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Solution.
- *
  * @ORM\Table(name="solution")
  * @ORM\Entity(repositoryClass="App\Repository\SolutionRepository")
  */

@@ -29,8 +29,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * FuncCat.
- *
  * @ORM\Table(name="funccat")
  * @ORM\Entity(repositoryClass="App\Repository\FuncCatRepository")
  */

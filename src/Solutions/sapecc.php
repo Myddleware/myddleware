@@ -27,8 +27,6 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//use Psr\LoggerInterface;
-
 class sapecccore extends sap
 {
     protected $limit = 5;
@@ -130,7 +128,6 @@ class sapecccore extends sap
             return [];
         }
     }
-
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)

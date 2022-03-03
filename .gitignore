@@ -10,12 +10,6 @@
 !var/logs/.gitkeep
 !var/sessions/.gitkeep
 
-# Parameters
-/config/packages/parameters.yml
-/config/packages/public/parameters_public.yml
-/config/packages/public/parameters_smtp.yml
-/config/packages/public/parameters_custom.yml
-
 # Parameters for Custom code
 /config/services_custom.yaml
 
@@ -28,31 +22,10 @@
 /var/bootstrap.php.cache
 /bin/*
 !bin/console
-!bin/symfony_requirements
 /vendor/
 /public/bundles
 /public/js/*
 /public/css/*
-
-# Assets and user uploads
-/web/bundles/
-/web/uploads/
-
-# Assets managed by Bower
-/web/assets/vendor/
-
-# PHPUnit
-/app/phpunit.xml
-/phpunit.xml
-
-# Build data
-/build/
-
-# Composer PHAR
-#/composer.phar
-
-# Backup entities generated with doctrine:generate:entities command
-*/Entity/*~
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
@@ -64,6 +37,7 @@ yarn-error.log
 ###> friendsofphp/php-cs-fixer ###
 /.php_cs
 /.php_cs.cache
+.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
 
 
@@ -80,18 +54,13 @@ yarn-error.log
 ###> local env file ###
 .env.local
 .env.local.php
+/.env.*.local
 ###< env file ###
 
 ##> vscode and other IDE parameters ## 
 .vscode
 /.idea/*
 ##< vscode parameters ##
-
-##> old files & folders ##
-/.platform/*
-.platform.app.yaml
-composer.phar
-##< old files & folders ##
 
 ##> Docker ##
 /docker/tmp/
@@ -102,7 +71,4 @@ composer.phar
 /docker/etc/openvpn/*
 ##< Docker ##
 
-###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
-###< phpunit/phpunit ###
+.php-version

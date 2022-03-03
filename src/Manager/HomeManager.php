@@ -31,20 +31,13 @@ use App\Repository\JobRepository;
 use Doctrine\DBAL\Driver\Connection;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class HomeManager.
- *
- * @package App\Manager
- *
- *
- */
 class HomeManager
 {
     protected $connection;
     protected $logger;
 
-    const historicDays = 7;
-    const nbHistoricJobs = 5;
+    public const historicDays = 7;
+    public const nbHistoricJobs = 5;
     protected $historicDateFormat = 'M-d';
     /**
      * @var JobRepository

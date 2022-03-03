@@ -36,32 +36,6 @@ namespace App\Solutions\lib\zuora;
  * any of Zuora's API Calls except for login which will be called
  * automatically prior to any other call
  */
-
-//require_once 'Zuora_Object.php';
-//require_once 'Zuora_Account.php';
-//require_once 'Zuora_Amendment.php';
-//require_once 'Zuora_Contact.php';
-//require_once 'Zuora_PaymentMethod.php';
-//require_once 'Zuora_Product.php';
-//require_once 'Zuora_ProductRatePlan.php';
-//require_once 'Zuora_ProductRatePlanCharge.php';
-//require_once 'Zuora_ProductRatePlanChargeTier.php';
-//require_once 'Zuora_RatePlan.php';
-//require_once 'Zuora_RatePlanCharge.php';
-//require_once 'Zuora_RatePlanData.php';
-//require_once 'Zuora_SubscribeRequest.php';
-//require_once 'Zuora_Subscription.php';
-//require_once 'Zuora_SubscriptionData.php';
-//require_once 'Zuora_Usage.php';
-//require_once 'Zuora_Invoice.php';
-//require_once 'Zuora_SubscribeOptions.php';
-//require_once 'Zuora_Payment.php';
-//require_once 'Zuora_InvoicePayment.php';
-//require_once 'Zuora_RatePlanChargeData.php';
-//require_once 'Zuora_RatePlanChargeTier.php';
-//require_once 'Zuora_SubscribeResult.php';
-//require_once 'Zuora_Error.php';
-
 class Zuora_API
 {
     /**
@@ -115,7 +89,6 @@ class Zuora_API
         'Usage' => 'Zuora_Usage',
         'Export' => 'Zuora_Export',
         'ID' => 'Zuora_ID',
-        //'LoginResult' => 'Zuora_LoginResult',
         'SubscribeRequest' => 'Zuora_SubscribeRequest',
         'SubscribeOptions' => 'Zuora_SubscribeOptions',
         'SubscriptionData' => 'Zuora_SubscriptionData',
@@ -125,10 +98,7 @@ class Zuora_API
         'InvoiceData' => 'Zuora_InvoiceData',
         'PreviewOptions' => 'Zuora_PreviewOptions',
         'SubscribeResult' => 'Zuora_SubscribeResult',
-        //'SaveResult' => 'Zuora_SaveResult',
-        //'DeleteResult' => 'Zuora_DeleteResult',
         'QueryLocator' => 'Zuora_QueryLocator',
-        //'QueryResult' => 'Zuora_QueryResult',
         'Error' => 'Zuora_Error',
         'ErrorCode' => 'Zuora_ErrorCode',
         'SessionHeader' => 'Zuora_SessionHeader',
@@ -143,8 +113,6 @@ class Zuora_API
     ];
 
     /**
-     * Constructor.
-     *
      * Instantiate using {@link getInstance()}; API is a singleton
      * object.
      *

@@ -25,13 +25,6 @@
 
 namespace App\Manager;
 
-/**
- * Class FormulaManager.
- *
- * @package App\Manager
- *
- *
- */
 class FormulaManager
 {
     private $path = "App\Manager\FormulaFunctionManager::";
@@ -311,4 +304,3 @@ class FormulaManager
         $this->secureFormule(); // niveau securité
     }
 }
-

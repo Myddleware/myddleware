@@ -33,17 +33,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * User
- *
  * @ORM\Table(name="users")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity(fields={"username"}, message="There is already an account with this username")
  */
 class User implements UserInterface, Serializable
 {
-    const ROLE_DEFAULT = 'ROLE_USER';
-    const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
-    const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const ROLE_DEFAULT = 'ROLE_USER';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
 
     /**
      * @ORM\Id
@@ -315,14 +313,14 @@ class User implements UserInterface, Serializable
         return array_unique($roles);
     }
 
-     /**
+    /**
      * {@inheritdoc}
      */
     public function getTimezone()
     {
-
         return $this->timezone;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -508,7 +506,7 @@ class User implements UserInterface, Serializable
     /**
      * Gets the timestamp that the user requested a password reset.
      *
-     * @return null|DateTime
+     * @return DateTime|null
      */
     public function getPasswordRequestedAt()
     {
@@ -537,11 +535,11 @@ class User implements UserInterface, Serializable
 
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
-    public function setTimezone(string $timezone='UTC')
+    public function setTimezone(string $timezone = 'UTC')
     {
         $this->timezone = $timezone;
 
@@ -554,5 +552,5 @@ class User implements UserInterface, Serializable
     public function __toString()
     {
         return (string) $this->getUsername();
-    }  
+    }
 }

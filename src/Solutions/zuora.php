@@ -28,8 +28,6 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//require_once('lib/zuora/API.php');
-
 class zuoracore extends solution
 {
     protected $instance;
@@ -67,8 +65,6 @@ class zuoracore extends solution
         ];
     }
 
-    // getFieldsLogin()
-
     // Login to Zuora
     public function login($paramConnexion)
     {
@@ -98,8 +94,6 @@ class zuoracore extends solution
             return ['error' => $error];
         }
     }
-
-    // login($paramConnexion)*/
 
     // Get the modules available
     public function get_modules($type = 'source')
@@ -141,7 +135,7 @@ class zuoracore extends solution
                             'type_bdd' => 'varchar(36)',
                             'required' => 0,
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     } else {
                         $this->moduleFields[$field] = [
@@ -149,18 +143,17 @@ class zuoracore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => 0,
-							'relate' => false
+                            'relate' => false,
                         ];
                     }
                 }
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
-    // get_module_fields($module)
-
 
     public function createData($param)
     {
@@ -179,7 +172,6 @@ class zuoracore extends solution
         try {
             $idDocArray = '';
             $i = 0;
-            // $first = true;
             $nb_record = count($param['data']);
             foreach ($param['data'] as $idDoc => $data) {
                 ++$i;
@@ -208,7 +200,7 @@ class zuoracore extends solution
                 // If we have finished to read all data or if the package is full we send the data to Sallesforce
                 if (
                         $nb_record == $i
-                     || 0 == $i % $this->limitCall
+                    || 0 == $i % $this->limitCall
                 ) {
                     // Manage calls create and update
                     if ('create' == $action) {

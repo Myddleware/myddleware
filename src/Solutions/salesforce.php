@@ -39,7 +39,7 @@ class salesforcecore extends solution {
 										'Lead' => array('Email','LastName'),
 										'Account' => array('Email', 'Name'),
 										'default' => array('Name')
-									  );
+									);
 
 	protected $required_relationships = array(
 												'default' => array(),
@@ -112,13 +112,13 @@ class salesforcecore extends solution {
 			$this->logger->error($error);
 			return array('error' => $error);
 		}
-	} // login($paramConnexion)
+	}
 	
 	// Fonction qui renvoie les données de connexion
 	public function getToken() {
 		return array('sf_access_token' => $this->access_token,
-					 'sf_instance_url' => $this->instance_url);
-	} // getToken()
+					'sf_instance_url' => $this->instance_url);
+	} 
 
 	// Liste des paramètres de connexion
 	public function getFieldsLogin() {	
@@ -154,7 +154,7 @@ class salesforcecore extends solution {
                             'label' => 'solution.fields.sandbox'
                         )
         );
-	} // getFieldsLogin()
+	}
 
 	// Renvoie les modules disponibles du compte Salesforce connecté
 	public function get_modules($type = 'source') {
@@ -184,7 +184,7 @@ class salesforcecore extends solution {
 			$error = $e->getMessage();
 			return $error;
 		}
-	} // get_modules()
+	}
 
 	// Renvoie les champs du module passé en paramètre
 	public function get_module_fields($module, $type = 'source', $param = null) {
@@ -226,7 +226,7 @@ class salesforcecore extends solution {
                 }
 
                 if ($field['type'] == 'reference') {
-                     $this->moduleFields[$field['name']] = array(
+                    $this->moduleFields[$field['name']] = array(
                                                 'label' => $field['label'],
                                                 'type' => $field['type'],
                                                 'type_bdd' => $type_bdd,
@@ -274,7 +274,7 @@ class salesforcecore extends solution {
                         foreach($field['picklistValues'] as $option) {
                             $this->moduleFields[$field['name']]['option'][$option['value']] = $option['label'];
                         }
-                         $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
+                        $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
                     }   
                 }           
             }
@@ -283,7 +283,7 @@ class salesforcecore extends solution {
 		catch (\Exception $e) {
 			return false;
 		}
-	} // get_module_fields($module)
+	}
 
 	// Permet d'ajouter des paramètres 
 	public function getFieldsParamUpd($type,$module) {	
@@ -512,7 +512,7 @@ class salesforcecore extends solution {
 				// If we have finished to read all data or if the package is full we send the data to Sallesforce
 				if (
 						$nb_record == $i
-					 || $i % $this->limitCall  == 0
+					|| $i % $this->limitCall  == 0
 				) {			
 					$parameters = json_encode($parameters);
 					// Call to Salesforce
@@ -565,7 +565,7 @@ class salesforcecore extends solution {
 			}
 		}					
 		return $result;
-	} // create($param)
+	} 
 	
 	// Permet de modifier des données
 	public function updateData($param) {		
@@ -632,8 +632,7 @@ class salesforcecore extends solution {
 											'id' => $target_id,
 											'error' => false
 									);
-				}
-				else  {
+				} else {
 					$result[$idDoc] = array(
 											'id' => '-1',
 											'error' => 'Failed to update Data in Salesforce : '.print_r($query_request_data['errors'],true),
@@ -651,7 +650,7 @@ class salesforcecore extends solution {
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		}			
 		return $result;
-	} // update($param)	
+	} 
 	
 	// Permet de formater la réponse si besoin
 	protected function formatResponse($param,$query_request_data) {
@@ -791,14 +790,14 @@ class salesforcecore extends solution {
 		
 	    $query_response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if (($query_response_code<200)||($query_response_code>=300)||empty($query_request_body)){
-             $query_request_data = json_decode($query_request_body, true);	
+            $query_request_data = json_decode($query_request_body, true);	
 			if(
 					!empty($query_request_data['hasErrors'])
-				 &&	$query_request_data['hasErrors'] == true
+				&&	$query_request_data['hasErrors'] == true
 			) {
 				return $query_request_data;
 			} elseif(isset($query_request_data['error_description'])) {
-            	throw new \Exception(ucfirst($query_request_data['error_description']));
+				throw new \Exception(ucfirst($query_request_data['error_description']));
 			} else {
 				throw new \Exception("Call failed - " . $query_response_code . ' ' . $query_request_body);
 			}
@@ -811,7 +810,7 @@ class salesforcecore extends solution {
 		curl_close($ch);
 		ob_end_flush();
 		return $query_request_data;	
-    } // call($method, $parameters)
+    }
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
 	protected function dateTimeToMyddleware($dateTime) {
@@ -820,7 +819,7 @@ class salesforcecore extends solution {
 		$tab = explode('.', $dateTime);
 		$dateTime = $tab[0];
 		return $dateTime;
-	}// dateTimeToMyddleware($dateTime)	
+	}
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
 	protected function dateTimeFromMyddleware($dateTime) {
@@ -828,9 +827,9 @@ class salesforcecore extends solution {
 		$date = $tab[0] . 'T' . $tab[1];
 		$date .= '+00:00';
 		return $date;
-	}// dateTimeToMyddleware($dateTime)    
+	}
     
-}// class salesforcecore
+}
 
 class salesforce extends salesforcecore {	
 }

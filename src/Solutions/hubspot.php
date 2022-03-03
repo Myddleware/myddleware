@@ -316,7 +316,7 @@ class hubspotcore extends solution
                         'type_bdd' => 'varchar(36)',
                         'required' => 0,
                         'required_relationship' => 0,
-						'relate' => true
+                        'relate' => true,
                     ];
                 }
                 $this->moduleFields[$field['name']] = [
@@ -324,7 +324,7 @@ class hubspotcore extends solution
                     'type' => $field['type'],
                     'type_bdd' => $field['type'],
                     'required' => 0,
-					'relate' => false
+                    'relate' => false,
                 ];
                 // Add list of values
                 if (!empty($field['options'])) {
@@ -342,7 +342,6 @@ class hubspotcore extends solution
         }
     }
     // get_module_fields($module)
-
 
     /**
      * Function read data.
@@ -1288,7 +1287,7 @@ class hubspotcore extends solution
      * @param $moduleSource
      * @param $RuleMode
      *
-     * @return null|string
+     * @return string|null
      *
      * @throws \Exception
      */
@@ -1383,4 +1382,3 @@ class hubspotcore extends solution
 class hubspot extends hubspotcore
 {
 }
-

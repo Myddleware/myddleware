@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleParam.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleParamRepository")
  * @ORM\Table(name="ruleparam", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
  */

@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleOrder.
- *
  * @ORM\Table(name="ruleorder")
  * @ORM\Entity(repositoryClass="App\Repository\RuleOrderRepository")
  */

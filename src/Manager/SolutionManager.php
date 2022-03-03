@@ -26,9 +26,7 @@
 namespace App\Manager;
 
 use App\Solutions\airtable;
-use App\Solutions\bittle;
 use App\Solutions\cirrusshield;
-use App\Solutions\dolist;
 use App\Solutions\erpnext;
 use App\Solutions\eventbrite;
 use App\Solutions\facebook;
@@ -37,7 +35,6 @@ use App\Solutions\hubspot;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
-use App\Solutions\medialogistique;
 use App\Solutions\microsoftsql;
 use App\Solutions\moodle;
 use App\Solutions\mysql;
@@ -45,13 +42,11 @@ use App\Solutions\oracledb;
 use App\Solutions\postgresql;
 use App\Solutions\prestashop;
 use App\Solutions\ringcentral;
-use App\Solutions\sage50;
 use App\Solutions\sagecrm;
-use App\Solutions\sagelive;
 use App\Solutions\salesforce;
 use App\Solutions\sap;
 use App\Solutions\sapcrm;
-use App\Solutions\shopapplication;
+use App\Solutions\sendinblue;
 use App\Solutions\sugarcrm;
 use App\Solutions\suitecrm;
 use App\Solutions\vtigercrm;
@@ -59,16 +54,8 @@ use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\zuora;
-use App\Solutions\sendinblue;
 use Exception;
 
-/**
- * Class SolutionManager.
- *
- * @package App\Manager
- *
- *
- */
 class SolutionManager
 {
     private $classes = [];

@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentRelationship.
- *
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRelationshipRepository")
  * @ORM\Table(name="documentrelationship", indexes={

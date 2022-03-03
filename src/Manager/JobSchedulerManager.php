@@ -29,13 +29,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class JobSchedulerManager.
- *
- * @package App\Manager
- *
- *
- */
 class JobSchedulerManager
 {
     protected $env;
@@ -121,4 +114,3 @@ class JobSchedulerManager
         return $rules;
     }
 }
-

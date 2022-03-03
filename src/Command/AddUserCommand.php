@@ -2,23 +2,22 @@
 
 namespace App\Command;
 
-use App\Entity\User;
 use App\Entity\Config;
-use App\Utils\Validator;
-use App\Service\SecurityService;
-use App\Repository\UserRepository;
+use App\Entity\User;
 use App\Repository\ConfigRepository;
+use App\Repository\UserRepository;
+use App\Utils\Validator;
 use Doctrine\ORM\EntityManagerInterface;
-use function Symfony\Component\String\u;
-use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
+use function Symfony\Component\String\u;
 
 /**
  * A console command that creates users and stores them in the database.
@@ -36,7 +35,6 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  *
  * We use the default services.yaml configuration, so command classes are registered as services.
  * See https://symfony.com/doc/current/console/commands_as_services.html
- *
  */
 class AddUserCommand extends Command
 {
@@ -176,15 +174,15 @@ class AddUserCommand extends Command
         $user->setUsernameCanonical($username);
         $user->setEmailCanonical($email);
         $user->setTimezone('UTC');
-        
+
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
         $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
         $user->setPassword($encodedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)
-        $allowInstalls= $this->configRepository->findBy(['name'=> 'allow_install']);
-        if(!empty($allowInstalls)){
-            foreach($allowInstalls as $allowInstall){
+        $allowInstalls = $this->configRepository->findBy(['name' => 'allow_install']);
+        if (!empty($allowInstalls)) {
+            foreach ($allowInstalls as $allowInstall) {
                 $allowInstall->setValue('false');
                 $this->entityManager->persist($allowInstall);
             }
@@ -220,7 +218,6 @@ class AddUserCommand extends Command
         // validate password and email if is not this input means interactive.
         $this->validator->validatePassword($plainPassword);
         $this->validator->validateEmail($email);
-   
 
         // check if a user with the same email already exists.
         $existingEmail = $this->users->findOneBy(['email' => $email]);

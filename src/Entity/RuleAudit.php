@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleAudit.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleAuditRepository")
  * @ORM\Table(name="ruleaudit", indexes={@ORM\Index(name="index_ruleid", columns={"rule_id"})})
  */
