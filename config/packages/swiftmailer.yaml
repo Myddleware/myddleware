@@ -1,8 +1,0 @@
-swiftmailer:
-    transport: sendmail
-    host:      localhost
-    username:  null
-    password:  null
-    port:      null
-    auth_mode: null
-    spool:     { type: memory }

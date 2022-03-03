@@ -70,7 +70,6 @@
     "symfony/security-bundle": "5.4.*",
     "symfony/serializer": "5.4.*",
     "symfony/stopwatch": "5.4.*",
-    "symfony/swiftmailer-bundle": "^3.5",
     "symfony/symfony": "5.4.*",
     "symfony/twig-bundle": "5.4.*",
     "symfony/validator": "5.4.*",
