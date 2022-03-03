@@ -61,7 +61,6 @@
     "symfony/form": "5.4.*",
     "symfony/framework-bundle": "5.4.*",
     "symfony/http-foundation": "5.4.*",
-    "symfony/mailer": "5.4.*",
     "symfony/monolog-bundle": "^3.1.2",
     "symfony/property-access": "5.4.*",
     "symfony/property-info": "5.4.*",
