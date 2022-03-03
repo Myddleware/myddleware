@@ -450,6 +450,9 @@
     "symfony/contracts": {
         "version": "v1.1.11"
     },
+    "symfony/doctrine-messenger": {
+        "version": "v5.4.3"
+    },
     "symfony/flex": {
         "version": "1.18",
         "recipe": {
