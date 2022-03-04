@@ -92,6 +92,33 @@ class toolscore
 
         return $r;
     }
+
+    // Compose checkbox
+    public static function composeListHtmlCheckbox($array, $phrase = false)
+    {
+        $r = '';
+        if ($array) {
+            asort($array);
+            if ($phrase) {
+            }
+            foreach ($array as $k => $v) {                
+                if ('Error if missing' == $v) {
+                    $r .= '<div class="form-check">';
+                    $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input" checked>'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+                    $r .= '</div>';
+                }else if('' != $v){
+                    $r .= '<div class="form-check">';
+                    $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input">'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+                    $r .= '</div>';
+                }
+            }
+        } else {
+            $r .= '<div class="form-check">';
+            $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input">'.$phrase.'</input>';
+            $r .= '</div>';
+        }
+        return $r;
+    }
 	
     public function beforeRuleEditViewRender($data) {
 		return $data;

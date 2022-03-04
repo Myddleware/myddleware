@@ -140,9 +140,8 @@ filter:
     notin: is not included in the following table separated by semicolon  
 
 behavior_filters:
-    error_messing: Error if missing
-    skip_empty: Skip if empty
-    skip_empty_wrong: Skip if empty or wrong
+    error_missing: Error if missing
+    error_empty: Error if empty
 
 view_rule:
     action:

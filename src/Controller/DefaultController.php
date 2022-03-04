@@ -683,8 +683,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $limitParam = $rule->getParamByName('limit')->getValue;
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
-                }
-
+                }                
                 // Get the other rule params
                 $connectorParams = $rule->getParams();
                 foreach ($connectorParams as $connectorParam) {
@@ -1855,9 +1854,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 //Behavior filters
                 $behaviorFilters =[
-                    'Error if missing' => $this->translator->trans('behavior_filters.error_messing'),
-                    'Skip if empty'    => $this->translator->trans('behavior_filters.skip_empty'),
-                    'Skip if empty or wrong' => $this->translator->trans('behavior_filters.skip_empty_wrong'),
+                    'Error if missing' => $this->translator->trans('behavior_filters.error_missing'),
+                    'Error if empty' => $this->translator->trans('behavior_filters.error_empty'),
                 ];
 
                 // paramètres de la règle
@@ -2011,7 +2009,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['behaviorFilters'] = ToolsManager::composeListHtml($result['behaviorFilters']);
+                $result['behaviorFilters'] = ToolsManager::composeListHtmlCheckbox($result['behaviorFilters']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
