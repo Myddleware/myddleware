@@ -60,6 +60,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'wordpress',		    'active' => 0, 'source' => 1, 'target' => 1],
         ['name' => 'postgresql',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)

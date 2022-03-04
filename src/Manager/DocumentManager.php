@@ -1035,7 +1035,7 @@ class documentcore
 		return true;
 	}
 	
-// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
+	// Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
 	protected function checkNoChange($history) {
 		try {
 			// Get target data 
@@ -1056,12 +1056,21 @@ class documentcore
 			if (!empty($target['Myddleware_element_id'])) {
 				$target['Myddleware_element_id'] = '';
 			}
-			
+				
 			// For each target fields, we compare the data we want to send and the data already in the target solution
 			// If one is different we stop the function
 			if (!empty($this->ruleFields)) {
 				foreach ($this->ruleFields as $field) {
-					if (trim($history[$field['target_field_name']]) != trim($target[$field['target_field_name']])){
+					if (
+							trim($history[$field['target_field_name']]) != trim($target[$field['target_field_name']])
+					){
+						// We check if both are empty not depending of the type 0 = ""
+						if (
+								empty($history[$field['target_field_name']]) 
+							AND	empty($target[$field['target_field_name']])
+						) {
+							continue;
+						}							
 						return false;
 					}
 				}
@@ -1073,7 +1082,7 @@ class documentcore
 					if (
 							$ruleRelationship['field_name_target'] != 'Myddleware_element_id'	// No check change on field Myddleware_element_id
 						AND $history[$ruleRelationship['field_name_target']] != $target[$ruleRelationship['field_name_target']]
-					){
+					){						
 						return false;
 					}
 				}

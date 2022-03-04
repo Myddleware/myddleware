@@ -462,7 +462,7 @@ class rulecore
 	// Update/create rule parameter
 	protected function updateParams() {
 		if (!empty($this->dataSource['ruleParams'])) {
-			foreach ($this->dataSource['ruleParams'] as $ruleParam) {				
+			foreach ($this->dataSource['ruleParams'] as $ruleParam) {		
 				// Search to check if the param already exists
 				 $paramEntity = $this->entityManager->getRepository(RuleParam::class)
 					   ->findOneBy( array(
@@ -472,10 +472,25 @@ class rulecore
 						);	
 				// Update or create the new param		
 				if (!empty($paramEntity)) {
+					if ($ruleParam['value'] != $paramEntity->getValue()) {
+						$paramAudit = new RuleParamAudit();
+						$paramAudit->setRuleParamId($paramEntity->getId());
+						$paramAudit->setDateModified(new \DateTime());
+						$paramAudit->setBefore($paramEntity->getValue());
+						$paramAudit->setAfter($ruleParam['value']);
+						$paramAudit->setJob($this->jobId);
+						$this->entityManager->persist($paramAudit);
+					}
 					$paramEntity->setValue( $ruleParam['value'] );
 				} else {
+					$rule = $this->entityManager->getRepository(Rule::class)
+											->findOneBy([
+												'id' => $this->ruleId,
+											]
+											);
+					
 					$paramEntity = new RuleParam();		
-					$paramEntity->setRule($this->ruleId);
+					$paramEntity->setRule($rule);
 					$paramEntity->setName($ruleParam['name']);
 					$paramEntity->setValue($ruleParam['value']); 						
 				}
@@ -553,11 +568,15 @@ class rulecore
 			array_multisort($modified, SORT_DESC, $dataSourceValues);		
 			foreach ($dataSourceValues as $value) {
 				// Check if the previous record has the same date_modified than the current record
+				// Check only if offset isn't managed into the source application connector
 				if (
-						empty($previousValue)   // first call
-					OR (
-							!empty($previousValue['date_modified'])
-						AND $previousValue['date_modified'] == $value['date_modified']
+						empty($this->dataSource['ruleParams']['offset'])
+					AND (
+							empty($previousValue)   // first call
+						OR (
+								!empty($previousValue['date_modified'])
+							AND $previousValue['date_modified'] == $value['date_modified']
+						)
 					)
 				) {
 					// Remove the current item, it will be read in the next call
@@ -575,9 +594,13 @@ class rulecore
 			// If reference date hasn't changed => it means that we reached the read limit and there are only 2 reference dates in the records, 
 			//									=> we removed the most recent ones (to be sure to miss no records) and only one reference date remain
 			//									=> If we don't stop the process, Myddleware will always read the same records
+			// Check only if offset isn't managed into the source application connector
 			if (
-					empty($this->dataSource['values'])
-				OR $this->ruleParams['datereference'] == $this->dataSource['date_ref']
+					empty($this->dataSource['ruleParams']['offset'])
+				AND (	
+						empty($this->dataSource['values'])
+					OR $this->ruleParams['datereference'] == $this->dataSource['date_ref']
+				)
 			) {
 				return array('error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.');
 			}
@@ -1375,9 +1398,13 @@ class rulecore
 					}
 					// Delete data from target application
 					elseif ($type == 'D') {
-						$send = $this->checkBeforeDelete($send);						
-						$send['data'] = $this->beforeDelete($send['data']);
-						$response = $this->solutionTarget->deleteData($send);
+						$send = $this->checkBeforeDelete($send);		
+						if (empty($send['error'])) {
+							$send['data'] = $this->beforeDelete($send['data']);
+							$response = $this->solutionTarget->deleteData($send);
+						} else {
+							$response['error'] = $send['error'];
+						}
 					}
 					else {
 						$response[$documentId] = false;
@@ -1415,30 +1442,30 @@ class rulecore
 					// We exclude the cancel document except the one no_send
 					// We exclude document from a rule linked with Myddleware_element_id (when 2 source modules update one target module) 
  					// At the end (HAVING) we exclude the group of document that have a deleted document (should have the status no_send)
-					$query = "	SELECT Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id, 
-									GROUP_CONCAT(DISTINCT Document.type) types,
-									GROUP_CONCAT(DISTINCT Document.id ORDER BY Document.date_created DESC) documents
-								FROM Document 
-									INNER JOIN Rule
-										ON Document.rule_id = Rule.id
-									LEFT OUTER JOIN RuleRelationShip
-+										 ON Rule.id = RuleRelationShip.field_id
-+										AND RuleRelationShip.field_name_target = 'Myddleware_element_id'
+					$query = "	SELECT rule.conn_id_target, rule.module_target, document.target_id, document.source_id, 
+									GROUP_CONCAT(DISTINCT document.type) types,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.date_created DESC) documents
+								FROM document 
+									INNER JOIN rule
+										ON document.rule_id = rule.id
+									LEFT OUTER JOIN rulerelationship
+										 ON rule.id = rulerelationship.field_id
+										AND rulerelationship.field_name_target = 'Myddleware_element_id'
 								WHERE 
-										Rule.conn_id_target = :conn_id_target
-									AND Rule.module_target = :module_target
-									AND Document.target_id = :target_id
-									AND Document.source_id <> (SELECT source_id from Document WHERE id = :docId)
-									AND RuleRelationShip.rule_id <> Rule.id
-									AND Document.deleted = 0
+										rule.conn_id_target = :conn_id_target
+									AND rule.module_target = :module_target
+									AND document.target_id = :target_id
+									AND document.source_id <> (SELECT source_id from document WHERE id = :docId)
+									AND rulerelationship.rule_id <> rule.id
+									AND document.deleted = 0
 									AND (
-												Document.global_status <> 'Cancel'
+												document.global_status <> 'Cancel'
 										OR (
-												Document.global_status = 'Cancel'
-											AND Document.status = 'No_send'
+												document.global_status = 'Cancel'
+											AND document.status = 'No_send'
 										)
 									)
-								GROUP BY Rule.conn_id_target, Rule.module_target, Document.target_id, Document.source_id
+								GROUP BY rule.conn_id_target, rule.module_target, document.target_id, document.source_id
 								HAVING types NOT LIKE '%D%'";
 					$stmt = $this->connection->prepare($query);
 					$stmt->bindValue(":conn_id_target", $this->rule['conn_id_target']);
@@ -1466,7 +1493,7 @@ class rulecore
 			}
 			// Exception if all documents has been removed from data
 			if (empty($send['data'])) {
-				throw new \Exception ('Every deletion record haven been cancelled. Nothing to send.');
+				$send['error'] = 'Every deletion record haven been cancelled for the rule '.$this->ruleId.'. Nothing to send.';
 			}
 		}
 		return $send;

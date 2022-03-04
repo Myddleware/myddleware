@@ -44,7 +44,7 @@ class databasecore extends solution
         try {
             try {
                 $this->pdo = $this->generatePdo();
-				$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+				$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING );
                 $this->connexion_valide = true;
             } catch (\PDOException $e) {
                 $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -310,7 +310,7 @@ class databasecore extends solution
 			// Build query	
 			$requestSQL = $this->buildQuery($param, $query);		
             // Query validation
-            $requestSQL = $this->queryValidation($param, 'read', $requestSQL);
+            $requestSQL = $this->queryValidation($param, 'read', $requestSQL, '');
 
             // Appel de la requête
             $q = $this->pdo->prepare($requestSQL);
@@ -349,7 +349,7 @@ class databasecore extends solution
 								} else {
 									$row['date_modified'] = date('Y-m-d H:i:s');
 								}
-								$result['date_ref'] = $value;
+								$result['date_ref'] = $row['date_modified'];
 							}
 						} elseif ($param['call_type'] == 'history') { // Id is fieldId for a history action 
 							if ($key === $param['ruleParams']['targetFieldId']) { 
@@ -411,10 +411,10 @@ class databasecore extends solution
 		$values .= ')'; // VALUES (value1,value2,value3,...)
 		$sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
 		// Query validation
-		$sql = $this->queryValidation($param, 'create', $sql);
+		$sql = $this->queryValidation($param, 'create', $sql, $record);
+
 		$q = $this->pdo->prepare($sql);
 		$exec = $q->execute();
-
 		if (!$exec) {
 			$errorInfo = $this->pdo->errorInfo();
 			throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
@@ -448,10 +448,9 @@ class databasecore extends solution
 		$sql = substr($sql, 0, -1);
 		$sql .= ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$record['target_id']."'";
 		// Query validation
-		$sql = $this->queryValidation($param, 'update', $sql);
+		$sql = $this->queryValidation($param, 'update', $sql, $record);
 		// Execute the query
 		$q = $this->pdo->prepare($sql);
-
 		$exec = $q->execute();
 		// Query error
 		if (!$exec) {
@@ -481,7 +480,8 @@ class databasecore extends solution
 		$sql = 'DELETE FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' ';
 		$sql .= ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$record['target_id']."'";
 		// Query validation
-		$sql = $this->queryValidation($param, 'delete', $sql);
+		$sql = $this->queryValidation($param, 'delete', $sql, $record);
+	
 		// Execute the query
 		$q = $this->pdo->prepare($sql);
 		$exec = $q->execute();
@@ -569,7 +569,7 @@ class databasecore extends solution
     }
 
     // Function to check, modify or validate the query
-    protected function queryValidation($param, $functionName, $requestSQL)
+    protected function queryValidation($param, $functionName, $requestSQL, $record)
     {
         return $requestSQL;
     }

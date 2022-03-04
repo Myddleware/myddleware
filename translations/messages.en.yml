@@ -632,7 +632,7 @@ menu_user:
     account: My account
     jobscheduler: Job scheduler
     crontab: Crontab
-    management_smtp: Configuration smtp
+    management_smtp: SMTP config
     logout: Logout
 
 help:
@@ -699,7 +699,6 @@ messages:
     template:
         nb_rule: "Number of generated rules: "
         help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
-  
 email_notification:
     subject: Myddleware notification
     hello: Hi, 
@@ -709,17 +708,26 @@ email_notification:
     transfer_open: "- Documents still open:"
     active_rule: "Active rules: "
     no_active_rule: No active rule in Myddleware.
-    100_first_erros: "Here the 100 first errors: "
-    error_list: "Here the errors:"
+    100_first_erros: "Here are the 100 first errors: "
+    error_list: "Here are the errors:"
     best_regards: Best regards, 
-    signature: Myddleware team
+    signature: The Myddleware team
 email_alert:
     subject: Myddleware alert
     introduction: "A job is running beyond the limit you have set up : "
     minute: minutes. 
-    job_start: The job has begun at 
+    job_start: The job started at 
     job_id: ". ID of this job : "
-    recommandation: Please, check if this job is still transferring data. If it doesn't, please stop the job manually by opening the job and clicking on the button "Stop task".
+    recommandation: Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".
+    body: |
+        Hello,
+        <p>A job is running beyond the limit you have set up : %min% minutes<br/>
+        The job started at  %begin%.<br/>
+        ID of this job : %id%<br/>
+        Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".<br/>
+        %base_uri%</p>
+
+        Kind regards,
 jobscheduler:
     command: Command
     date_created: Date created
@@ -727,10 +735,10 @@ jobscheduler:
     list: List
     title: Jobscheduler
     period: Period
-    job_order: Order job
+    job_order: Job order
     date_modified: Date update
     total : Total
-    create_by : create by
+    create_by : created by
     modified_by : modified by
     paramName1 : Parameter 1
     paramValue1 : Parameter value 1
@@ -751,10 +759,10 @@ jobscheduler:
                 For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
                    */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
 management_smtp:
-    submit :  Save configuration SMTP
+    submit :  Save SMTP config
     cancel: Cancel
-    title : Management SMTP
-    description : 'You can configure email parameters here. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
+    title : SMTP Management
+    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
     sendtestmail: Send test mail
 
 management_smtp_sendmail:
@@ -767,7 +775,7 @@ login:
     user: Login
     pwd: Password
     connexion: Sign in
-    error_session: Error of session
+    error_session: Session error
     text_up_right: More information about Myddleware
     text_bottom_right: You will be redirected towards our site
     invalid_credentials: Invalid credentials
@@ -846,6 +854,9 @@ crontab:
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
     create: Create crontab
+    period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
+    max_instance_help: A maximum instance limit for new tasks
+    help: Add a task in your task scheduler, to do this click on the "Create crontab" button, you will just have to fill in the requested fields and your task will automatically run according to the period entered (example period, */5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * coresspond to 5 min).
 duplicate_rule:
     duplicate: Duplicate
     cancel: Cancel

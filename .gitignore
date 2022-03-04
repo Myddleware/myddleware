@@ -4,6 +4,7 @@
 # Cache, session files and logs (Symfony3)
 /var/cache/*
 /var/log/*
+/var/logs/*
 /var/sessions/*
 !var/cache/.gitkeep
 !var/logs/.gitkeep
@@ -78,6 +79,7 @@ yarn-error.log
 
 ###> local env file ###
 .env.local
+.env.local.php
 ###< env file ###
 
 ##> vscode and other IDE parameters ## 
@@ -97,11 +99,10 @@ composer.phar
 /docker/var/
 !/docker/var/*/.gitkeep
 .env.docker
+/docker/etc/openvpn/*
 ##< Docker ##
 
-##> Yarn ##
-.yarn/*
-!.yarn/releases
-!.yarn/plugins
-.pnp.*
-##< Yarn ##
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
