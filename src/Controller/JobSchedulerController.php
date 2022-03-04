@@ -314,12 +314,10 @@ class JobSchedulerController extends AbstractController
             $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
             $form = $this->createForm(JobSchedulerCronType::class, $entityCrontab);
             $form->handleRequest($request);
-                if ($form->isSubmitted() && $form->isValid()) {      
-                    $entityCrontab->setDescription($form->getData()->getDescription());
-                    $entityCrontab->setArguments($form->getData()->getArguments());
-                    $entityCrontab->setMaxInstances($form->getData()->getMaxInstances());
-                    $entityCrontab->setNumber($form->getData()->getNumber());
+                if ($form->isSubmitted() && $form->isValid()) {                          
                     $entityCrontab->setPeriod($form->getData()->getPeriod());
+                    $entityCrontab->setCommand($form->getData()->getCommand());                    
+                    $entityCrontab->setDescription($form->getData()->getDescription());
                     $this->entityManager->persist($entityCrontab);
                     $this->entityManager->flush();
                     $success = $translator->trans('crontab.success');

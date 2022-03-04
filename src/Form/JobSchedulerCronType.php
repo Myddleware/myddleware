@@ -20,10 +20,8 @@ class JobSchedulerCronType extends AbstractType
             'label' => 'Active',
             'required' => false,
              ])
-            ->add('arguments', TextType::class)
+            ->add('command', TextType::class)
             ->add('description', TextType::class)
-            ->add('maxInstances', IntegerType::class)
-            ->add('number', IntegerType::class)
             ->add('period', TextType::class)
             ->add('save', SubmitType::class, [
             'attr' => [

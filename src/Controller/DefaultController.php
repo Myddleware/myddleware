@@ -416,15 +416,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ->findOneBy([
                     'id' => $id,
                 ]);   
-                // get the data from the rule
-                $connectorRepo    = $this->entityManager->getRepository(Connector::class);
-                $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
-                $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
-                $connectorSource = $rule->getconnectorSource()->getName();
-                $connectorTarget = $rule->getconnectorTarget()->getName();
                 $newRule = new Rule();
 
-                $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
+                //solution id current rule 
+                $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
+                $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
+				
+				// Create the form
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule, array('solution' => array('source' => $currentRuleSolutionSourceId, 'target' => $currentRuleSolutionTargetId)));
+
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -433,6 +433,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleName = $form->get('name')->getData();
                     $newRuleSource = $form->get('connectorSource')->getData();
                     $newRuleTarget = $form->get('connectorTarget')->getData();
+                    
+
                     if (isset($newRuleName)) {
                         $newRule->setName($newRuleName)
                             ->setCreatedBy($user)
@@ -468,15 +470,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $this->entityManager->flush();
                             $success =$translator->trans('duplicate_rule.success_duplicate');
                             $this->addFlash('success', $success);
+                            
                     }
+                    
+                
                         return $this->redirect($this->generateURL('regle_list'));
-                }
+                }               
                 return $this->render('Rule/create/duplic.html.twig', [
                     'rule' => $rule,
                     'connectorSourceUser' => $connectorSource,
                     'connectorTarget' => $connectorTarget,
-                    'solutionTarget'  => $solutionTarget,
-                    'solutionSource'  => $solutionSource,
                     'form' => $form->createView()
                 ]);
             } catch (Exception $e) {
