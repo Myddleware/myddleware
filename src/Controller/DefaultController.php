@@ -417,7 +417,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'id' => $id,
                 ]);   
                 $newRule = new Rule();
-
+				$connectorSource = $rule->getconnectorSource()->getName();
+                $connectorTarget = $rule->getconnectorTarget()->getName();
+				
                 //solution id current rule 
                 $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
                 $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
