@@ -39,8 +39,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class sendinbluecore extends solution
 {
     protected $config;
-    protected $required_fields = ['default' => ['id', 'modifiedAt']];
-
+    protected $required_fields = [
+									'default' => ['id', 'modifiedAt'],
+									'transactionalEmails' => ['uuid', 'date'],
+									'transactionalEmailActivity' => ['messageId', 'event', 'date'],
+								];
+    protected $FieldsDuplicate = ['contacts' => ['email']];
+	protected $limitEmailActivity = 100;
     
     public function getFieldsLogin()
     {
@@ -87,16 +92,12 @@ class sendinbluecore extends solution
         if ('source' == $type) {
             return [
                'contacts' => 'Contacts',
-               'campaign_stat' => 'Campaign statistics',
-               'transactional_stat' => 'Transactional statistics',
-               'transactionEmails' => 'Transaction emails'
+               'transactionalEmails' => 'Transactional emails',
+               'transactionalEmailActivity' => 'Transactional email activity'
             ];
         }
         return [
             'contacts' => 'Contacts',
-            'campaign_stat' => 'Campaign statistics',
-            'transactional_stat' => 'Transactional statistics',
-            'transactionEmails' => 'Transaction emails'
         ];
     }
 
@@ -111,27 +112,36 @@ class sendinbluecore extends solution
             $this->moduleFields = $moduleFields[$module];
             return $this->moduleFields;
         }
+		// Contact fields
         try {
             //Add of the different fields according to the modules
             //Use Sendinblue Api
             $apiInstance = new \SendinBlue\Client\Api\AttributesApi( new \GuzzleHttp\Client(), $this->config );
             $results = $apiInstance->getAttributes();
             $attributes = $results->getAttributes();
-            $this->moduleFields = $moduleFields['transactionalEmails'];  //add attributes for transaction             
+            // $this->moduleFields = $moduleFields['transactionalEmails'];  //add attributes for transaction             
             foreach ($attributes as $attribute) {       
                 $this->moduleFields [$attribute->getName()] = [
                     'label' => $attribute->getName(),
                     'required' => false,
-                    'type' => 'varchar(255)', // Define the correct type
+                    'type' => 'varchar(255)',
                     'type_bdd' => 'varchar(255)',
                     'required_relationship' => false,
                     'relate' => false
                 ];  
             }   
+            $this->moduleFields ['id'] = [
+                'label' => 'ID',
+                'required' => false,
+                'type' => 'varchar(255)',
+                'type_bdd' => 'varchar(255)',
+                'required_relationship' => false,
+                'relate' => true
+            ];  
             $this->moduleFields ['email'] = [
                 'label' => 'email',
                 'required' => false,
-                'type' => 'varchar(255)', // Define the correct type
+                'type' => 'varchar(255)', 
                 'type_bdd' => 'varchar(255)',
                 'required_relationship' => false,
                 'relate' => false
@@ -143,99 +153,163 @@ class sendinbluecore extends solution
         }
     }
 
-    public function getFieldsParamUpd($type, $module)
-    {
-        try {
-            $fieldsSource = $this->get_module_fields($module, $type, false);
-            // List only real database field so we remove the Myddleware_element_id field
-            unset($fieldsSource['templateId']);
-            if (!empty($fieldsSource)) {
-                if ('source' == $type) {
-                    // Add param to store the fieldname corresponding to the record id
-                    $idParam = [
-                        'id' => 'fieldId',
-                        'name' => 'fieldId',
-                        'type' => 'option',
-                        'label' => 'Primary key in your source table',
-                        'required' => true,
-                    ];
-                    // Add param to store the fieldname corresponding to the record reference date
-                    $dateParam = [
-                        'id' => 'fieldDateRef',
-                        'name' => 'fieldDateRef',
-                        'type' => 'option',
-                        'label' => 'Field Date Reference',
-                        'required' => true,
-                    ];
-                    // Add all fieds to the deletion list fields to get the one which carries the deletion flag
-                    $deletionParam = [
-                        'id' => 'deletionField',
-                        'name' => 'deletionField',
-                        'type' => 'option',
-                        'label' => 'Field with deletion flag',
-                        'required' => false,
-                        'option' => ['' => ''], // Add empty value
-                    ];
-                    // Add all fieds to the list
-                    foreach ($fieldsSource as $key => $value) {
-                        $idParam['option'][$key] = $value['label'];
-                        $dateParam['option'][$key] = $value['label'];
-                        $deletionParam['option'][$key] = $value['label'];
-                    }
-                    // Add the possibility to generate an unique id
-                    $idParam['option']['myddleware_generated'] = 'Generated by Myddleware';
-					// Add a parameter for deletion to automatically check if a record has been deleted from the database
-					$deletionParam['option']['compareTable'] = 'Compare source table with Myddleware';
-
-                    $params[] = $idParam;
-                    $params[] = $dateParam;
-                    $params[] = $deletionParam;
-                } else {
-                    // Add param to store the fieldname corresponding to the record id
-                    $idParam = [
-                        'id' => 'targetFieldId',
-                        'name' => 'targetFieldId',
-                        'type' => 'option',
-                        'label' => 'Primary key in your target table',
-                        'required' => true,
-                    ];
-                    // Add all fieds to the list
-                    foreach ($fieldsSource as $key => $value) {
-                        $idParam['option'][$key] = $value['label'];
-                    }
-                    $params[] = $idParam;
-                }
-                return $params;
-            }
-            return [];
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
 
      // Read all fields
     public function read($param){
-        //transactional stats
-        //filter email soft/hard bounce and update status
-        //$identifier = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
-        //$resultStats = $apiInstance->getContactInfo($identifier);
+
+		$result = array(); 
+		// Function are differents depending on the type of record we read from Sendinblue
         switch ($param['module']) {
-            case 'transactionalEmails':
-                //Get your transactional email activity aggregated per day
-                $dateTest = explode(" ", $param['date_ref'],2);
-                $day      = explode("/", $dateTest[0],3);
+           	case 'transactionalEmailActivity': 
+				// event is required
+				if (empty($param['ruleParams']['event'])) {
+					throw new \Exception('No event selected. Please select an event on your rule. ');
+				}
+				
+				// As we build the id (it doesn't exist in Sendinblue), we add it to the param field
+				$param['fields'][] = 'id';
+				
+				// ini call parameters
+				$nbCall = 1;
+				// $limitCall = $this->limitEmailActivity;
+				$offset = 0;
+				$records = array();
+				$dateStart = null;
+				$dateEnd = null;
+				$event = null;
+				$messageId = null;
+				$limitCall = 1;
+				$limitLastCall = 1;
+			
+				// Set call parameters when we search a specific transactional email
+				if (!empty($param['query']['id'])) {
+					// id = <message_id>+__+<event>
+					$searchParam = explode('__', $param['query']['id']);		
+					if (!empty($searchParam[0])) {
+						$messageId = $searchParam[0];
+					} else {
+						throw new \Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
+					}
+					if (!empty($searchParam[1])) {
+						$event = $searchParam[1];
+					} else {
+						throw new \Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
+					}
+				// Set call parameters when we read transactional email using reference date	
+				} else {
+					
+					// Because offset is managed in this function, we don't need the +1 in the rule param limit
+					if ($param['limit'] > 1) {
+						$param['limit']--;
+					}
+					
+					$event = $param['ruleParams']['event'];
+					// if simulation, we init the date start to today - 30 days
+					if ($param['call_type'] == 'simulation') {
+						$dateStartObj = new \DateTime('NOW');
+						$dateStartObj->sub(new \DateInterval('P30D'));
+						// $dateStart = $dateStartObj->format('Y-m-d');
+					} else {
+						$dateStartObj = new \DateTime($param['date_ref']);
+						// $dateEndObj = new \DateTime($param['date_ref']);
+					}
+					// Only date (not datetime) are used to filter transaction email activity
+					$dateStart = $dateStartObj->format('Y-m-d');
+					$dateEnd = $this->getDateEnd($dateStartObj);
+	
+					// Make sure that offset exists
+					if (empty($param['ruleParams']['offset'])) {
+						$param['ruleParams']['offset'] = 0;
+					} else {
+						// Change offset if the parameter exists on the rule
+						$offset = $param['ruleParams']['offset'];
+					}
+				
+					// Max call limit = 100
+					// Nb call depend on limit param
+					if ($param['limit'] > $this->limitEmailActivity) {
+						$nbCall = floor($param['limit']/$this->limitEmailActivity);
+						// Add 1 call if needid (using modulo function)
+						if ($param['limit']%$this->limitEmailActivity != 0) {
+							$limitLastCall = $param['limit']%$this->limitEmailActivity;
+							$nbCall++;
+						}
+						$limitCall = $this->limitEmailActivity;
+					} else {
+						// If rule limit < $limitCall , there is no need to call more records
+						$limitCall = $param['limit'];
+					}
+			
+					// If rule limit modulo limitcall is null then last call will be equal to limitcall
+					if ($param['limit']%$this->limitEmailActivity == 0) {
+						$limitLastCall = $this->limitEmailActivity;
+					}			
+				}
                 $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi( new \GuzzleHttp\Client(), $this->config);        
-                $limit = 10;
-                $offset = 0;
-                /*$startDate = $day;
-                $endDate = date('Y-m-d');*/      
-                try {
-                    $result = $apiInstance->getSmtpReport($limit, $offset);
-                } catch (\Exception $e) {
-                    $error = $e->getMessage();
-                    $this->logger->error($error);
-                    var_dump($error);
-                }         
+				
+				$contactRequested = array_search('contactId', $param['fields']);
+				if ($contactRequested !== false) {
+					$apiContactInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config );
+				}
+		
+				for ($i = 1; $i <= $nbCall; $i++) {
+					// The limit can be different for the last call (in case of several call)
+					if (
+							$i == $nbCall
+						AND $nbCall > 1
+					) {
+						$limitCall = $limitLastCall;
+					}				
+					$resultApi = $apiInstance->getEmailEventReport($limitCall, $offset, $dateStart, $dateEnd, null, null, $event, null, $messageId, null, 'asc');
+
+					if (!empty(current($resultApi)['events'])) {
+						$events = current($resultApi)['events'];
+							
+						// Add records read into result array
+						foreach($events as $record) {
+							$offset++;						
+							$record['id'] = $record['messageId'].'__'.$record['event'];
+							
+							// if the contactid is requested, we use the email to get it
+							if ($contactRequested !== false) {
+								try {
+									$resultContactApi = $apiContactInstance->getContactInfo($record['email']);
+									if (!empty(current($resultContactApi)['id']))
+									$record['contactId'] = current($resultContactApi)['id'];
+								} catch (\Exception $e) {
+									$record['contactId'] = '';
+								}
+							}
+							
+							$records[] = $record;
+							// IF the date change, we set the offset to 0 (because filter is only on date and not dateTime
+							/// Date start we be changed with the date of the current record
+							// Date ref will also be changed
+							$dateRecordObj = new \DateTime($record['date']);							
+							if (
+									empty($param['query']['id'])	// No offset management if search by id
+								AND $dateRecordObj->format('Y-m-d') != $dateStartObj->format('Y-m-d')
+							) {		
+								$dateStartObj = $dateRecordObj;
+								$dateStart = $dateStartObj->format('Y-m-d');
+								$dateEnd = $this->getDateEnd($dateStartObj);
+
+								// Offset = 1 not 0 becquse we have alredy read the first record of the day
+								$offset = 1;
+							}			
+						}
+
+						// If the limit hasn't been reached, it means there is no more result to read. We stop the read action.
+						if (count($events) < $this->limitEmailActivity) {						
+							break;
+						}
+					}
+				}
+				// Save the offset value on the rule
+				// No offset management if search by id
+				if (empty($param['query']['id'])) {
+					$result['ruleParams'][] = array('name' => 'offset', 'value' => $offset);
+				}				
                 break;
             case 'contacts':
                 $apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config ); 
@@ -244,49 +318,76 @@ class sendinbluecore extends solution
                     !empty($param['query']['id']) 
                  OR !empty($param['query']['email'])
                     ) {
+					// Search key for contact can be email or id
                     $shearchKey = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
-                    //Use getContactInfo            
-                    $resultApi = $apiInstance->getContactInfo($shearchKey);
-                    var_dump($resultApi);
+                    // Get the info from contact, an exception is generated by getContactInfo if the contact isn't found
+					try {
+						$resultApi = $apiInstance->getContactInfo($shearchKey);
+					} catch (\Exception $e) {
+						$error = $e->getMessage();
+						// No exception if history call (check if the contact exists) and contact not found
+						if (
+								$param['call_type'] == 'history'
+							AND strpos($error, 'document_not_found') !== false
+						) {
+							return false;
+						}
+						// exception generated if not history call
+						throw new \Exception('Exception when calling ContactsApi->getContactInfo: '. $error);
+					}
+					// Format results
                     if (!empty(current($resultApi))) {
-                    $records[] = current($resultApi);
+						$records[] = current($resultApi);
                     }                     
                 }else {
                     $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
-                    $modifiedSince = new \DateTime('2011-12-08T14:25:04.848+01:00');
-                    $resultApi = $apiInstance->getContacts();
+                    $modifiedSince = new \DateTime($dateRef);
+                    $resultApi = $apiInstance->getContacts($param['limit'], '0', $modifiedSince, 'asc');
                     $records = $resultApi->getContacts();            
                 } 
                 break;
-            default:             
+            default:  
+				throw new \Exception('Unknown module: '.$param['module']);
                 break;
         }
-         $result = array();                  
-            //Recover all contact sendinblue 
-            if(!empty($records)){
-                foreach($records as $record){
-                    foreach ($param['fields'] as $field) { 
-                        if (!empty($record[$field])) {
-                            $result[$record['id']][$field] = $record[$field];
-                        // Result attribute can be an object (example function getContacts())
-                        } elseif(!empty($record['attributes']->$field)) {
-                            $result[$record['id']][$field] = $record['attributes']->$field;  
-                        // Result attribute can be an array (example function getContactInfo())                    
-                        }elseif(
-                                !empty($param['query'])
-                            AND !empty($record['attributes'][$field])
-                        ) {
-                            $result[$record['id']][$field] = $record['attributes'][$field];                    
-                        }
-                        else {
-                            $result[$record['id']][$field] = '';
-                        }                    
-                    }
-                } 
-            }        
+         
+		//Recover all contact from sendinblue 
+		if(!empty($records)){
+			$idField = $this->getIdName($param['module']);		
+			foreach($records as $record){					
+				foreach ($param['fields'] as $field) {			
+					if (!empty($record[$field])) {
+						$result[$record[$idField]][$field] = $record[$field];
+					// Result attribute can be an object (example function getContacts())
+					} elseif(!empty($record['attributes']->$field)) {
+						$result[$record[$idField]][$field] = $record['attributes']->$field;  
+					// Result attribute can be an array (example function getContactInfo())                    
+					}elseif(
+							is_array($record['attributes'])
+						AND !empty($record['attributes'][$field])
+					) {
+						$result[$record[$idField]][$field] = $record['attributes'][$field];                    
+					}
+					else {
+						$result[$record[$idField]][$field] = '';
+					}                    
+				}
+			} 
+		}   			
         return $result;
     }
 
+	protected function getDateEnd($dateObj){
+		$dateEndObj = clone($dateObj);
+		$dateEndObj->add(new \DateInterval('P30D'));
+		$dateNow = new \DateTime('NOW');
+		// Date end can't be greater than today
+		if ($dateEndObj->format('Ymd') > $dateNow->format('Ymd')) {
+			$dateEndObj = $dateNow;
+		}
+		return $dateEndObj->format('Y-m-d');
+	}
+	
     //fonction for get all your transactional email activity
     public function EmailTransactional($param){
         $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi( new \GuzzleHttp\Client(), $this->config ); 
@@ -307,26 +408,19 @@ class sendinbluecore extends solution
     }
 
      // Create the record 
-     protected function create($param, $record)
-     {
+     protected function create($param, $record) {
         // Import or create new contact for sendinblue 
-        try {
-            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
-            $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
-            $createContact['email'] = $record['email'];
-            // Add attributes
-            $createContact['attributes'] = $record; 
-            $result = $apiInstance->createContact($createContact);
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            return false;
-        }          
-        return $result->getId();
+		$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+		$createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+		$createContact['email'] = $record['email'];
+		// Add attributes
+		$createContact['attributes'] = $record; 
+		$result = $apiInstance->createContact($createContact);			
+		return $result->getId();
      }
 
     // Update the record 
-    protected function update($param, $record)
-    {       
+    protected function update($param, $record) {  
         try {
             $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
             $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
@@ -335,8 +429,7 @@ class sendinbluecore extends solution
             $updateContact['attributes'] = $record;            
             $result = $apiInstance->updateContact($identifier, $updateContact);
          } catch (\Exception $e) {
-            $error = $e->getMessage();
-            return false;
+            throw new \Exception('Exception when calling ContactsApi->updateContact: '. $e->getMessage());			
         }    
         return $identifier;
     }
@@ -351,12 +444,107 @@ class sendinbluecore extends solution
 	protected function dateTimeFromMyddleware($dateTime) {
 		$dto = new \DateTime($dateTime);
 		// Return date to UTC timezone
-		return $dto->format('Y-m-d\TH:i:sP');
+		return $dto->format('Y-m-d\TH:i:s.uP');
 	}
+	
+	protected function dateTimeToDate($dateTime) {	
+        $dto = new \DateTime($dateTime);	
+        return $dto->format("Y-m-d");
+    }
 
-    // Returns the name of the reference date field according to the module and mode of the rule
-    public function getRefFieldName($moduleSource, $RuleMode) {
-    return 'modifiedAt';
+	public function getFieldsParamUpd($type, $module)
+    {
+		$params = parent::getFieldsParamUpd($type, $module);
+		try {
+			if ('source' == $type) {
+				if ($module == 'transactionalEmails') {
+					// Add param to store the fieldname corresponding to the record id
+					$templateId = [
+						'id' => 'templateId',
+						'name' => 'templateId',
+						'type' => 'text',
+						'label' => 'Template id(s) separated by ";" . Or set "All" to get all Emails.',
+						'required' => true,
+					];
+					$params[] = $templateId;
+				} 
+				if ($module == 'transactionalEmailActivity') {
+					// Add param to store the fieldname corresponding to the record id
+					$templateId = [
+						'id' => 'event',
+						'name' => 'event',
+						'type' => 'option',
+						'label' => 'Event',
+						'required' => true,
+						'option' => array(
+										'delivered' => 'delivered',
+										'bounces' => 'bounces',
+										'hardBounces' => 'hardBounces',
+										'softBounces' => 'softBounces',
+										'spam' => 'spam',
+										'requests' => 'requests',
+										'opened' => 'opened',
+										'clicks' => 'clicks',
+										'invalid' => 'invalid',
+										'deferred' => 'deferred',
+										'blocked' => 'blocked',
+										'unsubscribed' => 'unsubscribed',
+										'error' => 'error'
+									),
+					];
+					$params[] = $templateId;
+				} 
+				
+				
+				
+			} /* else { // target
+				if ($module == 'contacts') {
+					// Add param to store the fieldname corresponding to the record id
+					$fieldId = [
+						'id' => 'fieldId',
+						'name' => 'fieldId',
+						'type' => 'option',
+						'label' => 'Reference field (do not change it if documents have already been sent)',
+						'required' => true,
+						'option' => array(
+										'id' => 'Id (recommended)',
+										'email' => 'Email (only if you use Transactional email module)'
+									),
+					];
+					$params[] = $fieldId;
+				} 	
+			} */
+			
+		} catch (\Exception $e) {
+			return [];
+		} 
+		return $params;
+        
+    }
+	
+	// Return a specific id for some modules
+	public function getIdName($module)
+    {
+		if ($module == 'transactionalEmails') {
+			return 'uuid';
+		}
+		return parent::getIdName($module);
+    }
+
+    // Returns the name of the reference date field according to the module and mode of the rule	
+	public function getRefFieldName($moduleSource, $RuleMode)
+    {
+        switch ($moduleSource) {
+            case 'transactionalEmails':
+                return 'date';
+                break;
+            case 'transactionalEmailActivity':
+                return 'date';
+                break;
+            default:
+                return 'modifiedAt';
+                break;
+        }
     }
 }
 
@@ -364,4 +552,3 @@ class sendinblue extends sendinbluecore
 {
 
 }
-

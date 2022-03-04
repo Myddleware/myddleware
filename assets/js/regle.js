@@ -466,7 +466,6 @@ $(function () {
 
 	// Validation et vérification de l'ensemble du formulaire			
 	$("#validation", '#rule_mapping').on("click", function () {
-
 		before = $("#validation").attr('value'); // rev 1.08
 
 		if (require() && require_params() && require_relate() && duplicate_fields_error()) {
@@ -911,7 +910,7 @@ function btn_action_fct() {
 }
 
 function notification() {
-	notification = $.trim($('#zone_notification', '#notification').html());
+	var notification = $.trim($('#zone_notification', '#notification').html());
 
 	if (notification != '') {
 		$('#notification').fadeIn();
