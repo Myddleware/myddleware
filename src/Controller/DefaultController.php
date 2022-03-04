@@ -416,15 +416,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ->findOneBy([
                     'id' => $id,
                 ]);   
-                // get the data from the rule
-                $connectorRepo    = $this->entityManager->getRepository(Connector::class);
-                $solutionTarget  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'target');
-                $solutionSource  = $connectorRepo->findAllConnectorByUser($this->getUser()->getId(), 'source');
-                $connectorSource = $rule->getconnectorSource()->getName();
-                $connectorTarget = $rule->getconnectorTarget()->getName();
                 $newRule = new Rule();
+				$connectorSource = $rule->getconnectorSource()->getName();
+                $connectorTarget = $rule->getconnectorTarget()->getName();
 
-                $form = $this->createForm(DuplicateRuleFormType::class, $newRule);
+                //solution id current rule 
+                $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
+                $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
+				
+				// Create the form
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule, array('solution' => array('source' => $currentRuleSolutionSourceId, 'target' => $currentRuleSolutionTargetId)));
+
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -433,6 +435,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleName = $form->get('name')->getData();
                     $newRuleSource = $form->get('connectorSource')->getData();
                     $newRuleTarget = $form->get('connectorTarget')->getData();
+                    
+
                     if (isset($newRuleName)) {
                         $newRule->setName($newRuleName)
                             ->setCreatedBy($user)
@@ -468,15 +472,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $this->entityManager->flush();
                             $success =$translator->trans('duplicate_rule.success_duplicate');
                             $this->addFlash('success', $success);
+                            
                     }
+                    
+                
                         return $this->redirect($this->generateURL('regle_list'));
-                }
+                }               
                 return $this->render('Rule/create/duplic.html.twig', [
                     'rule' => $rule,
                     'connectorSourceUser' => $connectorSource,
                     'connectorTarget' => $connectorTarget,
-                    'solutionTarget'  => $solutionTarget,
-                    'solutionSource'  => $solutionSource,
                     'form' => $form->createView()
                 ]);
             } catch (Exception $e) {
@@ -680,8 +685,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $limitParam = $rule->getParamByName('limit')->getValue;
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
-                }
-
+                }                
                 // Get the other rule params
                 $connectorParams = $rule->getParams();
                 foreach ($connectorParams as $connectorParam) {
@@ -1852,9 +1856,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 //Behavior filters
                 $behaviorFilters =[
-                    'Error if missing' => $this->translator->trans('behavior_filters.error_messing'),
-                    'Skip if empty'    => $this->translator->trans('behavior_filters.skip_empty'),
-                    'Skip if empty or wrong' => $this->translator->trans('behavior_filters.skip_empty_wrong'),
+                    'Error if missing' => $this->translator->trans('behavior_filters.error_missing'),
+                    'Error if empty' => $this->translator->trans('behavior_filters.error_empty'),
                 ];
 
                 // paramètres de la règle
@@ -2008,7 +2011,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['behaviorFilters'] = ToolsManager::composeListHtml($result['behaviorFilters']);
+                $result['behaviorFilters'] = ToolsManager::composeListHtmlCheckbox($result['behaviorFilters']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
