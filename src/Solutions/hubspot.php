@@ -659,7 +659,10 @@ class hubspotcore extends solution
                             if (!empty($fieldArray[1])) {
                                 // If field contains Ids, then we add it as an array
                                 if ('Ids' == substr($key, -3)) {
-                                    $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+									// Hubspot doesn't support that we send an empty relationship
+									if (!empty($value)) {
+										$dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+									}
                                 } else {
                                     $dataHubspot[$fieldArray[0]][$fieldArray[1]] = $value;
                                 }
