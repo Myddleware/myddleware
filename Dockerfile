@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 php:7.4.26-apache
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install -qq --force-yes mariadb-client libzip-dev libicu-dev zlib1g-dev libc-client-dev libkrb5-dev gnupg2 libaio1 rsync && \
+    apt-get -y install -qq --force-yes mariadb-client libzip-dev libicu-dev zlib1g-dev libc-client-dev libkrb5-dev gnupg2 libaio1 && \
     docker-php-ext-configure intl && docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install imap exif mysqli pdo pdo_mysql zip intl && \
     echo "short_open_tag=off" >> /usr/local/etc/php/conf.d/syntax.ini && \
@@ -35,7 +35,6 @@ COPY --chown=www-data:www-data . .
 RUN yarn install
 RUN yarn run build
 
-RUN cd ./public && rsync -Rr ./build/ ./build/ && cd - 
 ## Setup Cronjob
 # RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
 # COPY docker/etc/crontab /etc/
@@ -46,6 +45,7 @@ COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foregrou
 
 
 RUN chown www-data:www-data ./var ./var/cache ./var/cache/*
-RUN chown www-data:www-data ./var/log
+RUN mkdir ./var/log 
+RUN chown www-data:www-data ./var/log ./var/log/*
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 CMD ["myddleware-foreground.sh"]
