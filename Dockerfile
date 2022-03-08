@@ -46,5 +46,8 @@ COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foregrou
 
 RUN chown www-data:www-data ./var ./var/cache ./var/cache/*
 RUN chown www-data:www-data ./var/log
+RUN mkdir ./var/cache/prod
+RUN chown www-data:www-data ./var/cache/prod
+RUN chmod 755 ./var ./var/cache ./var/cache/* ./var/log ./var/cache/prod
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 CMD ["myddleware-foreground.sh"]
