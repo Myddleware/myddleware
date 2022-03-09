@@ -1936,7 +1936,7 @@ class DefaultController extends AbstractController
             $bidirectional_params['module']['cible'] = $module['cible'];
 
             // TODO: check this still works
-            $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params);
+            $bidirectional = $this->ruleManager->getBidirectionalRules($bidirectional_params);
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
             }
