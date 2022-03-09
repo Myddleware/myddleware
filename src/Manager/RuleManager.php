@@ -284,17 +284,16 @@ class RuleManager
 							ON solution.id  = connector.sol_id
 		    		WHERE connector.id = :connId';
             $stmt = $this->connection->prepare($sql);
-            $stmt->bindValue(':connId', $connId);
-            $stmt->execute();
-            $r = $stmt->fetch();
+            $stmt->bindParam(':connId', $connId);
+            $r = $stmt->executeQuery();
             // Get params connection
             $sql = 'SELECT id, conn_id, name, value
 		    		FROM connectorparam 
 		    		WHERE conn_id = :connId';
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':connId', $connId);
-            $stmt->execute();
-            $tab_params = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $tab_params = $result->fetchAllAssociative();
             $params = [];
             if (!empty($tab_params)) {
                 foreach ($tab_params as $key => $value) {
@@ -991,9 +990,11 @@ class RuleManager
     {
         $sql = 'SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId AND deleted = 0';
         $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(':ruleId', $ruleId);
-        $stmt->execute();
-        $documents = $stmt->fetchAll();
+        $stmt->bindParam(':ruleId', $ruleId);
+        $result = $stmt->executeQuery();
+        while (($row = $result->fetchAssociative()) !== false) {
+        }
+        $documents = $result->fetchAllAssociative();
         if (!empty($documents)) {
             foreach ($documents as $document) {
                 $documentResult['sourceId'][$document['source_id']][] = $document;
@@ -1004,7 +1005,6 @@ class RuleManager
                     $documentResult['targetId'][$document['target_id']][] = $document;
                 }
             }
-
             return $documentResult;
         }
     }
@@ -1356,9 +1356,9 @@ class RuleManager
 										AND rule.deleted = 0
 								';
             $stmt = $this->connection->prepare($queryChild);
-            $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $stmt->bindParam(':ruleId', $this->ruleId);
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociative();
             if (!empty($rules)) {
                 return true;
             }
@@ -1495,12 +1495,13 @@ class RuleManager
 								GROUP BY rule.conn_id_target, rule.module_target, document.target_id, document.source_id
 								HAVING types NOT LIKE '%D%'";
                     $stmt = $this->connection->prepare($query);
-                    $stmt->bindValue(':conn_id_target', $this->rule['conn_id_target']);
-                    $stmt->bindValue(':module_target', $this->rule['module_target']);
-                    $stmt->bindValue(':target_id', $record['target_id']);
-                    $stmt->bindValue(':docId', $docId);
-                    $stmt->execute();
-                    $results = $stmt->fetchAll();
+                    $stmt->bindParam(':conn_id_target', $this->rule['conn_id_target']);
+                    $stmt->bindParam(':module_target', $this->rule['module_target']);
+                    $stmt->bindParam(':target_id', $record['target_id']);
+                    $stmt->bindParam(':docId', $docId);
+                    $result = $stmt->executeQuery();
+                    $results = $result->fetchAllAssociative();
+                    
                     if (!empty($results)) {
                         foreach ($results as $result) {
                             // Get the last reference document created to add it into the log
@@ -1608,9 +1609,8 @@ class RuleManager
             $stmt = $this->connection->prepare($query_documents);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $stmt->bindValue(':status', $status);
-            $stmt->execute();
-
-            return $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1624,8 +1624,8 @@ class RuleManager
             $query_document = 'SELECT * FROM document WHERE id = :documentId';
             $stmt = $this->connection->prepare($query_document);
             $stmt->bindValue(':documentId', $documentId);
-            $stmt->execute();
-            $document = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $document = $result->fetchAssociative();
             if (!empty($document)) {
                 return $document;
             } else {
@@ -1662,8 +1662,8 @@ class RuleManager
 				ORDER BY document.source_date_modified ASC
 				$limit";
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute();
-        $documents = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $documents = $result->fetchAllAssociative();
 
         foreach ($documents as $document) {
             // If the rule is a parent, we have to get the data of all rules child
@@ -1732,8 +1732,8 @@ class RuleManager
 							WHERE rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleFields = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $this->ruleFields = $result->fetchAllAssociative();
             if ($this->ruleFields) {
                 foreach ($this->ruleFields as $RuleField) {
                     // Plusieurs champs source peuvent être utilisé pour un seul champ cible
@@ -1775,8 +1775,8 @@ class RuleManager
 							WHERE rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $ruleParams = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $ruleParams = $result->fetchAllAssociative();
             if ($ruleParams) {
                 foreach ($ruleParams as $ruleParam) {
                     $this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
@@ -1797,9 +1797,9 @@ class RuleManager
 									rule_id = :ruleId
 								AND rule_id IS NOT NULL';
             $stmt = $this->connection->prepare($sqlFields);
-            $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleRelationships = $stmt->fetchAll();
+            $stmt->bindParam(':ruleId', $this->ruleId);
+            $result = $stmt->executeQuery();
+            $this->ruleRelationships = $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1827,8 +1827,8 @@ class RuleManager
 								rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleFilters = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $this->ruleFilters = $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1847,9 +1847,8 @@ class RuleManager
 								AND rulerelationship.parent = 1';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-
-            return $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             throw new \Exception('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
