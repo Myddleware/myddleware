@@ -1027,12 +1027,14 @@ class RuleManager
 											AND deleted = 0
 										';
             $stmt = $this->connection->prepare($queryBidirectionalRules);
-            $stmt->bindValue(':conn_id_source', $params['connector']['source']);
-            $stmt->bindValue(':conn_id_target', $params['connector']['cible']);
-            $stmt->bindValue(':module_source', $params['module']['source']);
-            $stmt->bindValue(':module_target', $params['module']['cible']);
-            $stmt->execute();
-            $bidirectionalRules = $stmt->fetchAll();
+            $stmt->bindParam(':conn_id_source', $params['connector']['source']);
+            $stmt->bindParam(':conn_id_target', $params['connector']['cible']);
+            $stmt->bindParam(':module_source', $params['module']['source']);
+            $stmt->bindParam(':module_target', $params['module']['cible']);
+            $result = $stmt->executeQuery();
+            while (($row = $result->fetchAssociative()) !== false) {
+            }
+            $bidirectionalRules = $result->fetchAllAssociative();
 
             // Construction du tableau de sortie
             if (!empty($bidirectionalRules)) {
