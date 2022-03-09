@@ -120,6 +120,7 @@ create_rule:
             record_id: Record ID
             yes: Yes
             behavior: Behavior
+            
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization

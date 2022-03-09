@@ -436,7 +436,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleSource = $form->get('connectorSource')->getData();
                     $newRuleTarget = $form->get('connectorTarget')->getData();
                     
-
                     if (isset($newRuleName)) {
                         $newRule->setName($newRuleName)
                             ->setCreatedBy($user)
@@ -456,7 +455,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             foreach($rule->getRelationsShip() as $relationsShip){
                                 $newRule->addRelationsShip($relationsShip);   
                             }
-                            foreach($rule->getOrders() as $order){
+                            foreach($rule->getOrders() as $order){//no
                                 $newRule->addOrder($order);   
                             }
                             foreach($rule->getFilters() as $filter){
@@ -465,9 +464,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             foreach($rule->getFields() as $field){
                                 $newRule->addField($field);   
                             }  
-                            foreach($rule->getAudits() as $audit){
+                            foreach($rule->getAudits() as $audit){//no
                                 $newRule->addAudit($audit);   
-                            }            
+                            }           
                             $this->entityManager->persist($newRule);
                             $this->entityManager->flush();
                             $success =$translator->trans('duplicate_rule.success_duplicate');
@@ -898,6 +897,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $relate[] = [
                             'source' => $ruleRelationShipsObj->getFieldNameSource(),
                             'target' => $ruleRelationShipsObj->getFieldNameTarget(),
+                            'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
+                            'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
                             'id' => $ruleRelationShipsObj->getFieldId(),
                             'parent' => $ruleRelationShipsObj->getParent(),
                         ];
@@ -968,6 +969,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $tab_rs[$i]['getFieldId'] = $r->getFieldId();
                 $tab_rs[$i]['getFieldNameSource'] = $r->getFieldNameSource();
                 $tab_rs[$i]['getFieldNameTarget'] = $r->getFieldNameTarget();
+                $tab_rs[$i]['getErrorMissing'] = $r->getErrorMissing();
+                $tab_rs[$i]['getErrorEmpty'] = $r->getErrorEmpty();
                 $tab_rs[$i]['getParent'] = $r->getParent();
 
                 $ruleTmp = $this->entityManager->getRepository(Rule::class)
@@ -992,7 +995,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $Fields = $rule->getFields();
             $Filters = $rule->getFilters();
             $ruleParam = RuleManager::getFieldsParamView();
-            $params_suite = false;
+            $params_suite = [];
             if ($Params) {
                 foreach ($Params as $field) {
                     $standardField = false;
@@ -1855,9 +1858,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ];
 
                 //Behavior filters
-                $behaviorFilters =[
-                    'Error if missing' => $this->translator->trans('behavior_filters.error_missing'),
-                    'Error if empty' => $this->translator->trans('behavior_filters.error_empty'),
+                $errorMissing =[
+                    'errorMissing'
+                ];
+
+                $errorEmpty =[
+                    'errorEmpty'
                 ];
 
                 // paramètres de la règle
@@ -1992,7 +1998,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
-                    'behaviorFilters' => $behaviorFilters,
+                    'errorMissing' => $errorMissing,
+                    'errorEmpty' => $errorEmpty,
                     'params' => $this->sessionService->getParamRule($ruleKey),
                     'duplicate_target' => $fieldsDuplicateTarget,
                     'opt_target' => $html_list_target,
@@ -2011,7 +2018,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['behaviorFilters'] = ToolsManager::composeListHtmlCheckbox($result['behaviorFilters']);
+                $result['errorMissing'] = ToolsManager::composeListHtmlCheckbox($result['errorMissing']);
+                $result['errorEmpty'] = ToolsManager::composeListHtmlCheckbox($result['errorEmpty']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2382,6 +2390,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $tabRelationShips = [];
                 if (!is_null($request->request->get('relations'))) {
                     foreach ($request->request->get('relations') as $rel) {
+                        
                         if (
                             !empty($rel['rule'])
                             && !empty($rel['source'])
@@ -2391,6 +2400,29 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleRelationShip->setRule($oneRule);
                             $oneRuleRelationShip->setFieldNameSource($rel['source']);
                             $oneRuleRelationShip->setFieldNameTarget($rel['target']);
+                            $rel['errorMissing'] = boolval($rel['errorMissing']);
+                            $rel['errorEmpty'] = boolval($rel['errorEmpty']);
+                            
+                            if (!empty($rel['errorEmpty'])) {
+                                $oneRuleRelationShip->setErrorEmpty(1);
+                            }else{
+                                $oneRuleRelationShip->setErrorEmpty(0);
+                            }
+                            if (!empty($rel['errorMissing'])) {
+                                $oneRuleRelationShip->setErrorMissing(1);
+                            }else{
+                                $oneRuleRelationShip->setErrorMissing(0);
+                            }
+                            // if (!empty($rel['errorEmpty'] === true)) {
+                            //     $oneRuleRelationShip->setErrorEmpty(1);
+                            // }elseif($rel['errorEmpty'] === false){
+                            //     $oneRuleRelationShip->setErrorEmpty(0);
+                            // }
+                            // if ($rel['errorMissing'] === true) {
+                            //     $oneRuleRelationShip->setErrorMissing(1);
+                            // }elseif($rel['errorMissing'] === false){
+                            //     $oneRuleRelationShip->setErrorMissing(0);
+                            // }                     
                             $oneRuleRelationShip->setFieldId($rel['rule']);
                             $oneRuleRelationShip->setParent($rel['parent']);
                             $oneRuleRelationShip->setDeleted(0);
@@ -2400,11 +2432,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                 $tabRelationShips['target'][] = $rel['target'];
                             }
                             $tabRelationShips['source'][] = $rel['source'];
-
                             $this->entityManager->persist($oneRuleRelationShip);
                             $this->entityManager->flush();
                         }
-                    }
+                    }                    
                 }
 
                 //------------------------------- RuleFilter ------------------------

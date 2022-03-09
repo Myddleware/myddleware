@@ -44,7 +44,8 @@
 				<td class="title">{{'create_rule.step3.relation.source'|trans}}</td>
 				<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 				<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
-				<td class="title">{{'create_rule.step3.relation.behavior'|trans}}</td>
+				<td class="title">{{'behavior_filters.error_missing'|trans}}</td>	
+				<td class="title">{{'behavior_filters.error_empty'|trans}}</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -70,8 +71,11 @@
 						{% endif %}		
 						<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 					</td>
+					<td >
+						{{ errorMissing | raw }}
+					</td>
 					<td>
-						{{ behaviorFilters | raw }}
+						{{ errorEmpty | raw }}
 					</td>
 				</tr>
 			{% endfor %}
@@ -109,8 +113,11 @@
 			 				{{ lst_parent_fields | raw }}
 						</select>
 					</td>
+					<td >
+						{{ errorMissing | raw }}
+					</td>
 					<td>
-						{{ behaviorFilters | raw }}
+						{{ errorEmpty | raw }}
 					</td>
 				</tr>
 			{% endfor %}

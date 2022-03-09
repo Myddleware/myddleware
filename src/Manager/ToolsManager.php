@@ -98,25 +98,46 @@ class toolscore
     {
         $r = '';
         if ($array) {
-            asort($array);
-            if ($phrase) {
-            }
-            foreach ($array as $k => $v) {                
-                if ('Error if missing' == $v) {
+            asort($array);           
+            foreach ($array as $k => $v) {
+                //dd($array);  
+                if ($v == 'errorMissing' ) {
                     $r .= '<div class="form-check">';
-                    $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input" checked>'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+                    $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input" checked></input>';
                     $r .= '</div>';
-                }else if('' != $v){
+                }else {
                     $r .= '<div class="form-check">';
-                    $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input">'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+                    $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input"></input>';
                     $r .= '</div>';
                 }
             }
         } else {
             $r .= '<div class="form-check">';
-            $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input">'.$phrase.'</input>';
+            $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input"></input>';
             $r .= '</div>';
         }
+        // $r = '';
+        // if ($array) {
+        //     asort($array);
+        //     dd($array);
+        //     if ($phrase) {
+        //     }
+        //     foreach ($array as $k => $v) {                
+        //         if ('Error if missing' == $v) {
+        //             $r .= '<div class="form-check">';
+        //             $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input" checked>'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+        //             $r .= '</div>';
+        //         }else if('' != $v){
+        //             $r .= '<div class="form-check">';
+        //             $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input">'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
+        //             $r .= '</div>';
+        //         }
+        //     }
+        // } else {
+        //     $r .= '<div class="form-check">';
+        //     $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input">'.$phrase.'</input>';
+        //     $r .= '</div>';
+        // }
         return $r;
     }
 	
