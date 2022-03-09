@@ -156,8 +156,8 @@ class ToolsManager
         // Get the custom php version first
         $select = "SELECT * FROM config WHERE name = 'php'";
         $stmt = $this->connection->prepare($select);
-        $stmt->execute();
-        $config = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $config = $result->fetchAssociative();
         if (!empty($config['conf_value'])) {
             $php = $config['conf_value'];
         } else {

@@ -236,8 +236,8 @@ class JobManager
 							LIMIT $limit";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('attempt', $attempt);
-            $stmt->execute();
-            $documentsError = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $documentsError = $result->fetchAllAssociative();
             if (!empty($documentsError)) {
                 // include_once 'rule.php';
                 foreach ($documentsError as $documentError) {
@@ -434,8 +434,8 @@ class JobManager
                             .$where.'
 							ORDER BY rule.id';
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();
-            $documents = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $documents = $result->fetchAllAssociative();
 
             if (!empty($documents)) {
                 // include_once 'rule.php';
@@ -476,8 +476,8 @@ class JobManager
             $sqlRule = 'SELECT * FROM rule WHERE id = :filter AND deleted = 0';
             $stmt = $this->connection->prepare($sqlRule);
             $stmt->bindValue('filter', $ruleId);
-            $stmt->execute();
-            $rule = $stmt->fetch(); // 1 row
+            $result =  $stmt->executeQuery();
+            $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
                 throw new \Exception('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
             }
@@ -535,8 +535,8 @@ class JobManager
 								AND	rule.deleted = 0
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociativeIndexed();
             if (!empty($rules)) {
                 foreach ($rules as $rule) {
                     $ruleOrder[] = $rule['name_slug'];
@@ -571,8 +571,8 @@ class JobManager
 						rule.deleted = 0
 					GROUP BY rule.id";
             $stmt = $this->connection->prepare($sql);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociative();
 
             if (!empty($rules)) {
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
@@ -713,8 +713,8 @@ class JobManager
 						WHERE
 							ruleparam.name = 'delete'";
         $stmt = $this->connection->prepare($sqlParams);
-        $stmt->execute();
-        $rules = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $rules = $result->fetchAllAssociative();
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
@@ -830,8 +830,8 @@ class JobManager
 							GROUP BY document.global_status';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
-            $data = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $data = $result->fetchAllAssociative();
             if (!empty($data)) {
                 foreach ($data as $row) {
                     if ('Close' == $row['global_status']) {
@@ -859,8 +859,8 @@ class JobManager
 									ON Connector_target.id = rule.conn_id_target';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
-            $solutions = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $solutions = $result->fetchAllAssociative();
             $this->logData['solutions'] = '';
             if (!empty($solutions)) {
                 foreach ($solutions as $solution) {
@@ -883,8 +883,8 @@ class JobManager
 									log.job_id = :id';
                 $stmt = $this->connection->prepare($sqlParamsDoc);
                 $stmt->bindValue('id', $this->id);
-                $stmt->execute();
-                $this->logData['documents'] = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $this->logData['documents'] = $result->fetchAllAssociative();
             }
 
             // Récupération de la durée du job

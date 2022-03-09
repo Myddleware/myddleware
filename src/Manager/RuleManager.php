@@ -160,8 +160,8 @@ class RuleManager
             $rule = "SELECT *, (SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode FROM rule WHERE id = :ruleId";
             $stmt = $this->connection->prepare($rule);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->rule = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $this->rule = $result->fetchAssociative();
             // Set the rule parameters and rule relationships
             $this->setRuleParam();
             $this->setLimit();
@@ -421,8 +421,8 @@ class RuleManager
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $this->jobId);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         if (!empty($job['status'])) {
             return $job['status'];
         }
