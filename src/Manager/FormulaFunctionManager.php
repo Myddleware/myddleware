@@ -25,7 +25,7 @@
 
 namespace App\Manager;
 
-class formulafunctioncore
+class FormulaFunctionManager
 {
     protected $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
 
@@ -119,8 +119,4 @@ class formulafunctioncore
             return $array[$key];
         }
     }
-}
-
-class FormulaFunctionManager extends formulafunctioncore
-{
 }

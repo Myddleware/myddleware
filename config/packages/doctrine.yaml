@@ -1,8 +1,7 @@
 # Doctrine Configuration
 doctrine:
     dbal:
-        charset:  UTF8
-        server_version: 5.6
+        charset: utf8mb4
         url: '%env(resolve:DATABASE_URL)%'
     orm:
         auto_generate_proxy_classes: true

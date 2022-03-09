@@ -26,7 +26,6 @@ namespace App\Controller;
 
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
-use App\Manager\ToolsManager;
 use App\Service\AlertBootstrapInterface;
 use App\Service\UserManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,10 +46,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class AccountController extends AbstractController
 {
-    /**
-     * @var ToolsManager
-     */
-    private $toolsManager;
     /**
      * @var LoggerInterface
      */
@@ -87,7 +82,6 @@ class AccountController extends AbstractController
         EntityManagerInterface $entityManager,
         ParameterBagInterface $params,
         // TranslatorInterface $translator,
-        ToolsManager $toolsManager,
         AlertBootstrapInterface $alert
     ) {
         $this->kernel = $kernel;
@@ -95,8 +89,6 @@ class AccountController extends AbstractController
         $this->logger = $logger;
         $this->entityManager = $entityManager;
         $this->params = $params;
-        // $this->translator = $translator;
-        $this->toolsManager = $toolsManager;
         $this->alert = $alert;
     }
 

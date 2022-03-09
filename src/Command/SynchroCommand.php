@@ -25,8 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
-use App\Entity\Rule;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
@@ -48,39 +46,15 @@ class SynchroCommand extends Command
      * @var JobManager
      */
     private $jobManager;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var DocumentManager
-     */
-    private $documentManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
 
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
-        DocumentManager $documentManager,
-        RuleManager $ruleManager,
-        EntityManagerInterface $entityManager,
-        DocumentRepository $documentRepository,
         $name = null
     ) {
         parent::__construct($name);
         $this->logger = $logger;
-        $this->entityManager = $entityManager;
         $this->jobManager = $jobManager;
-        $this->ruleManager = $ruleManager;
-        $this->documentManager = $documentManager;
-        $this->documentRepository = $documentRepository;
     }
 
     protected function configure()

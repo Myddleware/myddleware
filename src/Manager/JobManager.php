@@ -25,14 +25,7 @@
 
 namespace App\Manager;
 
-use App\Entity\Job;
-use App\Entity\Rule;
-use App\Repository\DocumentRepository;
-use App\Repository\JobRepository;
-use App\Repository\LogRepository;
-use App\Repository\RuleRepository;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Connection as DriverConnection;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -40,21 +33,17 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
-class jobcore
+class JobManager
 {
     protected $id;
     public $message = '';
     public $createdJob = false;
-
     protected $container;
     protected $connection;
     protected $logger;
     protected $tools;
-
     protected $ruleManager;
     protected $ruleId;
     protected $logData;
@@ -78,37 +67,9 @@ class jobcore
      */
     private $templateManager;
     /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-    /**
-     * @var string
-     */
-    private $projectDir;
-    /**
      * @var UpgradeManager
      */
     private $upgrade;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
     /**
      * @var SessionInterface
      */
@@ -117,14 +78,7 @@ class jobcore
     public function __construct(
         LoggerInterface $logger,
         DriverConnection $dbalConnection,
-        KernelInterface $kernel,
         ParameterBagInterface $parameterBagInterface,
-        TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
-        JobRepository $jobRepository,
-        DocumentRepository $documentRepository,
-        RuleRepository $ruleRepository,
-        LogRepository $logRepository,
         RouterInterface $router,
         SessionInterface $session,
         ToolsManager $tools,
@@ -135,20 +89,12 @@ class jobcore
         $this->logger = $logger; // gestion des logs symfony monolog
         $this->connection = $dbalConnection;
         $this->parameterBagInterface = $parameterBagInterface;
-        $this->translator = $translator;
-        $this->entityManager = $entityManager;
-        $this->ruleRepository = $ruleRepository;
-        $this->logRepository = $logRepository;
         $this->router = $router;
         $this->session = $session;
         $this->tools = $tools;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
         $this->templateManager = $templateManager;
-        $this->projectDir = $kernel->getProjectDir();
-        $this->jobRepository = $jobRepository;
-        $this->documentRepository = $documentRepository;
-
         $this->env = $parameterBagInterface->get('kernel.environment');
         $this->setManual();
     }
@@ -1026,7 +972,4 @@ class jobcore
 
         return true;
     }
-}
-class JobManager extends jobcore
-{
 }

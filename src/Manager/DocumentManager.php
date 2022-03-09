@@ -29,18 +29,15 @@ use App\Entity\Document;
 use App\Entity\DocumentData;
 use App\Entity\DocumentData as DocumentDataEntity;
 use App\Entity\DocumentRelationship;
-use App\Entity\Job;
-use App\Entity\Log;
-use App\Entity\Rule;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleRelationShipRepository;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class documentcore
+class DocumentManager
 {
     public $id;
 
@@ -124,12 +121,12 @@ class documentcore
         LoggerInterface $logger,
         Connection $dbalConnection,
         EntityManagerInterface $entityManager,
-        SolutionManager $solutionManager = null,
-        FormulaManager $formulaManager = null,
-        DocumentRepository $documentRepository = null,
-        RuleRelationShipRepository $ruleRelationshipsRepository = null,
-        ParameterBagInterface $parameterBagInterface = null,
-        ToolsManager $tools = null
+        SolutionManager $solutionManager,
+        FormulaManager $formulaManager,
+        DocumentRepository $documentRepository,
+        RuleRelationShipRepository $ruleRelationshipsRepository,
+        ParameterBagInterface $parameterBagInterface,
+        ToolsManager $tools
     ) {
         $this->connection = $dbalConnection;
         $this->logger = $logger;
@@ -137,7 +134,6 @@ class documentcore
         $this->documentRepository = $documentRepository;
         $this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
         $this->parameterBagInterface = $parameterBagInterface;
-        // $param = $params->get('param');
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
@@ -224,7 +220,6 @@ class documentcore
                 $this->data = $this->sourceData;
                 // Get document header
                 $documentEntity = $this->entityManager
-                              // ->getRepository('RegleBundle:Document')
                               ->getRepository(Document::class)
                               ->find($id_doc);
                 $this->data['id'] = $documentEntity->getSource();
@@ -2260,7 +2255,4 @@ class documentcore
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
-}
-class DocumentManager extends documentcore
-{
 }

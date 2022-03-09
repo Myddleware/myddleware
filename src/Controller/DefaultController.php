@@ -44,18 +44,16 @@ use App\Form\DuplicateRuleFormType;
 use App\Manager\DocumentManager;
 use App\Manager\FormulaManager;
 use App\Manager\HomeManager;
-use App\Manager\job;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
 use App\Manager\SolutionManager;
-use App\Manager\template;
 use App\Manager\TemplateManager;
 use App\Manager\ToolsManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Illuminate\Encryption\Encrypter;
@@ -97,7 +95,7 @@ class DefaultController extends AbstractController
     /**
      * @var ToolsManager
      */
-    private $tools;
+    private $toolsManager;
     /**
      * @var TranslatorInterface
      */
@@ -158,7 +156,7 @@ class DefaultController extends AbstractController
         TranslatorInterface $translator,
         AuthorizationCheckerInterface $authorizationChecker,
         HomeManager $home,
-        ToolsManager $tools,
+        ToolsManager $toolsManager,
         JobManager $jobManager,
         TemplateManager $template,
         ParameterBagInterface $params
@@ -177,7 +175,7 @@ class DefaultController extends AbstractController
         $this->translator = $translator;
         $this->authorizationChecker = $authorizationChecker;
         $this->home = $home;
-        $this->tools = $tools;
+        $this->toolsManager = $toolsManager;
         $this->jobManager = $jobManager;
         $this->template = $template;
         // Init parameters
@@ -1001,13 +999,13 @@ class DefaultController extends AbstractController
                         // We send the translation of the mode to the view
                         switch ($field->getValue()) {
                             case '0':
-                                $params_suite['mode'] = $this->tools->getTranslation(['create_rule', 'step3', 'syncdata', 'create_modify']);
+                                $params_suite['mode'] = $this->toolsManager->getTranslation(['create_rule', 'step3', 'syncdata', 'create_modify']);
                                 break;
                             case 'C':
-                                $params_suite['mode'] = $this->tools->getTranslation(['create_rule', 'step3', 'syncdata', 'create_only']);
+                                $params_suite['mode'] = $this->toolsManager->getTranslation(['create_rule', 'step3', 'syncdata', 'create_only']);
                                 break;
                             case 'S':
-                                $params_suite['mode'] = $this->tools->getTranslation(['create_rule', 'step3', 'syncdata', 'search_only']);
+                                $params_suite['mode'] = $this->toolsManager->getTranslation(['create_rule', 'step3', 'syncdata', 'search_only']);
                                 break;
                             default:
                                 $params_suite['mode'] = $field->getValue();
@@ -1257,7 +1255,7 @@ class DefaultController extends AbstractController
                 exit;
             }
 
-            $liste_modules_source = ToolsManager::composeListHtml($solution_source->get_modules('source'), $this->translator->trans('create_rule.step2.choice_module'));
+            $liste_modules_source = $this->toolsManager::composeListHtml($solution_source->get_modules('source'), $this->translator->trans('create_rule.step2.choice_module'));
             if (!$liste_modules_source) {
                 $myddlewareSession['error']['create_rule'] = $this->translator->trans('error.rule.source_module_load_list');
                 $session->getBag('flashes')->set('myddlewareSession', $myddlewareSession);
@@ -1295,7 +1293,7 @@ class DefaultController extends AbstractController
                 exit;
             }
 
-            $liste_modules_cible = ToolsManager::composeListHtml($solution_cible->get_modules('target'), $this->translator->trans('create_rule.step2.choice_module'));
+            $liste_modules_cible = $this->toolsManager::composeListHtml($solution_cible->get_modules('target'), $this->translator->trans('create_rule.step2.choice_module'));
 
             if (!$liste_modules_cible) {
                 $myddlewareSession['error']['create_rule'] = $this->translator->trans('error.rule.target_module_load_list');
@@ -1873,7 +1871,7 @@ class DefaultController extends AbstractController
             if (isset($formule_list['source'])) {
                 foreach ($formule_list['source'] as $field => $fields_tab) {
                     $html_list_source .= '<optgroup label="'.$field.'">';
-                    $html_list_source .= ToolsManager::composeListHtml($fields_tab['option']);
+                    $html_list_source .= $this->toolsManager::composeListHtml($fields_tab['option']);
                     $html_list_source .= '</optgroup>';
                 }
             }
@@ -1901,7 +1899,7 @@ class DefaultController extends AbstractController
             if (isset($formule_list['target'])) {
                 foreach ($formule_list['target'] as $field => $fields_tab) {
                     $html_list_target .= '<optgroup label="'.$field.'">';
-                    $html_list_target .= ToolsManager::composeListHtml($fields_tab['option']);
+                    $html_list_target .= $this->toolsManager::composeListHtml($fields_tab['option']);
                     $html_list_target .= '</optgroup>';
                 }
             }
@@ -1937,6 +1935,7 @@ class DefaultController extends AbstractController
             $bidirectional_params['module']['source'] = $module['source'];
             $bidirectional_params['module']['cible'] = $module['cible'];
 
+            // TODO: check this still works
             $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params);
             if ($bidirectional) {
                 $rule_params = array_merge($rule_params, $bidirectional);
@@ -1989,14 +1988,14 @@ class DefaultController extends AbstractController
                 'simulationQueryField' => $this->simulationQueryField,
             ];
 
-            $result = $this->tools->beforeRuleEditViewRender($result);
+            $result = $this->toolsManager->beforeRuleEditViewRender($result);
 
             // Formatage des listes déroulantes :
-            $result['lst_relation_source'] = ToolsManager::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
-            $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
-            $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
-            $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-            $result['behaviorFilters'] = ToolsManager::composeListHtml($result['behaviorFilters']);
+            $result['lst_relation_source'] = $this->toolsManager::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
+            $result['lst_parent_fields'] = $this->toolsManager::composeListHtml($result['lst_parent_fields'], ' ');
+            $result['lst_rule'] = $this->toolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
+            $result['lst_filter'] = $this->toolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
+            $result['behaviorFilters'] = $this->toolsManager::composeListHtml($result['behaviorFilters']);
 
             return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2237,7 +2236,7 @@ class DefaultController extends AbstractController
                         $limit = $ruleParam->getValue();
                     }
 
-                    if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
+                    if (in_array($ruleParam->getName(), $this->toolsManager->getRuleParam())) {
                         $this->entityManager->remove($ruleParam);
                         $this->entityManager->flush();
                     }
@@ -2834,7 +2833,7 @@ class DefaultController extends AbstractController
 
             $t = (('source' == $type) ? 'source' : 'target');
 
-            $liste_modules = ToolsManager::composeListHtml($solution->get_modules($t), $this->translator->trans('create_rule.step1.choose_module'));
+            $liste_modules = $this->toolsManager::composeListHtml($solution->get_modules($t), $this->translator->trans('create_rule.step1.choose_module'));
 
             return new Response($liste_modules);
         } catch (Exception $e) {
@@ -2859,7 +2858,7 @@ class DefaultController extends AbstractController
             }
         }
 
-        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+        $lst_solution = $this->toolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
 
         return $lst_solution;
     }

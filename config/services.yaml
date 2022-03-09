@@ -13,7 +13,6 @@ parameters:
   fallbacks: ['%locale%', 'fr']
   secret: '%env(APP_SECRET)%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
-  email_from: '%env(MAILER_FROM)%'
 
 services:
   # default configuration for services in *this* file

@@ -26,12 +26,12 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class solutioncore
+class Solution
 {
     public $connexion_valide = false;
     public $js = 0;
@@ -959,7 +959,4 @@ class solutioncore
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
-}
-class solution extends solutioncore
-{
 }

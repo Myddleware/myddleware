@@ -25,7 +25,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -33,12 +33,11 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Yaml\Yaml;
 
-class toolscore
+class ToolsManager
 {
     protected $connection;
     protected $container;
     protected $logger;
-
     protected $language;
     protected $translations;
     /**
@@ -175,8 +174,4 @@ class toolscore
 
         return $php;
     }
-}
-
-class ToolsManager extends toolscore
-{
 }

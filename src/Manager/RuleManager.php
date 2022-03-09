@@ -26,9 +26,7 @@
 namespace App\Manager;
 
 use App\Entity\Config;
-use App\Entity\Document;
 use App\Entity\DocumentData;
-use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit;
@@ -36,9 +34,8 @@ use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
 use App\Repository\RuleRelationShipRepository;
 use App\Repository\RuleRepository;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -48,10 +45,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
 
-class rulecore
+class RuleManager
 {
     protected $connection;
     protected $logger;
@@ -83,7 +79,7 @@ class rulecore
      */
     protected $parameterBagInterface;
     /**
-     * @var documentManager
+     * @var DocumentManager
      */
     protected $documentManager;
     /**
@@ -130,16 +126,15 @@ class rulecore
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBagInterface,
         FormulaManager $formulaManager,
-        SolutionManager $solutionManager = null,
-        DocumentManager $documentManager = null,
-        RuleRepository $ruleRepository = null,
-        RuleRelationShipRepository $ruleRelationShipRepository = null,
-        RuleOrderRepository $ruleOrderRepository = null,
-        DocumentRepository $documentRepository = null,
-        RouterInterface $router = null,
-        KernelInterface $kernel = null,
-        SessionInterface $session = null,
-        ToolsManager $tools = null
+        SolutionManager $solutionManager,
+        DocumentManager $documentManager,
+        RuleRepository $ruleRepository,
+        RuleRelationShipRepository $ruleRelationShipRepository,
+        RuleOrderRepository $ruleOrderRepository,
+        DocumentRepository $documentRepository,
+        RouterInterface $router,
+        SessionInterface $session,
+        ToolsManager $tools
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -1961,7 +1956,4 @@ class rulecore
             ],
         ];
     }
-}
-class RuleManager extends rulecore
-{
 }

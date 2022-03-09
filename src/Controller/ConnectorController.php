@@ -30,13 +30,10 @@ use App\Entity\Connector;
 use App\Entity\Rule;
 use App\Entity\Solution;
 use App\Form\ConnectorType;
-use App\Manager\permission;
 use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -74,16 +71,23 @@ class ConnectorController extends AbstractController
      */
     private $solutionManager;
 
+    /**
+     * @var ToolsManager
+     */
+    private $toolsManager;
+
     public function __construct(
         SolutionManager $solutionManager,
         SessionService $sessionService,
         TranslatorInterface $translator,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ToolsManager $toolsManager
     ) {
         $this->solutionManager = $solutionManager;
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
+        $this->toolsManager = $toolsManager;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -342,7 +346,7 @@ class ConnectorController extends AbstractController
             }
         }
 
-        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+        $lst_solution = $this->toolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
         $this->sessionService->setConnectorAnimation(false);
         $this->sessionService->setConnectorAddMessage('list');
 
@@ -687,7 +691,7 @@ class ConnectorController extends AbstractController
             foreach ($listConnector as $c) {
                 $lstArray[$c->getId()] = ucfirst($c->getName());
             }
-            $lst = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
+            $lst = $this->toolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
 
             return new Response($lst);
         }
@@ -714,7 +718,7 @@ class ConnectorController extends AbstractController
             }
         }
 
-        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
+        $lst_solution = $this->toolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
 
         $this->sessionService->setConnectorAddMessage($this->translator->trans('create_rule.step1.connector'));
         $this->sessionService->setParamConnectorAddType(strip_tags($type));
