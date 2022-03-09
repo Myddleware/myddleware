@@ -43,6 +43,9 @@
     "composer/xdebug-handler": {
         "version": "2.0.4"
     },
+    "dflydev/dot-access-data": {
+        "version": "v3.0.1"
+    },
     "doctrine/annotations": {
         "version": "1.13",
         "recipe": {
@@ -229,6 +232,12 @@
     "leafo/lessphp": {
         "version": "v0.4.0"
     },
+    "league/commonmark": {
+        "version": "2.2.3"
+    },
+    "league/config": {
+        "version": "v1.1.1"
+    },
     "lexik/jwt-authentication-bundle": {
         "version": "2.14",
         "recipe": {
@@ -270,6 +279,12 @@
     },
     "netresearch/jsonmapper": {
         "version": "v4.0.0"
+    },
+    "nette/schema": {
+        "version": "v1.2.2"
+    },
+    "nette/utils": {
+        "version": "v3.2.7"
     },
     "nikic/php-parser": {
         "version": "v4.13.2"
@@ -925,6 +940,9 @@
         "version": "1.2.1"
     },
     "twig/extra-bundle": {
+        "version": "v3.3.8"
+    },
+    "twig/markdown-extra": {
         "version": "v3.3.8"
     },
     "twig/twig": {
