@@ -795,8 +795,8 @@ class Solution
 						WHERE id = :id_doc';
         $stmt = $connection->prepare($sqlParams);
         $stmt->bindValue(':id_doc', $idDocument);
-        $stmt->execute();
-        $documentData = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $documentData = $result->fetchAssociative();
 
         return $documentData;
     }
@@ -808,8 +808,8 @@ class Solution
         $sql = 'SELECT `source_id` FROM `document` WHERE `id` = :idDoc AND document.deleted = 0';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':idDoc', $idDoc);
-        $stmt->execute();
-        $sourceId = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $sourceId = $result->fetchAssociative();
 
         return $sourceId['source_id'];
     }
@@ -908,8 +908,8 @@ class Solution
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $param['jobId']);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result =$stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         if (
                 empty($job['status'])
             || 'Start' != $job['status']
@@ -929,8 +929,8 @@ class Solution
 				WHERE connector.id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
-        $stmt->execute();
-        $r = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $r = $result->fetchAssociative();
 
         // RECUPERE LES PARAMS DE CONNEXION
         $sql = 'SELECT id, conn_id, name, value
@@ -938,8 +938,8 @@ class Solution
 				WHERE conn_id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
-        $stmt->execute();
-        $tab_params = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $tab_params = $result->fetchAllAssociative();
 
         $params = [];
 

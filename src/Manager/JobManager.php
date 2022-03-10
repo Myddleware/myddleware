@@ -130,8 +130,8 @@ class JobManager
 					';
             $stmt = $this->connection->prepare($sqlRule);
             $stmt->bindValue('filter', $filter);
-            $stmt->execute();
-            $rule = $stmt->fetch(); // 1 row
+            $result = $stmt->executeQuery();
+            $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
                 throw new \Exception('Rule '.$filter.' doesn\'t exist or is deleted.');
             }
@@ -265,8 +265,8 @@ class JobManager
         // Check if a job is already running
         $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
         $stmt = $this->connection->prepare($sqlJobOpen);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         // Error if one job is still running
         if (!empty($job)) {
             $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];

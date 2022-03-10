@@ -128,13 +128,13 @@ class RuleManager
         FormulaManager $formulaManager,
         SolutionManager $solutionManager,
         DocumentManager $documentManager,
-        RuleRepository $ruleRepository,
-        RuleRelationShipRepository $ruleRelationShipRepository,
-        RuleOrderRepository $ruleOrderRepository,
-        DocumentRepository $documentRepository,
-        RouterInterface $router,
-        SessionInterface $session,
-        ToolsManager $tools
+        RuleRepository $ruleRepository = null,
+        RuleRelationShipRepository $ruleRelationShipRepository = null,
+        RuleOrderRepository $ruleOrderRepository = null,
+        DocumentRepository $documentRepository = null,
+        RouterInterface $router = null,
+        SessionInterface $session = null,
+        ToolsManager $tools = null
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -284,8 +284,9 @@ class RuleManager
 							ON solution.id  = connector.sol_id
 		    		WHERE connector.id = :connId';
             $stmt = $this->connection->prepare($sql);
-            $stmt->bindParam(':connId', $connId);
+            $stmt->bindValue(':connId', $connId);
             $r = $stmt->executeQuery();
+            $r = $r->fetchAssociative();
             // Get params connection
             $sql = 'SELECT id, conn_id, name, value
 		    		FROM connectorparam 
@@ -301,7 +302,6 @@ class RuleManager
                     $params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
                 }
             }
-
             // Connect to the application
             if ('source' == $type) {
                 $this->solutionSource = $this->solutionManager->get($r['name']);
@@ -1670,8 +1670,6 @@ class RuleManager
             $childRules = $this->getChildRules();
             if (!empty($childRules)) {
                 foreach ($childRules as $childRule) {
-                    // $childRuleObj = $this;  // TODO: This 100% needs to be reviewed but 
-                    // I don't think we need to create a new RuleManager Object for each child rule, I believe simply calling '$this' should be enough or maybe clone self??
                     $childRuleObj = new RuleManager(
                     $this->logger,
                     $this->connection,
@@ -1680,13 +1678,6 @@ class RuleManager
                     $this->formulaManager,
                     $this->solutionManager,
                     $this->documentManager,
-                    $this->ruleRepository,
-                    $this->ruleRelationShipRepository,
-                    $this->ruleOrderRepository,
-                    $this->documentRepository,
-                    $this->router,
-                    $this->session,
-                    $this->tools
                     );
                     $childRuleObj->setRule($childRule['field_id']);
                     $childRuleObj->setJobId($this->jobId);

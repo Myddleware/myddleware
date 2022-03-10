@@ -25,11 +25,7 @@
 
 namespace App\Command;
 
-use App\Manager\DocumentManager;
 use App\Manager\JobManager;
-use App\Manager\RuleManager;
-use App\Repository\DocumentRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -133,16 +129,18 @@ class SynchroCommand extends Command
                 }
             }
         } catch (\Exception $e) {
-            $this->jobManager->message .= $e->getMessage();
+            $this->jobManager->message .= $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+            // Display error message in terminal
+            if (!empty($this->jobManager->message)) {
+                $output->writeln('0;<error>'.$this->jobManager->message.'</error>');
+                $this->logger->error($this->jobManager->message);
+            }
+            return Command::FAILURE;
         }
         // Close job if it has been created
         if (true === $this->jobManager->createdJob) {
             $this->jobManager->closeJob();
         }
-        // Retour en console --------------------------------------
-        if (!empty($this->jobManager->message)) {
-            $output->writeln('0;<error>'.$this->jobManager->message.'</error>');
-            $this->logger->error($this->jobManager->message);
-        }
+        return Command::SUCCESS;
     }
 }
