@@ -43,9 +43,5 @@ RUN yarn run build
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
 
-
-RUN chown www-data:www-data ./var ./var/cache ./var/cache/*
-RUN chown www-data:www-data ./var/log
-RUN chmod 755 ./var ./var/cache ./var/cache/* ./var/log
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 CMD ["myddleware-foreground.sh"]
