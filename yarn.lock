@@ -30,7 +30,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.7.0":
+"@babel/core@npm:^7.17.5, @babel/core@npm:^7.7.0":
   version: 7.17.5
   resolution: "@babel/core@npm:7.17.5"
   dependencies:
@@ -1093,7 +1093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-env@npm:^7.10.0":
+"@babel/preset-env@npm:^7.10.0, @babel/preset-env@npm:^7.16.11":
   version: 7.16.11
   resolution: "@babel/preset-env@npm:7.16.11"
   dependencies:
@@ -1369,7 +1369,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/webpack-encore@npm:^1.7.0":
+"@symfony/webpack-encore@npm:^1.8.1":
   version: 1.8.1
   resolution: "@symfony/webpack-encore@npm:1.8.1"
   dependencies:
@@ -5905,11 +5905,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
+    "@babel/core": ^7.17.5
+    "@babel/plugin-proposal-class-properties": ^7.16.7
+    "@babel/plugin-syntax-dynamic-import": ^7.8.3
+    "@babel/preset-env": ^7.16.11
     "@hotwired/stimulus": ^3.0.0
     "@symfony/stimulus-bridge": ^3.0.0
-    "@symfony/webpack-encore": ^1.7.0
+    "@symfony/webpack-encore": ^1.8.1
     core-js: ^3.0.0
     regenerator-runtime: ^0.13.2
+    tapable: ^2.2.1
     webpack-notifier: ^1.6.0
   languageName: unknown
   linkType: soft
@@ -6473,7 +6478,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tapable@npm:^2.1.1, tapable@npm:^2.2.0":
+"tapable@npm:^2.1.1, tapable@npm:^2.2.0, tapable@npm:^2.2.1":
   version: 2.2.1
   resolution: "tapable@npm:2.2.1"
   checksum: 3b7a1b4d86fa940aad46d9e73d1e8739335efd4c48322cb37d073eb6f80f5281889bf0320c6d8ffcfa1a0dd5bfdbd0f9d037e252ef972aca595330538aac4d51
