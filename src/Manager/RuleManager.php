@@ -149,7 +149,7 @@ class RuleManager
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
-        $this->env = getenv('APP_ENV');
+        $this->env = $this->parameterBagInterface->get('env'); // access env variable defined in config/services.yaml
         $this->formulaManager = $formulaManager;
     }
 

@@ -55,7 +55,6 @@ class MailerController extends AbstractController
                 // some error prevented the email sending; display an
                 // error message or try to resend the message
                 $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-                dump($e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
         // ...
     }
