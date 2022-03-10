@@ -1247,10 +1247,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fortawesome/fontawesome-free@npm:^5.15.3":
-  version: 5.15.4
-  resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
-  checksum: 32281c3df4075290d9a96dfc22f72fadb3da7055d4117e48d34046b8c98032a55fa260ae351b0af5d6f6fb57a2f5d79a4abe52af456da35195f7cb7dda27b4a2
+"@fortawesome/fontawesome-free@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@fortawesome/fontawesome-free@npm:6.0.0"
+  checksum: 138e352ba6e9ecdd711899943919d4020704ddf22dc6a7de14d0dbfb5222c60738fcded6ca39a3fcd6fa8eaf9b83033e44dd25625d9e0118a9cea1d4585b36de
   languageName: node
   linkType: hard
 
@@ -1258,6 +1258,22 @@ __metadata:
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
   checksum: 4059f790e2d07bf3c3ff3e0fec0daa8144fe35c1f6e0111c9921bd32106adaa97a4ab096ad7dab1e28ee6a9060083c4d1a4ada42a7f5f3f7a96b8812e2b757c1
+  languageName: node
+  linkType: hard
+
+"@hotwired/stimulus-webpack-helpers@npm:^1.0.0, @hotwired/stimulus-webpack-helpers@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@hotwired/stimulus-webpack-helpers@npm:1.0.1"
+  peerDependencies:
+    "@hotwired/stimulus": ">= 3.0"
+  checksum: 68d833f74fb90f2993c7baed6e542880c23416a129b50cadc00571102c782f6bdc8c68742ecdd668cc702aa0fafd8888f91098ed7dc43c12b2212fe5969ef6cd
+  languageName: node
+  linkType: hard
+
+"@hotwired/stimulus@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@hotwired/stimulus@npm:3.0.1"
+  checksum: 5f2dbfeb3dfff8472e1d0ef7db59a18d71540651861c0c5839fa32c56fcd5cae3fc6183a94746303c5adfbd66a9b552a3167e7e193c04dfaa6f51a8e5bea8e5e
   languageName: node
   linkType: hard
 
@@ -1346,55 +1362,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:^2.9.2":
+"@popperjs/core@npm:^2.11.2":
   version: 2.11.2
   resolution: "@popperjs/core@npm:2.11.2"
   checksum: 5695bf020eda54636e16a62dc9b5fdd92beaf7b2d19f62fcef049d57c5cff92773562d80cbf760b217c3ec928da310eb24994ab6a00fd39dffa0af9b5dfc01a6
   languageName: node
   linkType: hard
 
-"@stimulus/core@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@stimulus/core@npm:2.0.0"
+"@symfony/stimulus-bridge@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@symfony/stimulus-bridge@npm:3.0.0"
   dependencies:
-    "@stimulus/mutation-observers": ^2.0.0
-  checksum: 28e33dfaf2db2e72b007f1798aa906d18080ca988c7f99919107d9a5456fcb2f7eef21f908232666b34070d975ce12f1922a20b2eded796b1bb937d7de7322cd
-  languageName: node
-  linkType: hard
-
-"@stimulus/multimap@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@stimulus/multimap@npm:2.0.0"
-  checksum: 0b2dbacb02f9ef2e1a0c873fb445cdd9443afe35e007218242ebfb49c99877e73a0c3e951151e3b69b1dd16cbae67fe8ef6eb19da3c64aad71864976347af6af
-  languageName: node
-  linkType: hard
-
-"@stimulus/mutation-observers@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@stimulus/mutation-observers@npm:2.0.0"
-  dependencies:
-    "@stimulus/multimap": ^2.0.0
-  checksum: b0fb739563d4944c09602b55a56fd3953d6efdb4a24a6a97a7400de0101cc63064c2daa612acd3f3af340d79815687ddd85bad700929647de29b4e9ca3ce10ba
-  languageName: node
-  linkType: hard
-
-"@stimulus/webpack-helpers@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@stimulus/webpack-helpers@npm:2.0.0"
-  checksum: 0ec66e238193533e61a8bee8fc868db776a446fb52f70bec5d65c398826ac443f64b541fd141e06c0505b2f03683df407a4b94d4429fcd3beebb37e2d74b575f
-  languageName: node
-  linkType: hard
-
-"@symfony/stimulus-bridge@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@symfony/stimulus-bridge@npm:2.1.0"
-  dependencies:
+    "@hotwired/stimulus-webpack-helpers": ^1.0.1
     acorn: ^8.0.5
     loader-utils: ^2.0.0
     schema-utils: ^3.0.0
   peerDependencies:
-    stimulus: ^2.0
-  checksum: 330059df395185417d054fdb6863d4213aa3b9f84454323184b8783d4c923867160b7793ea086036641c1854bd14bd84c0cc27a09a3c4fe7e9c745f208c877fb
+    "@hotwired/stimulus": ^3.0
+  checksum: eb11562260464d3ef507b9dfe1c07d30a99b9188f8009cb68725c94d8c88c03511282931b490e69255649bea60d8ef782fa17bf7ee08c909bd3f91525d444ef7
   languageName: node
   linkType: hard
 
@@ -2387,7 +2372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:^5.0.1":
+"bootstrap@npm:^5.1.3":
   version: 5.1.3
   resolution: "bootstrap@npm:5.1.3"
   peerDependencies:
@@ -2538,7 +2523,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001249":
+"caniuse-lite@npm:^1.0.30001314":
   version: 1.0.30001314
   resolution: "caniuse-lite@npm:1.0.30001314"
   checksum: d82e1b8b287b1b2d2ed25c4495fe293276853dd9c77553c722929a6142fc49b3dd5ea21a95f6410d93319434a5bd071c304ea92e93debbcf292a9156cf08b35d
@@ -2573,7 +2558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.5.3":
+"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
   dependencies:
@@ -2858,7 +2843,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.0.0":
+"core-js@npm:^3.21.1":
   version: 3.21.1
   resolution: "core-js@npm:3.21.1"
   checksum: d68eddd831340ad5b24ac29c72fda022a43b17f194c4278b6b875a843283d316502cb4abd07f28631d6ebc4387f66aa06e2b1b3c8fd7e08096a751b5c63f6889
@@ -3717,7 +3702,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-loader@npm:^6.0.0":
+"file-loader@npm:^6.2.0":
   version: 6.2.0
   resolution: "file-loader@npm:6.2.0"
   dependencies:
@@ -4374,6 +4359,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immutable@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "immutable@npm:4.0.0"
+  checksum: 4b5e9181e4d5fa06728a481835ec09c86367e5d03268666c95b522b7644ab891098022e4479a43c4c81a68f2ed82f10751ce5d33e208d7b873b6e7f9dfaf4d87
+  languageName: node
+  linkType: hard
+
 "import-local@npm:^3.0.2":
   version: 3.1.0
   resolution: "import-local@npm:3.1.0"
@@ -4687,7 +4679,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery-ui@npm:^1.13.0":
+"jquery-ui@npm:^1.13.1":
   version: 1.13.1
   resolution: "jquery-ui@npm:1.13.1"
   dependencies:
@@ -6491,7 +6483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.13.2, regenerator-runtime@npm:^0.13.4":
+"regenerator-runtime@npm:^0.13.4, regenerator-runtime@npm:^0.13.9":
   version: 0.13.9
   resolution: "regenerator-runtime@npm:0.13.9"
   checksum: 65ed455fe5afd799e2897baf691ca21c2772e1a969d19bb0c4695757c2d96249eb74ee3553ea34a91062b2a676beedf630b4c1551cc6299afb937be1426ec55e
@@ -6749,23 +6741,26 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@fortawesome/fontawesome-free": ^5.15.3
-    "@popperjs/core": ^2.9.2
-    "@symfony/stimulus-bridge": 2.1.0
+    "@fortawesome/fontawesome-free": ^6.0.0
+    "@hotwired/stimulus": ^3.0.1
+    "@popperjs/core": ^2.11.2
+    "@symfony/stimulus-bridge": 3.0.0
     "@symfony/webpack-encore": 1.8.1
-    bootstrap: ^5.0.1
-    caniuse-lite: ^1.0.30001249
-    core-js: ^3.0.0
-    file-loader: ^6.0.0
+    bootstrap: ^5.1.3
+    caniuse-lite: ^1.0.30001314
+    core-js: ^3.21.1
+    file-loader: ^6.2.0
     google-charts: ^2.0.0
     jquery: 3.6.0
-    jquery-ui: ^1.13.0
+    jquery-ui: ^1.13.1
     node-sass: ^7.0.1
     popper.js: ^1.16.1
-    regenerator-runtime: ^0.13.2
-    sass-loader: ^12.1.0
-    stimulus: 2.0.0
-    webpack-notifier: ^1.6.0
+    regenerator-runtime: ^0.13.9
+    sass: ^1.49.9
+    sass-loader: ^12.6.0
+    stimulus: 3.0.1
+    webpack: ^5.70.0
+    webpack-notifier: ^1.15.0
     yarn: ^1.22.17
   languageName: unknown
   linkType: soft
@@ -6814,7 +6809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^12.1.0":
+"sass-loader@npm:^12.6.0":
   version: 12.6.0
   resolution: "sass-loader@npm:12.6.0"
   dependencies:
@@ -6836,6 +6831,19 @@ __metadata:
     sass-embedded:
       optional: true
   checksum: 5d73a428588150f704016aa27397941bb9246cecd2ee083b573e95d969fc080ac6a16f2fe1cc64aca08f6e70da6f3c586ee68f0efc9f527fecc360e5f1c299ec
+  languageName: node
+  linkType: hard
+
+"sass@npm:^1.49.9":
+  version: 1.49.9
+  resolution: "sass@npm:1.49.9"
+  dependencies:
+    chokidar: ">=3.0.0 <4.0.0"
+    immutable: ^4.0.0
+    source-map-js: ">=0.6.2 <2.0.0"
+  bin:
+    sass: sass.js
+  checksum: e5653e3499274c5127dcb5c9e7c5f6930378fc61764d999a5d8965782e027181ed09714f94836dec74ef55e3a858107fe6c571954c0cab0ad0be5ab8e586829c
   languageName: node
   linkType: hard
 
@@ -7116,7 +7124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:^1.0.2":
+"source-map-js@npm:>=0.6.2 <2.0.0, source-map-js@npm:^1.0.2":
   version: 1.0.2
   resolution: "source-map-js@npm:1.0.2"
   checksum: c049a7fc4deb9a7e9b481ae3d424cc793cb4845daa690bc5a05d428bf41bf231ced49b4cf0c9e77f9d42fdb3d20d6187619fc586605f5eabe995a316da8d377c
@@ -7295,13 +7303,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stimulus@npm:2.0.0":
-  version: 2.0.0
-  resolution: "stimulus@npm:2.0.0"
+"stimulus@npm:3.0.1":
+  version: 3.0.1
+  resolution: "stimulus@npm:3.0.1"
   dependencies:
-    "@stimulus/core": ^2.0.0
-    "@stimulus/webpack-helpers": ^2.0.0
-  checksum: f72d8951c9e162514a7004367c5a26eba2fddcc59926e65d7308aa719582df8bf4dd79d6541579d8de1f8388e27f506cb6d77a14439a6fd6b78540c15af613e0
+    "@hotwired/stimulus": ^3.0.1
+    "@hotwired/stimulus-webpack-helpers": ^1.0.0
+  checksum: 381b80d638b3168c3b7297777724127bfa96e57600bee73393017f10c9702cf313f4391dc5cd1dbe8a118fe3ae40dd66fdb1a72ee931ea9f26c0f342e53c15e8
   languageName: node
   linkType: hard
 
@@ -7921,7 +7929,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-notifier@npm:^1.6.0":
+"webpack-notifier@npm:^1.15.0":
   version: 1.15.0
   resolution: "webpack-notifier@npm:1.15.0"
   dependencies:
@@ -7953,7 +7961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.35":
+"webpack@npm:^5.35, webpack@npm:^5.70.0":
   version: 5.70.0
   resolution: "webpack@npm:5.70.0"
   dependencies:
