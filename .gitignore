@@ -54,6 +54,8 @@ yarn-error.log
 ###> local env file ###
 .env.local
 .env.local.php
+.env.prod
+.env.dev
 /.env.*.local
 ###< env file ###
 

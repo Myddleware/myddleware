@@ -69,6 +69,7 @@ class ManagementSMTPController extends AbstractController
             }
 
             if ($form->isValid() && $form->isSubmitted()) {
+                // Should we replace this with an Entity in DB which contains smtp config (login details)?
                 $this->setData($form);
 
                 return $this->redirect($this->generateUrl('management_smtp_index'));

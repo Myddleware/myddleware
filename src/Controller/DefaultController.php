@@ -544,6 +544,7 @@ class DefaultController extends AbstractController
 
             return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getLine().' '.$e->getFile());
             return $this->redirect($this->generateUrl('regle_list'));
         }
     }
