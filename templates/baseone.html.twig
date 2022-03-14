@@ -28,7 +28,7 @@
         <meta charset="UTF-8" />
         <title>{% block title %}Myddleware{% endblock %}</title>
         {% block stylesheets %}
-            {{ encore_entry_link_tags('login') }}
+            {# {{ encore_entry_link_tags('login') }} #}
         {% endblock %}
             {% block css %}{% endblock css %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -43,8 +43,7 @@
         {% endblock %}
         
         {% block javascripts %}
-            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-            {{ encore_entry_script_tags('login') }}
+            {# {{ encore_entry_script_tags('login') }} #}
         {% endblock %}
     </body>
 </html>
