@@ -2400,29 +2400,18 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleRelationShip->setRule($oneRule);
                             $oneRuleRelationShip->setFieldNameSource($rel['source']);
                             $oneRuleRelationShip->setFieldNameTarget($rel['target']);
-                            $rel['errorMissing'] = boolval($rel['errorMissing']);
-                            $rel['errorEmpty'] = boolval($rel['errorEmpty']);
                             
-                            if (!empty($rel['errorEmpty'])) {
+                            if ($rel['errorEmpty'] == 'true') {
                                 $oneRuleRelationShip->setErrorEmpty(1);
                             }else{
                                 $oneRuleRelationShip->setErrorEmpty(0);
                             }
-                            if (!empty($rel['errorMissing'])) {
+                            if ($rel['errorMissing'] == 'true') {
                                 $oneRuleRelationShip->setErrorMissing(1);
                             }else{
                                 $oneRuleRelationShip->setErrorMissing(0);
                             }
-                            // if (!empty($rel['errorEmpty'] === true)) {
-                            //     $oneRuleRelationShip->setErrorEmpty(1);
-                            // }elseif($rel['errorEmpty'] === false){
-                            //     $oneRuleRelationShip->setErrorEmpty(0);
-                            // }
-                            // if ($rel['errorMissing'] === true) {
-                            //     $oneRuleRelationShip->setErrorMissing(1);
-                            // }elseif($rel['errorMissing'] === false){
-                            //     $oneRuleRelationShip->setErrorMissing(0);
-                            // }                     
+                    
                             $oneRuleRelationShip->setFieldId($rel['rule']);
                             $oneRuleRelationShip->setParent($rel['parent']);
                             $oneRuleRelationShip->setDeleted(0);
