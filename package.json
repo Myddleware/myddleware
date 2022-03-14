@@ -1,15 +1,15 @@
 {
     "devDependencies": {
-        "@hotwired/stimulus": "^3.0.0",
+        "@hotwired/stimulus": "^3.0.1",
         "@symfony/stimulus-bridge": "^3.0.0",
         "@symfony/webpack-encore": "^1.8.1",
-        "core-js": "^3.0.0",
-        "file-loader": "^6.0.0",
-        "regenerator-runtime": "^0.13.2",
+        "core-js": "^3.21.1",
+        "file-loader": "^6.2.0",
+        "regenerator-runtime": "^0.13.9",
         "sass": "^1.49.9",
-        "sass-loader": "^12.0.0",
+        "sass-loader": "^12.6.0",
         "tapable": "^2.2.1",
-        "webpack-notifier": "^1.6.0"
+        "webpack-notifier": "^1.15.0"
     },
     "license": "UNLICENSED",
     "private": true,
