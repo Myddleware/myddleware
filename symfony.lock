@@ -142,6 +142,15 @@
     "dragonmantank/cron-expression": {
         "version": "v3.3.1"
     },
+    "easycorp/easyadmin-bundle": {
+        "version": "3.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "b131e6cbfe1b898a508987851963fff485986285"
+        }
+    },
     "egulias/email-validator": {
         "version": "3.1.2"
     },
@@ -625,6 +634,9 @@
     "symfony/http-kernel": {
         "version": "v5.4.6"
     },
+    "symfony/intl": {
+        "version": "v5.4.5"
+    },
     "symfony/mailchimp-mailer": {
         "version": "5.4",
         "recipe": {
@@ -760,6 +772,9 @@
     "symfony/polyfill-php81": {
         "version": "v1.25.0"
     },
+    "symfony/polyfill-uuid": {
+        "version": "v1.25.0"
+    },
     "symfony/postmark-mailer": {
         "version": "5.4",
         "recipe": {
@@ -891,6 +906,9 @@
             "./config/packages/twig.yaml",
             "./templates/base.html.twig"
         ]
+    },
+    "symfony/uid": {
+        "version": "v5.4.3"
     },
     "symfony/validator": {
         "version": "5.4",
