@@ -6,7 +6,7 @@ use DateTime;
 use App\Entity\User;
 use App\Entity\Solution;
 use App\Entity\Connector;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use DateTimeImmutable;
 
 class ConnectorTest extends DatabaseDependantTestCase
 {
@@ -22,8 +22,8 @@ class ConnectorTest extends DatabaseDependantTestCase
         $connector->setCreatedBy($user);
         $connector->setDeleted(0);
         $connector->setModifiedBy($user);
-        $connector->setDateCreated(new DateTime('now'));
-        $connector->setDateModified(new DateTime('now'));
+        $connector->setCreatedAt(new DateTimeImmutable('now'));
+        $connector->setUpdatedAt(new DateTimeImmutable('now'));
         $connector->setSolution($solution);
         // when
         $this->entityManager->persist($connector);
@@ -37,6 +37,11 @@ class ConnectorTest extends DatabaseDependantTestCase
 
     public function testAConnectorMustHaveASolutionRelationship(): void
     {
-        
+
+    }
+
+    public function testAConnectorMustHaveConnectionParameters(): void
+    {
+
     }
 }

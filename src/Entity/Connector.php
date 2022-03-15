@@ -67,18 +67,6 @@ class Connector
     private $nameSlug;
 
     /**
-     * TODO: FIX TYPE 
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
-    private $dateCreated;
-
-    /**
-     * TODO: FIX TYPE
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
-    private $dateModified;
-
-    /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private $deleted;
@@ -104,6 +92,16 @@ class Connector
      * @ORM\JoinColumn(nullable=false, name="modified_by")
      */
     private $modifiedBy;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $updatedAt;
 
 
     public function __construct()
@@ -139,30 +137,6 @@ class Connector
     public function getNameSlug(): string
     {
         return $this->nameSlug;
-    }
-
-    public function setDateCreated(DateTime $dateCreated): self
-    {
-        $this->dateCreated = $dateCreated;
-
-        return $this;
-    }
-
-    public function getDateCreated(): DateTime
-    {
-        return $this->dateCreated;
-    }
-
-    public function setDateModified(DateTime $dateModified): self
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    public function getDateModified(): DateTime
-    {
-        return $this->dateModified;
     }
 
     public function setSolution(Solution $solution): self
@@ -288,6 +262,30 @@ class Connector
     public function setModifiedBy(?User $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
