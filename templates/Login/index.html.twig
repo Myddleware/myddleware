@@ -22,12 +22,11 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 
-{% extends "baseone.html.twig" %}
+{% extends "base.html.twig" %}
 {% block title %}{{ parent() }} | {{ 'login.title'|trans }}{% endblock %}
-{% set body_class = 'login' %}
 {% block body %}
-	<div id="myd_connexion">
-		<div class="white">
+	<div>
+		<div>
 			<p class="text-center"><span class="logo"></span></p>
 				<form id="mydlogin" method="post" class="form-inline" role="form" action="{{ path('login') }}">
 				{% if attempt < 6 %}
@@ -66,16 +65,11 @@
 			{% endif %}
 			</form>
 		</div>
-		<div class="grey">
+		<div>
 			<p>Before trying to log in, please ensure you've completed the installation process</p>
 			<a href="{{ path('install_requirements')}}" role="button" class="btn btn-outline-secondary text-white">
 				Install Myddleware
 			</a>	
-			{% if platform_sh == true %}
-				<p><span class="logo_platform"></span></p>
-			{% else %}
-				<p><span class="logo_empty"></span></p>
-			{% endif %}
 			<p>
 				{% if password_message == true %}
 					<p>{{ 'login.platform.line1'|trans }}</p>
@@ -87,7 +81,4 @@
 			</p>
 		</div>
 	</div>
-	<script type="text/javascript">
-		var path_control = "{#{{ path('login_protect') }}#}";
-	</script>
 {% endblock %}
