@@ -34,8 +34,6 @@ use Doctrine\ORM\Mapping as ORM;
 class ConnectorParam
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -49,98 +47,58 @@ class ConnectorParam
     private $connector;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=684)
      */
     private $name;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="value", type="string", length=684)
      */
     private $value;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set connector.
-     *
-     * @param int $connector
-     *
-     * @return ConnectorParam
-     */
-    public function setConnector($connector)
+    public function setConnector(Connector $connector): self
     {
         $this->connector = $connector;
 
         return $this;
     }
 
-    /**
-     * Get connector.
-     *
-     * @return int
-     */
-    public function getConnector()
+    public function getConnector(): ?Connector
     {
         return $this->connector;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return ConnectorParam
-     */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set value.
-     *
-     * @param string $value
-     *
-     * @return ConnectorParam
-     */
-    public function setValue($value)
+    public function setValue(string $value): self
     {
         $this->value = $value;
 
         return $this;
     }
 
-    /**
-     * Get value.
-     *
-     * @return string
-     */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
+    }
+    
+    public function __toString(): string
+    {
+        return $this->name;
     }
 }

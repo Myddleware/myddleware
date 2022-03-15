@@ -45,6 +45,11 @@ class Connector
     private $id;
 
     /**
+     * @ORM\Column(name="name", type="string", length=50, nullable=false)
+     */
+    private $name;
+
+    /**
      * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector")
      */
     private $connectorParams;
@@ -54,11 +59,6 @@ class Connector
      * @ORM\JoinColumn(name="sol_id", referencedColumnName="id")
      */
     private $solution;
-
-    /**
-     * @ORM\Column(name="name", type="string", length=50, nullable=false)
-     */
-    private $name;
 
     /**
      * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
@@ -288,5 +288,10 @@ class Connector
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 }
