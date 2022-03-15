@@ -26,6 +26,7 @@ class ConnectorCrudController extends AbstractCrudController
         $connector->setCreatedAt($now);
         $connector->setUpdatedAt($now);
         $connector->setCreatedBy($user);
+        $connector->setModifiedBy($user);
         return $connector;
     }
 

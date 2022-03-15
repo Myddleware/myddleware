@@ -50,6 +50,10 @@ security:
                 domain:    ~
             logout:        true
             form_login:
+                # "login" is the name of the route created previously
+                login_path: login
+                check_path: login
+                enable_csrf: true
                 use_referer: true
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER

@@ -1,84 +1,22 @@
-{#/*********************************************************************************
- * This file is part of Myddleware.
+{% extends 'base.html.twig' %}
 
- * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com	
- 
- This file is part of Myddleware.
- 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+{% block title %}Login to Myddleware{% endblock %}
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
-
-{% extends "base.html.twig" %}
-{% block title %}{{ parent() }} | {{ 'login.title'|trans }}{% endblock %}
 {% block body %}
-	<div>
-		<div>
-			<p class="text-center"><span class="logo"></span></p>
-				<form id="mydlogin" method="post" class="form-inline" role="form" action="{{ path('login') }}">
-				{% if attempt < 6 %}
-				<div class="">
-					<input type="text" autocomplete='off' class="form-control mb-2" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
-					<input type="password" autocomplete='off' class="form-control mb-2" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
-					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
-			
-				{% if error %}
-					<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
-						<i class="fas fa-times"></i>
-						<p class="ms-2">
-							{{ error|trans }} <span> ( {{ attempt }} ) </span>
-						</p>
-					</div>
-				{% else %}
-					<div id="_error" style="display:none;" class="alert alert-danger" role="alert">
-						<i class="fas fa-times"></i>
-						<div>
-							{{ 'login.error_session'|trans }}
-						</div>
-					</div>
-				{% endif %}
-				<button type="submit" class="btn btn-success mb-2">{{ 'login.connexion'|trans }}</button>
-				<button style="display:none;" id="_submit" name="_submit" class="btn btn-outline-secondary text-white"></button>
-				<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
-				</div>
-				{% else %}
-					<div class="alert alert-danger" role="alert">
-						<span>
-						<i class="fas fa-times"></i>
-							Please wait :  {{ remaining.minute }}min {{ remaining.second }}s 
-						</span>
-					</div>
-					<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
-			{% endif %}
-			</form>
-		</div>
-		<div>
-			<p>Before trying to log in, please ensure you've completed the installation process</p>
-			<a href="{{ path('install_requirements')}}" role="button" class="btn btn-outline-secondary text-white">
-				Install Myddleware
-			</a>	
-			<p>
-				{% if password_message == true %}
-					<p>{{ 'login.platform.line1'|trans }}</p>
-					<p>{{ 'login.platform.line2'|trans }}</p>
-					<p class="login_warning">{{ 'login.platform.line3'|trans }}</p>
-				{% endif %}
-				<p>{{ 'login.text_up_right'|trans }}</p>
-				<a href="http://www.myddleware.com" class="btn-mydinv btn btn-outline-secondary text-white" role="button" target="_blank">{{ 'login.btn.here'|trans }}</a>
-			</p>
-		</div>
-	</div>
+    {% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+    <form action="{{ path('login') }}" method="post">
+        <label for="username">Email:</label>
+        <input type="text" id="username" name="_username" value="{{ last_username }}"/>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="_password"/>
+
+        {# If you want to control the URL the user is redirected to on success #}
+        <input type="hidden" name="_target_path" value="/admin"/> 
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit" class="btn btn-primary">login</button>
+    </form>
+
 {% endblock %}

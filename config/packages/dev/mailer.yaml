@@ -1,0 +1,10 @@
+framework:
+    mailer:
+        dsn: 'null://null'
+        envelope:
+            sender: 'no-reply@myddleware.com'
+            recipients: ['foo@example.com', 'bar@example.com']
+        headers:
+            From: 'Myddleware <no-reply@myddleware.com>'
+            Bcc: 'foo@example.com'
+            X-Custom-Header: 'foobar'
