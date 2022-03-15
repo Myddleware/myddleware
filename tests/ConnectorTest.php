@@ -34,4 +34,9 @@ class ConnectorTest extends DatabaseDependantTestCase
         $this->assertEquals($solution, $connectorRecord->getSolution());
         $this->assertEquals('my_connector', $connectorRecord->getNameSlug());
     }
+
+    public function testAConnectorMustHaveASolutionRelationship(): void
+    {
+        
+    }
 }

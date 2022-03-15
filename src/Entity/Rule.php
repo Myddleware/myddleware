@@ -47,18 +47,15 @@ class Rule
 
     /**
      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsSource")
-     * @ORM\JoinColumn(nullable=false, name="conn_id_source", referencedColumnName="id")
+     * @ORM\JoinColumn(nullable=false, name="conn_id_source")
      */
     private $connectorSource;
 
-
-    // /**
-    //  * @var Connector
-    //  *
-    //  * @ORM\ManyToOne(targetEntity="Connector")
-    //  * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="id")
-    //  */
-    // private $connectorTarget;
+    /**
+      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsTarget")
+     * @ORM\JoinColumn(nullable=false, name="conn_id_target")
+     */
+    private $connectorTarget;
 
     /**
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
@@ -148,12 +145,6 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsTarget")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $connector;
 
     public function __construct()
     {
@@ -273,26 +264,26 @@ class Rule
         return $this->nameSlug;
     }
 
-    public function setConnectorSource(Connector $connectorSource):self
+    public function setConnectorSource(?Connector $connectorSource): self
     {
         $this->connectorSource = $connectorSource;
         return $this;
     }
 
-    public function getConnectorSource():Connector
+    public function getConnectorSource(): ?Connector
     {
         return $this->connectorSource;
     }
 
-    public function setConnectorTarget(Connector $connectorTarget):self
+    public function getConnectorTarget(): ?Connector
+    {
+        return $this->connectorTarget;
+    }
+
+    public function setConnectorTarget(?Connector $connectorTarget): self
     {
         $this->connectorTarget = $connectorTarget;
         return $this;
-    }
-
-    public function getConnectorTarget():Connector
-    {
-        return $this->connectorTarget;
     }
 
     public function getParams(): Collection
@@ -591,17 +582,5 @@ class Rule
     public function __toString()
     {
         return $this->id;
-    }
-
-    public function getConnector(): ?Connector
-    {
-        return $this->connector;
-    }
-
-    public function setConnector(?Connector $connector): self
-    {
-        $this->connector = $connector;
-
-        return $this;
     }
 }
