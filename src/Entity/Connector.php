@@ -38,8 +38,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 class Connector
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -52,17 +50,14 @@ class Connector
     private $connectorParams;
 
     /**
-     * @var Solution
-     *
      * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
      * @ORM\JoinColumn(name="sol_id", referencedColumnName="id")
      */
     private $solution;
 
-    /**
-     * @var ArrayCollection
-     */
-    private $rule;
+
+    //  TODO: FIX TYPE, NUMBER & RELATIONSHIPMAPPING (MANYTOONE) 
+    // private $rule;
 
     /**
      * @var string
@@ -78,316 +73,176 @@ class Connector
     private $nameSlug;
 
     /**
-     * @var DateTime
-     *
+     * TODO: FIX TYPE 
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
     private $dateCreated;
 
     /**
-     * @var DateTime
-     *
+     * TODO: FIX TYPE
      * @ORM\Column(name="date_modified", type="datetime", nullable=false)
      */
     private $dateModified;
 
     /**
-     * @var int
-     *
+     * TODO: FIX TYPE 
      * @ORM\Column(name="created_by", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @var int
-     *
+     * TODO: FIX TYPE 
      * @ORM\Column(name="modified_by", nullable=false)
      */
     private $modifiedBy;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private $deleted;
 
-    /**
-     * Constructor.
-     */
+
     public function __construct()
     {
-        $this->rule = new ArrayCollection();
+        // $this->rule = new ArrayCollection();
     }
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int 
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return Connector
-     */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set nameSlug.
-     *
-     * @param string $nameSlug
-     *
-     * @return Connector
-     */
-    public function setNameSlug($nameSlug)
+    public function setNameSlug(string $nameSlug): self
     {
         $this->nameSlug = $nameSlug;
 
         return $this;
     }
 
-    /**
-     * Get nameSlug.
-     *
-     * @return string
-     */
-    public function getNameSlug()
+    public function getNameSlug(): string
     {
         return $this->nameSlug;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return Connector
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated(DateTime $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return Connector
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified(DateTime $dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set createdBy.
-     *
-     * @param string $createdBy
-     *
-     * @return Connector
-     */
-    public function setCreatedBy($createdBy)
+    public function setCreatedBy(string $createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    /**
-     * Get createdBy.
-     *
-     * @return string
-     */
-    public function getCreatedBy()
+    public function getCreatedBy(): string
     {
         return $this->createdBy;
     }
 
-    /**
-     * Set modifiedBy.
-     *
-     * @param string $modifiedBy
-     *
-     * @return Connector
-     */
-    public function setModifiedBy($modifiedBy)
+    public function setModifiedBy(string $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 
         return $this;
     }
 
-    /**
-     * Get modifiedBy.
-     *
-     * @return string
-     */
-    public function getModifiedBy()
+    public function getModifiedBy(): string
     {
         return $this->modifiedBy;
     }
 
-    /**
-     * Set solution.
-     *
-     * @return Connector
-     */
-    public function setSolution(Solution $solution)
+    public function setSolution(Solution $solution): self
     {
         $this->solution = $solution;
 
         return $this;
     }
 
-    /**
-     * Get solution.
-     *
-     * @return Solution
-     */
-    public function getSolution()
+    public function getSolution(): Solution
     {
         return $this->solution;
     }
 
-    /**
-     * Add rule.
-     *
-     * @return Connector
-     */
-    public function addRule(Rule $rule)
-    {
-        $this->rule[] = $rule;
+    // public function addRule(Rule $rule): self
+    // {
+    //     $this->rule[] = $rule;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    /**
-     * Remove rule.
-     */
-    public function removeRule(Rule $rule)
-    {
-        $this->rule->removeElement($rule);
-    }
+    // public function removeRule(Rule $rule)
+    // {
+    //     $this->rule->removeElement($rule);
+    // }
 
-    /**
-     * Get rule.
-     *
-     * @return Collection
-     */
-    public function getRule()
-    {
-        return $this->rule;
-    }
+    // public function getRule(): Collection
+    // {
+    //     return $this->rule;
+    // }
 
-    /**
-     * Add connectorParam.
-     *
-     * @return Connector
-     */
-    public function addConnectorParam(ConnectorParam $connectorParam)
+    public function addConnectorParam(ConnectorParam $connectorParam): self
     {
         $this->connectorParams[] = $connectorParam;
 
         return $this;
     }
 
-    /**
-     * Remove connectorParam.
-     */
     public function removeConnectorParam(ConnectorParam $connectorParam)
     {
         $this->connectorParams->removeElement($connectorParam);
     }
 
-    /**
-     * Get connectorParams.
-     *
-     * @return Collection|ConnectorParam[]
-     */
-    public function getConnectorParams()
+    public function getConnectorParams():Collection
     {
         return $this->connectorParams;
     }
 
-    /**
-     * Set connectorParams.
-     *
-     * @return Collection
-     *
-     * @param mixed|null $connectorParams
-     */
-    public function setConnectorParams($connectorParams = null)
+    public function setConnectorParams(mixed $connectorParams = null): Collection
     {
         return $this->connectorParams = $connectorParams;
     }
 
-    /**
-     * Set deleted.
-     *
-     * @param int $deleted
-     *
-     * @return Rule
-     */
-    public function setDeleted($deleted)
+    public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
 
         return $this;
     }
 
-    /**
-     * Get deleted.
-     *
-     * @return int
-     */
-    public function getDeleted()
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }

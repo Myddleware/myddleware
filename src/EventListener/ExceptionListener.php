@@ -21,8 +21,9 @@ class ExceptionListener
     {
         $exception = $event->getThrowable();
 
-        // we intercept exceptions to do with the fact that user hasn't set up his database parameters yet
+        // we intercept exceptions to do with the fact that the app cannot access the database
         if ($exception instanceof ConnectionException || $exception instanceof TableNotFoundException) {
+            // this will redirect to install if no DB set in .env.local or to login if DB set but not accessible
             $urlInstall = $this->router->generate('install_requirements');
             // redirect to installation page
             $response = new RedirectResponse($urlInstall);
