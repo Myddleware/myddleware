@@ -24,18 +24,21 @@ class PromoteUserCommand extends Command
     /**
      * @var UserRepository
      */
-    private $userRepository;
+    // private $userRepository;
 
     /**
      * @var SymfonyStyle
      */
     private $io;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $userRepository)
+    public function __construct(
+        EntityManagerInterface $em, 
+        // UserRepository $userRepository
+    )
     {
         parent::__construct();
         $this->em = $em;
-        $this->userRepository = $userRepository;
+        // $this->userRepository = $userRepository;
     }
 
     protected function configure()

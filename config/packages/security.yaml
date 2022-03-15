@@ -7,16 +7,11 @@ security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
 
     providers:
-        username_provider:
-            entity:
-                class: App\Entity\User
-                property: username
-
+        users_in_memory: { memory: null }
     firewalls:
         api_login:
             pattern:  ^/api/v1_0/login
             stateless: true
-            anonymous: true
             json_login:
                 check_path: /api/v1_0/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -33,22 +28,18 @@ security:
         main:
             lazy: true
             pattern: .*
-            provider: username_provider
+            provider: users_in_memory
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
-            guard:
-                authenticators:
-                    - App\Security\SecurityAuthenticator
             remember_me:
                 secret:    "%secret%"
                 lifetime:  30000000
                 path:      /
                 domain:    ~
             logout:        true
-            anonymous:     true
             form_login:
                 use_referer: true
     role_hierarchy:

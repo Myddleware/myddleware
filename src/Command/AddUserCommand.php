@@ -50,17 +50,22 @@ class AddUserCommand extends Command
     private $entityManager;
     private $passwordEncoder;
     private $validator;
-    private $users;
+    // private $users;
     private $configRepository;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
+    public function __construct(
+        EntityManagerInterface $em,
+        // UserPasswordEncoderInterface $encoder, 
+        // Validator $validator, UserRepository $users,
+        ConfigRepository $configRepository
+    )
     {
         parent::__construct();
 
         $this->entityManager = $em;
-        $this->passwordEncoder = $encoder;
-        $this->validator = $validator;
-        $this->users = $users;
+        // $this->passwordEncoder = $encoder;
+        // $this->validator = $validator;
+        // $this->users = $users;
         $this->configRepository = $configRepository;
     }
 
