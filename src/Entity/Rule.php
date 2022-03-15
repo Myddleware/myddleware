@@ -40,90 +40,69 @@ use Gedmo\Mapping\Annotation as Gedmo; // slug
 class Rule
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
     private $id;
 
     /**
-     * @var Connector
-     *
-     * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_source", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsSource")
+     * @ORM\JoinColumn(nullable=false, name="conn_id_source", referencedColumnName="id")
      */
     private $connectorSource;
 
-    /**
-     * @var Connector
-     *
-     * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="id")
-     */
-    private $connectorTarget;
+
+    // /**
+    //  * @var Connector
+    //  *
+    //  * @ORM\ManyToOne(targetEntity="Connector")
+    //  * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="id")
+    //  */
+    // private $connectorTarget;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
     private $dateCreated;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_modified", type="datetime", nullable=false)
      */
     private $dateModified;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
     private $modifiedBy;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="module_source", type="string", nullable=false)
      */
     private $moduleSource;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="module_target", type="string", nullable=false)
      */
     private $moduleTarget;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
     private $active;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private $deleted;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
     private $name;
@@ -135,54 +114,46 @@ class Rule
     private $nameSlug;
 
     /**
-     * @var RuleParam[]
-     *
      * @ORM\OneToMany(targetEntity="RuleParam", mappedBy="rule")
      */
     private $params;
 
     /**
-     * @var RuleRelationShip[]
-     *
      * @ORM\OneToMany(targetEntity="RuleRelationShip", mappedBy="rule")
      */
     private $relationsShip;
 
     /**
-     * @var RuleOrder[]
-     *
      * @ORM\OneToMany(targetEntity="RuleOrder", mappedBy="rule")
      */
     private $orders;
 
     /**
-     * @var RuleFilter[]
-     *
      * @ORM\OneToMany(targetEntity="RuleFilter", mappedBy="rule")
      */
     private $filters;
 
     /**
-     * @var RuleField[]
-     *
      * @ORM\OneToMany(targetEntity="RuleField", mappedBy="rule")
      */
     private $fields;
 
     /**
-     * @var RuleAudit[]
-     *
      * @ORM\OneToMany(targetEntity="RuleAudit", mappedBy="rule")
      */
     private $audits;
 
     /**
-     * @var Document[]
-     *
      * @ORM\OneToMany(targetEntity="Document", mappedBy="rule")
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsTarget")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $connector;
 
     public function __construct()
     {
@@ -203,269 +174,127 @@ class Rule
         $this->id = uniqid();
     }
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return Rule
-     */
-    public function setId($id)
+    public function setId(string $id):self
     {
         $this->id = $id;
-
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId():string
     {
         return $this->id;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return Rule
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated(DateTime $dateCreated):self
     {
         $this->dateCreated = $dateCreated;
-
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated():DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return Rule
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified(DateTime $dateModified):self
     {
         $this->dateModified = $dateModified;
-
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified():DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set moduleSource.
-     *
-     * @param string $moduleSource
-     *
-     * @return Rule
-     */
-    public function setModuleSource($moduleSource)
+    public function setModuleSource(string $moduleSource):self
     {
         $this->moduleSource = $moduleSource;
-
         return $this;
     }
 
-    /**
-     * Get moduleSource.
-     *
-     * @return string
-     */
-    public function getModuleSource()
+    public function getModuleSource():string
     {
         return $this->moduleSource;
     }
 
-    /**
-     * Set moduleTarget.
-     *
-     * @param string $moduleTarget
-     *
-     * @return Rule
-     */
-    public function setModuleTarget($moduleTarget)
+    public function setModuleTarget(string $moduleTarget):self
     {
         $this->moduleTarget = $moduleTarget;
-
         return $this;
     }
 
-    /**
-     * Get moduleTarget.
-     *
-     * @return string
-     */
-    public function getModuleTarget()
+    public function getModuleTarget():string
     {
         return $this->moduleTarget;
     }
 
-    /**
-     * Set active.
-     *
-     * @param int $active
-     *
-     * @return Rule
-     */
-    public function setActive($active)
+    public function setActive(bool $active):self
     {
         $this->active = $active;
-
         return $this;
     }
 
-    /**
-     * Get active.
-     *
-     * @return int
-     */
-    public function getActive()
+    public function getActive():bool
     {
         return $this->active;
     }
 
-    /**
-     * Set deleted.
-     *
-     * @param int $deleted
-     *
-     * @return Rule
-     */
-    public function setDeleted($deleted)
+    public function setDeleted(bool $deleted):self
     {
         $this->deleted = $deleted;
-
         return $this;
     }
 
-    /**
-     * Get deleted.
-     *
-     * @return int
-     */
-    public function getDeleted()
+    public function getDeleted():bool
     {
         return $this->deleted;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return Rule
-     */
-    public function setName($name)
+    public function setName(string $name):self
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName():string
     {
         return $this->name;
     }
 
-    /**
-     * Set nameSlug.
-     *
-     * @param string $nameSlug
-     *
-     * @return Rule
-     */
-    public function setNameSlug($nameSlug)
+    public function setNameSlug(string $nameSlug):self
     {
         $this->nameSlug = $nameSlug;
-
         return $this;
     }
 
-    /**
-     * Get nameSlug.
-     *
-     * @return string
-     */
-    public function getNameSlug()
+    public function getNameSlug():string
     {
         return $this->nameSlug;
     }
 
-    /**
-     * Set connectorSource.
-     *
-     * @return Rule
-     */
-    public function setConnectorSource(Connector $connectorSource)
+    public function setConnectorSource(Connector $connectorSource):self
     {
         $this->connectorSource = $connectorSource;
-
         return $this;
     }
 
-    /**
-     * Get connectorSource.
-     *
-     * @return Connector
-     */
-    public function getConnectorSource()
+    public function getConnectorSource():Connector
     {
         return $this->connectorSource;
     }
 
-    /**
-     * Set connectorTarget.
-     *
-     * @return Rule
-     */
-    public function setConnectorTarget(Connector $connectorTarget)
+    public function setConnectorTarget(Connector $connectorTarget):self
     {
         $this->connectorTarget = $connectorTarget;
-
         return $this;
     }
 
-    /**
-     * Get connectorTarget.
-     *
-     * @return Connector
-     */
-    public function getConnectorTarget()
+    public function getConnectorTarget():Connector
     {
         return $this->connectorTarget;
     }
 
-    /**
-     * @return Collection|RuleParam[]
-     */
     public function getParams(): Collection
     {
         return $this->params;
@@ -477,7 +306,6 @@ class Rule
         foreach ($this->getParams() as $ruleParam) {
             $return[$ruleParam->getName()] = ltrim($ruleParam->getValue());
         }
-
         return $return;
     }
 
@@ -490,7 +318,6 @@ class Rule
         if ($ruleParam instanceof RuleParam) {
             return $ruleParam;
         }
-
         return null;
     }
 
@@ -500,7 +327,6 @@ class Rule
             $this->params[] = $param;
             $param->setRule($this);
         }
-
         return $this;
     }
 
@@ -512,13 +338,9 @@ class Rule
                 $param->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleRelationShip[]
-     */
     public function getRelationsShip(): Collection
     {
         return $this->relationsShip;
@@ -531,7 +353,6 @@ class Rule
                 return true;
             }
         }
-
         return false;
     }
 
@@ -541,7 +362,6 @@ class Rule
             $this->relationsShip[] = $relationsShip;
             $relationsShip->setRule($this);
         }
-
         return $this;
     }
 
@@ -553,13 +373,9 @@ class Rule
                 $relationsShip->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleOrder[]
-     */
     public function getOrders(): Collection
     {
         return $this->orders;
@@ -571,7 +387,6 @@ class Rule
             $this->orders[] = $order;
             $order->setRule($this);
         }
-
         return $this;
     }
 
@@ -583,13 +398,9 @@ class Rule
                 $order->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleFilter[]
-     */
     public function getFilters(): Collection
     {
         return $this->filters;
@@ -601,7 +412,6 @@ class Rule
             $this->filters[] = $filter;
             $filter->setRule($this);
         }
-
         return $this;
     }
 
@@ -613,13 +423,9 @@ class Rule
                 $filter->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleAudit[]
-     */
     public function getAudits(): Collection
     {
         return $this->audits;
@@ -631,7 +437,6 @@ class Rule
             $this->audits[] = $audit;
             $audit->setRule($this);
         }
-
         return $this;
     }
 
@@ -643,13 +448,9 @@ class Rule
                 $audit->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleField[]
-     */
     public function getFields(): Collection
     {
         return $this->fields;
@@ -661,7 +462,6 @@ class Rule
             $this->fields[] = $field;
             $field->setRule($this);
         }
-
         return $this;
     }
 
@@ -673,13 +473,9 @@ class Rule
                 $field->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|Document[]
-     */
     public function getDocuments(): Collection
     {
         return $this->documents;
@@ -698,7 +494,6 @@ class Rule
             $this->documents[] = $document;
             $document->setRule($this);
         }
-
         return $this;
     }
 
@@ -710,21 +505,17 @@ class Rule
                 $document->setRule(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|RuleRelationShip[]
-     */
-    public function getChildRules()
+    public function getChildRules():Collection
     {
         return $this->getRelationsShip()->filter(function (RuleRelationShip $ruleRelationShip) {
             return true === $ruleRelationShip->getParent();
         });
     }
 
-    public function isChild()
+    public function isChild(): bool
     {
         return $this->getChildRules()->count() > 0;
     }
@@ -739,14 +530,12 @@ class Rule
                 $items[] = ltrim($field);
             }
         }
-
         // Lecture des relations de la règle
         if ($this->getRelationsShip()->count()) {
             foreach ($this->getRelationsShip() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameSource());
             }
         }
-
         return array_unique($items);
     }
 
@@ -756,14 +545,12 @@ class Rule
         foreach ($this->getFields() as $ruleField) {
             $items[] = ltrim($ruleField->getSource());
         }
-
         // Lecture des relations de la règle
         if ($this->getRelationsShip()->count()) {
             foreach ($this->getRelationsShip() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameTarget());
             }
         }
-
         return array_unique($items);
     }
 
@@ -776,7 +563,6 @@ class Rule
                 'target_field_name' => $ruleField->getTarget(),
             ];
         }
-
         return array_unique($items);
     }
 
@@ -788,7 +574,6 @@ class Rule
     public function setCreatedBy(?User $createdBy): self
     {
         $this->createdBy = $createdBy;
-
         return $this;
     }
 
@@ -800,12 +585,23 @@ class Rule
     public function setModifiedBy(?User $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
-
         return $this;
     }
 
     public function __toString()
     {
         return $this->id;
+    }
+
+    public function getConnector(): ?Connector
+    {
+        return $this->connector;
+    }
+
+    public function setConnector(?Connector $connector): self
+    {
+        $this->connector = $connector;
+
+        return $this;
     }
 }

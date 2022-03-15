@@ -55,13 +55,7 @@ class Connector
      */
     private $solution;
 
-
-    //  TODO: FIX TYPE, NUMBER & RELATIONSHIPMAPPING (MANYTOONE) 
-    // private $rule;
-
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
     private $name;
@@ -101,10 +95,21 @@ class Connector
      */
     private $deleted;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorSource", orphanRemoval=true)
+     */
+    private $rulesWhereIsSource;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorTarget", orphanRemoval=true)
+     */
+    private $rulesWhereIsTarget;
+
 
     public function __construct()
     {
-        // $this->rule = new ArrayCollection();
+        $this->rulesWhereIsTarget = new ArrayCollection();
+        $this->rulesWhereIsSource = new ArrayCollection();
     }
 
     public function getId(): int 
@@ -196,23 +201,6 @@ class Connector
         return $this->solution;
     }
 
-    // public function addRule(Rule $rule): self
-    // {
-    //     $this->rule[] = $rule;
-
-    //     return $this;
-    // }
-
-    // public function removeRule(Rule $rule)
-    // {
-    //     $this->rule->removeElement($rule);
-    // }
-
-    // public function getRule(): Collection
-    // {
-    //     return $this->rule;
-    // }
-
     public function addConnectorParam(ConnectorParam $connectorParam): self
     {
         $this->connectorParams[] = $connectorParam;
@@ -245,5 +233,62 @@ class Connector
     public function getDeleted(): bool
     {
         return $this->deleted;
+    }
+
+    /**
+     * @return Collection<int, Rule>
+     */
+    public function getRulesWhereIsSource(): Collection
+    {
+        return $this->rulesWhereIsSource;
+    }
+
+    public function addRuleWhereIsSource(Rule $rule): self
+    {
+        if (!$this->rulesWhereIsSource->contains($rule)) {
+            $this->rulesWhereIsSource[] = $rule;
+            $rule->setConnectorSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRuleWhereIsSource(Rule $rule): self
+    {
+        if ($this->rulesWhereIsSource->removeElement($rule)) {
+            // set the owning side to null (unless already changed)
+            if ($rule->getConnectorSource() === $this) {
+                $rule->setConnectorSource(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Rule>
+     */
+    public function getRulesWhereIsTarget(): Collection
+    {
+        return $this->rulesWhereIsTarget;
+    }
+
+    public function addRulesWhereIsTarget(Rule $rulesWhereIsTarget): self
+    {
+        if (!$this->rulesWhereIsTarget->contains($rulesWhereIsTarget)) {
+            $this->rulesWhereIsTarget[] = $rulesWhereIsTarget;
+            $rulesWhereIsTarget->setConnectorTarget($this);
+        }
+        return $this;
+    }
+
+    public function removeRulesWhereIsTarget(Rule $rulesWhereIsTarget): self
+    {
+        if ($this->rulesWhereIsTarget->removeElement($rulesWhereIsTarget)) {
+            // set the owning side to null (unless already changed)
+            if ($rulesWhereIsTarget->getConnectorTarget() === $this) {
+                $rulesWhereIsTarget->setConnectorTarget(null);
+            }
+        }
+        return $this;
     }
 }
