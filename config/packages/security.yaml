@@ -3,6 +3,8 @@ security:
     enable_authenticator_manager: true
     # https://symfony.com/doc/current/security.html#c-hashing-passwords
     password_hashers:
+        # Use native password hasher, which auto-selects and migrates the best
+        # possible hashing algorithm (starting from Symfony 5.3 this is "bcrypt")
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
         App\Entity\User:
             algorithm: auto
@@ -14,7 +16,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: username
+                property: email
     firewalls:
         api_login:
             pattern:  ^/api/v1_0/login

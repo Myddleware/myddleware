@@ -966,6 +966,9 @@
     "symfony/yaml": {
         "version": "v5.4.3"
     },
+    "symfonycasts/verify-email-bundle": {
+        "version": "v1.10.0"
+    },
     "theseer/tokenizer": {
         "version": "1.2.1"
     },

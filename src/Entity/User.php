@@ -21,11 +21,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
-    private $username;
-
-    /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -42,6 +37,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $timezone;
 
+    /**
+     * @ORM\Column(type="string", length=180, unique=true)
+     */
+    private $email;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,14 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->username;
-    }
-
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
+        return (string) $this->email;
     }
 
     /**
@@ -69,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return (string) $this->email;
     }
 
     /**
@@ -134,6 +127,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTimezone(string $timezone= 'UTC'): self
     {
         $this->timezone = $timezone;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
 
         return $this;
     }
