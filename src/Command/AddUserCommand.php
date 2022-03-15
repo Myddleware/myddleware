@@ -56,7 +56,8 @@ class AddUserCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         // UserPasswordEncoderInterface $encoder, 
-        // Validator $validator, UserRepository $users,
+        Validator $validator, 
+        UserRepository $users,
         ConfigRepository $configRepository
     )
     {

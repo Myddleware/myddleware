@@ -24,7 +24,7 @@ class DemoteUserCommand extends Command
     /**
      * @var UserRepository
      */
-    // private $userRepository;
+    private $userRepository;
 
     /**
      * @var SymfonyStyle
@@ -33,12 +33,12 @@ class DemoteUserCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em, 
-        // UserRepository $userRepository
+        UserRepository $userRepository
         )
     {
         parent::__construct();
         $this->em = $em;
-        // $this->userRepository = $userRepository;
+        $this->userRepository = $userRepository;
     }
 
     protected function configure()
