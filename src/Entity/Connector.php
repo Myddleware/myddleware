@@ -79,18 +79,6 @@ class Connector
     private $dateModified;
 
     /**
-     * TODO: FIX TYPE 
-     * @ORM\Column(name="created_by", nullable=false)
-     */
-    private $createdBy;
-
-    /**
-     * TODO: FIX TYPE 
-     * @ORM\Column(name="modified_by", nullable=false)
-     */
-    private $modifiedBy;
-
-    /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private $deleted;
@@ -104,6 +92,18 @@ class Connector
      * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorTarget", orphanRemoval=true)
      */
     private $rulesWhereIsTarget;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $modifiedBy;
 
 
     public function __construct()
@@ -163,30 +163,6 @@ class Connector
     public function getDateModified(): DateTime
     {
         return $this->dateModified;
-    }
-
-    public function setCreatedBy(string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): string
-    {
-        return $this->createdBy;
-    }
-
-    public function setModifiedBy(string $modifiedBy): self
-    {
-        $this->modifiedBy = $modifiedBy;
-
-        return $this;
-    }
-
-    public function getModifiedBy(): string
-    {
-        return $this->modifiedBy;
     }
 
     public function setSolution(Solution $solution): self
@@ -289,6 +265,30 @@ class Connector
                 $rulesWhereIsTarget->setConnectorTarget(null);
             }
         }
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modifiedBy;
+    }
+
+    public function setModifiedBy(?User $modifiedBy): self
+    {
+        $this->modifiedBy = $modifiedBy;
+
         return $this;
     }
 }
