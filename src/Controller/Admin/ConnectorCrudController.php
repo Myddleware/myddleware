@@ -37,8 +37,8 @@ class ConnectorCrudController extends AbstractCrudController
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
-            // AssociationField::new('connectorParams'),
-            // AssociationField::new('solution'),
+            AssociationField::new('connectorParams')->hideOnForm(),
+            AssociationField::new('solution')->onlyWhenCreating(),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),
