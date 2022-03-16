@@ -2,22 +2,22 @@
 
 namespace App\Command;
 
-use App\Entity\Config;
 use App\Entity\User;
-use App\Repository\ConfigRepository;
-use App\Repository\UserRepository;
+use App\Entity\Config;
 use App\Utils\Validator;
+use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use function Symfony\Component\String\u;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Stopwatch\Stopwatch;
-use function Symfony\Component\String\u;
+use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * A console command that creates users and stores them in the database.
@@ -48,14 +48,14 @@ class AddUserCommand extends Command
     private $io;
 
     private $entityManager;
-    private $passwordEncoder;
+    private $passwordHasher;
     private $validator;
     private $user;
     private $configRepository;
 
     public function __construct(
         EntityManagerInterface $em,
-        // UserPasswordEncoderInterface $encoder, 
+        UserPasswordHasherInterface $hasher, 
         Validator $validator, 
         UserRepository $user,
         ConfigRepository $configRepository
@@ -64,8 +64,8 @@ class AddUserCommand extends Command
         parent::__construct();
 
         $this->entityManager = $em;
-        // $this->passwordEncoder = $encoder;
-        // $this->validator = $validator;
+        $this->passwordHasher = $hasher;
+        $this->validator = $validator;
         $this->user = $user;
         $this->configRepository = $configRepository;
     }
@@ -80,9 +80,8 @@ class AddUserCommand extends Command
             ->setHelp($this->getCommandHelp())
             // commands can optionally define arguments and/or options (mandatory and optional)
             // see https://symfony.com/doc/current/components/console/console_arguments.html
-            ->addArgument('username', InputArgument::OPTIONAL, 'The username of the new user')
-            ->addArgument('password', InputArgument::OPTIONAL, 'The plain password of the new user')
             ->addArgument('email', InputArgument::OPTIONAL, 'The email of the new user')
+            ->addArgument('password', InputArgument::OPTIONAL, 'The plain password of the new user')
             ->addOption('superadmin', null, InputOption::VALUE_NONE, 'If set, the user is created as a super administrator')
         ;
     }
@@ -111,7 +110,7 @@ class AddUserCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        if (null !== $input->getArgument('username') && null !== $input->getArgument('password') && null !== $input->getArgument('email')) {
+        if (null !== $input->getArgument('password') && null !== $input->getArgument('email')) {
             return;
         }
 
@@ -120,18 +119,18 @@ class AddUserCommand extends Command
             'If you prefer to not use this interactive wizard, provide the',
             'arguments required by this command as follows:',
             '',
-            ' $ php bin/console myddleware:add-user username password email@example.com',
+            ' $ php bin/console myddleware:add-user email@example.com password',
             '',
             'Now we\'ll ask you for the value of all the missing command arguments.',
         ]);
 
-        // Ask for the username if it's not defined
-        $username = $input->getArgument('username');
-        if (null !== $username) {
-            $this->io->text(' > <info>Username</info>: '.$username);
+        // Ask for the email if it's not defined
+        $email = $input->getArgument('email');
+        if (null !== $email) {
+            $this->io->text(' > <info>Email</info>: '.$email);
         } else {
-            $username = $this->io->ask('Username', null, [$this->validator, 'validateUsername']);
-            $input->setArgument('username', $username);
+            $email = $this->io->ask('Email', null, [$this->validator, 'validateEmail']);
+            $input->setArgument('email', $email);
         }
 
         // Ask for the password if it's not defined
@@ -141,15 +140,6 @@ class AddUserCommand extends Command
         } else {
             $password = $this->io->askHidden('Password (what you type will be hidden)', [$this->validator, 'validatePassword']);
             $input->setArgument('password', $password);
-        }
-
-        // Ask for the email if it's not defined
-        $email = $input->getArgument('email');
-        if (null !== $email) {
-            $this->io->text(' > <info>Email</info>: '.$email);
-        } else {
-            $email = $this->io->ask('Email', null, [$this->validator, 'validateEmail']);
-            $input->setArgument('email', $email);
         }
     }
 
@@ -162,28 +152,22 @@ class AddUserCommand extends Command
         $stopwatch = new Stopwatch();
         $stopwatch->start('add-user-command');
 
-        $username = $input->getArgument('username');
-        $plainPassword = $input->getArgument('password');
         $email = $input->getArgument('email');
-
+        $plainPassword = $input->getArgument('password');
         $isSuperAdmin = $input->getOption('superadmin');
 
         // make sure to validate the user data is correct
-        $this->validateUserData($username, $plainPassword, $email);
+        $this->validateUserData($plainPassword, $email);
 
-        // create the user and encode its password
+        // create the user and hash its password
         $user = new User();
-        $user->setUsername($username);
         $user->setEmail($email);
         $user->setRoles($isSuperAdmin ? ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] : ['ROLE_ADMIN']);
-        $user->setEnabled(true);
-        $user->setUsernameCanonical($username);
-        $user->setEmailCanonical($email);
         $user->setTimezone('UTC');
 
-        // See https://symfony.com/doc/current/security.html#c-encoding-passwords
-        $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
-        $user->setPassword($encodedPassword);
+        // See https://symfony.com/doc/current/security/passwords.html
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)
         $allowInstalls = $this->configRepository->findBy(['name' => 'allow_install']);
@@ -212,15 +196,8 @@ class AddUserCommand extends Command
         return 0;
     }
 
-    private function validateUserData($username, $plainPassword, $email): void
+    private function validateUserData($plainPassword, $email): void
     {
-        // first check if a user with the same username already exists.
-        $existingUser = $this->user->findOneBy(['username' => $username]);
-
-        if (null !== $existingUser) {
-            throw new RuntimeException(sprintf('There is already a user registered with the "%s" username.', $username));
-        }
-
         // validate password and email if is not this input means interactive.
         $this->validator->validatePassword($plainPassword);
         $this->validator->validateEmail($email);
@@ -242,16 +219,14 @@ class AddUserCommand extends Command
     {
         return <<<'HELP'
                 The <info>%command.name%</info> command creates new users and saves them in the database:
-                <info>php %command.full_name%</info> <comment>username password email</comment>
+                <info>php %command.full_name%</info> <comment>password email</comment>
                 By default the command creates admin users. If you want to create Super Admin users, 
                 add the --superadmin option:
                 <info> php %command.full_name%</info> <comment>--superadmin</comment>
-                If you omit any of the three required arguments, the command will ask you to
+                If you omit any of the 2 required arguments, the command will ask you to
                 provide the missing values:
                 # command will ask you for the email
-                <info>php %command.full_name%</info> <comment>username password</comment>
-                # command will ask you for the email and password
-                <info>php %command.full_name%</info> <comment>username</comment>
+                <info>php %command.full_name%</info> <comment>password</comment>
                 # command will ask you for all arguments
                 <info>php %command.full_name%</info>
                 HELP;

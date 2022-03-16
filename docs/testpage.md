@@ -44,5 +44,5 @@ This is a test PHP code sample
 We can also use SQL syntax
 
 ```sql
-    SELECT * FROM users WHERE id=? 
+    SELECT * FROM user WHERE id=? 
 ```

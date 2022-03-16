@@ -21,20 +21,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="integer")
      */
     private $id;
+    
     /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
+
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
      */
     private $password;
+
     /**
      * @Assert\Timezone
      * @ORM\Column(type="string", length=255)
      */
     private $timezone;
+
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      */
@@ -44,6 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="boolean")
      */
     private $isVerified = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -117,16 +122,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->timezone;
     }
+
     public function setTimezone(string $timezone= 'UTC'): self
     {
         $this->timezone = $timezone;
 
         return $this;
     }
+
     public function getEmail(): ?string
     {
         return $this->email;
     }
+
     public function setEmail(string $email): self
     {
         $this->email = $email;

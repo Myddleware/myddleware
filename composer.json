@@ -72,6 +72,7 @@
     "symfony/mailjet-mailer": "5.4.*",
     "symfony/monolog-bundle": "^3.1.2",
     "symfony/oh-my-smtp-mailer": "5.4.*",
+    "symfony/password-hasher": "5.4.*",
     "symfony/postmark-mailer": "5.4.*",
     "symfony/property-access": "5.4.*",
     "symfony/property-info": "5.4.*",
