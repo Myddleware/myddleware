@@ -2247,7 +2247,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if('limit' === $ruleParam->getName()){
                             $limit = $ruleParam->getValue();
                         }
-					
                         if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
@@ -2463,7 +2462,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                                     'ruleName' => $nameRule,
                                                     'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
                                                     'datereference' => $date_reference,
-                                                    'limit' =>$limit,
+                                                    'limit' => $limit,
                                                     'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
                                                     'content' => $tab_new_rule,
                                                     'relationships' => $relationshipsBeforeSave,
