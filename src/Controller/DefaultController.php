@@ -1547,7 +1547,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
          *
          * @Route("/create/step3/{id}", name="regle_stepthree", defaults={"id"=0})
          */
-        public function ruleStepThreeAction(Request $request)
+        public function ruleStepThreeAction(Request $request, string $id, Rule $rule)
         {
             $this->getInstanceBdd();
             $ruleKey = $request->get('id');
@@ -1826,8 +1826,49 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $control[] = $value['name'];
                     }
                 }
-
                 asort($choice);
+
+                // -------------------	Error relation
+
+                // $lstErrors= $this->getDoctrine()
+                // ->getManager()
+                // ->getRepository(RuleRelationShip::class)
+                // ->findBy(['rule'=>$id]);
+
+                // $lstErrorRelation = [];
+                // $controls = [];
+
+                // foreach ($lstErrors as $key => $value) {
+                //     if (!in_array($value['errorEmpty'], $controls)) {
+                //         $lstErrorRelation[$value['id']] = $value['errorEmpty'];
+                //         $controls[] = $value['name'];
+
+                //         dump($value);
+                //     }
+                    
+                // }
+                // asort($lstErrorRelation);
+
+                // Relations d'une règle
+                if ($rule->getRelationsShip()->count()) {
+                    foreach ($rule->getRelationsShip() as $ruleRelationShipsObj) {
+                        $relate[] = [
+                            'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
+                            'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
+                        ];
+                    }
+                    $this->sessionService->getParamRuleReloadRelate($key, $relate);
+                }
+                $rule_relationships = $rule->getRelationsShip();
+                $tab_rs = [];
+                $i = 0;
+                foreach ($rule_relationships as $r) {
+                    $tab_rs[$i]['getErrorMissing'] = $r->getErrorMissing();
+                    $tab_rs[$i]['getErrorEmpty'] = $r->getErrorEmpty();
+                    ++$i;
+                }                
+                
+                dump($rule_relationships);
 
                 // -------------------	Parent relation
                 // Search if we can send document merged with the target solution
@@ -1885,11 +1926,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 //Behavior filters
                 $errorMissing =[
-                    'errorMissing'
+                    'false' => $this->translator->trans('create_rule.step3.relation.no'),
+                    'true' => $this->translator->trans('create_rule.step3.relation.yes'),
                 ];
 
                 $errorEmpty =[
-                    'errorEmpty'
+                    'true' => $this->translator->trans('create_rule.step3.relation.yes'),
+                    'false' => $this->translator->trans('create_rule.step3.relation.no'),
                 ];
 
                 // paramètres de la règle
@@ -2021,6 +2064,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'lst_relation_target' => $lst_relation_target_alpha,
                     'lst_relation_source' => $choice_source,
                     'lst_rule' => $choice,
+                    'lst_error_empty_' => $rule_relationships,
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
@@ -2044,13 +2088,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['errorMissing'] = ToolsManager::composeListHtmlCheckbox($result['errorMissing']);
-                $result['errorEmpty'] = ToolsManager::composeListHtmlCheckbox($result['errorEmpty']);
+                $result['errorMissing'] = ToolsManager::composeListHtml($result['errorMissing']);
+                $result['errorEmpty'] = ToolsManager::composeListHtml($result['errorEmpty']);
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
                 // ----------------
             } catch (Exception $e) {
+                dd($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
                 $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
 
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
@@ -2416,7 +2461,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $tabRelationShips = [];
                 if (!is_null($request->request->get('relations'))) {
                     foreach ($request->request->get('relations') as $rel) {
-                        
                         if (
                             !empty($rel['rule'])
                             && !empty($rel['source'])
@@ -2426,7 +2470,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleRelationShip->setRule($oneRule);
                             $oneRuleRelationShip->setFieldNameSource($rel['source']);
                             $oneRuleRelationShip->setFieldNameTarget($rel['target']);
-                            
+                           
                             if ($rel['errorEmpty'] == 'true') {
                                 $oneRuleRelationShip->setErrorEmpty(1);
                             }else{

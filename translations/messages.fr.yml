@@ -119,6 +119,7 @@ create_rule:
             parent: "Relation parent : fusion de plusieurs documents"
             record_id: ID enregistrement
             yes: Oui
+            no : Non
             behavior: Comportement
         params:
             duplicate: Champs pour éviter les doublons
