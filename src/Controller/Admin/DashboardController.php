@@ -2,9 +2,12 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Job;
+use App\Entity\Rule;
 use App\Entity\User;
 use App\Entity\Solution;
 use App\Entity\Connector;
+use App\Entity\JobScheduler;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\Admin\ConnectorCrudController;
@@ -47,13 +50,17 @@ class DashboardController extends AbstractDashboardController
     {
         return [ 
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
+            MenuItem::section('Rules'),
+            MenuItem::linkToCrud('Rule', 'fas fa-sync', Rule::class),
             MenuItem::section('Connectors'),
             MenuItem::linkToCrud('Connector', 'fa fa-link', Connector::class),
-            MenuItem::linkToCrud('Solution', 'fa fa-list', Solution::class),
+            MenuItem::linkToCrud('Solution', 'fa fa-bullseye', Solution::class),
+            MenuItem::section('Jobs'),
+            MenuItem::linkToCrud('Job', 'fas fa-tasks', Job::class),
+            MenuItem::section('JobScheduler'),  
+            MenuItem::linkToCrud('JobScheduler', 'fa fa-calendar', JobScheduler::class),
             MenuItem::section('Users'),
             MenuItem::linkToCrud('User', 'fa fa-user', User::class),
-            // MenuItem::linkToCrud('Blog Posts', 'fa fa-file-text', BlogPost::class),
-            // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
         ];
     }
 }
