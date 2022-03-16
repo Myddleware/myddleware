@@ -28,7 +28,7 @@ use Automattic\WooCommerce\Client;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class woocommercecore extends solution
+class WooCommerce extends Solution
 {
     protected $apiUrlSuffix = '/wp-json/wc/v3/';
     protected $url;
@@ -38,8 +38,10 @@ class woocommercecore extends solution
     protected $callLimit = 100;       // WooCommerce API only allows 100 records per page read
     protected $delaySearch = '-1 month';
     protected $subModules = [
-                                'line_items' => ['parent_module' => 'orders',
-                                                      'parent_id' => 'order_id', ],
+                                'line_items' => [
+                                    'parent_module' => 'orders',
+                                    'parent_id' => 'order_id', 
+                                ],
                             ];
 
     //Log in form parameters
@@ -389,8 +391,4 @@ class woocommercecore extends solution
     {
         return 'date_modified';
     }
-}
-
-class woocommerce extends woocommercecore
-{
 }

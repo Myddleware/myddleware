@@ -29,7 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\HttpClient;
 
-class airtablecore extends solution
+class Airtable extends Solution
 {
     protected $sendDeletion = true;
     protected $airtableURL = 'https://api.airtable.com/v0/';
@@ -515,8 +515,4 @@ class airtablecore extends solution
 
         return $dto->format('Y-m-d\TH:i:s');
     }
-}
-
-class airtable extends airtablecore
-{
 }

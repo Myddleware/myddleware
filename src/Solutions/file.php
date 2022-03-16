@@ -27,9 +27,8 @@ namespace App\Solutions;
 
 use App\Entity\Rule;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
-
-class filecore extends solution
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+class File extends Solution
 {
     protected $baseUrl;
     protected $messages = [];
@@ -598,7 +597,4 @@ class filecore extends solution
         // default is id
         return ['id'];
     }
-}
-class file extends filecore
-{
 }

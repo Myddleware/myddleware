@@ -27,7 +27,7 @@ namespace App\Solutions;
 use Datetime;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class hubspotcore extends solution
+class Hubspot extends Solution
 {
     protected $url = 'https://api.hubapi.com/';
     protected $version = 'v1';
@@ -1377,8 +1377,4 @@ class hubspotcore extends solution
 
         return $resultCurl;
     }
-}
-
-class hubspot extends hubspotcore
-{
 }

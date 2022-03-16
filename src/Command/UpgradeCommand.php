@@ -62,14 +62,13 @@ class UpgradeCommand extends Command
     }
 
     // Process to the upgrade
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $data = $this->jobManager->initJob('upgrade');
         if (false === $data['success']) {
-            $output->writeln('0;<error>'.$data['message'].'</error>');
+            $output->writeln('1;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
-
-            return 0;
+            return Command::FAILURE;
         }
 
         $output->writeln($this->jobManager->getId());
@@ -96,6 +95,6 @@ class UpgradeCommand extends Command
             }
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

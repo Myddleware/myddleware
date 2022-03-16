@@ -27,7 +27,7 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sapcrmcore extends saproot
+class SAPCRM extends SAPRoot
 {
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
@@ -534,8 +534,4 @@ class sapcrmcore extends saproot
 
         return $response;
     }
-}// class sapcrm
-
-class sapcrm extends sapcrmcore
-{
 }

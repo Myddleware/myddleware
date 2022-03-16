@@ -25,71 +25,71 @@
 
 namespace App\Manager;
 
-use App\Solutions\airtable;
-use App\Solutions\cirrusshield;
-use App\Solutions\erpnext;
-use App\Solutions\eventbrite;
-use App\Solutions\facebook;
-use App\Solutions\file;
-use App\Solutions\hubspot;
-use App\Solutions\magento;
-use App\Solutions\mailchimp;
-use App\Solutions\mautic;
-use App\Solutions\microsoftsql;
-use App\Solutions\moodle;
-use App\Solutions\mysql;
-use App\Solutions\oracledb;
-use App\Solutions\postgresql;
-use App\Solutions\prestashop;
-use App\Solutions\ringcentral;
-use App\Solutions\sagecrm;
-use App\Solutions\salesforce;
-use App\Solutions\sap;
-use App\Solutions\sapcrm;
-use App\Solutions\sendinblue;
-use App\Solutions\sugarcrm;
-use App\Solutions\suitecrm;
-use App\Solutions\vtigercrm;
-use App\Solutions\woocommerce;
-use App\Solutions\wooeventmanager;
-use App\Solutions\wordpress;
-use App\Solutions\zuora;
 use Exception;
+use App\Solutions\SAP;
+use App\Solutions\File;
+use App\Solutions\MySQL;
+use App\Solutions\Zuora;
+use App\Solutions\Mautic;
+use App\Solutions\Moodle;
+use App\Solutions\SAPCRM;
+use App\Solutions\ERPNext;
+use App\Solutions\Hubspot;
+use App\Solutions\Magento;
+use App\Solutions\SageCRM;
+use App\Solutions\Airtable;
+use App\Solutions\Facebook;
+use App\Solutions\SugarCRM;
+use App\Solutions\SuiteCRM;
+use App\Solutions\Mailchimp;
+use App\Solutions\VtigerCRM;
+use App\Solutions\WordPress;
+use App\Solutions\Eventbrite;
+use App\Solutions\PostgreSQL;
+use App\Solutions\PrestaShop;
+use App\Solutions\Salesforce;
+use App\Solutions\Sendinblue;
+use App\Solutions\RingCentral;
+use App\Solutions\WooCommerce;
+use App\Solutions\CirrusShield;
+use App\Solutions\MicrosoftSQL;
+use App\Solutions\OracleDatabase;
+use App\Solutions\WooEventManager;
 
 class SolutionManager
 {
     private $classes = [];
 
     public function __construct(
-        wordpress $wordpress,
-        woocommerce $woocommerce,
-        wooeventmanager $wooeventmanager,
-        erpnext $erpnext,
-        facebook $facebook,
-        mautic $mautic,
-        hubspot $hubspot,
-        zuora $zuora,
-        cirrusshield $cirrusshield,
-        ringcentral $ringcentral,
-        file $file,
-        moodle $moodle,
-        magento $magento,
-        microsoftsql $microsoftsql,
-        oracledb $oracledb,
-        mysql $mysql,
-        sap $sap,
-        sapcrm $sapcrm,
-        sagecrm $sagecrm,
-        vtigercrm $vtigercrm,
-        suitecrm $suitecrm,
-        eventbrite $eventbrite,
-        mailchimp $mailchimp,
-        prestashop $prestashop,
-        postgresql $postgresql,
-        sugarcrm $sugarcrm,
-        salesforce $salesforce,
-        airtable $airtable,
-        sendinblue $sendinblue
+        WordPress $wordpress,
+        WooCommerce $woocommerce,
+        WooEventManager $wooeventmanager,
+        ERPNext $erpnext,
+        Facebook $facebook,
+        Mautic $mautic,
+        Hubspot $hubspot,
+        Zuora $zuora,
+        CirrusShield $cirrusshield,
+        RingCentral $ringcentral,
+        File $file,
+        Moodle $moodle,
+        Magento $magento,
+        MicrosoftSQL $microsoftsql,
+        OracleDatabase $oracledb,
+        MySQL $mysql,
+        SAP $sap,
+        SAPCRM $sapcrm,
+        SageCRM $sagecrm,
+        VtigerCRM $vtigercrm,
+        SuiteCRM $suitecrm,
+        Eventbrite $eventbrite,
+        Mailchimp $mailchimp,
+        PrestaShop $prestashop,
+        PostgreSQL $postgresql,
+        SugarCRM $sugarcrm,
+        Salesforce $salesforce,
+        Airtable $airtable,
+        Sendinblue $sendinblue
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -127,7 +127,7 @@ class SolutionManager
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware. ');
+            throw new Exception('Solution '.ucfirst($name).' not found. Please make sure that you have added this solution into Myddleware. ');
         }
 
         return $this->classes[$name];

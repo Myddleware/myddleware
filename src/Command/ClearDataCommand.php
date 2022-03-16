@@ -60,7 +60,7 @@ class ClearDataCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
         $data = $this->jobManager->initJob('cleardata');

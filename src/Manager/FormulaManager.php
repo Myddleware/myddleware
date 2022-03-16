@@ -38,7 +38,7 @@ class FormulaManager
         $this->formulaFunctionManager = $formulaFunctionManager;
     }
 
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return __NAMESPACE__;
     }

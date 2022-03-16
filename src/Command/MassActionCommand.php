@@ -70,7 +70,7 @@ class MassActionCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
@@ -89,7 +89,7 @@ class MassActionCommand extends Command
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
 
-            return 0;
+            return Command::FAILURE;
         }
 
         $output->writeln('1;'.$this->jobManager->getId());  // Do not remove, used for manual job and webservices (display logs)
@@ -142,6 +142,6 @@ class MassActionCommand extends Command
             }
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class postgresqlcore extends database
+class PostgreSQL extends Database
 {
     protected $driver = 'pgsql';
 
@@ -199,8 +199,4 @@ class postgresqlcore extends database
 
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
-}// class postgresqlcore
-
-class postgresql extends postgresqlcore
-{
 }

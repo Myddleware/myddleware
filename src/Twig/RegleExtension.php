@@ -30,7 +30,7 @@ use Twig\TwigFilter;
 
 class RegleExtension extends AbstractExtension
 {
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('sensor', [$this, 'sensor']),

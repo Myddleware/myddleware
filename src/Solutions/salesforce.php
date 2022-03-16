@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class salesforcecore extends solution {
+class Salesforce extends Solution {
 
 	protected $limitCall = 100;
 
@@ -96,7 +96,7 @@ class salesforcecore extends solution {
 		        'password' => $this->paramConnexion['password'].$this->paramConnexion['token']
 		    );
 
- 			$token_request_data = $this->call($token_url, $post_fields);
+			$token_request_data = $this->call($token_url, $post_fields);
 
 		    if (!isset($token_request_data['access_token'])||
 		        !isset($token_request_data['instance_url'])){
@@ -829,7 +829,4 @@ class salesforcecore extends solution {
 		return $date;
 	}
     
-}
-
-class salesforce extends salesforcecore {	
 }

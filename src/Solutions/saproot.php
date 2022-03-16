@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class saprootcore extends solution
+class SAPRoot extends Solution
 {
     protected $limit = 100;
     protected $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
@@ -269,7 +269,7 @@ class saprootcore extends solution
                                             3 == count($fieldDetails)	// Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
                                         && (
                                                 $fieldDetails[0] != $oldFieldDetails[0]
-                                              || $fieldDetails[1] != $oldFieldDetails[1]
+                                            || $fieldDetails[1] != $oldFieldDetails[1]
                                         )
                                     )
                                 ) {
@@ -286,7 +286,7 @@ class saprootcore extends solution
                                         && $response->$structureFromat->item->$guidName == $header // Si on est sur la bonne opération
                                         && (
                                                 empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si pas de filtrage dans la structure
-                                             || (
+                                            || (
                                                     !empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si filtrage alors on vérifie la valeur
                                                 && $response->$structureFromat->item->$this->keySubStructure[$param['module']][$fieldDetails[0]] == $this->transformName($fieldDetails[2])
                                             )
@@ -471,8 +471,4 @@ class saprootcore extends solution
 
         return $result;
     }
-}// class saprootcore
-
-class saproot extends saprootcore
-{
 }

@@ -65,7 +65,7 @@ class RerunErrorCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
@@ -79,8 +79,7 @@ class RerunErrorCommand extends Command
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
-
-            return 0;
+            return Command::FAILURE;
         }
         $this->jobManager->setApi($api);
         $output->writeln($this->jobManager->getId());
@@ -106,6 +105,6 @@ class RerunErrorCommand extends Command
             }
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

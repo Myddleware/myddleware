@@ -63,7 +63,7 @@ class NotificationCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // We don't create job for alert
         if ('alert' == $input->getArgument('type')) {
@@ -81,7 +81,7 @@ class NotificationCommand extends Command
                 if (false === $data['success']) {
                     $output->writeln('0;<error>'.$data['message'].'</error>');
 
-                    return 0;
+                    return Command::FAILURE;
                 }
 
                 $this->notificationManager->sendNotification();
@@ -93,6 +93,6 @@ class NotificationCommand extends Command
             $this->jobManager->closeJob();
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

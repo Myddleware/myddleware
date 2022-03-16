@@ -30,7 +30,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class erpnextcore extends solution
+class ERPNext extends Solution
 {
     protected $token;
     protected $update;
@@ -512,7 +512,4 @@ class erpnextcore extends solution
 
         return $result;
     }
-}
-class erpnext extends erpnextcore
-{
 }

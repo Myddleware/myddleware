@@ -29,7 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\HttpClient;
 
-class wordpresscore extends solution
+class WordPress extends Solution
 {
     protected $apiSuffix = '/wp-json/wp/v2/';
     protected $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
@@ -307,8 +307,4 @@ class wordpresscore extends solution
 
         return true;
     }
-}
-
-class wordpress extends wordpresscore
-{
 }

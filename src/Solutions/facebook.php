@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class facebookcore extends solution
+class Facebook extends Solution
 {
     protected $baseUrl = 'https://graph.facebook.com';
     protected $apiVersion = 'v11.0';
@@ -307,8 +307,4 @@ class facebookcore extends solution
         // Only leads module for now
         return 'created_time';
     }
-}
-
-class facebook extends facebookcore
-{
 }

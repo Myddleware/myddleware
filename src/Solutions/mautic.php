@@ -33,7 +33,7 @@ use Mautic\MauticApi;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class mauticcore extends solution
+class Mautic extends Solution
 {
     protected $auth;
 
@@ -443,9 +443,4 @@ class mauticcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
-}
-
-class mautic extends mauticcore
-{
 }

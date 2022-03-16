@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class cirrusshieldcore extends solution
+class CirrusShield extends Solution
 {
     protected $url = 'https://www.cirrus-shield.net/RestApi/';
     protected $token;
@@ -486,8 +486,4 @@ class cirrusshieldcore extends solution
         }
         throw new \Exception('curl extension is missing!');
     }
-}
-
-class cirrusshield extends cirrusshieldcore
-{
 }

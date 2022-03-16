@@ -74,7 +74,7 @@ class ReadRecordCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');
@@ -94,7 +94,7 @@ class ReadRecordCommand extends Command
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
 
-            return 0;
+            return Command::FAILURE;
         }
 
         $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
@@ -113,6 +113,6 @@ class ReadRecordCommand extends Command
             }
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

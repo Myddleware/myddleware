@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -30,7 +30,7 @@ use App\Solutions\lib\PrestaShopWebserviceException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class prestashopcore extends solution
+class PrestaShop extends Solution
 {
     protected $required_fields = [
         'default' => ['id', 'date_upd', 'date_add'],
@@ -257,7 +257,7 @@ class prestashopcore extends solution
                     }
                     if (
                             'id_' == substr($presta_field, 0, 3)
-                         || '_id' == substr($presta_field, -3)
+                        || '_id' == substr($presta_field, -3)
                     ) {
                         $this->moduleFields[$presta_field] = [
                             'label' => $presta_field,
@@ -959,7 +959,7 @@ class prestashopcore extends solution
                 'target' == $type
             and (
                     in_array($module, ['customer_messages', 'order_details'])
-                 or array_key_exists($module, $this->module_relationship_many_to_many)
+                or array_key_exists($module, $this->module_relationship_many_to_many)
             )
         ) { // Si le module est dans le tableau alors c'est uniquement de la création
             return [
@@ -1029,7 +1029,6 @@ class prestashopcore extends solution
             return [];
         } catch (\Exception $e) {
             return [];
-            //return $e->getMessage();
         }
     }
 
@@ -1043,8 +1042,4 @@ class prestashopcore extends solution
     {
     }
 
-    // call($method, $parameters)
-}// class prestashopcore
-class prestashop extends prestashopcore
-{
 }

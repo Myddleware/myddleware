@@ -15,7 +15,7 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface
         $this->_secret = $params->get('secret');
     }
 
-    public function reverseTransform($value)
+    public function reverseTransform($value): mixed
     {
         // Generate object to encrypt data
         $encrypter = new Encrypter(substr($this->_secret, -16));
@@ -25,7 +25,7 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface
         return $value;
     }
 
-    public function transform($value)
+    public function transform($value): mixed
     {
         $value->setValue($this->decrypt_params($value->getValue()));
 

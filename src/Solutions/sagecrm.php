@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sagecrmcore extends solution
+class SageCRM extends Solution
 {
     private $wsdl = '';
     private $username = '';
@@ -114,16 +114,12 @@ class sagecrmcore extends solution
         }
     }
 
-    // login($paramConnexion)*/
-
     // Fonction qui renvoie les données de connexion
     public function getToken()
     {
         return ['sf_access_token' => $this->access_token,
             'sf_instance_url' => $this->instance_url, ];
     }
-
-    // getToken()
 
     // Liste des paramètres de connexion
     public function getFieldsLogin()
@@ -146,8 +142,6 @@ class sagecrmcore extends solution
             ],
         ];
     }
-
-    // getFieldsLogin()
 
     // Renvoie les modules disponibles du compte Salesforce connecté
     public function get_modules($type = 'source')
@@ -205,7 +199,6 @@ class sagecrmcore extends solution
         }
     }
 
-    // get_modules()
 
     // Renvoie les champs du module passé en paramètre
     public function get_module_fields($module, $type = 'source', $param = null)
@@ -322,7 +315,6 @@ class sagecrmcore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
@@ -661,8 +653,6 @@ class sagecrmcore extends solution
         return $result;
     }
 
-    // update($param)
-
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
     public function getRefFieldName($moduleSource, $RuleMode)
     {
@@ -698,7 +688,4 @@ class sagecrmcore extends solution
 
         return $date->format($formatReturn);
     }
-}// class sagecrmcore
-class sagecrm extends sagecrmcore
-{
 }

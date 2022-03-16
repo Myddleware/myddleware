@@ -7,28 +7,28 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
 
-use App\Manager\rule as ruleMyddleware;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
+use App\Manager\RuleManager;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sapcore extends saproot
+class SAP extends SAPRoot
 {
     protected $limit = 5;
 
@@ -310,7 +310,7 @@ class sapcore extends saproot
                                 if (!empty($childData)) {
                                     // Si le module de la règle est présent dans la réponse du webservice, on génère l'objet règle
                                     $param['ruleId'] = $rule['id'];
-                                    $ruleMyddleware = new ruleMyddleware($this->logger, $this->container, $this->conn, $param);
+                                    $ruleMyddleware = new RuleManager($this->logger, $this->container, $this->conn, $param);
                                     // Pour toutes les lignes du module fils on génère un document fils
                                     foreach ($childData as $childDocument) {
                                         $data = '';
@@ -405,8 +405,4 @@ class sapcore extends saproot
 
         return parent::getRuleMode($module, $type);
     }
-}// class sap
-
-class sap extends sapcore
-{
 }

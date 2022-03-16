@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use DateTime;
 use App\Entity\User;
 use App\Entity\Solution;
 use App\Entity\Connector;

@@ -73,7 +73,7 @@ class JobSchedulerCommand extends Command
     }
 
     // Run the job scheduler
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'dev');
@@ -113,5 +113,6 @@ class JobSchedulerCommand extends Command
                 $io->error($e->getMessage());
             }
         }
+        return Command::SUCCESS;
     }
 }

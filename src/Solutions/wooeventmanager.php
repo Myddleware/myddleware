@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class wooeventmanagercore extends wordpress
+class WooEventManager extends WordPress
 {
     protected $subModules = [
                                     'mep_event_more_date' => ['parent_module' => 'mep_events',
@@ -49,8 +49,4 @@ class wooeventmanagercore extends wordpress
                 ];
         }
     }
-}
-
-class wooeventmanager extends wooeventmanagercore
-{
 }

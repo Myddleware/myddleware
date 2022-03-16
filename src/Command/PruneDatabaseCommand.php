@@ -60,7 +60,7 @@ class PruneDatabaseCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $data = $this->jobManager->initJob('Prune database');
 
@@ -68,7 +68,7 @@ class PruneDatabaseCommand extends Command
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
 
-            return 0;
+            return Command::FAILURE;
         }
 
         $this->jobManager->pruneDatabase();
@@ -85,6 +85,6 @@ class PruneDatabaseCommand extends Command
             }
         }
 
-        return 1;
+        return Command::SUCCESS;
     }
 }

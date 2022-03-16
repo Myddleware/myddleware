@@ -27,7 +27,7 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sapecccore extends sap
+class SAPECC extends SAP
 {
     protected $limit = 5;
 
@@ -275,8 +275,4 @@ class sapecccore extends sap
 
         return parent::getRuleMode($module, $type);
     }
-}// class sapecc
-
-class sapecc extends sapecccore
-{
 }

@@ -15,7 +15,7 @@ class Language extends AbstractExtension
         $this->request = $request;
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('languages', [$this, 'getAllLanguages']),
