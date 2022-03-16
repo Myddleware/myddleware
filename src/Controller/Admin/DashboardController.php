@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
+use App\Entity\Solution;
 use App\Entity\Connector;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -48,6 +49,7 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
             MenuItem::section('Connectors'),
             MenuItem::linkToCrud('Connector', 'fa fa-link', Connector::class),
+            MenuItem::linkToCrud('Solution', 'fa fa-list', Solution::class),
             MenuItem::section('Users'),
             MenuItem::linkToCrud('User', 'fa fa-user', User::class),
             // MenuItem::linkToCrud('Blog Posts', 'fa fa-file-text', BlogPost::class),
