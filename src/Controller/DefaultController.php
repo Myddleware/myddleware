@@ -437,7 +437,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleTarget = $form->get('connectorTarget')->getData();
                     
                     if (isset($newRuleName)) {
-                        $newRule->setName($newRuleName)
+                        // Set the rule header data
+						$newRule->setName($newRuleName)
                             ->setCreatedBy($user)
                             ->setConnectorSource($newRuleSource)
                             ->setConnectorTarget($newRuleTarget)
@@ -449,33 +450,58 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             ->setDeleted(false)
                             ->setActive(false)
                             ->setNameSlug($newRuleName);
-                            foreach($rule->getParams() as $param){
-                                $newRule->addParam($param);   
-                            }      
-                            foreach($rule->getRelationsShip() as $relationsShip){
-                                $newRule->addRelationsShip($relationsShip);   
-                            }
-                            foreach($rule->getOrders() as $order){//no
-                                $newRule->addOrder($order);   
-                            }
-                            foreach($rule->getFilters() as $filter){
-                                $newRule->addFilter($filter);   
-                            }
-                            foreach($rule->getFields() as $field){
-                                $newRule->addField($field);   
-                            }  
-                            foreach($rule->getAudits() as $audit){//no
-                                $newRule->addAudit($audit);   
-                            }           
-                            $this->entityManager->persist($newRule);
-                            $this->entityManager->flush();
-                            $success =$translator->trans('duplicate_rule.success_duplicate');
-                            $this->addFlash('success', $success);
+
+						// Set the rule parameters
+						foreach($rule->getParams() as $param){
+							$paramNewRule = new RuleParam();
+							$paramNewRule->setRule($newRule);
+							$paramNewRule->setName($param->getName());
+							$paramNewRule->setValue($param->getValue());
+							$this->entityManager->persist($paramNewRule); 
+						} 
+
+						// Set the rule relationships						
+						foreach($rule->getRelationsShip() as $relationship){
+							$relationsShipNewRule = new RuleRelationShip();
+							$relationsShipNewRule->setRule($newRule);								
+							$relationsShipNewRule->setFieldNameSource($relationship->getFieldNameSource());					
+							$relationsShipNewRule->setFieldNameTarget($relationship->getFieldNameTarget());
+							$relationsShipNewRule->setFieldId($relationship->getFieldId());
+							$relationsShipNewRule->setParent($relationship->getParent());
+							$relationsShipNewRule->setDeleted(0);
+							$relationsShipNewRule->setErrorEmpty($relationship->getErrorEmpty());
+							$relationsShipNewRule->setErrorMissing($relationship->getErrorMissing());
+							$this->entityManager->persist($relationsShipNewRule);
+						}
+
+						// Set the rule filters
+						foreach($rule->getFilters() as $filter){
+							$filterNewRule = new RuleFilter();
+							$filterNewRule->setRule($newRule);
+							$filterNewRule->setTarget($filter->getTarget());
+							$filterNewRule->setType($filter->getType());
+							$filterNewRule->setValue($filter->getValue());
+							$this->entityManager->persist($filterNewRule); 
+						}
+					
+						// Set the rule fields
+						foreach($rule->getFields() as $field){
+							$fieldNewRule = new RuleField();
+							$fieldNewRule->setRule($newRule);
+							$fieldNewRule->setTarget($field->getTarget());
+							$fieldNewRule->setSource($field->getSource());
+							$fieldNewRule->setFormula($field->getFormula());
+							$this->entityManager->persist($fieldNewRule); 
+						}  
+						
+						// Save the new rule in the database
+						$this->entityManager->persist($newRule);
+						$this->entityManager->flush();
+						$success =$translator->trans('duplicate_rule.success_duplicate');
+						$this->addFlash('success', $success);
                             
                     }
-                    
-                
-                        return $this->redirect($this->generateURL('regle_list'));
+                    return $this->redirect($this->generateURL('regle_list'));
                 }               
                 return $this->render('Rule/create/duplic.html.twig', [
                     'rule' => $rule,
