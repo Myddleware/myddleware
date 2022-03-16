@@ -1,6 +1,5 @@
 # Developer's guide
 
-
 ## Connector creation
 
 ### Requirement
@@ -49,6 +48,7 @@ Then still in SolutionManager, we add your new connector to the construct functi
         ];
     }
 ```
+
 Add to Database : 
 
 - In your terminal load Myddleware fixtures:
