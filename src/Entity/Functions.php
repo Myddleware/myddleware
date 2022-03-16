@@ -75,7 +75,7 @@ class Functions implements \Stringable
         return $this;
     }
 
-    public function getCategoryId() 
+    public function getCategoryId()
     {
         return $this->categoryId;
     }

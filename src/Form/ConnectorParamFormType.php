@@ -6,11 +6,11 @@ namespace App\Form;
 
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ConnectorParamFormType extends AbstractType
 {
@@ -20,7 +20,7 @@ class ConnectorParamFormType extends AbstractType
             ->add('name', EntityType::class, [
                 'label' => 'Name',
                 'class' => Connector::class,
-                'choice_label' => 'name'
+                'choice_label' => 'name',
             ])
             ->add('value', TextType::class, [
                 'label' => 'Value',

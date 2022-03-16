@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
@@ -39,8 +39,6 @@ use Doctrine\ORM\Mapping as ORM;
 class DocumentRelationship
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -48,201 +46,110 @@ class DocumentRelationship
     private $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="doc_id", type="string", length=100, nullable=false)
      */
     private $doc_id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="doc_rel_id", type="string", length=100, nullable=false)
      */
     private $doc_rel_id;
 
     /**
-     * @var int
      * @ORM\Column(name="created_by", type="integer", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @var DateTime
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
     private $dateCreated;
 
     /**
-     * @var string
      * @ORM\Column(name="source_field", type="string", nullable=false)
      */
     private $sourceField;
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return DocumentRelationship
-     */
-    public function setId($id)
+    public function setId(int $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Set doc_id.
-     *
-     * @param string $doc_id
-     *
-     * @return DocumentRelationship
-     */
-    public function setDocId($doc_id)
+    public function setDocId(string $doc_id): self
     {
         $this->doc_id = $doc_id;
 
         return $this;
     }
 
-    /**
-     * Get doc_id.
-     *
-     * @return string
-     */
-    public function getDocId()
+    public function getDocId(): ?string
     {
         return $this->doc_id;
     }
 
-    /**
-     * Set doc_rel_id.
-     *
-     * @param string $doc_rel_id
-     *
-     * @return DocumentRelationship
-     */
-    public function setDocRelId($doc_rel_id)
+    public function setDocRelId(string $doc_rel_id): self
     {
         $this->doc_rel_id = $doc_rel_id;
 
         return $this;
     }
 
-    /**
-     * Get doc_rel_id.
-     *
-     * @return string
-     */
-    public function getDocRelId()
+    public function getDocRelId(): ?string
     {
         return $this->doc_rel_id;
     }
 
-    /**
-     * Set rule.
-     *
-     * @param string $rule
-     *
-     * @return DocumentRelationship
-     */
-    public function setRule($rule)
+    public function setRule(?string $rule): self
     {
         $this->rule = $rule;
 
         return $this;
     }
 
-    /**
-     * Get rule.
-     *
-     * @return string
-     */
-    public function getRule()
+    public function getRule(): ?string
     {
         return $this->rule;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return DocumentRelationship
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated(DateTime $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): ?DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set createdBy.
-     *
-     * @param int $createdBy
-     *
-     * @return DocumentRelationship
-     */
-    public function setCreatedBy($createdBy)
+    public function setCreatedBy(int $createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    /**
-     * Get createdBy.
-     *
-     * @return int
-     */
-    public function getCreatedBy()
+    public function getCreatedBy(): ?int
     {
         return $this->createdBy;
     }
 
-    /**
-     * Set sourceField.
-     *
-     * @param string $sourceField
-     *
-     * @return DocumentRelationship
-     */
-    public function setSourceField($sourceField)
+    public function setSourceField(string $sourceField): self
     {
         $this->sourceField = $sourceField;
 
         return $this;
     }
 
-    /**
-     * Get sourceField.
-     *
-     * @return string
-     */
-    public function getSourceField()
+    public function getSourceField(): ?string
     {
         return $this->sourceField;
     }

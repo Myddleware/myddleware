@@ -180,5 +180,4 @@ class Log implements \Stringable
     {
         return $this->id;
     }
-
 }
