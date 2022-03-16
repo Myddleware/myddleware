@@ -220,4 +220,14 @@ class Solution
     {
         return $this->connector;
     }
+
+    public function __toString()
+    {
+        return $this->name;
+    }
+
+    public function getLogo(): string 
+    {
+        return $this->name.'.png';
+    }
 }
