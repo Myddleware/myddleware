@@ -7,33 +7,33 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Manager;
 
-use Doctrine\DBAL\Connection as DriverConnection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Doctrine\DBAL\Connection as DriverConnection;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class JobManager
 {
@@ -70,27 +70,24 @@ class JobManager
      * @var UpgradeManager
      */
     private $upgrade;
-    /**
-     * @var SessionInterface
-     */
-    private $session;
 
     public function __construct(
         LoggerInterface $logger,
         DriverConnection $dbalConnection,
         ParameterBagInterface $parameterBagInterface,
         RouterInterface $router,
-        SessionInterface $session,
         ToolsManager $tools,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
-        UpgradeManager $upgrade
+        UpgradeManager $upgrade,
+        RequestStack $requestStack
     ) {
         $this->logger = $logger; // gestion des logs symfony monolog
         $this->connection = $dbalConnection;
         $this->parameterBagInterface = $parameterBagInterface;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
+        $this->session = $this->requestStack->getSession();
         $this->tools = $tools;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
@@ -624,7 +621,7 @@ class JobManager
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
                 $stmt = $this->connection->prepare($sql);
-                $stmt->execute();
+                $result = $stmt->executeQuery();
 
                 //Mise à jour de la table
                 $insert = 'INSERT INTO ruleorder VALUES ';
@@ -634,7 +631,7 @@ class JobManager
                 // Suppression de la dernière virgule
                 $insert = rtrim($insert, ',');
                 $stmt = $this->connection->prepare($insert);
-                $stmt->execute();
+                $result = $stmt->executeQuery();
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
@@ -737,9 +734,9 @@ class JobManager
                     $stmt = $this->connection->prepare($deleteSource);
                     $stmt->bindValue('ruleId', $rule['id']);
                     $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $stmt->execute();
-                    if ($stmt->rowCount() > 0) {
-                        $this->message .= $stmt->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+                    $result = $stmt->executeQuery();
+                    if ($result->rowCount() > 0) {
+                        $this->message .= $result->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
                     }
                     $this->connection->commit(); // -- COMMIT TRANSACTION
                 } catch (\Exception $e) {
@@ -765,9 +762,9 @@ class JobManager
                     $stmt = $this->connection->prepare($deleteLog);
                     $stmt->bindValue('ruleId', $rule['id']);
                     $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $stmt->execute();
-                    if ($stmt->rowCount() > 0) {
-                        $this->message .= $stmt->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+                    $result = $stmt->executeQuery();
+                    if ($result->rowCount() > 0) {
+                        $this->message .= $result->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';
                     }
                     $this->connection->commit(); // -- COMMIT TRANSACTION
                 } catch (\Exception $e) {
@@ -797,9 +794,9 @@ class JobManager
 			";
             $stmt = $this->connection->prepare($deleteJob);
             $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-            $stmt->execute();
-            if ($stmt->rowCount() > 0) {
-                $this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
+            $result = $stmt->executeQuery();
+            if ($result->rowCount() > 0) {
+                $this->message .= $result->rowCount().' rows deleted in the table Job. ';
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
@@ -940,7 +937,7 @@ class JobManager
             $stmt->bindValue('error', $error);
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -960,7 +957,7 @@ class JobManager
             $now = gmdate('Y-m-d H:i:s');
             $query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
             $stmt = $this->connection->prepare($query_header);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION

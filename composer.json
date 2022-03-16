@@ -47,6 +47,7 @@
     "pagerfanta/pagerfanta": "^3.0",
     "phan/phan": "^5.3",
     "phpdocumentor/reflection-docblock": "^5.2",
+    "phpstan/phpdoc-parser": "^1.2",
     "prestashop/prestashop-webservice-lib": "dev-master",
     "roave/better-reflection": "^5.2",
     "sensio/framework-extra-bundle": "^5.6",

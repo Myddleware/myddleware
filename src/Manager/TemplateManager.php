@@ -40,7 +40,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -72,13 +71,7 @@ class TemplateManager
      * @var SolutionManager
      */
     private $solutionManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var SessionInterface
-     */
+
     private $session;
     /**
      * @var TranslatorInterface
@@ -90,8 +83,6 @@ class TemplateManager
         EntityManagerInterface $entityManager,
         KernelInterface $kernel,
         SolutionManager $solutionManager,
-        RuleManager $ruleManager,
-        SessionInterface $session,
         TranslatorInterface $translator,
         RequestStack $requestStack,
         DriverConnection $dbalConnection
@@ -100,12 +91,12 @@ class TemplateManager
         $this->entityManager = $entityManager;
         $this->connection = $dbalConnection;
         $this->solutionManager = $solutionManager;
-        $this->ruleManager = $ruleManager;
-        $this->session = $session;
         $this->translator = $translator;
         $this->projectDir = $kernel->getProjectDir();
         $this->templateDir = $this->projectDir.'/src/Templates/';
-        $request = $requestStack->getCurrentRequest();
+        $this->requestStack = $requestStack;
+        $request = $this->requestStack->getCurrentRequest();
+        $this->session = $this->requestStack->getSession();
         $this->lang = $request ? $request->getLocale() : 'EN';
     }
 
@@ -117,9 +108,8 @@ class TemplateManager
         $query = 'SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC';
         $stmt = $this->connection->prepare($query);
         $stmt->bindValue('rules', $rulesString);
-        $stmt->execute();
-
-        return $stmt->fetchALL();
+        $result = $stmt->executeQuery();
+        return $result->fetchAllAssociative();
     }
 
     // Permet de lister les templates pour les connecteurs selectionnés

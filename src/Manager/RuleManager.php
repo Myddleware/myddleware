@@ -25,27 +25,27 @@
 
 namespace App\Manager;
 
-use App\Entity\Config;
-use App\Entity\DocumentData;
 use App\Entity\Rule;
+use App\Entity\Config;
 use App\Entity\RuleParam;
+use App\Entity\DocumentData;
+use Psr\Log\LoggerInterface;
+use Doctrine\DBAL\Connection;
 use App\Entity\RuleParamAudit;
+use App\Repository\RuleRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
-use App\Repository\RuleRelationShipRepository;
-use App\Repository\RuleRepository;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use App\Repository\RuleRelationShipRepository;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RuleManager
 {
@@ -110,10 +110,8 @@ class RuleManager
      * @var RuleOrderRepository
      */
     private $ruleOrderRepository;
-    /**
-     * @var SessionInterface
-     */
-    private $session;
+    private $requestStack;
+
 
     /**
      * @var FormulaManager
@@ -128,12 +126,12 @@ class RuleManager
         FormulaManager $formulaManager,
         SolutionManager $solutionManager,
         DocumentManager $documentManager,
+        RequestStack $requestStack = null,
         RuleRepository $ruleRepository = null,
         RuleRelationShipRepository $ruleRelationShipRepository = null,
         RuleOrderRepository $ruleOrderRepository = null,
         DocumentRepository $documentRepository = null,
         RouterInterface $router = null,
-        SessionInterface $session = null,
         ToolsManager $tools = null
     ) {
         $this->logger = $logger;
@@ -145,7 +143,8 @@ class RuleManager
         $this->documentRepository = $documentRepository;
         $this->tools = $tools;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
+        $this->session = $this->requestStack->getSession();
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
@@ -1678,6 +1677,7 @@ class RuleManager
                     $this->formulaManager,
                     $this->solutionManager,
                     $this->documentManager,
+                    // $this->requestStack,
                     );
                     $childRuleObj->setRule($childRule['field_id']);
                     $childRuleObj->setJobId($this->jobId);
