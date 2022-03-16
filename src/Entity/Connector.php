@@ -34,7 +34,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table(name="connector")
  * @ORM\Entity(repositoryClass="App\Repository\ConnectorRepository")
  */
-class Connector
+class Connector implements \Stringable
 {
     /**
      * @ORM\Column(name="id", type="integer")

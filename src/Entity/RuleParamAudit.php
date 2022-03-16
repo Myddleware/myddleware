@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
@@ -38,8 +38,6 @@ use Doctrine\ORM\Mapping as ORM;
 class RuleParamAudit
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -55,197 +53,108 @@ class RuleParamAudit
     }
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="rule_param_id", type="integer")
      */
     private $ruleParamId;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="modified", type="datetime", nullable=false)
      */
     private $dateModified;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="before_value", type="string", nullable=true)
      */
     private $before;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="after_value", type="string", nullable=true)
      */
     private $after;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="user", type="string", nullable=true)
      */
     private $byUser;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="job_id", type="string", length=255, nullable=true)
      */
     private $job;
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set ruleParamId.
-     *
-     * @param string $ruleParamId
-     *
-     * @return RuleParamAudit
-     */
-    public function setRuleParamId($ruleParamId)
+    public function setRuleParamId(string $ruleParamId): self
     {
         $this->ruleParamId = $ruleParamId;
 
         return $this;
     }
 
-    /**
-     * Get ruleParamId.
-     *
-     * @return string
-     */
-    public function getDoc()
+    public function getRuleParamId(): string
     {
         return $this->ruleParamId;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return RuleParamAudit
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified(DateTime $dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set before.
-     *
-     * @param string $before
-     *
-     * @return RuleParamAudit
-     */
-    public function setBefore($before)
+    public function setBefore(string $before): self
     {
         $this->before = $before;
 
         return $this;
     }
 
-    /**
-     * Get before.
-     *
-     * @return string
-     */
-    public function getBefore()
+    public function getBefore(): string
     {
         return $this->before;
     }
 
-    /**
-     * Set after.
-     *
-     * @param string $after
-     *
-     * @return RuleParamAudit
-     */
-    public function setAfter($after)
+    public function setAfter(string $after): self
     {
         $this->after = $after;
 
         return $this;
     }
 
-    /**
-     * Get after.
-     *
-     * @return string
-     */
-    public function getAfter()
+    public function getAfter(): string
     {
         return $this->after;
     }
 
-    /**
-     * Set byUser.
-     *
-     * @param string $byUser
-     *
-     * @return RuleParamAudit
-     */
-    public function setByUser($byUser)
+    public function setByUser(string $byUser): self
     {
         $this->byUser = $byUser;
 
         return $this;
     }
 
-    /**
-     * Get byUser.
-     *
-     * @return string
-     */
-    public function getByUser()
+    public function getByUser(): string
     {
         return $this->byUser;
     }
 
-    /**
-     * Set job.
-     *
-     * @param string $job
-     *
-     * @return Log
-     */
-    public function setJob($job)
+    public function setJob(string $job): self
     {
         $this->job = $job;
 
         return $this;
     }
 
-    /**
-     * Get job.
-     *
-     * @return string
-     */
-    public function getJob()
+    public function getJob(): string
     {
         return $this->job;
     }

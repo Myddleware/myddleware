@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
@@ -31,11 +31,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="functions")
  * @ORM\Entity(repositoryClass="App\Repository\FunctionsRepository")
  */
-class Functions
+class Functions implements \Stringable
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -43,73 +41,47 @@ class Functions
     private $id;
 
     /**
-     * @var FuncCat
-     *
      * @ORM\ManyToOne(targetEntity="FuncCat")
      * @ORM\JoinColumn(name="fcat_id", referencedColumnName="id")
      */
-    private $categorieId;
+    private $categoryId;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=20)
      */
     private $name;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return Functions
-     */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set categorieId.
-     *
-     * @return Functions
-     */
-    public function setCategorieId(FuncCat $categorieId)
+    public function setCategoryId(FuncCat $categoryId): self
     {
-        $this->categorieId = $categorieId;
+        $this->categoryId = $categoryId;
 
         return $this;
     }
 
-    /**
-     * Get categorieId.
-     *
-     * @return FuncCat
-     */
-    public function getCategorieId()
+    public function getCategoryId() 
     {
-        return $this->categorieId;
+        return $this->categoryId;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 }

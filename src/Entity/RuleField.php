@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
@@ -35,8 +35,6 @@ use Doctrine\ORM\Mapping as ORM;
 class RuleField
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -44,8 +42,6 @@ class RuleField
     private $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="fields")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
@@ -72,84 +68,43 @@ class RuleField
      */
     private $formula;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set target.
-     *
-     * @param string $target
-     *
-     * @return RuleField
-     */
-    public function setTarget($target)
+    public function setTarget(string $target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    /**
-     * Get target.
-     *
-     * @return string
-     */
-    public function getTarget()
+    public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * Set source.
-     *
-     * @param string $source
-     *
-     * @return RuleField
-     */
-    public function setSource($source)
+    public function setSource(string $source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    /**
-     * Get source.
-     *
-     * @return string
-     */
-    public function getSource()
+    public function getSource(): string
     {
         return $this->source;
     }
 
-    /**
-     * Set formula.
-     *
-     * @param string $formula
-     *
-     * @return RuleField
-     */
-    public function setFormula($formula)
+    public function setFormula(string $formula): self
     {
         $this->formula = $formula;
 
         return $this;
     }
 
-    /**
-     * Get formula.
-     *
-     * @return string
-     */
-    public function getFormula()
+    public function getFormula(): string
     {
         return $this->formula;
     }

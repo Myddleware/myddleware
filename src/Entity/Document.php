@@ -42,7 +42,7 @@ use Doctrine\ORM\Mapping as ORM;
  *      @ORM\Index(name="date_modified", columns={"date_modified"})
  * })
  */
-class Document
+class Document implements \Stringable
 {
     /**
      * @var string
@@ -616,5 +616,10 @@ class Document
         $this->modifiedBy = $modifiedBy;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->id;
     }
 }

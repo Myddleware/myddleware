@@ -33,7 +33,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="App\Repository\DocumentAuditRepository")
  */
-class DocumentAudit
+class DocumentAudit 
 {
     /**
      * @var string
