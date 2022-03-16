@@ -2,18 +2,20 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Connector;
 use App\Entity\Job;
-use App\Entity\JobScheduler;
 use App\Entity\Rule;
-use App\Entity\Solution;
 use App\Entity\User;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use App\Entity\Solution;
+use App\Entity\Connector;
+use App\Entity\JobScheduler;
+use App\Entity\ConnectorParam;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Controller\Admin\ConnectorCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 
 class DashboardController extends AbstractDashboardController
 {
@@ -53,6 +55,7 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToCrud('Rule', 'fas fa-sync', Rule::class),
             MenuItem::section('Connectors'),
             MenuItem::linkToCrud('Connector', 'fa fa-link', Connector::class),
+            MenuItem::linkToCrud('Connection Parameters', 'fa fa-plug', ConnectorParam::class),
             MenuItem::linkToCrud('Solution', 'fa fa-bullseye', Solution::class),
             MenuItem::section('Jobs'),
             MenuItem::linkToCrud('Job', 'fas fa-tasks', Job::class),

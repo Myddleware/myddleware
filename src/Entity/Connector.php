@@ -161,7 +161,7 @@ class Connector implements \Stringable
         $this->connectorParams->removeElement($connectorParam);
     }
 
-    public function getConnectorParams(): Collection
+    public function getConnectorParams(): ?Collection
     {
         return $this->connectorParams;
     }
@@ -186,7 +186,7 @@ class Connector implements \Stringable
     /**
      * @return Collection<int, Rule>
      */
-    public function getRulesWhereIsSource(): Collection
+    public function getRulesWhereIsSource(): ?Collection
     {
         return $this->rulesWhereIsSource;
     }
@@ -216,7 +216,7 @@ class Connector implements \Stringable
     /**
      * @return Collection<int, Rule>
      */
-    public function getRulesWhereIsTarget(): Collection
+    public function getRulesWhereIsTarget(): ?Collection
     {
         return $this->rulesWhereIsTarget;
     }

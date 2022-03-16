@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use DateTimeImmutable;
 use App\Entity\Connector;
+use App\Form\ConnectorParamFormType;
 use App\Controller\Admin\SolutionCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -43,9 +44,13 @@ class ConnectorCrudController extends AbstractCrudController
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
+            AssociationField::new('solution'),
+            CollectionField::new('connectorParams', 'Connection Parameters')
+                ->setEntryIsComplex(true)
+                ->setEntryType(ConnectorParamFormType::class)
+                ->setTemplatePath('admin/connector_params.html.twig'),
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
             // CollectionField::new('solution')->setEntryIsComplex(true),
-            AssociationField::new('solution'),
             // CollectionField::new('solution')->setTemplatePath('admin/solution.html.twig'),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
