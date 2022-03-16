@@ -50,14 +50,14 @@ class AddUserCommand extends Command
     private $entityManager;
     private $passwordEncoder;
     private $validator;
-    // private $users;
+    private $user;
     private $configRepository;
 
     public function __construct(
         EntityManagerInterface $em,
         // UserPasswordEncoderInterface $encoder, 
         Validator $validator, 
-        UserRepository $users,
+        UserRepository $user,
         ConfigRepository $configRepository
     )
     {
@@ -66,7 +66,7 @@ class AddUserCommand extends Command
         $this->entityManager = $em;
         // $this->passwordEncoder = $encoder;
         // $this->validator = $validator;
-        // $this->users = $users;
+        $this->user = $user;
         $this->configRepository = $configRepository;
     }
 
@@ -215,7 +215,7 @@ class AddUserCommand extends Command
     private function validateUserData($username, $plainPassword, $email): void
     {
         // first check if a user with the same username already exists.
-        $existingUser = $this->users->findOneBy(['username' => $username]);
+        $existingUser = $this->user->findOneBy(['username' => $username]);
 
         if (null !== $existingUser) {
             throw new RuntimeException(sprintf('There is already a user registered with the "%s" username.', $username));
@@ -226,7 +226,7 @@ class AddUserCommand extends Command
         $this->validator->validateEmail($email);
 
         // check if a user with the same email already exists.
-        $existingEmail = $this->users->findOneBy(['email' => $email]);
+        $existingEmail = $this->user->findOneBy(['email' => $email]);
 
         if (null !== $existingEmail) {
             throw new RuntimeException(sprintf('There is already a user registered with the "%s" email.', $email));
