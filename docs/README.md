@@ -28,7 +28,7 @@ To use Myddleware you need the following on your web server :
 
 - A web server such as [Apache](https://httpd.apache.org/)
 - [MySQL](https://www.mysql.com/downloads/) version 5.7 or above or [MariaDB](https://mariadb.org/download/?t=mariadb&p=mariadb&r=10.6.5&os=windows&cpu=x86_64&pkg=msi&m=xtom_ams)
-- [PHP](https://www.php.net/downloads.php) version 7.4 or above. The following PHP extensions need to be installed & enabled (they usually are by default):
+- [PHP](https://www.php.net/downloads.php) version 8.0 or above. The following PHP extensions need to be installed & enabled (they usually are by default):
   - Ctype
   - Iconv
   - JSON
