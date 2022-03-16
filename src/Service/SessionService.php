@@ -23,16 +23,15 @@ class SessionService
         $this->_session = $this->getSession();
     }
 
-        
     /**
-     * Since SF5.4, the way to load the session has changed
+     * Since SF5.4, the way to load the session has changed.
      */
     public function getSession()
     {
         $session = $this->requestStack->getSession();
+
         return $session;
     }
-
 
     public function getMyddlewareSession()
     {
@@ -43,7 +42,7 @@ class SessionService
         return $this->_session->get(self::MYDDLEWARE_SESSION_INDEX);
     }
 
-    //############ SOLUTION ###################
+    // ############ SOLUTION ###################
 
     public function setSolutionName($solutionName)
     {
@@ -78,9 +77,9 @@ class SessionService
         return $myddlewareSession['param']['myddleware']['connector'][0]['solution'][$type];
     }
 
-    //############ SOLUTION ###################
+    // ############ SOLUTION ###################
 
-    //############ UPLOAD ###################
+    // ############ UPLOAD ###################
 
     public function getUploadName()
     {
@@ -134,9 +133,9 @@ class SessionService
         return isset($myddlewareSession['param']['myddleware']['upload']['error']);
     }
 
-    //############ UPLOAD ###################
+    // ############ UPLOAD ###################
 
-    //############ CONNECTOR ###################
+    // ############ CONNECTOR ###################
 
     public function isConnectorExist()
     {
@@ -347,7 +346,7 @@ class SessionService
     public function removeConnector()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        unset($myddlewareSession['param']['connector']); //L391 in ConnectorController
+        unset($myddlewareSession['param']['connector']); // L391 in ConnectorController
 
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
@@ -398,9 +397,9 @@ class SessionService
         return isset($myddlewareSession['param']['myddleware']['connector']['values']);
     }
 
-    //############ CONNECTOR ###################
+    // ############ CONNECTOR ###################
 
-    //############ MAILCHIMP ###################
+    // ############ MAILCHIMP ###################
 
     public function setMailchimpParamConnexion($redirectUri, $value)
     {
@@ -417,9 +416,9 @@ class SessionService
         return $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'];
     }
 
-    //############ MAILCHIMP ###################
+    // ############ MAILCHIMP ###################
 
-    //############ RULE ###################
+    // ############ RULE ###################
 
     public function removeParamRule($key)
     {
@@ -935,9 +934,9 @@ class SessionService
         return true;
     }
 
-    //############ RULE ###################
+    // ############ RULE ###################
 
-    //############ FLUX FILTER ###################
+    // ############ FLUX FILTER ###################
 
     public function setFluxFilterWhere($where)
     {
@@ -1351,9 +1350,9 @@ class SessionService
         return isset($myddlewareSession['flux_filter']);
     }
 
-    //############ FLUX FILTER ###################
+    // ############ FLUX FILTER ###################
 
-    //############ ERROR ###################
+    // ############ ERROR ###################
 
     public function setCreateRuleError($key, $message)
     {
@@ -1385,5 +1384,5 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    //############ ERROR ###################
+    // ############ ERROR ###################
 }

@@ -243,7 +243,7 @@ class Hubspot extends Solution
                         break;
                     case 'task':
                         array_push($result,
-                            //metadata
+                            // metadata
                             ['name' => 'metadata__body', 'label' => 'Body', 'type' => 'text'],
                             ['name' => 'metadata__status', 'label' => 'Status', 'type' => 'varchar(255)', 'options' => [
                                 ['value' => 'NOT_STARTED', 'label' => 'NOT_STARTED'],
@@ -258,7 +258,7 @@ class Hubspot extends Solution
 
                     case 'meeting':
                         array_push($result,
-                            //metadata
+                            // metadata
                             ['name' => 'metadata__body', 'label' => 'Body', 'type' => 'text'],
                             ['name' => 'metadata__startTime', 'label' => 'startTime', 'type' => 'varchar(255)'],
                             ['name' => 'metadata__endTime', 'label' => 'endTime', 'type' => 'varchar(255)'],
@@ -268,7 +268,7 @@ class Hubspot extends Solution
 
                     case 'email':
                         array_push($result,
-                            //metadata
+                            // metadata
                             ['name' => 'metadata__from__email', 'label' => 'From email', 'type' => 'varchar(255)'],
                             ['name' => 'metadata__from__firstName', 'label' => 'From firstName', 'type' => 'varchar(255)'],
                             ['name' => 'metadata__from__lastName', 'label' => 'From lastName', 'type' => 'varchar(255)'],
@@ -432,7 +432,7 @@ class Hubspot extends Solution
                     foreach ($identifyProfiles as $identifyProfile) {
                         $records = null;
                         foreach ($param['fields'] as $field) {
-                            $fieldStructure = explode('__', $field);  //si on des fields avec la format metadata__body
+                            $fieldStructure = explode('__', $field);  // si on des fields avec la format metadata__body
                             // In case of 3 structures, example : metadata__from__email
                             if (sizeof($fieldStructure) > 2) {
                                 if (isset($identifyProfile[$fieldStructure[0]][$fieldStructure[1]][$fieldStructure[2]])) {
@@ -486,7 +486,7 @@ class Hubspot extends Solution
                                     $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile['properties'][$modifiedFieldName]['value'] / 1000);
                                 } elseif (isset($identifyProfile[$modifiedFieldName])) {
                                     $records['date_modified'] = date('Y-m-d H:i:s', $identifyProfile[$modifiedFieldName] / 1000);
-                                } else { //deal_pipeline_stage has no reference field
+                                } else { // deal_pipeline_stage has no reference field
                                     $records['date_modified'] = date('Y-m-d H:i:s');
                                 }
                                 $result['values'][$identifyProfile[$id]] = $records;
@@ -539,7 +539,7 @@ class Hubspot extends Solution
                 $dataHubspot = [];
                 $records = [];
 
-                //formatModuleName contact
+                // formatModuleName contact
                 $module = $this->formatModuleName($param['module']);
                 if ('companies' === $module || 'deal' === $module) {
                     $version = 'companies' === $module ? 'v2' : 'v1';
@@ -699,7 +699,7 @@ class Hubspot extends Solution
 
                 if (
                     $resultQuery['info']['http_code'] >= 200 // 200 is used to update deals for example
-                    and $resultQuery['info']['http_code'] <= 204 //204 is good
+                    and $resultQuery['info']['http_code'] <= 204 // 204 is good
                 ) {
                     $result[$idDoc] = [
                         'id' => $idProfile,
@@ -930,7 +930,7 @@ class Hubspot extends Solution
         return 'v1';
     }
 
-    //Get the id label depending of the module
+    // Get the id label depending of the module
     protected function getIdField($param, $module)
     {
         // In case of object module, we return objectId

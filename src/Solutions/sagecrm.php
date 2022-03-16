@@ -199,7 +199,6 @@ class SageCRM extends Solution
         }
     }
 
-
     // Renvoie les champs du module passé en paramètre
     public function get_module_fields($module, $type = 'source', $param = null)
     {
@@ -504,7 +503,7 @@ class SageCRM extends Solution
                 if (empty($record)) {
                     throw new \Exception('Values missing for create');
                 }
-                //create soap variable to send
+                // create soap variable to send
                 foreach ($record as $key => $value) {
                     if (is_integer($value)) {
                         $object[] = new \SoapVar($value, XSD_INT, null, null, $key);
@@ -612,7 +611,7 @@ class SageCRM extends Solution
                 } else { // S'il n'existe pas alors on met "companyid" par exemple pour le module Company
                     $record[strtolower($module).'id'] = $target_id;
                 }
-                //create soap variable to send
+                // create soap variable to send
                 foreach ($record as $key => $value) {
                     if (is_integer($value)) {
                         $object[] = new \SoapVar($value, XSD_INT, null, null, $key);

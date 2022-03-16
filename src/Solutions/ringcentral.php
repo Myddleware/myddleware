@@ -309,7 +309,7 @@ class RingCentral extends Solution
             return $params;
         } catch (\Exception $e) {
             return [];
-            //return $e->getMessage();
+            // return $e->getMessage();
         }
     }
 

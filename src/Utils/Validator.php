@@ -21,7 +21,6 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
  */
 class Validator
 {
-
     public function validatePassword(?string $plainPassword): string
     {
         if (empty($plainPassword)) {

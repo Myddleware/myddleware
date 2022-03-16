@@ -79,6 +79,7 @@ class RerunErrorCommand extends Command
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
+
             return Command::FAILURE;
         }
         $this->jobManager->setApi($api);

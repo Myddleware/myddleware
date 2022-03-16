@@ -25,19 +25,19 @@
 
 namespace App\Manager;
 
-use DateTime;
-use Exception;
-use App\Entity\User;
-use Twig\Environment;
 use App\Entity\Config;
-use Psr\Log\LoggerInterface;
+use App\Entity\User;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 class NotificationManager
 {

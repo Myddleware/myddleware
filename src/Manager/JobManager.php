@@ -25,14 +25,14 @@
 
 namespace App\Manager;
 
+use Doctrine\DBAL\Connection as DriverConnection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\RouterInterface;
-use Doctrine\DBAL\Connection as DriverConnection;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
 
 class JobManager
 {
@@ -158,7 +158,7 @@ class JobManager
         }
     }
 
-    // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
+    // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
     public function createDocuments()
     {
         $createDocuments = $this->ruleManager->createDocuments();
@@ -329,7 +329,7 @@ class JobManager
             // Get the php executable
             $php = $this->tools->getPhpVersion();
 
-            //Create your own folder in the cache directory
+            // Create your own folder in the cache directory
             $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/job/'.$guid.'.txt';
             $fs = new Filesystem();
             try {
@@ -471,7 +471,7 @@ class JobManager
             $sqlRule = 'SELECT * FROM rule WHERE id = :filter AND deleted = 0';
             $stmt = $this->connection->prepare($sqlRule);
             $stmt->bindValue('filter', $ruleId);
-            $result =  $stmt->executeQuery();
+            $result = $stmt->executeQuery();
             $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
                 throw new \Exception('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
@@ -621,7 +621,7 @@ class JobManager
                 $stmt = $this->connection->prepare($sql);
                 $result = $stmt->executeQuery();
 
-                //Mise à jour de la table
+                // Mise à jour de la table
                 $insert = 'INSERT INTO ruleorder VALUES ';
                 foreach ($ruleKeyVakue as $key => $value) {
                     $insert .= "('$key','$value'),";
@@ -969,11 +969,12 @@ class JobManager
     }
 
     /**
-     * Since SF5.4, the way to load the session has changed
+     * Since SF5.4, the way to load the session has changed.
      */
     public function getSession()
     {
         $session = $this->requestStack->getSession();
+
         return $session;
     }
 }

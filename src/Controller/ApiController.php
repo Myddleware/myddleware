@@ -2,20 +2,20 @@
 
 namespace App\Controller;
 
-use Exception;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
-use Psr\Log\LoggerInterface;
+use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use App\Repository\DocumentRepository;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/api/v1_0", name="api")
@@ -246,11 +246,11 @@ class ApiController extends AbstractController
             $ruleParam['api'] = 1;
             $rule = new RuleManager(
                 $this->logger,
-                $connection, 
+                $connection,
                 $this->entityManager,
                 $this->parameterBag,
-                // $ruleParam, 
-                $this->formulaManager, 
+                // $ruleParam,
+                $this->formulaManager,
                 $this->solutionManager,
                 $this->documentManager
             );

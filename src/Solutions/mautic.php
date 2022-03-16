@@ -55,7 +55,7 @@ class Mautic extends Solution
     // Enable to read deletion and to delete data
     protected $sendDeletion = true;
 
-    //If you have Mautic 2 or lower, you must change this parameter to your version number
+    // If you have Mautic 2 or lower, you must change this parameter to your version number
     protected $mauticVersion = 3;
 
     public function getFieldsLogin()
@@ -442,5 +442,4 @@ class Mautic extends Solution
 
         return $date->format('Y-m-d H:i:s');
     }
-
 }

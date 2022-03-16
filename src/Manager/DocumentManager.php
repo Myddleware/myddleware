@@ -617,7 +617,7 @@ class DocumentManager
             $stmt = $this->connection->prepare($sqlGetChildRules);
             $stmt->bindValue(':rule_id', $this->document_data['rule_id']);
             $result = $stmt->executeQuery();
-            $childRules =  $result->fetchAllAssociative();
+            $childRules = $result->fetchAllAssociative();
             if ($childRules) {
                 // If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
                 $sqlParamsChild = "	SELECT 
@@ -645,7 +645,7 @@ class DocumentManager
                     $stmt->bindValue(':rule_id', $childRule['rule_id']);
                     $stmt->bindValue(':source_id', $this->document_data['source_id']);
                     $stmt->bindValue(':date_created', $this->document_data['date_created']);
-                    $result=  $stmt->executeQuery();
+                    $result = $stmt->executeQuery();
                     $result = $result->fetchAssociative();
                     if (!empty($result['id'])) {
                         throw new \Exception('The document '.$result['id'].' is on the same record on the rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
@@ -1010,12 +1010,12 @@ class DocumentManager
     protected function runChildRule()
     {
         $parentRule = new RuleManager(
-            $this->logger, 
-            $this->connection, 
-            $this->entityManager, 
-            $this->parameterBagInterface, 
-            $this->formulaManager, 
-            $this->solutionManager, 
+            $this->logger,
+            $this->connection,
+            $this->entityManager,
+            $this->parameterBagInterface,
+            $this->formulaManager,
+            $this->solutionManager,
             clone $this,
         );
         $parentRule->setRule($this->ruleId);
@@ -1026,12 +1026,12 @@ class DocumentManager
             foreach ($childRuleIds as $childRuleId) {
                 // Instantiate the child rule
                 $childRule = new RuleManager(
-                    $this->logger, 
-                    $this->connection, 
-                    $this->entityManager, 
-                    $this->parameterBagInterface, 
-                    $this->formulaManager, 
-                    $this->solutionManager, 
+                    $this->logger,
+                    $this->connection,
+                    $this->entityManager,
+                    $this->parameterBagInterface,
+                    $this->formulaManager,
+                    $this->solutionManager,
                     clone $this
                 );
                 $childRule->setRule($childRuleId['field_id']);
@@ -1040,7 +1040,7 @@ class DocumentManager
                 if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
                     $idQuery = $this->sourceData[$childRuleId['field_name_source']];
                 } else {
-                    //throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
+                    // throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
                     continue;
                 }
                 // Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule
@@ -1371,7 +1371,7 @@ class DocumentManager
     public function getTransformValue($source, $ruleField)
     {
         try {
-            //--
+            // --
             if (!empty($ruleField['formula'])) {
                 // -- -- -- Formula management
 
@@ -1497,6 +1497,7 @@ class DocumentManager
                 $stmt = $this->connection->prepare($rule);
                 $stmt->bindValue(':ruleId', $this->ruleId);
                 $result = $stmt->executeQuery();
+
                 return $result->fetchAssociative();
             }
         } catch (\Exception $e) {
@@ -1521,7 +1522,7 @@ class DocumentManager
         $stmt = $this->connection->prepare($sqlIsChild);
         $stmt->bindValue(':ruleId', $this->ruleId);
         $result = $stmt->executeQuery();
-        $isChild = $result->fetchAssociative();; // 1 row
+        $isChild = $result->fetchAssociative(); // 1 row
         if (!empty($isChild)) {
             return true;
         }
@@ -1537,6 +1538,7 @@ class DocumentManager
             $stmt = $this->connection->prepare($sqlGetChilds);
             $stmt->bindValue(':docId', $this->id);
             $result = $stmt->executeQuery();
+
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->typeError = 'E';

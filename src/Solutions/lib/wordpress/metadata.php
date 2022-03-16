@@ -69,7 +69,7 @@ $moduleFields = [
         '_links' => ['label' => '__links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
 
-    //these modules are part of the Woocommerce Event manager plugin and are used in the wooeventmanager connector
+    // these modules are part of the Woocommerce Event manager plugin and are used in the wooeventmanager connector
     'mep_events' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'date' => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

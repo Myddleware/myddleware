@@ -102,14 +102,13 @@ class Connector
      */
     private $updatedAt;
 
-
     public function __construct()
     {
         $this->rulesWhereIsTarget = new ArrayCollection();
         $this->rulesWhereIsSource = new ArrayCollection();
     }
 
-    public function getId(): int 
+    public function getId(): int
     {
         return $this->id;
     }
@@ -162,7 +161,7 @@ class Connector
         $this->connectorParams->removeElement($connectorParam);
     }
 
-    public function getConnectorParams():Collection
+    public function getConnectorParams(): Collection
     {
         return $this->connectorParams;
     }
@@ -210,6 +209,7 @@ class Connector
                 $rule->setConnectorSource(null);
             }
         }
+
         return $this;
     }
 
@@ -227,6 +227,7 @@ class Connector
             $this->rulesWhereIsTarget[] = $rulesWhereIsTarget;
             $rulesWhereIsTarget->setConnectorTarget($this);
         }
+
         return $this;
     }
 
@@ -238,6 +239,7 @@ class Connector
                 $rulesWhereIsTarget->setConnectorTarget(null);
             }
         }
+
         return $this;
     }
 

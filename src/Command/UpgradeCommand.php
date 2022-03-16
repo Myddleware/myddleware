@@ -68,6 +68,7 @@ class UpgradeCommand extends Command
         if (false === $data['success']) {
             $output->writeln('1;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
+
             return Command::FAILURE;
         }
 

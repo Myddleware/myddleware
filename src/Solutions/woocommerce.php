@@ -40,11 +40,11 @@ class WooCommerce extends Solution
     protected $subModules = [
                                 'line_items' => [
                                     'parent_module' => 'orders',
-                                    'parent_id' => 'order_id', 
+                                    'parent_id' => 'order_id',
                                 ],
                             ];
 
-    //Log in form parameters
+    // Log in form parameters
     public function getFieldsLogin()
     {
         return [
@@ -183,7 +183,7 @@ class WooCommerce extends Solution
                 }
             }
 
-            //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
+            // for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if (!empty($this->subModules[$param['module']])) {
                 $module = $this->subModules[$param['module']]['parent_module'];
             }
@@ -192,32 +192,32 @@ class WooCommerce extends Solution
             $count = 0;
             $page = 1;
             do {
-                //for specific requests (e.g. readrecord with an id)
+                // for specific requests (e.g. readrecord with an id)
                 if (!empty($query)) {
                     $response = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
                                                                               'page' => $page, ]);
-                    //when reading a specific record only we need to add a layer to the array
+                    // when reading a specific record only we need to add a layer to the array
                     $records = $response;
                     $response = [];
                     $response[] = $records;
                 } elseif ('customers' === $module) {
-                    //orderby modified isn't available for customers in the API filters so we sort by creation date
+                    // orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, ['orderby' => 'registered_date',
                                                                                     'order' => 'asc',
                                                                                     'per_page' => $this->callLimit,
                                                                                     'page' => $page, ]);
-                //get all data, sorted by date_modified
+                // get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, ['orderby' => 'modified',
                                                                                 'per_page' => $this->callLimit,
                                                                                 'page' => $page, ]);
                 }
                 if (!empty($response)) {
-                    //used for submodules (e.g. line_items)
+                    // used for submodules (e.g. line_items)
                     $response = $this->convertResponse($param, $response);
                     foreach ($response as $record) {
                         $row = [];
-                        //either we read all from a date_ref or we read based on a query (readrecord)
+                        // either we read all from a date_ref or we read based on a query (readrecord)
                         if ($dateRefWooFormat < $record->date_modified || (!empty($query))) {
                             foreach ($param['fields'] as $field) {
                                 // If we have a 2 dimensional array we break it down
@@ -254,17 +254,17 @@ class WooCommerce extends Solution
         return $result;
     }
 
-    //for specific modules (e.g. : line_items)
+    // for specific modules (e.g. : line_items)
     public function convertResponse($param, $response)
     {
         if (array_key_exists($param['module'], $this->subModules)) {
-            $subModule = $param['module'];   //line_items
+            $subModule = $param['module'];   // line_items
             $newResponse = [];
             if (!empty($response)) {
                 foreach ($response as $key => $record) {
                     foreach ($record->$subModule as $subRecord) {
                         $subRecord->date_modified = $record->date_modified;
-                        //we add the ID of the parent field in the data (e.g. : for line_items, we add order_id)
+                        // we add the ID of the parent field in the data (e.g. : for line_items, we add order_id)
                         $parentFieldName = $this->subModules[$subModule]['parent_id'];
                         $subRecord->$parentFieldName = $record->id;
                         $newResponse[$subRecord->id] = $subRecord;
@@ -378,7 +378,7 @@ class WooCommerce extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    //convert from Myddleware format to Woocommerce format
+    // convert from Myddleware format to Woocommerce format
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);

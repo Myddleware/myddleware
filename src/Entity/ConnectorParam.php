@@ -96,7 +96,7 @@ class ConnectorParam
     {
         return $this->value;
     }
-    
+
     public function __toString(): string
     {
         return $this->name;

@@ -113,6 +113,7 @@ class JobSchedulerCommand extends Command
                 $io->error($e->getMessage());
             }
         }
+
         return Command::SUCCESS;
     }
 }

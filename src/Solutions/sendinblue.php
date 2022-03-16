@@ -84,7 +84,7 @@ class Sendinblue extends Solution
         }
     }
 
-    //Get module list
+    // Get module list
     public function get_modules($type = 'source')
     {
         if ('source' == $type) {
@@ -100,12 +100,12 @@ class Sendinblue extends Solution
         ];
     }
 
-    //Returns the fields of the module passed in parameter
+    // Returns the fields of the module passed in parameter
     public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
 
-        //Use Sendinblue metadata
+        // Use Sendinblue metadata
         require 'lib/sendinblue/metadata.php';
         if (!empty($moduleFields[$module])) {
             $this->moduleFields = $moduleFields[$module];
@@ -114,8 +114,8 @@ class Sendinblue extends Solution
         }
         // Contact fields
         try {
-            //Add of the different fields according to the modules
-            //Use Sendinblue Api
+            // Add of the different fields according to the modules
+            // Use Sendinblue Api
             $apiInstance = new \SendinBlue\Client\Api\AttributesApi(new \GuzzleHttp\Client(), $this->config);
             $results = $apiInstance->getAttributes();
             $attributes = $results->getAttributes();
@@ -284,7 +284,7 @@ class Sendinblue extends Solution
 
                             $records[] = $record;
                             // IF the date change, we set the offset to 0 (because filter is only on date and not dateTime
-                            /// Date start we be changed with the date of the current record
+                            // / Date start we be changed with the date of the current record
                             // Date ref will also be changed
                             $dateRecordObj = new \DateTime($record['date']);
                             if (
@@ -352,7 +352,7 @@ class Sendinblue extends Solution
                 break;
         }
 
-        //Recover all contact from sendinblue
+        // Recover all contact from sendinblue
         if (!empty($records)) {
             $idField = $this->getIdName($param['module']);
             foreach ($records as $record) {
@@ -391,7 +391,7 @@ class Sendinblue extends Solution
         return $dateEndObj->format('Y-m-d');
     }
 
-    //fonction for get all your transactional email activity
+    // fonction for get all your transactional email activity
     public function EmailTransactional($param)
     {
         $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->config);
@@ -452,7 +452,7 @@ class Sendinblue extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    //convert from Myddleware format to Sendinble format
+    // convert from Myddleware format to Sendinble format
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);

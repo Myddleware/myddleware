@@ -2,22 +2,22 @@
 
 namespace App\Command;
 
-use App\Entity\User;
 use App\Entity\Config;
-use App\Utils\Validator;
-use App\Repository\UserRepository;
+use App\Entity\User;
 use App\Repository\ConfigRepository;
+use App\Repository\UserRepository;
+use App\Utils\Validator;
 use Doctrine\ORM\EntityManagerInterface;
-use function Symfony\Component\String\u;
-use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
+use function Symfony\Component\String\u;
 
 /**
  * A console command that creates users and stores them in the database.
@@ -55,12 +55,11 @@ class AddUserCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $hasher, 
-        Validator $validator, 
+        UserPasswordHasherInterface $hasher,
+        Validator $validator,
         UserRepository $user,
         ConfigRepository $configRepository
-    )
-    {
+    ) {
         parent::__construct();
 
         $this->entityManager = $em;
@@ -186,14 +185,14 @@ class AddUserCommand extends Command
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->io->success(sprintf('%s was successfully created: %s (%s)', $isSuperAdmin ? 'Super Administrator user' : 'User', $user->getUsername(), $user->getEmail()));
+        $this->io->success(sprintf('%s was successfully created: %s (%s)', $isSuperAdmin ? 'Super Administrator user' : 'User', $user->getEmail()));
 
         $event = $stopwatch->stop('add-user-command');
         if ($output->isVerbose()) {
             $this->io->comment(sprintf('New user database id: %d / Elapsed time: %.2f ms / Consumed memory: %.2f MB', $user->getId(), $event->getDuration(), $event->getMemory() / (1024 ** 2)));
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function validateUserData($plainPassword, $email): void

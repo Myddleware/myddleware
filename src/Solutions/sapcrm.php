@@ -474,7 +474,7 @@ class SAPCRM extends SAPRoot
                         'id' => 'PROCESS_TYPE',
                         'name' => 'PROCESS_TYPE',
                         'type' => TextType::class,
-                        'label' => 'Order type ', //Type d'opération commerciale
+                        'label' => 'Order type ', // Type d'opération commerciale
                         'required' => false,
                     ];
                     // Ajout du paramètre de type d'object

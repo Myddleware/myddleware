@@ -71,7 +71,7 @@ class Airtable extends Solution
      */
     protected $callPostLimit = 10;
 
-    //Log in form parameters
+    // Log in form parameters
     public function getFieldsLogin()
     {
         // QUESTION: could we possibly pass a MODULE here ?
@@ -195,7 +195,7 @@ class Airtable extends Solution
             do {
                 $client = HttpClient::create();
                 $options = ['auth_bearer' => $this->token];
-                //specific record requested
+                // specific record requested
                 if (!empty($param['query'])) {
                     if (!empty($param['query']['id'])) {
                         $id = $param['query']['id'];
@@ -232,7 +232,7 @@ class Airtable extends Solution
                 $offset = (!empty($content['offset']) ? $content['offset'] : '');
                 if (!empty($content['records'])) {
                     $currentCount = 0;
-                    //used for complex fields that contain arrays
+                    // used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
@@ -505,10 +505,10 @@ class Airtable extends Solution
     {
         $dto = new \DateTime($dateTime);
 
-        return $dto->format('Y-m-d H:i:s');  //TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
+        return $dto->format('Y-m-d H:i:s');  // TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
     }
 
-    //convert from Myddleware format to Airtable format
+    // convert from Myddleware format to Airtable format
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);

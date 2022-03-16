@@ -25,36 +25,36 @@
 
 namespace App\Manager;
 
-use Exception;
-use App\Solutions\SAP;
-use App\Solutions\File;
-use App\Solutions\MySQL;
-use App\Solutions\Zuora;
-use App\Solutions\Mautic;
-use App\Solutions\Moodle;
-use App\Solutions\SAPCRM;
+use App\Solutions\Airtable;
+use App\Solutions\CirrusShield;
 use App\Solutions\ERPNext;
+use App\Solutions\Eventbrite;
+use App\Solutions\Facebook;
+use App\Solutions\File;
 use App\Solutions\Hubspot;
 use App\Solutions\Magento;
-use App\Solutions\SageCRM;
-use App\Solutions\Airtable;
-use App\Solutions\Facebook;
-use App\Solutions\SugarCRM;
-use App\Solutions\SuiteCRM;
 use App\Solutions\Mailchimp;
-use App\Solutions\VtigerCRM;
-use App\Solutions\WordPress;
-use App\Solutions\Eventbrite;
+use App\Solutions\Mautic;
+use App\Solutions\MicrosoftSQL;
+use App\Solutions\Moodle;
+use App\Solutions\MySQL;
+use App\Solutions\OracleDatabase;
 use App\Solutions\PostgreSQL;
 use App\Solutions\PrestaShop;
-use App\Solutions\Salesforce;
-use App\Solutions\Sendinblue;
 use App\Solutions\RingCentral;
+use App\Solutions\SageCRM;
+use App\Solutions\Salesforce;
+use App\Solutions\SAP;
+use App\Solutions\SAPCRM;
+use App\Solutions\Sendinblue;
+use App\Solutions\SugarCRM;
+use App\Solutions\SuiteCRM;
+use App\Solutions\VtigerCRM;
 use App\Solutions\WooCommerce;
-use App\Solutions\CirrusShield;
-use App\Solutions\MicrosoftSQL;
-use App\Solutions\OracleDatabase;
 use App\Solutions\WooEventManager;
+use App\Solutions\WordPress;
+use App\Solutions\Zuora;
+use Exception;
 
 class SolutionManager
 {

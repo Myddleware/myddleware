@@ -32,10 +32,9 @@ class PromoteUserCommand extends Command
     private $io;
 
     public function __construct(
-        EntityManagerInterface $em, 
+        EntityManagerInterface $em,
         UserRepository $userRepository
-    )
-    {
+    ) {
         parent::__construct();
         $this->em = $em;
         $this->userRepository = $userRepository;
@@ -116,16 +115,16 @@ class PromoteUserCommand extends Command
         $roles = $user->getRoles();
 
         if (in_array($role, $roles)) {
-            $io->error(sprintf('The user %s has already role %s', $email, $role));
+            $io->error(sprintf('The user %s already has role %s', $email, $role));
 
-            return 1;
+            return Command::FAILURE;
         } else {
             $roles[] = $role;
             $user->setRoles($roles);
             $this->em->flush();
             $io->success(sprintf('The role %s has been added to the user %s.', $role, $email));
 
-            return 0;
+            return Command::SUCCESS;
         }
     }
 }

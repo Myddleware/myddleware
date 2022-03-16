@@ -91,7 +91,7 @@ class curl
         // sends as part of the HTTP header (note this is recursive,
         // PHP will follow as many "Location: " headers that it is sent,
         // unless CURLOPT_MAXREDIRS is set).
-        //$this->options['CURLOPT_FOLLOWLOCATION']    = 1;
+        // $this->options['CURLOPT_FOLLOWLOCATION']    = 1;
         $this->options['CURLOPT_MAXREDIRS'] = 10;
         $this->options['CURLOPT_ENCODING'] = '';
         // TRUE to return the transfer as a string of the return
@@ -353,7 +353,7 @@ class curl
 
         return $this->error;
         // exception is not ajax friendly
-            //throw new moodle_exception($this->error, 'curl');
+            // throw new moodle_exception($this->error, 'curl');
     }
 
     /**
@@ -390,10 +390,10 @@ class curl
             if (is_object($v)) {
                 $v = (array) $v;
             }
-            if (is_array($v)) { //the value is an array, call the function recursively
+            if (is_array($v)) { // the value is an array, call the function recursively
                 $newcurrentdata = $newcurrentdata.'['.urlencode($k).']';
                 $this->format_array_postdata_for_curlcall($v, $newcurrentdata, $data);
-            } else { //add the POST parameter to the $data array
+            } else { // add the POST parameter to the $data array
                 $data[] = $newcurrentdata.'['.urlencode($k).']='.urlencode($v);
             }
         }

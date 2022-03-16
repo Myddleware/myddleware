@@ -32,10 +32,9 @@ class DemoteUserCommand extends Command
     private $io;
 
     public function __construct(
-        EntityManagerInterface $em, 
+        EntityManagerInterface $em,
         UserRepository $userRepository
-        )
-    {
+        ) {
         parent::__construct();
         $this->em = $em;
         $this->userRepository = $userRepository;
@@ -118,14 +117,14 @@ class DemoteUserCommand extends Command
         if (!in_array($role, $roles)) {
             $io->error(sprintf('The user %s has not role %s.', $email, $role));
 
-            return 1;
+            return Command::FAILURE;
         } else {
             array_splice($roles, array_search($role, $roles), 1);
             $user->setRoles($roles);
             $this->em->flush();
             $io->success(sprintf('The role %s has been removed from user %s.', $role, $email));
 
-            return 0;
+            return Command::SUCCESS;
         }
     }
 }

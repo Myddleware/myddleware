@@ -908,7 +908,7 @@ class Solution
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $param['jobId']);
-        $result =$stmt->executeQuery();
+        $result = $stmt->executeQuery();
         $job = $result->fetchAssociative(); // 1 row
         if (
                 empty($job['status'])

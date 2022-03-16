@@ -28,6 +28,7 @@ namespace App\Solutions;
 use App\Entity\Rule;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class File extends Solution
 {
     protected $baseUrl;
@@ -345,7 +346,7 @@ class File extends Solution
             ) {
                 throw new \Exception('File is not compatible. Missing fields : '.implode(';', $difFields));
             }
-            //Control all lines of the file
+            // Control all lines of the file
             $values = [];
             $this->lineNumber = 2; // We count the header
             while (($buffer = fgets($stream)) !== false) {
@@ -356,7 +357,7 @@ class File extends Solution
                     continue;
                 }
 
-                //If there are a line empty, we continue to read the file
+                // If there are a line empty, we continue to read the file
                 if (empty(trim($buffer))) {
                     ++$this->lineNumber;
                     continue;
@@ -369,7 +370,7 @@ class File extends Solution
                     ++$this->lineNumber;
                     continue;
                 }
-                //If there are not the good number of columns, display an error
+                // If there are not the good number of columns, display an error
                 $nbRowLine = count($rowFile);
                 if ($nbRowLine != $nbCountHeader) {
                     throw new \Exception('File is rejected because there are '.$nbRowLine.' columns at the line '.$this->lineNumber.'. '.$nbCountHeader.' columns are expected.');

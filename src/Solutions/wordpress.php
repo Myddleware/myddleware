@@ -52,7 +52,7 @@ class WordPress extends Solution
         parent::login($paramConnexion);
         try {
             $client = HttpClient::create();
-            //we test the connection to the API with a request on pages
+            // we test the connection to the API with a request on pages
             $response = $client->request('GET', $this->paramConnexion['url'].$this->apiSuffix.'pages');
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
@@ -128,7 +128,7 @@ class WordPress extends Solution
                 $dateRefWPFormat = $this->dateTimeFromMyddleware($param['date_ref']);
             }
 
-            //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
+            // for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
             if (!empty($this->subModules[$param['module']])) {
                 $module = $this->subModules[$param['module']]['parent_module'];
             }
@@ -178,7 +178,7 @@ class WordPress extends Solution
                 }
                 if (!empty($content)) {
                     $currentCount = 0;
-                    //used for complex fields that contain arrays
+                    // used for complex fields that contain arrays
                     $content = $this->convertResponse($param, $content);
 
                     foreach ($content as $record) {
@@ -234,7 +234,7 @@ class WordPress extends Solution
         return $result;
     }
 
-    //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
+    // for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
     protected function convertResponse($param, $response)
     {
         $newResponse = [];
@@ -289,7 +289,7 @@ class WordPress extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    //convert from Myddleware format to Woocommerce format
+    // convert from Myddleware format to Woocommerce format
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);

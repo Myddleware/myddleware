@@ -198,7 +198,7 @@ class ERPNext extends Solution
                 throw new \Exception('No data in the module '.$module.'. Failed to get the field list.');
             }
 
-            //If the module is a table and the solution is used in target, we add 3 fields
+            // If the module is a table and the solution is used in target, we add 3 fields
             if (
                     'target' == $type
                 and !empty($this->isTableModule[$module])

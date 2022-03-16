@@ -56,7 +56,7 @@ class Eventbrite extends Solution
     }
 
     protected $required_fields = ['default' => ['id', 'modified']];
-    protected $eventStatuses = ''; //'live,started,ended'
+    protected $eventStatuses = ''; // 'live,started,ended'
 
     public function login($paramConnexion)
     {
@@ -611,7 +611,7 @@ class Eventbrite extends Solution
             $moduleSingle = substr(strtolower($param['module']), 0, -1);
             $parameters = [
                 'only_display' => implode(',', $this->addRequiredField([])),
-                'event_statuses' => $this->eventStatuses, //If you leave this field blank, it will return everything. Also note that the “ended” option will only return events that have ended in the past 7 days.
+                'event_statuses' => $this->eventStatuses, // If you leave this field blank, it will return everything. Also note that the “ended” option will only return events that have ended in the past 7 days.
                 'asc_or_desc' => 'desc',
             ];
 

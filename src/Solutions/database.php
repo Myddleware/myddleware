@@ -627,7 +627,7 @@ class Database extends Solution
                 $sql = substr($sql, 0, -1);
                 $sql .= ')';
                 $stmt = $this->connection->prepare($sql);
-                $result =$stmt->executeQuery();
+                $result = $stmt->executeQuery();
                 $fields = $result->fetchAllAssociative();
                 if (!empty($fields)) {
                     // Add relate fields to display them in the rule edit view (relationship tab, source list fields)

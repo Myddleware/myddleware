@@ -2,18 +2,18 @@
 
 namespace App\Controller\Admin;
 
-use DateTimeImmutable;
 use App\Entity\Connector;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
@@ -22,7 +22,8 @@ class ConnectorCrudController extends AbstractCrudController
         return Connector::class;
     }
 
-    public function createEntity(string $entityFqcn) {
+    public function createEntity(string $entityFqcn)
+    {
         $user = $this->getUser();
         $connector = new Connector();
         $connector->setDeleted(false);
@@ -31,6 +32,7 @@ class ConnectorCrudController extends AbstractCrudController
         $connector->setUpdatedAt($now);
         $connector->setCreatedBy($user);
         $connector->setModifiedBy($user);
+
         return $connector;
     }
 
@@ -49,7 +51,6 @@ class ConnectorCrudController extends AbstractCrudController
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
             BooleanField::new('deleted')->hideOnForm(),
-
         ];
     }
 

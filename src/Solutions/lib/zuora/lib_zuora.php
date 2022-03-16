@@ -25,7 +25,7 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//Globals
+// Globals
 // $maxZObjectCount = 50;
 // $defaultApiNamespace = "ns1";
 // $defaultApiNamespaceURL = "http://api.zuora.com/";
@@ -36,136 +36,136 @@
 // $MAX_QUERY_RETURN_COUNT = 100;
 // $MAX_QUERY_WHERE_CLAUSE_COUNT = 500;
 
-//###############################################################################
+// ###############################################################################
 // High level call that takes care of logging in and making the query API call.
 function queryAPI($wsdl, $username, $password, $body, $debug)
 {
     return ZuoraAPIHelper::queryAPI($wsdl, $username, $password, $body, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 // High level call that takes care of logging in and making the API call.
 function callAPI($wsdl, $username, $password, $payload, $debug)
 {
     return ZuoraAPIHelper::callAPI($wsdl, $username, $password, $payload, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function callAPIWithClient($client, $header, $soapRequest, $debug)
 {
     return ZuoraAPIHelper::callAPIWithClient($client, $header, $soapRequest, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function login($client, $username, $password, $debug)
 {
     return ZuoraAPIHelper::login($client, $username, $password, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 // code pulled from http://www.imarc.net/communique/view/148/xml_pretty_printer_in_php5
 function xml_pretty_printer($xml, $html_output = false)
 {
     return ZuoraAPIHelper::xml_pretty_printer($xml, $html_output);
 }
 
-//###############################################################################
+// ###############################################################################
 function xmlspecialchars($text)
 {
     return ZuoraAPIHelper::xmlspecialchars($text);
 }
 
-//###############################################################################
+// ###############################################################################
 function getMethod($xml)
 {
     return ZuoraAPIHelper::getMethod($xml);
 }
 
-//###############################################################################
+// ###############################################################################
 function getZObjectCount($xml, $method)
 {
     return ZuoraAPIHelper::getZObjectCount($xml, $method);
 }
 
-//###############################################################################
+// ###############################################################################
 function printUsage()
 {
     return ZuoraAPIHelper::printUsage();
 }
 
-//###############################################################################
+// ###############################################################################
 function createClient($wsdl, $debug)
 {
     return ZuoraAPIHelper::createClient($wsdl, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function createRequest($sessionKey, $payload)
 {
     return ZuoraAPIHelper::createRequest($sessionKey, $payload);
 }
 
-//###############################################################################
+// ###############################################################################
 function createRequestWithNS($sessionKey, $payload, $apiNamespace, $objectNamespace)
 {
     return ZuoraAPIHelper::createRequestWithNS($sessionKey, $payload, $apiNamespace, $objectNamespace);
 }
 
-//###############################################################################
+// ###############################################################################
 function getSoapAddress($wsdl)
 {
     return ZuoraAPIHelper::getSoapAddress($wsdl);
 }
 
-//###############################################################################
+// ###############################################################################
 function getXMLElementFromWSDL($wsdl)
 {
     return ZuoraAPIHelper::getXMLElementFromWSDL($wsdl);
 }
 
-//###############################################################################
+// ###############################################################################
 function getFileContents($wsdl)
 {
     return ZuoraAPIHelper::getFileContents($wsdl);
 }
 
-//###############################################################################
+// ###############################################################################
 function bulkOperation($client, $header, $method, $payload, $itemCount, $debug, $htmlOutput = false)
 {
     return ZuoraAPIHelper::bulkOperation($client, $header, $method, $payload, $itemCount, $debug, $htmlOutput);
 }
 
-//###############################################################################
+// ###############################################################################
 function getOperationListFromWSDL($wsdl, $debug)
 {
     return ZuoraAPIHelper::getOperationListFromWSDL($wsdl, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function getObjectListFromWSDL($wsdl, $debug)
 {
     return ZuoraAPIHelper::getObjectListFromWSDL($wsdl, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function getAPIObjectListFromWSDL($wsdl, $namespace, $debug)
 {
     return ZuoraAPIHelper::getAPIObjectListFromWSDL($wsdl, $namespace, $debug);
 }
 
-//###############################################################################
+// ###############################################################################
 function printTemplate($wsdl, $call, $object, $debug, $offset)
 {
     return ZuoraAPIHelper::printTemplate($wsdl, $call, $object, $debug, $offset);
 }
 
-//###############################################################################
+// ###############################################################################
 function printTemplateWithNS($wsdl, $call, $object, $debug, $offset, $apiNamespace, $objectNamespace)
 {
     return ZuoraAPIHelper::printTemplateWithNS($wsdl, $call, $object, $debug, $offset, $apiNamespace, $objectNamespace);
 }
 
-//###############################################################################
+// ###############################################################################
 class ZuoraAPIHelper
 {
     public static $maxZObjectCount = 50;
@@ -185,7 +185,7 @@ class ZuoraAPIHelper
     public static $header = 0;
     public static $batchSize = 0;
 
-    //###############################################################################
+    // ###############################################################################
     public static function getNodeValue($xml, $xpath, $prefix, $namespace)
     {
         $xml_obj = new SimpleXMLElement($xml);
@@ -195,7 +195,7 @@ class ZuoraAPIHelper
         return $node;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getCreateResponseFieldValues($xml, $field)
     {
         // global $defaultApiNamespace;
@@ -203,7 +203,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::getNodeValue($xml, '//*/*/*/*/'.ZuoraAPIHelper::$defaultApiNamespace.':'.$field, ZuoraAPIHelper::$defaultApiNamespace, ZuoraAPIHelper::$defaultApiNamespaceURL);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getQueryResponseFieldValues($xml, $field)
     {
         // global $defaultObjectNamespace;
@@ -211,7 +211,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::getNodeValue($xml, '//*/*/*/*/*/'.ZuoraAPIHelper::$defaultObjectNamespace.':'.$field, ZuoraAPIHelper::$defaultObjectNamespace, ZuoraAPIHelper::$defaultObjectNamespaceURL);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getQueryResponseRecords($xml, $labels)
     {
         // global $defaultApiNamespace;
@@ -229,7 +229,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::getQueryResultsFromRecords($resultRecords, $labels);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getQueryResultsFromRecords($records, $labels)
     {
         // global $defaultObjectNamespace;
@@ -257,14 +257,14 @@ class ZuoraAPIHelper
         return $retList;
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of logging in and making the query API call.
     public static function queryAPI($wsdl, $username, $password, $body, $debug)
     {
         return ZuoraAPIHelper::queryAPIWithSession($body, $debug, $wsdl, $username, $password);
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of logging in and making the query API call.
     public static function queryAPIWithSession($body, $debug, $wsdl = '', $username = '', $password = '')
     {
@@ -276,7 +276,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::callAPIWithSession($payload, $debug);
     }
 
-    //###############################################################################
+    // ###############################################################################
     // Call to prepare a query string for discrete queries.
     public static function prepDiscreteQuery($body, $fieldStr, $fieldValues)
     {
@@ -310,14 +310,14 @@ class ZuoraAPIHelper
         return $querySet;
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of logging in and making the query & queryMore API calls.
     public static function queryMoreAPI($wsdl, $username, $password, $body, $debug)
     {
         return ZuoraAPIHelper::queryMoreAPIWithSession($body, $debug, $wsdl, $username, $password);
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of logging in and making the query & queryMore API calls.
     public static function queryMoreAPIWithSession($body, $debug, $wsdl = '', $username = '', $password = '')
     {
@@ -358,7 +358,7 @@ class ZuoraAPIHelper
         return $resultRecords;
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of logging in and making the API call.
     public static function callAPI($wsdl, $username, $password, $payload, $debug)
     {
@@ -371,7 +371,7 @@ class ZuoraAPIHelper
         }
     }
 
-    //###############################################################################
+    // ###############################################################################
     // High level call that takes care of making the API call.
     public static function callAPIWithSession($payload, $debug)
     {
@@ -388,7 +388,7 @@ class ZuoraAPIHelper
         }
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function callAPIWithClient($client, $header, $soapRequest, $debug)
     {
         // global $maxZObjectCount;
@@ -406,7 +406,7 @@ class ZuoraAPIHelper
             $result = $client->__soapCall($soapMethod, [], null, $header);
             $timeAfter = microtime(true);
 
-            //echo "Request: " . $soapRequest . " Duration: " . ($timeAfter - $timeBefore)/60 . " minutes.\n";
+            // echo "Request: " . $soapRequest . " Duration: " . ($timeAfter - $timeBefore)/60 . " minutes.\n";
 
             if ($debug) {
                 echo "\nResult:\n".ZuoraAPIHelper::xml_pretty_printer($client->myResponse);
@@ -419,7 +419,7 @@ class ZuoraAPIHelper
         }
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function checkLogin($wsdl, $username, $password, $debug)
     {
         $location = ZuoraAPIHelper::getSoapAddress($wsdl, $debug);
@@ -442,7 +442,7 @@ class ZuoraAPIHelper
         return '';
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function loginWithSession($wsdl, $session, $debug)
     {
         // global $defaultApiNamespaceURL;
@@ -455,7 +455,7 @@ class ZuoraAPIHelper
         return true;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getSession()
     {
         if (ZuoraAPIHelper::$header) {
@@ -465,7 +465,7 @@ class ZuoraAPIHelper
         return '';
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function login($client, $username, $password, $debug)
     {
         // do the login
@@ -491,7 +491,7 @@ class ZuoraAPIHelper
         // return ZuoraAPIHelper::getHeader($session);
     }
 
-    //###############################################################################
+    // ###############################################################################
     /*  public static function getHeader($sessionId){
         global $defaultApiNamespaceURL;
 
@@ -502,7 +502,7 @@ class ZuoraAPIHelper
         return $header;
      }
  */
-    //###############################################################################
+    // ###############################################################################
     // code pulled from http://www.imarc.net/communique/view/148/xml_pretty_printer_in_php5
     public static function xml_pretty_printer($xml, $html_output = false)
     {
@@ -543,13 +543,13 @@ class ZuoraAPIHelper
         return ($html_output) ? '<pre>'.xmlspecialchars($xml).'</pre>' : $xml;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function xmlspecialchars($text)
     {
         return str_replace('&#039;', '&apos;', htmlspecialchars(str_replace('&', '&amp;', $text), ENT_QUOTES, 'UTF-8', false));
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getMethod($xml)
     {
         $xml_obj = new SimpleXMLElement($xml);
@@ -559,7 +559,7 @@ class ZuoraAPIHelper
         return $node[0]->getName();
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getQueryLocator($xml)
     {
         // global $defaultApiNamespace;
@@ -571,7 +571,7 @@ class ZuoraAPIHelper
         return $node[0];
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getZObjectCount($xml, $method)
     {
         // global $defaultApiNamespaceURL;
@@ -584,7 +584,7 @@ class ZuoraAPIHelper
         return count($nodes);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function printUsage()
     {
         // global $defaultApiNamespaceURL;
@@ -611,7 +611,7 @@ class ZuoraAPIHelper
         exit($usage);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function createClient($wsdl, $debug)
     {
         $client = new MySoapClient($wsdl, ['exceptions' => 0]);
@@ -621,7 +621,7 @@ class ZuoraAPIHelper
         return $client;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function createRequest($sessionKey, $payload)
     {
         // global $defaultApiNamespace;
@@ -629,7 +629,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::createRequestWithNS($sessionKey, $payload, ZuoraAPIHelper::$defaultApiNamespace, ZuoraAPIHelper::$defaultObjectNamespace);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function createRequestWithNS($sessionKey, $payload, $apiNamespace, $objectNamespace)
     {
         // global $defaultApiNamespaceURL;
@@ -637,7 +637,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::createRequestAndHeadersWithNS($sessionKey, ZuoraAPIHelper::$batchSize, [], $payload, $apiNamespace, $objectNamespace);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function createRequestAndHeadersWithNS($sessionKey, $batchSize, $callOptions, $payload, $apiNamespace, $objectNamespace)
     {
         // global $defaultApiNamespaceURL;
@@ -671,7 +671,7 @@ class ZuoraAPIHelper
         return '<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:'.$objectNamespace.'="'.ZuoraAPIHelper::$defaultObjectNamespaceURL.'" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:'.$apiNamespace.'="'.ZuoraAPIHelper::$defaultApiNamespaceURL.'"><SOAP-ENV:Header>'.$sessionHeader.'</SOAP-ENV:Header><SOAP-ENV:Body>'.$payload.'</SOAP-ENV:Body></SOAP-ENV:Envelope>';
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getSoapAddress($wsdl)
     {
         $xml_obj = getXMLElementFromWSDL($wsdl);
@@ -680,15 +680,15 @@ class ZuoraAPIHelper
         return (string) $node[0]->attributes()->location;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getAPIVersion($wsdl)
     {
         $address = ZuoraAPIHelper::getSoapAddress($wsdl);
-        //Expecting: https://apisandbox.zuora.com/apps/services/a/8.0
+        // Expecting: https://apisandbox.zuora.com/apps/services/a/8.0
         return substr(strrchr($address, '/'), 1);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getXMLElementFromWSDL($wsdl)
     {
         $xml = ZuoraAPIHelper::getFileContents($wsdl);
@@ -700,7 +700,7 @@ class ZuoraAPIHelper
         return $xml_obj;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getFileContents($wsdl)
     {
         $contents = '';
@@ -720,7 +720,7 @@ class ZuoraAPIHelper
         return $contents;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function bulkOperation($client, $header, $method, $payload, $itemCount, $debug, $htmlOutput = false, $zObjectCap = -1)
     {
         // global $maxZObjectCount;
@@ -821,7 +821,7 @@ class ZuoraAPIHelper
         return $result;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getOperationListFromWSDL($wsdl, $debug)
     {
         $xml_obj = ZuoraAPIHelper::getXMLElementFromWSDL($wsdl);
@@ -834,14 +834,14 @@ class ZuoraAPIHelper
         return $names;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getObjectListFromWSDL($wsdl, $debug)
     {
         // global $defaultObjectNamespaceURL;
         return ZuoraAPIHelper::getAPIObjectListFromWSDL($wsdl, /* ZuoraAPIHelper::$defaultObjectNamespaceURL, */ $debug);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getAPIObjectListFromWSDL($wsdl, /* $namespace, */ $debug)
     {
         $xml_obj = ZuoraAPIHelper::getXMLElementFromWSDL($wsdl);
@@ -855,7 +855,7 @@ class ZuoraAPIHelper
         return $names;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function printTemplate($wsdl, $call, $object, $debug, $offset)
     {
         // global $defaultApiNamespace;
@@ -863,7 +863,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::printTemplateWithNS($wsdl, $call, $object, $debug, $offset, ZuoraAPIHelper::$defaultApiNamespace, ZuoraAPIHelper::$defaultObjectNamespace);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function printTemplateWithNS($wsdl, $call, $object, $debug, $offset, $apiNamespace, $objectNamespace)
     {
         /*
@@ -913,7 +913,7 @@ class ZuoraAPIHelper
         return ZuoraAPIHelper::printXMLWithNS($call, $object, $fieldNames, [], $debug, $offset, $apiNamespace, $objectNamespace, true);
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function printXMLWithNS($call, $object, $fieldNames, $values, $debug, $offset, $apiNamespace, $objectNamespace, $emptyValuesOk)
     {
         $ID_FIELD = 'Id';
@@ -977,7 +977,7 @@ class ZuoraAPIHelper
         return $payload;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getElementFromXML($xml)
     {
         // global $defaultApiNamespace;
@@ -992,7 +992,7 @@ class ZuoraAPIHelper
         return $xml_obj;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getCSVHeaders($xml_obj)
     {
         // global $defaultApiNamespace;
@@ -1000,7 +1000,7 @@ class ZuoraAPIHelper
 
         $labels = $xml_obj->xpath('//'.ZuoraAPIHelper::$defaultApiNamespace.':records/*');
 
-        //Determine headers.
+        // Determine headers.
         $found = false;
         $uniqueHeaders = [];
         foreach ($labels as $node) {
@@ -1023,7 +1023,7 @@ class ZuoraAPIHelper
         return $uniqueHeaders;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getFieldsFromQuery($query)
     {
         // global $SEPARATOR;
@@ -1037,7 +1037,7 @@ class ZuoraAPIHelper
 
         $labels = explode($SEPARATOR, $temp);
 
-        //Determine headers.
+        // Determine headers.
         $found = false;
         $uniqueHeaders = [];
         foreach ($labels as $value) {
@@ -1060,7 +1060,7 @@ class ZuoraAPIHelper
         return $uniqueHeaders;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getCSVData($xml_obj, $uniqueHeaders, $print, $headers)
     {
         // global $defaultApiNamespace;
@@ -1111,13 +1111,13 @@ class ZuoraAPIHelper
         */
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getCSVDataFromRecords($resultRecords, $uniqueHeaders, $print, $headers)
     {
         // global $SEPARATOR;
         // global $TEXT_QUALIFIER;
 
-        //Fill in the data.
+        // Fill in the data.
         $output = '';
         $outputArray = [];
         if ($headers) {
@@ -1143,7 +1143,7 @@ class ZuoraAPIHelper
         return $outputArray;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function convertXMLtoCSV($xml, $print, $headers)
     {
         $xml_obj = ZuoraAPIHelper::getElementFromXML($xml);
@@ -1216,7 +1216,7 @@ class ZuoraAPIHelper
         */
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function getFieldList($wsdl, $object)
     {
         // global $defaultObjectNamespaceURL;
@@ -1237,7 +1237,7 @@ class ZuoraAPIHelper
         return $list;
     }
 
-    //###############################################################################
+    // ###############################################################################
     // Helper call that finds the indexes of key in two arrays. Used for deciding if
     // the join will be innner or outer join.
     public static function getTableJoinKeyIndexes($table1Data, $table2Data, $key = '')
@@ -1279,7 +1279,7 @@ class ZuoraAPIHelper
         return [$found, $index1, $index2];
     }
 
-    //###############################################################################
+    // ###############################################################################
     // Helper call that finds the indexes of keys in two arrays. Used for deciding if
     // the join will be innner or outer join.
     public static function getTableJoinKeyIndex($tableData, $key = '')
@@ -1298,7 +1298,7 @@ class ZuoraAPIHelper
         return -1;
     }
 
-    //###############################################################################
+    // ###############################################################################
     // Helper call that joins two arrays, each with headers that contain the link column.
     // Returns a 2-dimensional array with the result.
     public static function joinTables($table1Data, $table2Data, $key = '')
@@ -1381,7 +1381,7 @@ class ZuoraAPIHelper
         */
     }
 
-    //###############################################################################
+    // ###############################################################################
     // Helper call that joins two arrays, each with headers that contain the link column.
     // Returns a 2-dimensional array with the result.
     public static function joinTablesWithIndexes($table1Data, $table2Data, $index1 = -1, $index2 = -1)
@@ -1431,7 +1431,7 @@ class ZuoraAPIHelper
         return $output;
     }
 
-    //###############################################################################
+    // ###############################################################################
     public static function execInBackground($cmd)
     {
         if ('Windows' == substr(php_uname(), 0, 7)) {
@@ -1446,7 +1446,7 @@ class ZuoraAPIHelper
     }
 }
 
-//###############################################################################
+// ###############################################################################
 class MySoapClient extends SoapClient
 {
     public $myRequest = '';
@@ -1488,7 +1488,7 @@ class MySoapClient extends SoapClient
     }
 }
 
-//###############################################################################
+// ###############################################################################
 /* Quoted from http://php.net/manual/en/function.substr.php, submitted by egingell at sisna dot com on 19-Oct-2006 10:19
  * string substrpos(string $str, mixed $start [[, mixed $end], boolean $ignore_case])
  *

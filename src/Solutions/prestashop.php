@@ -1041,5 +1041,4 @@ class PrestaShop extends Solution
     protected function call($url, $parameters)
     {
     }
-
 }

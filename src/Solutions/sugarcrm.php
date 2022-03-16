@@ -632,15 +632,15 @@ class SugarCRM extends Solution
                 'Content-Type: application/json',
                 "oauth-token: {$token->access_token}",
             ]);
-            //convert arguments to json
+            // convert arguments to json
             if (!empty($parameters)) {
                 $json_arguments = json_encode($parameters);
                 curl_setopt($request, CURLOPT_POSTFIELDS, $json_arguments);
             }
 
-            //execute request
+            // execute request
             $response = curl_exec($request);
-            //decode response
+            // decode response
             $response_obj = json_decode($response);
         } catch (Exception $e) {
             throw new \Exception($e->getMessage());

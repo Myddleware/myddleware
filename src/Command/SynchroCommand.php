@@ -135,12 +135,14 @@ class SynchroCommand extends Command
                 $output->writeln('0;<error>'.$this->jobManager->message.'</error>');
                 $this->logger->error($this->jobManager->message);
             }
+
             return Command::FAILURE;
         }
         // Close job if it has been created
         if (true === $this->jobManager->createdJob) {
             $this->jobManager->closeJob();
         }
+
         return Command::SUCCESS;
     }
 }

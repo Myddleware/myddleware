@@ -98,13 +98,13 @@ class TemplateManager
         $this->lang = $request ? $request->getLocale() : 'EN';
     }
 
-    
     /**
-     * Since SF5.4, the way to load the session has changed
+     * Since SF5.4, the way to load the session has changed.
      */
     public function getSession()
     {
         $session = $this->requestStack->getSession();
+
         return $session;
     }
 
@@ -117,6 +117,7 @@ class TemplateManager
         $stmt = $this->connection->prepare($query);
         $stmt->bindValue('rules', $rulesString);
         $result = $stmt->executeQuery();
+
         return $result->fetchAllAssociative();
     }
 

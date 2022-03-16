@@ -280,7 +280,7 @@ class SuiteCRM extends Solution
                             'relate' => true,
                         ];
                     }
-                    //To enable to take out all fields where there are 'relate' in the type of the field
+                    // To enable to take out all fields where there are 'relate' in the type of the field
                     else {
                         // Le champ id n'est envoyé qu'en source
                         if ('id' != $field->name || 'source' == $type) {
@@ -384,7 +384,7 @@ class SuiteCRM extends Solution
 
         // Built the query
         $query = $this->generateQuery($param, 'read');
-        //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
+        // Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
         $link_name_to_fields_array = [];
         foreach ($param['fields'] as $field) {
             if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
@@ -854,7 +854,7 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    //function to make cURL request
+    // function to make cURL request
     protected function call($method, $parameters)
     {
         try {

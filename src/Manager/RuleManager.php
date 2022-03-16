@@ -25,26 +25,26 @@
 
 namespace App\Manager;
 
-use App\Entity\Rule;
 use App\Entity\Config;
-use App\Entity\RuleParam;
 use App\Entity\DocumentData;
-use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
+use App\Entity\Rule;
+use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit;
-use App\Repository\RuleRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Repository\RuleRelationShipRepository;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use App\Repository\RuleRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
 
 class RuleManager
 {
@@ -111,7 +111,6 @@ class RuleManager
     private $ruleOrderRepository;
     private $requestStack;
 
-
     /**
      * @var FormulaManager
      */
@@ -150,16 +149,16 @@ class RuleManager
         $this->formulaManager = $formulaManager;
     }
 
-    
     /**
-     * Since SF5.4, the way to load the session has changed
+     * Since SF5.4, the way to load the session has changed.
      */
     public function getSession()
     {
         $session = $this->requestStack->getSession();
+
         return $session;
     }
-    
+
     public function setRule($idRule)
     {
         $this->ruleId = $idRule;
@@ -1012,6 +1011,7 @@ class RuleManager
                     $documentResult['targetId'][$document['target_id']][] = $document;
                 }
             }
+
             return $documentResult;
         }
     }
@@ -1149,10 +1149,10 @@ class RuleManager
             } catch (IOException $e) {
                 throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
             }
-            //if user clicked on cancel all transfers of a rule
+            // if user clicked on cancel all transfers of a rule
             if ('cancelDocumentJob' === $event) {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
-            //if user clicked on delete all transfers from a rule
+            // if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
             } else {
@@ -1508,7 +1508,7 @@ class RuleManager
                     $stmt->bindParam(':docId', $docId);
                     $result = $stmt->executeQuery();
                     $results = $result->fetchAllAssociative();
-                    
+
                     if (!empty($results)) {
                         foreach ($results as $result) {
                             // Get the last reference document created to add it into the log
@@ -1617,6 +1617,7 @@ class RuleManager
             $stmt->bindValue(':ruleId', $this->ruleId);
             $stmt->bindValue(':status', $status);
             $result = $stmt->executeQuery();
+
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -1847,6 +1848,7 @@ class RuleManager
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
+
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             throw new \Exception('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

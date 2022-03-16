@@ -67,11 +67,14 @@ class GenerateTemplateCommand extends Command
         $response = $this->jobManager->generateTemplate($nomTemplate, $descriptionTemplate, $rulesIds);
         if (true === $response['success']) {
             $output->writeln('Template '.$nomTemplate.' generated.');
+
             return Command::SUCCESS;
         } else {
             $output->writeln('<error>Failed to generate template '.$nomTemplate.' : '.$response['message'].'</error>');
+
             return Command::FAILURE;
         }
+
         return Command::SUCCESS;
     }
 }
