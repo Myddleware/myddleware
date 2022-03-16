@@ -76,7 +76,7 @@ class Solution implements \Stringable
         $this->connector = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -88,7 +88,7 @@ class Solution implements \Stringable
         return $this;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -100,7 +100,7 @@ class Solution implements \Stringable
         return $this;
     }
 
-    public function getActive(): int
+    public function getActive(): ?int
     {
         return $this->active;
     }
@@ -112,7 +112,7 @@ class Solution implements \Stringable
         return $this;
     }
 
-    public function getSource(): int
+    public function getSource(): ?int
     {
         return $this->source;
     }
@@ -124,7 +124,7 @@ class Solution implements \Stringable
         return $this;
     }
 
-    public function getTarget(): int
+    public function getTarget(): ?int
     {
         return $this->target;
     }
@@ -141,7 +141,7 @@ class Solution implements \Stringable
         $this->connector->removeElement($connector);
     }
 
-    public function getConnector(): Collection
+    public function getConnector(): ?Collection
     {
         return $this->connector;
     }
@@ -151,7 +151,7 @@ class Solution implements \Stringable
         return $this->name;
     }
 
-    public function getLogo(): string 
+    public function getLogo(): ?string 
     {
         return $this->name.'.png';
     }

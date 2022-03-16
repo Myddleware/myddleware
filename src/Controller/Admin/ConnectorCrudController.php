@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
@@ -43,7 +44,8 @@ class ConnectorCrudController extends AbstractCrudController
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
-            AssociationField::new('solution')->setCrudController(SolutionCrudController::class),
+            // CollectionField::new('solution')->setEntryIsComplex(true),
+            AssociationField::new('solution'),
             // CollectionField::new('solution')->setTemplatePath('admin/solution.html.twig'),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
@@ -70,6 +72,7 @@ class ConnectorCrudController extends AbstractCrudController
                         ->add('createdAt')
                         ->add('updatedAt')
                         ->add('deleted')
+                        ->add('solution')
                         ;
     }
 }
