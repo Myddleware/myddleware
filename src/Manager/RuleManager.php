@@ -40,7 +40,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use App\Repository\RuleRelationShipRepository;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -144,7 +143,6 @@ class RuleManager
         $this->tools = $tools;
         $this->router = $router;
         $this->requestStack = $requestStack;
-        $this->session = $this->requestStack->getSession();
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
@@ -152,6 +150,16 @@ class RuleManager
         $this->formulaManager = $formulaManager;
     }
 
+    
+    /**
+     * Since SF5.4, the way to load the session has changed
+     */
+    public function getSession()
+    {
+        $session = $this->requestStack->getSession();
+        return $session;
+    }
+    
     public function setRule($idRule)
     {
         $this->ruleId = $idRule;
@@ -953,7 +961,7 @@ class RuleManager
 
     // Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
     // Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté les entrées ruleId et date de référence au tableau
-    public static function afterSave($solutionManager, $data)
+    public function afterSave($solutionManager, $data)
     {
         // Contrôle sur la solution source
         $solutionSource = $solutionManager->get($data['module']['source']['solution']);
@@ -966,7 +974,7 @@ class RuleManager
         $data['testMessage'] = '';
         // Affichage des messages
         if (!empty($messages)) {
-            $session = new Session();
+            $session = $this->getSession();
             foreach ($messages as $message) {
                 if ('error' == $message['type']) {
                     $errorMessages[] = $message['message'];
@@ -1070,7 +1078,7 @@ class RuleManager
         // Set the param values and clear all document attributes
         $this->documentManager->setParam($param, true);
         $this->documentManager->documentCancel();
-        $session = new Session();
+        $session = $this->getSession();
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1093,7 +1101,7 @@ class RuleManager
         // Set the param values and clear all document attributes
         $this->documentManager->setParam($param, true);
         $this->documentManager->changeDeleteFlag($deleteFlag);
-        $session = new Session();
+        $session = $this->getSession();
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1127,7 +1135,7 @@ class RuleManager
     protected function runMyddlewareJob($ruleId, $event = null)
     {
         try {
-            $session = new Session();
+            $session = $this->getSession();
             // create temp file
             $guid = uniqid();
 
@@ -1186,7 +1194,7 @@ class RuleManager
 
             return $result[0];
         } catch (\Exception $e) {
-            $session = new Session();
+            $session = $this->getSession();
             $session->set('error', [$e->getMessage()]);
 
             return false;
@@ -1196,7 +1204,7 @@ class RuleManager
     // Permet de relancer un document quelque soit son statut
     protected function rerun($id_document)
     {
-        $session = new Session();
+        $session = $this->getSession();
         $msg_error = [];
         $msg_success = [];
         $msg_info = [];

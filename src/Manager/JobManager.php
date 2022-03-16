@@ -31,7 +31,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -87,7 +86,6 @@ class JobManager
         $this->parameterBagInterface = $parameterBagInterface;
         $this->router = $router;
         $this->requestStack = $requestStack;
-        $this->session = $this->requestStack->getSession();
         $this->tools = $tools;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
@@ -366,12 +364,12 @@ class JobManager
                 ++$cpt;
             }
             // Renvoie du message en session
-            $session = new Session();
+            $session = $this->getSession();
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (\Exception $e) {
-            $session = new Session();
+            $session = $this->requestStack->getSession();
             $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
 
             return false;
@@ -968,5 +966,14 @@ class JobManager
         }
 
         return true;
+    }
+
+    /**
+     * Since SF5.4, the way to load the session has changed
+     */
+    public function getSession()
+    {
+        $session = $this->requestStack->getSession();
+        return $session;
     }
 }

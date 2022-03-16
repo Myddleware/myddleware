@@ -20,8 +20,19 @@ class SessionService
     public function __construct(RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;
-        $this->_session = $this->requestStack->getSession();
+        $this->_session = $this->getSession();
     }
+
+        
+    /**
+     * Since SF5.4, the way to load the session has changed
+     */
+    public function getSession()
+    {
+        $session = $this->requestStack->getSession();
+        return $session;
+    }
+
 
     public function getMyddlewareSession()
     {

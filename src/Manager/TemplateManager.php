@@ -72,7 +72,6 @@ class TemplateManager
      */
     private $solutionManager;
 
-    private $session;
     /**
      * @var TranslatorInterface
      */
@@ -96,8 +95,17 @@ class TemplateManager
         $this->templateDir = $this->projectDir.'/src/Templates/';
         $this->requestStack = $requestStack;
         $request = $this->requestStack->getCurrentRequest();
-        $this->session = $this->requestStack->getSession();
         $this->lang = $request ? $request->getLocale() : 'EN';
+    }
+
+    
+    /**
+     * Since SF5.4, the way to load the session has changed
+     */
+    public function getSession()
+    {
+        $session = $this->requestStack->getSession();
+        return $session;
     }
 
     // Sort rule (rule parent first)
@@ -430,12 +438,14 @@ class TemplateManager
             // Commit the rules in the database
             $this->entityManager->flush();
 
+            $session = $this->getSession();
             // Set the message in Myddleware UI
-            $this->session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
+            $session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
         } catch (Exception $e) {
             // Rollback in case of error
             $this->entityManager->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->session->set('error', [$this->translator->trans('error.template.creation'), $e->getMessage()]);
+            $session = $this->getSession();
+            $session->set('error', [$this->translator->trans('error.template.creation'), $e->getMessage()]);
             $error = 'Failed to generate rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
