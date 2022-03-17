@@ -114,13 +114,17 @@ unzip myddleware.zip -d <myddleware_dirname>
 
 *This section is still under construction*
 
-#### Download the Myddleware image
+#### Build the Myddleware image with docker-compose (developer's mode)
 
 *This section is still under construction*
 
-#### Build the container
+##### Build the container
+
+#### Build the Myddleware image with Docker(developer's mode)
 
 *This section is still under construction*
+
+##### Build the container
 
 <!-- tabs:end -->
 
@@ -158,9 +162,15 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 
 ### Connect your applications to Myddleware
 
+*This section is still under construction*
+
 ### Create a rule
 
+*This section is still under construction*
+
 ## Administration tasks
+
+*This section is still under construction*
 
 ### Add users
 
@@ -170,6 +180,8 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 
 ## Supported Connectors
 
+*This section is still under construction*
+
 ## Contributing
 
 > Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
@@ -177,3 +189,5 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 %[{ dev_guide.md }]%
 
 ## Going further
+
+*This section is still under construction*

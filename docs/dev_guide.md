@@ -17,18 +17,19 @@ We use doctrine to update the database, so you have modify the file "LoadSolutio
 ```php
 
         protected $solutionData = [
-                ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'prestashop',		'active' => 1, 'source' => 1, 'target' => 1],
+                ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
+                ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
+                ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
+                ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
                 // Your connector
         ];
 ```
+
 In the Folder Manager ```myddleware/src/Manager/SolutionManager.php```
 
 - Add your new connector to the SolutionManager file, , in the same way as the others. First, add ```use App\Soltions\'your_connector'```.
 
-Then still in SolutionManager, we add your new connector to the construct function, following the others. 
+Then still in SolutionManager, we add your new connector to the construct function, following the others.
 
 ```php
         public function __construct(
@@ -49,7 +50,7 @@ Then still in SolutionManager, we add your new connector to the construct functi
     }
 ```
 
-Add to Database : 
+Add to Database :
 
 - In your terminal load Myddleware fixtures:
 
@@ -92,9 +93,9 @@ Finally, if youu want to display the application logo add the image correspondin
 
 In this new connector class, create the function getFieldLogin(). Here, you have to put the parameters required to connect to your solution.
 
-For example, if you need an url and an APIkey you can creat this methode : 
+For example, if you need an url and an APIkey you can creat this methode :
 
-```php       
+```php
     public function getFieldsLogin()
     {
         return [
@@ -116,13 +117,14 @@ For example, if you need an url and an APIkey you can creat this methode :
         ];
     }
 ```
+
 > Check that everything is working in Myddleware
 
 ![view fields_login](images/dev_guide/suitecrm_create.PNG)
 
 *We can now log into Myddleware*
 
-### Method login 
+### Method login
 
 Now to connect your connector, we need to create a new function in your class, we will call it "login".
 
@@ -130,7 +132,7 @@ Example code, available in the file ```myddleware/src/Solution/suitecrm.php```
 
 You have to add this function login to check the connexion with you application.
 
-Make sure every error is catched and "this->connexion_valide = true" if the connexion works. 
+Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
 
 ```php
          public function login($paramConnexion)
@@ -170,6 +172,7 @@ Make sure every error is catched and "this->connexion_valide = true" if the conn
         }
     }
 ```
+
 To debug this function, you can click on the button "Test" and check the result in firebug for example. The function will be called each time you click on "Test", no need to refresh the page.
 
 *Let's now create the first rule*
@@ -182,7 +185,7 @@ Here, you have to add the module you want to connect in the method.
 
 In input you have access to the type of connexion, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
 
-You then return an array with a list of module: 
+You then return an array with a list of module:
 
 ```php
         //Get module list
@@ -195,6 +198,7 @@ You then return an array with a list of module:
                 ]
         }
 ```
+
 **Other code examples are available in the:**
 
 ```myddleware/src/Solutions/sugarcrm.php```
@@ -204,6 +208,7 @@ Now you can debug (with firebug for example) your function when the module list 
 ![view modules](images/dev_guide/view_modules.PNG)
 
 Next step is the fields mapping, we now need to create a function for it.
+
 ### Method get_module_fields
 
 You have to indicate to Myddleware what fields are available for each module. If your application has a function which describe all fields for every module, you should use it. For example, we did it for Salesforce or Prestashop. Otherwise you have to describe every field.
@@ -230,6 +235,7 @@ You should then add the fields related (field available to create relationship) 
 ![view modules fields](images/dev_guide/modules_fields.PNG)
 
 *Create a mapping and save the rule. We will now create the function read*
+
 ### Method read
 
 > The read function is one of the most important function in the connector.
@@ -283,6 +289,7 @@ values with an array of records. The key of these entries has to be the id of th
 The output of the function read should look like this:
 
 IMAGE
+
 ### Method create
 
 Create a rule now with your application in target. Then create the function public function create($param) in your class.
@@ -319,7 +326,7 @@ The output of the function created should look like these :
                 ]
         ]
 
-> To help writing code and not recreate time-consuming manipulation in Myddleware, we can use in your terminal : 
+> To help writing code and not recreate time-consuming manipulation in Myddleware, we can use in your terminal :
 
 Read a record:
 
@@ -328,12 +335,12 @@ Read a record:
 Reread a document:
 
         bin/console myddleware:massaction rerun document <document id> --env=background
+
 ### Method update
 
 The method update works in the same way as the method create. The output parameter must be built exactly like in the method create.
 
 The only difference is that you have the entry “target_id” for each record in the array data. You will need this entry to update your data in your application.
-
 
 ## Create formula
 
@@ -359,36 +366,32 @@ To help, syntax highlighting (1) is available to you right on your text box. Fur
 
 - Add two fileds {field1} + {field2}
 
-
 In this article we‘ll look at an important point in your synchronization rules and one of the many setting options offered by Myddleware, formulas.
 
 **Functions**
 
 In the formula of Myddleware, you can use the functions listed at the bottom right (see of the previous image).
 
-
-This function round floating point (up), ([PHP](https://www.php.net/manual/fr/function.round.php)) **round(numbre [, clarification])**: 
+This function round floating point (up), ([PHP](https://www.php.net/manual/fr/function.round.php)) **round(numbre [, clarification])**:
 
         round(525.6352, 2) // Gives 525.64
 
- 
 Rounds up, ([PHP](https://www.php.net/manual/fr/function.ceil.php)) **ceil(float)**:
 
         ceil(525.6352) // Gives 526
 
-Returns the absolute value, ([PHP](https://www.php.net/manual/fr/function.abs.php)) **abs(number)**: 
+Returns the absolute value, ([PHP](https://www.php.net/manual/fr/function.abs.php)) **abs(number)**:
 
         abs(-5) // Gives 5
 
 Deletes spaces (or other charachters) at the begenning and the end of a string, ([PHP](https://www.php.net/manual/fr/function.trim.php)) **trim(string [, Masque])**:
-        
+
         trim(” bonjour “) // Returns “bonjour”
 
-
 Lowercases all charachters, ([PHP](https://www.php.net/manual/fr/function.mb-strtolower.php)) **lower(STRING)**:
- 
+
         lower(“BONJOUR”) // Returns “bonjour”
- 
+
 Uppercases all charachters, ([PHP](https://www.php.net/manual/fr/function.mb-strtoupper.php)) **upper(String)**:
 
         upper(“bonjour”) // Returns “BONJOUR”
@@ -398,16 +401,15 @@ Formats a local date/hour, ([PHP](https://www.php.net/manual/fr/function.date.ph
         date(“Y:m:d”) // Returns “2014:09:16”
 
 Returns current Unix timestamp with microseconds, ([PHP](https://www.php.net/manual/fr/function.microtime.php)) **microtime([true if you want a float result])**:
- 
+
         microtime(true) // Returns 1410338028.5745
 
 Changes the timezone of the given date, ([PHP](https://www.php.net/manual/fr/timezones.php)) **changeTimeZone(Date you want to change, old timezone, new timezone)**:
 
         changeTimeZone(“2014-09-16 12:00:00”, “America/Denver”, “America/New_York”) // Returns “2014-09-16 14:00:00”
 
-
 Changes the format of the given date, **changeFormatDate(Date you want to change, New format)**:
- 
+
         changeTimeZone(“2014-09-16 12:00:00”, “Y/m/d H:i:s”) // Returns “2014/09/16 12:00:00”
 
 Reads a string starting of the given Index, ([PHP](https://www.php.net/manual/fr/function.mb-substr.php)) **substr(String, Indexample)**:
@@ -418,14 +420,9 @@ Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/fun
 
         striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
 
-
-
-
-
-
 ## API Overwiew
 
-The API is built to allow you to call Myddleware from your application using REST protocol. For example, you will be able to call a specific Myddlewere ‘s rule when a specific event happends in your application. You will also be able to synchronize a specific record using a call to Myddleware. 
+The API is built to allow you to call Myddleware from your application using REST protocol. For example, you will be able to call a specific Myddlewere ‘s rule when a specific event happends in your application. You will also be able to synchronize a specific record using a call to Myddleware.
 
 Please find the [postman collection here](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#e564597d-ef6e-40e1-87f1-c69b7b2d7479).
 
@@ -441,14 +438,16 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/login_check' \
         --header 'Content-Type: application/json' \
         --data-raw '{
-	        "username":"username",
-	        "password":"password"
+         "username":"username",
+         "password":"password"
         }'
 ```
+
 **Output :**
 
 <!-- tabs:start -->
 #### **if success :**
+
 ```php
         {
         « token »: <token>
@@ -456,27 +455,30 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
 ```
 
 #### **If error :**
-```php     
+
+```php
         {
         « code »: <error code>,
         « message »: <error message>
         }
 ```
 <!-- tabs:end -->
-### Function synchro 
+### Function synchro
 
 Use the synchro function to run a specific rule or every active rules.
 
 Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#96de2d5c-7a77-4d50-aa15-2657663459b2) :
 
-```     
+```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/synchro' \
         --header 'Content-Type: application/json' \
         --form 'rule=<rule id>'
 ```
+
 Set the rule id you want to run in Myddleware. Set ALL if you want to reun avery active rules.
 
 **Output :**
+
 ```php
         {
         « error »: «  »,
@@ -540,12 +542,14 @@ Set the rule id you want to run in Myddleware. Set ALL if you want to reun avery
 Use the read record function to force Myddleware to read a specific record into your application. For example. you can call this function when a record is saved into your application. Myddleware will read it from your source application and send it to your target application. It is used when you need a real time synchronisation.
 
 Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#68ee49d2-2fea-47ca-92ad-5d2345b6ba0c) :
+
 ```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/read_record' \
         --form 'rule=<your rule id>' \
         --form 'filterQuery=<field>' \
         --form 'filterValues=<value>'
 ```
+
 **Set these parameters :**
 
 - rule : The rule you want to run
@@ -553,6 +557,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
 - filterValue : The field value used in the parameter filterQuery. It is usually the id of your record.
 
 **Output :**
+
 ```php
         {
         « error »: «  »,
@@ -592,11 +597,13 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         }
         }
 ```
+
 ### Function mass action
 
 Use the mass action function to change (rerun, cancel, remove, restore or change the status)  a group of data transfer.
 
 Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#eef6a218-fc20-4d3b-8d49-59b9d3d221cb) :
+
 ```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/mass_action' \
         --header 'action: ' \
@@ -616,6 +623,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
 - toStatus : Only used with action changeStatus action. New status to be set on all data transfer selected.
 
 **Output :**
+
 ```php
         {
         « error »: «  »,
@@ -700,6 +708,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
                         « source_date_modified »: « 2020-03-09 20:49:33 »,
 
 ```
+
 ```
                 […………………………………………………………………………]
                         « mode »: « 0 »,
@@ -713,11 +722,13 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         }
         }
 ```
+
 ### Function rerun error
 
 Use the rerun error function to run again data transfer in error.
 
 Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#34418cf2-e545-4423-8411-c2784785b2bd) :
+
 ```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/rerun_error' \
         --form 'limit=10' \
@@ -730,6 +741,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
 - attempt : Myddleware will read only data transfer with a number of attemps <= at this parameter
 
 **Output :**
+
 ```php
         {
         « error »: «  »,
@@ -805,11 +817,13 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         }
         }
 ```
+
 ### Function delete record
 
 Use the delete record function to delete a specific record into the target application using the id of the source application.
 
 Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#5f6f441e-ac1e-468e-bd5f-ab8fd67c6c88) :
+
 ```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/delete_record' \
         --form 'rule=5e5e5535564c0' \
@@ -819,6 +833,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         --form 'email=test@test.test' \
         --form 'firstname=firstname01'
 ```
+
 **Set these parameters :**
 
 - rule : The id of the rule
@@ -867,16 +882,20 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         }
         }
 ```
+
 ### Function statistics
 
 Use the statistics function to get the statistics from Myddleware.
 
 Here are [CURL info]() :
+
 ```
         curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/statistics'
         No input parameter.
 ```
+
 **Output :**
+
 ```php
         {
         « errorByRule »: [
