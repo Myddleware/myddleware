@@ -55,7 +55,7 @@ use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
 use App\Repository\JobRepository;
-use App\Manager\rule as RuleClass;
+// use App\Manager\rule as RuleClass;
 use App\Repository\RuleRepository;
 use App\Form\DuplicateRuleFormType;
 use Doctrine\DBAL\Driver\Connection;
@@ -1547,7 +1547,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
          *
          * @Route("/create/step3/{id}", name="regle_stepthree", defaults={"id"=0})
          */
-        public function ruleStepThreeAction(Request $request, string $id, Rule $rule)
+        public function ruleStepThreeAction(Request $request)
         {
             $this->getInstanceBdd();
             $ruleKey = $request->get('id');
@@ -1850,25 +1850,23 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 // asort($lstErrorRelation);
 
                 // Relations d'une règle
-                if ($rule->getRelationsShip()->count()) {
-                    foreach ($rule->getRelationsShip() as $ruleRelationShipsObj) {
-                        $relate[] = [
-                            'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
-                            'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
-                        ];
-                    }
-                    $this->sessionService->getParamRuleReloadRelate($key, $relate);
-                }
-                $rule_relationships = $rule->getRelationsShip();
-                $tab_rs = [];
-                $i = 0;
-                foreach ($rule_relationships as $r) {
-                    $tab_rs[$i]['getErrorMissing'] = $r->getErrorMissing();
-                    $tab_rs[$i]['getErrorEmpty'] = $r->getErrorEmpty();
-                    ++$i;
-                }                
-                
-                dump($rule_relationships);
+                // if ($rule->getRelationsShip()->count()) {
+                //     foreach ($rule->getRelationsShip() as $ruleRelationShipsObj) {
+                //         $relate[] = [
+                //             'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
+                //             'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
+                //         ];
+                //     }
+                //     // $this->sessionService->getParamRuleReloadRelate($key, $relate);
+                // }
+                // $rule_relationships = $rule->getRelationsShip();
+                // $tab_rs = [];
+                // $i = 0;
+                // foreach ($rule_relationships as $r) {
+                //     $tab_rs[$i]['getErrorMissing'] = $r->getErrorMissing();
+                //     $tab_rs[$i]['getErrorEmpty'] = $r->getErrorEmpty();
+                //     ++$i;
+                // }
 
                 // -------------------	Parent relation
                 // Search if we can send document merged with the target solution
@@ -2064,7 +2062,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'lst_relation_target' => $lst_relation_target_alpha,
                     'lst_relation_source' => $choice_source,
                     'lst_rule' => $choice,
-                    'lst_error_empty_' => $rule_relationships,
+                    // 'lst_error_empty_' => $rule_relationships,
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
@@ -2095,7 +2093,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 // ----------------
             } catch (Exception $e) {
-                dd($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
+                $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
                 $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
 
                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
