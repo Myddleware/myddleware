@@ -1,19 +1,22 @@
 # Basic usage
 
-## Rule
-### First rule
+## Connectors
 
-We will now see haw a rule work. The rule is the center of the work of myddleware. You can create as many as you want and as you need. 
+## Rules
 
-The rule is basically a job which send your data from a module to another module. It’s just like transfer something from a box to another, with all the changes it implicates if the first box is square and the new is a circle. The transfer is a copy, so none of your data will be erased. 
+### Creating your first rule
 
-To create a rule, you can click on ```“Rule”``` then ```“Creation”``` on the top 
+Rules are at the core of how Myddleware works. You can create as many as you want and as many as you need.
+
+A rule is basically a job which sends your data from a module to another module. It’s just like transfering something from a box to another, with all the changes it implicates if the first box is square and the second is a circle. The transfer is a copy, so none of your data will be erased.
+
+To create a rule, log in to your Myddleware instance then click on **Rules** then **Creation** in the navbar.
 
 ![Create rule](images/basic_usage/rule/rule1.PNG)
 
-### Select data
+### Selecting data
 
-First, you will choose your environments source and target (with the connectors you had created) 1, then you will select the two module you want in the transfer 2 and 3. 
+First, you need to choose your environment's source and target (with the connectors you have created first) 1, then you will select the two module you want in the transfer 2 and 3. 
 
 You can visualize with the example:
 

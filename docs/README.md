@@ -73,7 +73,6 @@ It is possible that depending on your webserver configuration there might be som
 
 ``` symfony check:requirements ```
 
-
 ## Install Myddleware
 
 ### Download Myddleware
@@ -160,8 +159,7 @@ Before proceeding to this step, please ensure you've already created the databas
 
 Fill in the form to create your Myddleware credentials (email, username & password). Once this is done, you should be redirected to the Myddleware homepage.
 
-#### **Setup from a terminal **
-
+#### **Setup from a terminal**
 
 ##### Create your environment file
 
@@ -191,7 +189,6 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 
 ### Create your own connectors
 
-
 ## Technical Requirements
 
 !> We are actively working on a [Docker](https://www.docker.com/) configuration for Myddleware. Once released, you will be able to install Myddleware using Docker too, which means we will ensure all requirements below are met.
@@ -218,7 +215,6 @@ Myddleware uses [Doctrine ORM](https://www.doctrine-project.org/projects/doctrin
 It is possible that depending on your webserver configuration there might be some missing requirements. We strongly recommend running the following command in a terminal to ensure all requirements are met :
 
 ``` symfony check:requirements ```
-
 
 ## Install Myddleware
 
@@ -306,8 +302,7 @@ Before proceeding to this step, please ensure you've already created the databas
 
 Fill in the form to create your Myddleware credentials (email, username & password). Once this is done, you should be redirected to the Myddleware homepage.
 
-#### **Setup from a terminal **
-
+#### **Setup from a terminal**
 
 ##### Create your environment file
 
