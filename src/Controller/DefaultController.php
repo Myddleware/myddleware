@@ -913,7 +913,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             }
                             $fields[] = $array;
                         }
-                    }
+                    }                  
                     $this->sessionService->setParamRuleReloadFields($key, $fields);
                 }
 
@@ -923,8 +923,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $relate[] = [
                             'source' => $ruleRelationShipsObj->getFieldNameSource(),
                             'target' => $ruleRelationShipsObj->getFieldNameTarget(),
-                            'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
-                            'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
+                            'errorMissing' => (!empty($ruleRelationShipsObj->getErrorMissing()) ? '1' : '0'),
+                            'errorEmpty' => (!empty($ruleRelationShipsObj->getErrorEmpty()) ? '1' : '0'),
                             'id' => $ruleRelationShipsObj->getFieldId(),
                             'parent' => $ruleRelationShipsObj->getParent(),
                         ];
@@ -1923,16 +1923,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ];
 
                 //Behavior filters
-                $errorMissing =[
-                    'false' => $this->translator->trans('create_rule.step3.relation.no'),
-                    'true' => $this->translator->trans('create_rule.step3.relation.yes'),
+                $lst_errorMissing =[
+                    '0' => $this->translator->trans('create_rule.step3.relation.no'),
+                    '1' => $this->translator->trans('create_rule.step3.relation.yes'),
                 ];
 
-                $errorEmpty =[
-                    'true' => $this->translator->trans('create_rule.step3.relation.yes'),
-                    'false' => $this->translator->trans('create_rule.step3.relation.no'),
+                $lst_errorEmpty =[
+                    '0' => $this->translator->trans('create_rule.step3.relation.no'),
+                    '1' => $this->translator->trans('create_rule.step3.relation.yes'),
                 ];
-
                 // paramètres de la règle
                 $rule_params = array_merge($ruleParamsSource, $ruleParamsTarget);
 
@@ -2062,12 +2061,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'lst_relation_target' => $lst_relation_target_alpha,
                     'lst_relation_source' => $choice_source,
                     'lst_rule' => $choice,
-                    // 'lst_error_empty_' => $rule_relationships,
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
-                    'errorMissing' => $errorMissing,
-                    'errorEmpty' => $errorEmpty,
+                    'lst_errorMissing' => $lst_errorMissing,
+                    'lst_errorEmpty' => $lst_errorEmpty,
                     'params' => $this->sessionService->getParamRule($ruleKey),
                     'duplicate_target' => $fieldsDuplicateTarget,
                     'opt_target' => $html_list_target,
@@ -2086,8 +2084,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
                 $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-                $result['errorMissing'] = ToolsManager::composeListHtml($result['errorMissing']);
-                $result['errorEmpty'] = ToolsManager::composeListHtml($result['errorEmpty']);
+                $result['lst_errorMissing'] = ToolsManager::composeListHtml($result['lst_errorMissing'], '', '1');
+                $result['lst_errorEmpty'] = ToolsManager::composeListHtml($result['lst_errorEmpty'], '', '0');
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2468,18 +2466,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleRelationShip->setRule($oneRule);
                             $oneRuleRelationShip->setFieldNameSource($rel['source']);
                             $oneRuleRelationShip->setFieldNameTarget($rel['target']);
-                           
-                            if ($rel['errorEmpty'] == 'true') {
-                                $oneRuleRelationShip->setErrorEmpty(1);
-                            }else{
-                                $oneRuleRelationShip->setErrorEmpty(0);
-                            }
-                            if ($rel['errorMissing'] == 'true') {
-                                $oneRuleRelationShip->setErrorMissing(1);
-                            }else{
-                                $oneRuleRelationShip->setErrorMissing(0);
-                            }
-                    
+                            // No error empty or missing for parent relationship, we set default values
+                            if (!empty($rel['parent'])) {
+                                $rel['errorEmpty'] = '0';
+                                $rel['errorMissing'] = '1';
+                            }            
+                            $oneRuleRelationShip->setErrorEmpty($rel['errorEmpty']);
+                            $oneRuleRelationShip->setErrorMissing($rel['errorMissing']);       
                             $oneRuleRelationShip->setFieldId($rel['rule']);
                             $oneRuleRelationShip->setParent($rel['parent']);
                             $oneRuleRelationShip->setDeleted(0);

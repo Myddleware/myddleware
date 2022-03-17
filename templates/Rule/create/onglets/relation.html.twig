@@ -73,12 +73,12 @@
 					</td>
 					<td >
 						<select class="parent_error_missing form-control" id="lst_error_missing_{{ rule.name }}" name="">
-							{{ errorMissing | raw }}
+							{{ lst_errorMissing | raw }}
 						</select>
 					</td>
 					<td>
 						<select class="parent_error_empty form-control" id="lst_error_empty_{{ rule.name }}" name="">
-							{{ errorEmpty | raw }}
+							{{ lst_errorEmpty | raw }}
 						</select>
 					</td>
 				</tr>
@@ -115,16 +115,6 @@
 					<td>
 						<select class="parent_search_field" id="parent_search_field_{{ i }}" name="">
 			 				{{ lst_parent_fields | raw }}
-						</select>
-					</td>
-					<td >
-						<select class="parent_error_missing" id="parent_error_missing_{{ i }}" name="">
-							{{ errorMissing | raw }}
-						</select>
-					</td>
-					<td>
-					<select class="parent_error_empty_" id="parent_error_empty_{{ i }}" name="">
-						{{ errorEmpty | raw }}
 						</select>
 					</td>
 				</tr>

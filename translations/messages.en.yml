@@ -142,7 +142,7 @@ filter:
     notin: is not included in the following table separated by semicolon  
 
 behavior_filters:
-    error_missing: Error not found
+    error_missing: Error if not found
     error_empty: Error if empty
 
 view_rule:
@@ -861,7 +861,11 @@ crontab:
     create: Create crontab
     period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
     max_instance_help: A maximum instance limit for new tasks
-    help: Add a task in your task scheduler, to do this click on the "Create crontab" button, you will just have to fill in the requested fields and your task will automatically run according to the period entered (example period, */5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * coresspond to 5 min).
+    help:  > 
+            Add this task in your Linux or Windows task scheduler : php bin/console shapecode:cron:run --env=background <BR>
+            For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
+               */5 * * * * cd <myddleware_directory>; php bin/console shapecode:cron:run > /dev/null 2>&1
+
 duplicate_rule:
     duplicate: Duplicate
     cancel: Cancel

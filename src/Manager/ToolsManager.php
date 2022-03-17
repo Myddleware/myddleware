@@ -71,7 +71,7 @@ class toolscore
     }
 
     // Compose une liste html avec les options
-    public static function composeListHtml($array, $phrase = false)
+    public static function composeListHtml($array, $phrase = false, $default = null)
     {
         $r = '';
         if ($array) {
@@ -83,7 +83,7 @@ class toolscore
 
             foreach ($array as $k => $v) {
                 if ('' != $v) {
-                    $r .= '<option value="'.$k.'">'.str_replace([';', '\'', '\"'], ' ', $v).'</option>';
+                    $r .= '<option value="'.$k.'" '.($k == $default ? 'selected' : '').'>'.str_replace([';', '\'', '\"'], ' ', $v).'</option>';
                 }
             }
         } else {

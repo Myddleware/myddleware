@@ -563,7 +563,7 @@ $(function () {
 					});
 				}
 			});
-		}
+		}	
 		// Relate
 		if (relate) {
 			var cpt = 0;
@@ -572,15 +572,12 @@ $(function () {
 				if (nameR.parent == 0) {
 					$('#lst_' + nameR.target).val(nameR.id);
 					$('#lst_source_' + nameR.target).val(nameR.source);
-					$('#lst_error_missing_' + nameR.errorMissing).val(nameR.errorMissing);
-					$('#lst_error_empty_' + nameR.errorEmpty).val(nameR.errorEmpty);
+					$('#lst_error_missing_' + nameR.target).val(nameR.errorMissing);
+					$('#lst_error_empty_' + nameR.target).val(nameR.errorEmpty);
 				} else {
 					$('#parent_rule_' + cpt).val(nameR.id);
 					$('#parent_source_field_' + cpt).val(nameR.source);
 					$('#parent_search_field_' + cpt).val(nameR.target);
-					$('#parent_error_missing_' + cpt).val(nameR.errorMissing);
-					$('#parent_error_empty_' + cpt).val(nameR.errorEmpty);
-					console.log(nameR.errorEmpty);
 					cpt++;
 				}
 			});
