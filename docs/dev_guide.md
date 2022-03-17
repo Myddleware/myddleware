@@ -1,6 +1,6 @@
 # Developer's guide
 
-## Connector creation
+## Create your own connectors
 
 ### Requirement
 
