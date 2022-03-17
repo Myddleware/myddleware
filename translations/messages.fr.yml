@@ -141,7 +141,7 @@ filter:
     notin: n’est pas compris dans le tableau suivant séparé par des points virgules
 
 behavior_filters:
-    error_missing: Erreur si manquant
+    error_missing: Erreur si non trouvé
     error_empty: Erreur si vide
             
 view_rule:

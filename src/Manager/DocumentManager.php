@@ -737,7 +737,7 @@ class documentcore
 				$this->updateStatus('Relate_OK');
 				return true;
 			}
-			
+		
 			// S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
 			// alors on contôle les enregistrements parent 		
 			if (
@@ -746,10 +746,24 @@ class documentcore
 			) {
 				$error = false;
 				// Vérification de chaque relation de la règle
-				foreach ($this->ruleRelationships as $ruleRelationship) {			
-					if(empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {				
-						continue; // S'il n'y a pas de relation, on envoie sans erreur
-					}		
+				foreach ($this->ruleRelationships as $ruleRelationship) {	
+					// If relationship source data is empty
+					if(empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {
+						// If source data is empty and errorEmpty is empty too, then no error 
+						if (empty($ruleRelationship['errorEmpty'])) {
+							$this->message .= 'The source field '.$ruleRelationship['field_name_source'].' is empty.';	
+							continue;
+						} else {
+							$error = true;
+							break;
+						}
+					}
+
+					// No check if "error if missing" is false
+					if (empty($ruleRelationship['errorMissing'])) {
+						$this->message .= 'No check on target field '.$ruleRelationship['field_name_target'].' because "Error if missing" is set to false.';
+						continue; 
+					}
 
 					// If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
 					if (!empty($ruleRelationship['parent'])) {
@@ -774,6 +788,7 @@ class documentcore
 					// Save document relationship to keep the relate id and display document linked into Myddleware
 					$this->insertDocumentRelationship($ruleRelationship, $targetId['document_id']);
 				}
+			
 				// Si aucun document parent n'est trouvé alors bloque le document
 				if ($error) {
 					// récupération du nom de la règle pour avoir un message plus clair
@@ -1282,7 +1297,12 @@ class documentcore
 				foreach ($this->ruleRelationships as $ruleRelationships) {
 					$value = $this->getTransformValue($this->sourceData,$ruleRelationships);
 					if (!empty($this->transformError)) {
-						throw new \Exception( 'Failed to transform relationship data.' );
+						if (empty($ruleRelationship['errorMissing'])) {
+							$this->message .= 'No value found for the target field '.$ruleRelationships['field_name_target'].' because "Error if missing" is set to false.';
+							$this->typeError = 'W';
+						} else {
+							throw new \Exception( 'Failed to transform relationship data.' );
+						}
 					}
 					$targetField[$ruleRelationships['field_name_target']] = $value;
 				}
