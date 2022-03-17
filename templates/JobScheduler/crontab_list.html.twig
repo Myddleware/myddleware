@@ -26,11 +26,10 @@
                 <thead>
                     <th scope="col" class="title"><label>{{ 'crontab.command'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.period'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.arguments'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.description'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.running'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.max_instance'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.number'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.lastUse'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.nextRun'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.enable'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'jobscheduler.actions'|trans }}</label></th>
                 </thead>
                 <tbody>
@@ -38,11 +37,10 @@
                 <tr>                    
                     <td class="value">{{ value.command }}</td>
                     <td class="value">{{ value.period }}</td>
-                    <td class="value">{{ value.arguments }}</td>
                     <td class="value">{{ value.description  }}</td>
-                    <td class="value">{{ value.runningInstances }}</td>
-                    <td class="value">{{ value.maxInstances }}</td>
-                    <td class="value">{{ value.number }}</td>
+					<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
+					<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
+                    <td class="value">{{ value.enable }}</td>
                      <td class="CRUD-icons">
                             <a href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
                                 <span class="btn-opt">

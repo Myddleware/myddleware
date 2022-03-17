@@ -855,6 +855,9 @@ crontab:
     description: Description
     running: Instance en cours
     max_instance: Instance max
+    lastUse: Last use
+    nextRun: Next run
+    enable: Enable
     number: Nombres
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches

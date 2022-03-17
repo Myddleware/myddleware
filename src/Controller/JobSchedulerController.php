@@ -350,9 +350,17 @@ class JobSchedulerController extends AbstractController
      */
     public function crontabList()
     {
+		 //Check the user timezone
+		if ($timezone = '') {
+			$timezone = 'UTC';
+		}else {
+			$timezone = $this->getUser()->getTimezone();
+		}
+			
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
         return $this->render('JobScheduler/crontab_list.html.twig', [
-            'entity' => $entity,        
+            'entity' => $entity,
+			'timezone' => $timezone,			
         ]);
     }
 

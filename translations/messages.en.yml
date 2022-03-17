@@ -851,7 +851,10 @@ crontab:
     arguments: Arguments
     description: Description
     running: Running instance
-    max_instance: Max instance
+    max_instance: Instance max
+    lastUse: Last use
+    nextRun: Next run
+    enable: Enable
     number: Number
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
