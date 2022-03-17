@@ -572,10 +572,15 @@ $(function () {
 				if (nameR.parent == 0) {
 					$('#lst_' + nameR.target).val(nameR.id);
 					$('#lst_source_' + nameR.target).val(nameR.source);
+					$('#lst_error_missing_' + nameR.errorMissing).val(nameR.errorMissing);
+					$('#lst_error_empty_' + nameR.errorEmpty).val(nameR.errorEmpty);
 				} else {
 					$('#parent_rule_' + cpt).val(nameR.id);
 					$('#parent_source_field_' + cpt).val(nameR.source);
 					$('#parent_search_field_' + cpt).val(nameR.target);
+					$('#parent_error_missing_' + cpt).val(nameR.errorMissing);
+					$('#parent_error_empty_' + cpt).val(nameR.errorEmpty);
+					console.log(nameR.errorEmpty);
 					cpt++;
 				}
 			});
@@ -1544,8 +1549,8 @@ function recup_relation() {
 			var valueRule = tr.find('.lst_rule_relate').val();
 			console.log(valueRule);
 			var valueSource = tr.find('.lst_source_relate').val();			
-			var valueEmpty = tr.find('.errorEmpty').is(':checked');				
-			var valueMissing =tr.find('.errorMissing').is(':checked');
+			var valueEmpty = tr.find('.parent_error_empty').val();				
+			var valueMissing =tr.find('.parent_error_missing').val();
 			var valueparent = 0;
 			if (valueRule !== '' && valueSource !== '' && valueEmpty !== '' && valueMissing !== '') {
 				relations.push({
@@ -1566,8 +1571,8 @@ function recup_relation() {
 			var name = tr.find('.parent_search_field').val();
 			var valueRule = tr.find('.parent_rule').val();
 			var valueSource = tr.find('.parent_source_field').val();			
-			var valueEmpty = tr.find('.errorEmpty').is(':checked');				
-			var valueMissing = tr.find('.errorMissing').is(':checked');
+			var valueEmpty = tr.find('.parent_error_empty').val();				
+			var valueMissing = tr.find('.parent_error_missing').val();
 			var valueparent = 1;
 			if (valueRule !== '' && valueSource !== '' && name !== '' && valueEmpty !== '' && valueMissing !== '') {
 				relations.push({

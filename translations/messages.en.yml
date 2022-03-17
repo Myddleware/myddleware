@@ -119,6 +119,7 @@ create_rule:
             parent: Parent relationship to merge several data documents
             record_id: Record ID
             yes: Yes
+            no : No
             behavior: Behavior
             
         params:

@@ -72,10 +72,14 @@
 						<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 					</td>
 					<td >
-						{{ errorMissing | raw }}
+						<select class="parent_error_missing form-control" id="lst_error_missing_{{ rule.name }}" name="">
+							{{ errorMissing | raw }}
+						</select>
 					</td>
 					<td>
-						{{ errorEmpty | raw }}
+						<select class="parent_error_empty form-control" id="lst_error_empty_{{ rule.name }}" name="">
+							{{ errorEmpty | raw }}
+						</select>
 					</td>
 				</tr>
 			{% endfor %}
@@ -94,7 +98,7 @@
 				<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 				<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
 			</tr>
-			{% for i in range(0, 4) %}
+			{% for i in range(0, 6) %}
 				<tr class="line-parent_relation">
 					<td>			    	
 						<select class="parent_source_field" id="parent_source_field_{{ i }}" name="">
@@ -114,10 +118,14 @@
 						</select>
 					</td>
 					<td >
-						{{ errorMissing | raw }}
+						<select class="parent_error_missing" id="parent_error_missing_{{ i }}" name="">
+							{{ errorMissing | raw }}
+						</select>
 					</td>
 					<td>
+					<select class="parent_error_empty_" id="parent_error_empty_{{ i }}" name="">
 						{{ errorEmpty | raw }}
+						</select>
 					</td>
 				</tr>
 			{% endfor %}
