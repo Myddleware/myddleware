@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Form\Type\UserForgotPasswordType;
 use App\Manager\NotificationManager;
@@ -13,7 +12,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -49,7 +47,6 @@ class SecurityController extends AbstractController
      */
     private $securityService;
 
-
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
         EncoderFactoryInterface $encoder,
@@ -57,7 +54,6 @@ class SecurityController extends AbstractController
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
         SecurityService $securityService
-
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->encoder = $encoder;
@@ -70,21 +66,19 @@ class SecurityController extends AbstractController
     /**
      * @Route("/", name="login")
      * @Route("/login")
-     * @param AuthenticationUtils $authenticationUtils
-     * @return Response
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser() instanceof User) {
             return $this->redirectToRoute('regle_panel');
         }
-        
+
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-        if(!empty($error)){
+        if (!empty($error)) {
             $error = $error->getMessage();
         }
-       
+
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
         $this->calculBan($lastUsername);
@@ -194,7 +188,6 @@ class SecurityController extends AbstractController
      * Reset user password.
      *
      * @param mixed $token
-
      * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
      */
     public function resetAction(Request $request, $token)
@@ -204,7 +197,7 @@ class SecurityController extends AbstractController
             $form->handleRequest($request);
             if ($form->isSubmitted()) {
                 $username = $form->get('username')->getData();
-                /** @var null|User $user */
+                /** @var User|null $user */
                 $user = $this->userRepository->findOneBy(['username' => $username]);
                 if (!$user) {
                     $form->get('username')->addError(new FormError('Aucune utilisateur avec ce username n\'a été trouvée.'));
@@ -215,7 +208,8 @@ class SecurityController extends AbstractController
 
                     try {
                         $this->notificationManager->resetPassword($user);
-                        return new Response('Un email a été envoyé sur '.$user->getEmail(). ' avec un lien de réinitialisation du mot de passe.');
+
+                        return new Response('Un email a été envoyé sur '.$user->getEmail().' avec un lien de réinitialisation du mot de passe.');
                     } catch (Exception $e) {
                         return new Response('Impossible d\'envoyer un email.');
                     }
@@ -227,7 +221,7 @@ class SecurityController extends AbstractController
             ]);
         }
 
-        /** @var null|User $user */
+        /** @var User|null $user */
         $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
         if (null === $user) {
             return $this->redirectToRoute('regle_panel');

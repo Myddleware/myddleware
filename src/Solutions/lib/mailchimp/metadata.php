@@ -23,8 +23,6 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************************/
 
-
-
 // List of fields for each modules
 $moduleFields = [
     'lists' => [

@@ -201,7 +201,6 @@ class sapcrmcore extends saproot
         return parent::get_module_fields($module, $type);
     }
 
-
     // Permet de modifier les nom des champs pour le read_last
     // Dans SAP les champs en lecture et en écriture ne sont pas toujours identiques pour le même module, les structures peuvent être différentes
     protected function convertFieldReadLast($param, $values, $mode)
@@ -542,4 +541,3 @@ class sapcrmcore extends saproot
 class sapcrm extends sapcrmcore
 {
 }
-

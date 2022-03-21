@@ -28,17 +28,13 @@ namespace App\Manager;
 use Doctrine\DBAL\Driver\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ToolsManager.
- *
- * @package App\Manager
- *
- *
  */
 class toolscore
 {
@@ -52,9 +48,9 @@ class toolscore
      * @var string
      */
     private $projectDir;
-	
-	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
+
+    // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+    protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -98,14 +94,14 @@ class toolscore
     {
         $r = '';
         if ($array) {
-            asort($array);           
+            asort($array);
             foreach ($array as $k => $v) {
-                //dd($array);  
-                if ($v == 'errorMissing' ) {
+                //dd($array);
+                if ('errorMissing' == $v) {
                     $r .= '<div class="form-check">';
                     $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input" checked></input>';
                     $r .= '</div>';
-                }else {
+                } else {
                     $r .= '<div class="form-check">';
                     $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input"></input>';
                     $r .= '</div>';
@@ -122,7 +118,7 @@ class toolscore
         //     dd($array);
         //     if ($phrase) {
         //     }
-        //     foreach ($array as $k => $v) {                
+        //     foreach ($array as $k => $v) {
         //         if ('Error if missing' == $v) {
         //             $r .= '<div class="form-check">';
         //             $r .= '<input type="checkbox" name="'.$k.'" class="form-check-input" checked>'.str_replace([';', '\'', '\"'], ' ', $v).'</input>';
@@ -140,15 +136,16 @@ class toolscore
         // }
         return $r;
     }
-	
-    public function beforeRuleEditViewRender($data) {
-		return $data;
-	}
-	
-	public function getRuleParam() {
-		return $this->ruleParam;
-	}
-	
+
+    public function beforeRuleEditViewRender($data)
+    {
+        return $data;
+    }
+
+    public function getRuleParam()
+    {
+        return $this->ruleParam;
+    }
 
     // Allow translation from php classes
     public function getTranslation($textArray)
@@ -228,12 +225,9 @@ class toolscore
         }
 
         return $php;
-
     }
 }
 
-class ToolsManager extends toolscore {
-	
+class ToolsManager extends toolscore
+{
 }
-
-

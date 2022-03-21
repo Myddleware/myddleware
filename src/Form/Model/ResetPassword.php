@@ -5,14 +5,13 @@ namespace App\Form\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Class ResetPassword
- * @package App\Form\Model
+ * Class ResetPassword.
  */
 class ResetPassword
 {
     /**
      * @var string
-     * 
+     *
      * @Assert\Length(
      *     min = 8,
      *     max = 50,

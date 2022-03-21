@@ -131,7 +131,6 @@ class sapecccore extends sap
         }
     }
 
-
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
     {

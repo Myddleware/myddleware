@@ -25,10 +25,10 @@
 namespace App\Solutions;
 
 use DateTime;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class erpnextcore extends solution
 {
@@ -42,8 +42,8 @@ class erpnextcore extends solution
 
     protected $FieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
-        'Item' => ['item_code']
-    ]; 
+        'Item' => ['item_code'],
+    ];
 
     // Module list that allows to make parent relationships
     protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
@@ -156,7 +156,7 @@ class erpnextcore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'required_relationship' => '',
-							'relate' => true
+                            'relate' => true,
                         ];
                     // Add field to manage dymamic links
                     } elseif (
@@ -169,7 +169,7 @@ class erpnextcore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'option' => $modules,
-							'relate' => false
+                            'relate' => false,
                         ];
                         $this->moduleFields['link_name'] = [
                             'label' => 'Link name',
@@ -177,7 +177,7 @@ class erpnextcore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
                             'required_relationship' => '',
-							'relate' => true
+                            'relate' => true,
                         ];
                     } else {
                         $this->moduleFields[$field->fieldname] = [
@@ -185,7 +185,7 @@ class erpnextcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => '',
-							'relate' => false
+                            'relate' => false,
                         ];
                         if (!empty($field->options)) {
                             $options = explode(chr(10), $field->options);
@@ -216,7 +216,7 @@ class erpnextcore extends solution
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
                     'option' => $modules,
-					'relate' => false
+                    'relate' => false,
                 ];
                 // Parentfield => field name in the parent module (eg. "items" in module Sales Invoice). We can't give the field list because we don't know the module selected yet
                 $this->moduleFields['parentfield'] = [
@@ -224,7 +224,7 @@ class erpnextcore extends solution
                     'type' => 'varchar(255)',
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
-					'relate' => false
+                    'relate' => false,
                 ];
                 // Parent => value of the parent field (eg SINV-00001 which is the "Sales Invoice" parent)
                 $this->moduleFields['parent'] = [
@@ -233,9 +233,10 @@ class erpnextcore extends solution
                     'type_bdd' => 'varchar(255)',
                     'required' => '',
                     'required_relationship' => '',
-					'relate' => true
+                    'relate' => true,
                 ];
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
@@ -244,9 +245,7 @@ class erpnextcore extends solution
         }
     }
 
-
     /**
-     *
      * @param $param
      *
      * @return mixed
@@ -254,15 +253,15 @@ class erpnextcore extends solution
     public function read($param)
     {
         try {
-			$result = array();
-            $data = array();
+            $result = [];
+            $data = [];
             // Get the reference date field name
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
-			// Add 1 second to the date ref because the call to ERPNExt includes the date ref.. Otherwise we will always read the last record
-			$date = new \DateTime($param['date_ref']);
-			$date = date_modify($date, '+1 seconde');
-			$param['date_ref'] = $date->format('Y-m-d H:i:s');
+            // Add 1 second to the date ref because the call to ERPNExt includes the date ref.. Otherwise we will always read the last record
+            $date = new \DateTime($param['date_ref']);
+            $date = date_modify($date, '+1 seconde');
+            $param['date_ref'] = $date->format('Y-m-d H:i:s');
 
             // Build the query for ERPNext
             if (!empty($param['query'])) {
@@ -293,9 +292,9 @@ class erpnextcore extends solution
                 foreach ($resultQuery as $key => $recordList) {
                     $record = null;
                     foreach ($param['fields'] as $field) {
-						$record[$field] = $recordList->$field;
+                        $record[$field] = $recordList->$field;
                     }
-					// The name is the id in ERPNExt
+                    // The name is the id in ERPNExt
                     $record['id'] = $recordList->name;
                     $result[] = $record; // last record
                 }
@@ -303,6 +302,7 @@ class erpnextcore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }
+
         return $result;
     }
 
@@ -312,7 +312,6 @@ class erpnextcore extends solution
     }
 
     /**
-     *
      * @param $param
      *
      * @return mixed
@@ -322,10 +321,7 @@ class erpnextcore extends solution
         return $this->createUpdate('update', $param);
     }
 
-
-
     /**
-     *
      * @param $method
      * @param $param
      *
@@ -333,7 +329,7 @@ class erpnextcore extends solution
      */
     public function createUpdate($method, $param)
     {
-        try {			
+        try {
             $result = [];
             $subDocIdArray = [];
             $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']);
@@ -410,7 +406,7 @@ class erpnextcore extends solution
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {
                         $this->updateDocumentStatus($idSubDoc, $valueSubDoc, $param);
                     }
-					$subDocIdArray = array();
+                    $subDocIdArray = [];
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
@@ -443,7 +439,6 @@ class erpnextcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
     {
@@ -451,7 +446,6 @@ class erpnextcore extends solution
 
         return $date->format('Y-m-d H:i:s.u');
     }
-
 
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type)
@@ -472,7 +466,6 @@ class erpnextcore extends solution
     }
 
     /**
-     *
      * @param $url
      * @param string $method
      * @param array  $parameters
@@ -528,6 +521,4 @@ class erpnextcore extends solution
 }
 class erpnext extends erpnextcore
 {
-
 }
-

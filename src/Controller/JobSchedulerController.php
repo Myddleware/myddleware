@@ -2,23 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Entity\CronJob as CronJobCustom;
 use App\Entity\JobScheduler;
-use App\Form\JobSchedulerType;
+use App\Entity\User;
 use App\Form\JobSchedulerCronType;
-use App\Repository\UserRepository;
+use App\Form\JobSchedulerType;
 use App\Manager\JobSchedulerManager;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Symfony\Component\HttpFoundation\Request;
 use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
-use App\Entity\CronJob as CronJobCustom;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * JobScheduler controller.
@@ -97,6 +97,7 @@ class JobSchedulerController extends AbstractController
 
             return $this->redirect($this->generateUrl('jobscheduler', ['id' => $entity->getId()]));
         }
+
         return $this->render('JobScheduler/new.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
@@ -304,63 +305,65 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * New creates job scheduler with cron
+     * New creates job scheduler with cron.
+     *
      * @Route("/crontab", name="crontab")
      */
     public function createActionWithCron(Request $request, TranslatorInterface $translator)
     {
-          try {
-            $command ='';
-            $period =' */5 * * * *';
-			// Use CronJobCustom to be able to get the method setCommand(), required from the form
+        try {
+            $command = '';
+            $period = ' */5 * * * *';
+            // Use CronJobCustom to be able to get the method setCommand(), required from the form
             $crontabForm = new CronJobCustom($command, $period);
             $entity = $this->entityManager->getRepository(CronJobCustom::class)->findAll();
             $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
-			
-			// get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
-			$formParam = $request->request->get('job_scheduler_cron');		
+
+            // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
+            $formParam = $request->request->get('job_scheduler_cron');
             $form->handleRequest($request);
-			
-			if ($form->isSubmitted() && $form->isValid()) {                          
-				// use the static method create because command can be set 
-				$crontab = CronJobCustom::create($formParam['command'], $formParam['period']);				
-				$crontab->setDescription($formParam['description']);			
-				$this->entityManager->persist($crontab);
-				$this->entityManager->flush();
-				$success = $translator->trans('crontab.success');
-				$this->addFlash('success', $success);
-				return $this->redirectToRoute('jobscheduler_cron_list');
-			} 
-			else {                         
-				return $this->render('JobScheduler/crontab.html.twig', [
-					'entity' => $entity,
-					'form' => $form->createView(),
-				]);
-			} 
-        } catch (Exception $e) {		
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                // use the static method create because command can be set
+                $crontab = CronJobCustom::create($formParam['command'], $formParam['period']);
+                $crontab->setDescription($formParam['description']);
+                $this->entityManager->persist($crontab);
+                $this->entityManager->flush();
+                $success = $translator->trans('crontab.success');
+                $this->addFlash('success', $success);
+
+                return $this->redirectToRoute('jobscheduler_cron_list');
+            } else {
+                return $this->render('JobScheduler/crontab.html.twig', [
+                    'entity' => $entity,
+                    'form' => $form->createView(),
+                ]);
+            }
+        } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('error', $failure);
+
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
-    
+
     /**
      * @Route("/crontab_list", name="jobscheduler_cron_list")
-     *
      */
     public function crontabList()
     {
-		 //Check the user timezone
-		if ($timezone = '') {
-			$timezone = 'UTC';
-		}else {
-			$timezone = $this->getUser()->getTimezone();
-		}
-			
+        //Check the user timezone
+        if ($timezone = '') {
+            $timezone = 'UTC';
+        } else {
+            $timezone = $this->getUser()->getTimezone();
+        }
+
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
-			'timezone' => $timezone,			
+            'timezone' => $timezone,
         ]);
     }
 
@@ -401,8 +404,8 @@ class JobSchedulerController extends AbstractController
             ->add('submit', SubmitType::class, ['label' => 'Delete'])
             ->getForm();
     }
-    
-     /**
+
+    /**
      * Displays a form to edit an existing Crontab entity.
      *
      * @Route("/{id}/edit_crontab", name="crontab_edit")
@@ -413,7 +416,6 @@ class JobSchedulerController extends AbstractController
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
-        
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Crontab entity.');
         }
@@ -427,7 +429,8 @@ class JobSchedulerController extends AbstractController
             'delete_form' => $deleteFormCrontab->createView(),
         ]);
     }
-     /**
+
+    /**
      * Creates a form to edit a Crontab entity.
      *
      * @param CronJob $entity The entity
@@ -437,12 +440,12 @@ class JobSchedulerController extends AbstractController
     private function createEditFormCrontab(CronJob $entity)
     {
         // Field command can't be changed
-		$form = $this->createForm(JobSchedulerCronType::class, $entity, [
-				'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
-				'method' => 'PUT',
-			])
-			->add('command', TextType::class, array('disabled' => true,)
-		);
+        $form = $this->createForm(JobSchedulerCronType::class, $entity, [
+                'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
+                'method' => 'PUT',
+            ])
+            ->add('command', TextType::class, ['disabled' => true]
+        );
 
         return $form;
     }
@@ -468,6 +471,7 @@ class JobSchedulerController extends AbstractController
 
             return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
         }
+
         return $this->render('JobScheduler/edit_crontab.html.twig', [
             'entity' => $entity,
             'edit_form' => $editForm->createView(),

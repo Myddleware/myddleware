@@ -106,8 +106,9 @@ class mailchimpcore extends solution
             require 'lib/mailchimp/metadata.php';
 
             if (!empty($moduleFields[$module])) {
-				$this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
@@ -283,4 +284,3 @@ class mailchimpcore extends solution
 class mailchimp extends mailchimpcore
 {
 }
-

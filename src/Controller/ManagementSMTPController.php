@@ -6,7 +6,6 @@ use App\Form\ManagementSMTPType;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Swift_Mailer;
-use Swift_Message;
 use Swift_SendmailTransport;
 use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,8 +22,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Class ManagementSMTPController.
- *
- * @package App\Controller
  *
  * @Route("/rule")
  */
@@ -56,7 +53,6 @@ class ManagementSMTPController extends AbstractController
      */
     public function indexAction()
     {
-
         $form = $this->createCreateForm();
         $form = $this->getData($form);
 
@@ -80,6 +76,7 @@ class ManagementSMTPController extends AbstractController
 
             if ($form->isValid() && $form->isSubmitted()) {
                 $this->setData($form);
+
                 return $this->redirect($this->generateUrl('management_smtp_index'));
             }
         } catch (ParseException $exception) {
@@ -100,16 +97,16 @@ class ManagementSMTPController extends AbstractController
             'action' => $this->generateUrl('management_smtp_create'),
         ]);
         $form->add('submit', SubmitType::class, [
-                    'label' => 'management_smtp.submit', 
+                    'label' => 'management_smtp.submit',
                     'attr' => [
-                        'class' => 'btn btn-outline-primary mb-2'
-                        ] 
+                        'class' => 'btn btn-outline-primary mb-2',
+                        ],
                     ]);
         $form->add('submit_test', SubmitType::class, [
             'label' => 'management_smtp.sendtestmail',
             'attr' => [
-                'class' => 'btn btn-outline-primary mb-2'
-                ] 
+                'class' => 'btn btn-outline-primary mb-2',
+                ],
             ]);
 
         return $form;
@@ -130,6 +127,7 @@ class ManagementSMTPController extends AbstractController
         $form->get('encryption')->setData($value['swiftmailer']['encryption']);
         $form->get('user')->setData($value['swiftmailer']['user']);
         $form->get('password')->setData($value['swiftmailer']['password']);
+
         return $form;
     }
 
@@ -155,24 +153,24 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file
+     * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
      *
      * @return void
      */
     protected function parseYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
-            $transport = isset($swiftParams['transport']) ?  $swiftParams['transport'] : null;
-            $host = isset($swiftParams['host']) ?  $swiftParams['host'] : null;
-            $port = isset($swiftParams['port'])  ?  $swiftParams['port'] : null;
-            $auth_mode =  isset($swiftParams['auth_mode'])   ?  $swiftParams['auth_mode']: null;
-            $encryption = isset( $swiftParams['encryption'])  ? $swiftParams['encryption'] : null;
-            $user =  isset($swiftParams['user'])  ?  $swiftParams['user'] : null;
-            $password =  isset($swiftParams['password'])  ?  $swiftParams['password'] : null;
+            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
+            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
+            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
+            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
+            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
+            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
+            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
             $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
             // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
             // TODO: find a way to check whether the variable is already set & if so overwrite it
-            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND|LOCK_EX);
+            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
         } catch (Exception $e) {
             $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
             $session = new Session();
@@ -245,20 +243,20 @@ class ManagementSMTPController extends AbstractController
 
     /**
      * TODO: refactor so that the sendmail code from the above function
-     *  is decoupled from the config part 
+     *  is decoupled from the config part.
      *
      * @return void
      */
-    public function sendEmail($name, \Swift_Mailer $mailer)
+    public function sendEmail($name, Swift_Mailer $mailer)
     {
         $message = (new \Swift_Message('Hello Email'))
             ->setFrom('send@example.com')
             ->setTo('recipient@example.com')
             ->setBody('You should see me from the profiler!')
         ;
-    
+
         $mailer->send($message);
-    
+
         // ...
     }
 }

@@ -33,10 +33,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class HomeManager.
- *
- * @package App\Manager
- *
- *
  */
 class HomeManager
 {

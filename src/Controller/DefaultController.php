@@ -24,62 +24,59 @@
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\Rule;
-use App\Entity\User;
-use App\Manager\job;
 use App\Entity\Config;
-use App\Entity\FuncCat;
-use App\Entity\Document;
-use App\Entity\Solution;
 use App\Entity\Connector;
+use App\Entity\ConnectorParam;
+use App\Entity\Document;
+use App\Entity\FuncCat;
 use App\Entity\Functions;
+use App\Entity\Rule;
 use App\Entity\RuleAudit;
 use App\Entity\RuleField;
-use App\Entity\RuleParam;
-use App\Manager\template;
 use App\Entity\RuleFilter;
-use Pagerfanta\Pagerfanta;
-use App\Form\ConnectorType;
-use App\Manager\JobManager;
-use App\Manager\HomeManager;
-use App\Manager\RuleManager;
-use Psr\Log\LoggerInterface;
-use App\Manager\ToolsManager;
-use App\Entity\ConnectorParam;
+use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit;
-use App\Manager\FormulaManager;
-use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
-use App\Manager\DocumentManager;
-use App\Manager\SolutionManager;
-use App\Manager\TemplateManager;
-use App\Repository\JobRepository;
-// use App\Manager\rule as RuleClass;
-use App\Repository\RuleRepository;
+use App\Entity\Solution;
+use App\Entity\User;
+use App\Form\ConnectorType;
 use App\Form\DuplicateRuleFormType;
+use App\Manager\DocumentManager;
+use App\Manager\FormulaManager;
+use App\Manager\HomeManager;
+use App\Manager\job;
+use App\Manager\JobManager;
+use App\Manager\RuleManager;
+use App\Manager\SolutionManager;
+use App\Manager\template;
+use App\Manager\TemplateManager;
+use App\Manager\ToolsManager;
+use App\Repository\DocumentRepository;
+use App\Repository\JobRepository;
+use App\Repository\RuleRepository;
+use App\Service\SessionService;
+// use App\Manager\rule as RuleClass;
 use Doctrine\DBAL\Driver\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Repository\DocumentRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-
+use Symfony\Contracts\Translation\TranslatorInterface;
 
     /**
      * Class DefaultControllerCore.
      *
-     * @package App\Controller
      * @Route("/rule")
      */
     class DefaultController extends AbstractController
@@ -186,22 +183,22 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
-			// Init parameters
-			$configRepository = $this->entityManager->getRepository(Config::class);
-			$configs = $configRepository->findAll();
-			if (!empty($configs)) {
-				foreach ($configs as $config) {
-					$this->params[$config->getName()] = $config->getvalue();
-				}
-			}		
+            // Init parameters
+            $configRepository = $this->entityManager->getRepository(Config::class);
+            $configs = $configRepository->findAll();
+            if (!empty($configs)) {
+                foreach ($configs as $config) {
+                    $this->params[$config->getName()] = $config->getvalue();
+                }
+            }
         }
 
         // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
         protected $connection;
-       
-		// To allow sending a specific record ID to rule simulation
-		protected $simulationQueryField;
-	
+
+        // To allow sending a specific record ID to rule simulation
+        protected $simulationQueryField;
+
         protected function getInstanceBdd()
         {
         }
@@ -394,38 +391,40 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ]
                 );
 
-            $this->sessionService->setFluxFilterWhere(array('rule' => $rule->getName()));
+            $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
             $this->sessionService->setFluxFilterRuleName($rule->getName());
 
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
 
         // Duplicate a rule
-          /**
+
+        /**
          * @param $id
          *
          * @return RedirectResponse
          *
          * @Route("/duplic_rule/{id}", name="duplic_rule")
          */
-        public function duplicRule($id, Request $request, TranslatorInterface $translator){  
+        public function duplicRule($id, Request $request, TranslatorInterface $translator)
+        {
             try {
                 $rule = $this->getDoctrine()
                 ->getManager()
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
-                ]);   
+                ]);
                 $newRule = new Rule();
-				$connectorSource = $rule->getconnectorSource()->getName();
+                $connectorSource = $rule->getconnectorSource()->getName();
                 $connectorTarget = $rule->getconnectorTarget()->getName();
 
-                //solution id current rule 
+                //solution id current rule
                 $currentRuleSolutionSourceId = $rule->getConnectorSource()->getSolution()->getId();
                 $currentRuleSolutionTargetId = $rule->getConnectorTarget()->getSolution()->getId();
-				
-				// Create the form
-                $form = $this->createForm(DuplicateRuleFormType::class, $newRule, array('solution' => array('source' => $currentRuleSolutionSourceId, 'target' => $currentRuleSolutionTargetId)));
+
+                // Create the form
+                $form = $this->createForm(DuplicateRuleFormType::class, $newRule, ['solution' => ['source' => $currentRuleSolutionSourceId, 'target' => $currentRuleSolutionTargetId]]);
 
                 $form->handleRequest($request);
                 //Sends new data if validated and submit
@@ -435,10 +434,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $newRuleName = $form->get('name')->getData();
                     $newRuleSource = $form->get('connectorSource')->getData();
                     $newRuleTarget = $form->get('connectorTarget')->getData();
-                    
+
                     if (isset($newRuleName)) {
                         // Set the rule header data
-						$newRule->setName($newRuleName)
+                        $newRule->setName($newRuleName)
                             ->setCreatedBy($user)
                             ->setConnectorSource($newRuleSource)
                             ->setConnectorTarget($newRuleTarget)
@@ -451,69 +450,70 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             ->setActive(false)
                             ->setNameSlug($newRuleName);
 
-						// Set the rule parameters
-						foreach($rule->getParams() as $param){
-							$paramNewRule = new RuleParam();
-							$paramNewRule->setRule($newRule);
-							$paramNewRule->setName($param->getName());
-							$paramNewRule->setValue($param->getValue());
-							$this->entityManager->persist($paramNewRule); 
-						} 
+                        // Set the rule parameters
+                        foreach ($rule->getParams() as $param) {
+                            $paramNewRule = new RuleParam();
+                            $paramNewRule->setRule($newRule);
+                            $paramNewRule->setName($param->getName());
+                            $paramNewRule->setValue($param->getValue());
+                            $this->entityManager->persist($paramNewRule);
+                        }
 
-						// Set the rule relationships						
-						foreach($rule->getRelationsShip() as $relationship){
-							$relationsShipNewRule = new RuleRelationShip();
-							$relationsShipNewRule->setRule($newRule);								
-							$relationsShipNewRule->setFieldNameSource($relationship->getFieldNameSource());					
-							$relationsShipNewRule->setFieldNameTarget($relationship->getFieldNameTarget());
-							$relationsShipNewRule->setFieldId($relationship->getFieldId());
-							$relationsShipNewRule->setParent($relationship->getParent());
-							$relationsShipNewRule->setDeleted(0);
-							$relationsShipNewRule->setErrorEmpty($relationship->getErrorEmpty());
-							$relationsShipNewRule->setErrorMissing($relationship->getErrorMissing());
-							$this->entityManager->persist($relationsShipNewRule);
-						}
+                        // Set the rule relationships
+                        foreach ($rule->getRelationsShip() as $relationship) {
+                            $relationsShipNewRule = new RuleRelationShip();
+                            $relationsShipNewRule->setRule($newRule);
+                            $relationsShipNewRule->setFieldNameSource($relationship->getFieldNameSource());
+                            $relationsShipNewRule->setFieldNameTarget($relationship->getFieldNameTarget());
+                            $relationsShipNewRule->setFieldId($relationship->getFieldId());
+                            $relationsShipNewRule->setParent($relationship->getParent());
+                            $relationsShipNewRule->setDeleted(0);
+                            $relationsShipNewRule->setErrorEmpty($relationship->getErrorEmpty());
+                            $relationsShipNewRule->setErrorMissing($relationship->getErrorMissing());
+                            $this->entityManager->persist($relationsShipNewRule);
+                        }
 
-						// Set the rule filters
-						foreach($rule->getFilters() as $filter){
-							$filterNewRule = new RuleFilter();
-							$filterNewRule->setRule($newRule);
-							$filterNewRule->setTarget($filter->getTarget());
-							$filterNewRule->setType($filter->getType());
-							$filterNewRule->setValue($filter->getValue());
-							$this->entityManager->persist($filterNewRule); 
-						}
-					
-						// Set the rule fields
-						foreach($rule->getFields() as $field){
-							$fieldNewRule = new RuleField();
-							$fieldNewRule->setRule($newRule);
-							$fieldNewRule->setTarget($field->getTarget());
-							$fieldNewRule->setSource($field->getSource());
-							$fieldNewRule->setFormula($field->getFormula());
-							$this->entityManager->persist($fieldNewRule); 
-						}  
-						
-						// Save the new rule in the database
-						$this->entityManager->persist($newRule);
-						$this->entityManager->flush();
-						$success =$translator->trans('duplicate_rule.success_duplicate');
-						$this->addFlash('success', $success);
-                            
+                        // Set the rule filters
+                        foreach ($rule->getFilters() as $filter) {
+                            $filterNewRule = new RuleFilter();
+                            $filterNewRule->setRule($newRule);
+                            $filterNewRule->setTarget($filter->getTarget());
+                            $filterNewRule->setType($filter->getType());
+                            $filterNewRule->setValue($filter->getValue());
+                            $this->entityManager->persist($filterNewRule);
+                        }
+
+                        // Set the rule fields
+                        foreach ($rule->getFields() as $field) {
+                            $fieldNewRule = new RuleField();
+                            $fieldNewRule->setRule($newRule);
+                            $fieldNewRule->setTarget($field->getTarget());
+                            $fieldNewRule->setSource($field->getSource());
+                            $fieldNewRule->setFormula($field->getFormula());
+                            $this->entityManager->persist($fieldNewRule);
+                        }
+
+                        // Save the new rule in the database
+                        $this->entityManager->persist($newRule);
+                        $this->entityManager->flush();
+                        $success = $translator->trans('duplicate_rule.success_duplicate');
+                        $this->addFlash('success', $success);
                     }
+
                     return $this->redirect($this->generateURL('regle_list'));
-                }               
+                }
+
                 return $this->render('Rule/create/duplic.html.twig', [
                     'rule' => $rule,
                     'connectorSourceUser' => $connectorSource,
                     'connectorTarget' => $connectorTarget,
-                    'form' => $form->createView()
+                    'form' => $form->createView(),
                 ]);
             } catch (Exception $e) {
                 return new JsonResponse($e->getMessage());
             }
         }
-        
+
         /**
          * ACTIVE UNE REGLE.
          *
@@ -563,70 +563,63 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         public function ruleExecAction($id)
         {
             try {
-
                 $this->ruleManager->setRule($id);
 
                 if ('ALL' == $id) {
-
                     $this->ruleManager->actionRule('ALL');
-                    return $this->redirect($this->generateUrl('regle_list'));
 
+                    return $this->redirect($this->generateUrl('regle_list'));
                 } elseif ('ERROR' == $id) {
-
                     $this->ruleManager->actionRule('ERROR');
-                    return $this->redirect($this->generateUrl('regle_list'));
 
+                    return $this->redirect($this->generateUrl('regle_list'));
                 }
 
                 $this->ruleManager->actionRule('runMyddlewareJob');
-                return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
 
+                return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
                 return $this->redirect($this->generateUrl('regle_list'));
-                
             }
         }
-		
+
         /**
-         * CANCEL ALL TRANSFERS FOR ONE RULE
+         * CANCEL ALL TRANSFERS FOR ONE RULE.
          *
          * @param $id
          *
-         *
          * @Route("/view/cancel/documents/{id}", name="rule_cancel_all_transfers")
          */
-		public function cancelRuleTransfersAction($id){
-			try {
-	
+        public function cancelRuleTransfersAction($id)
+        {
+            try {
                 $this->ruleManager->setRule($id);
-				$result = $this->ruleManager->actionRule('runMyddlewareJob', 'cancelDocumentJob');
-		
-			} catch(\Exception $e){
-				return $e->getMessage();
-			}
-			return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
-		
-		}
+                $result = $this->ruleManager->actionRule('runMyddlewareJob', 'cancelDocumentJob');
+            } catch (\Exception $e) {
+                return $e->getMessage();
+            }
+
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        }
 
         /**
-         * DELETE ALL TRANSFERS FOR ONE RULE
+         * DELETE ALL TRANSFERS FOR ONE RULE.
          *
          * @param $id
          *
          * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers")
          */
-		public function deleteRuleTransfersAction($id){
-			try {
-				
+        public function deleteRuleTransfersAction($id)
+        {
+            try {
                 $this->ruleManager->setRule($id);
-				$result = $this->ruleManager->actionRule('runMyddlewareJob', 'deleteDocumentJob');
-			} catch(\Exception $e){
-				return $e->getMessage();
-			}
-			return $this->redirect($this->generateUrl('regle_open', array('id' => $id)));
-		
-		}
-		
+                $result = $this->ruleManager->actionRule('runMyddlewareJob', 'deleteDocumentJob');
+            } catch (\Exception $e) {
+                return $e->getMessage();
+            }
+
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        }
 
         /**
          * MODIFIE LES PARAMETRES D'UNE REGLE.
@@ -650,17 +643,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                 'name' => $p['name'],
                             ]
                             );
-							
+
                         // In a few case, the parameter could not exist, in this case we create it
                         if (empty($param)) {
-							// Create rule entity 
-							$rule = $this->getDoctrine()
-											->getManager()
-											->getRepository(Rule::class)
-											->findOneBy([
-												'id' => $id,
-											]
-											);
+                            // Create rule entity
+                            $rule = $this->getDoctrine()
+                                            ->getManager()
+                                            ->getRepository(Rule::class)
+                                            ->findOneBy([
+                                                'id' => $id,
+                                            ]
+                                            );
                             $param = new RuleParam();
                             $param->setRule($rule);
                             $param->setName($p['name']);
@@ -710,7 +703,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $limitParam = $rule->getParamByName('limit')->getValue;
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
-                }                
+                }
                 // Get the other rule params
                 $connectorParams = $rule->getParams();
                 foreach ($connectorParams as $connectorParam) {
@@ -752,16 +745,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 if (empty($param['ruleParams']['mode'])) {
                     $param['ruleParams']['mode'] = '0';
                 }
-				
+
                 $param['offset'] = '0';
-				$param['call_type'] = 'read';
+                $param['call_type'] = 'read';
                 $result = $solution_source->readData($param);
                 if (!empty($result['error'])) {
                     throw new Exception('Reading Issue: '.$result['error']);
                 }
                 if (isset($result['count'])) {
-                    return new Response($result['count']);              
+                    return new Response($result['count']);
                 }
+
                 return new Response(0);
             } catch (Exception $e) {
                 return new Response(json_encode(['error' => $e->getMessage()]));
@@ -821,8 +815,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $this->sessionService->setParamRuleConnectorSourceId($key, (string) $rule->getConnectorSource()->getId());
                 $this->sessionService->setParamRuleConnectorCibleId($key, (string) $rule->getConnectorTarget()->getId());
                 $this->sessionService->setParamRuleLastId($key, $rule->getId());
-			
-				// Connector source -------------------
+
+                // Connector source -------------------
                 $connectorParamsSource = $this->getDoctrine()
                     ->getManager()
                     ->getRepository(ConnectorParam::class)
@@ -834,8 +828,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $this->sessionService->setParamRuleSourceConnector($key, $connector->getName(), $connector->getValue());
                 }
                 // Connector source -------------------
-				
-				// Connector target -------------------
+
+                // Connector target -------------------
                 $connectorParamsTarget = $this->getDoctrine()
                     ->getManager()
                     ->getRepository(ConnectorParam::class)
@@ -913,7 +907,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             }
                             $fields[] = $array;
                         }
-                    }                  
+                    }
                     $this->sessionService->setParamRuleReloadFields($key, $fields);
                 }
 
@@ -1103,7 +1097,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if (preg_match("#[\w]#", $request->request->get('solution')) && preg_match("#[\w]#", $request->request->get('parent'))) {
                             $classe = strtolower($request->request->get('solution'));
                             $parent = $request->request->get('parent');
-                            $solution = $this->entityManager->getRepository(Solution::class)->findOneBy(['name'=> $classe]);
+                            $solution = $this->entityManager->getRepository(Solution::class)->findOneBy(['name' => $classe]);
                             $connector = new Connector();
                             $connector->setSolution($solution);
                             $fieldsLogin = [];
@@ -1132,10 +1126,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if (preg_match("#[\w]#", $request->request->get('champs')) && preg_match("#[\w]#", $request->request->get('parent')) && preg_match("#[\w]#", $request->request->get('solution'))) {
                             $classe = strtolower($request->request->get('solution'));
                             $solution = $this->solutionManager->get($classe);
-    
+
                             // établi un tableau params
                             $champs = explode(';', $request->request->get('champs'));
-    
+
                             if ($champs) {
                                 foreach ($champs as $key) {
                                     $input = explode('::', $key);
@@ -1146,24 +1140,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                         }
                                     }
                                 }
-                            } 
+                            }
                             $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
-    
+
                             // Vérification du nombre de champs
                             if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
                                 $result = $solution->login($param);
                                 $r = $solution->connexion_valide;
-    
+
                                 if (!empty($r)) {
                                     return new JsonResponse(['success' => true]); // Connexion valide
                                 }
                                 $this->sessionService->removeParamRule($ruleKey);
-    
+
                                 return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
                             }
-    
+
                             return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]); // Erreur pas le même nombre de champs
-                        }  else {
+                        } else {
                             // Either parent, solution or champs is empty (from AJAX request sent in verif(div_clock) function in regle.js)
                             return new JsonResponse(['success' => false, 'message' => $this->translator->trans('create_connector.form_error')]);
                         }
@@ -1172,59 +1166,58 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         // 0 : solution
                         // 1 : id connector
                         $params = explode('_', $request->request->get('solution'));
-    
+
                         // Deux params obligatoires
                         if (2 == count($params) && intval($params[1]) && is_string($params[0])) {
                             $this->sessionService->removeParamParentRule($ruleKey, $request->request->get('parent'));
                             $classe = strtolower($params[0]);
                             $solution = $this->solutionManager->get($classe);
-    
+
                             $connector = $this->getDoctrine()
                                 ->getManager()
                                 ->getRepository(Connector::class)
                                 ->find($params[1]);
-    
+
                             $connector_params = $this->getDoctrine()
                                 ->getManager()
                                 ->getRepository(ConnectorParam::class)
                                 ->findBy(['connector' => $connector]);
-    
+
                             if ($connector_params) {
                                 foreach ($connector_params as $key) {
                                     $this->sessionService->setParamConnectorParentType($request->request->get('parent'), $key->getName(), $key->getValue());
                                 }
                             }
-    
+
                             $this->sessionService->setParamRuleName($ruleKey, $request->request->get('name'));
-    
+
                             // Affectation id connector
                             $this->sessionService->setParamRuleConnectorParent($ruleKey, $request->request->get('parent'), $params[1]);
-    
+
                             $result = $solution->login($this->decrypt_params($this->sessionService->getParamParentRule($ruleKey, $request->request->get('parent'))));
                             $this->sessionService->setParamRuleParentName($ruleKey, $request->request->get('parent'), 'solution', $classe);
-    
+
                             $r = $solution->connexion_valide;
                             if (!empty($r)) {
                                 return new JsonResponse(['success' => true]); // Connexion valide
                             }
-    
+
                             return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
-    
+
                             exit;
-    
+
                             return $this->render('Ajax/result_connexion.html.twig', []
                             );
                         }
-    
+
                         return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
                     }
                 } else {
                     throw $this->createNotFoundException('Error');
                 }
-            } catch(Exception $e){ 
+            } catch (Exception $e) {
                 return new JsonResponse(['success' => false, 'message' => $e->getMessage().' '.$e->getLine().' '.$e->getFile()]);
             }
-
         }
 
         /**
@@ -1422,51 +1415,50 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
                     }
                 }
-				// The mode is empty when we create the rule, so we set a default value
-				if (empty($ruleParams['ruleParams']['mode'])) {
+                // The mode is empty when we create the rule, so we set a default value
+                if (empty($ruleParams['ruleParams']['mode'])) {
                     $ruleParams['mode'] = '0';
                 }
-				
-				// Get result from AJAX request in regle.js 
+
+                // Get result from AJAX request in regle.js
                 $form = $request->request->all();
-                if(isset($form['query'])){
+                if (isset($form['query'])) {
                     $this->simulationQueryField = $form['query'];
                 }
 
                 // Avoid sending query on specific record ID if the user didn't actually input something
-                if(empty($this->simulationQueryField)){
-					// Get source data
-					$source = $solution_source->readData([
-						'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-						'fields' => $sourcesfields,
-						'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
-						'limit' => 1,
-						'ruleParams' => $ruleParams,
-						'call_type' => 'simulation'
-						]);		
+                if (empty($this->simulationQueryField)) {
+                    // Get source data
+                    $source = $solution_source->readData([
+                        'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+                        'fields' => $sourcesfields,
+                        'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
+                        'limit' => 1,
+                        'ruleParams' => $ruleParams,
+                        'call_type' => 'simulation',
+                        ]);
                 } else {
-						// Get source data
-						$source = $solution_source->readData([
-							'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-							'fields' => $sourcesfields,
-							'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
-							'limit' => 1,
-							'ruleParams' => $ruleParams,
-							'query' => array('id' => $this->simulationQueryField),
-							'call_type' => 'simulation'
-						]);	
+                    // Get source data
+                    $source = $solution_source->readData([
+                            'module' => $this->sessionService->getParamRuleSourceModule($ruleKey),
+                            'fields' => $sourcesfields,
+                            'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
+                            'limit' => 1,
+                            'ruleParams' => $ruleParams,
+                            'query' => ['id' => $this->simulationQueryField],
+                            'call_type' => 'simulation',
+                        ]);
 
-                        // In case of wrong record ID input from user 
-                        if(!empty($source['error'])){
-                            return $this->render('Rule/create/onglets/invalidrecord.html.twig');
-                        }   
+                    // In case of wrong record ID input from user
+                    if (!empty($source['error'])) {
+                        return $this->render('Rule/create/onglets/invalidrecord.html.twig');
+                    }
                 }
 
-                
-				$before = [];
-				$after = [];
+                $before = [];
+                $after = [];
                 if (!empty($source['values'])) {
-					$record = current($source['values']); // Remove a dimension to the array because we need only one record
+                    $record = current($source['values']); // Remove a dimension to the array because we need only one record
                     if (!empty($record)) {
                         foreach ($target['fields'] as $f) {
                             foreach ($f as $name_fields_target => $k) {
@@ -1517,7 +1509,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         // Préparation pour tableau template
                         foreach ($tab_simulation as $key => $value) {
                             foreach ($value as $k => $v) {
-
                                 if ('before' == $k) {
                                     $before[] = $v;
                                 } else {
@@ -1533,7 +1524,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'after' => $after, // target
                     'data_source' => (!empty($record) ? true : false),
                     'params' => $this->sessionService->getParamRule($ruleKey),
-					'simulationQueryField' => $this->simulationQueryField,   
+                    'simulationQueryField' => $this->simulationQueryField,
                 ]
                 );
             }
@@ -1639,7 +1630,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 // Ajoute des champs source pour la validation
                 $ruleParamsSource = $solution_source->getFieldsParamUpd('source', $module['source']);
 
-                // Add parameters to be able to read rules linked 
+                // Add parameters to be able to read rules linked
                 $param['connectorSourceId'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
                 $param['connectorTargetId'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
                 $param['ruleName'] = $this->sessionService->getParamRuleName($ruleKey);
@@ -1744,10 +1735,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $lst_relation_target_alpha = [];
                 if ($ruleFieldsTarget) {
                     foreach ($ruleFieldsTarget as $key => $value) {
-						// Only relationship fields
-						if (empty($value['relate'])) {
-							continue;
-						}
+                        // Only relationship fields
+                        if (empty($value['relate'])) {
+                            continue;
+                        }
                         $lst_relation_target[] = $key;
                     }
 
@@ -1767,9 +1758,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $choice_source = [];
                 if ($ruleFieldsSource) {
                     foreach ($ruleFieldsSource as $key => $value) {
-						if (empty($value['relate'])) {
-							continue;	// We keep only relationship fields
-						}
+                        if (empty($value['relate'])) {
+                            continue;	// We keep only relationship fields
+                        }
                         $lst_relation_source[] = $key;
                     }
 
@@ -1845,7 +1836,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 //         dump($value);
                 //     }
-                    
+
                 // }
                 // asort($lstErrorRelation);
 
@@ -1874,14 +1865,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 if ($allowParentRelationship) {
                     if (!empty($ruleListRelation)) {
                         // We get all relate fields from every source module
-                        foreach ($ruleListRelation as $ruleRelation) {					
+                        foreach ($ruleListRelation as $ruleRelation) {
                             // Get the relate fields from the source module of related rules
                             $ruleFieldsSource = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
-                            if (!empty($ruleFieldsSource)) {								
+                            if (!empty($ruleFieldsSource)) {
                                 foreach ($ruleFieldsSource as $key => $sourceRelateField) {
-									if (empty($sourceRelateField['relate'])) {
-										continue;	// Only relationship fields
-									}
+                                    if (empty($sourceRelateField['relate'])) {
+                                        continue;	// Only relationship fields
+                                    }
                                     $lstParentFields[$key] = $ruleRelation['name'].' - '.$sourceRelateField['label'];
                                 }
                             }
@@ -1923,12 +1914,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ];
 
                 //Behavior filters
-                $lst_errorMissing =[
+                $lst_errorMissing = [
                     '0' => $this->translator->trans('create_rule.step3.relation.no'),
                     '1' => $this->translator->trans('create_rule.step3.relation.yes'),
                 ];
 
-                $lst_errorEmpty =[
+                $lst_errorEmpty = [
                     '0' => $this->translator->trans('create_rule.step3.relation.no'),
                     '1' => $this->translator->trans('create_rule.step3.relation.yes'),
                 ];
@@ -2074,7 +2065,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'parentRelationships' => $allowParentRelationship,
                     'lst_parent_fields' => $lstParentFields,
                     'regleId' => $ruleKey,
-					'simulationQueryField' => $this->simulationQueryField
+                    'simulationQueryField' => $this->simulationQueryField,
                 ];
 
                 $result = $this->tools->beforeRuleEditViewRender($result);
@@ -2098,7 +2089,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 exit;
             }
         }
-		
+
         /**
          * Indique des informations concernant le champ envoyé en paramètre.
          *
@@ -2124,8 +2115,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ]
                     );
                 // SuiteCRM connector uses this structure instead
-                } else if ( isset($myddlewareSession['param']['rule']['key'])){
+                } elseif (isset($myddlewareSession['param']['rule']['key'])) {
                     $ruleKey = $myddlewareSession['param']['rule']['key'];
+
                     return $this->render('Rule/create/onglets/info.html.twig', [
                         'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
                         'name' => htmlentities(trim($field)),
@@ -2262,7 +2254,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 // BEFORE SAVE rev 1.08 ----------------------
                 $relationshipsBeforeSave = $request->request->get('relations');
                 $before_save = $this->ruleManager->beforeSave($this->solutionManager,
-                    [   'ruleName' => $nameRule,
+                    ['ruleName' => $nameRule,
                         'RuleId' => $oneRule->getId(),
                         'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
                         'content' => $tab_new_rule,
@@ -2322,10 +2314,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         if ('datereference' == $ruleParam->getName()) {
                             $date_reference = $ruleParam->getValue();
                         }
-                        if('limit' === $ruleParam->getName()){
+                        if ('limit' === $ruleParam->getName()) {
                             $limit = $ruleParam->getValue();
                         }
-					
+
                         if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
@@ -2365,15 +2357,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $oneRuleParam->setName($key);
                             if ('datereference' == $key) {
                                 // date de référence change en fonction create ou update
-                                $oneRuleParam->setValue($date_reference);  
-                                // Limit change according to create or update   
-                            } else if('limit' == $key){
-								// Set default value 100 for limit
-								if (empty($limit)) {
-									$limit = 100;
-								}
+                                $oneRuleParam->setValue($date_reference);
+                            // Limit change according to create or update
+                            } elseif ('limit' == $key) {
+                                // Set default value 100 for limit
+                                if (empty($limit)) {
+                                    $limit = 100;
+                                }
                                 $oneRuleParam->setValue($limit);
-                            }else {
+                            } else {
                                 $oneRuleParam->setValue($value);
                             }
                         }
@@ -2470,9 +2462,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             if (!empty($rel['parent'])) {
                                 $rel['errorEmpty'] = '0';
                                 $rel['errorMissing'] = '1';
-                            }            
+                            }
                             $oneRuleRelationShip->setErrorEmpty($rel['errorEmpty']);
-                            $oneRuleRelationShip->setErrorMissing($rel['errorMissing']);       
+                            $oneRuleRelationShip->setErrorMissing($rel['errorMissing']);
                             $oneRuleRelationShip->setFieldId($rel['rule']);
                             $oneRuleRelationShip->setParent($rel['parent']);
                             $oneRuleRelationShip->setDeleted(0);
@@ -2485,7 +2477,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $this->entityManager->persist($oneRuleRelationShip);
                             $this->entityManager->flush();
                         }
-                    }                    
+                    }
                 }
 
                 //------------------------------- RuleFilter ------------------------
@@ -2547,7 +2539,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                                                     'ruleName' => $nameRule,
                                                     'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
                                                     'datereference' => $date_reference,
-                                                    'limit' =>$limit,
+                                                    'limit' => $limit,
                                                     'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
                                                     'content' => $tab_new_rule,
                                                     'relationships' => $relationshipsBeforeSave,
@@ -2633,6 +2625,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $countTypeDoc[] = [$value['global_status'], (int) $value['nb']];
                 }
             }
+
             return $this->json($countTypeDoc);
         }
 
@@ -2651,6 +2644,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $countTransferRule[] = [$value['name'], (int) $value['nb']];
                 }
             }
+
             return $this->json($countTransferRule);
         }
 
@@ -2681,6 +2675,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ];
                 }
             }
+
             return $this->json($countTransferRule);
         }
 
@@ -2764,8 +2759,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $user = $this->getUser();
 
                         $this->template->convertTemplate($ruleName, $templateName, $connectorSourceId, $connectorTargetId, $user);
-						// Sort the rules
-						$this->jobManager->orderRules();
+                        // Sort the rules
+                        $this->jobManager->orderRules();
                         // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
                         return new Response('template');
                     }
@@ -2952,7 +2947,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             }
 
             $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
-         
+
             return $lst_solution;
         }
 
@@ -3026,7 +3021,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $compact = [];
 
                 //On passe l’adapter au bundle qui va s’occuper de la pagination
-                if ($orm) {  
+                if ($orm) {
                     $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
                 } else {
                     $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
