@@ -17,8 +17,8 @@ class JobSchedulerCronType extends AbstractType
             ->add('enable', CheckboxType::class, [
             'label' => 'Active',
             'required' => false,
-             ])
-            ->add('command', TextType::class)
+            ])
+            ->add('command', TextType::class, ['mapped' => false])
             ->add('description', TextType::class)
             ->add('period', TextType::class)
             ->add('save', SubmitType::class, [

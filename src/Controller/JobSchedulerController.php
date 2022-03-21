@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\CronJob as CronJobCustom;
 use App\Entity\JobScheduler;
 use App\Entity\User;
 use App\Form\JobSchedulerCronType;
@@ -314,9 +313,8 @@ class JobSchedulerController extends AbstractController
         try {
             $command = '';
             $period = ' */5 * * * *';
-            // Use CronJobCustom to be able to get the method setCommand(), required from the form
-            $crontabForm = new CronJobCustom($command, $period);
-            $entity = $this->entityManager->getRepository(CronJobCustom::class)->findAll();
+            $crontabForm = new CronJob($command, $period);
+            $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
             $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
 
             // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
@@ -325,7 +323,7 @@ class JobSchedulerController extends AbstractController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 // use the static method create because command can be set
-                $crontab = CronJobCustom::create($formParam['command'], $formParam['period']);
+                $crontab = CronJob::create($formParam['command'], $formParam['period']);
                 $crontab->setDescription($formParam['description']);
                 $this->entityManager->persist($crontab);
                 $this->entityManager->flush();
