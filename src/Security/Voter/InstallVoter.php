@@ -12,7 +12,7 @@ class InstallVoter extends Voter
 {
     protected function supports($attribute, $subject)
     {
-             // only vote on `Config` objects
+        // only vote on `Config` objects
         if (!$subject instanceof Config) {
             return false;
         }
