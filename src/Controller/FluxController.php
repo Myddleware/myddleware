@@ -292,9 +292,6 @@ class FluxController extends AbstractController
         $form->handleRequest($request);
         // condition d'affichage
         $data = [];
-        $where = '';
-        $from = 'FROM Document ';
-        // $where = ($this->sessionService->isFluxFilterCWhereExist() ? $this->sessionService->getFluxFilterWhere() : '');
         if (!empty($this->sessionService->getFluxFilterWhere())) {
             $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             $this->sessionService->removeFluxFilter();

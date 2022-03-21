@@ -525,7 +525,7 @@ class databasecore extends solution
                 // Prepare query to get the fieldId from the orther rules with the same connectors
                 $connection = $this->getConn();
                 $query = "	SELECT source_id, GROUP_CONCAT(type) type
-							FROM Document 
+							FROM document 
 							WHERE 
 									global_status != 'Cancel'
 								AND rule_id = :id_rule
@@ -620,7 +620,7 @@ class databasecore extends solution
                             ->getResult();
             if (!empty($ruleListRelation)) {
                 // Prepare query to get the fieldId from the orther rules with the same connectors
-                $sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
+                $sql = "SELECT value FROM ruleparam WHERE ruleparam.name = 'fieldId' AND ruleparam.rule_id  in (";
                 foreach ($ruleListRelation as $ruleRelation) {
                     $sql .= "'$ruleRelation[id]',";
                 }
