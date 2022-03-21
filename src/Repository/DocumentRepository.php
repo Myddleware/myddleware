@@ -368,7 +368,6 @@ class DocumentRepository extends ServiceEntityRepository
                 $qb->setParameter('gblstatus'.$i, $gblstatus);
                 ++$i;
             }
-            // $orModule->add($qb->expr()->isNull('p.module'));
             $qb->andWhere($orModule);
         } elseif (!empty($data['gblstatus'])) {
             $qb
