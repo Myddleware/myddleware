@@ -579,6 +579,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
+                $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
                 return $this->redirect($this->generateUrl('regle_list'));
             }
         }
@@ -2600,7 +2601,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             foreach ($listFlux as $field => $value) {
                 $nbFlux = $nbFlux + (int) $value['nb'];
             }
-
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
                 'listJobDetail' => $this->jobRepository->listJobDetail(),
