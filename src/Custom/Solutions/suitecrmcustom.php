@@ -119,6 +119,8 @@ class suitecrmcustom extends suitecrm {
 		) {
 			if ($param['ruleParams']['contactType'] == 'non_contact_partenaire') {
 				$query .= ' AND '.strtolower($param['module'])."_cstm.contact_type_c <> 'contact_partenaire' ";
+			}elseif ($param['ruleParams']['contactType'] == 'non_accompagne') {
+				$query .= ' AND '.strtolower($param['module'])."_cstm.contact_type_c <> 'Accompagne' ";
 			} else {
 				$query .= ' AND '.strtolower($param['module'])."_cstm.contact_type_c = '".$param['ruleParams']['contactType']."' ";
 			}
