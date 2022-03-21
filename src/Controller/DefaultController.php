@@ -700,7 +700,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 // Get the rule reference
                 $param['date_ref'] = $rule->getParamByName('datereference')->getValue();
                 // Get the rule limit
-                $limitParam = $rule->getParamByName('limit')->getValue;
+                $limitParam = $rule->getParamByName('limit');
                 if ($limitParam) {
                     $param['limit'] = $limitParam->getValue();
                 }
@@ -758,7 +758,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 return new Response(0);
             } catch (Exception $e) {
-                return new Response(json_encode(['error' => $e->getMessage()]));
+                $errorMessage =  $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+                return new Response(json_encode(['error' => $errorMessage]));
             }
         }
 
