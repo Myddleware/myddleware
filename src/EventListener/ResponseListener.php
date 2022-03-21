@@ -6,8 +6,6 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
  * Class ResponseListener.
- *
- * @package App\EventListener
  */
 class ResponseListener
 {

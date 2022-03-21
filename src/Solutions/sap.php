@@ -184,7 +184,6 @@ class sapcore extends saproot
         }
     }
 
-
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
     {

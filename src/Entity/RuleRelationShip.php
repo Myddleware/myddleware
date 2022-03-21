@@ -240,20 +240,19 @@ class RuleRelationShip
         return $this;
     }
 
-
     /**
-     * Get the value of errorEmpty
-     */ 
+     * Get the value of errorEmpty.
+     */
     public function getErrorEmpty()
     {
         return $this->errorEmpty;
     }
 
     /**
-     * Set the value of errorEmpty
+     * Set the value of errorEmpty.
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setErrorEmpty($errorEmpty)
     {
         $this->errorEmpty = $errorEmpty;
@@ -262,18 +261,18 @@ class RuleRelationShip
     }
 
     /**
-     * Get the value of errorMissing
-     */ 
+     * Get the value of errorMissing.
+     */
     public function getErrorMissing()
     {
         return $this->errorMissing;
     }
 
     /**
-     * Set the value of errorMissing
+     * Set the value of errorMissing.
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setErrorMissing($errorMissing)
     {
         $this->errorMissing = $errorMissing;

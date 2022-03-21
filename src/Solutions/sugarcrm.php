@@ -30,10 +30,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sugarcrmcore extends solution
 {
-	// Enable to read deletion and to delete data
+    // Enable to read deletion and to delete data
     protected $readDeletion = true;
     protected $sendDeletion = true;
-	
+
     protected $sugarAPI;
     protected $sugarAPIVersion = 'v11';
     protected $sugarPlatform = 'base';
@@ -107,7 +107,7 @@ class sugarcrmcore extends solution
     public function get_modules($type = 'source')
     {
         try {
-            $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');			
+            $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
             if (!empty($modulesSugar->full_module_list)) {
                 foreach ($modulesSugar->full_module_list as $module => $label) {
                     // hash isn't a Sugar module
@@ -117,81 +117,86 @@ class sugarcrmcore extends solution
                     $modules[$module] = $label;
                 }
             }
-			
-			// Add many-to-many relationships
-			$relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
-			if (!empty($relationshipsSugar->relationships)) {
+
+            // Add many-to-many relationships
+            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            if (!empty($relationshipsSugar->relationships)) {
                 foreach ($relationshipsSugar->relationships as $relationship => $value) {
                     // hash isn't a Sugar module
                     if ('_hash' == $relationship) {
                         continue;
                     }
-					// Only many-to-many relationships
-					if (
-							!empty($value->relationship_type)
-						AND $value->relationship_type <> 'many-to-many'
-					) {
-						continue;
-					}
+                    // Only many-to-many relationships
+                    if (
+                            !empty($value->relationship_type)
+                        and 'many-to-many' != $value->relationship_type
+                    ) {
+                        continue;
+                    }
                     $modules['link_'.$relationship] = $value->name;
                 }
             }
+
             return $modules;
         } catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );	
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+
             return false;
         }
     }
-	
-	// Check if the module is a relationship and return the relationship parameters
-	protected function isManyToManyRel($module) {
-		if (
-				!empty($module)
-			AND substr($module,0,5) == 'link_'
-		) {
-			$relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
-			$relName = substr($module,5);
-			if (!empty($relationshipsSugar->relationships->$relName)) {
-				return $relationshipsSugar->relationships->$relName;
-			}
-		}
-		return false;
-	}
-	
+
+    // Check if the module is a relationship and return the relationship parameters
+    protected function isManyToManyRel($module)
+    {
+        if (
+                !empty($module)
+            and 'link_' == substr($module, 0, 5)
+        ) {
+            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            $relName = substr($module, 5);
+            if (!empty($relationshipsSugar->relationships->$relName)) {
+                return $relationshipsSugar->relationships->$relName;
+            }
+        }
+
+        return false;
+    }
+
     public function get_module_fields($module, $type = 'source', $param = null)
     {
         parent::get_module_fields($module, $type);
         try {
-			// If module is a many-to-many relationship
-			$rel = $this->isManyToManyRel($module);			
-			if (!empty($rel)) {
-				$this->moduleFields[$rel->join_key_lhs] = [
-						'label' => $rel->join_key_lhs,
-						'type' => 'varchar(36)',
-						'type_bdd' => 'varchar(36)',
-						'required' => 0,
-						'required_relationship' => 1,
-						'relate' => true
+            // If module is a many-to-many relationship
+            $rel = $this->isManyToManyRel($module);
+            if (!empty($rel)) {
+                $this->moduleFields[$rel->join_key_lhs] = [
+                        'label' => $rel->join_key_lhs,
+                        'type' => 'varchar(36)',
+                        'type_bdd' => 'varchar(36)',
+                        'required' => 0,
+                        'required_relationship' => 1,
+                        'relate' => true,
                     ];
-				$this->moduleFields[$rel->join_key_rhs] = [
-						'label' => $rel->join_key_rhs,
-						'type' => 'varchar(36)',
-						'type_bdd' => 'varchar(36)',
-						'required' => 0,
-						'required_relationship' => 1,
-						'relate' => true
+                $this->moduleFields[$rel->join_key_rhs] = [
+                        'label' => $rel->join_key_rhs,
+                        'type' => 'varchar(36)',
+                        'type_bdd' => 'varchar(36)',
+                        'required' => 0,
+                        'required_relationship' => 1,
+                        'relate' => true,
                     ];
-				return $this->moduleFields;
-			}			
+
+                return $this->moduleFields;
+            }
             // Call teh detail of all Sugar fields for the module
             $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
             // Browse fields
             if (!empty($fieldsSugar->modules->$module->fields)) {
-                foreach ($fieldsSugar->modules->$module->fields as $field) {	
+                foreach ($fieldsSugar->modules->$module->fields as $field) {
                     if (
-							empty($field->type)
-						 OR $field->type == 'link' // Module linked not just a related fields (example : module bigs for contact)
-					) {
+                            empty($field->type)
+                         or 'link' == $field->type // Module linked not just a related fields (example : module bigs for contact)
+                    ) {
                         continue;
                     }
 
@@ -213,16 +218,16 @@ class sugarcrmcore extends solution
                         'type' => $field->type,
                         'type_bdd' => $type_bdd,
                         'required' => (!empty($field->required) ? $field->required : 0),
-						'relate' => false
+                        'relate' => false,
                     ];
 
                     // Add option for enum fields
                     if (in_array($field->type, ['enum', 'multienum'])) {
                         $fieldsList = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/'.$module.'/enum/'.$field->name);
                         if (
-								!empty($fieldsList)
-							AND is_array($fieldsList)
-						) {					
+                                !empty($fieldsList)
+                            and is_array($fieldsList)
+                        ) {
                             // Transform object to array
                             foreach ($fieldsList as $key => $value) {
                                 $this->moduleFields[$field->name]['option'][$key] = $value;
@@ -247,7 +252,7 @@ class sugarcrmcore extends solution
                             'type_bdd' => 'varchar(36)',
                             'required' => (!empty($field->required) ? $field->required : 0),
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     }
                 }
@@ -255,12 +260,13 @@ class sugarcrmcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );			
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     /**
      * Function read data.
@@ -271,97 +277,101 @@ class sugarcrmcore extends solution
      */
     // public function readData($param)
     public function read($param)
-    {	
-		$result = [];
-		
-		// Manage delete option to enable
-		$deleted = false;
-		if (!empty($param['ruleParams']['deletion'])) {
-			$deleted = true;
-			$param['fields'][] = 'deleted';
-		}
+    {
+        $result = [];
 
-		// Init search parameters
-		$filterArgs = [
-			'max_num' => $param['limit'],
-			'offset' => 0,
-			'fields' => implode($param['fields'], ','),
-			'order_by' => 'date_modified',
-			'deleted' => $deleted,
-		];
-		// Init search filters
-		// Search by fields (id or duplicate fields)
-		if (!empty($param['query'])) {
-			// Add every filter (AND operator by default)
-			foreach ($param['query'] as $key => $value) {
-				$filterArgs['filter'][] = [$key => ['$equals' => $value]];
-			}
-		// Search By reference
-		} else {
-			$filterArgs['filter'] = [
-				[
-					'date_modified' => [
-						'$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
-					],
-				],
-			];
-		}
-		// Add function to odify filter id needed
-		$filterArgs = $this->changeReadFilterArgs($param, $filterArgs);	
-		// Get the records
-		$getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
-		$response = $getRecords->getResponse();	
-		// Format response if http return = 200
-		if ('200' == $response->getStatus()) {
-			$body = $getRecords->getResponse()->getBody(false);
-			if (!empty($body->records)) {
-				$records = $body->records;
-			}
-		} else {	
-			$bodyError = $response->getBody();
-			throw new \Exception('Status '.$response->getStatus(). ' : '.$bodyError['error'].', '.$bodyError['error_message']);
-		}	
-		// Format records to result format
-		if (!empty($records)) {
-			foreach ($records as $record) {
-				// Manage deletion by adding the flag Myddleware_deletion to the record
-				if (
-						$deleted == true
-					and !empty($record->deleted)
-				) {
-					$result[$record->id]['myddleware_deletion'] = true;
-				}
-				foreach ($param['fields'] as $field) {
-					// Sugar returns multilist value as array
-					if (
-							!empty($record->$field)
-						AND	is_array($record->$field)		
-					) {				
-						// Some fields can be an object like teamname field
-						if (is_object($record->$field[0])) {
-							$record->$field = $record->$field[0]->name;
-						} else {
-							$record->$field = implode(',', $record->$field);
-						}
-					}
-					$result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
-				}
-				// No data returned if record deleted, we set a default date
-				if (!empty($result[$record->id]['myddleware_deletion'])) {
-					$result[$record->id]['date_modified'] = gmdate('Y-m-d H:i:s');
-				}			
-			}
-		}			
+        // Manage delete option to enable
+        $deleted = false;
+        if (!empty($param['ruleParams']['deletion'])) {
+            $deleted = true;
+            $param['fields'][] = 'deleted';
+        }
+
+        // Init search parameters
+        $filterArgs = [
+            'max_num' => $param['limit'],
+            'offset' => 0,
+            'fields' => implode($param['fields'], ','),
+            'order_by' => 'date_modified',
+            'deleted' => $deleted,
+        ];
+        // Init search filters
+        // Search by fields (id or duplicate fields)
+        if (!empty($param['query'])) {
+            // Add every filter (AND operator by default)
+            foreach ($param['query'] as $key => $value) {
+                $filterArgs['filter'][] = [$key => ['$equals' => $value]];
+            }
+            // Search By reference
+        } else {
+            $filterArgs['filter'] = [
+                [
+                    'date_modified' => [
+                        '$gt' => $this->dateTimeFromMyddleware($param['date_ref']),
+                    ],
+                ],
+            ];
+        }
+        // Add function to odify filter id needed
+        $filterArgs = $this->changeReadFilterArgs($param, $filterArgs);
+        // Get the records
+        $getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
+        $response = $getRecords->getResponse();
+        // Format response if http return = 200
+        if ('200' == $response->getStatus()) {
+            $body = $getRecords->getResponse()->getBody(false);
+            if (!empty($body->records)) {
+                $records = $body->records;
+            }
+        } else {
+            $bodyError = $response->getBody();
+            throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
+        }
+        // Format records to result format
+        if (!empty($records)) {
+            foreach ($records as $record) {
+                // Manage deletion by adding the flag Myddleware_deletion to the record
+                if (
+                        true == $deleted
+                    and !empty($record->deleted)
+                ) {
+                    $result[$record->id]['myddleware_deletion'] = true;
+                }
+                foreach ($param['fields'] as $field) {
+                    // Sugar returns multilist value as array
+                    if (
+                            !empty($record->$field)
+                        and is_array($record->$field)
+                    ) {
+                        // Some fields can be an object like teamname field
+                        if (is_object($record->$field[0])) {
+                            $record->$field = $record->$field[0]->name;
+                        } else {
+                            $record->$field = implode(',', $record->$field);
+                        }
+                    }
+                    $result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
+                }
+                // No data returned if record deleted, we set a default date
+                if (!empty($result[$record->id]['myddleware_deletion'])) {
+                    $result[$record->id]['date_modified'] = gmdate('Y-m-d H:i:s');
+                }
+            }
+        }
+
         return $result;
     }
-	
-	protected function changeReadFilterArgs($param, $filterArgs) {
-		return $filterArgs;
-	}
 
-	public function getRefFieldName($moduleSource, $RuleMode) {
-		return 'date_modified';
+    protected function changeReadFilterArgs($param, $filterArgs)
+    {
+        return $filterArgs;
     }
+
+    public function getRefFieldName($moduleSource, $RuleMode)
+    {
+        return 'date_modified';
+    }
+
     // end function read
 
     /**
@@ -372,27 +382,29 @@ class sugarcrmcore extends solution
      * @return mixed
      */
     public function createData($param)
-    {	
-		$result = array();
-		$error = '';
-		// Limit each call using the bulk limit
-		// Split the data into several array using the bulk limite size
-		$paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
-		// Call several time SugarCRM API bulk
-		foreach ($paramDataBulkArray as $paramDataBulk) {
-			// Change the data fo teh call			
-			$param['data'] = $paramDataBulk;			
-			$resultBulk = $this->upsert('create', $param);;
-			// Manage result
-			if (!empty($resultBulk['error'])) {
-				$error .= $resultBulk['error'];
-			}			
-			$result = array_merge($result,$resultBulk);
-		}
-		// get the concatenation of all bulk calls
-		$result['error'] = $error;		
+    {
+        $result = [];
+        $error = '';
+        // Limit each call using the bulk limit
+        // Split the data into several array using the bulk limite size
+        $paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
+        // Call several time SugarCRM API bulk
+        foreach ($paramDataBulkArray as $paramDataBulk) {
+            // Change the data fo teh call
+            $param['data'] = $paramDataBulk;
+            $resultBulk = $this->upsert('create', $param);
+            // Manage result
+            if (!empty($resultBulk['error'])) {
+                $error .= $resultBulk['error'];
+            }
+            $result = array_merge($result, $resultBulk);
+        }
+        // get the concatenation of all bulk calls
+        $result['error'] = $error;
+
         return $result;
     }
+
     // end function create
 
     /**
@@ -404,26 +416,28 @@ class sugarcrmcore extends solution
      */
     public function updateData($param)
     {
-		$result = array();
-		$error = '';
-		// Limit each call using the bulk limit
-		// Split the data into several array using the bulk limite size
-		$paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
-		// Call several time SugarCRM API bulk
-		foreach ($paramDataBulkArray as $paramDataBulk) {
-			// Change the data fo teh call	
-			$param['data'] = $paramDataBulk;		
-			$resultBulk = $this->upsert('update', $param);
-			// Manage result
-			if (!empty($resultBulk['error'])) {
-				$error .= $resultBulk['error'];
-			}
-			$result = array_merge($result,$resultBulk);
-		}
-		// get the concatenation of all bulk calls
-		$result['error'] = $error;
-		return $result;
+        $result = [];
+        $error = '';
+        // Limit each call using the bulk limit
+        // Split the data into several array using the bulk limite size
+        $paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
+        // Call several time SugarCRM API bulk
+        foreach ($paramDataBulkArray as $paramDataBulk) {
+            // Change the data fo teh call
+            $param['data'] = $paramDataBulk;
+            $resultBulk = $this->upsert('update', $param);
+            // Manage result
+            if (!empty($resultBulk['error'])) {
+                $error .= $resultBulk['error'];
+            }
+            $result = array_merge($result, $resultBulk);
+        }
+        // get the concatenation of all bulk calls
+        $result['error'] = $error;
+
+        return $result;
     }
+
     // end function update
 
     /**
@@ -435,131 +449,135 @@ class sugarcrmcore extends solution
      */
     public function deleteData($param)
     {
-		$result = array();
-		$error = '';
-		// Limit each call using the bulk limit
-		// Split the data into several array using the bulk limite size
-		$paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
-		// Call several time SugarCRM API bulk
-		foreach ($paramDataBulkArray as $paramDataBulk) {
-			// Change the data fo teh call	
-			$param['data'] = $paramDataBulk;		
-			$resultBulk = $this->upsert('delete', $param);
-			// Manage result
-			if (!empty($resultBulk['error'])) {
-				$error .= $resultBulk['error'];
-			}
-			$result = array_merge($result,$resultBulk);
-		}
-		// get the concatenation of all bulk calls
-		$result['error'] = $error;
-		return $result;
+        $result = [];
+        $error = '';
+        // Limit each call using the bulk limit
+        // Split the data into several array using the bulk limite size
+        $paramDataBulkArray = array_chunk($param['data'], $this->bulkLimit, true);
+        // Call several time SugarCRM API bulk
+        foreach ($paramDataBulkArray as $paramDataBulk) {
+            // Change the data fo teh call
+            $param['data'] = $paramDataBulk;
+            $resultBulk = $this->upsert('delete', $param);
+            // Manage result
+            if (!empty($resultBulk['error'])) {
+                $error .= $resultBulk['error'];
+            }
+            $result = array_merge($result, $resultBulk);
+        }
+        // get the concatenation of all bulk calls
+        $result['error'] = $error;
+
+        return $result;
     }
+
     // end function update
-	
+
     public function upsert($method, $param)
     {
-		try {
-			$i = 0;
-			// Build bulk call
-			foreach ($param['data'] as $idDoc => $data) {
+        try {
+            $i = 0;
+            // Build bulk call
+            foreach ($param['data'] as $idDoc => $data) {
                 // Check control before create/update
                 $param['method'] = $method;
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
 
-				// Check if the module is a many-to-many relationship
-				$rel = $this->isManyToManyRel($param['module']);
-				if (!empty($rel)) {
-					if (empty($data[$rel->join_key_lhs])) {
-						throw new \Exception('No value for the field '.$rel->join_key_lhs.' in the document '.$idDoc.'.');
-					}
-					if (empty($data[$rel->join_key_rhs])) {
-						throw new \Exception('No value for the field '.$rel->join_key_rhs.' in the document '.$idDoc.'.');
-					}
-					unset($data['target_id']);
-					$dataRel = array(
-									'link_name' => $rel->name,
-									'ids' => array(
-											$data[$rel->join_key_lhs] => array('id' => $data[$rel->join_key_rhs])
-										),
-								);
-					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel);
+                // Check if the module is a many-to-many relationship
+                $rel = $this->isManyToManyRel($param['module']);
+                if (!empty($rel)) {
+                    if (empty($data[$rel->join_key_lhs])) {
+                        throw new \Exception('No value for the field '.$rel->join_key_lhs.' in the document '.$idDoc.'.');
+                    }
+                    if (empty($data[$rel->join_key_rhs])) {
+                        throw new \Exception('No value for the field '.$rel->join_key_rhs.' in the document '.$idDoc.'.');
+                    }
+                    unset($data['target_id']);
+                    $dataRel = [
+                                    'link_name' => $rel->name,
+                                    'ids' => [
+                                            $data[$rel->join_key_lhs] => ['id' => $data[$rel->join_key_rhs]],
+                                        ],
+                                ];
+                    $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel];
                 // Create record
-				} elseif ('create' == $method) {
+                } elseif ('create' == $method) {
                     // Myddleware field empty when data transfer type is create
                     unset($data['target_id']);
-					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'], 'method' => 'POST', 'data' => $data);
+                    $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'], 'method' => 'POST', 'data' => $data];
                 // Update record
-				} elseif ('delete' == $method) { 
+                } elseif ('delete' == $method) {
                     // The record id is stored in $data['target_id']
-                    $targetId = $data['target_id'];			
-					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'DELETE');
+                    $targetId = $data['target_id'];
+                    $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'DELETE'];
                 } else {
                     // The record id is stored in $data['target_id']
                     $targetId = $data['target_id'];
-                    unset($data['target_id']);				
-					$bulkData['requests'][] = array('url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'PUT', 'data' => $data);
+                    unset($data['target_id']);
+                    $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'PUT', 'data' => $data];
                 }
-			}	
-			// Send all data in 1 call
-			$recordResult = $this->sugarAPI->bulk()->execute($bulkData);
-			$response = $recordResult->getResponse();
-			// Manage response
-			if ($response->getStatus() == '200') {
-				$records = $response->getBody(false);					
-				$i = 0;
-				// Manage result returned from SugarCRM
-				foreach ($param['data'] as $idDoc => $data) {
-					if ($records[$i]->status == '200') {
-						// Return for create relationship
-						if (!empty($rel)) {
-							if (!empty($records[$i]->contents->related_records[0]->id)) {
-								$result[$idDoc] = array(
-														'id' => $records[$i]->contents->related_records[0]->id.'__'.$records[$i]->contents->record->id,
-														'error' => false,
-													);
-							} else {
-								$result[$idDoc]['id'] = '-1';
-								if (!empty($records[$i]->contents)) {
-									$result[$idDoc]['error'] = 'Error '.$records[$i]->contents->error.' : '.$records[$i]->contents->error_message;
-								} else {
-									$result[$idDoc]['error'] = 'No id returned from SugarCRM.';
-								}
-							}
-						
-						// return for create/update record
-						} elseif (!empty($records[$i]->contents->id)) {
-							$result[$idDoc] = array(
-													'id' => $records[$i]->contents->id,
-													'error' => false,
-												);
-						} else {
-							$result[$idDoc]['id'] = '-1';
-							if (!empty($records[$i]->contents)) {
-								$result[$idDoc]['error'] = 'Error '.$records[$i]->contents->error.' : '.$records[$i]->contents->error_message;
-							} else {
-								$result[$idDoc]['error'] = 'No id returned from SugarCRM.';
-							}
-						}
-					} else {
-						$result[$idDoc] = array(
-								'id' => '-1',
-								'error' => 'Error '.$records[$i]->status.' : '.$records[$i]->status_text.'. '.
-									(!empty($records[$i]->contents->error) ? $records[$i]->contents->error.' : '.$records[$i]->contents->error_message : ''),
-							);
-					}
-					$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-					$i++;
-				}
-			} else {
-				throw new \Exception('Error '.$response->getStatus().' : '.$response->getError());
-			}
-			// Modification du statut du flux
-		} catch (\Exception $e) {
-			$result['error'] = $e->getMessage();
-		}		
+            }
+            // Send all data in 1 call
+            $recordResult = $this->sugarAPI->bulk()->execute($bulkData);
+            $response = $recordResult->getResponse();
+            // Manage response
+            if ('200' == $response->getStatus()) {
+                $records = $response->getBody(false);
+                $i = 0;
+                // Manage result returned from SugarCRM
+                foreach ($param['data'] as $idDoc => $data) {
+                    if ('200' == $records[$i]->status) {
+                        // Return for create relationship
+                        if (!empty($rel)) {
+                            if (!empty($records[$i]->contents->related_records[0]->id)) {
+                                $result[$idDoc] = [
+                                                        'id' => $records[$i]->contents->related_records[0]->id.'__'.$records[$i]->contents->record->id,
+                                                        'error' => false,
+                                                    ];
+                            } else {
+                                $result[$idDoc]['id'] = '-1';
+                                if (!empty($records[$i]->contents)) {
+                                    $result[$idDoc]['error'] = 'Error '.$records[$i]->contents->error.' : '.$records[$i]->contents->error_message;
+                                } else {
+                                    $result[$idDoc]['error'] = 'No id returned from SugarCRM.';
+                                }
+                            }
+
+                            // return for create/update record
+                        } elseif (!empty($records[$i]->contents->id)) {
+                            $result[$idDoc] = [
+                                                    'id' => $records[$i]->contents->id,
+                                                    'error' => false,
+                                                ];
+                        } else {
+                            $result[$idDoc]['id'] = '-1';
+                            if (!empty($records[$i]->contents)) {
+                                $result[$idDoc]['error'] = 'Error '.$records[$i]->contents->error.' : '.$records[$i]->contents->error_message;
+                            } else {
+                                $result[$idDoc]['error'] = 'No id returned from SugarCRM.';
+                            }
+                        }
+                    } else {
+                        $result[$idDoc] = [
+                                'id' => '-1',
+                                'error' => 'Error '.$records[$i]->status.' : '.$records[$i]->status_text.'. '.
+                                    (!empty($records[$i]->contents->error) ? $records[$i]->contents->error.' : '.$records[$i]->contents->error_message : ''),
+                            ];
+                    }
+                    $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+                    ++$i;
+                }
+            } else {
+                throw new \Exception('Error '.$response->getStatus().' : '.$response->getError());
+            }
+            // Modification du statut du flux
+        } catch (\Exception $e) {
+            $result['error'] = $e->getMessage();
+        }
+
         return $result;
     }
+
     // end function create
 
     // Convert date to Myddleware format
@@ -572,6 +590,7 @@ class sugarcrmcore extends solution
 
         return $dto->format('Y-m-d H:i:s');
     }
+
     // dateTimeToMyddleware($dateTime)
 
     // Convert date to SugarCRM format
@@ -644,4 +663,3 @@ class sugarcrmcore extends solution
 class sugarcrm extends sugarcrmcore
 {
 }
-

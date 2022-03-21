@@ -2,12 +2,10 @@
 
 namespace App\Service;
 
-use App\Entity\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Interface UserManagerInterface
- * @package App\Service
+ * Interface UserManagerInterface.
  */
 interface UserManagerInterface
 {

@@ -39,10 +39,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class JobSchedulerCommand.
- *
- * @package App\Command
- *
- *
  */
 class JobSchedulerCommand extends Command
 {

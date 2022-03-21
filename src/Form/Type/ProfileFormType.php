@@ -11,13 +11,10 @@
 
 namespace App\Form\Type;
 
-use DateTimeZone;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeZoneToStringTransformer;
-use Symfony\Component\Form\Extension\Core\DataTransformer\IntlTimeZoneToStringTransformer;
 
 class ProfileFormType extends AbstractType
 {

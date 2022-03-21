@@ -25,9 +25,9 @@
 
 namespace App\DataFixtures;
 
-use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Shapecode\Bundle\CronBundle\Entity\CronJob;
 
 class LoadCronJobData implements FixtureInterface
 {
@@ -50,25 +50,25 @@ class LoadCronJobData implements FixtureInterface
 
     private function generateEntities()
     {
-		// Get all solutions already in the database
-		$cronJobs = $this->manager->getRepository(CronJob::class)->findAll();
+        // Get all solutions already in the database
+        $cronJobs = $this->manager->getRepository(CronJob::class)->findAll();
         foreach ($this->cronJobData as $cronJobData) {
-			$foundCronJob = false;
-			if (!empty($cronJobs)) {
-				foreach ($cronJobs as $cronJob) {
-					if ($cronJob->getCommand() == $cronJobData['command']) {
-						$foundCronJob = true;				
-						break;
-					}
-				}
-			}
+            $foundCronJob = false;
+            if (!empty($cronJobs)) {
+                foreach ($cronJobs as $cronJob) {
+                    if ($cronJob->getCommand() == $cronJobData['command']) {
+                        $foundCronJob = true;
+                        break;
+                    }
+                }
+            }
 
             // If we didn't found the solution we create a new one, otherwise we update it
-			if (!$foundCronJob) {
-                $crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);				
-				$crontab->setDescription($cronJobData['description']);	
-				$this->manager->persist($crontab);
-            }		
+            if (!$foundCronJob) {
+                $crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);
+                $crontab->setDescription($cronJobData['description']);
+                $this->manager->persist($crontab);
+            }
         }
     }
 }
