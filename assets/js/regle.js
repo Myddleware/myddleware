@@ -1537,14 +1537,12 @@ function recup_formule() {
 // Récupère la liste des relations
 function recup_relation() {
 	var relations = [];
-	var parent_relations = [];
 	$('.rel tr.line-relation', '#relation').each(function () {
 		tr = $(this);
 		$($(this)).find(".title").each(function () {
 			
 			var name = $(this).attr('data-value');
 			var valueRule = tr.find('.lst_rule_relate').val();
-			console.log(valueRule);
 			var valueSource = tr.find('.lst_source_relate').val();			
 			var valueEmpty = tr.find('.parent_error_empty').val();				
 			var valueMissing =tr.find('.parent_error_missing').val();
