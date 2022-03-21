@@ -7,26 +7,24 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Command;
 
-use App\Entity\Job;
-use App\Entity\Rule;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
@@ -65,16 +63,19 @@ class SynchroCommand extends Command
      */
     private $documentRepository;
 
+    // the name of the command (the part after "bin/console")
+    protected static $defaultName = 'myddleware:synchro';
+
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
         DocumentManager $documentManager,
         RuleManager $ruleManager,
         EntityManagerInterface $entityManager,
-        DocumentRepository $documentRepository,
-        $name = null
-    ) {
-        parent::__construct($name);
+        DocumentRepository $documentRepository
+    )
+    {
+        parent::__construct();
         $this->logger = $logger;
         $this->entityManager = $entityManager;
         $this->jobManager = $jobManager;
@@ -87,8 +88,8 @@ class SynchroCommand extends Command
     {
         $this
             ->setName('myddleware:synchro')
-            ->setDescription('Synchronisation des données')
-            ->addArgument('rule', InputArgument::REQUIRED, 'Alias de la règle')
+            ->setDescription('Execute all active Myddleware transfer rules')
+            ->addArgument('rule', InputArgument::REQUIRED, 'Rule alias')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -167,7 +168,7 @@ class SynchroCommand extends Command
         }
         // Retour en console --------------------------------------
         if (!empty($this->jobManager->message)) {
-            $output->writeln('0;<error>'.$this->jobManager->message.'</error>');
+            $output->writeln('1;<error>'.$this->jobManager->message.'</error>');
             $this->logger->error($this->jobManager->message);
             return 1;
         }
