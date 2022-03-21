@@ -539,18 +539,18 @@ $(function () {
     };
 
     // changed the name of function as otherwise if it's called carousel it conflicts with Bootstrap carousel
-    $.fn.newCarousel = function (options) {
+    $.fn.carousel = function (options) {
         return new Carousel(this.first(), options);
     };
 });
 
 window.onload = function () {
 
-    $("#animation-cleft").newCarousel({
+    $("#animation-cleft").carousel({
         vertical: true,
         duration: 1000
     });
-    $("#animation-cright").newCarousel({
+    $("#animation-cright").carousel({
         vertical: true,
         duration: 1000
     });
