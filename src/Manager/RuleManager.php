@@ -154,7 +154,7 @@ class rulecore
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
-        $this->env = getenv('APP_ENV');
+        $this->env = $this->parameterBagInterface->get('env'); // access env variable defined in config/services.yaml
         $this->formulaManager = $formulaManager;
     }
 
@@ -1193,7 +1193,7 @@ class rulecore
         } catch (\Exception $e) {
             $session = new Session();
             $session->set('error', [$e->getMessage()]);
-
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
             return false;
         }
     }

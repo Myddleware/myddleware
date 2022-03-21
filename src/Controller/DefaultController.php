@@ -44,18 +44,15 @@ use App\Form\DuplicateRuleFormType;
 use App\Manager\DocumentManager;
 use App\Manager\FormulaManager;
 use App\Manager\HomeManager;
-use App\Manager\job;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
 use App\Manager\SolutionManager;
-use App\Manager\template;
 use App\Manager\TemplateManager;
 use App\Manager\ToolsManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
-// use App\Manager\rule as RuleClass;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -574,7 +571,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
-
                 $this->ruleManager->actionRule('runMyddlewareJob');
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
@@ -1820,46 +1816,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     }
                 }
                 asort($choice);
-
-                // -------------------	Error relation
-
-                // $lstErrors= $this->getDoctrine()
-                // ->getManager()
-                // ->getRepository(RuleRelationShip::class)
-                // ->findBy(['rule'=>$id]);
-
-                // $lstErrorRelation = [];
-                // $controls = [];
-
-                // foreach ($lstErrors as $key => $value) {
-                //     if (!in_array($value['errorEmpty'], $controls)) {
-                //         $lstErrorRelation[$value['id']] = $value['errorEmpty'];
-                //         $controls[] = $value['name'];
-
-                //         dump($value);
-                //     }
-
-                // }
-                // asort($lstErrorRelation);
-
-                // Relations d'une règle
-                // if ($rule->getRelationsShip()->count()) {
-                //     foreach ($rule->getRelationsShip() as $ruleRelationShipsObj) {
-                //         $relate[] = [
-                //             'errorMissing' => $ruleRelationShipsObj->getErrorMissing(),
-                //             'errorEmpty' => $ruleRelationShipsObj->getErrorEmpty(),
-                //         ];
-                //     }
-                //     // $this->sessionService->getParamRuleReloadRelate($key, $relate);
-                // }
-                // $rule_relationships = $rule->getRelationsShip();
-                // $tab_rs = [];
-                // $i = 0;
-                // foreach ($rule_relationships as $r) {
-                //     $tab_rs[$i]['getErrorMissing'] = $r->getErrorMissing();
-                //     $tab_rs[$i]['getErrorEmpty'] = $r->getErrorEmpty();
-                //     ++$i;
-                // }
 
                 // -------------------	Parent relation
                 // Search if we can send document merged with the target solution
