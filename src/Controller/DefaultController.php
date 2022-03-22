@@ -2277,7 +2277,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                         if ('limit' === $ruleParam->getName()) {
                             $limit = $ruleParam->getValue();
                         }
-
                         if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
                             $this->entityManager->remove($ruleParam);
                             $this->entityManager->flush();
