@@ -23,6 +23,7 @@
         "@popperjs/core": "^2.9.2",
         "bootstrap": "^5.0.1",
         "caniuse-lite": "^1.0.30001249",
+        "docsify-cli": "^4.4.4",
         "google-charts": "^2.0.0",
         "jquery": "3.6.0",
         "jquery-ui": "^1.13.0",
