@@ -243,8 +243,8 @@ class filecore extends solution
             $sql = substr($sql, 0, -1);
             $sql .= ')';
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
-            $fields = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $fields = $result->fetchAllAssociative();
             if (!empty($fields)) {
                 // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                 foreach ($fields as $field) {

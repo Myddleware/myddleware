@@ -120,9 +120,9 @@ class TemplateManager
         $query = 'SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC';
         $stmt = $this->connection->prepare($query);
         $stmt->bindValue('rules', $rulesString);
-        $stmt->execute();
+        $result = $stmt->executeQuery();
 
-        return $stmt->fetchALL();
+        return $result->fetchAllAssociative();
     }
 
     // Permet de lister les templates pour les connecteurs selectionnés

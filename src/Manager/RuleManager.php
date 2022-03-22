@@ -165,8 +165,8 @@ class rulecore
             $rule = "SELECT *, (SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode FROM rule WHERE id = :ruleId";
             $stmt = $this->connection->prepare($rule);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->rule = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $this->rule = $result->fetchAssociative();
             // Set the rule parameters and rule relationships
             $this->setRuleParam();
             $this->setLimit();
@@ -290,16 +290,16 @@ class rulecore
 		    		WHERE connector.id = :connId';
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':connId', $connId);
-            $stmt->execute();
-            $r = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $r = $result->fetchAssociative();
             // Get params connection
             $sql = 'SELECT id, conn_id, name, value
 		    		FROM connectorparam 
 		    		WHERE conn_id = :connId';
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':connId', $connId);
-            $stmt->execute();
-            $tab_params = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $tab_params = $result->fetchAllAssociative();
             $params = [];
             if (!empty($tab_params)) {
                 foreach ($tab_params as $key => $value) {
@@ -427,8 +427,8 @@ class rulecore
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $this->jobId);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         if (!empty($job['status'])) {
             return $job['status'];
         }
@@ -997,8 +997,8 @@ class rulecore
         $sql = 'SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId AND deleted = 0';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':ruleId', $ruleId);
-        $stmt->execute();
-        $documents = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $documents = $result->fetchAllAssociative();
         if (!empty($documents)) {
             foreach ($documents as $document) {
                 $documentResult['sourceId'][$document['source_id']][] = $document;
@@ -1037,8 +1037,8 @@ class rulecore
             $stmt->bindValue(':conn_id_target', $params['connector']['cible']);
             $stmt->bindValue(':module_source', $params['module']['source']);
             $stmt->bindValue(':module_target', $params['module']['cible']);
-            $stmt->execute();
-            $bidirectionalRules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $bidirectionalRules = $result->fetchAllAssociative();
 
             // Construction du tableau de sortie
             if (!empty($bidirectionalRules)) {
@@ -1362,8 +1362,8 @@ class rulecore
 								';
             $stmt = $this->connection->prepare($queryChild);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociative();
             if (!empty($rules)) {
                 return true;
             }
@@ -1504,8 +1504,8 @@ class rulecore
                     $stmt->bindValue(':module_target', $this->rule['module_target']);
                     $stmt->bindValue(':target_id', $record['target_id']);
                     $stmt->bindValue(':docId', $docId);
-                    $stmt->execute();
-                    $results = $stmt->fetchAll();
+                    $result = $stmt->executeQuery();
+                    $results = $result->fetchAllAssociative();
                     if (!empty($results)) {
                         foreach ($results as $result) {
                             // Get the last reference document created to add it into the log
@@ -1613,9 +1613,9 @@ class rulecore
             $stmt = $this->connection->prepare($query_documents);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $stmt->bindValue(':status', $status);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
 
-            return $stmt->fetchAll();
+            return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1629,8 +1629,8 @@ class rulecore
             $query_document = 'SELECT * FROM document WHERE id = :documentId';
             $stmt = $this->connection->prepare($query_document);
             $stmt->bindValue(':documentId', $documentId);
-            $stmt->execute();
-            $document = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $document = $result->fetchAssociative();
             if (!empty($document)) {
                 return $document;
             } else {
@@ -1667,8 +1667,8 @@ class rulecore
 				ORDER BY document.source_date_modified ASC
 				$limit";
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute();
-        $documents = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $documents = $result->fetchAllAssociative();
 
         foreach ($documents as $document) {
             // If the rule is a parent, we have to get the data of all rules child
@@ -1720,8 +1720,8 @@ class rulecore
 							WHERE rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleFields = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $this->ruleFields = $result->fetchAllAssociative();
             if ($this->ruleFields) {
                 foreach ($this->ruleFields as $RuleField) {
                     // Plusieurs champs source peuvent être utilisé pour un seul champ cible
@@ -1763,8 +1763,8 @@ class rulecore
 							WHERE rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $ruleParams = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $ruleParams = $result->fetchAllAssociative();
             if ($ruleParams) {
                 foreach ($ruleParams as $ruleParam) {
                     $this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
@@ -1786,8 +1786,8 @@ class rulecore
 								AND rule_id IS NOT NULL';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleRelationships = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $this->ruleRelationships = $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1815,8 +1815,8 @@ class rulecore
 								rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $this->ruleFilters = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $this->ruleFilters = $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
@@ -1835,9 +1835,9 @@ class rulecore
 								AND rulerelationship.parent = 1';
             $stmt = $this->connection->prepare($sqlFields);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
 
-            return $stmt->fetchAll();
+            return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             throw new \Exception('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }

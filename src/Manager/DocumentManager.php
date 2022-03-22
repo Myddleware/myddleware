@@ -206,8 +206,8 @@ class documentcore
 							WHERE document.id = :id_doc";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':id_doc', $id_doc);
-            $stmt->execute();
-            $this->document_data = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $this->document_data = $result->fetchAssociative();
 
             if (!empty($this->document_data['id'])) {
                 $this->id = $this->document_data['id'];
@@ -359,7 +359,7 @@ class documentcore
             // Source_id could contain accent
             $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId')";
             $stmt = $this->connection->prepare($query_header);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->updateStatus('New');
             // Insert source data
             return $this->insertDataTable($this->data, 'S');
@@ -415,8 +415,8 @@ class documentcore
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $this->jobId);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         if (!empty($job['status'])) {
             return $job['status'];
         }
@@ -587,8 +587,8 @@ class documentcore
             $stmt->bindValue(':rule_id', $this->document_data['rule_id']);
             $stmt->bindValue(':source_id', $this->document_data['source_id']);
             $stmt->bindValue(':date_created', $this->document_data['date_created']);
-            $stmt->execute();
-            $result = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $result = $result->fetchAssociative();
 
             // if id found, we stop to send an error
             if (!empty($result['id'])) {
@@ -601,8 +601,8 @@ class documentcore
                 $stmt->bindValue(':rule_id', $this->ruleParams['bidirectional']);
                 $stmt->bindValue(':source_id', $this->document_data['source_id']);
                 $stmt->bindValue(':date_created', $this->document_data['date_created']);
-                $stmt->execute();
-                $result = $stmt->fetch();
+                $result = $stmt->executeQuery();
+                $result = $result->fetchAssociative();
                 if (!empty($result['id'])) {
                     throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$this->ruleParams['bidirectional'].'. This document is not closed. This document is queued. ');
                 }
@@ -624,8 +624,8 @@ class documentcore
 										AND	childRule.deleted = 0';
             $stmt = $this->connection->prepare($sqlGetChildRules);
             $stmt->bindValue(':rule_id', $this->document_data['rule_id']);
-            $stmt->execute();
-            $childRules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $childRules = $result->fetchAllAssociative();
             if ($childRules) {
                 // If rule child, document open in ready_to_send are accepted because data in ready to send could be pending
                 $sqlParamsChild = "	SELECT 
@@ -653,8 +653,8 @@ class documentcore
                     $stmt->bindValue(':rule_id', $childRule['rule_id']);
                     $stmt->bindValue(':source_id', $this->document_data['source_id']);
                     $stmt->bindValue(':date_created', $this->document_data['date_created']);
-                    $stmt->execute();
-                    $result = $stmt->fetch();
+                    $result = $stmt->executeQuery();
+                    $result = $result->fetchAssociative();
                     if (!empty($result['id'])) {
                         throw new \Exception('The document '.$result['id'].' is on the same record on the rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
                     }
@@ -807,8 +807,8 @@ class documentcore
                     $sqlParams = '	SELECT name FROM rule WHERE id = :rule_id';
                     $stmt = $this->connection->prepare($sqlParams);
                     $stmt->bindValue(':rule_id', $ruleRelationship['field_id']);
-                    $stmt->execute();
-                    $ruleResult = $stmt->fetch();
+                    $result = $stmt->executeQuery();
+                    $ruleResult = $result->fetchAssociative();
                     $direction = $this->getRelationshipDirection($ruleRelationship);
                     throw new \Exception('Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
                 }
@@ -1508,9 +1508,9 @@ class documentcore
                 $rule = 'SELECT * FROM rule WHERE id = :ruleId';
                 $stmt = $this->connection->prepare($rule);
                 $stmt->bindValue(':ruleId', $this->ruleId);
-                $stmt->execute();
+                $result = $stmt->executeQuery();
 
-                return $stmt->fetch();
+                return $result->fetchAssociative();
             }
         } catch (\Exception $e) {
             $this->typeError = 'E';
@@ -1533,8 +1533,8 @@ class documentcore
 								';
         $stmt = $this->connection->prepare($sqlIsChild);
         $stmt->bindValue(':ruleId', $this->ruleId);
-        $stmt->execute();
-        $isChild = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $isChild = $result->fetchAssociative(); // 1 row
         if (!empty($isChild)) {
             return true;
         }
@@ -1549,9 +1549,9 @@ class documentcore
             $sqlGetChilds = 'SELECT * FROM document WHERE parent_id = :docId AND deleted = 0 ';
             $stmt = $this->connection->prepare($sqlGetChilds);
             $stmt->bindValue(':docId', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
 
-            return $stmt->fetchAll();
+            return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1570,8 +1570,8 @@ class documentcore
 								';
         $stmt = $this->connection->prepare($sqlIsChild);
         $stmt->bindValue(':ruleId', $this->ruleId);
-        $stmt->execute();
-        $isChild = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $isChild = $result->fetchAssociative(); // 1 row
         if (!empty($isChild)) {
             return true;
         }
@@ -1596,8 +1596,8 @@ class documentcore
                 $rule = 'SELECT * FROM rulefield WHERE rule_id = :ruleId';
                 $stmt = $this->connection->prepare($rule);
                 $stmt->bindValue(':ruleId', $this->ruleId);
-                $stmt->execute();
-                $ruleFields = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $ruleFields = $result->fetchAllAssociative();
                 foreach ($ruleFields as $ruleField) {
                     $fields[] = $ruleField['target_field_name'];
                 }
@@ -1606,8 +1606,8 @@ class documentcore
                 $rule = 'SELECT * FROM rulerelationship WHERE rule_id = :ruleId';
                 $stmt = $this->connection->prepare($rule);
                 $stmt->bindValue(':ruleId', $this->ruleId);
-                $stmt->execute();
-                $ruleRelationShips = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $ruleRelationShips = $result->fetchAllAssociative();
                 if (!empty($ruleRelationShips)) {
                     foreach ($ruleRelationShips as $ruleRelationShip) {
                         // If it is a normal relationship we take the target field
@@ -1647,8 +1647,8 @@ class documentcore
 							WHERE rule_id = :ruleId';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->execute();
-            $ruleParams = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $ruleParams = $result->fetchAllAssociative();
             if ($ruleParams) {
                 foreach ($ruleParams as $ruleParam) {
                     $this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
@@ -1745,8 +1745,8 @@ class documentcore
                             $stmt->bindValue(':ruleId', $ruleRelationship['field_id']);
                             $stmt->bindValue(':id', $this->sourceId);
                             $stmt->bindValue(':id_doc', $this->id);
-                            $stmt->execute();
-                            $result = $stmt->fetch();
+                            $result = $stmt->executeQuery();
+                            $result = $result->fetchAssociative();
                             // Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
                             if (!empty($result['target_id'])) {
                                 $this->targetId = $result['target_id'];
@@ -1813,8 +1813,8 @@ class documentcore
                 $stmt->bindValue(':ruleId', $this->ruleId);
                 $stmt->bindValue(':id', $id);
                 $stmt->bindValue(':id_doc', $this->id);
-                $stmt->execute();
-                $result = $stmt->fetch();
+                $result = $stmt->executeQuery();
+                $result = $result->fetchAssociative();
             }
 
             // Si on n'a pas trouvé de résultat et que la règle à une équivalente inverse (règle bidirectionnelle)
@@ -1827,8 +1827,8 @@ class documentcore
                 $stmt->bindValue(':ruleId', $this->ruleParams['bidirectional']);
                 $stmt->bindValue(':id', $id);
                 $stmt->bindValue(':id_doc', $this->id);
-                $stmt->execute();
-                $result = $stmt->fetch();
+                $result = $stmt->executeQuery();
+                $result = $result->fetchAssociative();
             }
 
             // If we found a record
@@ -1923,7 +1923,7 @@ class documentcore
             $stmt->bindValue(':attempt', $this->attempt);
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
@@ -1957,7 +1957,7 @@ class documentcore
             $stmt->bindValue(':now', $now);
             $stmt->bindValue(':deleted', $deleted);
             $stmt->bindValue(':id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
@@ -2020,7 +2020,7 @@ class documentcore
             $stmt->bindValue(':now', $now);
             $stmt->bindValue(':new_type', $new_type);
             $stmt->bindValue(':id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
@@ -2052,7 +2052,7 @@ class documentcore
             // Target id could contain accent
             $stmt->bindValue(':target_id', utf8_encode($target_id));
             $stmt->bindValue(':id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->message .= 'Target id : '.$target_id;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
@@ -2087,8 +2087,8 @@ class documentcore
 						";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':id', $ruleRelationship['id']);
-            $stmt->execute();
-            $result = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $result = $result->fetchAssociative();
             if (!empty($result['direction'])) {
                 return $result['direction'];
             }
@@ -2184,8 +2184,8 @@ class documentcore
                 $stmt = $this->connection->prepare($sqlParams);
                 $stmt->bindValue(':ruleRelateId', $ruleRelationship['field_id']);
                 $stmt->bindValue(':record_id', $record_id);
-                $stmt->execute();
-                $result = $stmt->fetch();
+                $result = $stmt->executeQuery();
+                $result = $result->fetchAssociative();
             }
             if (!empty($result['record_id'])) {
                 // If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
@@ -2236,8 +2236,8 @@ class documentcore
             $stmt->bindValue(':ruleRelateId', $ruleRelationship['field_id']);
             $stmt->bindValue(':record_id', $record_id);
             $stmt->bindValue(':status', $status);
-            $stmt->execute();
-            $result = $stmt->fetch();
+            $result = $stmt->executeQuery();
+            $result = $result->fetchAssociative();
             if (!empty($result['id'])) {
                 return $result;
             }
@@ -2275,7 +2275,7 @@ class documentcore
             $stmt->bindValue(':doc_id', $this->id);
             $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
             $stmt->bindValue(':job_id', $this->jobId);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->message = '';
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {

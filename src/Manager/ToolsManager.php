@@ -25,13 +25,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ToolsManager.
@@ -186,8 +186,8 @@ class toolscore
         // Get the custom php version first
         $select = "SELECT * FROM config WHERE name = 'php'";
         $stmt = $this->connection->prepare($select);
-        $stmt->execute();
-        $config = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $config = $result->fetchAssociative();
         if (!empty($config['conf_value'])) {
             $php = $config['conf_value'];
         } else {

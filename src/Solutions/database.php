@@ -532,8 +532,8 @@ class databasecore extends solution
 							GROUP BY source_id";
                 $stmt = $connection->prepare($query);
                 $stmt->bindValue(':id_rule', $param['rule']['id']);
-                $stmt->execute();
-                $documents = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $documents = $result->fetchAllAssociative();
 
                 // Test all document found in Myddleware
                 foreach ($documents as $document) {
@@ -628,8 +628,8 @@ class databasecore extends solution
                 $sql = substr($sql, 0, -1);
                 $sql .= ')';
                 $stmt = $this->connection->prepare($sql);
-                $stmt->execute();
-                $fields = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $fields = $result->fetchAllAssociative();
                 if (!empty($fields)) {
                     // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                     foreach ($fields as $field) {

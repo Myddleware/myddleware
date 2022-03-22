@@ -184,8 +184,8 @@ class jobcore
 					';
             $stmt = $this->connection->prepare($sqlRule);
             $stmt->bindValue('filter', $filter);
-            $stmt->execute();
-            $rule = $stmt->fetch(); // 1 row
+            $result = $stmt->executeQuery();
+            $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
                 throw new \Exception('Rule '.$filter.' doesn\'t exist or is deleted.');
             }
@@ -290,8 +290,8 @@ class jobcore
 							LIMIT $limit";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('attempt', $attempt);
-            $stmt->execute();
-            $documentsError = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $documentsError = $result->fetchAllAssociative();
             if (!empty($documentsError)) {
                 // include_once 'rule.php';
                 foreach ($documentsError as $documentError) {
@@ -319,8 +319,8 @@ class jobcore
         // Check if a job is already running
         $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
         $stmt = $this->connection->prepare($sqlJobOpen);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         // Error if one job is still running
         if (!empty($job)) {
             $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
@@ -488,8 +488,8 @@ class jobcore
                             .$where.'
 							ORDER BY rule.id';
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();
-            $documents = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $documents = $result->fetchAllAssociative();
 
             if (!empty($documents)) {
                 // include_once 'rule.php';
@@ -530,8 +530,8 @@ class jobcore
             $sqlRule = 'SELECT * FROM rule WHERE id = :filter AND deleted = 0';
             $stmt = $this->connection->prepare($sqlRule);
             $stmt->bindValue('filter', $ruleId);
-            $stmt->execute();
-            $rule = $stmt->fetch(); // 1 row
+            $result = $stmt->executeQuery();
+            $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
                 throw new \Exception('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
             }
@@ -589,8 +589,8 @@ class jobcore
 								AND	rule.deleted = 0
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociative();
             if (!empty($rules)) {
                 foreach ($rules as $rule) {
                     $ruleOrder[] = $rule['name_slug'];
@@ -625,8 +625,8 @@ class jobcore
 						rule.deleted = 0
 					GROUP BY rule.id";
             $stmt = $this->connection->prepare($sql);
-            $stmt->execute();
-            $rules = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $rules = $result->fetchAllAssociative();
 
             if (!empty($rules)) {
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
@@ -678,7 +678,7 @@ class jobcore
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
                 $stmt = $this->connection->prepare($sql);
-                $stmt->execute();
+                $result = $stmt->executeQuery();
 
                 //Mise à jour de la table
                 $insert = 'INSERT INTO ruleorder VALUES ';
@@ -688,7 +688,7 @@ class jobcore
                 // Suppression de la dernière virgule
                 $insert = rtrim($insert, ',');
                 $stmt = $this->connection->prepare($insert);
-                $stmt->execute();
+                $result = $stmt->executeQuery();
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
@@ -767,8 +767,8 @@ class jobcore
 						WHERE
 							ruleparam.name = 'delete'";
         $stmt = $this->connection->prepare($sqlParams);
-        $stmt->execute();
-        $rules = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $rules = $result->fetchAllAssociative();
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
@@ -791,7 +791,7 @@ class jobcore
                     $stmt = $this->connection->prepare($deleteSource);
                     $stmt->bindValue('ruleId', $rule['id']);
                     $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $stmt->execute();
+                    $result = $stmt->executeQuery();
                     if ($stmt->rowCount() > 0) {
                         $this->message .= $stmt->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
                     }
@@ -819,7 +819,7 @@ class jobcore
                     $stmt = $this->connection->prepare($deleteLog);
                     $stmt->bindValue('ruleId', $rule['id']);
                     $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $stmt->execute();
+                    $result = $stmt->executeQuery();
                     if ($stmt->rowCount() > 0) {
                         $this->message .= $stmt->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';
                     }
@@ -851,7 +851,7 @@ class jobcore
 			";
             $stmt = $this->connection->prepare($deleteJob);
             $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             if ($stmt->rowCount() > 0) {
                 $this->message .= $stmt->rowCount().' rows deleted in the table Job. ';
             }
@@ -884,8 +884,8 @@ class jobcore
 							GROUP BY document.global_status';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
-            $data = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $data = $result->fetchAllAssociative();
             if (!empty($data)) {
                 foreach ($data as $row) {
                     if ('Close' == $row['global_status']) {
@@ -913,8 +913,8 @@ class jobcore
 									ON Connector_target.id = rule.conn_id_target';
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
-            $solutions = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $solutions = $result->fetchAllAssociative();
             $this->logData['solutions'] = '';
             if (!empty($solutions)) {
                 foreach ($solutions as $solution) {
@@ -937,8 +937,8 @@ class jobcore
 									log.job_id = :id';
                 $stmt = $this->connection->prepare($sqlParamsDoc);
                 $stmt->bindValue('id', $this->id);
-                $stmt->execute();
-                $this->logData['documents'] = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $this->logData['documents'] = $result->fetchAllAssociative();
             }
 
             // Récupération de la durée du job
@@ -994,7 +994,7 @@ class jobcore
             $stmt->bindValue('error', $error);
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -1014,7 +1014,7 @@ class jobcore
             $now = gmdate('Y-m-d H:i:s');
             $query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
             $stmt = $this->connection->prepare($query_header);
-            $stmt->execute();
+            $result = $stmt->executeQuery();
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION

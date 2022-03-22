@@ -202,8 +202,8 @@ class NotificationManager
                                 )
                             GROUP BY document.global_status";
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();
-            $cptLogs = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $cptLogs = $result->fetchAllAssociative();
             $job_open = 0;
             $job_close = 0;
             $job_error = 0;
