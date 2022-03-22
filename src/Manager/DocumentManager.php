@@ -37,7 +37,7 @@ use App\Entity\Log;
 use App\Entity\Rule;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleRelationShipRepository;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;

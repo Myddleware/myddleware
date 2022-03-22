@@ -35,7 +35,7 @@ use App\Entity\RuleRelationShip;
 use App\Entity\User;
 use App\Repository\ConnectorParamRepository;
 use App\Repository\ConnectorRepository;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;

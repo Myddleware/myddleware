@@ -25,13 +25,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
-use Doctrine\DBAL\Driver\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 /**
  * Class ToolsManager.

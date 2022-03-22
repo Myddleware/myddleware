@@ -31,7 +31,7 @@ use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
 use DateTime;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;

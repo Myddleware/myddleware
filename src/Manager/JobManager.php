@@ -25,19 +25,13 @@
 
 namespace App\Manager;
 
-// use Symfony\Bridge\Monolog\Logger; // Gestion des logs
-// use Symfony\Component\DependencyInjection\ContainerInterface as Container; // Accède aux services
-// use Doctrine\DBAL\Connection; // Connexion BDD
-// use Symfony\Component\HttpFoundation\Session\Session;
-// use Myddleware\RegleBundle\Classes\tools as MyddlewareTools;
-
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;

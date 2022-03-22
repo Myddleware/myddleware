@@ -26,12 +26,10 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
-// document Myddleware
 
 class solutioncore
 {
