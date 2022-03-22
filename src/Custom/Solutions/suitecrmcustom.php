@@ -96,6 +96,7 @@ class suitecrmcustom extends suitecrm {
 												'Benevole' => 'Bénévole',
 												'contact_partenaire' => 'Contact partenaire',
 												'non_contact_partenaire' => 'Pas contact partenaire',
+												'non_accompagne' => 'Pas mentoré',
 											)
 						);
 					return array($param);
