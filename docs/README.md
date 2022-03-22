@@ -2,46 +2,17 @@
 
 > Welcome to the Myddleware community and thank you for joining us!
 
-![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
-
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
 ![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
 
-[On our community website,](http://community.myddleware.com) you’ll find everything you’re looking for to master Myddleware, from step-by-step tutorials, to English and French forums. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
+[On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
 This community is ours : let’s all contribute, make it a friendly, helpful space where we can all find what we’re looking for!
 
 Please don’t hide any precious skills from us, whether it is coding, translation, connectors creation, .... the list goes on! The whole community could then benefit from these!
 
-Applications currently connected :
-
-- Bittle
-- Dolist
-- ERPNext
-- Eventbrite
-- Facebook
-- Hubspot
-- Magento
-- Mailchimp
-- Mautic
-- Microsoft SQL
-- Moodle
-- MySQL
-- OracleDB
-- Prestashop
-- Sage CRM
-- Salesforce
-- SAP CRM
-- Sendinblue
-- SugarCRM
-- SuiteCRM
-- Vtiger
-- Woocommerce
-- Wordpress
-- Zuora  
-
-We also connect File via FTP and Database.
+%[{ connectors.md }]%
 
 Find us here : [www.myddleware.com](https://www.myddleware.com)
 

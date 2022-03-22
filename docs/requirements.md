@@ -17,7 +17,7 @@ To use Myddleware you need the following on your web server :
 - [composer](https://getcomposer.org/download/)
 - the [Symfony CLI](https://symfony.com/download)
 - [Node.js](https://nodejs.org/de/download/) version 14.16.1
-- [yarn](https://yarnpkg.com/getting-started/install) version [1.22.10](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable )
+- [yarn](https://yarnpkg.com/getting-started/install) version [1.22.17](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable )
 
 Myddleware uses [Doctrine ORM](https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/tutorials/getting-started.html#getting-started-with-doctrine) so you will need to have the PDO driver installed for the database server you intend to use.
 
