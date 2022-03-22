@@ -2,13 +2,14 @@
 
 > Welcome to the Myddleware community and thank you for joining us!
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b22fda90ea2b4a9a9542b8026734e840)](https://www.codacy.com/gh/Myddleware/myddleware/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Myddleware/myddleware&amp;utm_campaign=Badge_Grade)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Myddleware/myddleware)](https://github.com/Myddleware/myddleware)
 ![GitHub repo size](https://img.shields.io/github/repo-size/Myddleware/myddleware)
+![GitHub top language](https://img.shields.io/github/languages/top/Myddleware/myddleware)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/Myddleware/myddleware/bootstrap)
 [![GitHub issues](https://img.shields.io/github/issues/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/issues?q=is%3Aissue+is%3Aclosed)
 [![GitHub](https://img.shields.io/github/license/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/blob/main/LICENSE)
-![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/Myddleware/myddleware/bootstrap)
-![GitHub top language](https://img.shields.io/github/languages/top/Myddleware/myddleware)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Myddleware/myddleware)
 [![GitHub contributors](https://img.shields.io/github/contributors/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/graphs/contributors)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fwww.myddleware.com%2F)](https://www.myddleware.com/)
