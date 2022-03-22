@@ -99,19 +99,72 @@ unzip myddleware.zip -d <myddleware_dirname>
 
 #### **Docker install**
 
-You can 
+You can use the Docker config files provided to install Myddleware if you want to reproduce our developer's environment or deploy it using Kubernetes for example.
+
+#### Using the Myddleware Makefile
+
+> Make isn't available on Windows systems. If you want to use them on your Windows machine, you will need to set up [WSL](https://docs.microsoft.com/en-us/windows/wsl/).
+
+Various useful commands are available on our [Makefile](https://github.com/Myddleware/myddleware/blob/main/Makefile). For instance, you can use the following to build & run the Docker container for Myddleware :
+
+```bash
+## List all your Docker containers
+make ps
+
+## Run Myddleware with Docker Compose
+make run-with-compose
+
+## Run Myddleware with Docker
+make build
+make run
+```
 
 #### Build the Myddleware image with docker-compose (developer's mode)
 
-*This section is still under construction*
+##### Build the container locally
 
-##### Build the container
+Run the following commands in your myddleware directory :
+
+```docker-compose
+docker-compose up --build
+
+```
+
+This will build a Myddleware image containing the Myddleware container (PHP with Apache) as well as a Node.js container to handle assets and a MySQL container for your database.
+
+Once the images are up and running, you need to go to the Node.js terminal and type :
+
+```yarn
+yarn install
+yarn build
+
+```
+
+Once your assets are built, you can now go to <http://localhost:30080>, where you should see the Myddleware homescreen.
+
+To connect to the MySQL database, use the following credentials :
+
+- **username** : myddleware
+- **database** : myddleware
+- **password** : secret
 
 #### Build the Myddleware image with Docker(developer's mode)
 
-*This section is still under construction*
-
 ##### Build the container
+
+If you choose to build Myddleware using Docker on its own, you will need to set up your database environment variables and connect Myddleware to it as this image doesn't provide a Myddleware database.
+
+```docker
+docker build . -t myddleware
+```
+
+#### Run
+
+```docker
+docker run -d -p 30080:80 myddleware
+```
+
+You can then access your Myddleware instance by going to ```http://localhost:30080/index.php```
 
 <!-- tabs:end -->
 
@@ -141,33 +194,28 @@ Fill in the form to create your Myddleware credentials (email, username & passwo
 
 #### Create your environment file
 
-At the root of your /myddleware directory, you need to create a .env.local file (it should be at the same level as the .env & .env.example files).
+At the root of your /myddleware directory, you need to create a .env.local file (it should be at the same level as the .env & .env.example files). If you've followed the installation from GitHub above, all you will need to do here is to fill in the .env.local file with the following information :
+
+```env
+DATABASE_URL="mysql://username:password@host:port/dbname"
+APP_ENV=prod
+APP_DEBUG=false
+APP_SECRET=ThisSecretIsNotSoSecretChangeIt
+MAILER_URL=gmail://smtp.example.com:465?encryption=ssl&auth_mode=login&username=&password=
+```
+
+The DATABASE_URL variable will contain the values used by Myddleware to connect to your actual database, so you must replace each placeholder value with your credentials.
+
+The MAILER_URL is optional. It is used by Myddleware to send you notification emails on some occasions such as when a task failed or some documents are in error. You need to configure it to match your SMTP server's credentials.
 
 <!-- tabs:end -->
 
-## Basic usage
-
-### Connect your applications to Myddleware
-
-*This section is still under construction*
-
-### Create a rule
-
-*This section is still under construction*
-
-## Administration tasks
-
-*This section is still under construction*
-
-### Add users
-
-### Promote a user
-
-### Demote a user
+%[{ basic_usage.md }]%
+%[{ admin_tasks.md }]%
 
 ## Supported Connectors
 
-*This section is still under construction*
+%[{ connectors.md }]%
 
 ## Contributing
 

@@ -2,17 +2,11 @@
 
 ## Create your own connectors
 
-### Requirement
+### Requirements
 
-It is important that the application you want to connect has a webservice API with functions to read data. This will make it easier to use foor source application and create/update data and also for target application.
+It is important that the application you want to connect has a webservice API with methods to read data (at the very least).
 
-First you will need to prepare Myddleware :
-
-In the folder ```myddleware/src/DataFixtures/LoadSoltionData.php```
-
-We use doctrine to update the database, so you have modify the file "LoadSolutionData.php"
-
-- Add a new row to the LoadSolutionData class for your new connector
+First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures, and more specifically the LoadSolutionData class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
 
 ```php
 
@@ -25,7 +19,7 @@ We use doctrine to update the database, so you have modify the file "LoadSolutio
         ];
 ```
 
-In the Folder Manager ```myddleware/src/Manager/SolutionManager.php```
+In ```/src/Manager/SolutionManager.php```
 
 - Add your new connector to the SolutionManager file, , in the same way as the others. First, add ```use App\Soltions\'your_connector'```.
 
@@ -52,17 +46,21 @@ Then still in SolutionManager, we add your new connector to the construct functi
 
 Add to Database :
 
-- In your terminal load Myddleware fixtures:
+- In your terminal, load Myddleware fixtures:
 
-        php bin/console doctrine:fixtures:load-append
+```bash
+        php bin/console doctrine:fixtures:load --append
+```
 
 - In your terminal use the command corresponding to your API:
 
+```bash
        composer require ...
+```
 
-> Check in myddleware if the new connector is accessible
+> Check in Myddleware if the new connector is accessible.
 
-Now we need to create a new connector class, in ```myddleware/src/Solutions```, the file name should be the name service.  You can use the code of another class as inspiration, for example: "suitecrm.php":
+Now we need to create a new connector class, in ```myddleware/src/Solutions```, the file name must be the same as the name of your class. You can use the code of another class for inspiration. For example, check out "SuiteCRM.php":
 
 ```php
         namespace App\Solutions;
@@ -70,7 +68,7 @@ Now we need to create a new connector class, in ```myddleware/src/Solutions```, 
         use Symfony\Component\Form\Extension\Core\Type\PasswordType;
         use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-        class suitecrmcore extends solution
+        class SuiteCRM extends Solution
         {
         protected $limitCall = 100;
         protected $urlSuffix = '/service/v4_1/rest.php';
@@ -85,13 +83,16 @@ Now we need to create a new connector class, in ```myddleware/src/Solutions```, 
         }
 ```
 
-Finally, if youu want to display the application logo add the image corresponding to your appliaction with the png format and size 64*64 pixels in the directory ```myddleware/public/build/images/solution```
+Finally, if you want to display the application's logo, add the image corresponding to your application with the png format and size 64*64 pixels in the ```myddleware/public/build/images/solution/``` directory
 
-> Tips: For error handling, we have different possiblies, the firstone creates a "throw exception" in the try, it will be directly sent to the catch. we also use the ```dev.log``` file(it returns your errors).
+> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. You should also log errors using Symfony logger. In case of errors, the error message will be sent to the ```prod.log``` file.
 
-### Method getFieldLogin
+Here is an example from our WooCommerce.php file :
+ 
 
-In this new connector class, create the function getFieldLogin(). Here, you have to put the parameters required to connect to your solution.
+### getFieldLogin method
+
+In this new connector class, create the function getFieldsLogin(). Here, you have to put the parameters required to connect to your solution.
 
 For example, if you need an url and an APIkey you can creat this methode :
 
