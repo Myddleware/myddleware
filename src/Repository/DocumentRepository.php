@@ -25,17 +25,16 @@
 
 namespace App\Repository;
 
-use DateTime;
-use Exception;
+use App\Entity\Document;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
-use App\Entity\Document;
 use App\Manager\HomeManager;
+use DateTime;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * DocumentRepository.
@@ -75,7 +74,7 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return null|Document
+     * @return Document|null
      */
     public function findDocumentByFilters(array $filters = [])
     {
@@ -107,7 +106,7 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return null|Document
+     * @return Document|null
      */
     public function findDocumentByReadyToSend(array $filters = [])
     {
@@ -196,7 +195,7 @@ class DocumentRepository extends ServiceEntityRepository
 
     public function countTransferHisto(User $user = null)
     {
-            $qb = $this->createQueryBuilder('d')
+        $qb = $this->createQueryBuilder('d')
                 ->select("DATE_FORMAT(d.dateModified, '%Y-%m-%d') AS date")
                 ->addSelect('d.globalStatus')
                 ->addSelect('COUNT(d.id) AS nb')
@@ -206,10 +205,11 @@ class DocumentRepository extends ServiceEntityRepository
                 ->groupBy('date')
                 ->addGroupBy('d.globalStatus');
 
-            if ($user && !$user->isAdmin()) {
-                $qb->andWhere('d.createdBy = :user')
+        if ($user && !$user->isAdmin()) {
+            $qb->andWhere('d.createdBy = :user')
                     ->setParameter('user', $user);
-            }
+        }
+
         return $qb->getQuery()->getResult();
     }
 
@@ -263,7 +263,7 @@ class DocumentRepository extends ServiceEntityRepository
     /**
      * @param string $type
      *
-     * @return null|Document
+     * @return Document|null
      *
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -303,105 +303,105 @@ class DocumentRepository extends ServiceEntityRepository
     public function getFluxPagination(array $data)
     {
         $qb = $this->createQueryBuilder('document');
-            $qb
+        $qb
             ->select('document.id, document.dateCreated, document.dateModified as date_modified, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
             ->addSelect('user.username, rule.name as rule_name, rule.id as rule_id')
             ->join('document.rule', 'rule')
             ->join('document.createdBy', 'user')
-			->andWhere('document.deleted = 0');
-		
-		// No search if no parameter set
-		if (empty($data)) {
-			$qb->andWhere('document.deleted < 0');
-		}
-		
-		if (!empty($data['source_content']) && is_string($data['source_content'])) {
-			$qb->innerJoin('document.datas', 'document_data_source')
-				->andWhere('document_data_source.data LIKE :source_content')
-				->andWhere('document_data_source.type = :document_data_type')
-				->setParameter('source_content', '%'.$data['source_content'].'%')
-				->setParameter('document_data_type', 'S');
-		}
+            ->andWhere('document.deleted = 0');
 
-		if (!empty($data['target_content']) && is_string($data['target_content'])) {
-			$qb->innerJoin('document.datas', 'document_data_target')
-				->andWhere('document_data_target.data LIKE :target_content')
-				->andWhere('document_data_target.type = :document_data_type')
-				->setParameter('target_content', '%'.$data['target_content'].'%')
-				->setParameter('document_data_type', 'T');
-		}
+        // No search if no parameter set
+        if (empty($data)) {
+            $qb->andWhere('document.deleted < 0');
+        }
 
-		if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-			$qb
-				->andWhere('document.dateModified >= :dateModified')
-				->setParameter('dateModified', $data['date_modif_start']);
-		}
+        if (!empty($data['source_content']) && is_string($data['source_content'])) {
+            $qb->innerJoin('document.datas', 'document_data_source')
+                ->andWhere('document_data_source.data LIKE :source_content')
+                ->andWhere('document_data_source.type = :document_data_type')
+                ->setParameter('source_content', '%'.$data['source_content'].'%')
+                ->setParameter('document_data_type', 'S');
+        }
 
-		if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-			$qb
-				->andWhere('document.dateModified <= :dateModifiedEnd')
-				->setParameter('dateModifiedEnd', $data['date_modif_end']);
-		}
+        if (!empty($data['target_content']) && is_string($data['target_content'])) {
+            $qb->innerJoin('document.datas', 'document_data_target')
+                ->andWhere('document_data_target.data LIKE :target_content')
+                ->andWhere('document_data_target.type = :document_data_type')
+                ->setParameter('target_content', '%'.$data['target_content'].'%')
+                ->setParameter('document_data_type', 'T');
+        }
 
-		if (
-				(!empty($data['rule']) && is_string($data['rule']))
-			OR (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
-		) {
-			$ruleFilter = (!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']);
-			$qb
-				->andWhere('rule.name = :rule_name')
-				->setParameter('rule_name', trim($ruleFilter));
-		}
+        if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+            $qb
+                ->andWhere('document.dateModified >= :dateModified')
+                ->setParameter('dateModified', $data['date_modif_start']);
+        }
 
-		if (!empty($data['status'])) {
-			$qb
-				->andWhere('document.status = :status')
-				->setParameter('status', $data['status']);
-		}
+        if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+            $qb
+                ->andWhere('document.dateModified <= :dateModifiedEnd')
+                ->setParameter('dateModifiedEnd', $data['date_modif_end']);
+        }
 
-		// customWhere can have several status (open and error from the error dashlet in the home page)
-		if (!empty($data['customWhere']['gblstatus'])) {
-			$i = 1;
-			$orModule = $qb->expr()->orx();
-			foreach ($data['customWhere']['gblstatus'] as $gblstatus) {
-				$orModule->add($qb->expr()->eq('document.globalStatus', ':gblstatus'.$i));
-				$qb->setParameter('gblstatus'.$i, $gblstatus);
-				$i++;		 
-			}
-			// $orModule->add($qb->expr()->isNull('p.module'));
-			$qb->andWhere($orModule);
-		} elseif (!empty($data['gblstatus'])) {
-			$qb
-				->andWhere('document.globalStatus = :globalStatus')
-				->setParameter('globalStatus', $data['gblstatus']);
-		}
+        if (
+                (!empty($data['rule']) && is_string($data['rule']))
+            or (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
+        ) {
+            $ruleFilter = (!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']);
+            $qb
+                ->andWhere('rule.name = :rule_name')
+                ->setParameter('rule_name', trim($ruleFilter));
+        }
 
-		if (!empty($data['type'])) {
-			$qb
-				->andWhere('document.type = :type')
-				->setParameter('type', $data['type']);
-		}
+        if (!empty($data['status'])) {
+            $qb
+                ->andWhere('document.status = :status')
+                ->setParameter('status', $data['status']);
+        }
 
-		if (!empty($data['target_id'])) {
-			$qb
-				->andWhere('document.target LIKE :target')
-				->setParameter('target', '%'.$data['target_id'].'%');
-		}
+        // customWhere can have several status (open and error from the error dashlet in the home page)
+        if (!empty($data['customWhere']['gblstatus'])) {
+            $i = 1;
+            $orModule = $qb->expr()->orx();
+            foreach ($data['customWhere']['gblstatus'] as $gblstatus) {
+                $orModule->add($qb->expr()->eq('document.globalStatus', ':gblstatus'.$i));
+                $qb->setParameter('gblstatus'.$i, $gblstatus);
+                ++$i;
+            }
+            $qb->andWhere($orModule);
+        } elseif (!empty($data['gblstatus'])) {
+            $qb
+                ->andWhere('document.globalStatus = :globalStatus')
+                ->setParameter('globalStatus', $data['gblstatus']);
+        }
 
-		if (!empty($data['source_id'])) {
-			$qb
-				->andWhere('document.source LIKE :source')
-				->setParameter('source', '%'.$data['source_id'].'%');
-		}
-		if (!empty($data['user']) && !$data['user']->isAdmin()) {
-			$qb
-				->andWhere('document.createdBy = :createdBy')
-				->setParameter('createdBy', $data['user']);
-		}
-		if (!empty($data['limit'])) {
-			$qb->setMaxResults($data['limit']);
-		}
+        if (!empty($data['type'])) {
+            $qb
+                ->andWhere('document.type = :type')
+                ->setParameter('type', $data['type']);
+        }
+
+        if (!empty($data['target_id'])) {
+            $qb
+                ->andWhere('document.target LIKE :target')
+                ->setParameter('target', '%'.$data['target_id'].'%');
+        }
+
+        if (!empty($data['source_id'])) {
+            $qb
+                ->andWhere('document.source LIKE :source')
+                ->setParameter('source', '%'.$data['source_id'].'%');
+        }
+        if (!empty($data['user']) && !$data['user']->isAdmin()) {
+            $qb
+                ->andWhere('document.createdBy = :createdBy')
+                ->setParameter('createdBy', $data['user']);
+        }
+        if (!empty($data['limit'])) {
+            $qb->setMaxResults($data['limit']);
+        }
         $qb->orderBy('document.dateModified', 'DESC');
+
         return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
 }

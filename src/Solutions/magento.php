@@ -38,7 +38,7 @@ class magentocore extends solution
         'customer_address' => 'id',
         'orders' => 'entity_id',
         'products' => 'id',
-		'orders_items' => 'item_id'
+        'orders_items' => 'item_id',
     ];
 
     protected $FieldsDuplicate = [
@@ -102,7 +102,7 @@ class magentocore extends solution
                 'customer_address' => 'Customer Address',
                 'orders' => 'Sales Order',
                 'products' => 'Products',
-				'orders_items' => 'Orders Items'
+                'orders_items' => 'Orders Items',
             ];
         }
 
@@ -110,7 +110,6 @@ class magentocore extends solution
             'customers' => 'Customers',
         ];
     }
-
 
     // Renvoie les champs du module passé en paramètre
     public function get_module_fields($module, $type = 'source', $param = null)
@@ -419,22 +418,22 @@ class magentocore extends solution
                 case 'products':
                     $moduleFields = [
                         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'sku' => ['label' => 'SKU', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'attribute_set_id' => ['label' => 'Attribute set ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'visibility' => ['label' => 'Visibility', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'type_id' => ['label' => 'Type ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'created_at' => ['label' => 'Created at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						'weight' => ['label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'extension_attributes' => ['label' => 'Extension_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'product_links' => ['label' => 'Product_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'options' => ['label' => 'Options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'media_gallery_entries' => ['label' => 'Media_gallery_entries', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'tier_prices' => ['label' => 'Tier_prices', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-						// 'custom_attributes' => ['label' => 'Custom_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'sku' => ['label' => 'SKU', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'attribute_set_id' => ['label' => 'Attribute set ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'visibility' => ['label' => 'Visibility', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'type_id' => ['label' => 'Type ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'created_at' => ['label' => 'Created at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'updated_at' => ['label' => 'Updated at', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        'weight' => ['label' => 'Weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'extension_attributes' => ['label' => 'Extension_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'product_links' => ['label' => 'Product_links', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'options' => ['label' => 'Options', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'media_gallery_entries' => ['label' => 'Media_gallery_entries', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'tier_prices' => ['label' => 'Tier_prices', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                        // 'custom_attributes' => ['label' => 'Custom_attributes', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
                     break;
                 default:
@@ -454,7 +453,8 @@ class magentocore extends solution
             } catch (\Exception $e) {
                 // We don't bloc the program if the ws for countries didn't work
             }
-			$this->moduleFields = array_merge($this->moduleFields, $moduleFields);
+            $this->moduleFields = array_merge($this->moduleFields, $moduleFields);
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -463,12 +463,11 @@ class magentocore extends solution
         }
     }
 
-
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
     {
         $result = [];
-		$result['count'] = 0;
+        $result['count'] = 0;
         try {
             // Ajout du champ id, obligatoire mais spécifique au module
             if (!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
@@ -506,41 +505,41 @@ class magentocore extends solution
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
-            
-            // Limit = pageSize 
-            if(!empty($param['limit'])){
+
+            // Limit = pageSize
+            if (!empty($param['limit'])) {
                 $this->callLimit = $param['limit'];
             }
-			
+
             // Get all data after the reference date
-			// Search by fields (id or duplicate fields)
-			$searchCriteria = '';
+            // Search by fields (id or duplicate fields)
+            $searchCriteria = '';
             if (!empty($param['query'])) {
-				$i = 0;
+                $i = 0;
                 // Add every filter (AND operator by default)
                 foreach ($param['query'] as $key => $value) {
-					// We change id to entity_id whe we serach a specific record with an id. In this case we use only the id filter even if other filters are set.
-					if ($key == 'id') {
-						$searchCriteria = '?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters][0][condition_type]=eq';
-						break;
-					}
+                    // We change id to entity_id whe we serach a specific record with an id. In this case we use only the id filter even if other filters are set.
+                    if ('id' == $key) {
+                        $searchCriteria = '?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters][0][condition_type]=eq';
+                        break;
+                    }
                     // Workaround for a Magento bug, if we keep order_id then we get the Magento error : Column 'order_id' in where clause is ambiguous
-					// So we change the where condition to make it work on Magento side
-					if (
-							$key == 'order_id'
-						AND in_array($param['module'],array('orders_items','orders')) 
-					) {
-						$key = 'main_table.entity_id';
-					}
-					// Create search criteria
-					$searchCriteria .= '?searchCriteria[filter_groups][0][filters]['.$i.'][field]='.$key.'&searchCriteria[filter_groups][0][filters]['.$i.'][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters]['.$i.'][condition_type]=eq';
-					$i++;
-				}
+                    // So we change the where condition to make it work on Magento side
+                    if (
+                            'order_id' == $key
+                        and in_array($param['module'], ['orders_items', 'orders'])
+                    ) {
+                        $key = 'main_table.entity_id';
+                    }
+                    // Create search criteria
+                    $searchCriteria .= '?searchCriteria[filter_groups][0][filters]['.$i.'][field]='.$key.'&searchCriteria[filter_groups][0][filters]['.$i.'][value]='.urlencode($value).'&searchCriteria[filter_groups][0][filters]['.$i.'][condition_type]=eq';
+                    ++$i;
+                }
             } else {
-				// Search By reference
-				$searchCriteria = '?searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
-				// order by reference
-				$searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
+                // Search By reference
+                $searchCriteria = '?searchCriteria[pageSize]='.$this->callLimit.'&searchCriteria[filter_groups][0][filters][0][field]='.$dateRefField.'&searchCriteria[filter_groups][0][filters][0][value]='.urlencode($param['date_ref']).'&searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
+                // order by reference
+                $searchCriteria .= '&searchCriteria[sortOrders][0][field]='.$dateRefField.'&searchCriteria[sortOrders][0][direction]=ASC';
             }
 
             // Call to Magento
@@ -573,7 +572,7 @@ class magentocore extends solution
                     }
 
                     // remove one dimension by replacing the dimension by __
-					$subRecordsNoDimension = array();
+                    $subRecordsNoDimension = [];
                     foreach ($subRecords as $subRecord) {
                         $subRecordsNoDimension[] = $this->removeDimension($subRecord);
                     }
@@ -605,7 +604,7 @@ class magentocore extends solution
                                 }
                             }
                             $result['values'][$row['id']] = $row;
-                            $result['count']++;
+                            ++$result['count'];
                         }
                     }
                 }
@@ -613,6 +612,7 @@ class magentocore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
+
         return $result;
     }
 

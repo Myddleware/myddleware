@@ -25,47 +25,44 @@
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\Log;
-use App\Entity\Rule;
 use App\Entity\Config;
 use App\Entity\Document;
-use Pagerfanta\Pagerfanta;
-use App\Manager\JobManager;
-use App\Entity\DocumentData;
 use App\Entity\DocumentAudit;
-use App\Service\SessionService;
+use App\Entity\DocumentData;
+use App\Entity\DocumentRelationship;
+use App\Entity\Log;
+use App\Entity\Rule;
 use App\Manager\document as doc;
 use App\Manager\DocumentManager;
+use App\Manager\JobManager;
 use App\Manager\SolutionManager;
-use App\Entity\DocumentRelationship;
-use Pagerfanta\Adapter\ArrayAdapter;
 use App\Repository\DocumentRepository;
+use App\Service\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Pagerfanta\Pagerfanta;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Class FluxController.
- *
- * @package App\Controller
  *
  * @Route("/rule")
  */
 class FluxController extends AbstractController
 {
     protected $params;
-    
+
     private $sessionService;
     /**
      * @var TranslatorInterface
@@ -109,7 +106,7 @@ class FluxController extends AbstractController
             foreach ($configs as $config) {
                 $this->params[$config->getName()] = $config->getvalue();
             }
-        }				
+        }
     }
 
     /* ******************************************************
@@ -145,7 +142,7 @@ class FluxController extends AbstractController
         if ($rule) {
             $this->sessionService->setFluxFilterRuleName($rule[0]->getName());
             $this->sessionService->setFluxFilterGlobalStatus('Error');
-            $this->sessionService->setFluxFilterWhere(array('rule' => $rule[0]->getName(), 'gblstatus' => array('Error','Open')));
+            $this->sessionService->setFluxFilterWhere(['rule' => $rule[0]->getName(), 'gblstatus' => ['Error', 'Open']]);
         } else {
             $this->sessionService->removeFluxFilter();
         }
@@ -165,7 +162,7 @@ class FluxController extends AbstractController
      * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
      */
     public function fluxListAction(Request $request, $page, $search = 1)
-    {					
+    {
         //--- Liste status traduction
         $lstStatusTwig = DocumentManager::lstStatus();
         foreach ($lstStatusTwig as $key => $value) {
@@ -295,9 +292,6 @@ class FluxController extends AbstractController
         $form->handleRequest($request);
         // condition d'affichage
         $data = [];
-        $where = '';
-        $from = 'FROM Document ';
-        // $where = ($this->sessionService->isFluxFilterCWhereExist() ? $this->sessionService->getFluxFilterWhere() : '');
         if (!empty($this->sessionService->getFluxFilterWhere())) {
             $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             $this->sessionService->removeFluxFilter();
@@ -311,9 +305,9 @@ class FluxController extends AbstractController
             $data['search'] = $search;
             $data['page'] = $page;
 
-            // Get the limit parameter 
+            // Get the limit parameter
             $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-            $searchLimit = $configRepository->findOneBy(['name'=> 'search_limit']);
+            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
             if (!empty($searchLimit)) {
                 $data['limit'] = $searchLimit->getValue();
             }
@@ -378,7 +372,7 @@ class FluxController extends AbstractController
             }
         } // end clicked
         //---[ FORM ]-------------------------
-        
+
         $r = $this->documentRepository->getFluxPagination($data);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $r,
@@ -402,9 +396,10 @@ class FluxController extends AbstractController
             //Check the user timezone
             if ($timezone = '') {
                 $timezone = 'UTC';
-            }else {
+            } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
             return $this->render('Flux/list.html.twig', [
                 'nb' => $compact['nb'],
                 'entities' => $compact['entities'],
@@ -582,7 +577,7 @@ class FluxController extends AbstractController
             //Check the user timezone
             if ($timezone = '') {
                 $timezone = 'UTC';
-            }else {
+            } else {
                 $timezone = $this->getUser()->getTimezone();
             }
             // Call the view
@@ -831,7 +826,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
             } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
                 //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Page not found. ".$e->getMessage());
+                throw $this->createNotFoundException('Page not found. '.$e->getMessage());
             }
 
             return $compact;
@@ -852,15 +847,16 @@ class FluxController extends AbstractController
                 ]
                 );
             if (!empty($documentDataEntity)) {
-				$data = json_decode($documentDataEntity->getData(), true);
-				// Boolean values aren't displayed properly, we convert them into string	
-				if (!empty($data)) {
-					foreach ($data as $key => $value) {
-						if (is_bool($value)) {
-							$data[$key] = (string)$value;
-						}
-					}
-				}
+                $data = json_decode($documentDataEntity->getData(), true);
+                // Boolean values aren't displayed properly, we convert them into string
+                if (!empty($data)) {
+                    foreach ($data as $key => $value) {
+                        if (is_bool($value)) {
+                            $data[$key] = (string) $value;
+                        }
+                    }
+                }
+
                 return $data;
             }
 
@@ -870,4 +866,3 @@ class FluxController extends AbstractController
         }
     }
 }
-

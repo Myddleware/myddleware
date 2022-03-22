@@ -480,23 +480,20 @@ $(function () {
 					duplicate: recup_fields_relate(),
 					filter: recup_filter(),
 				},
-				beforeSend: function () {
+				beforeSend: function () {	
 					$("#validation").attr('value', save_wait); // rev 1.08
 				},
 				success: function (data) {
-
 					if (data == 1) {
 						alert(confirm_success);
 						$(location).attr('href', return_success);
 					} else {
-
 						data = data.split(';');
 						if (data[0] == 2) {
 							alert(data[1]); // Erreur personnalisé via beforeSave
 						} else {
 							alert(confirm_error);
 						}
-
 						$("#validation").attr('value', before); // rev 1.08
 					}
 				}, // rev 1.08
@@ -566,7 +563,7 @@ $(function () {
 					});
 				}
 			});
-		}
+		}	
 		// Relate
 		if (relate) {
 			var cpt = 0;
@@ -575,6 +572,8 @@ $(function () {
 				if (nameR.parent == 0) {
 					$('#lst_' + nameR.target).val(nameR.id);
 					$('#lst_source_' + nameR.target).val(nameR.source);
+					$('#lst_error_missing_' + nameR.target).val(nameR.errorMissing);
+					$('#lst_error_empty_' + nameR.target).val(nameR.errorEmpty);
 				} else {
 					$('#parent_rule_' + cpt).val(nameR.id);
 					$('#parent_source_field_' + cpt).val(nameR.source);
@@ -1538,24 +1537,26 @@ function recup_formule() {
 // Récupère la liste des relations
 function recup_relation() {
 	var relations = [];
-	var parent_relations = [];
-
 	$('.rel tr.line-relation', '#relation').each(function () {
 		tr = $(this);
 		$($(this)).find(".title").each(function () {
+			
 			var name = $(this).attr('data-value');
 			var valueRule = tr.find('.lst_rule_relate').val();
-			var valueSource = tr.find('.lst_source_relate').val();
+			var valueSource = tr.find('.lst_source_relate').val();			
+			var valueEmpty = tr.find('.parent_error_empty').val();				
+			var valueMissing =tr.find('.parent_error_missing').val();
 			var valueparent = 0;
-			if (valueRule != '' && valueSource != '') {
+			if (valueRule !== '' && valueSource !== '' && valueEmpty !== '' && valueMissing !== '') {
 				relations.push({
 					target: name,
+					errorEmpty: valueEmpty,
+					errorMissing: valueMissing,
 					rule: valueRule,
 					source: valueSource,
 					parent: valueparent
 				});
 			}
-
 		});
 	});
 
@@ -1564,21 +1565,23 @@ function recup_relation() {
 		$($(this)).find(".parent_search_field").each(function () {
 			var name = tr.find('.parent_search_field').val();
 			var valueRule = tr.find('.parent_rule').val();
-			var valueSource = tr.find('.parent_source_field').val();
+			var valueSource = tr.find('.parent_source_field').val();			
+			var valueEmpty = tr.find('.parent_error_empty').val();				
+			var valueMissing = tr.find('.parent_error_missing').val();
 			var valueparent = 1;
-
-			if (valueRule != '' && valueSource != '' && name != '') {
+			if (valueRule !== '' && valueSource !== '' && name !== '' && valueEmpty !== '' && valueMissing !== '') {
 				relations.push({
 					target: name,
 					rule: valueRule,
-					source: valueSource,
+					source: valueSource,					
+					errorEmpty: valueEmpty,
+					errorMissing: valueMissing,
 					parent: valueparent
 				});
 			}
 
 		});
 	});
-
 	return relations;
 }
 

@@ -34,8 +34,8 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method null|Rule find($id, $lockMode = null, $lockVersion = null)
- * @method null|Rule findOneBy(array $criteria, array $orderBy = null)
+ * @method Rule|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Rule|null findOneBy(array $criteria, array $orderBy = null)
  * @method Rule[]    findAll()
  * @method Rule[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
@@ -120,7 +120,7 @@ class RuleRepository extends ServiceEntityRepository
     /**
      * @param $ruleId
      *
-     * @return null|Rule
+     * @return Rule|null
      *
      * @throws NonUniqueResultException
      */
@@ -210,7 +210,6 @@ class RuleRepository extends ServiceEntityRepository
 
     public function getRuleToOrder()
     {
-
         return $this->createQueryBuilder('rule')
             ->select('rule.id, GROUP_CONCAT(relationship.fieldId SEPARATOR \';\')')
             ->join('rule.relationsShip', 'relationship')

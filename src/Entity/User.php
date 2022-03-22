@@ -33,7 +33,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * User
+ * User.
  *
  * @ORM\Table(name="users")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -315,14 +315,14 @@ class User implements UserInterface, Serializable
         return array_unique($roles);
     }
 
-     /**
+    /**
      * {@inheritdoc}
      */
     public function getTimezone()
     {
-
         return $this->timezone;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -508,7 +508,7 @@ class User implements UserInterface, Serializable
     /**
      * Gets the timestamp that the user requested a password reset.
      *
-     * @return null|DateTime
+     * @return DateTime|null
      */
     public function getPasswordRequestedAt()
     {
@@ -537,11 +537,11 @@ class User implements UserInterface, Serializable
 
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
-    public function setTimezone(string $timezone='UTC')
+    public function setTimezone(string $timezone = 'UTC')
     {
         $this->timezone = $timezone;
 
@@ -554,5 +554,5 @@ class User implements UserInterface, Serializable
     public function __toString()
     {
         return (string) $this->getUsername();
-    }  
+    }
 }

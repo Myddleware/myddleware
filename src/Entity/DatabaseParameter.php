@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Repository\DatabaseRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -141,5 +140,4 @@ class DatabaseParameter
 
         return $this;
     }
-
 }

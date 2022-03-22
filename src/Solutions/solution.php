@@ -26,12 +26,10 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Doctrine\ORM\EntityManagerInterface;
-
-// document Myddleware
 
 class solutioncore
 {
@@ -83,8 +81,8 @@ class solutioncore
 
     // Specify if the class is called by the API
     protected $api;
-	
-	protected $message;
+
+    protected $message;
 
     // Instanciation de la classe de génération de log Symfony
     /**
@@ -95,16 +93,16 @@ class solutioncore
      * @var ParameterBagInterface
      */
     protected $parameterBagInterface;
-	/**
-	 * @var EntityManagerInterface
-	 */
-	protected $entityManager;
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
 
     public function __construct(
         LoggerInterface $logger,
         Connection $connection,
         ParameterBagInterface $parameterBagInterface,
-		EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -131,7 +129,7 @@ class solutioncore
             }
         }
         // Check whether the URL input ends with /, if yes, remove it before making the call
-        if(isset($paramConnexion['url']) && substr($paramConnexion['url'], -1) === '/'){
+        if (isset($paramConnexion['url']) && '/' === substr($paramConnexion['url'], -1)) {
             $paramConnexion['url'] = substr($paramConnexion['url'], 0, -1);
         }
 
@@ -159,15 +157,15 @@ class solutioncore
     protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
     {
         $this->connection->beginTransaction();
-        try {			
+        try {
             $param['id_doc_myddleware'] = $idDoc;
-            $param['api'] = $this->api;				
-			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);				
-			$documentManager->setParam($param);	
+            $param['api'] = $this->api;
+            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+            $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
-                $documentManager->setMessage($value['error']);				
-				$this->message = '';
+                $documentManager->setMessage($value['error']);
+                $this->message = '';
             }
             // Mise à jour de la table document avec l'id target comme id de document
             // Si la création a fonctionné
@@ -191,7 +189,7 @@ class solutioncore
                 } else {
                     $status = $forceStatus;
                 }
-			
+
                 $documentManager->setMessage('Failed to send document. ');
                 $documentManager->setTypeError('E');
                 $documentManager->updateStatus($status);
@@ -199,7 +197,7 @@ class solutioncore
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
-			echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $documentManager->setTypeError('E');
@@ -270,12 +268,11 @@ class solutioncore
             'type' => 'varchar(255)',
             'type_bdd' => 'varchar(255)',
             'required' => 0,
-			'relate' => true
+            'relate' => true,
         ];
 
         return $this->moduleFields;
     }
-	
 
     // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
     // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
@@ -283,90 +280,89 @@ class solutioncore
     {
     }
 
-	
-	// Helper function for the read call
+    // Helper function for the read call
     public function readData($param)
     {
-		try { // try-catch Myddleware
-			$result['count'] = 0;
-			if (empty($param['limit'])) {
-				$param['limit'] = 100;
-			}
-			if (empty($param['offset'])) {
+        try { // try-catch Myddleware
+            $result['count'] = 0;
+            if (empty($param['limit'])) {
+                $param['limit'] = 100;
+            }
+            if (empty($param['offset'])) {
                 $param['offset'] = 0;
             }
-			// Add requiered fields based on attribute $required_fields
-			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
-			$param['fields'] = array_unique($param['fields']);
-			// Remove Myddleware specific fields (not existing in the solution)
-			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
-			// Read data
-			$readResult = $this->read($param);
-			
-			// Save the new rule params into attribut dataSource
-			if (!empty($readResult['ruleParams'])) {
-				$result['ruleParams'] = $readResult['ruleParams'];
-				unset($readResult['ruleParams']);
-			}
-			
-			// Format data
-			if (!empty($readResult)) {
-				// Get the name of the field used for the reference
-				$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);	
-				// Get the name of the field used as id
-				$idField = $this->getIdName($param['module']);
-				
-				// Sort data with the reference field
-				$modified  = array_column($readResult, $dateRefField);
-				array_multisort($modified, SORT_ASC, $readResult);
+            // Add requiered fields based on attribute $required_fields
+            $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
+            $param['fields'] = array_unique($param['fields']);
+            // Remove Myddleware specific fields (not existing in the solution)
+            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
-				// Add id and date_modified values into the read call result
-				foreach ($readResult as $record) {
-					// If the id column hasn't been defined in the read method we calculate it.
-					if (empty($record['id'])) {
-						if (empty($record[$idField])) {
-							throw new \Exception('Id field '.$idField.' is missing in this record '. print_r($record, true).'.');
-						}
-						$record['id'] = $record[$idField];
-					}
-					// If the date_modified column hasn't been defined in the read method we calculate it.
-					if (empty($record['date_modified'])) {
-						if (empty($record[$dateRefField])) {
-							throw new \Exception('Reference field '.$dateRefField.' is missing in this record '. print_r($record, true).'.');
-						}
-						// Convert date ref into Myddleware format					
-						$record['date_modified'] = $this->getModifiedDate($param, $record, $dateRefField);
-					} else {
-						$record['date_modified'] = $this->dateTimeToMyddleware($record['date_modified']);
-					}
-					$result['values'][$record['id']] = $record;
-					// Return the number of result
-					$result['count']++;
-					// Stop the loop when the limit is reached
-					if ($result['count'] >=	$param['limit']) {
-						break;
-					}
-				}
-				
-				// Calculate the reference call
-				$result['date_ref'] = $this->getReferenceCall($param,$result);
-				if (empty($result['date_ref'])) {
-					throw new \Exception('Failed to get the reference call.');
-				}
-			} else {
-				// Init values if no result
-				$result['count'] = 0;
-				$result['date_ref'] = $param['date_ref'];
-			}
-		} catch (\Exception $e) {
+            // Read data
+            $readResult = $this->read($param);
+
+            // Save the new rule params into attribut dataSource
+            if (!empty($readResult['ruleParams'])) {
+                $result['ruleParams'] = $readResult['ruleParams'];
+                unset($readResult['ruleParams']);
+            }
+
+            // Format data
+            if (!empty($readResult)) {
+                // Get the name of the field used for the reference
+                $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+                // Get the name of the field used as id
+                $idField = $this->getIdName($param['module']);
+
+                // Sort data with the reference field
+                $modified = array_column($readResult, $dateRefField);
+                array_multisort($modified, SORT_ASC, $readResult);
+
+                // Add id and date_modified values into the read call result
+                foreach ($readResult as $record) {
+                    // If the id column hasn't been defined in the read method we calculate it.
+                    if (empty($record['id'])) {
+                        if (empty($record[$idField])) {
+                            throw new \Exception('Id field '.$idField.' is missing in this record '.print_r($record, true).'.');
+                        }
+                        $record['id'] = $record[$idField];
+                    }
+                    // If the date_modified column hasn't been defined in the read method we calculate it.
+                    if (empty($record['date_modified'])) {
+                        if (empty($record[$dateRefField])) {
+                            throw new \Exception('Reference field '.$dateRefField.' is missing in this record '.print_r($record, true).'.');
+                        }
+                        // Convert date ref into Myddleware format
+                        $record['date_modified'] = $this->getModifiedDate($param, $record, $dateRefField);
+                    } else {
+                        $record['date_modified'] = $this->dateTimeToMyddleware($record['date_modified']);
+                    }
+                    $result['values'][$record['id']] = $record;
+                    // Return the number of result
+                    ++$result['count'];
+                    // Stop the loop when the limit is reached
+                    if ($result['count'] >= $param['limit']) {
+                        break;
+                    }
+                }
+
+                // Calculate the reference call
+                $result['date_ref'] = $this->getReferenceCall($param, $result);
+                if (empty($result['date_ref'])) {
+                    throw new \Exception('Failed to get the reference call.');
+                }
+            } else {
+                // Init values if no result
+                $result['count'] = 0;
+                $result['date_ref'] = $param['date_ref'];
+            }
+        } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-        }			
-		return $result;
+        }
+
+        return $result;
     }
 
-	
-	// Get the new records from the solution
+    // Get the new records from the solution
     // Param's content :
     //		date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
     //		module : module called
@@ -374,11 +370,11 @@ class solutioncore
     //		limit : max records that the rule can read (default limit is 100)
     // Expected output :
     //		Array with the list of records
-	public function read($param)
+    public function read($param)
     {
-		return null;
+        return null;
     }
-	
+
     // Permet de créer un enregistrement
     // $param contient  :
     //  -> le module destinataire
@@ -406,29 +402,29 @@ class solutioncore
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
     public function createData($param)
-    {        
-		try {
+    {
+        try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
-				try {
-					// Clean record by removing myddleware field
-					$record = $this->cleanMyddlewareRecord($record);
-					
-					// Check control before create
-					$record = $this->checkDataBeforeCreate($param, $record, $idDoc);
-					// Call create method
-					$recordId = $this->create($param, $record);
-					
-					// Exception if no Id retruned
-					if (empty($recordId)) {
-						throw new \Exception('No Id returned. ');
-					}
-					// Format result
-					$result[$idDoc] = [
+                try {
+                    // Clean record by removing myddleware field
+                    $record = $this->cleanMyddlewareRecord($record);
+
+                    // Check control before create
+                    $record = $this->checkDataBeforeCreate($param, $record, $idDoc);
+                    // Call create method
+                    $recordId = $this->create($param, $record);
+
+                    // Exception if no Id retruned
+                    if (empty($recordId)) {
+                        throw new \Exception('No Id returned. ');
+                    }
+                    // Format result
+                    $result[$idDoc] = [
                         'id' => $recordId,
-                        'error' => false
+                        'error' => false,
                     ];
-				} catch (\Exception $e) {
+                } catch (\Exception $e) {
                     $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -437,25 +433,26 @@ class solutioncore
                 }
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-			}
-		} catch (\Exception $e) {
+            }
+        } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
                 'error' => $error,
             ];
         }
+
         return $result;
     }
 
-	// Create method : 
-	// - input : array with the record's data
-	// - output : the id of the new record
-	// An exception has to be generated when an error happends during the creation.
-	// this exception will be catched by the method createData
-	protected function create($param, $record)
+    // Create method :
+    // - input : array with the record's data
+    // - output : the id of the new record
+    // An exception has to be generated when an error happends during the creation.
+    // this exception will be catched by the method createData
+    protected function create($param, $record)
     {
-		return null;
+        return null;
     }
 
     // Permet de mettre à jour un enregistrement
@@ -489,31 +486,31 @@ class solutioncore
     // )
     public function updateData($param)
     {
-		try {
+        try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
-				try {					
-					// Clean record by removing myddleware field
-					$record = $this->cleanMyddlewareRecord($record);
-					
-					if (empty($record['target_id'])) {
-						throw new \Exception('No target id found. Failed to update the record.');
-					}
-					// Check control before create
-					$record = $this->checkDataBeforeUpdate($param, $record);
-					// Call create methode 
-					$recordId = $this->update($param, $record);
-					
-					// Exception if no Id retruned
-					if (empty($recordId)) {
-						throw new \Exception('No Id returned. ');
-					}
-					// Format result
-					$result[$idDoc] = [
+                try {
+                    // Clean record by removing myddleware field
+                    $record = $this->cleanMyddlewareRecord($record);
+
+                    if (empty($record['target_id'])) {
+                        throw new \Exception('No target id found. Failed to update the record.');
+                    }
+                    // Check control before create
+                    $record = $this->checkDataBeforeUpdate($param, $record);
+                    // Call create methode
+                    $recordId = $this->update($param, $record);
+
+                    // Exception if no Id retruned
+                    if (empty($recordId)) {
+                        throw new \Exception('No Id returned. ');
+                    }
+                    // Format result
+                    $result[$idDoc] = [
                         'id' => $recordId,
-                        'error' => false
+                        'error' => false,
                     ];
-				} catch (\Exception $e) {
+                } catch (\Exception $e) {
                     $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -522,48 +519,48 @@ class solutioncore
                 }
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-			}
-		} catch (\Exception $e) {
+            }
+        } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
                 'error' => $error,
             ];
         }
+
         return $result;
     }
 
     protected function update($param, $data)
     {
-		return null;
+        return null;
     }
-	
-	 // Delete a record
+
+    // Delete a record
     public function deleteData($param)
     {
-		try {
+        try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
-				try {					
-			
-					if (empty($record['target_id'])) {
-						throw new \Exception('No target id found. Failed to update the record.');
-					}
-					// Check control before delete
-					$record = $this->checkDataBeforeDelete($param, $record);
-					// Call delete methode 
-					$recordId = $this->delete($param, $record);
-					
-					// Exception if no Id retruned
-					if (empty($recordId)) {
-						throw new \Exception('No Id returned. ');
-					}
-					// Format result
-					$result[$idDoc] = [
+                try {
+                    if (empty($record['target_id'])) {
+                        throw new \Exception('No target id found. Failed to update the record.');
+                    }
+                    // Check control before delete
+                    $record = $this->checkDataBeforeDelete($param, $record);
+                    // Call delete methode
+                    $recordId = $this->delete($param, $record);
+
+                    // Exception if no Id retruned
+                    if (empty($recordId)) {
+                        throw new \Exception('No Id returned. ');
+                    }
+                    // Format result
+                    $result[$idDoc] = [
                         'id' => $recordId,
-                        'error' => false
+                        'error' => false,
                     ];
-				} catch (\Exception $e) {
+                } catch (\Exception $e) {
                     $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -572,23 +569,23 @@ class solutioncore
                 }
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-			}
-		} catch (\Exception $e) {
+            }
+        } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',
                 'error' => $error,
             ];
         }
+
         return $result;
     }
-
 
     // Delete a record
     protected function delete($param, $data)
     {
         // Set an error by default
-		throw new \Exception('Delete function not developped for this connector. Failed to delete this record in the target application. ');
+        throw new \Exception('Delete function not developped for this connector. Failed to delete this record in the target application. ');
     }
 
     // Permet de renvoyer le mode de la règle en fonction du module target
@@ -605,7 +602,7 @@ class solutioncore
     public function setMessageCreateRule($module)
     {
     }
-	
+
     public function setApi($api)
     {
         $this->api = $api;
@@ -701,16 +698,16 @@ class solutioncore
                 }
             }
         }
-		
-		// Add the ref field if it isn't already in the array
-		$dateRefField = $this->getRefFieldName($module, $mode);
-		if (
-				!empty($dateRefField)
-			AND array_search($dateRefField, $fields) === false
-		) {
-			$fields[] = $dateRefField;
-		}
-		
+
+        // Add the ref field if it isn't already in the array
+        $dateRefField = $this->getRefFieldName($module, $mode);
+        if (
+                !empty($dateRefField)
+            and false === array_search($dateRefField, $fields)
+        ) {
+            $fields[] = $dateRefField;
+        }
+
         return $fields;
     }
 
@@ -729,7 +726,7 @@ class solutioncore
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
                     'required_relationship' => 1,
-					'relate' => true
+                    'relate' => true,
                 ];
             } else {
                 $this->moduleFields[$required_relationship]['required_relationship'] = 1;
@@ -744,7 +741,7 @@ class solutioncore
                 'type_bdd' => 'varchar(255)',
                 'required' => false,
                 'required_relationship' => 0,
-				'relate' => true
+                'relate' => true,
             ];
         }
     }
@@ -758,36 +755,39 @@ class solutioncore
 
         return $fieldArray;
     }
-	
-	// Clean record before create/update
-    protected function cleanMyddlewareRecord($record){
-		if (isset($record['Myddleware_element_id'])) {
-			unset($record['Myddleware_element_id']);
-		}
-		return $record;
-	}
-	
 
-	// Calculate the date modified of the current record
-	protected function getModifiedDate($param, $record, $dateRefField) {
-		return $this->dateTimeToMyddleware($record[$dateRefField]);
-	}
+    // Clean record before create/update
+    protected function cleanMyddlewareRecord($record)
+    {
+        if (isset($record['Myddleware_element_id'])) {
+            unset($record['Myddleware_element_id']);
+        }
+
+        return $record;
+    }
+
+    // Calculate the date modified of the current record
+    protected function getModifiedDate($param, $record, $dateRefField)
+    {
+        return $this->dateTimeToMyddleware($record[$dateRefField]);
+    }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToMyddleware($dateTime)
     {
-		return $dateTime;
+        return $dateTime;
     }
-    // dateTimeToMyddleware($dateTime)
 
+    // dateTimeToMyddleware($dateTime)
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
     {
-		return $dateTime;
+        return $dateTime;
     }
+
     // dateTimeToMyddleware($dateTime)
-	
+
     protected function getInfoDocument($idDocument)
     {
         $connection = $this->getConn();
@@ -799,8 +799,8 @@ class solutioncore
 						WHERE id = :id_doc';
         $stmt = $connection->prepare($sqlParams);
         $stmt->bindValue(':id_doc', $idDocument);
-        $stmt->execute();
-        $documentData = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $documentData = $result->fetchAssociative();
 
         return $documentData;
     }
@@ -812,8 +812,8 @@ class solutioncore
         $sql = 'SELECT `source_id` FROM `document` WHERE `id` = :idDoc AND document.deleted = 0';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':idDoc', $idDoc);
-        $stmt->execute();
-        $sourceId = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $sourceId = $result->fetchAssociative();
 
         return $sourceId['source_id'];
     }
@@ -828,11 +828,11 @@ class solutioncore
     public function getRefFieldName($moduleSource, $RuleMode)
     {
     }
-	
-	// Return the name of the field used for the id
+
+    // Return the name of the field used for the id
     public function getIdName($module)
     {
-		return 'id';
+        return 'id';
     }
 
     // The function return true if we can display the column parent in the rule view, relationship tab
@@ -878,10 +878,11 @@ class solutioncore
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
-		// Target_id isn't used in create method
-		if (array_key_exists('target_id', $data)) {
-			unset($data['target_id']);
-		}
+        // Target_id isn't used in create method
+        if (array_key_exists('target_id', $data)) {
+            unset($data['target_id']);
+        }
+
         return $data;
     }
 
@@ -911,8 +912,8 @@ class solutioncore
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $param['jobId']);
-        $stmt->execute();
-        $job = $stmt->fetch(); // 1 row
+        $result = $stmt->executeQuery();
+        $job = $result->fetchAssociative(); // 1 row
         if (
                 empty($job['status'])
             || 'Start' != $job['status']
@@ -932,8 +933,8 @@ class solutioncore
 				WHERE connector.id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
-        $stmt->execute();
-        $r = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $r = $result->fetchAssociative();
 
         // RECUPERE LES PARAMS DE CONNEXION
         $sql = 'SELECT id, conn_id, name, value
@@ -941,8 +942,8 @@ class solutioncore
 				WHERE conn_id = :connId';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('connId', $connId);
-        $stmt->execute();
-        $tab_params = $stmt->fetchAll();
+        $result = $stmt->executeQuery();
+        $tab_params = $result->fetchAllAssociative();
 
         $params = [];
 
@@ -955,14 +956,14 @@ class solutioncore
 
         return $params;
     }
-	
-	// Method de find the date ref after a read call 
-	protected function getReferenceCall($param, $result) {
-		// Result is sorted, the last one is the oldest one
-		return end($result['values'])['date_modified'];
-	}
+
+    // Method de find the date ref after a read call
+    protected function getReferenceCall($param, $result)
+    {
+        // Result is sorted, the last one is the oldest one
+        return end($result['values'])['date_modified'];
+    }
 }
 class solution extends solutioncore
 {
 }
-

@@ -4,45 +4,44 @@ namespace App\Form\Type;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ResetPasswordType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-        ->add('oldPassword', PasswordType::class, array(
+        ->add('oldPassword', PasswordType::class, [
             'mapped' => false,
             'required' => true,
-            'label' => 'password_reset.old_password'
-        ))
-        ->add('plainPassword', RepeatedType::class, array(
+            'label' => 'password_reset.old_password',
+        ])
+        ->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
             'invalid_message' => 'Passwords must be identical',
-            'options' => array(
-                'attr' => array(
-                    'class' => 'password-field'
-                )
-            ),
-            'first_options'  => [
+            'options' => [
+                'attr' => [
+                    'class' => 'password-field',
+                ],
+            ],
+            'first_options' => [
                 'label' => 'password_reset.first_options',
             ],
             'second_options' => [
                 'label' => 'password_reset.second_options',
             ],
             'required' => true,
-        ))
-        ->add('submit', SubmitType::class, array(
-            'attr' => array(
-                'class' => 'btn btn-primary mt-3'
-            ),
-            'label' => 'password_reset.submit'
-
-        ))
+        ])
+        ->add('submit', SubmitType::class, [
+            'attr' => [
+                'class' => 'btn btn-primary mt-3',
+            ],
+            'label' => 'password_reset.submit',
+        ])
 
     ;
     }

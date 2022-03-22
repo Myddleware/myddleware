@@ -62,6 +62,7 @@ class SessionService
     public function getSolutionType($type)
     {
         $myddlewareSession = $this->getMyddlewareSession();
+
         return $myddlewareSession['param']['myddleware']['connector'][0]['solution'][$type];
     }
 
@@ -927,24 +928,25 @@ class SessionService
     //############ FLUX FILTER ###################
 
     public function setFluxFilterWhere($where)
-    {	
+    {
         $myddlewareSession = $this->getMyddlewareSession();
-		if (!empty($where)) {
-			foreach($where as $key => $value) {
-				$myddlewareSession['flux_filter']['customWhere'][$key] = $value;
-			}
-		}
+        if (!empty($where)) {
+            foreach ($where as $key => $value) {
+                $myddlewareSession['flux_filter']['customWhere'][$key] = $value;
+            }
+        }
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getFluxFilterWhere()
     {
         $myddlewareSession = $this->getMyddlewareSession();
-		$customWhere = null;
-		if (!empty($myddlewareSession['flux_filter']['customWhere'])) {
-			$customWhere = $myddlewareSession['flux_filter']['customWhere'];
-			unset($myddlewareSession['flux_filter']['customWhere']);
-		}
+        $customWhere = null;
+        if (!empty($myddlewareSession['flux_filter']['customWhere'])) {
+            $customWhere = $myddlewareSession['flux_filter']['customWhere'];
+            unset($myddlewareSession['flux_filter']['customWhere']);
+        }
+
         return $customWhere;
     }
 

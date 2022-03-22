@@ -89,7 +89,7 @@ class SolutionRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $field = (('target' == $type) ? 'target' : 'source');
-        
+
         $qb->select('s.name')
          ->where('s.active = :active AND s.'.$field.' = :type')
          ->setParameter('active', 1)
