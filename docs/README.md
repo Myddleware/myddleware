@@ -2,6 +2,20 @@
 
 > Welcome to the Myddleware community and thank you for joining us!
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Myddleware/myddleware)](https://github.com/Myddleware/myddleware)
+![GitHub repo size](https://img.shields.io/github/repo-size/Myddleware/myddleware)
+[![GitHub issues](https://img.shields.io/github/issues/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/issues)
+[![GitHub closed issues](https://img.shields.io/github/issues-closed/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/issues?q=is%3Aissue+is%3Aclosed)
+[![GitHub](https://img.shields.io/github/license/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/blob/main/LICENSE)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/Myddleware/myddleware/bootstrap)
+![GitHub top language](https://img.shields.io/github/languages/top/Myddleware/myddleware)
+![GitHub last commit](https://img.shields.io/github/last-commit/Myddleware/myddleware)
+[![GitHub contributors](https://img.shields.io/github/contributors/Myddleware/myddleware)](https://github.com/Myddleware/myddleware/graphs/contributors)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fwww.myddleware.com%2F)](https://www.myddleware.com/)
+[![docsify](https://img.shields.io/badge/documented%20with-docsify-cc00ff.svg)](https://docsify.js.org/)
+![GitHub followers](https://img.shields.io/github/followers/Myddleware?style=social)
+[![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
+
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
 ![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
@@ -84,7 +98,7 @@ unzip myddleware.zip -d <myddleware_dirname>
 
 #### **Docker install**
 
-*This section is still under construction*
+You can 
 
 #### Build the Myddleware image with docker-compose (developer's mode)
 

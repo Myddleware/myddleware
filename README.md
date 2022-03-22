@@ -1,4 +1,4 @@
-# Welcome to Myddleware community and thanks for joining us !
+# Welcome to Myddleware community and thanks for joining us
 
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
