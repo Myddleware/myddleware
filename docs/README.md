@@ -33,6 +33,7 @@ Applications currently connected :
 - Sage CRM
 - Salesforce
 - SAP CRM
+- Sendinblue
 - SugarCRM
 - SuiteCRM
 - Vtiger
