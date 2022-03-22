@@ -4,7 +4,9 @@
 
 ### Requirements
 
-It is important that the application you want to connect has a webservice API with methods to read data (at the very least).
+The application you want to connect needs to have a webservice API with methods to read data (at the very least) and hopefully have a documentation website available to help you connect Myddleware to the target application. 
+
+> Most Myddleware applications are connected using REST API, however this is not the only option.
 
 First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures, and more specifically the LoadSolutionData class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
 
@@ -16,51 +18,65 @@ First you will need to add your new connector to the solution table in your data
                 ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
                 ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
                 // Your connector
+                ['name' => 'myconnector',  'active' => 1, 'source' => 1, 'target' => 1],
         ];
 ```
 
-In ```/src/Manager/SolutionManager.php```
+In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the SolutionManager class.
 
-- Add your new connector to the SolutionManager file, , in the same way as the others. First, add ```use App\Soltions\'your_connector'```.
+First, add the use statement at the top of the SolutionManager class :
 
-Then still in SolutionManager, we add your new connector to the construct function, following the others.
+```php
+...
+use App\Solutions\WooEventManager;
+use App\Solutions\WordPress;
+use App\Solutions\Zuora;
+// Your new connector
+use App\Solutions\MyConnector;
+```
+
+Then still in SolutionManager, add the new connector to the constructor.
 
 ```php
         public function __construct(
-        wordpress $wordpress,
-        woocommerce $woocommerce,
-        wooeventmanager $wooeventmanager,
-        ...
+        WrdPress $wordPress,
+        WooCommerce $wooCommerce,
+        WooEventManager $wooEventManager,
          // Your connector
+         MyConnector $myConnector
     
     ) {
         $this->classes = [
-            'wordpress' => $wordpress,
-            'wooeventmanager' => $wooeventmanager,
-            'woocommerce' => $woocommerce,
-            ...
+            'wordpress' => $wordPress,
+            'wooeventmanager' => $wooEventManager,
+            'woocommerce' => $wooCommerce,
              // Your connector
+            'myconnector' => $myConnector
         ];
     }
 ```
 
-Add to Database :
+#### Download source API SDKs
 
-- In your terminal, load Myddleware fixtures:
+!> This step is optional and will vary according to the type of API you would like to connect to Myddleware. For this part, you must refer to the source API documentation.
+
+In your terminal, you might need to download an SDK for the new API. For instance, [the WooCommerce REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) tells us that we need to add the **automattic/woocommerce** dependency to our Myddleware project in order to be able to login to the REST API. To do so, we ran :
+
+```bash
+       composer require automattic/woocommerce
+```
+
+#### Add the new connector to your current database
+
+In your terminal, load Myddleware fixtures:
 
 ```bash
         php bin/console doctrine:fixtures:load --append
 ```
 
-- In your terminal use the command corresponding to your API:
+> Check in Myddleware if the new connector is already available.
 
-```bash
-       composer require ...
-```
-
-> Check in Myddleware if the new connector is accessible.
-
-Now we need to create a new connector class, in ```myddleware/src/Solutions```, the file name must be the same as the name of your class. You can use the code of another class for inspiration. For example, check out "SuiteCRM.php":
+Now, let's create a new connector class, in [/src/Solutions](https://github.com/Myddleware/myddleware/tree/main/src/Solutions), the file name must be the same as the name of your class (this is due to autoloading). You can use the code of another class for inspiration. For example, check out "SuiteCRM.php":
 
 ```php
         namespace App\Solutions;
@@ -83,39 +99,53 @@ Now we need to create a new connector class, in ```myddleware/src/Solutions```, 
         }
 ```
 
-Finally, if you want to display the application's logo, add the image corresponding to your application with the png format and size 64*64 pixels in the ```myddleware/public/build/images/solution/``` directory
+#### Add the solution's logo
 
-> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. You should also log errors using Symfony logger. In case of errors, the error message will be sent to the ```prod.log``` file.
+Finally, if you want to display the application's logo, add the image corresponding to your application with the png format and size 64*64 pixels in [assets/images/solution](https://github.com/Myddleware/myddleware/tree/main/assets/images/solution)
 
-Here is an example from our WooCommerce.php file :
- 
+> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. You should also log errors using Symfony logger. In case of errors, the error message will be sent to the ```background.log```, ```prod.log``` & ```dev.log`` files, depending on your environment.
 
-### getFieldLogin method
-
-In this new connector class, create the function getFieldsLogin(). Here, you have to put the parameters required to connect to your solution.
-
-For example, if you need an url and an APIkey you can creat this methode :
+Here is an example method from our [WordPress.php](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/wordpress.php) file :
 
 ```php
-    public function getFieldsLogin()
+        public function login($paramConnexion){
+                parent::login($paramConnexion);
+                try  {
+                        ...
+                }catch(\Exception $e){
+                        $error = $e->getMessage();
+                        $this->logger->error($error);
+                        return array('error' => $error);
+                }
+        }
+```
+
+### getFieldsLogin() method
+
+In the new connector class, you need to implement the getFieldsLogin() method. Here, you have to put the parameters required to connect to your solution.
+
+For example, to login to the WooCommerce API, we need a URL, Consumer Key & Consumer Secret  :
+
+```php
+  public function getFieldsLogin()
     {
         return [
-            [
-                'name' => 'login',
-                'type' => TextType::class,
-                'label' => 'solution.fields.login',
-            ],
-            [
-                'name' => 'password',
-                'type' => PasswordType::class,
-                'label' => 'solution.fields.password',
-            ],
-            [
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url',
-            ],
-        ];
+                    [
+                        'name' => 'url',
+                        'type' => TextType::class,
+                        'label' => 'solution.fields.url',
+                    ],
+                    [
+                        'name' => 'consumerkey',
+                        'type' => PasswordType::class,
+                        'label' => 'solution.fields.consumerkey',
+                    ],
+                    [
+                        'name' => 'consumersecret',
+                        'type' => PasswordType::class,
+                        'label' => 'solution.fields.consumersecret',
+                    ],
+                ];
     }
 ```
 
@@ -125,7 +155,7 @@ For example, if you need an url and an APIkey you can creat this methode :
 
 *We can now log into Myddleware*
 
-### Method login
+### login() method
 
 Now to connect your connector, we need to create a new function in your class, we will call it "login".
 
