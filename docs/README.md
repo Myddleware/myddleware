@@ -2,11 +2,13 @@
 
 > Welcome to the Myddleware community and thanks for joining us!
 
+![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
+
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications
 
 ![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
 
-[On our community website,](http://community.myddleware.com) you’ll find everything you’re looking for to master Myddleware, from step-by-step tutorials, to English and French forums. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
+[On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
 This community is ours : let’s all contribute, make it a friendly, helpful space where we can all find what we’re looking for!
 
@@ -18,35 +20,7 @@ Find us here : [www.myddleware.com](https://www.myddleware.com)
 
 *We created it, you own it!*
 
-![Myddleware Logo](http://community.myddleware.com/wp-content/uploads/2016/09/myddleware_logo-300x215.jpg)
-
-## Technical Requirements
-
-!> We are actively working on a [Docker](https://www.docker.com/) configuration for Myddleware. Once released, you will be able to install Myddleware using Docker too, which means we will ensure all requirements below are met.
-
-To use Myddleware you need the following on your web server :
-
-- A web server such as [Apache](https://httpd.apache.org/)
-- [MySQL](https://www.mysql.com/downloads/) version 5.7 or above or [MariaDB](https://mariadb.org/download/?t=mariadb&p=mariadb&r=10.6.5&os=windows&cpu=x86_64&pkg=msi&m=xtom_ams)
-- [PHP](https://www.php.net/downloads.php) version 8.0 or above. The following PHP extensions need to be installed & enabled (they usually are by default):
-  - Ctype
-  - Iconv
-  - JSON
-  - PCRE
-  - Session
-  - SimpleXML
-  - Tokenizer
-- [composer](https://getcomposer.org/download/)
-- the [Symfony CLI](https://symfony.com/download)
-- [Node.js](https://nodejs.org/de/download/) version 14.16.1
-- [yarn](https://yarnpkg.com/getting-started/install) version [1.22.10](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable )
-
-Myddleware uses [Doctrine ORM](https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/tutorials/getting-started.html#getting-started-with-doctrine) so you will need to have the PDO driver installed for the database server you intend to use.
-
-It is possible that depending on your webserver configuration there might be some missing requirements. We strongly recommend running the following command in a terminal to ensure all requirements are met :
-
-``` symfony check:requirements ```
-
+%[{ requirements.md }]%
 
 ## Install Myddleware
 
@@ -134,8 +108,7 @@ Before proceeding to this step, please ensure you've already created the databas
 
 Fill in the form to create your Myddleware credentials (email, username & password). Once this is done, you should be redirected to the Myddleware homepage.
 
-#### **Setup from a terminal **
-
+#### **Setup from a terminal**
 
 ##### Create your environment file
 
@@ -147,9 +120,15 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 
 ### Connect your applications to Myddleware
 
+*This section is still under construction*
+
 ### Create a rule
 
+*This section is still under construction*
+
 ## Administration tasks
+
+*This section is still under construction*
 
 ### Add users
 
@@ -159,11 +138,14 @@ At the root of your /myddleware directory, you need to create a .env.local file 
 
 ## Supported Connectors
 
+*This section is still under construction*
+
 ## Contributing
 
 > Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
 
-### Create your own connectors
-
+%[{ dev_guide.md }]%
 
 ## Going further
+
+*This section is still under construction*
