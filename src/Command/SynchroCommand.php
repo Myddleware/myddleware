@@ -73,8 +73,7 @@ class SynchroCommand extends Command
         RuleManager $ruleManager,
         EntityManagerInterface $entityManager,
         DocumentRepository $documentRepository
-    )
-    {
+    ) {
         parent::__construct();
         $this->logger = $logger;
         $this->entityManager = $entityManager;
@@ -170,8 +169,10 @@ class SynchroCommand extends Command
         if (!empty($this->jobManager->message)) {
             $output->writeln('1;<error>'.$this->jobManager->message.'</error>');
             $this->logger->error($this->jobManager->message);
+
             return 1;
         }
+
         return 0;
     }
 }

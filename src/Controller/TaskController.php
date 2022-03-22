@@ -171,6 +171,7 @@ class TaskController extends AbstractController
             );
         } catch (Exception $e) {
             $this->logger->error($e->getMessage().''.$e->getFile().' '.$e->getLine());
+
             return $this->redirect($this->generateUrl('task_list'));
         }
     }

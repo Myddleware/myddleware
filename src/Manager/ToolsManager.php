@@ -111,6 +111,7 @@ class toolscore
             $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input"></input>';
             $r .= '</div>';
         }
+
         return $r;
     }
 

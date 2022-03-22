@@ -1194,6 +1194,7 @@ class rulecore
             $session = new Session();
             $session->set('error', [$e->getMessage()]);
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
             return false;
         }
     }
