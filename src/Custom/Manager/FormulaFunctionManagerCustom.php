@@ -5,7 +5,7 @@ use App\Manager\FormulaFunctionManager;
 
 class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 	
-	protected $namesCustom = array('Afev_serialize');
+	protected $namesCustom = array('Afev_serialize', 'Afev_removeEmoji');
 	
 	protected $pathCustom = "App\Custom\Manager\FormulaFunctionManagerCustom::";
 	
@@ -53,6 +53,13 @@ class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 			}
 		}
 		return '';
+	}
+	
+	// Remove emotji from a string
+	public static function Afev_removeEmoji($text) {
+		$text = iconv('UTF-8', 'ISO-8859-15//IGNORE', $text);
+		$text = preg_replace('/\s+/', ' ', $text);
+		return iconv('ISO-8859-15', 'UTF-8', $text);
 	}
 
 }
