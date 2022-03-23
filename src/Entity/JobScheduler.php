@@ -42,26 +42,6 @@ class JobScheduler implements \Stringable
     private $id;
 
     /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
-    private $dateCreated;
-
-    /**
-     * @ORM\Column(name="date_modified", type="datetime")
-     */
-    private $dateModified;
-
-    /**
-     * @ORM\Column(name="created_by", type="integer", nullable=false, options={"default":1})
-     */
-    private $createdBy;
-
-    /**
-     * @ORM\Column(name="modified_by", type="integer", nullable=false, options={"default":1})
-     */
-    private $modifiedBy;
-
-    /**
      * @ORM\Column(name="command", type="string", length=50, nullable=false)
      */
     private $command;
@@ -110,57 +90,31 @@ class JobScheduler implements \Stringable
      */
     private $jobOrder;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $modifiedBy;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $updatedAt;
+
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function setDateCreated(DateTime $dateCreated): self
-    {
-        $this->dateCreated = $dateCreated;
-
-        return $this;
-    }
-
-    public function getDateCreated(): DateTime
-    {
-        return $this->dateCreated;
-    }
-
-    public function setDateModified(DateTime $dateModified): self
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    public function getDateModified(): DateTime
-    {
-        return $this->dateModified;
-    }
-
-    public function setCreatedBy(int $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): int
-    {
-        return $this->createdBy;
-    }
-
-    public function setModifiedBy(int $modifiedBy): self
-    {
-        $this->modifiedBy = $modifiedBy;
-
-        return $this;
-    }
-
-    public function getModifiedBy(): int
-    {
-        return $this->modifiedBy;
     }
 
     public function setCommand(string $command): self
@@ -274,5 +228,53 @@ class JobScheduler implements \Stringable
     public function __toString(): string
     {
         return $this->id;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modifiedBy;
+    }
+
+    public function setModifiedBy(?User $modifiedBy): self
+    {
+        $this->modifiedBy = $modifiedBy;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 }
