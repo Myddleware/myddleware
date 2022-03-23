@@ -1408,7 +1408,7 @@ class DocumentManager
                     // Try the formula first
                     try {
                         // Trigger to redefine formula
-                        $f = $this->changeFormula($f);
+                        $formula = $this->changeFormula($formula);
                         eval($f.';'); // exec
                     } catch (\ParseError $e) {
                         throw new \Exception('FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());
@@ -1456,7 +1456,7 @@ class DocumentManager
                     and isset($source['id'])
             ) {
                 return $this->checkField($source['id']);
-            } elseif (is_null($source[$ruleField['source_field_name']])) {
+            } elseif ($source[$ruleField['source_field_name']] === null) {
                 return null;
             } else {
                 throw new \Exception('Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField, true));
@@ -1473,9 +1473,9 @@ class DocumentManager
     }
 
     // Trigger to be able to redefine formula
-    protected function changeFormula($f)
+    protected function changeFormula($formula)
     {
-        return $f;
+        return $formula;
     }
 
     // Fonction permettant de contrôle les données.

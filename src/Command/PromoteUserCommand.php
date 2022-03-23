@@ -19,7 +19,7 @@ class PromoteUserCommand extends Command
     /**
      * @var EntityManagerInterface
      */
-    private $em;
+    private $entityManager;
 
     /**
      * @var UserRepository
@@ -32,11 +32,11 @@ class PromoteUserCommand extends Command
     private $io;
 
     public function __construct(
-        EntityManagerInterface $em,
+        EntityManagerInterface $entityManager,
         UserRepository $userRepository
     ) {
         parent::__construct();
-        $this->em = $em;
+        $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
     }
 
@@ -121,7 +121,7 @@ class PromoteUserCommand extends Command
         } else {
             $roles[] = $role;
             $user->setRoles($roles);
-            $this->em->flush();
+            $this->entityManager->flush();
             $io->success(sprintf('The role %s has been added to the user %s.', $role, $email));
 
             return Command::SUCCESS;

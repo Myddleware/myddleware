@@ -26,16 +26,17 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Manager;
 
 use App\Entity\Config;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class UpgradeManager
 {
@@ -65,11 +66,13 @@ class UpgradeManager
     public function __construct(
         LoggerInterface $logger,
         KernelInterface $kernel,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBagInterface
     ) {
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->entityManager = $entityManager;
+        $this->parameterBagInterface = $parameterBagInterface;
         $this->env = $kernel->getEnvironment();
         $this->projectDir = $kernel->getProjectDir();
 
@@ -121,14 +124,14 @@ class UpgradeManager
             $this->afterUpdate($output);
 
             // Get old and new Myddleware version
-            $oldVersion = getenv('MYDDLEWARE_VERSION');
+            $oldVersion = $this->parameterBagInterface->get('myd_version');
             // Refresh variable from env file
             if (file_exists(__DIR__.'/../../.env')) {
                 (new Dotenv())->load(__DIR__.'/../../.env');
             }
 
-            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').'</info>');
-            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').chr(10);
+            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '. $this->parameterBagInterface->get('myd_version').'</info>');
+            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.$this->parameterBagInterface->get('myd_version').chr(10);
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
@@ -143,6 +146,7 @@ class UpgradeManager
     {
         // Update Main if git_branch is empty otherwise we update the specific branch
         $command = (!empty($this->configParams['git_branch'])) ? 'git pull origin '.$this->configParams['git_branch'] : 'git pull';
+        // TODO: $command must be an array of commands with its arguments as a separate entry
         $process = new Process($command);
         $process->run();
         // executes after the command finishes
@@ -158,6 +162,7 @@ class UpgradeManager
         }
 
         // Run the command a second time, we expect to get the message "Already up-to-date"
+        // TODO: $command must be an array of commands with its arguments as a separate entry
         $process = new Process($command);
         $process->run();
         // executes after the command finishes
@@ -179,6 +184,7 @@ class UpgradeManager
     protected function updateVendors()
     {
         // Change the command composer if php isn't the default php version
+        // TODO: $command must be an array of commands with its arguments as a separate entry
         $process = new Process('composer install --ignore-platform-reqs');
         $process->run();
         // executes after the command finishes
@@ -190,13 +196,14 @@ class UpgradeManager
     // Execute yarn action
     protected function yarnAction()
     {
+        // TODO: $command must be an array of commands with its arguments as a separate entry
         $process = new Process('yarn install');
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
-
+        // TODO: $command must be an array of commands with its arguments as a separate entry
         $process = new Process('yarn build');
         $process->run();
         // executes after the command finishes
@@ -290,6 +297,7 @@ class UpgradeManager
             } else {
                 // CLear other environment cache via command
                 $command = 'rm -rf var/cache/'.$env.'/*';
+                // TODO: $command must be an array of commands with its arguments as a separate entry
                 $process = new Process($command);
                 $process->run();
                 // executes after the command finishes

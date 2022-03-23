@@ -32,11 +32,11 @@ class DemoteUserCommand extends Command
     private $io;
 
     public function __construct(
-        EntityManagerInterface $em,
+        EntityManagerInterface $entityManager,
         UserRepository $userRepository
         ) {
         parent::__construct();
-        $this->em = $em;
+        $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
     }
 
@@ -121,7 +121,7 @@ class DemoteUserCommand extends Command
         } else {
             array_splice($roles, array_search($role, $roles), 1);
             $user->setRoles($roles);
-            $this->em->flush();
+            $this->entityManager->flush();
             $io->success(sprintf('The role %s has been removed from user %s.', $role, $email));
 
             return Command::SUCCESS;
