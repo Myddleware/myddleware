@@ -2208,6 +2208,12 @@ class documentcore
 		}
 	}
 	
+	public function generateDocLog($errorType, $message) {
+		$this->typeError = $errorType;
+		$this->message = $message;
+		$this->createDocLog();
+	}
+
 }
 class DocumentManager extends documentcore {
 	

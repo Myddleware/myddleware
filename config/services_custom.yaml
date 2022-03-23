@@ -58,3 +58,8 @@ services:
       decorates: App\Solutions\airtable
       decoration_on_invalid: ignore
       decoration_priority: 1
+
+  App\Custom\Solutions\sendinbluecustom:
+      decorates: App\Solutions\sendinblue
+      decoration_on_invalid: ignore
+      decoration_priority: 1

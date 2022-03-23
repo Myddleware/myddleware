@@ -47,6 +47,8 @@ class sendinbluecore extends solution
     protected $FieldsDuplicate = ['contacts' => ['email']];
 	protected $limitEmailActivity = 100;
     
+	protected $sendDeletion = true;
+		
     public function getFieldsLogin()
     {
         return [
@@ -408,7 +410,7 @@ class sendinbluecore extends solution
     }
 
      // Create the record 
-     protected function create($param, $record) {
+     protected function create($param, $record, $idDoc = null) {
         // Import or create new contact for sendinblue 
 		$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
 		$createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
@@ -420,7 +422,7 @@ class sendinbluecore extends solution
      }
 
     // Update the record 
-    protected function update($param, $record) {  
+    protected function update($param, $record, $idDoc = null) {  
         try {
             $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
             $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
@@ -434,6 +436,22 @@ class sendinbluecore extends solution
         return $identifier;
     }
 
+	// delete the record 
+    protected function delete($param, $record) {  
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
+            // target_id contains the id of the record to be modified        
+            $identifier = $record['target_id'];                                 
+            $updateContact['attributes'] = $record;            
+            $result = $apiInstance->deleteContact($identifier);
+         } catch (\Exception $e) {
+            throw new \Exception('Exception when calling ContactsApi->deleteContact: '. $e->getMessage());			
+        }    
+        return $identifier;
+    }
+
+	
     // Convert date to Myddleware format 
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
     protected function dateTimeToMyddleware($dateTime) {	
