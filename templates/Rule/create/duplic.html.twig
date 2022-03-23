@@ -101,10 +101,19 @@
 				<th scope="row">{{'view_rule.title.source'|trans}}</th>
 				<td>
 					{{connectorSourceUser}}
-				</td>
-				<td colspan="2">
-					{{ form_widget(form.connectorSource) }}
-				</td>
+				</td>	
+				{# {% for value in newRuleSolutionTarget %}	 #}
+					<td colspan="2">					
+						{# {% if currentRuleSolutionSource == value.solution.name %}	
+						 #}
+						
+							{{ form_widget(form.connectorSource) }}
+						
+						{# {% endif %}
+					{% elseif currentRuleSolutionSource != value.solution.name %}
+							<p>R</p> #}
+					</td>
+				{# {% endfor %} #}
 			</tr>
 			<tr>
 				<th scope="row">{{'view_rule.title.target'|trans}}</th>

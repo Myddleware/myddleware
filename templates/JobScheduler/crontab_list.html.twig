@@ -26,11 +26,10 @@
                 <thead>
                     <th scope="col" class="title"><label>{{ 'crontab.command'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.period'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.arguments'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.description'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.running'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.max_instance'|trans }}</label></th>
-                    <th scope="col" class="title"><label>{{ 'crontab.number'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.lastUse'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.nextRun'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.enable'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'jobscheduler.actions'|trans }}</label></th>
                 </thead>
                 <tbody>
@@ -38,11 +37,10 @@
                 <tr>                    
                     <td class="value">{{ value.command }}</td>
                     <td class="value">{{ value.period }}</td>
-                    <td class="value">{{ value.arguments }}</td>
                     <td class="value">{{ value.description  }}</td>
-                    <td class="value">{{ value.runningInstances }}</td>
-                    <td class="value">{{ value.maxInstances }}</td>
-                    <td class="value">{{ value.number }}</td>
+					<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
+					<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
+                    <td class="value">{{ value.enable }}</td>
                      <td class="CRUD-icons">
                             <a href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
                                 <span class="btn-opt">
@@ -80,8 +78,15 @@
                 </tbody>
             </table>
         </div>
-        <div class="row text-center">
-            {# <p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p> #}
+        <div id="help-content-info" class="help-content">
+        <h2>
+            {{'help.title'|trans}} 
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+            </svg>
+        </h2>
+            <p class="jobscheduler_text">{{'crontab.help'|trans|raw}}</p>
         </div>
     </div>
 {% endblock %}

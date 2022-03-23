@@ -25,35 +25,32 @@
 
 namespace App\Controller;
 
+use App\Entity\Config;
 use App\Entity\Job;
 use App\Entity\Log;
-use App\Entity\Config;
 use App\Manager\JobManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
-use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Class TaskController.
- *
- * @package App\Controller
  *
  * @Route("/rule")
  */
 class TaskController extends AbstractController
 {
-	protected $params;
-	
+    protected $params;
+
     /**
      * @var JobManager
      */
@@ -63,41 +60,42 @@ class TaskController extends AbstractController
      * @var JobRepository
      */
     private $jobRepository;
-	/**
-	 * @var EntityManagerInterface
-	 */
-	private $entityManager;
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
     /**
      * @var DocumentRepository
      */
     private $documentRepository;
-	/**
-	 * @var LoggerInterface
-	 */
-	private $LoggerInterface;
+    /**
+     * @var LoggerInterface
+     */
+    private $LoggerInterface;
+
     /**
      * TaskController constructor.
      */
     public function __construct(
-		JobManager $jobManager, 
-		JobRepository $jobRepository, 
-		DocumentRepository $documentRepository,
-		LoggerInterface $LoggerInterface,
-		EntityManagerInterface $entityManager
-	) {
+        JobManager $jobManager,
+        JobRepository $jobRepository,
+        DocumentRepository $documentRepository,
+        LoggerInterface $LoggerInterface,
+        EntityManagerInterface $entityManager
+    ) {
         $this->jobRepository = $jobRepository;
         $this->jobManager = $jobManager;
         $this->documentRepository = $documentRepository;
         $this->LoggerInterface = $LoggerInterface;
-		$this->entityManager = $entityManager;
-		// Init parameters
-		$configRepository = $this->entityManager->getRepository(Config::class);
-		$configs = $configRepository->findAll();
-		if (!empty($configs)) {
-			foreach ($configs as $config) {
-				$this->params[$config->getName()] = $config->getvalue();
-			}
-		}		
+        $this->entityManager = $entityManager;
+        // Init parameters
+        $configRepository = $this->entityManager->getRepository(Config::class);
+        $configs = $configRepository->findAll();
+        if (!empty($configs)) {
+            foreach ($configs as $config) {
+                $this->params[$config->getName()] = $config->getvalue();
+            }
+        }
     }
 
     /**
@@ -120,11 +118,12 @@ class TaskController extends AbstractController
             'page' => $page,
         ], false);
 
-         //Check the user timezone
-         $timezone = $this->getUser()->getTimezone();
+        //Check the user timezone
+        $timezone = $this->getUser()->getTimezone();
         if (empty($timezone)) {
             $timezone = 'UTC';
         }
+
         return $this->render('Task/list.html.twig', [
             'nb' => $compact['nb'],
             'entities' => $compact['entities'],
@@ -158,9 +157,10 @@ class TaskController extends AbstractController
             //Check the user timezone
             if ($timezone = '') {
                 $timezone = 'UTC';
-            }else {
+            } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
             return $this->render('Task/view/view.html.twig', [
                 'task' => $task,
                 'nb' => $compact['nb'],
@@ -170,6 +170,8 @@ class TaskController extends AbstractController
             ]
             );
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage().''.$e->getFile().' '.$e->getLine());
+
             return $this->redirect($this->generateUrl('task_list'));
         }
     }
@@ -187,7 +189,7 @@ class TaskController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             // Get job detail
-            $jobData = $this->jobManager->getLogData($taskStop);              			
+            $jobData = $this->jobManager->getLogData($taskStop);
 
             // Stop task and update statistics
             $taskStop->setOpen($jobData['Open']);
@@ -198,14 +200,15 @@ class TaskController extends AbstractController
             $taskStop->setEnd(new \DateTime());
             $em->persist($taskStop);
 
-			// Add log to indicate this action
-			$log = new Log();	
-			$log->setDateCreated(new \DateTime);
-			$log->setType('W');
-			$log->setMessage('The task has been manually stopped. ');
-			$log->setJob($taskStop);
-			$em->persist($log);
-			$em->flush();        
+            // Add log to indicate this action
+            $log = new Log();
+            $log->setDateCreated(new \DateTime());
+            $log->setType('W');
+            $log->setMessage('The task has been manually stopped. ');
+            $log->setJob($taskStop);
+            $em->persist($log);
+            $em->flush();
+
             return $this->redirect($this->generateURL('task_view', ['id' => $taskStop->getId()]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('task_list'));

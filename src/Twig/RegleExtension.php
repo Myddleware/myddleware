@@ -30,8 +30,6 @@ use Twig\TwigFilter;
 
 /**
  * Class RegleExtension.
- *
- * @package App\Twig
  */
 class RegleExtension extends AbstractExtension
 {

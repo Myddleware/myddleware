@@ -6,7 +6,6 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class MailControllerTest extends WebTestCase
 {
-
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -14,7 +13,6 @@ class MailControllerTest extends WebTestCase
 
     public function testMailIsSentAndContentIsOk()
     {
-
         // enables the profiler for the next request (it does nothing if the profiler is not available)
         $this->client->enableProfiler();
 

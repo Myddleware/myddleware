@@ -219,7 +219,7 @@ class prestashopcore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
-						'relate' => false
+                        'relate' => false,
                     ];
                 }
                 foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
@@ -229,10 +229,11 @@ class prestashopcore extends solution
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
                         'required_relationship' => 1,
-						'relate' => true
+                        'relate' => true,
                     ];
                 }
-                 return $this->moduleFields;
+
+                return $this->moduleFields;
             }
 
             try { // try-catch PrestashopWebservice
@@ -252,7 +253,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
-							'relate' => false
+                            'relate' => false,
                         ];
                         if ('id_gender' == $presta_field) {
                             $this->moduleFields['id_gender']['option'] = ['1' => 'Mr.', '2' => 'Mrs.'];
@@ -269,7 +270,7 @@ class prestashopcore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => 0,
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     } elseif (empty($value)) {
                         $this->moduleFields[$presta_field] = [
@@ -277,7 +278,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
-							'relate' => false
+                            'relate' => false,
                         ];
                     } else {
                         if ('associations' == $presta_field) {
@@ -288,7 +289,7 @@ class prestashopcore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
-							'relate' => false
+                            'relate' => false,
                         ];
                         if (isset($value['@attributes']['format'])) {
                             $this->moduleFields[$presta_field]['type'] = $value['@attributes']['format'];
@@ -350,7 +351,7 @@ class prestashopcore extends solution
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
                         'required_relationship' => 0,
-						'relate' => true
+                        'relate' => true,
                     ];
                 }
                 // On enlève les champ date_add et date_upd si le module est en target
@@ -362,6 +363,7 @@ class prestashopcore extends solution
                         unset($this->moduleFields['date_upd']);
                     }
                 }
+
                 return $this->moduleFields;
             } catch (PrestashopWebserviceException $e) {
                 // Here we are dealing with errors
@@ -393,13 +395,13 @@ class prestashopcore extends solution
         $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
         $records = json_decode(json_encode((array) $simplexml->children()->children()), true);
         foreach ($records[$field] as $record) {
-             // The structure is different if there is only one language or several languages in Prestashop
-			$attributeId = (!empty($record['@attributes']['id']) ? $record['@attributes']['id'] : $record['id']);
+            // The structure is different if there is only one language or several languages in Prestashop
+            $attributeId = (!empty($record['@attributes']['id']) ? $record['@attributes']['id'] : $record['id']);
             $opt = [
                 'resource' => $fields,
                 'id' => $attributeId,
             ];
-           
+
             // Function to modify opt (used for custom needs)
             $opt = $this->updateOptions('getList', $opt, $field);
             // Call
@@ -431,169 +433,173 @@ class prestashopcore extends solution
 
         return $out;
     }
-    // xml2array ( $xmlObject, $out = array () )
 
+    // xml2array ( $xmlObject, $out = array () )
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function read($param)
     {
-		// traitement spécial pour module de relation Customers / Groupe
-		if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			$result = $this->readManyToMany($param);
-			return $result;
-		}
+        // traitement spécial pour module de relation Customers / Groupe
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $result = $this->readManyToMany($param);
 
-		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            return $result;
+        }
 
-		try { // try-catch PrestashopWebservice
-			$result = [];
-			// Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
-			$getCurrentState = false;
-			if (
-					'orders' == $param['module']
-				&& in_array('current_state', $param['fields'])
-			) {
-				$getCurrentState = true;
-				unset($param['fields'][array_search('current_state', $param['fields'])]);
-			}
+        // On va chercher le nom du champ pour la date de référence: Création ou Modification
+        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
-			$opt['limit'] = $param['limit'];
-			$opt['resource'] = $param['module'].'&date=1';
-			$opt['display'] = '[';
-			foreach ($param['fields'] as $field) {
-				// On ne demande pas les champs spécifiques à Myddleware
-				if (
-						!in_array($field, ['Myddleware_element_id', 'my_value'])
-					and !('id_order' == $field and 'order_payments' == $param['module'])
-				) {
-					$opt['display'] .= $field.',';
-				}
-			}
+        try { // try-catch PrestashopWebservice
+            $result = [];
+            // Le champ current_state n'est plus lisible (même s'il est dans la liste des champs disponible!) dans Prestashop 1.6.0.14, il faut donc le gérer manuellement
+            $getCurrentState = false;
+            if (
+                    'orders' == $param['module']
+                && in_array('current_state', $param['fields'])
+            ) {
+                $getCurrentState = true;
+                unset($param['fields'][array_search('current_state', $param['fields'])]);
+            }
 
-			$opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
-			$opt['display'] .= ']';
+            $opt['limit'] = $param['limit'];
+            $opt['resource'] = $param['module'].'&date=1';
+            $opt['display'] = '[';
+            foreach ($param['fields'] as $field) {
+                // On ne demande pas les champs spécifiques à Myddleware
+                if (
+                        !in_array($field, ['Myddleware_element_id', 'my_value'])
+                    and !('id_order' == $field and 'order_payments' == $param['module'])
+                ) {
+                    $opt['display'] .= $field.',';
+                }
+            }
 
-			// Query creation
-			// if a specific query is requeted we don't use date_ref
-			if (!empty($param['query'])) {
-				foreach ($param['query'] as $key => $value) {
-					$opt['filter['.$key.']'] = '['.$value.']';
-				}
-			} else {
-				// Si la référence est une date alors la requête dépend de la date
-				if ($this->referenceIsDate($param['module'])) {
-					if ('date_add' == $dateRefField) {
-						$opt['filter[date_add]'] = '['.$param['date_ref'].',9999-12-31 00:00:00]';
+            $opt['display'] = substr($opt['display'], 0, -1); // Suppression de la dernière virgule
+            $opt['display'] .= ']';
 
-						$opt['sort'] = '[date_add_ASC]';
-					} else {
-						// $opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
-						$opt['filter[date_upd]'] = '['.$param['date_ref'].',9999-12-31 00:00:00]';
+            // Query creation
+            // if a specific query is requeted we don't use date_ref
+            if (!empty($param['query'])) {
+                foreach ($param['query'] as $key => $value) {
+                    $opt['filter['.$key.']'] = '['.$value.']';
+                }
+            } else {
+                // Si la référence est une date alors la requête dépend de la date
+                if ($this->referenceIsDate($param['module'])) {
+                    if ('date_add' == $dateRefField) {
+                        $opt['filter[date_add]'] = '['.$param['date_ref'].',9999-12-31 00:00:00]';
 
-						$opt['sort'] = '[date_upd_ASC]';
-					}
-				}
-				// Si la référence n'est pas une date alors c'est l'ID de prestashop
-				else {
-					if ('' == $param['date_ref']) {
-						$param['date_ref'] = 1;
-					}
-					$opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
-					$opt['sort'] = '[id_ASC]';
-				}
-			}
+                        $opt['sort'] = '[date_add_ASC]';
+                    } else {
+                        // $opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
+                        $opt['filter[date_upd]'] = '['.$param['date_ref'].',9999-12-31 00:00:00]';
 
-			// Function to modify opt (used for custom needs)
-			$opt = $this->updateOptions('read', $opt, $param);
+                        $opt['sort'] = '[date_upd_ASC]';
+                    }
+                }
+                // Si la référence n'est pas une date alors c'est l'ID de prestashop
+                else {
+                    if ('' == $param['date_ref']) {
+                        $param['date_ref'] = 1;
+                    }
+                    $opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
+                    $opt['sort'] = '[id_ASC]';
+                }
+            }
 
-			// Call
-			$xml = $this->webService->get($opt);
+            // Function to modify opt (used for custom needs)
+            $opt = $this->updateOptions('read', $opt, $param);
 
-			$xml = $xml->asXML();
-			$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-			$record = [];
-			foreach ($simplexml->children()->children() as $data) {
-				if (!empty($data)) {
-					foreach ($data as $key => $value) {
-						// If field is requested (field corresponding to the reference date could be requested in the field mapping too)
-						if (false !== array_search($key, $param['fields'])) {
-							if (isset($value->language)) {
-								if (!empty($value->language[1])) {
-									$record[$key] = (string) $value->language[1];
-								} else {
-									$record[$key] = (string) $value->language;
-								}
-							} else {
-								$record[$key] = (string) $value;
-							}
-						}
-					}
-					// If id_order is requested for the module order_payments, we have to get the id order by using the order_reference
-					if (
-							false !== array_search('id_order', $param['fields'])
-						and 'order_payments' == $param['module']
-						and !empty($data->order_reference)
-					) {
-						// Get the id_order from Prestashop
-						$optOrder['limit'] = 1;
-						$optOrder['resource'] = 'orders&date=1';
-						$optOrder['display'] = '[id]';
-						$optOrder['filter[reference]'] = '['.(string) $data->order_reference.']';
-						$xml = $this->webService->get($optOrder);
-						$xml = $xml->asXML();
-						$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-						if (!empty($simplexml->orders->order->id)) {
-							$record['id_order'] = (string) $simplexml->orders->order->id;
-						}
-					}
-					// Récupération du statut courant de la commande si elle est demandée
-					if ($getCurrentState) {
-						$optState['limit'] = 1;
-						$optState['resource'] = 'order_histories&date=1';
-						$optState['display'] = '[id_order_state]';
-						$optState['filter[id_order]'] = '['.$data->id.']';
-						$optState['sort'] = '[date_add_DESC]';
-						$xml = $this->webService->get($optState);
-						$xml = $xml->asXML();
-						$simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+            // Call
+            $xml = $this->webService->get($opt);
 
-						$currentState = $simplexml->children()->children();
-						if (!empty($currentState)) {
-							$record['current_state'] = (string) $currentState->order_history->id_order_state;
-						}
-					}
-					$result[] = $record;
-					$record = [];
-				}
-			}
-		} catch (PrestashopWebserviceException $e) {
-			// Here we are dealing with errors
-			$trace = $e->getTrace();
-			if (401 == $trace[0]['args'][0]) {
-				throw new \Exception('Bad auth key');
-			}
+            $xml = $xml->asXML();
+            $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $record = [];
+            foreach ($simplexml->children()->children() as $data) {
+                if (!empty($data)) {
+                    foreach ($data as $key => $value) {
+                        // If field is requested (field corresponding to the reference date could be requested in the field mapping too)
+                        if (false !== array_search($key, $param['fields'])) {
+                            if (isset($value->language)) {
+                                if (!empty($value->language[1])) {
+                                    $record[$key] = (string) $value->language[1];
+                                } else {
+                                    $record[$key] = (string) $value->language;
+                                }
+                            } else {
+                                $record[$key] = (string) $value;
+                            }
+                        }
+                    }
+                    // If id_order is requested for the module order_payments, we have to get the id order by using the order_reference
+                    if (
+                            false !== array_search('id_order', $param['fields'])
+                        and 'order_payments' == $param['module']
+                        and !empty($data->order_reference)
+                    ) {
+                        // Get the id_order from Prestashop
+                        $optOrder['limit'] = 1;
+                        $optOrder['resource'] = 'orders&date=1';
+                        $optOrder['display'] = '[id]';
+                        $optOrder['filter[reference]'] = '['.(string) $data->order_reference.']';
+                        $xml = $this->webService->get($optOrder);
+                        $xml = $xml->asXML();
+                        $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+                        if (!empty($simplexml->orders->order->id)) {
+                            $record['id_order'] = (string) $simplexml->orders->order->id;
+                        }
+                    }
+                    // Récupération du statut courant de la commande si elle est demandée
+                    if ($getCurrentState) {
+                        $optState['limit'] = 1;
+                        $optState['resource'] = 'order_histories&date=1';
+                        $optState['display'] = '[id_order_state]';
+                        $optState['filter[id_order]'] = '['.$data->id.']';
+                        $optState['sort'] = '[date_add_DESC]';
+                        $xml = $this->webService->get($optState);
+                        $xml = $xml->asXML();
+                        $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 
-			throw new \Exception('Call failed '.$e->getMessage());
-		}		
+                        $currentState = $simplexml->children()->children();
+                        if (!empty($currentState)) {
+                            $record['current_state'] = (string) $currentState->order_history->id_order_state;
+                        }
+                    }
+                    $result[] = $record;
+                    $record = [];
+                }
+            }
+        } catch (PrestashopWebserviceException $e) {
+            // Here we are dealing with errors
+            $trace = $e->getTrace();
+            if (401 == $trace[0]['args'][0]) {
+                throw new \Exception('Bad auth key');
+            }
+
+            throw new \Exception('Call failed '.$e->getMessage());
+        }
+
         return $result;
     }
 
-	// Method de find the date ref after a read call 
-	protected function getReferenceCall($param, $result) {
-		// IF the reference is a date
-		if ($this->referenceIsDate($param['module'])) {
-			// Add 1 second to the date ref because the read function is a >= not a >
-			$date = new \DateTime(end($result['values'])['date_modified']);
-			$second = new \DateInterval('PT1S'); // one second 		
-			$date->add($second);
-			return $date->format('Y-m-d H:i:s');
-		}
-		// if the reference is an increment
-		else{ 		
-			return end($result['values'])['date_modified']++;
-		}
-	}
+    // Method de find the date ref after a read call
+    protected function getReferenceCall($param, $result)
+    {
+        // IF the reference is a date
+        if ($this->referenceIsDate($param['module'])) {
+            // Add 1 second to the date ref because the read function is a >= not a >
+            $date = new \DateTime(end($result['values'])['date_modified']);
+            $second = new \DateInterval('PT1S'); // one second
+            $date->add($second);
+
+            return $date->format('Y-m-d H:i:s');
+        }
+        // if the reference is an increment
+        else {
+            return end($result['values'])['date_modified']++;
+        }
+    }
 
     // Read pour les modules fictifs sur les relations many to many
     protected function readManyToMany($param)
@@ -767,7 +773,7 @@ class prestashopcore extends solution
                                 $i = 0;
                                 $languageFound = false;
                                 foreach ($modele->$nodeKey->children() as $node) {
-                                    if(!empty($param['ruleParams']['language'])) {
+                                    if (!empty($param['ruleParams']['language'])) {
                                         if ($node->attributes() == $param['ruleParams']['language']) {
                                             $toSend->$nodeKey->language[$i][0] = $data[$nodeKey];
                                             $languageFound = true;
@@ -1048,4 +1054,3 @@ class prestashopcore extends solution
 class prestashop extends prestashopcore
 {
 }
-

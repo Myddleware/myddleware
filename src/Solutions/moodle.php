@@ -152,20 +152,19 @@ class moodlecore extends solution
                 } catch (\Exception $e) {
                 }
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
 
-
-
     // Read data in Moodle
     // public function readData($param)
     public function read($param)
     {
         try {
-            $result = array();
+            $result = [];
 
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
@@ -195,6 +194,7 @@ class moodlecore extends solution
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
+
         return $result;
     }
 

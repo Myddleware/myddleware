@@ -25,20 +25,16 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ToolsManager.
- *
- * @package App\Manager
- *
- *
  */
 class toolscore
 {
@@ -52,9 +48,9 @@ class toolscore
      * @var string
      */
     private $projectDir;
-	
-	// Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-	protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
+
+    // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
+    protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -71,7 +67,7 @@ class toolscore
     }
 
     // Compose une liste html avec les options
-    public static function composeListHtml($array, $phrase = false)
+    public static function composeListHtml($array, $phrase = false, $default = null)
     {
         $r = '';
         if ($array) {
@@ -83,7 +79,7 @@ class toolscore
 
             foreach ($array as $k => $v) {
                 if ('' != $v) {
-                    $r .= '<option value="'.$k.'">'.str_replace([';', '\'', '\"'], ' ', $v).'</option>';
+                    $r .= '<option value="'.$k.'" '.($k == $default ? 'selected' : '').'>'.str_replace([';', '\'', '\"'], ' ', $v).'</option>';
                 }
             }
         } else {
@@ -92,15 +88,42 @@ class toolscore
 
         return $r;
     }
-	
-    public function beforeRuleEditViewRender($data) {
-		return $data;
-	}
-	
-	public function getRuleParam() {
-		return $this->ruleParam;
-	}
-	
+
+    // Compose checkbox
+    public static function composeListHtmlCheckbox($array, $phrase = false)
+    {
+        $r = '';
+        if ($array) {
+            asort($array);
+            foreach ($array as $k => $v) {
+                if ('errorMissing' == $v) {
+                    $r .= '<div class="form-check">';
+                    $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input" checked></input>';
+                    $r .= '</div>';
+                } else {
+                    $r .= '<div class="form-check">';
+                    $r .= '<input type="checkbox" name="'.$v.'" class="'.$v.' form-check-input"></input>';
+                    $r .= '</div>';
+                }
+            }
+        } else {
+            $r .= '<div class="form-check">';
+            $r .= '<input type="checkbox" name="'.$phrase.'" class="form-check-input"></input>';
+            $r .= '</div>';
+        }
+
+        return $r;
+    }
+
+    public function beforeRuleEditViewRender($data)
+    {
+        return $data;
+    }
+
+    public function getRuleParam()
+    {
+        return $this->ruleParam;
+    }
 
     // Allow translation from php classes
     public function getTranslation($textArray)
@@ -163,8 +186,8 @@ class toolscore
         // Get the custom php version first
         $select = "SELECT * FROM config WHERE name = 'php'";
         $stmt = $this->connection->prepare($select);
-        $stmt->execute();
-        $config = $stmt->fetch();
+        $result = $stmt->executeQuery();
+        $config = $result->fetchAssociative();
         if (!empty($config['conf_value'])) {
             $php = $config['conf_value'];
         } else {
@@ -180,12 +203,9 @@ class toolscore
         }
 
         return $php;
-
     }
 }
 
-class ToolsManager extends toolscore {
-	
+class ToolsManager extends toolscore
+{
 }
-
-
