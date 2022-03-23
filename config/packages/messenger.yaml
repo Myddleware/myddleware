@@ -2,8 +2,8 @@ framework:
     messenger:
         reset_on_message: true
         transports:
-            async:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+            # async:
+            #     dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
             

@@ -56,19 +56,20 @@ class DocumentRelationship
     private $doc_rel_id;
 
     /**
-     * @ORM\Column(name="created_by", type="integer", nullable=false)
-     */
-    private $createdBy;
-
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
-    private $dateCreated;
-
-    /**
      * @ORM\Column(name="source_field", type="string", nullable=false)
      */
     private $sourceField;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $createdBy;
 
     public function setId(int $id): self
     {
@@ -118,30 +119,6 @@ class DocumentRelationship
         return $this->rule;
     }
 
-    public function setDateCreated(DateTime $dateCreated): self
-    {
-        $this->dateCreated = $dateCreated;
-
-        return $this;
-    }
-
-    public function getDateCreated(): ?DateTime
-    {
-        return $this->dateCreated;
-    }
-
-    public function setCreatedBy(int $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->createdBy;
-    }
-
     public function setSourceField(string $sourceField): self
     {
         $this->sourceField = $sourceField;
@@ -152,5 +129,29 @@ class DocumentRelationship
     public function getSourceField(): ?string
     {
         return $this->sourceField;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
     }
 }

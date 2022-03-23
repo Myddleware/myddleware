@@ -58,16 +58,6 @@ class Rule
     private $connectorTarget;
 
     /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
-    private $dateCreated;
-
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
-    private $dateModified;
-
-    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
@@ -146,6 +136,16 @@ class Rule
      */
     private $documents;
 
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $updatedAt;
+
     public function __construct()
     {
         $this->params = new ArrayCollection();
@@ -175,30 +175,6 @@ class Rule
     public function getId(): string
     {
         return $this->id;
-    }
-
-    public function setDateCreated(DateTime $dateCreated): self
-    {
-        $this->dateCreated = $dateCreated;
-
-        return $this;
-    }
-
-    public function getDateCreated(): DateTime
-    {
-        return $this->dateCreated;
-    }
-
-    public function setDateModified(DateTime $dateModified): self
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    public function getDateModified(): DateTime
-    {
-        return $this->dateModified;
     }
 
     public function setModuleSource(string $moduleSource): self
@@ -615,5 +591,29 @@ class Rule
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 }
