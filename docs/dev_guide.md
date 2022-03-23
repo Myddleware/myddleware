@@ -11,7 +11,6 @@ The application you want to connect needs to have a webservice API with methods 
 First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures, and more specifically the LoadSolutionData class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
 
 ```php
-
         protected $solutionData = [
                 ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
                 ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
@@ -39,7 +38,7 @@ Then still in SolutionManager, add the new connector to the constructor.
 
 ```php
         public function __construct(
-        WrdPress $wordPress,
+        WordPress $wordPress,
         WooCommerce $wooCommerce,
         WooEventManager $wooEventManager,
          // Your connector
@@ -88,7 +87,6 @@ Now, let's create a new connector class, in [/src/Solutions](https://github.com/
         {
         protected $limitCall = 100;
         protected $urlSuffix = '/service/v4_1/rest.php';
-
         // Enable to read deletion and to delete data
         protected $readDeletion = true;
         protected $sendDeletion = true;
@@ -403,6 +401,7 @@ In this article we‘ll look at an important point in your synchronization rules
 
 In the formula of Myddleware, you can use the functions listed at the bottom right (see of the previous image).
 
+
 This function round floating point (up), ([PHP](https://www.php.net/manual/fr/function.round.php)) **round(numbre [, clarification])**:
 
         round(525.6352, 2) // Gives 525.64
@@ -486,7 +485,6 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
 ```
 
 #### **If error :**
-
 ```php
         {
         « code »: <error code>,
@@ -494,6 +492,7 @@ Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?ver
         }
 ```
 <!-- tabs:end -->
+
 ### Function synchro
 
 Use the synchro function to run a specific rule or every active rules.
