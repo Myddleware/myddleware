@@ -24,37 +24,25 @@
 
 namespace App\Controller;
 
-use Exception;
-use DateTime;
-use DateTimeZone;
-use Psr\Log\LoggerInterface;
-use App\Manager\ToolsManager;
-use App\Form\Model\ResetPassword;
 use App\Form\Type\ProfileFormType;
-use App\Form\Type\PasswordFormType;
 use App\Form\Type\ResetPasswordType;
-use App\Service\UserManagerInterface;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\Process\Process;
+use App\Manager\ToolsManager;
 use App\Service\AlertBootstrapInterface;
+use App\Service\UserManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Bundle\FrameworkBundle\Translation\Translator;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class AccountController.
- *
- * @package App\Controller
  *
  * @Route("/rule")
  */
@@ -90,7 +78,7 @@ class AccountController extends AbstractController
     private $env;
 
     /**
-     * @var AlertBootstrapInterface 
+     * @var AlertBootstrapInterface
      */
     private $alert;
 
@@ -121,13 +109,12 @@ class AccountController extends AbstractController
         $request->getSession()->set('_locale', $locale);
 
         return $this->redirect($request->headers->get('referer'));
-
     }
 
     /**
      * Function for forms of my account.
      *
-     * @return null|RedirectResponse|Response
+     * @return RedirectResponse|Response|null
      *
      * @Route("/account", name="my_account")
      */
@@ -141,8 +128,10 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
-            return $this->redirectToRoute('my_account'); 
+
+            return $this->redirectToRoute('my_account');
         }
+
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
@@ -150,7 +139,7 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @return null|RedirectResponse|Response
+     * @return RedirectResponse|Response|null
      *
      * @Route("/account/reset-password", name="my_account_reset_password")
      */
@@ -170,14 +159,16 @@ class AccountController extends AbstractController
                 $em->flush();
                 $success = $translator->trans('password_reset.success');
                 $this->addFlash('success', $success);
+
                 return $this->redirectToRoute('my_account');
             } else {
                 $failure = $translator->trans('password_reset.incorrect_password');
                 $this->addFlash('error', $failure);
             }
         }
-        return $this->render('account/resetPassword.html.twig', array(
+
+        return $this->render('account/resetPassword.html.twig', [
             'form' => $form->createView(),
-        ));
-    }    
+        ]);
+    }
 }

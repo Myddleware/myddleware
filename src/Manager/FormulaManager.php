@@ -27,10 +27,6 @@ namespace App\Manager;
 
 /**
  * Class FormulaManager.
- *
- * @package App\Manager
- *
- *
  */
 class FormulaManager
 {
@@ -311,4 +307,3 @@ class FormulaManager
         $this->secureFormule(); // niveau securité
     }
 }
-

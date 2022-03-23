@@ -294,13 +294,14 @@ class eventbritecore extends solution
                     throw new \Exception('Fields unreadable');
                     break;
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     // Param contient :
@@ -715,5 +716,4 @@ class eventbritecore extends solution
 
 class eventbrite extends eventbritecore
 {
-
 }

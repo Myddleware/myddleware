@@ -38,31 +38,30 @@ class LoadFunctionData implements FixtureInterface
         'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray'],
         'date' => ['date', 'microtime', 'changeTimeZone', 'changeFormatDate'],
     ];
-	
-	protected $functionCats = array();
-	protected $functions = array();
+
+    protected $functionCats = [];
+    protected $functions = [];
 
     public function load(ObjectManager $manager)
     {
         $this->manager = $manager;
-		
-		// load all categories that already exist in the database
-		$funcCats = $this->manager->getRepository(FuncCat::class)->findAll();
-		if(!empty($funcCats)){
-			foreach($funcCats as $funcCat) {
-				$this->functionCats[$funcCat->getId()] = $funcCat;
-			}
-		}
+
+        // load all categories that already exist in the database
+        $funcCats = $this->manager->getRepository(FuncCat::class)->findAll();
+        if (!empty($funcCats)) {
+            foreach ($funcCats as $funcCat) {
+                $this->functionCats[$funcCat->getId()] = $funcCat;
+            }
+        }
         // load all functions that already exist in the database
-		$functions = $this->manager->getRepository(Functions::class)->findAll();
-		if(!empty($functions)){
-			foreach($functions as $function) {
-				$this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
-			}
-		}
+        $functions = $this->manager->getRepository(Functions::class)->findAll();
+        if (!empty($functions)) {
+            foreach ($functions as $function) {
+                $this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
+            }
+        }
         $this->generateEntities();
         $this->manager->flush();
-		
     }
 
     public function getOrder()
@@ -79,35 +78,35 @@ class LoadFunctionData implements FixtureInterface
 
     private function newEntity($cat, $functions)
     {
-		$catFound = false;
-		// Check if the function category doesn't exist in Myddleware
-		if (!empty($this->functionCats)) {
-			foreach ($this->functionCats as $funcCat) {
-				if ($funcCat->getName() == $cat) {
-					$catFound = true;
-					break;
-				}
-			}
-		}
-		// If it doesn't exist, we create it
-		if (!$catFound) {
-			$funcCat = new FuncCat();
+        $catFound = false;
+        // Check if the function category doesn't exist in Myddleware
+        if (!empty($this->functionCats)) {
+            foreach ($this->functionCats as $funcCat) {
+                if ($funcCat->getName() == $cat) {
+                    $catFound = true;
+                    break;
+                }
+            }
+        }
+        // If it doesn't exist, we create it
+        if (!$catFound) {
+            $funcCat = new FuncCat();
             $funcCat->setName($cat);
-            $this->manager->persist($funcCat);			
-		}
-		
-		// Check each function of the category
+            $this->manager->persist($funcCat);
+        }
+
+        // Check each function of the category
         foreach ($functions as $function) {
             // Ff the function  doesn't exist in Myddleware, then we create it
             if (
                     empty($this->functions[$cat])
-                 || array_search($function, $this->functions[$cat]) === false
+                 || false === array_search($function, $this->functions[$cat])
             ) {
                 $func = new Functions();
-				$func->setName($function);
-				$func->setCategorieId($funcCat);
-				$this->manager->persist($func);			
+                $func->setName($function);
+                $func->setCategorieId($funcCat);
+                $this->manager->persist($func);
             }
-        } 
+        }
     }
 }

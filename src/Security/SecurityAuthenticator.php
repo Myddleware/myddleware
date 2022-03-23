@@ -108,7 +108,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         //check password, if correct, add last login to database
-        if($this->passwordEncoder->isPasswordValid($user, $credentials['password'])){
+        if ($this->passwordEncoder->isPasswordValid($user, $credentials['password'])) {
             $user->setLastLogin(new DateTime());
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -117,8 +117,6 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
-
-       
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

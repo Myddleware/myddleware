@@ -223,7 +223,7 @@ class suitecrmcore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => 0,
-						'relate' => false
+                        'relate' => false,
                     ];
                 }
                 foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
@@ -233,7 +233,7 @@ class suitecrmcore extends solution
                         'type_bdd' => 'varchar(36)',
                         'required' => 0,
                         'required_relationship' => 0,
-                        'relate' => true
+                        'relate' => true,
                     ];
                 }
             } else {
@@ -277,7 +277,7 @@ class suitecrmcore extends solution
                             'type_bdd' => 'varchar(36)',
                             'required' => $field->required,
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     }
                     //To enable to take out all fields where there are 'relate' in the type of the field
@@ -289,7 +289,7 @@ class suitecrmcore extends solution
                                 'type' => $field->type,
                                 'type_bdd' => $type_bdd,
                                 'required' => $field->required,
-								'relate' => false
+                                'relate' => false,
                             ];
                         }
                         // Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
@@ -337,7 +337,7 @@ class suitecrmcore extends solution
                                 'type_bdd' => 'varchar(36)',
                                 'required' => 0,
                                 'required_relationship' => 0,
-								'relate' => true
+                                'relate' => true,
                             ];
                             // Get the name field for this relationship (already in array moduleFields but we need to flag it as a customrelationship)
                             if (!empty($this->moduleFields[$field->relationship.'_name'])) {
@@ -356,162 +356,162 @@ class suitecrmcore extends solution
             return false;
         }
     }
-	
 
     // Permet de lire les données
     public function read($param)
     {
-		$result = [];
+        $result = [];
 
-		// Manage delete option to enable
-		$deleted = false;
-		if (!empty($param['ruleParams']['deletion'])) {
-			$deleted = true;
-			$param['fields'][] = 'deleted';
-		}
-		$totalCount = 0;
-		$currentCount = 0;
-		$query = '';
+        // Manage delete option to enable
+        $deleted = false;
+        if (!empty($param['ruleParams']['deletion'])) {
+            $deleted = true;
+            $param['fields'][] = 'deleted';
+        }
+        $totalCount = 0;
+        $currentCount = 0;
+        $query = '';
 
-		// On va chercher le nom du champ pour la date de référence: Création ou Modification
-		$dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        // On va chercher le nom du champ pour la date de référence: Création ou Modification
+        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
-		if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-			$paramSave = $param;
-			$param['fields'] = [];
-			$param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
-		}
+        // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $paramSave = $param;
+            $param['fields'] = [];
+            $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
+        }
 
-		// Built the query
-		$query = $this->generateQuery($param, 'read');
-		//Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
-		$link_name_to_fields_array = [];
-		foreach ($param['fields'] as $field) {
-			if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
-				// Get all custom relationships
-				if (empty($customRelationshipList)) {
-					$customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
-				}
-				// Get the relationship name for all custom relationship field (coudb be id field or name field)
-				// Search the field in the array
-				if (!empty($customRelationshipListFields)) {
-					foreach ($customRelationshipListFields as $key => $value) {
-						// If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
-						if (
-								$value['id'] == $field
-							or $value['name'] == $field
-						) {
-							$link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
-							break;
-						}
-					}
-				}
-			}
-		}
+        // Built the query
+        $query = $this->generateQuery($param, 'read');
+        //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
+        $link_name_to_fields_array = [];
+        foreach ($param['fields'] as $field) {
+            if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                // Get all custom relationships
+                if (empty($customRelationshipList)) {
+                    $customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
+                }
+                // Get the relationship name for all custom relationship field (coudb be id field or name field)
+                // Search the field in the array
+                if (!empty($customRelationshipListFields)) {
+                    foreach ($customRelationshipListFields as $key => $value) {
+                        // If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
+                        if (
+                                $value['id'] == $field
+                            or $value['name'] == $field
+                        ) {
+                            $link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         // add limit to query
-        if(!empty($param['limit'])){
+        if (!empty($param['limit'])) {
             $this->limitCall = $param['limit'];
         }
-        
-		// On lit les données dans le CRM
-		do {
-			$get_entry_list_parameters = [
-				'session' => $this->session,
-				'module_name' => $param['module'],
-				'query' => $query,
-				'order_by' => $dateRefField.' ASC',
-				'offset' => $param['offset'],
-				'select_fields' => $param['fields'],
-				'link_name_to_fields_array' => $link_name_to_fields_array,
-				'max_results' => $this->limitCall,
-				'deleted' => $deleted,
-				'Favorites' => '',
-			];
-			$get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
-			// Construction des données de sortie
-			if (isset($get_entry_list_result->result_count)) {
-				$currentCount = $get_entry_list_result->result_count;
-				$totalCount += $currentCount;
-				$record = [];
-				$i = 0;
-				// For each records, we add all fields requested
-				for ($i = 0; $i < $currentCount; ++$i) {
-					$entry = $get_entry_list_result->entry_list[$i];
-					foreach ($entry->name_value_list as $value) {
-						$record[$value->name] = $value->value;
-					}
-					// Manage deletion by adding the flag Myddleware_deletion to the record
-					if (
-							true == $deleted
-						and !empty($entry->name_value_list->deleted->value)
-					) {
-						$record['myddleware_deletion'] = true;
-					}
 
-					// All custom relationships will be added even the ones no requested (Myddleware will ignore them later)
-					if (!empty($customRelationshipListFields)) {
-						// For each fields requested corresponding to a custom relationship
-						foreach ($param['fields'] as $field) {
-							// Check if the field is a custom relationship
-							foreach ($customRelationshipListFields as $key => $value) {
-								if (
-										$field == $value['id']
-									or $field == $value['name']
-								) {
-									// Init field even if the relationship is empty. Myddleware needs the field to be set
-									$record[$value['id']] = '';
-									$record[$value['name']] = '';
+        // On lit les données dans le CRM
+        do {
+            $get_entry_list_parameters = [
+                'session' => $this->session,
+                'module_name' => $param['module'],
+                'query' => $query,
+                'order_by' => $dateRefField.' ASC',
+                'offset' => $param['offset'],
+                'select_fields' => $param['fields'],
+                'link_name_to_fields_array' => $link_name_to_fields_array,
+                'max_results' => $this->limitCall,
+                'deleted' => $deleted,
+                'Favorites' => '',
+            ];
+            $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
+            // Construction des données de sortie
+            if (isset($get_entry_list_result->result_count)) {
+                $currentCount = $get_entry_list_result->result_count;
+                $totalCount += $currentCount;
+                $record = [];
+                $i = 0;
+                // For each records, we add all fields requested
+                for ($i = 0; $i < $currentCount; ++$i) {
+                    $entry = $get_entry_list_result->entry_list[$i];
+                    foreach ($entry->name_value_list as $value) {
+                        $record[$value->name] = $value->value;
+                    }
+                    // Manage deletion by adding the flag Myddleware_deletion to the record
+                    if (
+                            true == $deleted
+                        and !empty($entry->name_value_list->deleted->value)
+                    ) {
+                        $record['myddleware_deletion'] = true;
+                    }
 
-									// Find the the right relationship into SuiteCRM result call
-									foreach ($get_entry_list_result->relationship_list[$i]->link_list as $relationship) {
-										if (
-												!empty($relationship->name)
-											and $relationship->name == $key
-										) {
-											// Save relationship values
-											if (!empty($relationship->records[0]->link_value->id->value)) {
-												$record[$value['id']] = $relationship->records[0]->link_value->id->value;
-												$record[$value['name']] = $relationship->records[0]->link_value->name->value;
-											}
-											break 2; // Go to the next field
-										}
-									}
-								}
-							}
-						}
-					}
-					$result[] = $record;
-					$record = [];
-				}
-				// Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
-				$param['offset'] += $this->limitCall;
-			} else {
-				if (!empty($get_entry_list_result->number)) {
-					// $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
-					throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
-				} else {
-					// $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
-					throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
-				}
-				break; // Stop the loop if an error happened
-			}
-		}
-		// On continue si le nombre de résultat du dernier appel est égal à la limite
-		while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
-		// Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
-		if (!empty($paramSave)) {
-			$resultRel = $this->readRelationship($paramSave, $result);
-			// Récupération des données sauf de la date de référence qui dépend des enregistrements parent
-			if (!empty($resultRel['count'])) {
-				$result = $resultRel['values'];
-			}
-			// Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
-			else {
-				return;
-			}
-		}
+                    // All custom relationships will be added even the ones no requested (Myddleware will ignore them later)
+                    if (!empty($customRelationshipListFields)) {
+                        // For each fields requested corresponding to a custom relationship
+                        foreach ($param['fields'] as $field) {
+                            // Check if the field is a custom relationship
+                            foreach ($customRelationshipListFields as $key => $value) {
+                                if (
+                                        $field == $value['id']
+                                    or $field == $value['name']
+                                ) {
+                                    // Init field even if the relationship is empty. Myddleware needs the field to be set
+                                    $record[$value['id']] = '';
+                                    $record[$value['name']] = '';
+
+                                    // Find the the right relationship into SuiteCRM result call
+                                    foreach ($get_entry_list_result->relationship_list[$i]->link_list as $relationship) {
+                                        if (
+                                                !empty($relationship->name)
+                                            and $relationship->name == $key
+                                        ) {
+                                            // Save relationship values
+                                            if (!empty($relationship->records[0]->link_value->id->value)) {
+                                                $record[$value['id']] = $relationship->records[0]->link_value->id->value;
+                                                $record[$value['name']] = $relationship->records[0]->link_value->name->value;
+                                            }
+                                            break 2; // Go to the next field
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $result[] = $record;
+                    $record = [];
+                }
+                // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
+                $param['offset'] += $this->limitCall;
+            } else {
+                if (!empty($get_entry_list_result->number)) {
+                    // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
+                    throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
+                } else {
+                    // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
+                    throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
+                }
+                break; // Stop the loop if an error happened
+            }
+        }
+        // On continue si le nombre de résultat du dernier appel est égal à la limite
+        while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
+        // Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
+        if (!empty($paramSave)) {
+            $resultRel = $this->readRelationship($paramSave, $result);
+            // Récupération des données sauf de la date de référence qui dépend des enregistrements parent
+            if (!empty($resultRel['count'])) {
+                $result = $resultRel['values'];
+            }
+            // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
+            else {
+                return;
+            }
+        }
+
         return $result;
     }
 
@@ -895,4 +895,3 @@ class suitecrmcore extends solution
 class suitecrm extends suitecrmcore
 {
 }
-

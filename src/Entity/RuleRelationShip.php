@@ -89,9 +89,14 @@ class RuleRelationShip
     private $deleted;
 
     /**
-     * @ORM\Column(name="behavior", type="string", nullable=true)
+     * @ORM\Column(name="errorEmpty", type="boolean", options={"default":0})
      */
-    private $behavior;
+    private $errorEmpty;
+
+    /**
+     * @ORM\Column(name="errorMissing", type="boolean", options={"default":1})
+     */
+    private $errorMissing;
 
     /**
      * Get id.
@@ -235,14 +240,42 @@ class RuleRelationShip
         return $this;
     }
 
-    public function getBehavior(): ?string
+    /**
+     * Get the value of errorEmpty.
+     */
+    public function getErrorEmpty()
     {
-        return $this->behavior;
+        return $this->errorEmpty;
     }
 
-    public function setBehavior(string $behavior): self
+    /**
+     * Set the value of errorEmpty.
+     *
+     * @return self
+     */
+    public function setErrorEmpty($errorEmpty)
     {
-        $this->behavior = $behavior;
+        $this->errorEmpty = $errorEmpty;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of errorMissing.
+     */
+    public function getErrorMissing()
+    {
+        return $this->errorMissing;
+    }
+
+    /**
+     * Set the value of errorMissing.
+     *
+     * @return self
+     */
+    public function setErrorMissing($errorMissing)
+    {
+        $this->errorMissing = $errorMissing;
 
         return $this;
     }

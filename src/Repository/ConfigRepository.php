@@ -19,10 +19,6 @@ class ConfigRepository extends ServiceEntityRepository
         parent::__construct($registry, Config::class);
     }
 
-
-    /**
-     * @return int
-     */
     public function deleteAll(): int
     {
         $qb = $this->createQueryBuilder('c');

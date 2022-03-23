@@ -130,7 +130,7 @@ class cirrusshieldcore extends solution
                             'type_bdd' => 'varchar(36)',
                             'required' => $field['IsRequired'],
                             'required_relationship' => $field['IsRequired'],
-							'relate' => true
+                            'relate' => true,
                         ];
                     } else {
                         $this->moduleFields[$field['Name']] = [
@@ -138,7 +138,7 @@ class cirrusshieldcore extends solution
                             'type' => $field['DataType'],
                             'type_bdd' => $field['DataType'],
                             'required' => $field['IsRequired'],
-							'relate' => false
+                            'relate' => false,
                         ];
                         // Add list of values
                         if (!empty($field['PicklistValues'])) {
@@ -149,11 +149,13 @@ class cirrusshieldcore extends solution
                     }
                 }
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
+
     // get_module_fields($module)
 
     public function readData($param)
@@ -489,6 +491,4 @@ class cirrusshieldcore extends solution
 
 class cirrusshield extends cirrusshieldcore
 {
-
 }
-

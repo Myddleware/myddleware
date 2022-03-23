@@ -35,10 +35,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class NotificationCommand.
- *
- * @package App\Command
- *
- *
  */
 class NotificationCommand extends Command
 {
@@ -73,7 +69,7 @@ class NotificationCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // We don't create job for alert
-        if ($input->getArgument('type') == 'alert') {
+        if ('alert' == $input->getArgument('type')) {
             try {
                 $this->notificationManager->sendAlert();
             } catch (\Exception $e) {

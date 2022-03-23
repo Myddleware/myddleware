@@ -22,5 +22,4 @@ return [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     BabDev\PagerfantaBundle\BabDevPagerfantaBundle::class => ['all' => true],
     Shapecode\Bundle\CronBundle\ShapecodeCronBundle::class => ['all' => true],
-    Cron\CronBundle\CronCronBundle::class => ['all' => true],
 ];

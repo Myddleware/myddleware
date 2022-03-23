@@ -19,6 +19,10 @@
 # Parameters for Custom code
 /config/services_custom.yaml
 
+
+# Custom directory
+/src/Custom/*
+
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
@@ -55,11 +59,19 @@
 /public/build/
 npm-debug.log
 yarn-error.log
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
 ###< symfony/webpack-encore-bundle ###
 
 ###> friendsofphp/php-cs-fixer ###
 /.php_cs
 /.php_cs.cache
+.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
 
 
@@ -76,6 +88,9 @@ yarn-error.log
 ###> local env file ###
 .env.local
 .env.local.php
+.env.prod
+.env.dev
+/.env.*.local
 ###< env file ###
 
 ##> vscode and other IDE parameters ## 
@@ -103,4 +118,4 @@ composer.phar
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
-.ssh/*
+/migrations

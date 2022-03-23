@@ -172,7 +172,7 @@ class filecore extends solution
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
                         'required' => false,
-						'relate' => false
+                        'relate' => false,
                     ];
 
                     // If the field contains the id indicator, we add it to the moduleFields list
@@ -186,7 +186,7 @@ class filecore extends solution
                                     'type_bdd' => 'varchar(255)',
                                     'required' => false,
                                     'required_relationship' => 0,
-									'relate' => true
+                                    'relate' => true,
                                 ];
                             }
                         }
@@ -196,8 +196,9 @@ class filecore extends solution
             } else {
                 $this->moduleFields = [];
             }
-			// Add relationship fields coming from other rules
-			$this->get_module_fields_relate($module, $param);
+            // Add relationship fields coming from other rules
+            $this->get_module_fields_relate($module, $param);
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -234,7 +235,7 @@ class filecore extends solution
                         ->getResult();
         if (!empty($ruleListRelation)) {
             // Prepare query to get the fieldId from the orther rules with the same connectors
-            $sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
+            $sql = "SELECT value FROM ruleparam WHERE ruleparam.name = 'fieldId' AND ruleparam.rule_id  in (";
             foreach ($ruleListRelation as $ruleRelation) {
                 $sql .= "'$ruleRelation[id]',";
             }
@@ -242,12 +243,12 @@ class filecore extends solution
             $sql = substr($sql, 0, -1);
             $sql .= ')';
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
-            $fields = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $fields = $result->fetchAllAssociative();
             if (!empty($fields)) {
                 // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                 foreach ($fields as $field) {
-					// The field has to exist in the current module
+                    // The field has to exist in the current module
                     if (!empty($this->moduleFields[$field['value']])) {
                         $this->moduleFields[$field['value']] = [
                             'label' => $field['value'],
@@ -255,14 +256,13 @@ class filecore extends solution
                             'type_bdd' => 'varchar(255)',
                             'required' => false,
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     }
                 }
             }
         }
     }
-	
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     // Param contient :

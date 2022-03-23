@@ -48,7 +48,7 @@ class JobRepository extends ServiceEntityRepository
     /**
      * @param $begin
      *
-     * @return null|Job
+     * @return Job|null
      *
      * @throws NonUniqueResultException
      */
@@ -64,7 +64,6 @@ class JobRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-   
     /**
      * @return Job[]
      */

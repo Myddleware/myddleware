@@ -37,12 +37,6 @@
     "composer/xdebug-handler": {
         "version": "2.0.4"
     },
-    "cron/cron": {
-        "version": "1.6.0"
-    },
-    "cron/cron-bundle": {
-        "version": "2.10.3"
-    },
     "doctrine/annotations": {
         "version": "1.13",
         "recipe": {

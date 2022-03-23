@@ -1,8 +1,6 @@
 * [Home](/)
-* **Requirements**
-  * [Test](testpage.md)
-* **Install Myddleware**
-  * [Another Test](anotherpage.md)
-  * [Setting up Database](database_install.md)
-  * [Register User](register.md)
-* **Creating a connector**
+* [Basic Usage](basic_usage.md)
+* [Developer's guide](dev_guide.md)
+* **Demo**
+  * [Myddleware Demo](http://www.crmconsult.com/livedemo/myddleware/web/)
+  * [Demo instructions](http://www.myddleware.com/solution/demo)

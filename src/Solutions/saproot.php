@@ -125,7 +125,7 @@ class saprootcore extends solution
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
                                 'required_relationship' => $this->relateFieldAllowed[$module][$field->ZzmydKey]['required_relationship'],
-								'relate' => true
+                                'relate' => true,
                             ];
                         } else {
                             $fields[$module.'__'.$field->ZzmydKey] = [
@@ -134,7 +134,7 @@ class saprootcore extends solution
                                 'type_bdd' => 'varchar(255)',
                                 'required' => false,
                                 'required_relationship' => 0,
-								'relate' => false
+                                'relate' => false,
                             ];
                         }
                     }
@@ -168,7 +168,7 @@ class saprootcore extends solution
                                                     'type' => 'varchar(255)',
                                                     'type_bdd' => 'varchar(255)',
                                                     'required_relationship' => $this->relateFieldAllowed[$moduleKey][$structure][$field->ZzmydKey]['required_relationship'],
-													'relate' => true
+                                                    'relate' => true,
                                                 ];
                                             } else {
                                                 $fields[$moduleKey.'__'.$structure.(!empty($value) ? '__'.$key : '')][$structure.'__'.(!empty($value) ? $key.'__' : '').$field->ZzmydKey] = [
@@ -177,7 +177,7 @@ class saprootcore extends solution
                                                     'type_bdd' => 'varchar(255)',
                                                     'required' => false,
                                                     'required_relationship' => 0,
-													'relate' => false
+                                                    'relate' => false,
                                                 ];
                                             }
                                         }

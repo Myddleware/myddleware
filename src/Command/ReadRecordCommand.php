@@ -37,10 +37,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class ReadRecordCommand.
- *
- * @package App\Command
- *
- *
  */
 class ReadRecordCommand extends Command
 {
@@ -92,8 +88,8 @@ class ReadRecordCommand extends Command
             throw new Exception('No rule found. Please add values to run this action.');
         }
         $api = $input->getArgument('api');
-		
-		// Set the API value
+
+        // Set the API value
         $this->jobManager->setApi((bool) $api);
 
         $data = $this->jobManager->initJob('read records with filter '.$filterQuery.' IN ('.$filterValues.')');
