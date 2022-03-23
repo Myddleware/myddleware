@@ -2283,6 +2283,12 @@ class documentcore
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
+	
+	public function generateDocLog($errorType, $message) {
+ 		$this->typeError = $errorType;
+ 		$this->message = $message;
+ 		$this->createDocLog();
+ 	}
 }
 class DocumentManager extends documentcore
 {
