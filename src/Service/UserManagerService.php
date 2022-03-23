@@ -7,8 +7,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class UserManagerService
- * @package App\Service
+ * Class UserManagerService.
  */
 class UserManagerService implements UserManagerInterface
 {
@@ -30,8 +29,8 @@ class UserManagerService implements UserManagerInterface
     }
 
     /**
-     * Génération de token
-     * @return string
+     * Génération de token.
+     *
      * @throws Exception
      */
     public function generateToken(): string

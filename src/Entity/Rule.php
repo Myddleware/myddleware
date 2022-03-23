@@ -188,7 +188,6 @@ class Rule
      */
     private $documents;
 
-
     public function __construct()
     {
         $this->params = new ArrayCollection();
@@ -809,8 +808,8 @@ class Rule
         return $this;
     }
 
-
-    public function __toString(){
-        return  $this->id; 
+    public function __toString()
+    {
+        return $this->id;
     }
 }

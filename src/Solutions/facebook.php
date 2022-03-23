@@ -25,8 +25,8 @@
 
 namespace App\Solutions;
 
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class facebookcore extends solution
 {
@@ -164,8 +164,8 @@ class facebookcore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     // Permet de lire les données
     public function readData($param)
@@ -313,4 +313,3 @@ class facebookcore extends solution
 class facebook extends facebookcore
 {
 }
-

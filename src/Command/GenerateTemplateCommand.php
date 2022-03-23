@@ -33,10 +33,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class GenerateTemplateCommand.
- *
- * @package App\Command
- *
- *
  */
 class GenerateTemplateCommand extends Command
 {

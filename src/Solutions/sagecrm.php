@@ -292,7 +292,7 @@ class sagecrmcore extends solution
                                     'type_bdd' => $type_bdd,
                                     'required' => $field->required,
                                     'required_relationship' => $field->required,
-									'relate' => true
+                                    'relate' => true,
                                 ];
                                 continue;
                             }
@@ -303,13 +303,14 @@ class sagecrmcore extends solution
                             'type' => substr($field->type, 3),
                             'type_bdd' => $type_bdd,
                             'required' => $field->required,
-							'relate' => false
+                            'relate' => false,
                         ];
                         if (!empty($dropdownvalues[$field->name])) {
                             $this->moduleFields[$field->name]['option'] = $dropdownvalues[$field->name];
                         }
                     }
                 }
+
                 return $this->moduleFields;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
@@ -321,8 +322,8 @@ class sagecrmcore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
@@ -698,7 +699,6 @@ class sagecrmcore extends solution
 
         return $date->format($formatReturn);
     }
-
 }// class sagecrmcore
 class sagecrm extends sagecrmcore
 {

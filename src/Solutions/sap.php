@@ -132,8 +132,8 @@ class sapcore extends saproot
 							AND Rule.module_source = 'BU_PARTNER'";
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
-                $stmt->execute();
-                $rules = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $rules = $result->fetchAllAssociative();
                 if (!empty($rules)) {
                     return $rules;
                 }
@@ -183,7 +183,6 @@ class sapcore extends saproot
             return [];
         }
     }
-
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
@@ -295,8 +294,8 @@ class sapcore extends saproot
 									AND RuleRelationShip.field_id = :idHeaderRule';
                         $stmt = $this->conn->prepare($sql);
                         $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
-                        $stmt->execute();
-                        $rules = $stmt->fetchAll();
+                        $result = $stmt->executeQuery();
+                        $rules = $result->fetchAllAssociative();
                         if (!empty($rules)) {
                             // Pour chaque règle liée on récupérère les données et on génère les documents fils
                             foreach ($rules as $rule) {

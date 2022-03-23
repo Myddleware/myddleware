@@ -141,7 +141,7 @@ class zuoracore extends solution
                             'type_bdd' => 'varchar(36)',
                             'required' => 0,
                             'required_relationship' => 0,
-							'relate' => true
+                            'relate' => true,
                         ];
                     } else {
                         $this->moduleFields[$field] = [
@@ -149,18 +149,19 @@ class zuoracore extends solution
                             'type' => 'varchar(255)',
                             'type_bdd' => 'varchar(255)',
                             'required' => 0,
-							'relate' => false
+                            'relate' => false,
                         ];
                     }
                 }
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     public function createData($param)
     {

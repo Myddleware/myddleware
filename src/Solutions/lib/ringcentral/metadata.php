@@ -166,4 +166,3 @@ $moduleFields = [
         'userStatus' => ['label' => 'User status', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => ['Offline' => 'Offline', 'Busy' => 'Busy', 'Available' => 'Available']],
     ],
 ];
-

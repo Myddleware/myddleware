@@ -25,7 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -36,10 +35,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class RerunErrorCommand.
- *
- * @package App\Command
- *
- *
  */
 class RerunErrorCommand extends Command
 {
@@ -78,8 +73,8 @@ class RerunErrorCommand extends Command
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
         $api = $input->getArgument('api');
-		
-		// Set the API value
+
+        // Set the API value
         $this->jobManager->setApi((bool) $api);
 
         $data = $this->jobManager->initJob('Rerun error : limit '.$limit.', attempt '.$attempt);

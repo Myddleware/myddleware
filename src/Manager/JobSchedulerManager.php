@@ -31,10 +31,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class JobSchedulerManager.
- *
- * @package App\Manager
- *
- *
  */
 class JobSchedulerManager
 {
@@ -121,4 +117,3 @@ class JobSchedulerManager
         return $rules;
     }
 }
-

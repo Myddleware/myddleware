@@ -36,10 +36,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class MassActionCommand.
- *
- * @package App\Command
- *
- *
  */
 class MassActionCommand extends Command
 {
@@ -79,10 +75,9 @@ class MassActionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
-        $ids = $input->getArgument('ids');	
+        $ids = $input->getArgument('ids');
         $forceAll = $input->getArgument('forceAll');
         $fromStatus = $input->getArgument('fromStatus');
         $toStatus = $input->getArgument('toStatus');
@@ -100,7 +95,7 @@ class MassActionCommand extends Command
             return 0;
         }
 
-		$output->writeln( '1;'.$this->jobManager->getId() );  // Do not remove, used for manual job and webservices (display logs)
+        $output->writeln('1;'.$this->jobManager->getId());  // Do not remove, used for manual job and webservices (display logs)
 
         // Récupération des paramètres
         if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus'])) {
@@ -112,7 +107,7 @@ class MassActionCommand extends Command
         if (empty($ids)) {
             throw new Exception('No ids in the command parameters. Please add ids to run this action.');
         }
-        $ids = explode(',', $ids);	
+        $ids = explode(',', $ids);
         if (
             'changeStatus' == $action
             and (
@@ -134,9 +129,9 @@ class MassActionCommand extends Command
                 $this->logger->error($this->jobManager->getMessage());
             }
         }
-		
-		// Clear job message to avoid duplicate messages
-		$this->jobManager->setMessage('');
+
+        // Clear job message to avoid duplicate messages
+        $this->jobManager->setMessage('');
         // Close job if it has been created
         $responseCloseJob = $this->jobManager->closeJob();
 

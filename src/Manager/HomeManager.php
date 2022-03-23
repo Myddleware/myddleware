@@ -28,15 +28,11 @@ namespace App\Manager;
 use App\Entity\User;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 
 /**
  * Class HomeManager.
- *
- * @package App\Manager
- *
- *
  */
 class HomeManager
 {

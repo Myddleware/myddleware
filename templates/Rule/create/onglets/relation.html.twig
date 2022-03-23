@@ -44,7 +44,8 @@
 				<td class="title">{{'create_rule.step3.relation.source'|trans}}</td>
 				<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 				<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
-				<td class="title">{{'create_rule.step3.relation.behavior'|trans}}</td>
+				<td class="title">{{'behavior_filters.error_missing'|trans}}</td>	
+				<td class="title">{{'behavior_filters.error_empty'|trans}}</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -70,9 +71,14 @@
 						{% endif %}		
 						<input readonly="readonly" class="title form-control" data-required="{{ rule.required }}" data-value="{{ rule.name }}" value="{{ rule.label }}" /></span>	
 					</td>
+					<td >
+						<select class="parent_error_missing form-control" id="lst_error_missing_{{ rule.name }}" name="">
+							{{ lst_errorMissing | raw }}
+						</select>
+					</td>
 					<td>
-						<select class="form-control"  name="">
-			 				{{ behaviorFilters | raw }}
+						<select class="parent_error_empty form-control" id="lst_error_empty_{{ rule.name }}" name="">
+							{{ lst_errorEmpty | raw }}
 						</select>
 					</td>
 				</tr>
@@ -92,7 +98,7 @@
 				<td class="title" colspan="3">{{'create_rule.step3.relation.rule'|trans}}</td>
 				<td class="title">{{'create_rule.step3.relation.target'|trans}}</td>	
 			</tr>
-			{% for i in range(0, 4) %}
+			{% for i in range(0, 6) %}
 				<tr class="line-parent_relation">
 					<td>			    	
 						<select class="parent_source_field" id="parent_source_field_{{ i }}" name="">
@@ -109,11 +115,6 @@
 					<td>
 						<select class="parent_search_field" id="parent_search_field_{{ i }}" name="">
 			 				{{ lst_parent_fields | raw }}
-						</select>
-					</td>
-					<td>
-						<select class="form-control" name="">
-			 				{{ behaviorFilters | raw }}
 						</select>
 					</td>
 				</tr>

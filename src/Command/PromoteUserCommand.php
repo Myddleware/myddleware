@@ -5,12 +5,11 @@ namespace App\Command;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PromoteUserCommand extends Command
 {
@@ -18,13 +17,11 @@ class PromoteUserCommand extends Command
     protected static $defaultDescription = 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN';
 
     /**
-     *
      * @var EntityManagerInterface
      */
     private $em;
-    
+
     /**
-     *
      * @var UserRepository
      */
     private $userRepository;
@@ -41,7 +38,6 @@ class PromoteUserCommand extends Command
         $this->userRepository = $userRepository;
     }
 
-
     protected function configure()
     {
         $this
@@ -56,12 +52,10 @@ class PromoteUserCommand extends Command
         ]));
     }
 
-
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
     }
-
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
@@ -91,7 +85,6 @@ class PromoteUserCommand extends Command
             $questions['email'] = $question;
         }
 
-
         if (!$input->getArgument('role')) {
             $question = new Question('Please enter the new role:');
             $question->setValidator(function ($role) {
@@ -103,7 +96,7 @@ class PromoteUserCommand extends Command
             });
             $questions['role'] = $question;
         }
-        
+
         foreach ($questions as $name => $question) {
             $answer = $this->getHelper('question')->ask($input, $output, $question);
             $input->setArgument($name, $answer);
@@ -116,17 +109,19 @@ class PromoteUserCommand extends Command
         $email = $input->getArgument('email');
         $role = $input->getArgument('role');
         $user = $this->userRepository->findOneByEmail($email);
-        
+
         $roles = $user->getRoles();
-        
+
         if (in_array($role, $roles)) {
-            $io->error(sprintf("The user %s has already role %s", $email, $role));
+            $io->error(sprintf('The user %s has already role %s', $email, $role));
+
             return 1;
         } else {
             $roles[] = $role;
             $user->setRoles($roles);
             $this->em->flush();
             $io->success(sprintf('The role %s has been added to the user %s.', $role, $email));
+
             return 0;
         }
     }

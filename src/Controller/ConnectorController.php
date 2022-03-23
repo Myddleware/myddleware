@@ -25,44 +25,39 @@
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\Rule;
 use App\Entity\Config;
-use App\Entity\Solution;
 use App\Entity\Connector;
-use Pagerfanta\Pagerfanta;
+use App\Entity\Rule;
+use App\Entity\Solution;
 use App\Form\ConnectorType;
 use App\Manager\permission;
+use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
+use App\Repository\RuleRepository;
 use App\Service\SessionService;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use App\Manager\SolutionManager;
-use App\Repository\RuleRepository;
-use Pagerfanta\Adapter\ArrayAdapter;
 use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Adapter\AdapterInterface;
+use Exception;
+use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Pagerfanta\Doctrine\Collections\CollectionAdapter;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class ConnectorController.
- *
- * @package App\Controller
  *
  * @Route("/rule")
  */
 class ConnectorController extends AbstractController
 {
-	protected$params;
-	
+    protected $params;
+
     /**
      * @var SessionService
      */
@@ -91,14 +86,14 @@ class ConnectorController extends AbstractController
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
-		// Init parameters
-		$configRepository = $this->entityManager->getRepository(Config::class);
-		$configs = $configRepository->findAll();
-		if (!empty($configs)) {
-			foreach ($configs as $config) {
-				$this->params[$config->getName()] = $config->getvalue();
-			}
-		}	
+        // Init parameters
+        $configRepository = $this->entityManager->getRepository(Config::class);
+        $configs = $configRepository->findAll();
+        if (!empty($configs)) {
+            foreach ($configs as $config) {
+                $this->params[$config->getName()] = $config->getvalue();
+            }
+        }
     }
 
     /* ******************************************************
@@ -170,7 +165,7 @@ class ConnectorController extends AbstractController
                 }
 
                 // Autorisation de l'application
-                if (!empty($_POST['solutionjs'])) {     
+                if (!empty($_POST['solutionjs'])) {
                     // Déclenche la pop up
                     if (!empty($_POST['detectjs'])) {
                         $callbackUrl = $solution->getCreateAuthUrl((isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$this->generateUrl('connector_callback'));
@@ -295,14 +290,14 @@ class ConnectorController extends AbstractController
                 $this->sessionService->setUploadError($error);
             } else {
                 // A list of permitted file extensions
-				$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-				$extensionAllowed = $configRepository->findOneBy(['name'=> 'extension_allowed']);
-				if (!empty($extensionAllowed)) {
-					$allowedJson = $extensionAllowed->getValue();				
-					if (!empty($allowedJson)) {
-						$allowed = json_decode($allowedJson);
-					}
-				}
+                $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+                $extensionAllowed = $configRepository->findOneBy(['name' => 'extension_allowed']);
+                if (!empty($extensionAllowed)) {
+                    $allowedJson = $extensionAllowed->getValue();
+                    if (!empty($allowedJson)) {
+                        $allowed = json_decode($allowedJson);
+                    }
+                }
                 $extension = pathinfo($_FILES['myfile']['name'], PATHINFO_EXTENSION);
 
                 if (!in_array(strtolower($extension), $allowed)) {
@@ -366,13 +361,13 @@ class ConnectorController extends AbstractController
      * @Route("/connector/insert", name="regle_connector_insert")
      */
     public function connectorInsertAction(Request $request)
-    { 
+    {
         $type = '';
 
         $solution = $this->getDoctrine()
                             ->getManager()
                             ->getRepository(Solution::class)
-                            ->findOneBy(array('name' => $this->sessionService->getParamConnectorSourceSolution()));
+                            ->findOneBy(['name' => $this->sessionService->getParamConnectorSourceSolution()]);
 
         $connector = new Connector();
         $connector->setSolution($solution);
@@ -471,13 +466,12 @@ class ConnectorController extends AbstractController
     public function connectorListAction($page = 1)
     {
         try {
-
             // $config = new Configuration();
             // $connection = [
             //     'driver' => 'pdo',
             //     'memory' => true
             // ];
-            
+
             // $em = EntityManager::create($connection, $config);
             // $connectorTest = $em->getRepository(Connector::class);
             // $connectorTest->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId());
@@ -654,11 +648,10 @@ class ConnectorController extends AbstractController
         }
         // Display the connector
         else {
-        
             return $this->render('Connector/edit/fiche.html.twig', [
                 'connector' => $connector,
-                'form' => $form->createView(), 
-                'connector_name' => $connector->getName()
+                'form' => $form->createView(),
+                'connector_name' => $connector->getName(),
                 ]
             );
         }
@@ -697,6 +690,7 @@ class ConnectorController extends AbstractController
                 $lstArray[$c->getId()] = ucfirst($c->getName());
             }
             $lst = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
+
             return new Response($lst);
         }
 
@@ -713,9 +707,9 @@ class ConnectorController extends AbstractController
      * @Route("/connector/createout/{type}", name="regle_connector_create_out")
      */
     public function createOutAction($type)
-    {  
+    {
         $solution = $this->entityManager->getRepository(Solution::class)->solutionConnectorType($type);
-        $lstArray = [];        
+        $lstArray = [];
         if ($solution) {
             foreach ($solution as $s) {
                 $lstArray[$s['name']] = ucfirst($s['name']);

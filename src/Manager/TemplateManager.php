@@ -25,32 +25,28 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
-use Exception;
-use App\Entity\Rule;
-use App\Entity\User;
 use App\Entity\Connector;
-use App\Entity\RuleField;
-use App\Entity\RuleParam;
-use App\Entity\RuleFilter;
-use Psr\Log\LoggerInterface;
 use App\Entity\ConnectorParam;
+use App\Entity\Rule;
+use App\Entity\RuleField;
+use App\Entity\RuleFilter;
+use App\Entity\RuleParam;
 use App\Entity\RuleRelationShip;
-use Symfony\Component\Yaml\Yaml;
-use App\Repository\ConnectorRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
 use App\Repository\ConnectorParamRepository;
-use Symfony\Component\HttpKernel\KernelInterface;
+use App\Repository\ConnectorRepository;
+use Doctrine\DBAL\Connection as DriverConnection;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Class TemplateManager.
- *
- * @package App\Manager
- *
- *
  */
 class TemplateManager
 {
@@ -115,18 +111,19 @@ class TemplateManager
         $request = $requestStack->getCurrentRequest();
         $this->lang = $request ? $request->getLocale() : 'EN';
     }
-    
-    // Sort rule (rule parent first)
-    public function setRules($rules) {
-        $this->rules = $rules;
-        $rulesString = trim(implode(',',$rules));
-        $query = "SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindValue("rules", $rulesString);
-        $stmt->execute();	    		
-        return $stmt->fetchALL();
-    }
 
+    // Sort rule (rule parent first)
+    public function setRules($rules)
+    {
+        $this->rules = $rules;
+        $rulesString = trim(implode(',', $rules));
+        $query = 'SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC';
+        $stmt = $this->connection->prepare($query);
+        $stmt->bindValue('rules', $rulesString);
+        $result = $stmt->executeQuery();
+
+        return $result->fetchAllAssociative();
+    }
 
     // Permet de lister les templates pour les connecteurs selectionnés
     public function getTemplates(string $solutionSourceName, string $solutionTarget)
@@ -146,7 +143,7 @@ class TemplateManager
     {
         $rule = $this->entityManager
                             ->getRepository(Rule::class)
-                            ->find( $ruleId );	
+                            ->find($ruleId);
         // General data
         $data['name'] = $rule->getName();
         $data['nameSlug'] = $rule->getNameSlug();

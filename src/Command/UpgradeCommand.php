@@ -25,7 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use Exception;
 use Psr\Log\LoggerInterface;

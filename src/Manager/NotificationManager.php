@@ -25,13 +25,13 @@
 
 namespace App\Manager;
 
-use App\Entity\User;
 use App\Entity\Config;
+use App\Entity\User;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
 use DateTime;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -43,10 +43,6 @@ use Twig\Environment;
 
 /**
  * Class NotificationManager.
- *
- * @package App\Manager
- *
- *
  */
 class NotificationManager
 {
@@ -155,7 +151,7 @@ class NotificationManager
                 // Send the message to all admins
                 foreach ($this->emailAddresses as $emailAddress) {
                     $message->setTo($emailAddress);
-                    $send = $this->mailer->send($message);						
+                    $send = $this->mailer->send($message);
                     if (!$send) {
                         $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
                         throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
@@ -206,8 +202,8 @@ class NotificationManager
                                 )
                             GROUP BY document.global_status";
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->execute();	   				
-            $cptLogs = $stmt->fetchAll();
+            $result = $stmt->executeQuery();
+            $cptLogs = $result->fetchAllAssociative();
             $job_open = 0;
             $job_close = 0;
             $job_error = 0;
@@ -235,7 +231,7 @@ class NotificationManager
             // Récupération des règles actives
             $activeRules = $this->ruleRepository->findBy(['active' => true, 'deleted' => false]);
             if (!empty($activeRules)) {
-                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);					
+                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);
                 foreach ($activeRules as $activeRule) {
                     $textMail .= ' - '.$activeRule->getName().chr(10);
                 }
@@ -270,7 +266,7 @@ class NotificationManager
             // Send the message to all admins
             foreach ($this->emailAddresses as $emailAddress) {
                 $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);				
+                $send = $this->mailer->send($message);
                 if (!$send) {
                     $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
                     throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
@@ -279,7 +275,7 @@ class NotificationManager
 
             return true;
         } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';				
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             throw new Exception($error);
         }
@@ -288,7 +284,7 @@ class NotificationManager
     // Add every admin email in the notification list
     private function setEmailAddresses()
     {
-        $users = $this->userRepository->findEmailsToNotification();			
+        $users = $this->userRepository->findEmailsToNotification();
         foreach ($users as $user) {
             $this->emailAddresses[] = $user['email'];
         }
@@ -307,9 +303,10 @@ class NotificationManager
             throw new Exception('Failed to send email');
         }
     }
-    
+
     // Get the content of the table config
-    protected function setConfigParam() {
+    protected function setConfigParam()
+    {
         if (empty($this->configParams)) {
             $configRepository = $this->entityManager->getRepository(Config::class);
             $configs = $configRepository->findAll();
@@ -317,7 +314,7 @@ class NotificationManager
                 foreach ($configs as $config) {
                     $this->configParams[$config->getName()] = $config->getvalue();
                 }
-            }			
-        }			
+            }
+        }
     }
 }

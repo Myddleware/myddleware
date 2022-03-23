@@ -295,6 +295,7 @@ class hubspotcore extends solution
             } elseif (empty($result)) {
                 throw new \Exception('No fields returned by Hubspot. ');
             }
+
             // Add each field in the right list (relate fields or normal fields)
             foreach ($result as $field) {
                 // Field not editable can't be display on the target side
@@ -304,28 +305,21 @@ class hubspotcore extends solution
                 ) {
                     continue;
                 }
+                $this->moduleFields[$field['name']] = [
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'type_bdd' => $field['type'],
+                    'required' => 0,
+                    'relate' => false,
+                ];
                 // If the fields is a relationship
                 if (
                         'ID' == strtoupper(substr($field['name'], -2))
                      or 'IDS' == strtoupper(substr($field['name'], -3))
                      or 'ID__VALUE' == strtoupper(substr($field['name'], -9)) // Used for module's type object
                 ) {
-                    $this->moduleFields[$field['name']] = [
-                        'label' => $field['label'],
-                        'type' => 'varchar(36)',
-                        'type_bdd' => 'varchar(36)',
-                        'required' => 0,
-                        'required_relationship' => 0,
-						'relate' => true
-                    ];
+                    $this->moduleFields[$field['name']]['relate'] = true;
                 }
-                $this->moduleFields[$field['name']] = [
-                    'label' => $field['label'],
-                    'type' => $field['type'],
-                    'type_bdd' => $field['type'],
-                    'required' => 0,
-					'relate' => false
-                ];
                 // Add list of values
                 if (!empty($field['options'])) {
                     foreach ($field['options'] as $value) {
@@ -341,8 +335,8 @@ class hubspotcore extends solution
             return false;
         }
     }
-    // get_module_fields($module)
 
+    // get_module_fields($module)
 
     /**
      * Function read data.
@@ -564,7 +558,10 @@ class hubspotcore extends solution
                         if (!empty($fieldArray[1])) {
                             // If field contains Ids, then we add it as an array
                             if ('Ids' == substr($key, -3)) {
-                                $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+                                // Hubspot doesn't support that we send an empty relationship
+                                if (!empty($value)) {
+                                    $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+                                }
                             } else {
                                 $dataHubspot[$fieldArray[0]][$fieldArray[1]] = $value;
                             }
@@ -586,7 +583,6 @@ class hubspotcore extends solution
                 }
                 // Call to Hubspot
                 $resultQuery = $this->call($url, 'POST', $dataHubspot);
-
                 if (isset($resultQuery['exec']['status']) && 'error' === $resultQuery['exec']['status']) {
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -664,7 +660,10 @@ class hubspotcore extends solution
                             if (!empty($fieldArray[1])) {
                                 // If field contains Ids, then we add it as an array
                                 if ('Ids' == substr($key, -3)) {
-                                    $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+                                    // Hubspot doesn't support that we send an empty relationship
+                                    if (!empty($value)) {
+                                        $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
+                                    }
                                 } else {
                                     $dataHubspot[$fieldArray[0]][$fieldArray[1]] = $value;
                                 }
@@ -1288,7 +1287,7 @@ class hubspotcore extends solution
      * @param $moduleSource
      * @param $RuleMode
      *
-     * @return null|string
+     * @return string|null
      *
      * @throws \Exception
      */
@@ -1383,4 +1382,3 @@ class hubspotcore extends solution
 class hubspot extends hubspotcore
 {
 }
-

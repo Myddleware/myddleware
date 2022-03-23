@@ -411,6 +411,9 @@
     "sebastian/version": {
         "version": "3.0.2"
     },
+    "sendinblue/api-v3-sdk": {
+        "version": "v7.4.4"
+    },
     "sensio/framework-extra-bundle": {
         "version": "5.6",
         "recipe": {

@@ -9,24 +9,19 @@
                     <thead class="table-light">
                     {{ form_start(form) }} 
                         <tr>
-                            <th scope="col">{{ 'crontab.arguments'|trans }}</th>
-                            <th scope="col">{{ 'crontab.description'|trans }}</th>
-                            <th scope="col">{{ 'crontab.max_instance'|trans }}</th>
-                            <th scope="col">{{ 'crontab.number'|trans }}</th>
                             <th scope="col">{{ 'crontab.period'|trans }}</th>
+                            <th scope="col">{{ 'crontab.command'|trans }}</th>
+                            <th scope="col">{{ 'crontab.description'|trans }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ form_widget(form.arguments, { 'attr': {'placeholder': 'Your arguments'} }) }}</td>
-                            <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
-                            <td>{{ form_widget(form.maxInstances) }}</td>
-                            <td>{{ form_widget(form.number) }}</td>
-                            <td>
+                            <td data-bs-toggle="tooltip" data-bs-placement="left" title="{{ 'crontab.period_help'|trans }}">
                                 {{ form_widget(form.period, { 'attr': {'placeholder': '* /5 * * * *'} }) }}
                                 {{ form_errors(form.period)}}
                             </td>
-
+                            <td>{{ form_widget(form.command, { 'attr': {'placeholder': 'Your command'} }) }}</td>
+                            <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
                         </tr>
                     </tbody>
                     </table>

@@ -363,7 +363,7 @@ class Connector
      *
      * @return Collection
      *
-     * @param null|mixed $connectorParams
+     * @param mixed|null $connectorParams
      */
     public function setConnectorParams($connectorParams = null)
     {

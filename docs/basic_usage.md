@@ -1,58 +1,66 @@
 # Basic usage
 
-## Rule
-### First rule
+## Connectors
 
-We will now see haw a rule work. The rule is the center of the work of myddleware. You can create as many as you want and as you need. 
+*This section is still under construction*
 
-The rule is basically a job which send your data from a module to another module. It’s just like transfer something from a box to another, with all the changes it implicates if the first box is square and the new is a circle. The transfer is a copy, so none of your data will be erased. 
+## Rules
 
-To create a rule, you can click on ```“Rule”``` then ```“Creation”``` on the top 
+### Creating your first rule
+
+Rules are at the core of how Myddleware works. You can create as many as you want and as many as you need.
+
+A rule is basically a job which sends your data from a module to another module. It’s just like transfering something from a box to another, with all the changes it implicates if the first box is square and the second is a circle. The transfer is a copy, so no data can be erased.
+
+To create a rule, log in to your Myddleware instance then click on **Rules** then **Creation** in the navbar.
 
 ![Create rule](images/basic_usage/rule/rule1.PNG)
 
-### Select data
+### Selecting data
 
-First, you will choose your environments source and target (with the connectors you had created) 1, then you will select the two module you want in the transfer 2 and 3. 
-
-You can visualize with the example:
+First, you need to choose your environment's source and target connectors (see 1), then you will select the two modules you need to sync (see 2 & 3).
 
 ![Create rule](images/basic_usage/rule/rule2.PNG)
 
-Do not forget to find a name for your rule or you won’t have access to the module selections. 
+Do not forget to give a name to your rule or you won’t be able to select your modules.
 
-In our example we choose the e-shop s customers, wich have the information we need to fill the ```“Accounts”``` module in our target.  
+In our example we chose **the e-shop s customers**, wich have the information we need to fill the ```Accounts``` module in our target.  
 
-!> It is important to know exactly from wich modules the data you need are from, and in wich module you want them to be copied. 
+!> It is important to know exactly from which module the data you need comes from, and in which module you want it to be copied. Indeed, you won't be able to change this part later.
 
-### Map your feilds
+### Mapping fields
 
-Once you did this step you can continue to the field mapping. It is the space where you can define the destination of each data, in the field you want it to be. 
+Once you've named & decided on the modules you want to synchronise, you will be redirected to the fields mapping step. This is where you will define the general pattern for each data transfer made by your rule, field by field.
 
-To map your field, you just have to drag and drop your data in the area of the target field, like the email in the example  
+To map your fields, you just have to drag and drop the source field to the target field. For instance, here we've selected the the source field **email** from the ```Customers``` module of our PrestaShop application and we've place it in the **email1** target field from the ```Accounts``` module of our SuiteCRM application. You can map as many fields as you need and can even send multiple sources into one target.
+
+> NB: please note you don't have to map **all** source/target fields, you can simply select a few if that's what you need. However, some of them will be required, depending on the target app
 
 ![Create rule](images/basic_usage/rule/rule3.PNG)
 
-Sometimes there are datas with a shape wich doesn’t correspond to the target. You can create a formula to adapt your data source, make it the shape it must have to be import in your target. 
+### Apply formulas to transform data before it is sent to the target app
 
-**Example:** 
-We only avec first_name and last_name in our source, we want to have both in the field name. So, we drag and drop this two datas, and we create a formula to concat it. 
+Sometimes, the source data mapping doesn't quite match the target app's own mapping. But don't worry! Myddleware allows you to operate transformations on the data you want to send in order to fit with the target requirements. This is possible thanks to Myddleware's *formulas* system.
+Indeed, for each target field, you can create a formula to modify the source data to fit the type, length,... and other requirements from the target field.
+
+**Example:**
+In our example, we want to map PrestaShop Customers' data to be sent to SuiteCRM's Accounts module. However, PrestaShop only maps Customers' **first_name** and **last_name** whereas SuiteCRM provides us with a **name** field. Ideally, we would want to add up our source's  **first_name** and **last_name** in order to fit SuiteCRM's name field's logic. To do so, we need to drag and drop this **first_name** and **last_name**, and create a formula to concatenate them.
 
 ![Create rule](images/basic_usage/rule/rule4.PNG)
 
 ![Create rule](images/basic_usage/rule/rule5.PNG)
 
-You can double-click on the data in “Fields” to make it appear in the formula area. To concat use ```‘.’```, the quotes are here to make a space. The result will be to have the first name, a space, the the last name in our fields name. 
+You can double-click on the data in “Fields” to make it appear in the formula area. To concat use ```‘.’```, the quotes are here to make a space. The result will be to have the first name, a space, the the last name in our fields name.
 
->To test your formula and your mapping, you can go to ```“simulation”``` 
+>To test your formula and your mapping, you can go to ```“simulation”```
 
 ![Create rule](images/basic_usage/rule/rule6.PNG)
 
-Then you can run “Simple simulation” to visualize an example of the transfer, you can also check if your formula transform the data the way you want. 
+Then you can run “Simple simulation” to visualize an example of the transfer, you can also check if your formula transform the data the way you want.
 
 !>We will talk about the tabs "Relationships" and "filters" in another chapter
 
-### Confirm the rule 
+### Confirm the rule
 
 To finish the creation of this rule, click on “Confirmation” :
 
@@ -67,6 +75,7 @@ You will then see 2 parameters :
  Depending on the solution, you could have the choice to read newly created data or all data, created or modified in the source module. In our example, if you only want to send new customers created in Prestashop to SuiteCRM, then select ```“Create data only”```. Otherwise, if you only want to send customers’ modifications in Prestashop to SuiteCRM, then select “Create and update data”. In our example we selected ```“Create and update data”```. This process is based on the reference date that you can set up.
 
 #### **Avoid duplicates fields :**
+
  You can select one of these fields if you want Myddleware to check if a record with the same value already exists in the target solution. If so, Myddleware will only update this data and won’t create a duplicate. But to be able to duplicate a field, the field must be present in the fields mapping. In our example, we selected ```“Email”```.
 
 <!-- tabs:end -->
@@ -87,7 +96,7 @@ On your Myddleware interface you have the possibility to create your periodic ta
 
 ![Jobscheduler 1](images/basic_usage/jobscheduler_1.png)
 
-Here you will find the list of your tasks, with the possibility to modify or delete a task through the action column. 
+Here you will find the list of your tasks, with the possibility to modify or delete a task through the action column.
 
 ![Jobscheduler 1](images/basic_usage/jobscheduler_2.png)
 
@@ -102,7 +111,7 @@ Here you will first have to select the type of command you want to create, depen
 <!-- tabs:start -->
 #### **Period**
 
-this is the time interval corresponding to the frequency of execution of your task 
+this is the time interval corresponding to the frequency of execution of your task
 
 #### **Job order**
 
@@ -113,7 +122,6 @@ This is the order in which the tasks will be executed
  Active ? Allows you to deactivate/activate a scheduled task
 
 <!-- tabs:end -->
-
 
 ### Using crontab in the Myddleware interface
 
@@ -132,11 +140,11 @@ Just like with Jobscheduler you can use to create new periodic tasks directly vi
 
 #### **Running instance**
 
-#### **Period **
+#### **Period**
 
- As for jobscheduler, period is a time interval corresponding to the frequency of execution of your task. Here on the other hand the syntax to use is precise example (*/5 * * * * : in the order of writing, minute, hours, day of the month, day of the week).
+ As for jobscheduler, period is a time interval corresponding to the frequency of execution of your task. Here on the other hand the syntax to use is precise example (*/5* ** * : in the order of writing, minute, hours, day of the month, day of the week).
 
- Syntaxe example : 
+ Syntax example :
 
 <!-- tabs:end -->
 

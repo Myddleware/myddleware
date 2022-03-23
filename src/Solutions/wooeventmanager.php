@@ -23,40 +23,34 @@
  * along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************************/
 
- namespace App\Solutions;
+namespace App\Solutions;
 
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-
-class wooeventmanagercore extends wordpress {
-
-    protected $subModules = array(
-                                    'mep_event_more_date' => array('parent_module' => 'mep_events',
-                                                                    'parent_id' => 'event_id')
-                                    );
+class wooeventmanagercore extends wordpress
+{
+    protected $subModules = [
+                                    'mep_event_more_date' => ['parent_module' => 'mep_events',
+                                                                    'parent_id' => 'event_id', ],
+                                    ];
 
     // Module without reference date
-	protected $moduleWithoutReferenceDate = array('mep_cat', 'mep_org');
+    protected $moduleWithoutReferenceDate = ['mep_cat', 'mep_org'];
 
-    public function get_modules($type = 'source') {
-        if($type === 'source'){
-            return array(
-                'mep_events' =>	'Events',
-                'mep_cat' =>	'Categories',
-                'mep_org' =>	'Organizers',
-                'mep_event_more_date' => 'Event More Date'
+    public function get_modules($type = 'source')
+    {
+        if ('source' === $type) {
+            return [
+                'mep_events' => 'Events',
+                'mep_cat' => 'Categories',
+                'mep_org' => 'Organizers',
+                'mep_event_more_date' => 'Event More Date',
                 // these modules are part of the PRO subscription to the Woocommerce Event Manager Plugin
                 // 'mep_event_speaker'	 => 'Event Speaker List',
                 // 'mep_event_attendee' =>	'Event Attendee List',
-                );
+                ];
         }
     }
-
-    
 }
 
-
-class wooeventmanager extends wooeventmanagercore {
-
+class wooeventmanager extends wooeventmanagercore
+{
 }

@@ -25,26 +25,20 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace App\Manager;
 
+use App\Entity\Config;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Ldap\Adapter\ConnectionInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\Config;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 
 /**
  * Class UpgradeManager.
- *
- * @package App\Manager
- *
- *
  */
 class UpgradeManager
 {
@@ -70,19 +64,19 @@ class UpgradeManager
      * @var EntityManagerInterface
      */
     private $entityManager;
-    
+
     public function __construct(
         LoggerInterface $logger,
         KernelInterface $kernel,
         EntityManagerInterface $entityManager
     ) {
-        $this->logger = $logger; 
+        $this->logger = $logger;
         $this->kernel = $kernel;
         $this->entityManager = $entityManager;
         $this->env = $kernel->getEnvironment();
         $this->projectDir = $kernel->getProjectDir();
 
-        // Get the php executable 
+        // Get the php executable
         $phpBinaryFinder = new PhpExecutableFinder();
         $phpBinaryPath = $phpBinaryFinder->find();
         $this->phpExecutable = $phpBinaryPath;
@@ -90,12 +84,12 @@ class UpgradeManager
 
     public function processUpgrade($output)
     {
-        try {		
+        try {
             // Customize update process
             $this->beforeUpdate($output);
             // Set all config parameters
             $this->setConfigParam();
-            
+
             // Update file
             $output->writeln('<comment>Update files...</comment>');
             $this->updateFiles();
@@ -107,37 +101,37 @@ class UpgradeManager
             $this->updateVendors();
             $output->writeln('<comment>Update vendors OK</comment>');
             $this->message .= 'Update vendors OK'.chr(10);
-            
+
             // Update database
             $output->writeln('<comment>Update database...</comment>');
             $this->updateDatabase();
             $output->writeln('<comment>Update database OK</comment>');
             $this->message .= 'Update database OK'.chr(10);
 
-                // Clear cache
+            // Clear cache
             $output->writeln('<comment>Clear Symfony cache...</comment>');
             $this->clearSymfonycache();
             $output->writeln('<comment>Clear Symfony cache OK</comment>');
             $this->message .= 'Clear Symfony cache OK'.chr(10);
-            
+
             // Yarn action
             $output->writeln('<comment>Yarn action... Can take 1 or 2 minutes </comment>');
             $this->yarnAction();
             $output->writeln('<comment>Yarn action OK</comment>');
-            $this->message .= 'Yarn action OK'.chr(10);  
+            $this->message .= 'Yarn action OK'.chr(10);
 
             // Customize update process
             $this->afterUpdate($output);
 
             // Get old and new Myddleware version
-            $oldVersion = getEnv('MYDDLEWARE_VERSION');
+            $oldVersion = getenv('MYDDLEWARE_VERSION');
             // Refresh variable from env file
             if (file_exists(__DIR__.'/../../.env')) {
                 (new Dotenv())->load(__DIR__.'/../../.env');
             }
-            
-            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getEnv('MYDDLEWARE_VERSION').'</info>');
-            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getEnv('MYDDLEWARE_VERSION').chr(10);
+
+            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').'</info>');
+            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').chr(10);
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
@@ -188,7 +182,7 @@ class UpgradeManager
     protected function updateVendors()
     {
         // Change the command composer if php isn't the default php version
-		    $process = new Process('composer install --ignore-platform-reqs');
+        $process = new Process('composer install --ignore-platform-reqs');
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -205,7 +199,7 @@ class UpgradeManager
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
-        
+
         $process = new Process('yarn build');
         $process->run();
         // executes after the command finishes
@@ -313,7 +307,8 @@ class UpgradeManager
     }
 
     // Get the content of the table config
-    protected function setConfigParam() {
+    protected function setConfigParam()
+    {
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
         if (!empty($configs)) {
