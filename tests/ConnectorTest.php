@@ -2,9 +2,9 @@
 
 namespace App\Tests;
 
-use App\Entity\User;
-use App\Entity\Solution;
 use App\Entity\Connector;
+use App\Entity\Solution;
+use App\Entity\User;
 use DateTimeImmutable;
 
 class ConnectorTest extends DatabaseDependantTestCase
@@ -36,11 +36,9 @@ class ConnectorTest extends DatabaseDependantTestCase
 
     public function testAConnectorMustHaveASolutionRelationship(): void
     {
-
     }
 
     public function testAConnectorMustHaveConnectionParameters(): void
     {
-
     }
 }

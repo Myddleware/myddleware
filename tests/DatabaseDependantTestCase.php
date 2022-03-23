@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class DatabaseDependantTestCase extends KernelTestCase
 {
     /**
-     *  @var EntityManagerInterface 
+     *  @var EntityManagerInterface
      */
     protected $entityManager;
 
@@ -20,7 +20,6 @@ class DatabaseDependantTestCase extends KernelTestCase
 
         $this->entityManager = $kernel->getContainer()->get('doctrine')->getManager();
     }
-
 
     protected function tearDown(): void
     {
