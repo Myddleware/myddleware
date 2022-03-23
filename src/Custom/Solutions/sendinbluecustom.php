@@ -3,31 +3,46 @@
 namespace App\Custom\Solutions;
 
 use App\Solutions\sendinblue;
+use App\Manager\DocumentManager;
 
 class sendinbluecustom extends sendinblue {
 
     // Update the record 
-    protected function update($param, $record) {  
-		if (!in_array($param['ruleId'], array('620d3e768e678'))) {
-			return parent::update($param, $record);
+    protected function update($param, $record, $idDoc = null) {  
+		if (!in_array($param['ruleId'], array('620d3e768e678', '620e5520c62d6'))) {
+			return parent::update($param, $record, $idDoc);
 		}
-// print_r($param);		
+
+		// Custom code for contacts
 		// Specific action for rules Sendinblue - contact and Sendinblue - coupon
         try {
-            $identifier = parent::update($param, $record);
+            $identifier = parent::update($param, $record, $idDoc);
 		} catch (\Exception $e) {
-			if (strpos($e->getMessage(), 'duplicate_parameter') !== false) {
+			// If update didn't work and there is an error 
+			if (
+					strpos($e->getMessage(), 'duplicate_parameter') !== false
+				 OR strpos($e->getMessage(), 'Contact already exist') !== false	
+			) {
 				$mask = $this->searchDuplicate($param, $record);
 				if (!empty($mask)) {
 					$first = true;
 					foreach ($mask as $key => $value) {
-						// The first record is the one we keep^
+						// The first record is the one we keep
 						if ($first) {
 							$first = false;
+							$contactNotDeleted = $key;
 							continue;
 						}
 						// Delete the other ones in Sendinblue
-						$this->removeContact($param['ruleId'], $key);					
+						$contactIdDeleted = $this->removeContact($param, $key, $idDoc);			
+						// If the partner deleted is the one in the current document, we change the target id of the document with the one that won't be deleted
+						if ($contactIdDeleted == $record['target_id']) {
+							$paramDoc['id_doc_myddleware'] = $idDoc;
+							$paramDoc['jobId'] = $param['jobId'];
+							$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+							$documentManager->setParam($paramDoc);
+							$documentManager->updateTargetId($contactNotDeleted);
+						}
 					}
 				}
 			}
@@ -36,53 +51,40 @@ class sendinbluecustom extends sendinblue {
         return $identifier; 
     }
 	
-	protected function removeContact($ruleId, $contactId) {
-		echo 'a suppr : '.$contactId.chr(10);
+	// Remove a contact from Sendinblue
+	protected function removeContact($param, $contactId, $idDoc) {
 		// Get all source field of the ruleId
+		$paramDoc['id_doc_myddleware'] = $idDoc;
+		$paramDoc['jobId'] = $param['jobId'];
+		$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$documentManager->setParam($paramDoc);			
+		$documentManager->generateDocLog('S', 'Try to delete contact '.$contactId.' from Sendinblue.');
+
+		try {
+			$result = $this->delete($param, array('target_id' => $contactId));
+			$documentManager->generateDocLog('S', 'Contact '.$contactId.' deleted from Sendinblue.');
+        } catch (\Exception $e) {
+            $documentManager->generateDocLog('E', 'Failed to delete the contact '.$contactId.' from Sendinblue.');	
+			throw new \Exception('Failed to delete the contact '.$contactId.' from Sendinblue : '. $e->getMessage());	
+        }
 		
-		// Empty them and set deletion field to 1
-		
-		// generate document
-		
-		// $deletionParam['values']['statut_c'] = 'suppr'; 
-		// $deletionParam['values']['chatbot_c'] = 'suppr'; 
-		// $deletionParam['values']['fin'] = ''; 
-		// $deletionParam['values']['mise_en_place_c'] = ''; 
-		// $deletionParam['values']['name'] = ''; 
-		// $deletionParam['values']['annee_scolaire_c'] = ''; 
-		// $deletionParam['values']['deleted'] = ''; 
-		// $deletionParam['values']['heure_babituelle_rencontre_c'] = ''; 
-		// $deletionParam['values']['jour_habituel_rencontre_c'] = ''; 
-		// $deletionParam['values']['lieu_habituel_rencontre_c'] = ''; 
-		// $deletionParam['values']['precision_lieu_c'] = ''; 
-		
-		$ruleParam['ruleId'] = $ruleId; 
-		// $ruleParam['jobId'] = $param['jobId']; 			
-		// $ruleDeletion = new rule($this->logger, $this->container, $this->conn, $ruleParam);				
-		
-		// $deletionParam['values']['myddleware_deletion'] = true;
-		// $deletionParam['values']['id'] = $values['IDCOMET'];
-		// $deletionParam['values']['date_modified'] = gmdate('Y-m-d H:i:s');					
-		// $documents = $ruleDeletion->generateDocuments($values['IDCOMET'], false, $deletionParam); 
+		return $contactId;
 	}
 	
 	protected function searchDuplicate($param, $record) {
 		$mask = array();
 		$apiInstance = new \SendinBlue\Client\Api\ContactsApi( new \GuzzleHttp\Client(), $this->config ); 
-print_r($record);
+
 		// Search using id
 		if (!empty($record['target_id'])) {
-echo 'id'.chr(10);
 			$resultApi = array();
 			$resultApi = $apiInstance->getContactInfo($record['target_id']);
-echo 'id'.current($resultApi)['id'].chr(10);
 			if (!empty(current($resultApi)['id'])) {
 				$duplicates[current($resultApi)['id']] = $resultApi;
 			}
 		}
 		// Search using email address
 		if (!empty($record['email'])) {
-echo 'email'.chr(10);
 			$resultApi = array();
 			$resultApi = $apiInstance->getContactInfo($record['email']);
 			if (!empty(current($resultApi)['id'])) {
@@ -91,7 +93,6 @@ echo 'email'.chr(10);
 		}
 		// Search using SMS
 		if (!empty($record['SMS'])) {
-echo 'SMS'.chr(10);
 			$resultApi = array();
 			$resultApi = $apiInstance->getContactInfo($record['SMS']);
 			if (!empty(current($resultApi)['id'])) {
@@ -108,11 +109,9 @@ echo 'SMS'.chr(10);
 							  (empty(current($duplicate['statistics'])['clicked']) ? '0' : current($duplicate['statistics'])['clicked']).
 							  (($duplicate['id'] ==  $record['target_id']) ? '1' : '0'); // If records equal, we keep the one that Myddleware has created
 			}
-			// The biggest value first	
+			// Put the biggest value first	
 			arsort($mask);
 		}
-print_r($duplicates);
-print_r($mask);
 		
 		return $mask;
 	}

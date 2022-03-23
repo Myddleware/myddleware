@@ -410,7 +410,7 @@ class sendinbluecore extends solution
     }
 
      // Create the record 
-     protected function create($param, $record) {
+     protected function create($param, $record, $idDoc = null) {
         // Import or create new contact for sendinblue 
 		$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
 		$createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
@@ -422,7 +422,7 @@ class sendinbluecore extends solution
      }
 
     // Update the record 
-    protected function update($param, $record) {  
+    protected function update($param, $record, $idDoc = null) {  
         try {
             $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
             $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
