@@ -59,8 +59,10 @@ class RuleManagerCustom extends RuleManager {
 			$document = array();
 			$sql = "SELECT document.source_id FROM document WHERE id = '$docId'";
 			$stmt = $this->connection->prepare($sql);
-			$stmt->execute();	    
-			$document = $stmt->fetch();
+			// $stmt->execute();	    
+			// $document = $stmt->fetch();
+			$result = $stmt->executeQuery();
+            $document = $result->fetchAssociative();
 
 			if (
 					!empty($response['id']) 
