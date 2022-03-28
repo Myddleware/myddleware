@@ -28,8 +28,9 @@ namespace App\DataFixtures;
 use App\Entity\Config;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-class ConfigFixtures extends Fixture
+class ConfigFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
     protected $configData = [
@@ -84,5 +85,10 @@ class ConfigFixtures extends Fixture
             $conf->setValue($configData['value']);
             $this->manager->persist($conf);
         }
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig', 'conf'];
     }
 }

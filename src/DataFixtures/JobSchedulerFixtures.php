@@ -28,14 +28,13 @@ namespace App\DataFixtures;
 use DateTimeImmutable;
 use App\Entity\JobScheduler;
 use App\DataFixtures\UserFixtures;
-use App\Repository\UserRepository;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
+class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
-    private $userRepository;
     private $manager;
     protected $jobSchedulerData = [
         ['command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => 1],
@@ -45,11 +44,6 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         ['command' => 'notification',	'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 210,	'active' => 1],
         ['command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 300,	'active' => 1],
     ];
-
-    public function __construct(UserRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
 
     public function load(ObjectManager $manager)
     {
@@ -75,8 +69,8 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
             $jobSchedulerObject = new JobScheduler();
             $jobSchedulerObject->setCreatedAt(new DateTimeImmutable('now'));
             $jobSchedulerObject->setUpdatedAt(new DateTimeImmutable('now'));
-            $jobSchedulerObject->setCreatedBy($this->userRepository->findOneBy(['email' => 'admin@myddleware.com']));
-            $jobSchedulerObject->setModifiedBy($this->userRepository->findOneBy(['email' => 'admin@myddleware.com']));
+            $jobSchedulerObject->setCreatedBy($this->getReference(UserFixtures::FIRST_USER_REFERENCE));
+            $jobSchedulerObject->setModifiedBy($this->getReference(UserFixtures::FIRST_USER_REFERENCE));
             $jobSchedulerObject->setCommand($jobScheduler['command']);
             $jobSchedulerObject->setParamName1($jobScheduler['paramName1']);
             $jobSchedulerObject->setParamValue1($jobScheduler['paramValue1']);
@@ -94,5 +88,10 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         return [
             UserFixtures::class,
         ];
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig', 'user'];
     }
 }

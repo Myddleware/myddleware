@@ -28,8 +28,9 @@ namespace App\DataFixtures;
 use App\Entity\Solution;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-class SolutionFixtures extends Fixture
+class SolutionFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
     protected $solutionData = [
@@ -70,6 +71,8 @@ class SolutionFixtures extends Fixture
         $this->manager->flush();
     }
 
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         // Get all solutions already in the database
@@ -96,5 +99,10 @@ class SolutionFixtures extends Fixture
             $sol->setTarget($solutionData['target']);
             $this->manager->persist($sol);
         }
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig'];
     }
 }
