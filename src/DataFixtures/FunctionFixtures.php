@@ -27,10 +27,10 @@ namespace App\DataFixtures;
 
 use App\Entity\FuncCat;
 use App\Entity\Functions;
-use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 
-class LoadFunctionData implements FixtureInterface
+class FunctionFixtures  extends Fixture
 {
     private $manager;
     protected $functionData = [
