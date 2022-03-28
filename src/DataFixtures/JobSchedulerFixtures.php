@@ -25,11 +25,14 @@
 
 namespace App\DataFixtures;
 
+use DateTimeImmutable;
 use App\Entity\JobScheduler;
-use Doctrine\Common\DataFixtures\FixtureInterface;
+use App\DataFixtures\UserFixtures;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class LoadJobSchedulerData implements FixtureInterface
+class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
 {
     private $manager;
     protected $jobSchedulerData = [
@@ -66,10 +69,12 @@ class LoadJobSchedulerData implements FixtureInterface
         $jobSchedulers = $this->manager->getRepository(JobScheduler::class)->findAll();
         if (empty($jobSchedulers)) {
             $jobSchedulerObject = new JobScheduler();
-            $jobSchedulerObject->setDateCreated(new \DateTime('now'));
-            $jobSchedulerObject->setDateModified(new \DateTime('now'));
-            $jobSchedulerObject->setCreatedBy('1');
-            $jobSchedulerObject->setModifiedBy('1');
+            $jobSchedulerObject->setCreatedAt(new DateTimeImmutable('now'));
+            $jobSchedulerObject->setUpdatedAt(new DateTimeImmutable('now'));
+            // TODO: change this->getUser to reflect calling 1st a User Fixture which will then be used to create this rel
+            // or alternatively we could set this property to nullable?
+            $jobSchedulerObject->setCreatedBy($this->getUser());
+            $jobSchedulerObject->setModifiedBy($this->getUser());
             $jobSchedulerObject->setCommand($jobScheduler['command']);
             $jobSchedulerObject->setParamName1($jobScheduler['paramName1']);
             $jobSchedulerObject->setParamValue1($jobScheduler['paramValue1']);
@@ -80,5 +85,12 @@ class LoadJobSchedulerData implements FixtureInterface
             $jobSchedulerObject->setJobOrder($jobScheduler['jobOrder']);
             $this->manager->persist($jobSchedulerObject);
         }
+    }
+
+    public function getDependencies()
+    {
+        return [
+            UserFixtures::class,
+        ];
     }
 }

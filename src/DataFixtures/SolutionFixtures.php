@@ -26,10 +26,10 @@
 namespace App\DataFixtures;
 
 use App\Entity\Solution;
-use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 
-class LoadSolutionData implements FixtureInterface
+class SolutionFixtures extends Fixture
 {
     private $manager;
     protected $solutionData = [

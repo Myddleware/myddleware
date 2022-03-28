@@ -29,7 +29,7 @@ use App\Entity\Config;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class LoadConfigData implements FixtureInterface
+class ConfigFixtures implements FixtureInterface
 {
     private $manager;
     protected $configData = [
