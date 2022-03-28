@@ -22,6 +22,7 @@ class UserFixtures extends Fixture
         $user->setEmail('admin@myddleware.com');
         $password = $this->hasher->hashPassword($user, 'thisPasswordMustBeChanged!');
         $user->setPassword($password);
+        $user->setTimezone('GMT');
         $manager->persist($user);
         $manager->flush();
     }

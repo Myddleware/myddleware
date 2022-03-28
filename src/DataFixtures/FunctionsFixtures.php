@@ -30,7 +30,7 @@ use App\Entity\Functions;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
-class FunctionFixtures  extends Fixture
+class FunctionsFixtures  extends Fixture
 {
     private $manager;
     protected $functionData = [
@@ -57,18 +57,15 @@ class FunctionFixtures  extends Fixture
         $functions = $this->manager->getRepository(Functions::class)->findAll();
         if (!empty($functions)) {
             foreach ($functions as $function) {
-                $this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
+                $this->functions[$function->getCategoryId()->getName()][$function->getId()] = $function->getName();
             }
         }
         $this->generateEntities();
         $this->manager->flush();
     }
 
-    public function getOrder()
-    {
-        return 1;
-    }
-
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         foreach ($this->functionData as $cat => $functions) {
@@ -104,7 +101,7 @@ class FunctionFixtures  extends Fixture
             ) {
                 $func = new Functions();
                 $func->setName($function);
-                $func->setCategorieId($funcCat);
+                $func->setCategoryId($funcCat);
                 $this->manager->persist($func);
             }
         }

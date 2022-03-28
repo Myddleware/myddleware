@@ -28,12 +28,14 @@ namespace App\DataFixtures;
 use DateTimeImmutable;
 use App\Entity\JobScheduler;
 use App\DataFixtures\UserFixtures;
+use App\Repository\UserRepository;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
 class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
 {
+    private $userRepository;
     private $manager;
     protected $jobSchedulerData = [
         ['command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => 1],
@@ -44,6 +46,11 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         ['command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 300,	'active' => 1],
     ];
 
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function load(ObjectManager $manager)
     {
         $this->manager = $manager;
@@ -51,11 +58,8 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         $this->manager->flush();
     }
 
-    public function getOrder()
-    {
-        return 1;
-    }
-
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         foreach ($this->jobSchedulerData as $jobScheduler) {
@@ -71,10 +75,8 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
             $jobSchedulerObject = new JobScheduler();
             $jobSchedulerObject->setCreatedAt(new DateTimeImmutable('now'));
             $jobSchedulerObject->setUpdatedAt(new DateTimeImmutable('now'));
-            // TODO: change this->getUser to reflect calling 1st a User Fixture which will then be used to create this rel
-            // or alternatively we could set this property to nullable?
-            $jobSchedulerObject->setCreatedBy($this->getUser());
-            $jobSchedulerObject->setModifiedBy($this->getUser());
+            $jobSchedulerObject->setCreatedBy($this->userRepository->findOneBy(['email' => 'admin@myddleware.com']));
+            $jobSchedulerObject->setModifiedBy($this->userRepository->findOneBy(['email' => 'admin@myddleware.com']));
             $jobSchedulerObject->setCommand($jobScheduler['command']);
             $jobSchedulerObject->setParamName1($jobScheduler['paramName1']);
             $jobSchedulerObject->setParamValue1($jobScheduler['paramValue1']);

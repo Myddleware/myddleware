@@ -51,10 +51,11 @@
 /.env.*.local
 ###< env file ###
 
-##> vscode and other IDE parameters ## 
+##> vscode & extensions and other IDE parameters ## 
 .vscode
 /.idea/*
-##< vscode parameters ##
+*.session.sql
+##<  vscode & extensions and other IDE parameters ##
 
 ##> Docker ##
 /docker/tmp/
