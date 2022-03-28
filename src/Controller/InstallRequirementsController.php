@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Repository\ConfigRepository;
 use Doctrine\DBAL\ConnectionException as DoctrineConnectionException;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception as DBALException;
 use Doctrine\DBAL\Driver\PDO\Exception as DoctrinePDOException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Exception;
