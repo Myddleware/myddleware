@@ -28,7 +28,10 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Table(name="functions")
+ * TODO: to avoid confusion, this Entity should probably be renamed to something which:
+ * 1) isn't plural
+ * 2) isn't a reserved keyword
+ * 3) reflects intent (for example PHPFunction, PHPBuiltInFunction or PHPInternalFunction?)
  * @ORM\Entity(repositoryClass="App\Repository\FunctionsRepository")
  */
 class Functions implements \Stringable

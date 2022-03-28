@@ -7,29 +7,30 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\DataFixtures;
 
 use App\Entity\Config;
-use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-class ConfigFixtures implements FixtureInterface
+class ConfigFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
     protected $configData = [
@@ -51,6 +52,8 @@ class ConfigFixtures implements FixtureInterface
         $this->manager->flush();
     }
 
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         // Get all config already in the database
@@ -82,5 +85,10 @@ class ConfigFixtures implements FixtureInterface
             $conf->setValue($configData['value']);
             $this->manager->persist($conf);
         }
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig', 'conf'];
     }
 }

@@ -30,18 +30,19 @@ use App\Entity\JobScheduler;
 use App\DataFixtures\UserFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
+class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $manager;
     protected $jobSchedulerData = [
-        ['command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => 1],
-        ['command' => 'rerunerror',	'paramName1' => 'limit', 'paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100,	'active' => 1],
-        ['command' => 'rerunerror',	'paramName1' => 'limit', 'paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '10',	'period' => 1440,	'jobOrder' => 110,	'active' => 1],
-        ['command' => 'notification',	'paramName1' => 'type',	'paramValue1' => 'alert',	'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 200,	'active' => 1],
-        ['command' => 'notification',	'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 210,	'active' => 1],
-        ['command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 300,	'active' => 1],
+        ['command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => true],
+        ['command' => 'rerunerror',	'paramName1' => 'limit', 'paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100,	'active' => true],
+        ['command' => 'rerunerror',	'paramName1' => 'limit', 'paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '10',	'period' => 1440,	'jobOrder' => 110,	'active' => true],
+        ['command' => 'notification',	'paramName1' => 'type',	'paramValue1' => 'alert',	'paramName2' => '',			'paramValue2' => '', 	'period' => 60,		'jobOrder' => 200,	'active' => true],
+        ['command' => 'notification',	'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 210,	'active' => true],
+        ['command' => 'cleardata',		'paramName1' => '',		'paramValue1' => '',		'paramName2' => '',			'paramValue2' => '', 	'period' => 1440,	'jobOrder' => 300,	'active' => true],
     ];
 
     public function load(ObjectManager $manager)
@@ -51,11 +52,8 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         $this->manager->flush();
     }
 
-    public function getOrder()
-    {
-        return 1;
-    }
-
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         foreach ($this->jobSchedulerData as $jobScheduler) {
@@ -71,10 +69,8 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
             $jobSchedulerObject = new JobScheduler();
             $jobSchedulerObject->setCreatedAt(new DateTimeImmutable('now'));
             $jobSchedulerObject->setUpdatedAt(new DateTimeImmutable('now'));
-            // TODO: change this->getUser to reflect calling 1st a User Fixture which will then be used to create this rel
-            // or alternatively we could set this property to nullable?
-            $jobSchedulerObject->setCreatedBy($this->getUser());
-            $jobSchedulerObject->setModifiedBy($this->getUser());
+            $jobSchedulerObject->setCreatedBy($this->getReference(UserFixtures::FIRST_USER_REFERENCE));
+            $jobSchedulerObject->setModifiedBy($this->getReference(UserFixtures::FIRST_USER_REFERENCE));
             $jobSchedulerObject->setCommand($jobScheduler['command']);
             $jobSchedulerObject->setParamName1($jobScheduler['paramName1']);
             $jobSchedulerObject->setParamValue1($jobScheduler['paramValue1']);
@@ -92,5 +88,10 @@ class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface
         return [
             UserFixtures::class,
         ];
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig', 'user'];
     }
 }

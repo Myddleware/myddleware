@@ -27,10 +27,13 @@ namespace App\DataFixtures;
 
 use App\Entity\FuncCat;
 use App\Entity\Functions;
+use App\DataFixtures\FuncCatFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class FunctionFixtures  extends Fixture
+class FunctionsFixtures  extends Fixture  implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $manager;
     protected $functionData = [
@@ -46,7 +49,12 @@ class FunctionFixtures  extends Fixture
     {
         $this->manager = $manager;
 
-        // load all categories that already exist in the database
+        //TODO: implement this to create a hierarchy between the 2 fixtures file 
+        $mathematical = $this->getReference(FuncCatFixtures::MATHEMATICAL_FUNC_CAT_REFERENCE);
+        $text = $this->getReference(FuncCatFixtures::TEXT_FUNC_CAT_REFERENCE);
+        $date = $this->getReference(FuncCatFixtures::DATE_FUNC_CAT_REFERENCE);
+
+         // load all categories that already exist in the database
         $funcCats = $this->manager->getRepository(FuncCat::class)->findAll();
         if (!empty($funcCats)) {
             foreach ($funcCats as $funcCat) {
@@ -57,17 +65,13 @@ class FunctionFixtures  extends Fixture
         $functions = $this->manager->getRepository(Functions::class)->findAll();
         if (!empty($functions)) {
             foreach ($functions as $function) {
-                $this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
+                $this->functions[$function->getCategoryId()->getName()][$function->getId()] = $function->getName();
             }
         }
         $this->generateEntities();
         $this->manager->flush();
     }
 
-    public function getOrder()
-    {
-        return 1;
-    }
 
     private function generateEntities()
     {
@@ -104,9 +108,21 @@ class FunctionFixtures  extends Fixture
             ) {
                 $func = new Functions();
                 $func->setName($function);
-                $func->setCategorieId($funcCat);
+                $func->setCategoryId($funcCat);
                 $this->manager->persist($func);
             }
         }
+    }
+
+    public static function getGroups(): array
+    {
+        return ['functions', 'mydconfig'];
+    }
+
+    public function getDependencies()
+    {
+        return [
+            FuncCatFixtures::class,
+        ];
     }
 }

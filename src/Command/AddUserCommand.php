@@ -162,7 +162,7 @@ class AddUserCommand extends Command
         $user = new User();
         $user->setEmail($email);
         $user->setRoles($isSuperAdmin ? ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] : ['ROLE_ADMIN']);
-        $user->setTimezone('UTC');
+        $user->setTimezone('GMT');
 
         // See https://symfony.com/doc/current/security/passwords.html
         $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
@@ -185,7 +185,7 @@ class AddUserCommand extends Command
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->io->success(sprintf('%s was successfully created: %s (%s)', $isSuperAdmin ? 'Super Administrator user' : 'User', $user->getEmail()));
+        $this->io->success(sprintf('%s was successfully created: (%s)', $isSuperAdmin ? 'Super Administrator user' : 'User', $user->getEmail()));
 
         $event = $stopwatch->stop('add-user-command');
         if ($output->isVerbose()) {

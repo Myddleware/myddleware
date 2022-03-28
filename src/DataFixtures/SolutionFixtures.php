@@ -28,39 +28,40 @@ namespace App\DataFixtures;
 use App\Entity\Solution;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-class SolutionFixtures extends Fixture
+class SolutionFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
     protected $solutionData = [
-        ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'prestashop',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'suitecrm',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'cirrusshield',		'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'erpnext',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'facebook',			'active' => 0, 'source' => 1, 'target' => 0],
+        ['name' => 'file',				'active' => 0, 'source' => 1, 'target' => 0],
+        ['name' => 'hubspot',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'magento',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mailchimp',			'active' => 0, 'source' => 0, 'target' => 1],
-        ['name' => 'sagecrm',			'active' => 0, 'source' => 1, 'target' => 1],
-        ['name' => 'sapcrm',			'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'mautic',			'active' => 0, 'source' => 0, 'target' => 1],
+        ['name' => 'microsoftsql',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'moodle',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mysql',				'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'oracledb',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'sapecc',			'active' => 0, 'source' => 1, 'target' => 0],
-        ['name' => 'magento',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'moodle',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'file',				'active' => 0, 'source' => 1, 'target' => 0],
-        ['name' => 'microsoftsql',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'postgresql',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'prestashop',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'ringcentral',		'active' => 0, 'source' => 1, 'target' => 0],
-        ['name' => 'cirrusshield',		'active' => 0, 'source' => 1, 'target' => 1],
-        ['name' => 'zuora',			    'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'hubspot',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'erpnext',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'mautic',			'active' => 0, 'source' => 0, 'target' => 1],
-        ['name' => 'facebook',			'active' => 0, 'source' => 1, 'target' => 0],
+        ['name' => 'sagecrm',			'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'sapcrm',			'active' => 0, 'source' => 1, 'target' => 1],
+        ['name' => 'sapecc',			'active' => 0, 'source' => 1, 'target' => 0],
+        ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'suitecrm',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'woocommerce',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'wooeventmanager',	'active' => 0, 'source' => 1, 'target' => 1],
         ['name' => 'wordpress',		    'active' => 0, 'source' => 1, 'target' => 1],
-        ['name' => 'postgresql',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'zuora',			    'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)
@@ -70,6 +71,8 @@ class SolutionFixtures extends Fixture
         $this->manager->flush();
     }
 
+    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
+    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         // Get all solutions already in the database
@@ -96,5 +99,10 @@ class SolutionFixtures extends Fixture
             $sol->setTarget($solutionData['target']);
             $this->manager->persist($sol);
         }
+    }
+
+    public static function getGroups(): array
+    {
+        return ['mydconfig'];
     }
 }

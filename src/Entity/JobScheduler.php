@@ -25,7 +25,6 @@
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -81,7 +80,7 @@ class JobScheduler implements \Stringable
     private $lastRun;
 
     /**
-     * @ORM\Column(name="active", type="boolean", options={"default":1})
+     * @ORM\Column(name="active", type="boolean", options={"default":true})
      */
     private $active;
 
@@ -201,14 +200,14 @@ class JobScheduler implements \Stringable
         return $this->lastRun;
     }
 
-    public function setActive(string $active): self
+    public function setActive(bool $active): self
     {
         $this->active = $active;
 
         return $this;
     }
 
-    public function getActive(): string
+    public function getActive(): bool
     {
         return $this->active;
     }
