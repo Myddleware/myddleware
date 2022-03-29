@@ -271,6 +271,9 @@
             "./config/packages/lexik_jwt_authentication.yaml"
         ]
     },
+    "liip/test-fixtures-bundle": {
+        "version": "2.2.1"
+    },
     "mautic/api-library": {
         "version": "2.16.1"
     },
