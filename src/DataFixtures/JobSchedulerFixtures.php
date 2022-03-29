@@ -25,13 +25,12 @@
 
 namespace App\DataFixtures;
 
-use DateTimeImmutable;
 use App\Entity\JobScheduler;
-use App\DataFixtures\UserFixtures;
-use Doctrine\Persistence\ObjectManager;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
 
 class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {

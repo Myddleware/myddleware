@@ -32,8 +32,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  *  * TODO: to avoid confusion, this Entity should probably be renamed to something which:
  * 1) isn't an abbreviation
- * 2) clearly reflects intent (for example FunctionCategory, FunctionType or PHPFunctionCategory ?)
- * 
+ * 2) clearly reflects intent (for example FunctionCategory, FunctionType or PHPFunctionCategory ?).
+ *
  * @ORM\Table(name="funccat")
  * @ORM\Entity(repositoryClass="App\Repository\FuncCatRepository")
  */

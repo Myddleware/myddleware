@@ -26,9 +26,9 @@
 namespace App\DataFixtures;
 
 use App\Entity\Config;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Doctrine\Persistence\ObjectManager;
 
 class ConfigFixtures extends Fixture implements FixtureGroupInterface
 {

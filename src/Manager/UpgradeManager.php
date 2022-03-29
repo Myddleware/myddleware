@@ -26,17 +26,17 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Manager;
 
 use App\Entity\Config;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\Process\Process;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 
 class UpgradeManager
 {
@@ -130,7 +130,7 @@ class UpgradeManager
                 (new Dotenv())->load(__DIR__.'/../../.env');
             }
 
-            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '. $this->parameterBagInterface->get('myd_version').'</info>');
+            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.$this->parameterBagInterface->get('myd_version').'</info>');
             $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.$this->parameterBagInterface->get('myd_version').chr(10);
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

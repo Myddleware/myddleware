@@ -27,13 +27,12 @@ namespace App\DataFixtures;
 
 use App\Entity\FuncCat;
 use App\Entity\Functions;
-use App\DataFixtures\FuncCatFixtures;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
 
-class FunctionsFixtures  extends Fixture  implements DependentFixtureInterface, FixtureGroupInterface
+class FunctionsFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $manager;
     protected $functionData = [
@@ -49,12 +48,12 @@ class FunctionsFixtures  extends Fixture  implements DependentFixtureInterface, 
     {
         $this->manager = $manager;
 
-        //TODO: implement this to create a hierarchy between the 2 fixtures file 
+        // TODO: implement this to create a hierarchy between the 2 fixtures file
         $mathematical = $this->getReference(FuncCatFixtures::MATHEMATICAL_FUNC_CAT_REFERENCE);
         $text = $this->getReference(FuncCatFixtures::TEXT_FUNC_CAT_REFERENCE);
         $date = $this->getReference(FuncCatFixtures::DATE_FUNC_CAT_REFERENCE);
 
-         // load all categories that already exist in the database
+        // load all categories that already exist in the database
         $funcCats = $this->manager->getRepository(FuncCat::class)->findAll();
         if (!empty($funcCats)) {
             foreach ($funcCats as $funcCat) {
@@ -71,7 +70,6 @@ class FunctionsFixtures  extends Fixture  implements DependentFixtureInterface, 
         $this->generateEntities();
         $this->manager->flush();
     }
-
 
     private function generateEntities()
     {
