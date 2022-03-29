@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -176,14 +178,14 @@ class JobScheduler implements \Stringable
         return $this->paramValue2;
     }
 
-    public function setPeriod(string $period): self
+    public function setPeriod(int $period): self
     {
         $this->period = $period;
 
         return $this;
     }
 
-    public function getPeriod(): string
+    public function getPeriod(): int
     {
         return $this->period;
     }
@@ -212,14 +214,14 @@ class JobScheduler implements \Stringable
         return $this->active;
     }
 
-    public function setJobOrder(string $jobOrder): self
+    public function setJobOrder(int $jobOrder): self
     {
         $this->jobOrder = $jobOrder;
 
         return $this;
     }
 
-    public function getJobOrder(): string
+    public function getJobOrder(): int
     {
         return $this->jobOrder;
     }

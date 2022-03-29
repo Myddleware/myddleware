@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\ConfigRepository;
@@ -25,7 +27,7 @@ class Config
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(length=255)
      */
     private $value;
 
@@ -46,12 +48,12 @@ class Config
         return $this;
     }
 
-    public function getValue(): ?string
+    public function getValue(): mixed
     {
         return $this->value;
     }
 
-    public function setValue(string $value): self
+    public function setValue(mixed $value): self
     {
         $this->value = $value;
 

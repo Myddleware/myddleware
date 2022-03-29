@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -108,10 +110,16 @@ class Job implements \Stringable
      */
     private $logs;
 
+    /**
+     * @ORM\OneToMany(targetEntity=RuleParamAudit::class, mappedBy="job")
+     */
+    private $ruleParamAudits;
+
     public function __construct()
     {
         $this->begin = new DateTime();
         $this->logs = new ArrayCollection();
+        $this->ruleParamAudits = new ArrayCollection();
     }
 
     public function setId(string $id): self
@@ -295,5 +303,35 @@ class Job implements \Stringable
     public function __toString(): string
     {
         return $this->id;
+    }
+
+    /**
+     * @return Collection<int, RuleParamAudit>
+     */
+    public function getRuleParamAudits(): Collection
+    {
+        return $this->ruleParamAudits;
+    }
+
+    public function addRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if (!$this->ruleParamAudits->contains($ruleParamAudit)) {
+            $this->ruleParamAudits[] = $ruleParamAudit;
+            $ruleParamAudit->setJob($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if ($this->ruleParamAudits->removeElement($ruleParamAudit)) {
+            // set the owning side to null (unless already changed)
+            if ($ruleParamAudit->getJob() === $this) {
+                $ruleParamAudit->setJob(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\FuncCat;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Doctrine\Persistence\ObjectManager;
 
 // TODO:;FIX THIS - Fixtures are ADDED even when the categories already exist in Database
 class FuncCatFixtures extends Fixture implements FixtureGroupInterface
@@ -23,7 +25,7 @@ class FuncCatFixtures extends Fixture implements FixtureGroupInterface
         $mathematical->setName('mathematical');
         $text->setName('text');
         $date->setName('date');
-        
+
         $manager->persist($mathematical);
         $manager->persist($text);
         $manager->persist($date);

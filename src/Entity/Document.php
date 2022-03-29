@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -174,10 +176,16 @@ class Document implements \Stringable
      */
     private $logs;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentAudit::class, mappedBy="document", orphanRemoval=true)
+     */
+    private $documentAudits;
+
     public function __construct()
     {
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
+        $this->documentAudits = new ArrayCollection();
     }
 
     /**
@@ -621,5 +629,35 @@ class Document implements \Stringable
     public function __toString(): string
     {
         return $this->id;
+    }
+
+    /**
+     * @return Collection<int, DocumentAudit>
+     */
+    public function getDocumentAudits(): Collection
+    {
+        return $this->documentAudits;
+    }
+
+    public function addDocumentAudit(DocumentAudit $documentAudit): self
+    {
+        if (!$this->documentAudits->contains($documentAudit)) {
+            $this->documentAudits[] = $documentAudit;
+            $documentAudit->setDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentAudit(DocumentAudit $documentAudit): self
+    {
+        if ($this->documentAudits->removeElement($documentAudit)) {
+            // set the owning side to null (unless already changed)
+            if ($documentAudit->getDocument() === $this) {
+                $documentAudit->setDocument(null);
+            }
+        }
+
+        return $this;
     }
 }

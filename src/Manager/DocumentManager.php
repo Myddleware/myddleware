@@ -1456,7 +1456,7 @@ class DocumentManager
                     and isset($source['id'])
             ) {
                 return $this->checkField($source['id']);
-            } elseif ($source[$ruleField['source_field_name']] === null) {
+            } elseif (null === $source[$ruleField['source_field_name']]) {
                 return null;
             } else {
                 throw new \Exception('Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField, true));

@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Manager;
@@ -61,66 +61,66 @@ class SolutionManager
     private $classes = [];
 
     public function __construct(
-        WordPress $wordpress,
-        WooCommerce $woocommerce,
-        WooEventManager $wooeventmanager,
-        ERPNext $erpnext,
-        Facebook $facebook,
-        Mautic $mautic,
-        Hubspot $hubspot,
-        Zuora $zuora,
+        Airtable $airtable,
         CirrusShield $cirrusshield,
-        RingCentral $ringcentral,
+        ERPNext $erpnext,
+        Eventbrite $eventbrite,
+        Facebook $facebook,
         File $file,
-        Moodle $moodle,
+        Hubspot $hubspot,
         Magento $magento,
+        Mailchimp $mailchimp,
+        Mautic $mautic,
         MicrosoftSQL $microsoftsql,
-        OracleDatabase $oracledb,
+        Moodle $moodle,
         MySQL $mysql,
+        OracleDatabase $oracledb,
+        PostgreSQL $postgresql,
+        PrestaShop $prestashop,
+        RingCentral $ringcentral,
+        SageCRM $sagecrm,
+        Salesforce $salesforce,
         SAP $sap,
         SAPCRM $sapcrm,
-        SageCRM $sagecrm,
-        VtigerCRM $vtigercrm,
-        SuiteCRM $suitecrm,
-        Eventbrite $eventbrite,
-        Mailchimp $mailchimp,
-        PrestaShop $prestashop,
-        PostgreSQL $postgresql,
+        Sendinblue $sendinblue,
         SugarCRM $sugarcrm,
-        Salesforce $salesforce,
-        Airtable $airtable,
-        Sendinblue $sendinblue
+        SuiteCRM $suitecrm,
+        VtigerCRM $vtigercrm,
+        WooCommerce $woocommerce,
+        WooEventManager $wooeventmanager,
+        WordPress $wordpress,
+        Zuora $zuora
     ) {
         $this->classes = [
-            'wordpress' => $wordpress,
-            'wooeventmanager' => $wooeventmanager,
-            'woocommerce' => $woocommerce,
-            'erpnext' => $erpnext,
-            'facebook' => $facebook,
-            'mautic' => $mautic,
-            'hubspot' => $hubspot,
-            'zuora' => $zuora,
-            'cirrusshield' => $cirrusshield,
-            'ringcentral' => $ringcentral,
-            'file' => $file,
-            'moodle' => $moodle,
-            'magento' => $magento,
-            'microsoftsql' => $microsoftsql,
-            'oracledb' => $oracledb,
-            'mysql' => $mysql,
-            'sap' => $sap,
-            'sapcrm' => $sapcrm,
-            'sagecrm' => $sagecrm,
-            'vtigercrm' => $vtigercrm,
-            'suitecrm' => $suitecrm,
-            'eventbrite' => $eventbrite,
-            'mailchimp' => $mailchimp,
-            'prestashop' => $prestashop,
-            'postgresql' => $postgresql,
-            'sugarcrm' => $sugarcrm,
-            'salesforce' => $salesforce,
-            'airtable' => $airtable,
-            'sendinblue' => $sendinblue,
+            'Airtable' => $airtable,
+            'CirrusShield' => $cirrusshield,
+            'ERPNext' => $erpnext,
+            'Eventbrite' => $eventbrite,
+            'Facebook' => $facebook,
+            'File' => $file,
+            'Hubspot' => $hubspot,
+            'Magento' => $magento,
+            'Mailchimp' => $mailchimp,
+            'Mautic' => $mautic,
+            'MicrosoftSQL' => $microsoftsql,
+            'Moodle' => $moodle,
+            'MySQL' => $mysql,
+            'OracleDatabase' => $oracledb,
+            'PostgreSQL' => $postgresql,
+            'PrestaShop' => $prestashop,
+            'RingCentral' => $ringcentral,
+            'SageCRM' => $sagecrm,
+            'Salesforce' => $salesforce,
+            'SAP' => $sap,
+            'SAPCRM' => $sapcrm,
+            'Sendinblue' => $sendinblue,
+            'SugarCRM' => $sugarcrm,
+            'SuiteCRM' => $suitecrm,
+            'VtigerCRM' => $vtigercrm,
+            'WooCommerce' => $woocommerce,
+            'WooEventManager' => $wooeventmanager,
+            'WordPress' => $wordpress,
+            'Zuora' => $zuora,
         ];
     }
 
