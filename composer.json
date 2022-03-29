@@ -124,7 +124,6 @@
     "require-dev": {
     "dama/doctrine-test-bundle": "^6.7",
     "doctrine/doctrine-fixtures-bundle": "^3.4",
-    "liip/test-fixtures-bundle": "^2.2",
     "phpstan/phpstan": "^0.12.64",
     "phpstan/phpstan-doctrine": "^0.12.26",
     "phpstan/phpstan-symfony": "^0.12.12",
@@ -132,7 +131,8 @@
     "symfony/browser-kit": "5.4.*",
     "symfony/css-selector": "5.4.*",
     "symfony/maker-bundle": "^1.26",
-    "symfony/phpunit-bridge": "^6.0"
+    "symfony/phpunit-bridge": "^6.0",
+    "zenstruck/foundry": "^1.17"
   },
     "scripts": {
         "post-root-package-install": [

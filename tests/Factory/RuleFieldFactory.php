@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Tests\Factory;
+
+use App\Entity\RuleField;
+use App\Repository\RuleFieldRepository;
+use Zenstruck\Foundry\RepositoryProxy;
+use Zenstruck\Foundry\ModelFactory;
+use Zenstruck\Foundry\Proxy;
+
+/**
+ * @extends ModelFactory<RuleField>
+ *
+ * @method static RuleField|Proxy createOne(array $attributes = [])
+ * @method static RuleField[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static RuleField|Proxy find(object|array|mixed $criteria)
+ * @method static RuleField|Proxy findOrCreate(array $attributes)
+ * @method static RuleField|Proxy first(string $sortedField = 'id')
+ * @method static RuleField|Proxy last(string $sortedField = 'id')
+ * @method static RuleField|Proxy random(array $attributes = [])
+ * @method static RuleField|Proxy randomOrCreate(array $attributes = [])
+ * @method static RuleField[]|Proxy[] all()
+ * @method static RuleField[]|Proxy[] findBy(array $attributes)
+ * @method static RuleField[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static RuleField[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static RuleFieldRepository|RepositoryProxy repository()
+ * @method RuleField|Proxy create(array|callable $attributes = [])
+ */
+final class RuleFieldFactory extends ModelFactory
+{
+    public function __construct()
+    {
+        parent::__construct();
+
+        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
+            'target' => self::faker()->text(),
+            'source' => self::faker()->text(),
+        ];
+    }
+
+    protected function initialize(): self
+    {
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
+        return $this
+            // ->afterInstantiate(function(RuleField $ruleField): void {})
+        ;
+    }
+
+    protected static function getClass(): string
+    {
+        return RuleField::class;
+    }
+}

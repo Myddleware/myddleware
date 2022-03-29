@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
@@ -26,11 +27,11 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\RuleParamAuditRepository;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\RuleParamAuditRepository")
+ * @ORM\Entity(repositoryClass=RuleParamAuditRepository::class)
  * @ORM\Table(name="ruleparamaudit", indexes={
  *  @ORM\Index(name="index_job_id", columns={"job_id"}),
  *  @ORM\Index(name="index_rule_param_id", columns={"rule_param_id"})
@@ -54,16 +55,6 @@ class RuleParamAudit
     }
 
     /**
-     * @ORM\Column(name="rule_param_id", type="integer")
-     */
-    private $ruleParamId;
-
-    /**
-     * @ORM\Column(name="modified", type="datetime", nullable=false)
-     */
-    private $dateModified;
-
-    /**
      * @ORM\Column(name="before_value", type="string", nullable=true)
      */
     private $before;
@@ -74,42 +65,30 @@ class RuleParamAudit
     private $after;
 
     /**
-     * @ORM\Column(name="user", type="string", nullable=true)
+     * @ORM\ManyToOne(targetEntity=RuleParam::class, inversedBy="ruleParamAudits")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $byUser;
+    private $ruleParam;
 
     /**
-     * @ORM\Column(name="job_id", type="string", length=255, nullable=true)
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ruleParamAudits")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $modifiedBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Job::class, inversedBy="ruleParamAudits")
      */
     private $job;
 
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function setRuleParamId(string $ruleParamId): self
-    {
-        $this->ruleParamId = $ruleParamId;
-
-        return $this;
-    }
-
-    public function getRuleParamId(): string
-    {
-        return $this->ruleParamId;
-    }
-
-    public function setDateModified(DateTime $dateModified): self
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    public function getDateModified(): DateTime
-    {
-        return $this->dateModified;
     }
 
     public function setBefore(string $before): self
@@ -136,27 +115,51 @@ class RuleParamAudit
         return $this->after;
     }
 
-    public function setByUser(string $byUser): self
+    public function getRuleParam(): ?RuleParam
     {
-        $this->byUser = $byUser;
+        return $this->ruleParam;
+    }
+
+    public function setRuleParam(?RuleParam $ruleParam): self
+    {
+        $this->ruleParam = $ruleParam;
 
         return $this;
     }
 
-    public function getByUser(): string
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->byUser;
+        return $this->updatedAt;
     }
 
-    public function setJob(string $job): self
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modifiedBy;
+    }
+
+    public function setModifiedBy(?User $modifiedBy): self
+    {
+        $this->modifiedBy = $modifiedBy;
+
+        return $this;
+    }
+
+    public function getJob(): ?Job
+    {
+        return $this->job;
+    }
+
+    public function setJob(?Job $job): self
     {
         $this->job = $job;
 
         return $this;
-    }
-
-    public function getJob(): string
-    {
-        return $this->job;
     }
 }

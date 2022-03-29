@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -54,6 +57,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $username;
+
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentAudit::class, mappedBy="modifiedBy")
+     */
+    private $documentAudits;
+
+    /**
+     * @ORM\OneToMany(targetEntity=RuleParamAudit::class, mappedBy="modifiedBy")
+     */
+    private $ruleParamAudits;
+
+    public function __construct()
+    {
+        $this->documentAudits = new ArrayCollection();
+        $this->ruleParamAudits = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -176,6 +195,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(?string $username): self
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DocumentAudit>
+     */
+    public function getDocumentAudits(): Collection
+    {
+        return $this->documentAudits;
+    }
+
+    public function addDocumentAudit(DocumentAudit $documentAudit): self
+    {
+        if (!$this->documentAudits->contains($documentAudit)) {
+            $this->documentAudits[] = $documentAudit;
+            $documentAudit->setModifiedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentAudit(DocumentAudit $documentAudit): self
+    {
+        if ($this->documentAudits->removeElement($documentAudit)) {
+            // set the owning side to null (unless already changed)
+            if ($documentAudit->getModifiedBy() === $this) {
+                $documentAudit->setModifiedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RuleParamAudit>
+     */
+    public function getRuleParamAudits(): Collection
+    {
+        return $this->ruleParamAudits;
+    }
+
+    public function addRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if (!$this->ruleParamAudits->contains($ruleParamAudit)) {
+            $this->ruleParamAudits[] = $ruleParamAudit;
+            $ruleParamAudit->setModifiedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if ($this->ruleParamAudits->removeElement($ruleParamAudit)) {
+            // set the owning side to null (unless already changed)
+            if ($ruleParamAudit->getModifiedBy() === $this) {
+                $ruleParamAudit->setModifiedBy(null);
+            }
+        }
 
         return $this;
     }

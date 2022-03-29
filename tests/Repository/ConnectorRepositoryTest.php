@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Repository;
 
-use App\Entity\User;
-use DateTimeImmutable;
-use App\Entity\Solution;
 use App\Entity\Connector;
+use App\Entity\Solution;
+use App\Entity\User;
 use App\Tests\DatabaseDependantTestCase;
+use DateTimeImmutable;
+
 class ConnectorRepositoryTest extends DatabaseDependantTestCase
 {
-
     public function testCount()
     {
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
@@ -35,7 +35,7 @@ class ConnectorRepositoryTest extends DatabaseDependantTestCase
     }
 
     // public function testAConnectorCanBeRemovedFromDatabase() :void
-    // {  
+    // {
     //     // given
     //     $connector = $this->createAndAddConnectorToDatabase();
     //     // when
@@ -64,6 +64,7 @@ class ConnectorRepositoryTest extends DatabaseDependantTestCase
         $connector->setCreatedAt(new DateTimeImmutable('now'));
         $connector->setUpdatedAt(new DateTimeImmutable('now'));
         $connector->setSolution($solution);
+
         return $connector;
     }
 }

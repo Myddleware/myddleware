@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
@@ -26,6 +27,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -58,6 +61,16 @@ class RuleParam
      * @ORM\Column(name="value", type="text", nullable=false)
      */
     private $value;
+
+    /**
+     * @ORM\OneToMany(targetEntity=RuleParamAudit::class, mappedBy="ruleParam")
+     */
+    private $ruleParamAudits;
+
+    public function __construct()
+    {
+        $this->ruleParamAudits = new ArrayCollection();
+    }
 
     public function getId(): int
     {
@@ -96,6 +109,36 @@ class RuleParam
     public function setRule(?Rule $rule): self
     {
         $this->rule = $rule;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RuleParamAudit>
+     */
+    public function getRuleParamAudits(): Collection
+    {
+        return $this->ruleParamAudits;
+    }
+
+    public function addRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if (!$this->ruleParamAudits->contains($ruleParamAudit)) {
+            $this->ruleParamAudits[] = $ruleParamAudit;
+            $ruleParamAudit->setRuleParam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRuleParamAudit(RuleParamAudit $ruleParamAudit): self
+    {
+        if ($this->ruleParamAudits->removeElement($ruleParamAudit)) {
+            // set the owning side to null (unless already changed)
+            if ($ruleParamAudit->getRuleParam() === $this) {
+                $ruleParamAudit->setRuleParam(null);
+            }
+        }
 
         return $this;
     }

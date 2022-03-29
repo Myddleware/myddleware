@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
@@ -33,6 +34,8 @@ use Doctrine\Persistence\ObjectManager;
 
 class SolutionFixtures extends Fixture implements FixtureGroupInterface
 {
+    public const DEFAULT_SOLUTIONS_REFERENCE = 'default-solutions';
+
     private $manager;
     protected $solutionData = [
         ['name' => 'Airtable',			'active' => 1, 'source' => 1, 'target' => 1],
@@ -97,6 +100,7 @@ class SolutionFixtures extends Fixture implements FixtureGroupInterface
             $sol->setSource($solutionData['source']);
             $sol->setTarget($solutionData['target']);
             $this->manager->persist($sol);
+            $this->addReference(self::DEFAULT_SOLUTIONS_REFERENCE, $sol->getName());
         }
     }
 

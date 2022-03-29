@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class DatabaseDependantTestCase extends KernelTestCase
 {
-
     /**
      *  @var EntityManagerInterface
      */

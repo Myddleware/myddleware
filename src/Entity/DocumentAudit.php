@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /*********************************************************************************
  * This file is part of Myddleware.
@@ -26,19 +27,17 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use DateTime;
+use App\Repository\DocumentAuditRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Table(name="documentaudit")
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="App\Repository\DocumentAuditRepository")
+ * @ORM\Entity(repositoryClass=DocumentAuditRepository::class)
  */
 class DocumentAudit
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
@@ -53,212 +52,118 @@ class DocumentAudit
     }
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="doc_id", type="string", nullable=false)
-     */
-    private $doc;
-
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="modified", type="datetime", nullable=false)
-     */
-    private $dateModified;
-
-    /**
-     * @var int
-     *
      * @ORM\Column(name="before_value", type="string", nullable=true)
      */
     private $before;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="after_value", type="string", nullable=true)
      */
     private $after;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="user", type="string", nullable=false)
-     */
-    private $byUser;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", nullable=false)
      */
     private $name;
 
     /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return DocumentAudit
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="documentAudits")
+     * @ORM\JoinColumn(nullable=false)
      */
-    public function setId($id)
+    private $modifiedBy;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Document::class, inversedBy="documentAudits")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $document;
+
+    public function setId(string $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * Set doc.
-     *
-     * @param string $doc
-     *
-     * @return DocumentAudit
-     */
-    public function setDoc($doc)
-    {
-        $this->doc = $doc;
-
-        return $this;
-    }
-
-    /**
-     * Get doc.
-     *
-     * @return string
-     */
-    public function getDoc()
-    {
-        return $this->doc;
-    }
-
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return DocumentAudit
-     */
-    public function setDateModified($dateModified)
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
-    {
-        return $this->dateModified;
-    }
-
-    /**
-     * Set before.
-     *
-     * @param string $before
-     *
-     * @return DocumentAudit
-     */
-    public function setBefore($before)
+    public function setBefore(?string $before): self
     {
         $this->before = $before;
 
         return $this;
     }
 
-    /**
-     * Get before.
-     *
-     * @return string
-     */
-    public function getBefore()
+    public function getBefore(): ?string
     {
         return $this->before;
     }
 
-    /**
-     * Set after.
-     *
-     * @param string $after
-     *
-     * @return DocumentAudit
-     */
-    public function setAfter($after)
+    public function setAfter(?string $after): self
     {
         $this->after = $after;
 
         return $this;
     }
 
-    /**
-     * Get after.
-     *
-     * @return string
-     */
-    public function getAfter()
+    public function getAfter(): ?string
     {
         return $this->after;
     }
 
-    /**
-     * Set byUser.
-     *
-     * @param string $byUser
-     *
-     * @return DocumentAudit
-     */
-    public function setByUser($byUser)
-    {
-        $this->byUser = $byUser;
-
-        return $this;
-    }
-
-    /**
-     * Get byUser.
-     *
-     * @return string
-     */
-    public function getByUser()
-    {
-        return $this->byUser;
-    }
-
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return DocumentAudit
-     */
-    public function setName($name)
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modifiedBy;
+    }
+
+    public function setModifiedBy(?User $modifiedBy): self
+    {
+        $this->modifiedBy = $modifiedBy;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?Document $document): self
+    {
+        $this->document = $document;
+
+        return $this;
     }
 }

@@ -23,19 +23,30 @@ class UserFixtures extends Fixture implements FixtureGroupInterface
 
     public function load(ObjectManager $manager)
     {
-        $user = new User();
-        $user->setEmail('admin@myddleware.com');
-        $password = $this->hasher->hashPassword($user, 'thisPasswordMustBeChanged!');
-        $user->setPassword($password);
-        $user->setTimezone('GMT');
-        $manager->persist($user);
-        $manager->flush();
-        // allows other fixtures to reference the User fixture via the constant
-        $this->addReference(self::FIRST_USER_REFERENCE, $user);
+        if (!$this->databaseContainsUsers($manager)) {
+            $user = new User();
+            $user->setEmail('admin@myddleware.com');
+            $user->setUsername('admin');
+            $password = $this->hasher->hashPassword($user, 'thisPasswordMustBeChanged!');
+            $user->setPassword($password);
+            $user->setTimezone('GMT');
+            $manager->persist($user);
+            $manager->flush();
+            // allows other fixtures to reference the User fixture via the constant
+            $this->addReference(self::FIRST_USER_REFERENCE, $user);
+        }
     }
 
     public static function getGroups(): array
     {
         return ['user', 'mydconfig'];
+    }
+
+    public function databaseContainsUsers(ObjectManager $manager): bool
+    {
+        $userRepository = $manager->getRepository(User::class);
+        $numberOfUsers = count($userRepository->findAll());
+
+        return 0 !== $numberOfUsers;
     }
 }
