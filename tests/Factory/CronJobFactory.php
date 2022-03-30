@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use Zenstruck\Foundry\ModelFactory;

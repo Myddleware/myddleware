@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use App\Entity\RuleRelationship;
 use App\Repository\RuleRelationshipRepository;
