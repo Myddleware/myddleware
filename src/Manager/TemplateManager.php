@@ -31,7 +31,7 @@ use App\Entity\Rule;
 use App\Entity\RuleField;
 use App\Entity\RuleFilter;
 use App\Entity\RuleParam;
-use App\Entity\RuleRelationShip;
+use App\Entity\RuleRelationship;
 use App\Entity\User;
 use App\Repository\ConnectorParamRepository;
 use App\Repository\ConnectorRepository;
@@ -312,8 +312,8 @@ class TemplateManager
                     throw new Exception('No correspondance between source solutions. ');
                 }
 
-                $ruleObject->setDateCreated(new \DateTime());
-                $ruleObject->setDateModified(new \DateTime());
+                $ruleObject->setCreatedAt(new \DateTimeImmutable());
+                $ruleObject->setUpdatedAt(new \DateTimeImmutable());
                 $ruleObject->setCreatedBy($user);
                 $ruleObject->setModifiedBy($user);
                 $ruleObject->setModuleSource((string) $rule['sourceModule']);

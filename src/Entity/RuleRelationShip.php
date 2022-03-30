@@ -30,15 +30,13 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\RuleRelationShipRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\RuleRelationshipRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="rulerelationship", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
  */
-class RuleRelationShip
+class RuleRelationship
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -48,7 +46,7 @@ class RuleRelationShip
     /**
      * @var Rule
      *
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="relationsShip")
+     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="relationships")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
     private $rule;

@@ -9,25 +9,24 @@ declare(strict_types=1);
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -47,131 +46,95 @@ use Doctrine\ORM\Mapping as ORM;
 class Document implements \Stringable
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string", nullable=false)
      * @ORM\Id
      */
     private $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="documents")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
     private $rule;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+     * @ORM\Column(name="date_created", type="datetime_immutable", nullable=false)
      */
     private $dateCreated;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
+     * @ORM\Column(name="date_modified", type="datetime_immutable", nullable=false)
      */
     private $dateModified;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
     private $modifiedBy;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
      */
     private $status;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="source_id", type="string", nullable=true, options={"default":NULL})
      */
     private $source;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="target_id", type="string",  nullable=true, options={"default":NULL})
      */
     private $target;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="source_date_modified", type="datetime",  nullable=true, options={"default":NULL})
+     * @ORM\Column(name="source_date_modified", type="datetime_immutable",  nullable=true, options={"default":NULL})
      */
     private $sourceDateModified;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="mode", type="string", length=1,  nullable=true, options={"default":NULL})
      */
     private $mode;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="type", type="string", length=1,  nullable=true, options={"default":NULL})
      */
     private $type;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="attempt", type="integer", length=5,  nullable=false, options={"default":0})
      */
     private $attempt;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="global_status", type="string",  nullable=false, options={"default":0})
      */
     private $globalStatus;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
      */
     private $parentId;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private $deleted;
 
     /**
-     * @var DocumentData[]
-     *
-     * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="doc_id")
+     * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="document")
      */
     private $datas;
 
     /**
-     * @var Log[]
-     *
      * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
      */
     private $logs;
@@ -181,352 +144,190 @@ class Document implements \Stringable
      */
     private $documentAudits;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentRelationship::class, mappedBy="document")
+     */
+    private $documentRelationships;
+
     public function __construct()
     {
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->documentAudits = new ArrayCollection();
+        $this->documentRelationships = new ArrayCollection();
     }
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return Document
-     */
-    public function setId($id)
+    public function setId(?string $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
 
-    /**
-     * Set rule.
-     *
-     * @param string $rule
-     *
-     * @return Document
-     */
-    public function setRule($rule)
+    public function setRule(?Rule $rule): self
     {
         $this->rule = $rule;
 
         return $this;
     }
 
-    /**
-     * Get rule.
-     *
-     * @return string
-     */
-    public function getRule()
+    public function getRule(): ?Rule
     {
         return $this->rule;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return Document
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated(?\DateTimeImmutable $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): ?\DateTimeImmutable
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return Document
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified(?\DateTimeImmutable $dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): ?\DateTimeImmutable
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set status.
-     *
-     * @param string $status
-     *
-     * @return Document
-     */
-    public function setStatus($status)
+    public function setStatus(string $status): self
     {
         $this->status = $status;
 
         return $this;
     }
 
-    /**
-     * Get status.
-     *
-     * @return string
-     */
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
 
-    /**
-     * Set source.
-     *
-     * @param string $source
-     *
-     * @return Document
-     */
-    public function setSource($source)
+    public function setSource(?string $source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    /**
-     * Get source.
-     *
-     * @return string
-     */
-    public function getSource()
+    public function getSource(): string
     {
         return $this->source;
     }
 
-    /**
-     * Set target.
-     *
-     * @param string $target
-     *
-     * @return Document
-     */
-    public function setTarget($target)
+    public function setTarget(?string $target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    /**
-     * Get target.
-     *
-     * @return string
-     */
-    public function getTarget()
+    public function getTarget(): ?string
     {
         return $this->target;
     }
 
-    /**
-     * Set sourceDateModified.
-     *
-     * @param DateTime $sourceDateModified
-     *
-     * @return Document
-     */
-    public function setSourceDateModified($sourceDateModified)
+    public function setSourceDateModified(?\DateTimeImmutable $sourceDateModified): self
     {
         $this->sourceDateModified = $sourceDateModified;
 
         return $this;
     }
 
-    /**
-     * Get sourceDateModified.
-     *
-     * @return DateTime
-     */
-    public function getSourceDateModified()
+    public function getSourceDateModified(): ?\DateTimeImmutable
     {
         return $this->sourceDateModified;
     }
 
-    /**
-     * Set mode.
-     *
-     * @param string $mode
-     *
-     * @return Document
-     */
-    public function setMode($mode)
+    public function setMode(string $mode): self
     {
         $this->mode = $mode;
 
         return $this;
     }
 
-    /**
-     * Get mode.
-     *
-     * @return string
-     */
-    public function getMode()
+    public function getMode(): ?string
     {
         return $this->mode;
     }
 
-    /**
-     * Set type.
-     *
-     * @param string $type
-     *
-     * @return Document
-     */
-    public function setType($type)
+    public function setType(?string $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * Get type.
-     *
-     * @return string
-     */
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    /**
-     * Set attempt.
-     *
-     * @param int $attempt
-     *
-     * @return Document
-     */
-    public function setAttempt($attempt)
+    public function setAttempt(int $attempt): self
     {
         $this->attempt = $attempt;
 
         return $this;
     }
 
-    public function addAttempt()
+    public function addAttempt(): self
     {
         ++$this->attempt;
 
         return $this;
     }
 
-    /**
-     * Get attempt.
-     *
-     * @return int
-     */
-    public function getAttempt()
+    public function getAttempt(): ?int
     {
         return $this->attempt;
     }
 
-    /**
-     * Set globalStatus.
-     *
-     * @param string $globalStatus
-     *
-     * @return Document
-     */
-    public function setGlobalStatus($globalStatus)
+    public function setGlobalStatus(?string $globalStatus): self
     {
         $this->globalStatus = $globalStatus;
 
         return $this;
     }
 
-    /**
-     * Get globalStatus.
-     *
-     * @return string
-     */
-    public function getGlobalStatus()
+    public function getGlobalStatus(): ?string
     {
         return $this->globalStatus;
     }
 
-    /**
-     * Set parentId.
-     *
-     * @param string $parentId
-     *
-     * @return Document
-     */
-    public function setParentId($parentId)
+    public function setParentId(string $parentId): self
     {
         $this->parentId = $parentId;
 
         return $this;
     }
 
-    /**
-     * Get parentId.
-     *
-     * @return string
-     */
-    public function getParentId()
+    public function getParentId(): ?string
     {
         return $this->parentId;
     }
 
-    /**
-     * Set deleted.
-     *
-     * @param int $deleted
-     *
-     * @return Document
-     */
-    public function setDeleted($deleted)
+    public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
 
         return $this;
     }
 
-    /**
-     * Get deleted.
-     *
-     * @return int
-     */
-    public function getDeleted()
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
@@ -543,7 +344,7 @@ class Document implements \Stringable
     {
         if (!$this->datas->contains($data)) {
             $this->datas[] = $data;
-            $data->setDocId($this);
+            $data->setDocument($this);
         }
 
         return $this;
@@ -553,8 +354,8 @@ class Document implements \Stringable
     {
         if ($this->datas->removeElement($data)) {
             // set the owning side to null (unless already changed)
-            if ($data->getDocId() === $this) {
-                $data->setDocId(null);
+            if ($data->getDocument() === $this) {
+                $data->setDocument(null);
             }
         }
 
@@ -655,6 +456,36 @@ class Document implements \Stringable
             // set the owning side to null (unless already changed)
             if ($documentAudit->getDocument() === $this) {
                 $documentAudit->setDocument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DocumentRelationship>
+     */
+    public function getDocumentRelationships(): Collection
+    {
+        return $this->documentRelationships;
+    }
+
+    public function addDocumentRelationship(DocumentRelationship $documentRelationship): self
+    {
+        if (!$this->documentRelationships->contains($documentRelationship)) {
+            $this->documentRelationships[] = $documentRelationship;
+            $documentRelationship->setDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentRelationship(DocumentRelationship $documentRelationship): self
+    {
+        if ($this->documentRelationships->removeElement($documentRelationship)) {
+            // set the owning side to null (unless already changed)
+            if ($documentRelationship->getDocument() === $this) {
+                $documentRelationship->setDocument(null);
             }
         }
 

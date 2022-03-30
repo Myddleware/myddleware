@@ -452,8 +452,8 @@ class RuleManager
             // Save param modification in the audit table
             if ($param->getValue() != $this->dataSource['date_ref']) {
                 $paramAudit = new RuleParamAudit();
-                $paramAudit->setRuleParamId($param->getId());
-                $paramAudit->setDateModified(new \DateTime());
+                $paramAudit->setRuleParam($param);
+                $paramAudit->setUpdatedAt(new \DateTimeImmutable());
                 $paramAudit->setBefore($param->getValue());
                 $paramAudit->setAfter($this->dataSource['date_ref']);
                 $paramAudit->setJob($this->jobId);
@@ -473,7 +473,7 @@ class RuleManager
             foreach ($this->dataSource['ruleParams'] as $ruleParam) {
                 // Search to check if the param already exists
                 $paramEntity = $this->entityManager->getRepository(RuleParam::class)
-                       ->findOneBy([
+                        ->findOneBy([
                                     'rule' => $this->ruleId,
                                     'name' => $ruleParam['name'],
                                 ]
@@ -482,8 +482,8 @@ class RuleManager
                 if (!empty($paramEntity)) {
                     if ($ruleParam['value'] != $paramEntity->getValue()) {
                         $paramAudit = new RuleParamAudit();
-                        $paramAudit->setRuleParamId($paramEntity->getId());
-                        $paramAudit->setDateModified(new \DateTime());
+                        $paramAudit->setRuleParam($paramEntity);
+                        $paramAudit->setUpdatedAt(new \DateTimeImmutable());
                         $paramAudit->setBefore($paramEntity->getValue());
                         $paramAudit->setAfter($ruleParam['value']);
                         $paramAudit->setJob($this->jobId);

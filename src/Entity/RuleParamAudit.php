@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\RuleParamAuditRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=RuleParamAuditRepository::class)
  * @ORM\Table(name="ruleparamaudit", indexes={
- *  @ORM\Index(name="index_job_id", columns={"job_id"}),
+ *  @ORM\Index(name="index_job", columns={"job"}),
  *  @ORM\Index(name="index_rule_param_id", columns={"rule_param_id"})
  *})
  */
@@ -83,6 +83,7 @@ class RuleParamAudit
 
     /**
      * @ORM\ManyToOne(targetEntity=Job::class, inversedBy="ruleParamAudits")
+     * @ORM\JoinColumn(name="job")
      */
     private $job;
 

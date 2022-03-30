@@ -27,7 +27,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -108,9 +107,9 @@ class Rule
     private $params;
 
     /**
-     * @ORM\OneToMany(targetEntity="RuleRelationShip", mappedBy="rule")
+     * @ORM\OneToMany(targetEntity="RuleRelationship", mappedBy="rule")
      */
-    private $relationsShip;
+    private $relationships;
 
     /**
      * @ORM\OneToMany(targetEntity="RuleOrder", mappedBy="rule")
@@ -148,15 +147,21 @@ class Rule
      */
     private $updatedAt;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentRelationship::class, mappedBy="rule", orphanRemoval=true)
+     */
+    private $documentRelationships;
+
     public function __construct()
     {
         $this->params = new ArrayCollection();
-        $this->relationsShip = new ArrayCollection();
+        $this->relationships = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->filters = new ArrayCollection();
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->documentRelationships = new ArrayCollection();
     }
 
     /**
@@ -325,15 +330,15 @@ class Rule
         return $this;
     }
 
-    public function getRelationsShip(): Collection
+    public function getRelationships(): Collection
     {
-        return $this->relationsShip;
+        return $this->relationships;
     }
 
     public function isParent(): bool
     {
-        foreach ($this->getRelationsShip() as $ruleRelationShip) {
-            if ($ruleRelationShip->getParent()) {
+        foreach ($this->getRelationships() as $ruleRelationship) {
+            if ($ruleRelationship->getParent()) {
                 return true;
             }
         }
@@ -341,22 +346,22 @@ class Rule
         return false;
     }
 
-    public function addRelationsShip(RuleRelationShip $relationsShip): self
+    public function addRelationship(RuleRelationship $relationship): self
     {
-        if (!$this->relationsShip->contains($relationsShip)) {
-            $this->relationsShip[] = $relationsShip;
-            $relationsShip->setRule($this);
+        if (!$this->relationships->contains($relationship)) {
+            $this->relationships[] = $relationship;
+            $relationship->setRule($this);
         }
 
         return $this;
     }
 
-    public function removeRelationsShip(RuleRelationShip $relationsShip): self
+    public function removeRelationsShip(RuleRelationship $relationship): self
     {
-        if ($this->relationsShip->removeElement($relationsShip)) {
+        if ($this->relationships->removeElement($relationship)) {
             // set the owning side to null (unless already changed)
-            if ($relationsShip->getRule() === $this) {
-                $relationsShip->setRule(null);
+            if ($relationship->getRule() === $this) {
+                $relationship->setRule(null);
             }
         }
 
@@ -507,8 +512,8 @@ class Rule
 
     public function getChildRules(): Collection
     {
-        return $this->getRelationsShip()->filter(function (RuleRelationShip $ruleRelationShip) {
-            return true === $ruleRelationShip->getParent();
+        return $this->getRelationships()->filter(function (RuleRelationship $ruleRelationship) {
+            return true === $ruleRelationship->getParent();
         });
     }
 
@@ -528,8 +533,8 @@ class Rule
             }
         }
         // Lecture des relations de la règle
-        if ($this->getRelationsShip()->count()) {
-            foreach ($this->getRelationsShip() as $ruleRelationship) {
+        if ($this->getRelationships()->count()) {
+            foreach ($this->getRelationships() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameSource());
             }
         }
@@ -544,8 +549,8 @@ class Rule
             $items[] = ltrim($ruleField->getSource());
         }
         // Lecture des relations de la règle
-        if ($this->getRelationsShip()->count()) {
-            foreach ($this->getRelationsShip() as $ruleRelationship) {
+        if ($this->getRelationships()->count()) {
+            foreach ($this->getRelationships() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameTarget());
             }
         }
@@ -615,6 +620,48 @@ class Rule
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DocumentRelationship>
+     */
+    public function getDocumentRelationships(): Collection
+    {
+        return $this->documentRelationships;
+    }
+
+    public function addDocumentRelationship(DocumentRelationship $documentRelationship): self
+    {
+        if (!$this->documentRelationships->contains($documentRelationship)) {
+            $this->documentRelationships[] = $documentRelationship;
+            $documentRelationship->setRule($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentRelationship(DocumentRelationship $documentRelationship): self
+    {
+        if ($this->documentRelationships->removeElement($documentRelationship)) {
+            // set the owning side to null (unless already changed)
+            if ($documentRelationship->getRule() === $this) {
+                $documentRelationship->setRule(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function removeRelationship(RuleRelationship $relationship): self
+    {
+        if ($this->relationships->removeElement($relationship)) {
+            // set the owning side to null (unless already changed)
+            if ($relationship->getRule() === $this) {
+                $relationship->setRule(null);
+            }
+        }
 
         return $this;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\RuleAudit;
 use App\Repository\RuleAuditRepository;
@@ -39,7 +39,7 @@ final class RuleAuditFactory extends ModelFactory
     {
         return [
             // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'dateCreated' => null, // TODO add DATETIME ORM type manually
+            'dateCreated' => self::faker()->datetime(),
             'data' => [],
         ];
     }

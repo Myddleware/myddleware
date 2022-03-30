@@ -60,8 +60,6 @@ class RuleFilter
     private $type;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="value", type="string", length=255, nullable=false)
      */
     private $value;

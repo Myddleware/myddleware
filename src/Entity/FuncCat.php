@@ -68,9 +68,9 @@ class FuncCat
         return $this->id;
     }
 
-    public function setName(string $nameYml): self
+    public function setName(string $name): self
     {
-        $this->name = $nameYml;
+        $this->name = $name;
 
         return $this;
     }

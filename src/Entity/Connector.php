@@ -109,6 +109,7 @@ class Connector implements \Stringable
     {
         $this->rulesWhereIsTarget = new ArrayCollection();
         $this->rulesWhereIsSource = new ArrayCollection();
+        $this->connectorParams = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -297,5 +298,27 @@ class Connector implements \Stringable
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function addRulesWhereIsSource(Rule $rulesWhereIsSource): self
+    {
+        if (!$this->rulesWhereIsSource->contains($rulesWhereIsSource)) {
+            $this->rulesWhereIsSource[] = $rulesWhereIsSource;
+            $rulesWhereIsSource->setConnectorSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRulesWhereIsSource(Rule $rulesWhereIsSource): self
+    {
+        if ($this->rulesWhereIsSource->removeElement($rulesWhereIsSource)) {
+            // set the owning side to null (unless already changed)
+            if ($rulesWhereIsSource->getConnectorSource() === $this) {
+                $rulesWhereIsSource->setConnectorSource(null);
+            }
+        }
+
+        return $this;
     }
 }

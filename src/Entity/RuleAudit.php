@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -50,7 +51,7 @@ class RuleAudit
     private $rule;
 
     /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+     * @ORM\Column(name="date_created", type="datetime_immutable", nullable=false)
      */
     private $dateCreated;
 
@@ -64,31 +65,31 @@ class RuleAudit
         return $this->id;
     }
 
-    public function getDateCreated(): DateTime
+    public function getDateCreated(): DateTimeImmutable
     {
         return $this->dateCreated;
     }
 
-    public function setDateCreated(DateTime $dateCreated): self
+    public function setDateCreated(DateTimeImmutable $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    public function getData(): string
+    public function getData(): array
     {
         return $this->data;
     }
 
-    public function setData(string $data): self
+    public function setData(array $data): self
     {
         $this->data = $data;
 
         return $this;
     }
 
-    public function getRule(): ?Rule
+    public function getRule(): Rule
     {
         return $this->rule;
     }

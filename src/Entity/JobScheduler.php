@@ -77,7 +77,7 @@ class JobScheduler implements \Stringable
     private $period;
 
     /**
-     * @ORM\Column(name="lastRun", type="datetime", nullable=true)
+     * @ORM\Column(name="lastRun", type="datetime_immutable", nullable=true)
      */
     private $lastRun;
 
@@ -130,50 +130,50 @@ class JobScheduler implements \Stringable
         return $this->command;
     }
 
-    public function setParamName1(string $paramName1): self
+    public function setParamName1(?string $paramName1): self
     {
         $this->paramName1 = $paramName1;
 
         return $this;
     }
 
-    public function getParamName1(): string
+    public function getParamName1(): ?string
     {
         return $this->paramName1;
     }
 
-    public function setParamValue1(string $paramValue1): self
+    public function setParamValue1(?string $paramValue1): self
     {
         $this->paramValue1 = $paramValue1;
 
         return $this;
     }
 
-    public function getParamValue1(): string
+    public function getParamValue1(): ?string
     {
         return $this->paramValue1;
     }
 
-    public function setParamName2(string $paramName2): self
+    public function setParamName2(?string $paramName2): self
     {
         $this->paramName2 = $paramName2;
 
         return $this;
     }
 
-    public function getParamName2(): string
+    public function getParamName2(): ?string
     {
         return $this->paramName2;
     }
 
-    public function setParamValue2(string $paramValue2): self
+    public function setParamValue2(?string $paramValue2): self
     {
         $this->paramValue2 = $paramValue2;
 
         return $this;
     }
 
-    public function getParamValue2(): string
+    public function getParamValue2(): ?string
     {
         return $this->paramValue2;
     }
@@ -190,14 +190,14 @@ class JobScheduler implements \Stringable
         return $this->period;
     }
 
-    public function setLastRun(string $lastRun): self
+    public function setLastRun(?\DateTimeImmutable $lastRun): self
     {
         $this->lastRun = $lastRun;
 
         return $this;
     }
 
-    public function getLastRun(): string
+    public function getLastRun(): ?\DateTimeImmutable
     {
         return $this->lastRun;
     }
@@ -214,14 +214,14 @@ class JobScheduler implements \Stringable
         return $this->active;
     }
 
-    public function setJobOrder(int $jobOrder): self
+    public function setJobOrder(?int $jobOrder): self
     {
         $this->jobOrder = $jobOrder;
 
         return $this;
     }
 
-    public function getJobOrder(): int
+    public function getJobOrder(): ?int
     {
         return $this->jobOrder;
     }

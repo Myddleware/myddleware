@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\DocumentData;
 use App\Repository\DocumentDataRepository;

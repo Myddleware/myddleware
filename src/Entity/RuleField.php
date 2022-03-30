@@ -99,14 +99,14 @@ class RuleField
         return $this->source;
     }
 
-    public function setFormula(string $formula): self
+    public function setFormula(?string $formula): self
     {
         $this->formula = $formula;
 
         return $this;
     }
 
-    public function getFormula(): string
+    public function getFormula(): ?string
     {
         return $this->formula;
     }

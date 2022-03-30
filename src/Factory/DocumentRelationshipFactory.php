@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\DocumentRelationship;
 use App\Repository\DocumentRelationshipRepository;
@@ -39,7 +39,6 @@ final class DocumentRelationshipFactory extends ModelFactory
     {
         return [
             // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'doc_id' => self::faker()->text(),
             'doc_rel_id' => self::faker()->text(),
             'sourceField' => self::faker()->text(),
             'createdAt' => self::faker()->datetime(),

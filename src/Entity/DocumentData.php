@@ -32,8 +32,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentDataRepository")
  * @ORM\Table(name="documentdata", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_job_id_type", columns={"doc_id","type"})
+ *  @ORM\Index(name="index_document", columns={"document"}),
+ *  @ORM\Index(name="index_job_id_type", columns={"document","type"})
  *})
  */
 class DocumentData
@@ -47,9 +47,9 @@ class DocumentData
 
     /**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="document", referencedColumnName="id")
      */
-    private $doc_id;
+    private $document;
 
     /**
      * @ORM\Column(name="type", type="string", length=1, nullable=false)
@@ -78,26 +78,26 @@ class DocumentData
         return $this->type;
     }
 
-    public function setData(string $data): self
+    public function setData(array $data): self
     {
         $this->data = $data;
 
         return $this;
     }
 
-    public function getData(): string
+    public function getData(): array
     {
         return $this->data;
     }
 
-    public function getDocId(): ?Document
+    public function getDocument(): ?Document
     {
-        return $this->doc_id;
+        return $this->document;
     }
 
-    public function setDocId(?Document $doc_id): self
+    public function setDocument(?Document $document): self
     {
-        $this->doc_id = $doc_id;
+        $this->document = $document;
 
         return $this;
     }
