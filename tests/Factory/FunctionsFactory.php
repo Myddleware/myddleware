@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use App\Entity\Functions;
 use App\Repository\FunctionsRepository;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use App\Entity\Log;
 use App\Repository\LogRepository;
