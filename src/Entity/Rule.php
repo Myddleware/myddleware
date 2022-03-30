@@ -148,6 +148,11 @@ class Rule
      */
     private $updatedAt;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentRelationShip::class, mappedBy="rule", orphanRemoval=true)
+     */
+    private $documentRelationShips;
+
     public function __construct()
     {
         $this->params = new ArrayCollection();
@@ -157,6 +162,7 @@ class Rule
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->documentRelationShips = new ArrayCollection();
     }
 
     /**
@@ -615,6 +621,36 @@ class Rule
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DocumentRelationShip>
+     */
+    public function getDocumentRelationShips(): Collection
+    {
+        return $this->documentRelationShips;
+    }
+
+    public function addDocumentRelationShip(DocumentRelationShip $documentRelationShip): self
+    {
+        if (!$this->documentRelationShips->contains($documentRelationShip)) {
+            $this->documentRelationShips[] = $documentRelationShip;
+            $documentRelationShip->setRule($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentRelationShip(DocumentRelationShip $documentRelationShip): self
+    {
+        if ($this->documentRelationShips->removeElement($documentRelationShip)) {
+            // set the owning side to null (unless already changed)
+            if ($documentRelationShip->getRule() === $this) {
+                $documentRelationShip->setRule(null);
+            }
+        }
 
         return $this;
     }

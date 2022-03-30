@@ -27,14 +27,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DocumentRelationshipRepository;
 
 /**
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="App\Repository\DocumentRelationshipRepository")
+ * @ORM\Entity(repositoryClass=DocumentRelationshipRepository::class)
  * @ORM\Table(name="documentrelationship", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
+ *  @ORM\Index(name="index_doc_id", columns={"document"}),
  *  @ORM\Index(name="index_doc_rel_id", columns={"doc_rel_id"}),
  *})
  */
@@ -46,11 +46,6 @@ class DocumentRelationship
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @ORM\Column(name="doc_id", type="string", length=100, nullable=false)
-     */
-    private $doc_id;
 
     /**
      * @ORM\Column(name="doc_rel_id", type="string", length=100, nullable=false)
@@ -73,6 +68,18 @@ class DocumentRelationship
      */
     private $createdBy;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Document::class, inversedBy="documentRelationShips")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $document;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Rule::class, inversedBy="documentRelationShips")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $rule;
+
     public function setId(int $id): self
     {
         $this->id = $id;
@@ -85,18 +92,6 @@ class DocumentRelationship
         return $this->id;
     }
 
-    public function setDocId(string $doc_id): self
-    {
-        $this->doc_id = $doc_id;
-
-        return $this;
-    }
-
-    public function getDocId(): ?string
-    {
-        return $this->doc_id;
-    }
-
     public function setDocRelId(string $doc_rel_id): self
     {
         $this->doc_rel_id = $doc_rel_id;
@@ -107,18 +102,6 @@ class DocumentRelationship
     public function getDocRelId(): ?string
     {
         return $this->doc_rel_id;
-    }
-
-    public function setRule(?string $rule): self
-    {
-        $this->rule = $rule;
-
-        return $this;
-    }
-
-    public function getRule(): ?string
-    {
-        return $this->rule;
     }
 
     public function setSourceField(string $sourceField): self
@@ -153,6 +136,30 @@ class DocumentRelationship
     public function setCreatedBy(?User $createdBy): self
     {
         $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?Document $document): self
+    {
+        $this->document = $document;
+
+        return $this;
+    }
+
+    public function getRule(): ?Rule
+    {
+        return $this->rule;
+    }
+
+    public function setRule(?Rule $rule): self
+    {
+        $this->rule = $rule;
 
         return $this;
     }

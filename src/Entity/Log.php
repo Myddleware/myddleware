@@ -48,9 +48,7 @@ class Log implements \Stringable
     private $id;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="created", type="datetime", nullable=false)
+     * @ORM\Column(name="created", type="datetime_immutable", nullable=false)
      */
     private $dateCreated;
 
@@ -89,19 +87,19 @@ class Log implements \Stringable
      */
     private $job;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setDateCreated(DateTime $dateCreated): self
+    public function setDateCreated(?\DateTimeImmutable $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    public function getDateCreated(): DateTime
+    public function getDateCreated(): ?\DateTimeImmutable
     {
         return $this->dateCreated;
     }
@@ -113,31 +111,31 @@ class Log implements \Stringable
         return $this;
     }
 
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setMessage(string $message): self
+    public function setMessage(?string $message): self
     {
         $this->message = $message;
 
         return $this;
     }
 
-    public function getMessage(): string
+    public function getMessage(): ?string
     {
         return $this->message;
     }
 
-    public function setDocument(string $document): self
+    public function setDocument(?Document $document): self
     {
         $this->document = $document;
 
         return $this;
     }
 
-    public function getDocument(): string
+    public function getDocument(): ?Document
     {
         return $this->document;
     }
@@ -154,14 +152,14 @@ class Log implements \Stringable
         return $this->ref;
     }
 
-    public function setJob(string $job): self
+    public function setJob(?Job $job): self
     {
         $this->job = $job;
 
         return $this;
     }
 
-    public function getJob(): string
+    public function getJob(): ?Job
     {
         return $this->job;
     }
