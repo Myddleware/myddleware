@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Manager;
@@ -30,7 +30,7 @@ use App\Entity\DocumentData;
 use App\Entity\DocumentData as DocumentDataEntity;
 use App\Entity\DocumentRelationship;
 use App\Repository\DocumentRepository;
-use App\Repository\RuleRelationShipRepository;
+use App\Repository\RuleRelationshipRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -104,7 +104,7 @@ class DocumentManager
      */
     private $documentRepository;
     /**
-     * @var RuleRelationShipRepository
+     * @var RuleRelationshipRepository
      */
     private $ruleRelationshipsRepository;
     /**
@@ -124,7 +124,7 @@ class DocumentManager
         SolutionManager $solutionManager = null,
         FormulaManager $formulaManager = null,
         DocumentRepository $documentRepository = null,
-        RuleRelationShipRepository $ruleRelationshipsRepository = null,
+        RuleRelationshipRepository $ruleRelationshipsRepository = null,
         ParameterBagInterface $parameterBagInterface = null,
         ToolsManager $tools = null
     ) {
@@ -1268,9 +1268,9 @@ class DocumentManager
                                     ->getRepository(Document::class)
                                     ->find($this->id);
             $documentData = new DocumentDataEntity();
-            $documentData->setDocId($documentEntity);
+            $documentData->setDocument($documentEntity);
             $documentData->setType($type); // Source
-            $documentData->setData(json_encode($dataInsert)); // Encode in JSON
+            $documentData->setData($dataInsert); // Encode in JSON
             $this->entityManager->persist($documentData);
         } catch (\Exception $e) {
             $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1964,9 +1964,9 @@ class DocumentManager
         try {
             // Add the relationship in the table document Relationship
             $documentRelationship = new DocumentRelationship();
-            $documentRelationship->setDocId($this->id);
+            $documentRelationship->setDocument($this->id);
             $documentRelationship->setDocRelId($docRelId);
-            $documentRelationship->setDateCreated(new \DateTime());
+            $documentRelationship->setCreatedAt(new \DateTimeImmutable());
             $documentRelationship->setCreatedBy((int) $this->userId);
             $documentRelationship->setSourceField($ruleRelationship['field_name_source']);
             $this->entityManager->persist($documentRelationship);

@@ -88,7 +88,7 @@ class DatabaseParameter
         return $this->port;
     }
 
-    public function setPort(int $port): self
+    public function setPort(?int $port): self
     {
         $this->port = $port;
 
@@ -100,7 +100,7 @@ class DatabaseParameter
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -112,7 +112,7 @@ class DatabaseParameter
         return $this->user;
     }
 
-    public function setUser(string $user): self
+    public function setUser(?string $user): self
     {
         $this->user = $user;
 
@@ -124,7 +124,7 @@ class DatabaseParameter
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(?string $password): self
     {
         $this->password = $password;
 
@@ -136,7 +136,7 @@ class DatabaseParameter
         return $this->secret;
     }
 
-    public function setSecret(string $secret): self
+    public function setSecret(?string $secret): self
     {
         $this->secret = $secret;
 

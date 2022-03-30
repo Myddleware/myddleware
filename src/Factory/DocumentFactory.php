@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\Document;
 use App\Repository\DocumentRepository;
@@ -39,8 +39,8 @@ final class DocumentFactory extends ModelFactory
     {
         return [
             // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'dateCreated' => null, // TODO add DATETIME ORM type manually
-            'dateModified' => null, // TODO add DATETIME ORM type manually
+            'dateCreated' => self::faker()->datetime(),
+            'dateModified' => self::faker()->datetime(),
             'attempt' => self::faker()->randomNumber(),
             'globalStatus' => self::faker()->text(),
             'deleted' => self::faker()->boolean(),

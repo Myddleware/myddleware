@@ -27,14 +27,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DocumentRelationshipRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass=DocumentRelationshipRepository::class)
  * @ORM\Table(name="documentrelationship", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"document"}),
+ *  @ORM\Index(name="index_document", columns={"document"}),
  *  @ORM\Index(name="index_doc_rel_id", columns={"doc_rel_id"}),
  *})
  */
@@ -69,13 +69,13 @@ class DocumentRelationship
     private $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Document::class, inversedBy="documentRelationShips")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity=Document::class, inversedBy="documentRelationships")
+     * @ORM\JoinColumn(name="document", nullable=false)
      */
     private $document;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Rule::class, inversedBy="documentRelationShips")
+     * @ORM\ManyToOne(targetEntity=Rule::class, inversedBy="documentRelationships")
      * @ORM\JoinColumn(nullable=false)
      */
     private $rule;

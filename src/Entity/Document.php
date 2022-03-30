@@ -130,7 +130,7 @@ class Document implements \Stringable
     private $deleted;
 
     /**
-     * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="doc_id")
+     * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="document")
      */
     private $datas;
 
@@ -145,19 +145,19 @@ class Document implements \Stringable
     private $documentAudits;
 
     /**
-     * @ORM\OneToMany(targetEntity=DocumentRelationShip::class, mappedBy="document")
+     * @ORM\OneToMany(targetEntity=DocumentRelationship::class, mappedBy="document")
      */
-    private $documentRelationShips;
+    private $documentRelationships;
 
     public function __construct()
     {
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->documentAudits = new ArrayCollection();
-        $this->documentRelationShips = new ArrayCollection();
+        $this->documentRelationships = new ArrayCollection();
     }
 
-    public function setId(?string $id) :self
+    public function setId(?string $id): self
     {
         $this->id = $id;
 
@@ -169,7 +169,7 @@ class Document implements \Stringable
         return $this->id;
     }
 
-    public function setRule(?Rule $rule) :self
+    public function setRule(?Rule $rule): self
     {
         $this->rule = $rule;
 
@@ -344,7 +344,7 @@ class Document implements \Stringable
     {
         if (!$this->datas->contains($data)) {
             $this->datas[] = $data;
-            $data->setDocId($this);
+            $data->setDocument($this);
         }
 
         return $this;
@@ -354,8 +354,8 @@ class Document implements \Stringable
     {
         if ($this->datas->removeElement($data)) {
             // set the owning side to null (unless already changed)
-            if ($data->getDocId() === $this) {
-                $data->setDocId(null);
+            if ($data->getDocument() === $this) {
+                $data->setDocument(null);
             }
         }
 
@@ -463,29 +463,29 @@ class Document implements \Stringable
     }
 
     /**
-     * @return Collection<int, DocumentRelationShip>
+     * @return Collection<int, DocumentRelationship>
      */
-    public function getDocumentRelationShips(): Collection
+    public function getDocumentRelationships(): Collection
     {
-        return $this->documentRelationShips;
+        return $this->documentRelationships;
     }
 
-    public function addDocumentRelationShip(DocumentRelationShip $documentRelationShip): self
+    public function addDocumentRelationship(DocumentRelationship $documentRelationship): self
     {
-        if (!$this->documentRelationShips->contains($documentRelationShip)) {
-            $this->documentRelationShips[] = $documentRelationShip;
-            $documentRelationShip->setDocument($this);
+        if (!$this->documentRelationships->contains($documentRelationship)) {
+            $this->documentRelationships[] = $documentRelationship;
+            $documentRelationship->setDocument($this);
         }
 
         return $this;
     }
 
-    public function removeDocumentRelationShip(DocumentRelationShip $documentRelationShip): self
+    public function removeDocumentRelationship(DocumentRelationship $documentRelationship): self
     {
-        if ($this->documentRelationShips->removeElement($documentRelationShip)) {
+        if ($this->documentRelationships->removeElement($documentRelationship)) {
             // set the owning side to null (unless already changed)
-            if ($documentRelationShip->getDocument() === $this) {
-                $documentRelationShip->setDocument(null);
+            if ($documentRelationship->getDocument() === $this) {
+                $documentRelationship->setDocument(null);
             }
         }
 
