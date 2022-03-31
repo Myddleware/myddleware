@@ -62,7 +62,7 @@ class RuleManagerCustom extends RuleManager {
 			// $stmt->execute();	    
 			// $document = $stmt->fetch();
 			$result = $stmt->executeQuery();
-			$document = $result->fetchAssociative();
+            $document = $result->fetchAssociative();
 
 			if (
 					!empty($response['id']) 
