@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shapecode\Bundle\CronBundle\Command;
+namespace App\Command;
 
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Console\Command\Command;
+use Shapecode\Bundle\CronBundle\Command\BaseCommand;
 
 use function count;
 use function sleep;
