@@ -119,3 +119,5 @@ composer.phar
 ###< phpunit/phpunit ###
 
 /migrations
+
+.ssh/*
