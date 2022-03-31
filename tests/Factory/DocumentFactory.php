@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\Document;
 use App\Repository\DocumentRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<Document>
  *
- * @method static Document|Proxy createOne(array $attributes = [])
- * @method static Document[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static Document|Proxy find(object|array|mixed $criteria)
- * @method static Document|Proxy findOrCreate(array $attributes)
- * @method static Document|Proxy first(string $sortedField = 'id')
- * @method static Document|Proxy last(string $sortedField = 'id')
- * @method static Document|Proxy random(array $attributes = [])
- * @method static Document|Proxy randomOrCreate(array $attributes = [])
- * @method static Document[]|Proxy[] all()
- * @method static Document[]|Proxy[] findBy(array $attributes)
- * @method static Document[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static Document[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static DocumentRepository|RepositoryProxy repository()
+ * @method static         Document|Proxy createOne(array $attributes = [])
+ * @method static         Document[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static         Document|Proxy find(object|array|mixed $criteria)
+ * @method static         Document|Proxy findOrCreate(array $attributes)
+ * @method static         Document|Proxy first(string $sortedField = 'id')
+ * @method static         Document|Proxy last(string $sortedField = 'id')
+ * @method static         Document|Proxy random(array $attributes = [])
+ * @method static         Document|Proxy randomOrCreate(array $attributes = [])
+ * @method static         Document[]|Proxy[] all()
+ * @method static         Document[]|Proxy[] findBy(array $attributes)
+ * @method static         Document[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static         Document[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static         DocumentRepository|RepositoryProxy repository()
  * @method Document|Proxy create(array|callable $attributes = [])
  */
 final class DocumentFactory extends ModelFactory

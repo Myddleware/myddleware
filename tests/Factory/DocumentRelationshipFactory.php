@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\DocumentRelationship;
 use App\Repository\DocumentRelationshipRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<DocumentRelationship>
  *
- * @method static DocumentRelationship|Proxy createOne(array $attributes = [])
- * @method static DocumentRelationship[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static DocumentRelationship|Proxy find(object|array|mixed $criteria)
- * @method static DocumentRelationship|Proxy findOrCreate(array $attributes)
- * @method static DocumentRelationship|Proxy first(string $sortedField = 'id')
- * @method static DocumentRelationship|Proxy last(string $sortedField = 'id')
- * @method static DocumentRelationship|Proxy random(array $attributes = [])
- * @method static DocumentRelationship|Proxy randomOrCreate(array $attributes = [])
- * @method static DocumentRelationship[]|Proxy[] all()
- * @method static DocumentRelationship[]|Proxy[] findBy(array $attributes)
- * @method static DocumentRelationship[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static DocumentRelationship[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static DocumentRelationshipRepository|RepositoryProxy repository()
+ * @method static                     DocumentRelationship|Proxy createOne(array $attributes = [])
+ * @method static                     DocumentRelationship[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static                     DocumentRelationship|Proxy find(object|array|mixed $criteria)
+ * @method static                     DocumentRelationship|Proxy findOrCreate(array $attributes)
+ * @method static                     DocumentRelationship|Proxy first(string $sortedField = 'id')
+ * @method static                     DocumentRelationship|Proxy last(string $sortedField = 'id')
+ * @method static                     DocumentRelationship|Proxy random(array $attributes = [])
+ * @method static                     DocumentRelationship|Proxy randomOrCreate(array $attributes = [])
+ * @method static                     DocumentRelationship[]|Proxy[] all()
+ * @method static                     DocumentRelationship[]|Proxy[] findBy(array $attributes)
+ * @method static                     DocumentRelationship[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static                     DocumentRelationship[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static                     DocumentRelationshipRepository|RepositoryProxy repository()
  * @method DocumentRelationship|Proxy create(array|callable $attributes = [])
  */
 final class DocumentRelationshipFactory extends ModelFactory

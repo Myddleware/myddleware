@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\ConnectorParam;
 use App\Repository\ConnectorParamRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<ConnectorParam>
  *
- * @method static ConnectorParam|Proxy createOne(array $attributes = [])
- * @method static ConnectorParam[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static ConnectorParam|Proxy find(object|array|mixed $criteria)
- * @method static ConnectorParam|Proxy findOrCreate(array $attributes)
- * @method static ConnectorParam|Proxy first(string $sortedField = 'id')
- * @method static ConnectorParam|Proxy last(string $sortedField = 'id')
- * @method static ConnectorParam|Proxy random(array $attributes = [])
- * @method static ConnectorParam|Proxy randomOrCreate(array $attributes = [])
- * @method static ConnectorParam[]|Proxy[] all()
- * @method static ConnectorParam[]|Proxy[] findBy(array $attributes)
- * @method static ConnectorParam[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static ConnectorParam[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static ConnectorParamRepository|RepositoryProxy repository()
+ * @method static               ConnectorParam|Proxy createOne(array $attributes = [])
+ * @method static               ConnectorParam[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static               ConnectorParam|Proxy find(object|array|mixed $criteria)
+ * @method static               ConnectorParam|Proxy findOrCreate(array $attributes)
+ * @method static               ConnectorParam|Proxy first(string $sortedField = 'id')
+ * @method static               ConnectorParam|Proxy last(string $sortedField = 'id')
+ * @method static               ConnectorParam|Proxy random(array $attributes = [])
+ * @method static               ConnectorParam|Proxy randomOrCreate(array $attributes = [])
+ * @method static               ConnectorParam[]|Proxy[] all()
+ * @method static               ConnectorParam[]|Proxy[] findBy(array $attributes)
+ * @method static               ConnectorParam[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static               ConnectorParam[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static               ConnectorParamRepository|RepositoryProxy repository()
  * @method ConnectorParam|Proxy create(array|callable $attributes = [])
  */
 final class ConnectorParamFactory extends ModelFactory

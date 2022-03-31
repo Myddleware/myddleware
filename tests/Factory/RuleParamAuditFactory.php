@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\RuleParamAudit;
 use App\Repository\RuleParamAuditRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<RuleParamAudit>
  *
- * @method static RuleParamAudit|Proxy createOne(array $attributes = [])
- * @method static RuleParamAudit[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static RuleParamAudit|Proxy find(object|array|mixed $criteria)
- * @method static RuleParamAudit|Proxy findOrCreate(array $attributes)
- * @method static RuleParamAudit|Proxy first(string $sortedField = 'id')
- * @method static RuleParamAudit|Proxy last(string $sortedField = 'id')
- * @method static RuleParamAudit|Proxy random(array $attributes = [])
- * @method static RuleParamAudit|Proxy randomOrCreate(array $attributes = [])
- * @method static RuleParamAudit[]|Proxy[] all()
- * @method static RuleParamAudit[]|Proxy[] findBy(array $attributes)
- * @method static RuleParamAudit[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static RuleParamAudit[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static RuleParamAuditRepository|RepositoryProxy repository()
+ * @method static               RuleParamAudit|Proxy createOne(array $attributes = [])
+ * @method static               RuleParamAudit[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static               RuleParamAudit|Proxy find(object|array|mixed $criteria)
+ * @method static               RuleParamAudit|Proxy findOrCreate(array $attributes)
+ * @method static               RuleParamAudit|Proxy first(string $sortedField = 'id')
+ * @method static               RuleParamAudit|Proxy last(string $sortedField = 'id')
+ * @method static               RuleParamAudit|Proxy random(array $attributes = [])
+ * @method static               RuleParamAudit|Proxy randomOrCreate(array $attributes = [])
+ * @method static               RuleParamAudit[]|Proxy[] all()
+ * @method static               RuleParamAudit[]|Proxy[] findBy(array $attributes)
+ * @method static               RuleParamAudit[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static               RuleParamAudit[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static               RuleParamAuditRepository|RepositoryProxy repository()
  * @method RuleParamAudit|Proxy create(array|callable $attributes = [])
  */
 final class RuleParamAuditFactory extends ModelFactory

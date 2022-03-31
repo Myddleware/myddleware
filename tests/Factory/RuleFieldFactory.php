@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\RuleField;
 use App\Repository\RuleFieldRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<RuleField>
  *
- * @method static RuleField|Proxy createOne(array $attributes = [])
- * @method static RuleField[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static RuleField|Proxy find(object|array|mixed $criteria)
- * @method static RuleField|Proxy findOrCreate(array $attributes)
- * @method static RuleField|Proxy first(string $sortedField = 'id')
- * @method static RuleField|Proxy last(string $sortedField = 'id')
- * @method static RuleField|Proxy random(array $attributes = [])
- * @method static RuleField|Proxy randomOrCreate(array $attributes = [])
- * @method static RuleField[]|Proxy[] all()
- * @method static RuleField[]|Proxy[] findBy(array $attributes)
- * @method static RuleField[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static RuleField[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static RuleFieldRepository|RepositoryProxy repository()
+ * @method static          RuleField|Proxy createOne(array $attributes = [])
+ * @method static          RuleField[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static          RuleField|Proxy find(object|array|mixed $criteria)
+ * @method static          RuleField|Proxy findOrCreate(array $attributes)
+ * @method static          RuleField|Proxy first(string $sortedField = 'id')
+ * @method static          RuleField|Proxy last(string $sortedField = 'id')
+ * @method static          RuleField|Proxy random(array $attributes = [])
+ * @method static          RuleField|Proxy randomOrCreate(array $attributes = [])
+ * @method static          RuleField[]|Proxy[] all()
+ * @method static          RuleField[]|Proxy[] findBy(array $attributes)
+ * @method static          RuleField[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static          RuleField[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static          RuleFieldRepository|RepositoryProxy repository()
  * @method RuleField|Proxy create(array|callable $attributes = [])
  */
 final class RuleFieldFactory extends ModelFactory
