@@ -55,26 +55,6 @@ class FuncCatFixtures extends Fixture implements FixtureGroupInterface
         }
     }
 
-    public function existingCategories($existingFunctionCategories): ?array
-    {
-        if (null !== $existingFunctionCategories) {
-            $functionCategories = [];
-            foreach ($existingFunctionCategories as $existingFunctionCategory) {
-                foreach ($this->defaultFunctionCategories as $defaultFunctionCategory) {
-                    if ($existingFunctionCategory->getName() === $defaultFunctionCategory['name']) {
-                        $functionCategory = new FuncCat();
-                        $functionCategory->setName($defaultFunctionCategory['name']);
-                        $functionCategories[] = $functionCategory;
-                    }
-                }
-            }
-
-            return $functionCategories;
-        }
-
-        return null;
-    }
-
     public static function getGroups(): array
     {
         return ['functions', 'mydconfig'];
