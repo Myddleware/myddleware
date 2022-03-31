@@ -630,8 +630,9 @@ class mysqlcustom extends mysql {
 		    		WHERE connector.id = :connId";
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $this->suitecrmConnId);
-		    $stmt->execute();		
-			$r = $stmt->fetch();			
+			$result = $stmt->executeQuery();
+            $r = $result->fetchAssociative();	
+			
 			// Get params connection
 		    $sql = "SELECT id, conn_id, name, value
 		    		FROM connectorparam 
@@ -639,7 +640,9 @@ class mysqlcustom extends mysql {
 		    $stmt = $this->connection->prepare($sql);
 			$stmt->bindValue(":connId", $this->suitecrmConnId);
 		    $stmt->execute();	    
-			$tab_params = $stmt->fetchAll();
+			$resultConn = $stmt->executeQuery();
+            $tab_params = $resultConn->fetchAllAssociative();
+			
 			$params = array();
 			if(!empty($tab_params)) {
 				foreach ($tab_params as $key => $value) {
