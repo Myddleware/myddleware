@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\RuleRelationship;
 use App\Repository\RuleRelationshipRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<RuleRelationship>
  *
- * @method static RuleRelationship|Proxy createOne(array $attributes = [])
- * @method static RuleRelationship[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static RuleRelationship|Proxy find(object|array|mixed $criteria)
- * @method static RuleRelationship|Proxy findOrCreate(array $attributes)
- * @method static RuleRelationship|Proxy first(string $sortedField = 'id')
- * @method static RuleRelationship|Proxy last(string $sortedField = 'id')
- * @method static RuleRelationship|Proxy random(array $attributes = [])
- * @method static RuleRelationship|Proxy randomOrCreate(array $attributes = [])
- * @method static RuleRelationship[]|Proxy[] all()
- * @method static RuleRelationship[]|Proxy[] findBy(array $attributes)
- * @method static RuleRelationship[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static RuleRelationship[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static RuleRelationshipRepository|RepositoryProxy repository()
+ * @method static                 RuleRelationship|Proxy createOne(array $attributes = [])
+ * @method static                 RuleRelationship[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static                 RuleRelationship|Proxy find(object|array|mixed $criteria)
+ * @method static                 RuleRelationship|Proxy findOrCreate(array $attributes)
+ * @method static                 RuleRelationship|Proxy first(string $sortedField = 'id')
+ * @method static                 RuleRelationship|Proxy last(string $sortedField = 'id')
+ * @method static                 RuleRelationship|Proxy random(array $attributes = [])
+ * @method static                 RuleRelationship|Proxy randomOrCreate(array $attributes = [])
+ * @method static                 RuleRelationship[]|Proxy[] all()
+ * @method static                 RuleRelationship[]|Proxy[] findBy(array $attributes)
+ * @method static                 RuleRelationship[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static                 RuleRelationship[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static                 RuleRelationshipRepository|RepositoryProxy repository()
  * @method RuleRelationship|Proxy create(array|callable $attributes = [])
  */
 final class RuleRelationshipFactory extends ModelFactory

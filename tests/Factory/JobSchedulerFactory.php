@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\JobScheduler;
 use App\Repository\JobSchedulerRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<JobScheduler>
  *
- * @method static JobScheduler|Proxy createOne(array $attributes = [])
- * @method static JobScheduler[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static JobScheduler|Proxy find(object|array|mixed $criteria)
- * @method static JobScheduler|Proxy findOrCreate(array $attributes)
- * @method static JobScheduler|Proxy first(string $sortedField = 'id')
- * @method static JobScheduler|Proxy last(string $sortedField = 'id')
- * @method static JobScheduler|Proxy random(array $attributes = [])
- * @method static JobScheduler|Proxy randomOrCreate(array $attributes = [])
- * @method static JobScheduler[]|Proxy[] all()
- * @method static JobScheduler[]|Proxy[] findBy(array $attributes)
- * @method static JobScheduler[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static JobScheduler[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static JobSchedulerRepository|RepositoryProxy repository()
+ * @method static             JobScheduler|Proxy createOne(array $attributes = [])
+ * @method static             JobScheduler[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static             JobScheduler|Proxy find(object|array|mixed $criteria)
+ * @method static             JobScheduler|Proxy findOrCreate(array $attributes)
+ * @method static             JobScheduler|Proxy first(string $sortedField = 'id')
+ * @method static             JobScheduler|Proxy last(string $sortedField = 'id')
+ * @method static             JobScheduler|Proxy random(array $attributes = [])
+ * @method static             JobScheduler|Proxy randomOrCreate(array $attributes = [])
+ * @method static             JobScheduler[]|Proxy[] all()
+ * @method static             JobScheduler[]|Proxy[] findBy(array $attributes)
+ * @method static             JobScheduler[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static             JobScheduler[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static             JobSchedulerRepository|RepositoryProxy repository()
  * @method JobScheduler|Proxy create(array|callable $attributes = [])
  */
 final class JobSchedulerFactory extends ModelFactory

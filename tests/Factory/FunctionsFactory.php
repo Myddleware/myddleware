@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\Functions;
 use App\Repository\FunctionsRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<Functions>
  *
- * @method static Functions|Proxy createOne(array $attributes = [])
- * @method static Functions[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static Functions|Proxy find(object|array|mixed $criteria)
- * @method static Functions|Proxy findOrCreate(array $attributes)
- * @method static Functions|Proxy first(string $sortedField = 'id')
- * @method static Functions|Proxy last(string $sortedField = 'id')
- * @method static Functions|Proxy random(array $attributes = [])
- * @method static Functions|Proxy randomOrCreate(array $attributes = [])
- * @method static Functions[]|Proxy[] all()
- * @method static Functions[]|Proxy[] findBy(array $attributes)
- * @method static Functions[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static Functions[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static FunctionsRepository|RepositoryProxy repository()
+ * @method static          Functions|Proxy createOne(array $attributes = [])
+ * @method static          Functions[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static          Functions|Proxy find(object|array|mixed $criteria)
+ * @method static          Functions|Proxy findOrCreate(array $attributes)
+ * @method static          Functions|Proxy first(string $sortedField = 'id')
+ * @method static          Functions|Proxy last(string $sortedField = 'id')
+ * @method static          Functions|Proxy random(array $attributes = [])
+ * @method static          Functions|Proxy randomOrCreate(array $attributes = [])
+ * @method static          Functions[]|Proxy[] all()
+ * @method static          Functions[]|Proxy[] findBy(array $attributes)
+ * @method static          Functions[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static          Functions[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static          FunctionsRepository|RepositoryProxy repository()
  * @method Functions|Proxy create(array|callable $attributes = [])
  */
 final class FunctionsFactory extends ModelFactory

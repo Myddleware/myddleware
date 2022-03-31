@@ -50,17 +50,17 @@ class Solution implements \Stringable
     private $name;
 
     /**
-     * @ORM\Column(name="active", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="active", type="boolean",nullable=false)
      */
     private $active;
 
     /**
-     * @ORM\Column(name="source", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="source", type="boolean",nullable=false)
      */
     private $source;
 
     /**
-     * @ORM\Column(name="target", type="integer", length=1,nullable=false)
+     * @ORM\Column(name="target", type="boolean",nullable=false)
      */
     private $target;
 
@@ -95,38 +95,38 @@ class Solution implements \Stringable
         return $this->name;
     }
 
-    public function setActive(int $active): self
+    public function setActive(bool $active): self
     {
         $this->active = $active;
 
         return $this;
     }
 
-    public function getActive(): ?int
+    public function getActive(): bool
     {
         return $this->active;
     }
 
-    public function setSource(int $source): self
+    public function setSource(bool $source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    public function getSource(): ?int
+    public function getSource(): bool
     {
         return $this->source;
     }
 
-    public function setTarget(int $target): self
+    public function setTarget(bool $target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    public function getTarget(): ?int
+    public function getTarget(): bool
     {
         return $this->target;
     }

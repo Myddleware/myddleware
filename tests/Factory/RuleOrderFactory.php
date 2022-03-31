@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\RuleOrder;
 use App\Repository\RuleOrderRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<RuleOrder>
  *
- * @method static RuleOrder|Proxy createOne(array $attributes = [])
- * @method static RuleOrder[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static RuleOrder|Proxy find(object|array|mixed $criteria)
- * @method static RuleOrder|Proxy findOrCreate(array $attributes)
- * @method static RuleOrder|Proxy first(string $sortedField = 'id')
- * @method static RuleOrder|Proxy last(string $sortedField = 'id')
- * @method static RuleOrder|Proxy random(array $attributes = [])
- * @method static RuleOrder|Proxy randomOrCreate(array $attributes = [])
- * @method static RuleOrder[]|Proxy[] all()
- * @method static RuleOrder[]|Proxy[] findBy(array $attributes)
- * @method static RuleOrder[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static RuleOrder[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static RuleOrderRepository|RepositoryProxy repository()
+ * @method static          RuleOrder|Proxy createOne(array $attributes = [])
+ * @method static          RuleOrder[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static          RuleOrder|Proxy find(object|array|mixed $criteria)
+ * @method static          RuleOrder|Proxy findOrCreate(array $attributes)
+ * @method static          RuleOrder|Proxy first(string $sortedField = 'id')
+ * @method static          RuleOrder|Proxy last(string $sortedField = 'id')
+ * @method static          RuleOrder|Proxy random(array $attributes = [])
+ * @method static          RuleOrder|Proxy randomOrCreate(array $attributes = [])
+ * @method static          RuleOrder[]|Proxy[] all()
+ * @method static          RuleOrder[]|Proxy[] findBy(array $attributes)
+ * @method static          RuleOrder[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static          RuleOrder[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static          RuleOrderRepository|RepositoryProxy repository()
  * @method RuleOrder|Proxy create(array|callable $attributes = [])
  */
 final class RuleOrderFactory extends ModelFactory

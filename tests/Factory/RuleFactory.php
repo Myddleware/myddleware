@@ -4,26 +4,26 @@ namespace App\Tests\Factory;
 
 use App\Entity\Rule;
 use App\Repository\RuleRepository;
-use Zenstruck\Foundry\RepositoryProxy;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<Rule>
  *
- * @method static Rule|Proxy createOne(array $attributes = [])
- * @method static Rule[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static Rule|Proxy find(object|array|mixed $criteria)
- * @method static Rule|Proxy findOrCreate(array $attributes)
- * @method static Rule|Proxy first(string $sortedField = 'id')
- * @method static Rule|Proxy last(string $sortedField = 'id')
- * @method static Rule|Proxy random(array $attributes = [])
- * @method static Rule|Proxy randomOrCreate(array $attributes = [])
- * @method static Rule[]|Proxy[] all()
- * @method static Rule[]|Proxy[] findBy(array $attributes)
- * @method static Rule[]|Proxy[] randomSet(int $number, array $attributes = [])
- * @method static Rule[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static RuleRepository|RepositoryProxy repository()
+ * @method static     Rule|Proxy createOne(array $attributes = [])
+ * @method static     Rule[]|Proxy[] createMany(int $number, array|callable $attributes = [])
+ * @method static     Rule|Proxy find(object|array|mixed $criteria)
+ * @method static     Rule|Proxy findOrCreate(array $attributes)
+ * @method static     Rule|Proxy first(string $sortedField = 'id')
+ * @method static     Rule|Proxy last(string $sortedField = 'id')
+ * @method static     Rule|Proxy random(array $attributes = [])
+ * @method static     Rule|Proxy randomOrCreate(array $attributes = [])
+ * @method static     Rule[]|Proxy[] all()
+ * @method static     Rule[]|Proxy[] findBy(array $attributes)
+ * @method static     Rule[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method static     Rule[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
+ * @method static     RuleRepository|RepositoryProxy repository()
  * @method Rule|Proxy create(array|callable $attributes = [])
  */
 final class RuleFactory extends ModelFactory
