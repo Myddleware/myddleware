@@ -13,4 +13,4 @@ cat /etc/hosts
 echo "--"
 
 ## Start job
-php bin/console shapecode:cron:run --env=background
+php bin/console myddleware:cronrun --env=background
