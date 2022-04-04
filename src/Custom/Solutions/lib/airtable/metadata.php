@@ -1,6 +1,6 @@
 <?php
 
-$moduleFields = array (
+$moduleFields['appdKFUpk2X2Ok8Dc'] = array (
     'CONTACTS' => array(
         'ID___COMET'=> array( 'label' => 'ID Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
         'STATUS' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
@@ -56,6 +56,9 @@ $moduleFields = array (
 		'BINOMES'=> array( 'label' => 'BINOMES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true),
         'POLES'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true),
     ),
+);
+
+$moduleFields['appX0PhUGIkBTcWBE'] = array (
 	'Aiko Auto Supr' => array(
         'LABEL'=> array( 'label' => 'Label', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'IDCOMET'=> array( 'label' => 'Id COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
