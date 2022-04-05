@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\Connector;
-use App\Repository\ConnectorRepository;
-use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
+use App\Factory\UserFactory;
+use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\RepositoryProxy;
+use App\Repository\ConnectorRepository;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * @extends ModelFactory<Connector>
@@ -28,9 +30,12 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class ConnectorFactory extends ModelFactory
 {
-    public function __construct()
+    private $slugger; 
+
+    public function __construct(SluggerInterface $slugger)
     {
         parent::__construct();
+        $this->slugger = $slugger;
 
         // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
@@ -39,11 +44,13 @@ final class ConnectorFactory extends ModelFactory
     {
         return [
             // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'name' => self::faker()->text(),
-            'nameSlug' => self::faker()->text(),
+            'name' => self::faker()->unique()->word(),
+            // 'nameSlug' => $this->slugger->slug('name'),
             'deleted' => self::faker()->boolean(10),
-            'createdAt' => self::faker()->datetime(),
-            'updatedAt' => self::faker()->datetime(),
+            'createdAt' => new \DateTimeImmutable('-1 days'),
+            'updatedAt' => new  \DateTimeImmutable('now'),
+            'createdBy' => UserFactory::new()->isAdmin(),
+            'modifiedBy' => UserFactory::new()->isSuperAdmin(),
         ];
     }
 
@@ -51,7 +58,9 @@ final class ConnectorFactory extends ModelFactory
     {
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return $this
-            // ->afterInstantiate(function(Connector $connector): void {})
+            ->afterInstantiate(function(Connector $connector): void {
+                $connector->setNameSlug($this->slugger->slug($connector->getName()));
+            })
         ;
     }
 

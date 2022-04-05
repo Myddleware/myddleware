@@ -28,10 +28,11 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ConnectorParamRepository;
 
 /**
  * @ORM\Table(name="connectorparam")
- * @ORM\Entity(repositoryClass="App\Repository\ConnectorParamRepository")
+ * @ORM\Entity(repositoryClass=ConnectorParamRepository::class)
  */
 class ConnectorParam implements \Stringable
 {

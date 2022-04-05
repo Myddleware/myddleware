@@ -25,7 +25,7 @@ class UserFixtures extends Fixture implements FixtureGroupInterface
     {
         if (!$this->databaseContainsUsers($manager)) {
             $user = new User();
-            $user->setEmail('admin@myddleware.com');
+            $user->setEmail('admin@admin.com');
             $user->setUsername('admin');
             $password = $this->hasher->hashPassword($user, 'thisPasswordMustBeChanged!');
             $user->setPassword($password);

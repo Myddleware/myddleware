@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\DocumentRelationship;
 use App\Repository\DocumentRelationshipRepository;

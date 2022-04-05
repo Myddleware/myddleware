@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\ConnectorParam;
 use App\Repository\ConnectorParamRepository;
@@ -39,8 +39,8 @@ final class ConnectorParamFactory extends ModelFactory
     {
         return [
             // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
-            'name' => self::faker()->text(),
-            'value' => self::faker()->text(),
+            'name' => self::faker()->word(),
+            'value' => self::faker()->word(),
         ];
     }
 
