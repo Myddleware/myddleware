@@ -34,7 +34,7 @@ class Hubspot extends Solution
     protected $readLast = false;
     protected $migrationMode = false;
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         // 'contacts' => array('email'), // No duplicate search for now
     ];
 
@@ -74,7 +74,7 @@ class Hubspot extends Solution
         'line_items' => ['properties' => ['name', 'price', 'quantity', 'hs_product_id']],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -105,9 +105,7 @@ class Hubspot extends Solution
         }
     }
 
-    // login($paramConnexion)*/
-
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         $modules = [
             'companies' => 'Companies',
@@ -139,10 +137,8 @@ class Hubspot extends Solution
         return $modules;
     }
 
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -341,7 +337,6 @@ class Hubspot extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     /**
      * Function read data.
@@ -518,8 +513,6 @@ class Hubspot extends Solution
         return $result;
     }
 
-    // end function read
-
     /**
      * Function create data.
      *
@@ -527,7 +520,7 @@ class Hubspot extends Solution
      *
      * @return mixed
      */
-    public function createData($param)
+    public function createData($param): array
     {
         try {
             // Associate deal is always an update to Hubspot
@@ -618,8 +611,6 @@ class Hubspot extends Solution
 
         return $result;
     }
-
-    // end function create
 
     /**
      * Function update data.
@@ -724,8 +715,6 @@ class Hubspot extends Solution
 
         return $result;
     }
-
-    // end function update
 
     // Change the result
     protected function beforeGenerateResult($identifyProfiles, $param)
@@ -1279,28 +1268,26 @@ class Hubspot extends Solution
         return $date->getTimestamp() * 1000;
     }
 
-    // dateTimeToMyddleware($dateTime)
-
     /**
      * return the reference date field name.
      *
      * @param $moduleSource
-     * @param $RuleMode
+     * @param $ruleMode
      *
      * @return string|null
      *
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'ModificationDate';
         // Creation mode only
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     /**

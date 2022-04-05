@@ -82,10 +82,8 @@ class SAP extends SAPRoot
         parent::login($paramConnexion);
     }
 
-    // login($paramConnexion)*/
-
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -97,10 +95,8 @@ class SAP extends SAPRoot
         ];
     }
 
-    // get_modules()
-
     // On appelle la fonction get_module_fields de SAP standard et on ajoute les champ de relation spécifique
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         // Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
         if ('ET_BSEG' == $module) {
@@ -141,7 +137,7 @@ class SAP extends SAPRoot
         }
     }
 
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];

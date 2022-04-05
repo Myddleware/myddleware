@@ -44,7 +44,7 @@ class Eventbrite extends Solution
     private $token;
     private $urlBase = 'https://www.eventbrite.com/json/';
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -83,9 +83,7 @@ class Eventbrite extends Solution
         }
     }
 
-    // login($paramConnexion)
-
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): array
     {
         try {
             // Le module attendee n'est accessible d'en source
@@ -122,10 +120,8 @@ class Eventbrite extends Solution
         }
     }
 
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -300,18 +296,19 @@ class Eventbrite extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    // Param contient :
-    //	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
-    //	module : le module appelé
-    //	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
-    //	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
-    // Valeur de sortie est un tableau contenant :
-    //		count : Le nombre d'enregistrement trouvé
-    //		date_ref : la nouvelle date de référence
-    //   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18)
+    /**
+     * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
+     * Param contient :
+     * 	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
+     * 	module : le module appelé
+     * 	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
+     * 	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
+     * Valeur de sortie est un tableau contenant :
+     * 		count : Le nombre d'enregistrement trouvé
+     * 		date_ref : la nouvelle date de référence
+     *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18).
+     */
     public function readData($param)
     {
         if (!isset($param['fields'])) {
@@ -335,7 +332,7 @@ class Eventbrite extends Solution
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): ?array
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar

@@ -25,6 +25,9 @@
 
 namespace App\Solutions;
 
+use App\Entity\Connector;
+use App\Entity\Document;
+use App\Entity\Rule;
 use App\Manager\DocumentManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,7 +54,9 @@ class Solution
     // URL de la solution pour atteindre les webservices
     protected $paramConnexion;
 
-    // Classe permettant d'enregistrer les log Symfony
+    /**
+     * @var LoggerInterface
+     */
     protected $logger;
 
     // Tableau comportant les différents types de BDD valides
@@ -82,7 +87,6 @@ class Solution
 
     protected $message;
 
-    // Instanciation de la classe de génération de log Symfony
     /**
      * @var Connection
      */
@@ -108,12 +112,14 @@ class Solution
         $this->parameterBagInterface = $parameterBagInterface;
     }
 
-    // Fonction permettant de se loguer à la solution
-    // Param est un tableau contenant tous les paramètres nécessaires à la connexion
-    // Cette méthode doit mettre à jour les attributs :
-    // $this->session avec la session de la solution
-    // $this->connexion_valide (true si la connexion estréussie, false sinon)
-    public function login($paramConnexion)
+    /**
+     * Fonction permettant de se loguer à la solution
+     * Param est un tableau contenant tous les paramètres nécessaires à la connexion
+     * Cette méthode doit mettre à jour les attributs :
+     * $this->session avec la session de la solution
+     * $this->connexion_valide (true si la connexion est réussie, false sinon).
+     */
+    public function login(array $paramConnexion)
     {
         // Instanciate object to decrypte data
         $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
@@ -134,19 +140,18 @@ class Solution
         $this->paramConnexion = $paramConnexion;
     }
 
-    public function logout()
+    public function logout(): bool
     {
         return true;
     }
 
-    // Permet de récupérer la classe de génération de log Symfony
-    protected function getLogger()
+    protected function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
 
     // Permet de se connecter à la base de données
-    protected function getConn()
+    protected function getConn(): Connection
     {
         return $this->connection;
     }
@@ -207,57 +212,64 @@ class Solution
         return $response;
     }
 
-    // Cette méthode renvoie un tableau permettant d'indiquer tous les champs nécessaire à la connexion (login, mot de passe...)
-    // Exemple de tableau
-    // array(
-    // array(
-    // 'name' => 'login',
-    // 'type' => 'text',
-    // 'label' => 'solution.fields.login'
-    // ),
-    // array(
-    // 'name' => 'password',
-    // 'type' => 'password',
-    // 'label' => 'solution.fields.password'
-    // )
-    // );
-    public function getFieldsLogin()
+    /**
+     * Cette méthode renvoie un tableau permettant d'indiquer tous les champs nécessaire à la connexion (login, mot de passe...)
+     * Exemple de tableau
+     * array(
+     *   array(
+     *     'name' => 'login',
+     *     'type' => 'text',
+     *     'label' => 'solution.fields.login'
+     *   ),
+     *   array(
+     *     'name' => 'password',
+     *     'type' => 'password',
+     *     'label' => 'solution.fields.password'
+     *   )
+     * );.
+     */
+    public function getFieldsLogin(): array
     {
+        return [];
     }
 
     // Même structure que la méthode getFieldsLogin
     // Prend en paramètre d'entre source ou target
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd(string $type, string $module): array
     {
         return [];
     }
 
     // Renvoie la liste des champs sur lequel on peut vérifier les doublons
-    public function getFieldsDuplicate($module)
+    public function getFieldsDuplicate(string $module)
     {
-        if (isset($this->FieldsDuplicate[$module])) {
-            return $this->FieldsDuplicate[$module];
-        } elseif (isset($this->FieldsDuplicate['default'])) {
-            return $this->FieldsDuplicate['default'];
+        if (isset($this->fieldsDuplicate[$module])) {
+            return $this->fieldsDuplicate[$module];
+        } elseif (isset($this->fieldsDuplicate['default'])) {
+            return $this->fieldsDuplicate['default'];
         }
 
         return false;
     }
 
-    // Méthode permettant de récupérer le nom de tous les modules accessible à l'utilisateur
-    // Tableau sous la forme :
-    // array(
-    // nom_module1 => libellé module 1,
-    // nom_module2 => libellé module 2
-    // )
-    // Renvoie false si aucun module n'a été récupéré
-    public function get_modules($type = 'source')
+    /**
+     * Méthode permettant de récupérer le nom de tous les modules accessible à l'utilisateur
+     * Tableau sous la forme :
+     * array(
+     *   nom_module1 => libellé module 1,
+     *   nom_module2 => libellé module 2
+     * ).
+     */
+    public function get_modules(string $type = 'source'): ?array
     {
+        return [];
     }
 
-    // Cette méthode doit remplir les attributs :
-    // moduleFields avec le tableu ci-dessus
-    public function get_module_fields($module, $type = 'source', $param = null)
+    /**
+     * Cette méthode doit remplir les attributs :
+     * moduleFields avec le tableu ci-dessus.
+     */
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         $this->moduleFields = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
@@ -272,16 +284,18 @@ class Solution
         return $this->moduleFields;
     }
 
-    // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
-    // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+    /**
+     * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
+     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées.
+     */
     public function get_rule_custom_relationship($module, $type)
     {
     }
 
     // Helper function for the read call
-    public function readData($param)
+    public function readData(array $param)
     {
-        try { // try-catch Myddleware
+        try {
             $result['count'] = 0;
             if (empty($param['limit'])) {
                 $param['limit'] = 100;
@@ -360,46 +374,49 @@ class Solution
         return $result;
     }
 
-    // Get the new records from the solution
-    // Param's content :
-    //		date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
-    //		module : module called
-    //		fields : rule field list, example : array('name','date_entered')
-    //		limit : max records that the rule can read (default limit is 100)
-    // Expected output :
-    //		Array with the list of records
-    public function read($param)
+    /**
+     * Get the new records from the solution
+     * Param's content :
+     * 		date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
+     * 		module : module called
+     * 		fields : rule field list, example : array('name','date_entered')
+     * 		limit : max records that the rule can read (default limit is 100)
+     * Expected output :
+     * 		Array with the list of records.
+     */
+    public function read(array $param): ?array
     {
         return null;
     }
 
-    // Permet de créer un enregistrement
-    // $param contient  :
-    //  -> le module destinataire
-    //  -> les données à envoyer sous cette forme :
-    // Array
-    // (
-    // [0] => Array
-    // (
-    // [id_sfaure01_001_target] => 52e58c482b704
-    // [name] => myddl01
-    // [email1] => myddle01@test.test
-    // )
-    // [1] => Array
-    // (
-    // [id_sfaure01_001_target] => 52e58c482baaa
-    // [name] => myddl02
-    // [email1] => myddle02@test.test
-    // )
-
-    // )
-    // Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
-    // Array
-    // (
-    // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
-    // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-    // )
-    public function createData($param)
+    /**
+     * Permet de créer un enregistrement
+     * $param contient  :
+     *  -> le module destinataire
+     *  -> les données à envoyer sous cette forme :
+     * Array
+     * (
+     *   [0] => Array
+     *   (
+     *      [id_sfaure01_001_target] => 52e58c482b704
+     *      [name] => myddl01
+     *      [email1] => myddle01@test.test
+     *   )
+     *   [1] => Array
+     *   (
+     *     [id_sfaure01_001_target] => 52e58c482baaa
+     *     [name] => myddl02
+     *     [email1] => myddle02@test.test
+     *    )
+     * )
+     * Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
+     * Array
+     * (
+     *   [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
+     *   [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
+     * ).
+     */
+    public function createData(array $param): ?array
     {
         try {
             // For every document
@@ -443,46 +460,49 @@ class Solution
         return $result;
     }
 
-    // Create method :
-    // - input : array with the record's data
-    // - output : the id of the new record
-    // An exception has to be generated when an error happends during the creation.
-    // this exception will be catched by the method createData
-    protected function create($param, $record)
+    /**
+     * Create method :
+     * - input : array with the record's data
+     * - output : the id of the new record
+     * An exception has to be generated when an error happends during the creation.
+     * this exception will be caught by the createData method.
+     */
+    protected function create(array $param, $record)
     {
         return null;
     }
 
-    // Permet de mettre à jour un enregistrement
-    // Permet de créer un enregistrement
-    // $param contient  :
-    //  -> le module destinataire
-    //  -> les données à envoyer sous cette forme (le champ id_target est obligatoire) :
-    // Array
-    // (
-    // [0] => Array
-    // (
-    // [target_id] => 54545-sds542s1d-sd21s2d54
-    // [id_sfaure01_001_target] => 52e58c482b704
-    // [name] => myddl01
-    // [email1] => myddle01@test.test
-    // )
-    // [1] => Array
-    // (
-    // [target_id] => 54545-sds542s1d-sd21s2d54
-    // [id_sfaure01_001_target] => 52e58c482baaa
-    // [name] => myddl02
-    // [email1] => myddle02@test.test
-    // )
-
-    // )
-    // Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
-    // Array
-    // (
-    // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
-    // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-    // )
-    public function updateData($param)
+    /**
+     * Permet de mettre à jour un enregistrement
+     * Permet de créer un enregistrement
+     * $param contient  :
+     *  -> le module destinataire
+     *  -> les données à envoyer sous cette forme (le champ id_target est obligatoire) :
+     * Array
+     * (
+     *   [0] => Array
+     *   (
+     *     [target_id] => 54545-sds542s1d-sd21s2d54
+     *     [id_sfaure01_001_target] => 52e58c482b704
+     *     [name] => myddl01
+     *     [email1] => myddle01@test.test
+     *   )
+     *   [1] => Array
+     *   (
+     *     [target_id] => 54545-sds542s1d-sd21s2d54
+     *     [id_sfaure01_001_target] => 52e58c482baaa
+     *     [name] => myddl02
+     *     [email1] => myddle02@test.test
+     *   )
+     * )
+     * Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
+     * Array
+     * (
+     *   [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
+     *   [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
+     * ).
+     */
+    public function updateData(array $param)
     {
         try {
             // For every document
@@ -534,8 +554,7 @@ class Solution
         return null;
     }
 
-    // Delete a record
-    public function deleteData($param)
+    public function deleteData(array $param)
     {
         try {
             // For every document
@@ -579,16 +598,17 @@ class Solution
         return $result;
     }
 
-    // Delete a record
     protected function delete($param, $data)
     {
         // Set an error by default
         throw new \Exception('Delete function not developped for this connector. Failed to delete this record in the target application. ');
     }
 
-    // Permet de renvoyer le mode de la règle en fonction du module target
-    // Valeur par défaut "0"
-    // Si la règle n'est qu'en création, pas en modicication alors le mode est C
+    /**
+     * Permet de renvoyer le mode de la règle en fonction du module target
+     * Valeur par défaut "0"
+     * Si la règle n'est qu'en création, pas en modicication alors le mode est C.
+     */
     public function getRuleMode($module, $type)
     {
         return [
@@ -643,26 +663,30 @@ class Solution
         return $this->sendDeletion;
     }
 
-    // Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
-    // Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
-    // data est de la forme :
-    // [datereference] => 2015-02-23 00:00:00
-    // [connector] => Array ( [source] => 3 [cible] => 30 )
-    // [content] => Array (
-    // [fields] => Array ( [name] => Array ( [Date] => Array ( [champs] => Array ( [0] => date_entered [1] => date_modified ) [formule] => Array ( [0] => {date_entered}.{date_modified} ) ) [account_Filter] => Array ( [champs] => Array ( [0] => name ) ) ) )
-    // [params] => Array ( [mode] => 0 ) )
-    // [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
-    // [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
-    // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
-    // Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle
+    /**
+     * Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
+     * Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
+     * data est de la forme :
+     * [datereference] => 2015-02-23 00:00:00
+     * [connector] => Array ( [source] => 3 [cible] => 30 )
+     * [content] => Array (
+     * [fields] => Array ( [name] => Array ( [Date] => Array ( [champs] => Array ( [0] => date_entered [1] => date_modified ) [formule] => Array ( [0] => {date_entered}.{date_modified} ) ) [account_Filter] => Array ( [champs] => Array ( [0] => name ) ) ) )
+     * [params] => Array ( [mode] => 0 ) )
+     * [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
+     * [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
+     * La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
+     * Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle.
+     */
     public function beforeRuleSave($data, $type)
     {
         return ['done' => true, 'message' => ''];
     }
 
-    // Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
-    // Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté l'entrée ruleId au tableau
-    // Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');
+    /**
+     * Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
+     * Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté l'entrée ruleId au tableau
+     * Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');.
+     */
     public function afterRuleSave($data, $type)
     {
         return [];
@@ -755,7 +779,7 @@ class Solution
     }
 
     // Clean record before create/update
-    protected function cleanMyddlewareRecord($record)
+    protected function cleanMyddlewareRecord(array $record): array
     {
         if (isset($record['Myddleware_element_id'])) {
             unset($record['Myddleware_element_id']);
@@ -771,18 +795,16 @@ class Solution
     }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         return $dateTime;
     }
-    // dateTimeToMyddleware($dateTime)
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         return $dateTime;
     }
-    // dateTimeToMyddleware($dateTime)
 
     protected function getInfoDocument($idDocument)
     {
@@ -821,18 +843,18 @@ class Solution
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName(string $moduleSource, $ruleMode)
     {
     }
 
     // Return the name of the field used for the id
-    public function getIdName($module)
+    public function getIdName(string $module): string
     {
         return 'id';
     }
 
     // The function return true if we can display the column parent in the rule view, relationship tab
-    public function allowParentRelationship($module)
+    public function allowParentRelationship(string $module): bool
     {
         if (
                 !empty($this->allowParentRelationship)
@@ -846,12 +868,12 @@ class Solution
 
     // Build the direct link to the record (used in data transfer view)
     // Type : source or target
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink(Rule $rule, Document $document, string $type)
     {
     }
 
     // Get a connector param decrypted
-    protected function getConnectorParam($connector, $paramName)
+    protected function getConnectorParam(Connector $connector, string $paramName)
     {
         // Get the connector params from the rule
         $connectorParams = $connector->getConnectorParams();
@@ -868,9 +890,8 @@ class Solution
         }
     }
 
-    // Check data before create
     // Add a throw exeption if error
-    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    protected function checkDataBeforeCreate(array $param, array $data, $idDoc): ?array
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
@@ -882,9 +903,8 @@ class Solution
         return $data;
     }
 
-    // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate(array $param, array $data): ?array
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
@@ -892,9 +912,8 @@ class Solution
         return $data;
     }
 
-    // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeDelete($param, $data)
+    protected function checkDataBeforeDelete(array $param, array $data): ?array
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
@@ -902,8 +921,7 @@ class Solution
         return $data;
     }
 
-    // Check if the job is still active
-    protected function isJobActive($param)
+    protected function isJobActive(array $param)
     {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
@@ -919,7 +937,7 @@ class Solution
     }
 
     // Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule
-    protected function getParamLogin($connId)
+    protected function getParamLogin($connId): ?array
     {
         // RECUPERE LE NOM DE LA SOLUTION
         $sql = 'SELECT solution.name  

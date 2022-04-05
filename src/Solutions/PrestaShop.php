@@ -28,7 +28,7 @@ namespace App\Solutions;
 use App\Solutions\lib\PrestaShopWebservice;
 use App\Solutions\lib\PrestaShopWebserviceException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class PrestaShop extends Solution
 {
@@ -80,7 +80,7 @@ class PrestaShop extends Solution
     ];
     protected $exclude_field_list = [];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'customers' => ['email'],
         'products' => ['ean13', 'name', 'reference'],
         'stock_availables' => ['id_product'],
@@ -122,15 +122,13 @@ class PrestaShop extends Solution
         }
     }
 
-    // login($paramConnexion)
-
     // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [
@@ -141,10 +139,8 @@ class PrestaShop extends Solution
         ];
     }
 
-    // getFieldsLogin()
-
     // Renvoie les modules disponibles
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' == $type) {
             try { // try-catch Myddleware
@@ -199,10 +195,8 @@ class PrestaShop extends Solution
         }
     }
 
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $extension = false)
+    public function get_module_fields($module, $type = 'source', $extension = false): array
     {
         parent::get_module_fields($module, $type, $extension);
         try { // try-catch Myddleware
@@ -375,8 +369,6 @@ class PrestaShop extends Solution
         }
     }
 
-    // get_module_fields($module)
-
     // Fonction permettant de récupérer les listes déroulantes
     protected function getList($field, $fields)
     {
@@ -428,10 +420,9 @@ class PrestaShop extends Solution
 
         return $out;
     }
-    // xml2array ( $xmlObject, $out = array () )
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+    public function read($param): ?array
     {
         // traitement spécial pour module de relation Customers / Groupe
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -730,10 +721,8 @@ class PrestaShop extends Solution
         return $result;
     }
 
-    // readManyToMany($param)
-
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): ?array
     {
         // If a sub record is created, it means that we will update the main module
         if (!empty($this->module_relationship_many_to_many[$param['module']])) {
@@ -824,8 +813,6 @@ class PrestaShop extends Solution
 
         return $result;
     }
-
-    // create($param)
 
     // Permet de modifier des données
     public function updateData($param)
@@ -948,8 +935,6 @@ class PrestaShop extends Solution
         return $result;
     }
 
-    // update($param)
-
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
@@ -971,7 +956,7 @@ class PrestaShop extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
         if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
@@ -980,12 +965,12 @@ class PrestaShop extends Solution
         if (in_array($moduleSource, ['order_details'])) {
             return 'id';
         }
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'date_upd';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'date_add';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
@@ -1000,7 +985,7 @@ class PrestaShop extends Solution
     }
 
     // Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             if (

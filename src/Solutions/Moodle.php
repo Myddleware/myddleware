@@ -27,7 +27,7 @@ namespace App\Solutions;
 
 use App\Solutions\lib\curl;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class Moodle extends Solution
 {
@@ -40,7 +40,7 @@ class Moodle extends Solution
         'get_user_grades' => ['id', 'timemodified'],
     ];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'users' => ['email', 'username'],
         'courses' => ['shortname', 'idnumber'],
     ];
@@ -74,12 +74,12 @@ class Moodle extends Solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [
@@ -91,7 +91,7 @@ class Moodle extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             if ('source' == $type) {
@@ -123,7 +123,7 @@ class Moodle extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -157,8 +157,7 @@ class Moodle extends Solution
     }
 
     // Read data in Moodle
-    // public function readData($param)
-    public function read($param)
+    public function read($param): array
     {
         try {
             $result = [];
@@ -196,7 +195,7 @@ class Moodle extends Solution
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -420,7 +419,7 @@ class Moodle extends Solution
     }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware($dateTime): string
     {
         $date = new \DateTime();
         $date->setTimestamp($dateTime);
@@ -429,7 +428,7 @@ class Moodle extends Solution
     }
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware($dateTime): string
     {
         $date = new \DateTime($dateTime);
 
@@ -503,7 +502,7 @@ class Moodle extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         switch ($moduleSource) {
             case 'get_course_completion_by_date':

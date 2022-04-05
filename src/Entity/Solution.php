@@ -27,13 +27,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\SolutionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Table(name="solution")
- * @ORM\Entity(repositoryClass="App\Repository\SolutionRepository")
+ * @ORM\Entity(repositoryClass=SolutionRepository::class)
  */
 class Solution implements \Stringable
 {
@@ -75,7 +76,7 @@ class Solution implements \Stringable
      */
     public function __construct()
     {
-        $this->connector = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->connector = new ArrayCollection();
     }
 
     public function getId(): ?int

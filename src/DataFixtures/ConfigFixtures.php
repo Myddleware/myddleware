@@ -54,8 +54,6 @@ class ConfigFixtures extends Fixture implements FixtureGroupInterface
         $this->manager->flush();
     }
 
-    // TODO: is this function still relevant ? Given that we ask users to load fixtures using --append option,
-    // which ADDS fixtures without purging database
     private function generateEntities()
     {
         // Get all config already in the database

@@ -465,6 +465,9 @@
     "sebastian/version": {
         "version": "3.0.2"
     },
+    "sendinblue/api-v3-sdk": {
+        "version": "v7.4.0"
+    },
     "sensio/framework-extra-bundle": {
         "version": "5.6",
         "recipe": {
@@ -670,10 +673,10 @@
             "repo": "github.com/symfony/recipes",
             "branch": "master",
             "version": "4.3",
-            "ref": "bbfc7e27257d3a3f12a6fb0a42540a42d9623a37"
+            "ref": "97a61eabb351d7f6cb7702039bcfe07fe9d7e03c"
         },
         "files": [
-            "./config/packages/mailer.yaml"
+            "config/packages/mailer.yaml"
         ]
     },
     "symfony/mailgun-mailer": {

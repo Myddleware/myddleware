@@ -26,8 +26,10 @@
 namespace App\Solutions;
 
 use App\Entity\Rule;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class File extends Solution
 {
@@ -81,9 +83,7 @@ class File extends Solution
         }
     }
 
-    // login($paramConnexion)
-
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -98,12 +98,12 @@ class File extends Solution
             ],
             [
                 'name' => 'host',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.host',
             ],
             [
                 'name' => 'port',
-                'type' => TextType::class,
+                'type' => IntegerType::class,
                 'label' => 'solution.fields.ftpport',
             ],
             [
@@ -115,7 +115,7 @@ class File extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             // Get the subfolders of the current directory
@@ -143,7 +143,7 @@ class File extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -208,8 +208,6 @@ class File extends Solution
         }
     }
 
-    // get_module_fields($module)
-
     // Get the fieldId from the other rules to add them into the source relationship list field
     public function get_module_fields_relate($module, $param)
     {
@@ -264,20 +262,21 @@ class File extends Solution
         }
     }
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    // Param contient :
-    //	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
-    //	module : le module appelé
-    //	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
-    //	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
-    // Valeur de sortie est un tableau contenant :
-    //		count : Le nombre d'enregistrement trouvé
-    //		date_ref : la nouvelle date de référence
-    //   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
-    // 			     exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
-    // 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
-
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
+    /**
+     * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
+     * Param contient :
+     * 	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
+     * 	module : le module appelé
+     * 	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
+     * 	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
+     * Valeur de sortie est un tableau contenant :
+     * 		count : Le nombre d'enregistrement trouvé
+     * 		date_ref : la nouvelle date de référence
+     *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
+     * 			     exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
+     * 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
+     * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution.
+     */
     public function readData($param)
     {
         $count = 0;
@@ -491,7 +490,7 @@ class File extends Solution
     }
 
     // Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             // $fieldsSource = array();

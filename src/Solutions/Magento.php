@@ -7,26 +7,27 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class Magento extends Solution
 {
@@ -41,7 +42,7 @@ class Magento extends Solution
         'orders_items' => 'item_id',
     ];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'customers' => ['email'],
     ];
 
@@ -49,13 +50,12 @@ class Magento extends Solution
 
     protected $callLimit = 100;
 
-    // Liste des param�tres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [
@@ -71,7 +71,6 @@ class Magento extends Solution
         ];
     }
 
-    // Connexion à Magento
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -94,7 +93,7 @@ class Magento extends Solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -112,7 +111,7 @@ class Magento extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -617,7 +616,7 @@ class Magento extends Solution
     }
 
     // Permet de créer un enregistrement
-    public function createData($param)
+    public function createData($param): array
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -755,28 +754,17 @@ class Magento extends Solution
         return $result;
     }
 
-    // For module address, we only update data
-    // public function getRuleMode($module,$type) {
-    // if (
-    // $type == 'source'
-    // AND $module == 'customer_address'
-    // ) {
-    // return array(
-    // 'U' => 'update_only',
-    // );
-    // }
-    // return parent::getRuleMode($module,$type);
-    // }
-
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    /**
+     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle.
+     */
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'updated_at';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'created_at';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     /**

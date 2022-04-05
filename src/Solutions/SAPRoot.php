@@ -46,7 +46,6 @@ class SAPRoot extends Solution
     protected $required_fields = [];
     protected $relateFieldAllowed = [];
 
-    // Connexion à sapcrm
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -77,10 +76,7 @@ class SAPRoot extends Solution
         }
     }
 
-    // login($paramConnexion)*/
-
-    // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -101,10 +97,8 @@ class SAPRoot extends Solution
         ];
     }
 
-    // getFieldsLogin()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         try {
             try {
@@ -197,8 +191,6 @@ class SAPRoot extends Solution
             $error = $e->getMessage();
         }
     }
-
-    // get_module_fields($module)
 
     // Permet de lire des données et de les sauvegarder dans plusieurs structures
     public function readMultiStructure($param, $function, $parameters, $readLast)
@@ -439,25 +431,19 @@ class SAPRoot extends Solution
         return 'REF_GUID';
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
-
-    // Function de conversion de datetime format Myddleware à un datetime format solution
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 
         return $date->format('YmdHis');
     }
-
-    // dateTimeFromMyddleware($dateTime)
 
     // Lorsque SAP renvoie un résultat, le réponse est différente s'il y a une seule ligne dans le retour ou s'il y en a plusieurs
     // On formate de sorte que même s'il n'y a qu'une seule ligne, la réponse soit convertie en tableau comme s'il y avait plusieurs lignes

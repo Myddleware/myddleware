@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\DocumentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
+ * @ORM\Entity(repositoryClass=DocumentRepository::class)
  * @ORM\Table(name="document", indexes={
  *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
  *      @ORM\Index(name="index_parent_id", columns={"parent_id"}),
@@ -369,7 +370,7 @@ class Document implements \Stringable
         })->first();
 
         if ($documentData instanceof DocumentData) {
-            return json_decode($documentData->getData(), true);
+            return $documentData->getData();
         }
     }
 

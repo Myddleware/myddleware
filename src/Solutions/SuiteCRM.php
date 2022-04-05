@@ -27,6 +27,7 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SuiteCRM extends Solution
 {
@@ -39,7 +40,7 @@ class SuiteCRM extends Solution
 
     protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
 
-    protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -143,7 +144,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    public function logout()
+    public function logout(): bool
     {
         try {
             $logout_parameters = ['session' => $this->session];
@@ -157,7 +158,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -172,14 +173,14 @@ class SuiteCRM extends Solution
             ],
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
         ];
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $get_available_modules_parameters = [
@@ -211,7 +212,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -357,8 +358,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    // Permet de lire les données
-    public function read($param)
+    public function read($param): ?array
     {
         $result = [];
 
@@ -508,7 +508,7 @@ class SuiteCRM extends Solution
             }
             // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
             else {
-                return;
+                return null;
             }
         }
 
@@ -590,8 +590,7 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Permet de créer des données
-    public function createData($param)
+    public function createData($param): ?array
     {
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -693,7 +692,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
     public function updateData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -746,7 +744,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Function to delete a record
     public function deleteData($param)
     {
         // We set the flag deleted to 1 and we call the update function
@@ -757,7 +754,6 @@ class SuiteCRM extends Solution
         return $this->updateData($param);
     }
 
-    // Build the query for read data to SuiteCRM
     protected function generateQuery($param, $method)
     {
         $query = '';
@@ -814,14 +810,14 @@ class SuiteCRM extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'date_modified';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'date_entered';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship
@@ -854,7 +850,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // function to make cURL request
     protected function call($method, $parameters)
     {
         try {

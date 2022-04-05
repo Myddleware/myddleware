@@ -38,7 +38,7 @@ class SageCRM extends Solution
 
     protected $required_fields = ['default' => ['updateddate', 'createddate']];
 
-    protected $FieldsDuplicate = [];
+    protected $fieldsDuplicate = [];
 
     protected $required_relationships = [
         'default' => [],
@@ -122,7 +122,7 @@ class SageCRM extends Solution
     }
 
     // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -144,7 +144,7 @@ class SageCRM extends Solution
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             try {
@@ -200,7 +200,7 @@ class SageCRM extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
 
@@ -368,7 +368,7 @@ class SageCRM extends Solution
             $param['fields'] = array_values($param['fields']);
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
-            $queryrecord = ['fieldlist' => '', 'queryString' => $prefix.'_'.$DateRefField." > '".$this->DateConverter($param['date_ref'], 1)."'", 'entityname' => $module, 'orderby' => $prefix.'_'.$DateRefField.' ASC'];
+            $queryrecord = ['fieldlist' => '', 'queryString' => $prefix.'_'.$DateRefField." > '".$this->dateConverter($param['date_ref'], 1)."'", 'entityname' => $module, 'orderby' => $prefix.'_'.$DateRefField.' ASC'];
 
             // Ajout du champ id, obligatoire mais spécifique au module
             if (isset($this->IdByModule[$module])) { // Si le champ id existe dans le tableau
@@ -403,8 +403,8 @@ class SageCRM extends Solution
                         $row['id'] = $recordFields[$fieldID]; // Ajout de l'ID, $fieldID vaut "companyid" pour le module "company" par exemple
                         foreach ($recordFields as $key => $value) {
                             if ($key == $DateRefField) {
-                                $row['date_modified'] = $this->DateConverter($value);
-                                $result['date_ref'] = $this->DateConverter($value);
+                                $row['date_modified'] = $this->dateConverter($value);
+                                $result['date_ref'] = $this->dateConverter($value);
                             }
                             if (in_array($key, $param['fields'])) {
                                 $row[$key] = $value;
@@ -428,8 +428,8 @@ class SageCRM extends Solution
                     $row['id'] = $recordFields[$fieldID]; // Ajout de l'ID, $fieldID vaut "companyid" pour le module "company" par exemple
                     foreach ($recordFields as $key => $value) {
                         if ($key == $DateRefField) {
-                            $row['date_modified'] = $this->DateConverter($value);
-                            $result['date_ref'] = $this->DateConverter($value);
+                            $row['date_modified'] = $this->dateConverter($value);
+                            $result['date_ref'] = $this->dateConverter($value);
                         }
                         if (in_array($key, $param['fields'])) {
                             $row[$key] = $value;
@@ -448,7 +448,7 @@ class SageCRM extends Solution
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): array
     {
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
@@ -543,8 +543,6 @@ class SageCRM extends Solution
 
         return $result;
     }
-
-    // create($param)
 
     // Permet de modifier des données
     public function updateData($param)
@@ -653,18 +651,18 @@ class SageCRM extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'updateddate';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'createddate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Function de conversion de date format solution à une date format Myddleware
-    protected function DateConverter($dateTime, $sens = 0)
+    protected function dateConverter($dateTime, $sens = 0)
     {
         if ($sens) { // Vers SageCRM
             $formatReturn = "Y-m-d\TH:i:s";

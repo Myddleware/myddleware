@@ -25,8 +25,10 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SugarCRM extends Solution
 {
@@ -43,7 +45,7 @@ class SugarCRM extends Solution
 
     protected $required_fields = ['default' => ['id', 'date_modified']];
 
-    protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -51,7 +53,7 @@ class SugarCRM extends Solution
         'default' => ['name'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -66,13 +68,12 @@ class SugarCRM extends Solution
             ],
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
         ];
     }
 
-    // Connect to SugarCRM
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -103,8 +104,7 @@ class SugarCRM extends Solution
         }
     }
 
-    // Get module list
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
@@ -162,7 +162,7 @@ class SugarCRM extends Solution
         return false;
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -265,17 +265,13 @@ class SugarCRM extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     /**
-     * Function read data.
-     *
      * @param $param
      *
      * @return mixed
      */
-    // public function readData($param)
-    public function read($param)
+    public function read($param): ?array
     {
         $result = [];
 
@@ -290,7 +286,7 @@ class SugarCRM extends Solution
         $filterArgs = [
             'max_num' => $param['limit'],
             'offset' => 0,
-            'fields' => implode($param['fields'], ','),
+            'fields' => implode(',', $param['fields']),
             'order_by' => 'date_modified',
             'deleted' => $deleted,
         ];
@@ -366,20 +362,17 @@ class SugarCRM extends Solution
         return $filterArgs;
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         return 'date_modified';
     }
-    // end function read
 
     /**
-     * Function create data.
-     *
      * @param $param
      *
      * @return mixed
      */
-    public function createData($param)
+    public function createData($param): ?array
     {
         $result = [];
         $error = '';
@@ -402,11 +395,8 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function create
 
     /**
-     * Function update data.
-     *
      * @param $param
      *
      * @return mixed
@@ -434,11 +424,8 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function update
 
     /**
-     * Function delete data.
-     *
      * @param $param
      *
      * @return mixed
@@ -466,7 +453,6 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function update
 
     public function upsert($method, $param)
     {
@@ -572,11 +558,10 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function create
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // We save the UTC date in Myddleware
@@ -584,17 +569,14 @@ class SugarCRM extends Solution
 
         return $dto->format('Y-m-d H:i:s');
     }
-    // dateTimeToMyddleware($dateTime)
 
     // Convert date to SugarCRM format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // Return date to UTC timezone
         return $dto->format('Y-m-d\TH:i:s+00:00');
     }
-
-    // dateTimeToMyddleware($dateTime)
 
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type)

@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -38,11 +38,11 @@ class CirrusShield extends Solution
 
     protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
 
-    protected $FieldsDuplicate = ['Contact' => ['Email', 'Name'],
+    protected $fieldsDuplicate = ['Contact' => ['Email', 'Name'],
         'default' => ['Name'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -58,8 +58,7 @@ class CirrusShield extends Solution
         ];
     }
 
-    // Login to Cirrus Shield
-    public function login($paramConnexion)
+    public function login(array $paramConnexion)
     {
         parent::login($paramConnexion);
         try {
@@ -85,10 +84,7 @@ class CirrusShield extends Solution
         }
     }
 
-    // login($paramConnexion)
-
-    // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): ?array
     {
         try {
             $apiModules = $this->call($this->url.'DescribeAll?authToken='.$this->token);
@@ -106,8 +102,7 @@ class CirrusShield extends Solution
         }
     }
 
-    // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -152,12 +147,11 @@ class CirrusShield extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            return null;
         }
     }
-    // get_module_fields($module)
 
-    public function readData($param)
+    public function readData(array $param)
     {
         try {
             $result['date_ref'] = $param['date_ref'];
@@ -282,8 +276,7 @@ class CirrusShield extends Solution
         return $result;
     }
 
-    // Create data in the target solution
-    public function createData($param)
+    public function createData(array $param): ?array
     {
         try {
             $i = 0;
@@ -391,7 +384,7 @@ class CirrusShield extends Solution
     }
 
     // Cirrus Shield use the same function for record's creation and modification
-    public function updateData($param)
+    public function updateData(array $param)
     {
         $this->update = true;
         $result = $this->createData($param);
@@ -401,16 +394,16 @@ class CirrusShield extends Solution
     }
 
     // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'ModificationDate';
         // Creation mode only
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     protected function getOrganizationTimezone()

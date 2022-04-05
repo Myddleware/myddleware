@@ -7,23 +7,23 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
- NOTICE: please ensure you have correctly emptied your Mautic var/cache folder before
- using Myddleware to avoid issues when connecting to Mautic API
+    NOTICE: please ensure you have correctly emptied your Mautic var/cache folder before
+    using Myddleware to avoid issues when connecting to Mautic API
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -32,6 +32,7 @@ use Mautic\Auth\ApiAuth;
 use Mautic\MauticApi;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class Mautic extends Solution
 {
@@ -48,7 +49,7 @@ class Mautic extends Solution
         'company' => ['id'],
     ];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'contact' => ['email'],
     ];
 
@@ -58,7 +59,7 @@ class Mautic extends Solution
     // If you have Mautic 2 or lower, you must change this parameter to your version number
     protected $mauticVersion = 3;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -73,7 +74,7 @@ class Mautic extends Solution
             ],
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
         ];
@@ -116,7 +117,7 @@ class Mautic extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         // Modules available in source and target
         $modules = [
@@ -134,7 +135,7 @@ class Mautic extends Solution
     }
 
     // Get the fields available
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -193,9 +194,8 @@ class Mautic extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
-    public function createData($param)
+    public function createData($param): array
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -207,8 +207,6 @@ class Mautic extends Solution
                 return $this->createUpdate('create', $param);
         }
     }
-
-    // end function create
 
     public function updateData($param)
     {
@@ -223,8 +221,6 @@ class Mautic extends Solution
         }
     }
 
-    // end function create
-
     public function deleteData($param)
     {
         // Specific management depending on the module
@@ -237,8 +233,6 @@ class Mautic extends Solution
                 return $this->deleteRecord($param);
         }
     }
-
-    // end function create
 
     // Create reconto to Mautic
     public function createUpdate($action, $param)
@@ -425,7 +419,7 @@ class Mautic extends Solution
         }
     }
 
-    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    protected function checkDataBeforeCreate($param, $data, $idDoc): ?array
     {
         // Remove target_id field as it is a Myddleware field
         if (array_key_exists('target_id', $data)) {
@@ -436,7 +430,7 @@ class Mautic extends Solution
     }
 
     // Function to convert datetime format from the current application to Myddleware date format
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware($dateTime): string
     {
         $date = new \DateTime($dateTime);
 

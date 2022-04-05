@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Factory;
+namespace App\Factory;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -45,6 +45,16 @@ final class UserFactory extends ModelFactory
             'email' => self::faker()->email(),
             'isVerified' => self::faker()->boolean(),
         ];
+    }
+
+    public function isAdmin(): self
+    {
+        return $this->addState(['roles' => ['ROLE_ADMIN']]);
+    }
+
+    public function isSuperAdmin(): self
+    {
+        return $this->addState(['roles' => ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']]);
     }
 
     protected function initialize(): self
