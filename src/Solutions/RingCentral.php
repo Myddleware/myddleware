@@ -283,7 +283,7 @@ class RingCentral extends Solution
     }
 
     // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         if ('call-log' == $moduleSource) {
             return 'startTime';

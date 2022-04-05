@@ -503,7 +503,7 @@ class Moodle extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         switch ($moduleSource) {
             case 'get_course_completion_by_date':

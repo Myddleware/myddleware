@@ -387,7 +387,7 @@ class WooCommerce extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         return 'date_modified';
     }

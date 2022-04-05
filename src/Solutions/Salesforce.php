@@ -737,13 +737,13 @@ class Salesforce extends Solution {
 	}
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getRefFieldName($moduleSource, $RuleMode) {
-		if(in_array($RuleMode,array("0","S"))) {
+	public function getRefFieldName($moduleSource, $ruleMode) {
+		if(in_array($ruleMode,array("0","S"))) {
 			return "LastModifiedDate";
-		} else if ($RuleMode == "C"){
+		} else if ($ruleMode == "C"){
 			return "CreatedDate";
 		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
+			throw new \Exception ("$ruleMode is not a correct Rule mode.");
 		}
 		return null;
 	}

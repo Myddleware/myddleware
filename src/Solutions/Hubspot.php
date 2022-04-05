@@ -1285,22 +1285,22 @@ class Hubspot extends Solution
      * return the reference date field name.
      *
      * @param $moduleSource
-     * @param $RuleMode
+     * @param $ruleMode
      *
      * @return string|null
      *
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Creation and modification mode
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'ModificationDate';
         // Creation mode only
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     /**

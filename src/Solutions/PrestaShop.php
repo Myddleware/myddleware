@@ -971,7 +971,7 @@ class PrestaShop extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
         if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
@@ -980,12 +980,12 @@ class PrestaShop extends Solution
         if (in_array($moduleSource, ['order_details'])) {
             return 'id';
         }
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'date_upd';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'date_add';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)

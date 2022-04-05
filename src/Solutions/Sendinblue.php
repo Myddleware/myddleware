@@ -544,7 +544,7 @@ class Sendinblue extends Solution
     }
 
     // Returns the name of the reference date field according to the module and mode of the rule
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         switch ($moduleSource) {
             case 'transactionalEmails':

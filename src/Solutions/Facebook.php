@@ -302,7 +302,7 @@ class Facebook extends Solution
         }
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         // Only leads module for now
         return 'created_time';

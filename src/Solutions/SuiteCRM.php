@@ -810,14 +810,14 @@ class SuiteCRM extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($ruleMode, ['0', 'S'])) {
             return 'date_modified';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $ruleMode) {
             return 'date_entered';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship

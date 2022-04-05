@@ -362,7 +362,7 @@ class SugarCRM extends Solution
         return $filterArgs;
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $ruleMode)
     {
         return 'date_modified';
     }
