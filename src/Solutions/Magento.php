@@ -50,8 +50,7 @@ class Magento extends Solution
 
     protected $callLimit = 100;
 
-    // Liste des param�tres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -72,7 +71,6 @@ class Magento extends Solution
         ];
     }
 
-    // Connexion à Magento
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -95,7 +93,7 @@ class Magento extends Solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -113,7 +111,7 @@ class Magento extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -618,7 +616,7 @@ class Magento extends Solution
     }
 
     // Permet de créer un enregistrement
-    public function createData($param)
+    public function createData($param): array
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -756,20 +754,10 @@ class Magento extends Solution
         return $result;
     }
 
-    // For module address, we only update data
-    // public function getRuleMode($module,$type) {
-    // if (
-    // $type == 'source'
-    // AND $module == 'customer_address'
-    // ) {
-    // return array(
-    // 'U' => 'update_only',
-    // );
-    // }
-    // return parent::getRuleMode($module,$type);
-    // }
 
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+    /**
+     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+     */
     public function getRefFieldName($moduleSource, $ruleMode)
     {
         if (in_array($ruleMode, ['0', 'S'])) {

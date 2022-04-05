@@ -51,7 +51,7 @@ class PostgreSQL extends Database
     }
 
     // Get all tables from the database
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modules = [];
@@ -80,7 +80,7 @@ class PostgreSQL extends Database
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         try {
             // Get all fields of the table in input
@@ -158,7 +158,6 @@ class PostgreSQL extends Database
             return false;
         }
     }
-    // get_module_fields($module)
 
     // Query to get all the flieds of the table
     protected function get_query_describe_table($table)

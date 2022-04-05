@@ -28,6 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Twig\Node\Expression\Test\NullTest;
 
 class SuiteCRM extends Solution
 {
@@ -144,7 +145,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    public function logout()
+    public function logout(): bool
     {
         try {
             $logout_parameters = ['session' => $this->session];
@@ -158,7 +159,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -180,7 +181,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $get_available_modules_parameters = [
@@ -212,7 +213,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -358,7 +359,7 @@ class SuiteCRM extends Solution
         }
     }
 
-    public function read($param)
+    public function read($param): ?array
     {
         $result = [];
 
@@ -508,7 +509,7 @@ class SuiteCRM extends Solution
             }
             // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
             else {
-                return;
+                return null;
             }
         }
 
@@ -590,7 +591,7 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    public function createData($param)
+    public function createData($param): ?array
     {
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {

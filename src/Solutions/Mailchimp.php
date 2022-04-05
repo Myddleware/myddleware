@@ -35,7 +35,7 @@ class Mailchimp extends Solution
     protected $update = false;
     public const TIMEOUT = 60;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -74,10 +74,8 @@ class Mailchimp extends Solution
         }
     }
 
-    // login($paramConnexion)
-
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): ?array
     {
         try {
             if ('target' == $type) {
@@ -87,7 +85,7 @@ class Mailchimp extends Solution
                     'members' => 'Members',
                 ];
             } else {
-                return;
+                return null;
             }
 
             return $modules;
@@ -99,7 +97,7 @@ class Mailchimp extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -114,8 +112,6 @@ class Mailchimp extends Solution
             return false;
         }
     }
-
-    // get_module_fields($module)
 
     // Permet de créer des données
     public function createUpdate($method, $param)
@@ -190,7 +186,7 @@ class Mailchimp extends Solution
     }
 
     // Create data to Mailchimp
-    public function createData($param)
+    public function createData($param): array
     {
         return $this->createUpdate('POST', $param);
     }

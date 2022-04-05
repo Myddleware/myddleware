@@ -53,7 +53,7 @@ class SugarCRM extends Solution
         'default' => ['name'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -104,7 +104,7 @@ class SugarCRM extends Solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
@@ -162,7 +162,7 @@ class SugarCRM extends Solution
         return false;
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -271,7 +271,7 @@ class SugarCRM extends Solution
      *
      * @return mixed
      */
-    public function read($param)
+    public function read($param): ?array
     {
         $result = [];
 
@@ -286,7 +286,7 @@ class SugarCRM extends Solution
         $filterArgs = [
             'max_num' => $param['limit'],
             'offset' => 0,
-            'fields' => implode($param['fields'], ','),
+            'fields' => implode(',', $param['fields']),
             'order_by' => 'date_modified',
             'deleted' => $deleted,
         ];
@@ -372,7 +372,7 @@ class SugarCRM extends Solution
      *
      * @return mixed
      */
-    public function createData($param)
+    public function createData($param): ?array
     {
         $result = [];
         $error = '';
@@ -561,7 +561,7 @@ class SugarCRM extends Solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // We save the UTC date in Myddleware
@@ -571,7 +571,7 @@ class SugarCRM extends Solution
     }
 
     // Convert date to SugarCRM format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // Return date to UTC timezone

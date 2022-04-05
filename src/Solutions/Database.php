@@ -7,20 +7,20 @@
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
- This file is part of Myddleware.
+    This file is part of Myddleware.
 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    Myddleware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    Myddleware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
 namespace App\Solutions;
@@ -38,7 +38,7 @@ class Database extends Solution
     protected $stringSeparatorOpen = '`';
     protected $stringSeparatorClose = '`';
 
-    public function login($paramConnexion)
+    public function login(array $paramConnexion)
     {
         parent::login($paramConnexion);
         try {
@@ -60,9 +60,7 @@ class Database extends Solution
         }
     }
 
-    // login($paramConnexion)
-
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -94,7 +92,7 @@ class Database extends Solution
     }
 
     // Get all tables from the database
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): ?array
     {
         try {
             $modules = [];
@@ -124,7 +122,7 @@ class Database extends Solution
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -203,7 +201,6 @@ class Database extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
@@ -649,7 +646,7 @@ class Database extends Solution
         }
     }
 
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd(string $type, string $module): array
     {
         try {
             $fieldsSource = $this->get_module_fields($module, $type, false);

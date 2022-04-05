@@ -36,7 +36,7 @@ class WordPress extends Solution
     // Module without reference date
     protected $moduleWithoutReferenceDate = ['users', 'categories'];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
                     [
@@ -69,7 +69,7 @@ class WordPress extends Solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): ?array
     {
         return [
             'posts' => 'Posts',
@@ -91,7 +91,7 @@ class WordPress extends Solution
             ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -280,7 +280,7 @@ class WordPress extends Solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // We save the UTC date in Myddleware
@@ -290,7 +290,7 @@ class WordPress extends Solution
     }
 
     // convert from Myddleware format to Woocommerce format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // Return date to UTC timezone

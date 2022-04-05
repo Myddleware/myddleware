@@ -554,7 +554,7 @@ class Solution
         return null;
     }
 
-    public function deleteData($param)
+    public function deleteData(array $param)
     {
         try {
             // For every document

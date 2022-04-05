@@ -69,10 +69,8 @@ class SAPECC extends SAP
         parent::login($paramConnexion);
     }
 
-    // login($paramConnexion)*/
-
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -84,9 +82,7 @@ class SAPECC extends SAP
         ];
     }
 
-    // get_modules()
-
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];

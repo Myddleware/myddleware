@@ -121,7 +121,8 @@ class Salesforce extends Solution {
 	} 
 
 	// Liste des paramètres de connexion
-	public function getFieldsLogin() {	
+	public function getFieldsLogin() : array
+	{	
         return array(
                     array(
                             'name' => 'login',
@@ -157,7 +158,8 @@ class Salesforce extends Solution {
 	}
 
 	// Renvoie les modules disponibles du compte Salesforce connecté
-	public function get_modules($type = 'source') {
+	public function get_modules($type = 'source'): array
+	{
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
 		// Accès au service de SalesForce renvoyant la liste des objets disponibles propres à l'organisation
@@ -187,7 +189,8 @@ class Salesforce extends Solution {
 	}
 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $param = null) {
+	public function get_module_fields($module, $type = 'source', $param = null): array
+	{
 		parent::get_module_fields($module, $type);
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
@@ -286,7 +289,8 @@ class Salesforce extends Solution {
 	}
 
 	// Permet d'ajouter des paramètres 
-	public function getFieldsParamUpd($type,$module) {	
+	public function getFieldsParamUpd($type,$module): array
+	{	
 		try {
 			// Si le module est PricebookEntry (produit dans le catalogue) alors il faut indiquer le catalogue de produit utilisé
 			if (
@@ -328,7 +332,8 @@ class Salesforce extends Solution {
 	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function readData($param) {	
+	public function readData($param) 
+	{	
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -450,7 +455,8 @@ class Salesforce extends Solution {
 	} 
 	
 	// Permet de créer des données
-	public function createData($param) {
+	public function createData($param): array
+	{
 		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
@@ -568,7 +574,8 @@ class Salesforce extends Solution {
 	} 
 	
 	// Permet de modifier des données
-	public function updateData($param) {		
+	public function updateData($param) 
+	{		
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
 		}
@@ -653,12 +660,14 @@ class Salesforce extends Solution {
 	} 
 	
 	// Permet de formater la réponse si besoin
-	protected function formatResponse($param,$query_request_data) {
+	protected function formatResponse($param,$query_request_data) 
+	{
 		return $query_request_data;
 	}
 	
 	// Génération du SELECT
-	protected function getSelect($param) {
+	protected function getSelect($param) 
+	{
 		$querySelect = "SELECT+";
 		// Gestion du SELECT
 		foreach ($param['fields'] as $field){
@@ -671,12 +680,14 @@ class Salesforce extends Solution {
 	}
 	
 	// Génération du FROM
-	protected function getFrom($param) {
+	protected function getFrom($param) 
+	{
 		return "+FROM+".$param['module'];
 	}
 	
 	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
-	protected function getWhere($param) {
+	protected function getWhere($param) 
+	{
 		if (!empty($param['query'])) {
 			foreach ($param['query'] as $key => $value) {
 				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
@@ -711,7 +722,8 @@ class Salesforce extends Solution {
 	}
 	
 	// Génération du ORDER
-	protected function getOrder($param){	
+	protected function getOrder($param)
+	{	
 		$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
@@ -724,7 +736,8 @@ class Salesforce extends Solution {
 	// Permet de renvoyer le mode de la règle en fonction du module target
 	// Valeur par défaut "0"
 	// Si la règle n'est qu'en création, pas en modicication alors le mode est C
-	public function getRuleMode($module,$type) {
+	public function getRuleMode($module,$type) 
+	{
 		if(
 			$type == 'target'
 			&& in_array($module, array('GroupMember','CollaborationGroupMember','CaseTeamMember','CaseTeamTemplateMember'))
@@ -737,7 +750,8 @@ class Salesforce extends Solution {
 	}
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getRefFieldName($moduleSource, $ruleMode) {
+	public function getRefFieldName($moduleSource, $ruleMode)
+	{
 		if(in_array($ruleMode,array("0","S"))) {
 			return "LastModifiedDate";
 		} else if ($ruleMode == "C"){
@@ -749,7 +763,8 @@ class Salesforce extends Solution {
 	}
 	
 	// Fonction permettant de faire l'appel REST
-	protected function call($url, $parameters, $update = false){	
+	protected function call($url, $parameters, $update = false)
+	{	
 		ob_start();
 		$ch = curl_init();
 		if($parameters === false){ // Si l'appel ne possède pas de paramètres, on exécute un GET en curl
@@ -813,7 +828,8 @@ class Salesforce extends Solution {
     }
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
-	protected function dateTimeToMyddleware($dateTime) {
+	protected function dateTimeToMyddleware(string $dateTime): string
+	{
 		$tab = explode('T', $dateTime);
 		$dateTime = $tab[0] . ' ' . $tab[1];
 		$tab = explode('.', $dateTime);
@@ -822,7 +838,8 @@ class Salesforce extends Solution {
 	}
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
-	protected function dateTimeFromMyddleware($dateTime) {
+	protected function dateTimeFromMyddleware(string $dateTime): string 
+	{
 		$tab = explode(' ', $dateTime);
 		$date = $tab[0] . 'T' . $tab[1];
 		$date .= '+00:00';

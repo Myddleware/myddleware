@@ -52,7 +52,7 @@ class RingCentral extends Solution
         'presence' => ['id', 'date_modified'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -115,10 +115,8 @@ class RingCentral extends Solution
         }
     }
 
-    // login($paramConnexion)
-
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modules = [
@@ -136,7 +134,7 @@ class RingCentral extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -150,7 +148,6 @@ class RingCentral extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     public function readData($param)
     {
@@ -295,7 +292,7 @@ class RingCentral extends Solution
     }
 
     // Add the filed extensionId on the rule
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params[] = [
@@ -314,7 +311,7 @@ class RingCentral extends Solution
     }
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         try {
             if (empty($dateTime)) {
@@ -339,17 +336,13 @@ class RingCentral extends Solution
         }
     }
 
-    // dateTimeFromMyddleware($dateTime)
-
     // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
-
-    // dateTimeToMyddleware($dateTime)
 
     // HTTP Request function
     public function makeRequest($server, $token, $path, $args = null, $method = 'GET', $data = null)

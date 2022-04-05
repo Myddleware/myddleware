@@ -44,7 +44,7 @@ class Sendinblue extends Solution
     protected $fieldsDuplicate = ['contacts' => ['email']];
     protected $limitEmailActivity = 100;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -85,7 +85,7 @@ class Sendinblue extends Solution
     }
 
     // Get module list
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -101,7 +101,7 @@ class Sendinblue extends Solution
     }
 
     // Returns the fields of the module passed in parameter
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
 
@@ -156,7 +156,7 @@ class Sendinblue extends Solution
     }
 
     // Read all fields
-    public function read($param)
+    public function read($param): ?array
     {
         $result = [];
         // Function are differents depending on the type of record we read from Sendinblue
@@ -445,7 +445,7 @@ class Sendinblue extends Solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
 
@@ -453,7 +453,7 @@ class Sendinblue extends Solution
     }
 
     // convert from Myddleware format to Sendinble format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // Return date to UTC timezone
@@ -467,7 +467,7 @@ class Sendinblue extends Solution
         return $dto->format('Y-m-d');
     }
 
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         $params = parent::getFieldsParamUpd($type, $module);
         try {
@@ -534,7 +534,7 @@ class Sendinblue extends Solution
     }
 
     // Return a specific id for some modules
-    public function getIdName($module)
+    public function getIdName(string $module): string
     {
         if ('transactionalEmails' == $module) {
             return 'uuid';

@@ -39,7 +39,7 @@ class Zuora extends Solution
     protected $required_fields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
 
     // Connection parameters
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -96,7 +96,7 @@ class Zuora extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): ?array
     {
         try {
             require_once 'lib/zuora/lib_zuora.php';
@@ -118,7 +118,7 @@ class Zuora extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -155,7 +155,7 @@ class Zuora extends Solution
         }
     }
 
-    public function createData($param)
+    public function createData($param): ?array
     {
         // Get the action because we use the create function to update data as well
         if ($this->update) {
@@ -497,7 +497,7 @@ class Zuora extends Solution
 
     // The function return true if we can display the column parent in the rule view, relationship tab
     // We display the parent column when module is subscription
-    public function allowParentRelationship($module)
+    public function allowParentRelationship($module): bool
     {
         if (in_array($module, ['Subscription', 'RatePlan'])) {
             return true;

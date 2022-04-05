@@ -90,7 +90,7 @@ class SAPCRM extends SAPRoot
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ($type = 'source') {
             return [
@@ -105,7 +105,7 @@ class SAPCRM extends SAPRoot
         ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         if ('target' == $type) {
             switch ($module) {
@@ -279,7 +279,7 @@ class SAPCRM extends SAPRoot
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
@@ -440,7 +440,7 @@ class SAPCRM extends SAPRoot
     }
 
     // Ajout des filiale et du groupe en paramètre
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];

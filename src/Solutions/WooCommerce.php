@@ -45,7 +45,7 @@ class WooCommerce extends Solution
                             ];
 
     // Log in form parameters
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
                     [
@@ -91,7 +91,7 @@ class WooCommerce extends Solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): ?array
     {
         return [
             'customers' => 'Customers',
@@ -108,7 +108,7 @@ class WooCommerce extends Solution
         ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         require 'lib/woocommerce/metadata.php';
         parent::get_module_fields($module, $type);
@@ -153,7 +153,7 @@ class WooCommerce extends Solution
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
     // public function readData($param) {
-    public function read($param)
+    public function read($param): ?array
     {
         try {
             $module = $param['module'];
@@ -285,7 +285,7 @@ class WooCommerce extends Solution
      *
      * @return mixed
      */
-    public function createData($param)
+    public function createData($param): ?array
     {
         return $this->upsert('create', $param);
     }
@@ -346,12 +346,9 @@ class WooCommerce extends Solution
         return $result;
     }
 
-    // Check data before create
-    // Add a throw exeption if error
-
     // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate($param, $data): ?array
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
@@ -361,7 +358,7 @@ class WooCommerce extends Solution
 
     // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeDelete($param, $data)
+    protected function checkDataBeforeDelete($param, $data): ?array
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);
@@ -371,7 +368,7 @@ class WooCommerce extends Solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
 
@@ -379,7 +376,7 @@ class WooCommerce extends Solution
     }
 
     // convert from Myddleware format to Woocommerce format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
         // Return date to UTC timezone

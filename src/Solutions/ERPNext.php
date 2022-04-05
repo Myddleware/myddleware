@@ -57,7 +57,7 @@ class ERPNext extends Solution
     // Get isTable parameter for each module
     protected $isTableModule = [];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -105,7 +105,7 @@ class ERPNext extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): array
     {
         try {
             // Get
@@ -128,7 +128,7 @@ class ERPNext extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -245,7 +245,7 @@ class ERPNext extends Solution
      *
      * @return mixed
      */
-    public function read($param)
+    public function read(array $param): ?array
     {
         try {
             $result = [];
@@ -301,7 +301,7 @@ class ERPNext extends Solution
         return $result;
     }
 
-    public function createData($param)
+    public function createData(array $param): ?array
     {
         return $this->createUpdate('create', $param);
     }
@@ -311,7 +311,7 @@ class ERPNext extends Solution
      *
      * @return mixed
      */
-    public function updateData($param)
+    public function updateData(array $param)
     {
         return $this->createUpdate('update', $param);
     }
@@ -427,7 +427,7 @@ class ERPNext extends Solution
     }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 
@@ -435,7 +435,7 @@ class ERPNext extends Solution
     }
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 

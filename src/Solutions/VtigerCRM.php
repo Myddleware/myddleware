@@ -150,23 +150,23 @@ class VtigerCRM extends Solution
         ];
     }
 
-    public function get_modules(string $type = 'source'): array|bool
+    public function get_modules(string $type = 'source'): ?array
     {
         try {
             if (empty($this->vtigerClient)) {
-                return false;
+                return null;
             }
 
             $result = $this->vtigerClient->listTypes();
 
             if (!$result['success'] || ($result['success'] && 0 == count($result['result']))) {
-                return false;
+                return null;
             }
 
             $modules = $result['result'] ?? null;
 
             if (empty($modules)) {
-                return false;
+                return null;
             }
 
             $escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
@@ -178,7 +178,7 @@ class VtigerCRM extends Solution
                 }
             }
 
-            return $options ?: false;
+            return $options ?: null;
         } catch (\Exception $e) {
             $error = $e->getMessage();
 
@@ -221,7 +221,7 @@ class VtigerCRM extends Solution
      *
      * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {

@@ -76,7 +76,7 @@ class SAPRoot extends Solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -98,7 +98,7 @@ class SAPRoot extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): ?array
     {
         try {
             try {
@@ -431,14 +431,14 @@ class SAPRoot extends Solution
         return 'REF_GUID';
     }
 
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
 
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
 

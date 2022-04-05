@@ -59,7 +59,7 @@ class Mautic extends Solution
     // If you have Mautic 2 or lower, you must change this parameter to your version number
     protected $mauticVersion = 3;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -117,7 +117,7 @@ class Mautic extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         // Modules available in source and target
         $modules = [
@@ -135,7 +135,7 @@ class Mautic extends Solution
     }
 
     // Get the fields available
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -194,9 +194,8 @@ class Mautic extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
-    public function createData($param)
+    public function createData($param): array
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -208,8 +207,6 @@ class Mautic extends Solution
                 return $this->createUpdate('create', $param);
         }
     }
-
-    // end function create
 
     public function updateData($param)
     {
@@ -224,8 +221,6 @@ class Mautic extends Solution
         }
     }
 
-    // end function create
-
     public function deleteData($param)
     {
         // Specific management depending on the module
@@ -238,8 +233,6 @@ class Mautic extends Solution
                 return $this->deleteRecord($param);
         }
     }
-
-    // end function create
 
     // Create reconto to Mautic
     public function createUpdate($action, $param)
@@ -426,7 +419,7 @@ class Mautic extends Solution
         }
     }
 
-    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    protected function checkDataBeforeCreate($param, $data, $idDoc): ?array
     {
         // Remove target_id field as it is a Myddleware field
         if (array_key_exists('target_id', $data)) {
@@ -437,7 +430,7 @@ class Mautic extends Solution
     }
 
     // Function to convert datetime format from the current application to Myddleware date format
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware($dateTime): string
     {
         $date = new \DateTime($dateTime);
 
