@@ -27,8 +27,8 @@ namespace App\Solutions;
 
 use App\Solutions\lib\PrestaShopWebservice;
 use App\Solutions\lib\PrestaShopWebserviceException;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class PrestaShop extends Solution
 {
@@ -80,7 +80,7 @@ class PrestaShop extends Solution
     ];
     protected $exclude_field_list = [];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'customers' => ['email'],
         'products' => ['ean13', 'name', 'reference'],
         'stock_availables' => ['id_product'],
@@ -130,7 +130,7 @@ class PrestaShop extends Solution
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [

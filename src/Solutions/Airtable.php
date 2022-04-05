@@ -72,7 +72,7 @@ class Airtable extends Solution
     protected $callPostLimit = 10;
 
     // Log in form parameters
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         // QUESTION: could we possibly pass a MODULE here ?
         // This would allow us to then only resort to variable in login etc
@@ -98,7 +98,7 @@ class Airtable extends Solution
      *
      * @return void
      */
-    public function login($paramConnexion)
+    public function login(array $paramConnexion)
     {
         parent::login($paramConnexion);
         try {
@@ -130,7 +130,7 @@ class Airtable extends Solution
      *
      * @return array
      */
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): array
     {
         if (!empty($this->modules[$this->projectID])) {
             return $this->modules[$this->projectID];
@@ -148,7 +148,7 @@ class Airtable extends Solution
      *
      * @return array
      */
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         require 'lib/airtable/metadata.php';
         parent::get_module_fields($module, $type);
@@ -161,7 +161,7 @@ class Airtable extends Solution
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return null;
         }
     }
 
@@ -172,7 +172,7 @@ class Airtable extends Solution
      *
      * @return array
      */
-    public function readData($param)
+    public function readData(array $param)
     {
         try {
             $baseID = $this->paramConnexion['projectid'];
@@ -323,6 +323,7 @@ class Airtable extends Solution
             return $result;
         }
      */
+
     /**
      * Create data into target app.
      *
@@ -330,7 +331,7 @@ class Airtable extends Solution
      *
      * @return void
      */
-    public function createData($param)
+    public function createData(array $param): ?array
     {
         return $this->upsert('create', $param);
     }
@@ -342,7 +343,7 @@ class Airtable extends Solution
      *
      * @return void
      */
-    public function updateData($param)
+    public function updateData(array $param)
     {
         return $this->upsert('update', $param);
     }
@@ -358,10 +359,8 @@ class Airtable extends Solution
      *
      * @param string $method create|update
      * @param array  $param
-     *
-     * @return void
      */
-    public function upsert($method, $param)
+    public function upsert(string $method, array $param)
     {
         // Init parameters
         $baseID = $this->paramConnexion['projectid'];
@@ -501,7 +500,7 @@ class Airtable extends Solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 12:33:06
-    protected function dateTimeToMyddleware($dateTime)
+    protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
 
@@ -509,7 +508,7 @@ class Airtable extends Solution
     }
 
     // convert from Myddleware format to Airtable format
-    protected function dateTimeFromMyddleware($dateTime)
+    protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
 

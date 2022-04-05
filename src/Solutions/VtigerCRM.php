@@ -44,7 +44,7 @@ class VtigerCRM extends Solution
         ],
     ];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'Contacts' => ['email', 'lastname'],
         'CompanyDetails' => ['organizationname'],
         'Accounts' => ['accountname'],
@@ -93,14 +93,7 @@ class VtigerCRM extends Solution
     /** @var VtigerClient */
     protected $vtigerClient;
 
-    /**
-     * Make the login.
-     *
-     * @param array $paramConnexion
-     *
-     * @return array|void
-     */
-    public function login($paramConnexion)
+    public function login(array $paramConnexion): ?array
     {
         parent::login($paramConnexion);
 
@@ -123,12 +116,8 @@ class VtigerCRM extends Solution
         }
     }
 
-    /**
-     * Make the logout.
-     *
-     * @return bool
-     */
-    public function logout()
+
+    public function logout(): bool
     {
         // TODO: Creare ed usare il loguot di vtiger (Non Funziona)
         /*
@@ -141,12 +130,7 @@ class VtigerCRM extends Solution
         return true;
     }
 
-    /**
-     * Return the login fields.
-     *
-     * @return array
-     */
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -167,14 +151,7 @@ class VtigerCRM extends Solution
         ];
     }
 
-    /**
-     * Return of the modules without the specified ones.
-     *
-     * @param string $type
-     *
-     * @return array|bool
-     */
-    public function get_modules($type = 'source')
+    public function get_modules(string $type = 'source'): array|bool
     {
         try {
             if (empty($this->vtigerClient)) {
@@ -305,8 +282,6 @@ class VtigerCRM extends Solution
     }
 
     /**
-     * Read.
-     *
      * @param array $param
      *
      * @return array
@@ -450,14 +425,7 @@ class VtigerCRM extends Solution
         return $result;
     }
 
-    /**
-     * Create new record in target.
-     *
-     * @param array $param
-     *
-     * @return array
-     */
-    public function createData($param)
+    public function createData(array $param): ?array
     {
         try {
             $subDocIdArray = [];
@@ -555,13 +523,11 @@ class VtigerCRM extends Solution
     }
 
     /**
-     * Update exist record in target.
-     *
      * @param array $param
      *
      * @return array
      */
-    public function updateData($param)
+    public function updateData(array $param): ?array
     {
         try {
             $subDocIdArray = [];
@@ -659,11 +625,9 @@ class VtigerCRM extends Solution
         return $result;
     }
 
-    // Function to delete a record
-    public function deleteData($param)
+    public function deleteData(array $param)
     {
         try {
-            // For every document
             foreach ($param['data'] as $idDoc => $data) {
                 try {
                     // Check control before delete
@@ -703,7 +667,7 @@ class VtigerCRM extends Solution
     }
 
     // Clean a record by removing all Myddleware fields
-    protected function cleanRecord($param, $data)
+    protected function cleanRecord(array $param, $data)
     {
         $myddlewareFields = ['target_id', 'source_date_modified', 'id_doc_myddleware', 'Myddleware_element_id'];
         foreach ($myddlewareFields as $myddlewareField) {

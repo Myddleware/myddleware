@@ -25,10 +25,11 @@
 namespace App\Solutions;
 
 use DateTime;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class ERPNext extends Solution
 {
@@ -37,7 +38,7 @@ class ERPNext extends Solution
     protected $organizationTimezoneOffset;
     protected $limitCall = 100;
     protected $required_fields = ['default' => ['name', 'creation', 'modified']];
-    protected $FieldsDuplicate = ['Contact' => ['last_name'],
+    protected $fieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
         'Item' => ['item_code'],
     ];
@@ -61,7 +62,7 @@ class ERPNext extends Solution
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [

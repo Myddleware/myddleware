@@ -41,7 +41,7 @@ class Sendinblue extends Solution
                                     'transactionalEmails' => ['uuid', 'date'],
                                     'transactionalEmailActivity' => ['messageId', 'event', 'date'],
                                 ];
-    protected $FieldsDuplicate = ['contacts' => ['email']];
+    protected $fieldsDuplicate = ['contacts' => ['email']];
     protected $limitEmailActivity = 100;
 
     public function getFieldsLogin()

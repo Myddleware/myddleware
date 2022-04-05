@@ -26,8 +26,10 @@
 namespace App\Solutions;
 
 use App\Entity\Rule;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class File extends Solution
 {
@@ -98,12 +100,12 @@ class File extends Solution
             ],
             [
                 'name' => 'host',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.host',
             ],
             [
                 'name' => 'port',
-                'type' => TextType::class,
+                'type' => IntegerType::class,
                 'label' => 'solution.fields.ftpport',
             ],
             [

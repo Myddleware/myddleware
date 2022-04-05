@@ -25,8 +25,9 @@
 
 namespace App\Solutions;
 
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class SuiteCRM extends Solution
 {
@@ -39,7 +40,7 @@ class SuiteCRM extends Solution
 
     protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
 
-    protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -172,7 +173,7 @@ class SuiteCRM extends Solution
             ],
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
         ];
@@ -357,7 +358,6 @@ class SuiteCRM extends Solution
         }
     }
 
-    // Permet de lire les données
     public function read($param)
     {
         $result = [];
@@ -590,7 +590,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Permet de créer des données
     public function createData($param)
     {
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
@@ -693,7 +692,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
     public function updateData($param)
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -746,7 +744,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Function to delete a record
     public function deleteData($param)
     {
         // We set the flag deleted to 1 and we call the update function
@@ -757,7 +754,6 @@ class SuiteCRM extends Solution
         return $this->updateData($param);
     }
 
-    // Build the query for read data to SuiteCRM
     protected function generateQuery($param, $method)
     {
         $query = '';
@@ -854,7 +850,6 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // function to make cURL request
     protected function call($method, $parameters)
     {
         try {

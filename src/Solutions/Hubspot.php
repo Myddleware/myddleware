@@ -34,7 +34,7 @@ class Hubspot extends Solution
     protected $readLast = false;
     protected $migrationMode = false;
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         // 'contacts' => array('email'), // No duplicate search for now
     ];
 

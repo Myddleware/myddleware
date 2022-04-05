@@ -26,8 +26,8 @@
 namespace App\Solutions;
 
 use App\Solutions\lib\curl;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Moodle extends Solution
 {
@@ -40,7 +40,7 @@ class Moodle extends Solution
         'get_user_grades' => ['id', 'timemodified'],
     ];
 
-    protected $FieldsDuplicate = [
+    protected $fieldsDuplicate = [
         'users' => ['email', 'username'],
         'courses' => ['shortname', 'idnumber'],
     ];
@@ -79,7 +79,7 @@ class Moodle extends Solution
         return [
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
             [

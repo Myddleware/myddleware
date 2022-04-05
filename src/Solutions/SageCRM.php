@@ -38,7 +38,7 @@ class SageCRM extends Solution
 
     protected $required_fields = ['default' => ['updateddate', 'createddate']];
 
-    protected $FieldsDuplicate = [];
+    protected $fieldsDuplicate = [];
 
     protected $required_relationships = [
         'default' => [],

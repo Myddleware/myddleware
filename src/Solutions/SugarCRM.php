@@ -25,8 +25,10 @@
 
 namespace App\Solutions;
 
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Exception;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class SugarCRM extends Solution
 {
@@ -43,7 +45,7 @@ class SugarCRM extends Solution
 
     protected $required_fields = ['default' => ['id', 'date_modified']];
 
-    protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -66,13 +68,12 @@ class SugarCRM extends Solution
             ],
             [
                 'name' => 'url',
-                'type' => TextType::class,
+                'type' => UrlType::class,
                 'label' => 'solution.fields.url',
             ],
         ];
     }
 
-    // Connect to SugarCRM
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -103,7 +104,6 @@ class SugarCRM extends Solution
         }
     }
 
-    // Get module list
     public function get_modules($type = 'source')
     {
         try {
@@ -265,16 +265,13 @@ class SugarCRM extends Solution
             return false;
         }
     }
-    // get_module_fields($module)
 
     /**
-     * Function read data.
      *
      * @param $param
      *
      * @return mixed
      */
-    // public function readData($param)
     public function read($param)
     {
         $result = [];
@@ -370,11 +367,8 @@ class SugarCRM extends Solution
     {
         return 'date_modified';
     }
-    // end function read
 
     /**
-     * Function create data.
-     *
      * @param $param
      *
      * @return mixed
@@ -402,11 +396,8 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function create
 
     /**
-     * Function update data.
-     *
      * @param $param
      *
      * @return mixed
@@ -434,11 +425,8 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function update
 
     /**
-     * Function delete data.
-     *
      * @param $param
      *
      * @return mixed
@@ -466,7 +454,6 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function update
 
     public function upsert($method, $param)
     {
@@ -572,7 +559,6 @@ class SugarCRM extends Solution
 
         return $result;
     }
-    // end function create
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
@@ -584,7 +570,6 @@ class SugarCRM extends Solution
 
         return $dto->format('Y-m-d H:i:s');
     }
-    // dateTimeToMyddleware($dateTime)
 
     // Convert date to SugarCRM format
     protected function dateTimeFromMyddleware($dateTime)
@@ -594,7 +579,6 @@ class SugarCRM extends Solution
         return $dto->format('Y-m-d\TH:i:s+00:00');
     }
 
-    // dateTimeToMyddleware($dateTime)
 
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type)

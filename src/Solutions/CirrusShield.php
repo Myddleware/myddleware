@@ -38,7 +38,7 @@ class CirrusShield extends Solution
 
     protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
 
-    protected $FieldsDuplicate = ['Contact' => ['Email', 'Name'],
+    protected $fieldsDuplicate = ['Contact' => ['Email', 'Name'],
         'default' => ['Name'],
     ];
 
