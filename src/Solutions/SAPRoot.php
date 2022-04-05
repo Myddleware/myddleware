@@ -98,7 +98,7 @@ class SAPRoot extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
         try {
             try {
