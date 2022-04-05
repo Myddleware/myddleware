@@ -116,7 +116,6 @@ class VtigerCRM extends Solution
         }
     }
 
-
     public function logout(): bool
     {
         // TODO: Creare ed usare il loguot di vtiger (Non Funziona)
@@ -523,8 +522,6 @@ class VtigerCRM extends Solution
     }
 
     /**
-     * @param array $param
-     *
      * @return array
      */
     public function updateData(array $param): ?array

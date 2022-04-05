@@ -26,9 +26,9 @@
 namespace App\Solutions;
 
 use Exception;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SugarCRM extends Solution
 {
@@ -267,7 +267,6 @@ class SugarCRM extends Solution
     }
 
     /**
-     *
      * @param $param
      *
      * @return mixed
@@ -578,7 +577,6 @@ class SugarCRM extends Solution
         // Return date to UTC timezone
         return $dto->format('Y-m-d\TH:i:s+00:00');
     }
-
 
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type)

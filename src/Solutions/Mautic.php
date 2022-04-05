@@ -28,11 +28,11 @@
 
 namespace App\Solutions;
 
-use Mautic\MauticApi;
 use Mautic\Auth\ApiAuth;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Mautic\MauticApi;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class Mautic extends Solution
 {

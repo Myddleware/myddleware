@@ -94,8 +94,6 @@ class Airtable extends Solution
     /**
      * Request to attempt to log in to Airtable.
      *
-     * @param array $paramConnexion
-     *
      * @return void
      */
     public function login(array $paramConnexion)
@@ -127,8 +125,6 @@ class Airtable extends Solution
      * Retrieve the list of modules available to be read or sent.
      *
      * @param string $type source|target
-     *
-     * @return array
      */
     public function get_modules(string $type = 'source'): array
     {
@@ -142,9 +138,7 @@ class Airtable extends Solution
     /**
      * Retrieve the list of fields (metadata) associated to each module.
      *
-     * @param string $module
-     * @param string $type
-     * @param array  $param
+     * @param array $param
      *
      * @return array
      */
@@ -167,8 +161,6 @@ class Airtable extends Solution
 
     /**
      * Read records in source application & transform them to fit standard Myddleware format.
-     *
-     * @param array $param
      *
      * @return array
      */
@@ -293,8 +285,6 @@ class Airtable extends Solution
     /**
      * Reads the last inserted record (latest) from the source application.
      *
-     * @param array $param
-     *
      * @return array
      */
     /*    public function read_last($param){
@@ -327,8 +317,6 @@ class Airtable extends Solution
     /**
      * Create data into target app.
      *
-     * @param array $param
-     *
      * @return void
      */
     public function createData(array $param): ?array
@@ -358,7 +346,6 @@ class Airtable extends Solution
      * Insert or update data depending on method's value.
      *
      * @param string $method create|update
-     * @param array  $param
      */
     public function upsert(string $method, array $param)
     {

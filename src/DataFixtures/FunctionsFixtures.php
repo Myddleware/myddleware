@@ -29,11 +29,10 @@ namespace App\DataFixtures;
 
 use App\Entity\FuncCat;
 use App\Entity\Functions;
-use App\DataFixtures\FuncCatFixtures;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
 
 class FunctionsFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
@@ -98,7 +97,7 @@ class FunctionsFixtures extends Fixture implements DependentFixtureInterface, Fi
         // Check each function of the category
         foreach ($functions as $function) {
             // Ff the function  doesn't exist in Myddleware, then we create it
-            if ( empty($this->functions[$cat]) || false === array_search($function, $this->functions[$cat])) {
+            if (empty($this->functions[$cat]) || false === array_search($function, $this->functions[$cat])) {
                 $func = new Functions();
                 $func->setName($function);
                 $func->setCategoryId($funcCat);

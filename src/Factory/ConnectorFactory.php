@@ -3,12 +3,11 @@
 namespace App\Factory;
 
 use App\Entity\Connector;
-use Zenstruck\Foundry\Proxy;
-use App\Factory\UserFactory;
-use Zenstruck\Foundry\ModelFactory;
-use Zenstruck\Foundry\RepositoryProxy;
 use App\Repository\ConnectorRepository;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Zenstruck\Foundry\ModelFactory;
+use Zenstruck\Foundry\Proxy;
+use Zenstruck\Foundry\RepositoryProxy;
 
 /**
  * @extends ModelFactory<Connector>
@@ -30,7 +29,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  */
 final class ConnectorFactory extends ModelFactory
 {
-    private $slugger; 
+    private $slugger;
 
     public function __construct(SluggerInterface $slugger)
     {
@@ -48,7 +47,7 @@ final class ConnectorFactory extends ModelFactory
             // 'nameSlug' => $this->slugger->slug('name'),
             'deleted' => self::faker()->boolean(10),
             'createdAt' => new \DateTimeImmutable('-1 days'),
-            'updatedAt' => new  \DateTimeImmutable('now'),
+            'updatedAt' => new \DateTimeImmutable('now'),
             'createdBy' => UserFactory::new()->isAdmin(),
             'modifiedBy' => UserFactory::new()->isSuperAdmin(),
         ];
@@ -58,7 +57,7 @@ final class ConnectorFactory extends ModelFactory
     {
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return $this
-            ->afterInstantiate(function(Connector $connector): void {
+            ->afterInstantiate(function (Connector $connector): void {
                 $connector->setNameSlug($this->slugger->slug($connector->getName()));
             })
         ;

@@ -16,7 +16,7 @@ class FuncCatFixtures extends Fixture implements FixtureGroupInterface
     public const DATE_FUNC_CAT_REFERENCE = 'date-function';
 
     protected $defaultFunctionCategories = [
-        ['name' => 'mathematical'], 
+        ['name' => 'mathematical'],
         ['name' => 'text'],
         ['name' => 'date'],
     ];

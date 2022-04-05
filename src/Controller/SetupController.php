@@ -11,7 +11,6 @@ class SetupController extends AbstractController
     #[Route('/setup', name: 'app_setup')]
     public function index(): Response
     {
-        
         return $this->render('setup/index.html.twig', [
             'controller_name' => 'SetupController',
         ]);

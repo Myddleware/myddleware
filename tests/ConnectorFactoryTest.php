@@ -2,17 +2,17 @@
 
 namespace App\Tests;
 
-use Zenstruck\Foundry\Test\Factories;
 use App\Factory\ConnectorFactory;
-use Zenstruck\Foundry\Test\ResetDatabase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class ConnectorFactoryTest extends KernelTestCase
 {
     use Factories;
     use ResetDatabase;
 
-    public function setUp(): void 
+    public function setUp(): void
     {
         $kernel = self::bootKernel();
     }
@@ -34,6 +34,5 @@ class ConnectorFactoryTest extends KernelTestCase
     {
         $connectors = ConnectorFactory::createMany(25);
         $this->assertCount(25, $connectors);
-
     }
 }

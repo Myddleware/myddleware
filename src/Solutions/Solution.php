@@ -25,14 +25,13 @@
 
 namespace App\Solutions;
 
-use App\Entity\Rule;
-use App\Entity\Document;
 use App\Entity\Connector;
-use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
+use App\Entity\Document;
+use App\Entity\Rule;
 use App\Manager\DocumentManager;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Solution
@@ -118,7 +117,7 @@ class Solution
      * Param est un tableau contenant tous les paramètres nécessaires à la connexion
      * Cette méthode doit mettre à jour les attributs :
      * $this->session avec la session de la solution
-     * $this->connexion_valide (true si la connexion est réussie, false sinon)
+     * $this->connexion_valide (true si la connexion est réussie, false sinon).
      */
     public function login(array $paramConnexion)
     {
@@ -213,7 +212,6 @@ class Solution
         return $response;
     }
 
-
     /**
      * Cette méthode renvoie un tableau permettant d'indiquer tous les champs nécessaire à la connexion (login, mot de passe...)
      * Exemple de tableau
@@ -228,8 +226,7 @@ class Solution
      *     'type' => 'password',
      *     'label' => 'solution.fields.password'
      *   )
-     * );
-     *
+     * );.
      */
     public function getFieldsLogin(): array
     {
@@ -255,14 +252,13 @@ class Solution
         return false;
     }
 
-
     /**
      * Méthode permettant de récupérer le nom de tous les modules accessible à l'utilisateur
      * Tableau sous la forme :
      * array(
      *   nom_module1 => libellé module 1,
      *   nom_module2 => libellé module 2
-     * )
+     * ).
      */
     public function get_modules(string $type = 'source'): ?array
     {
@@ -271,7 +267,7 @@ class Solution
 
     /**
      * Cette méthode doit remplir les attributs :
-     * moduleFields avec le tableu ci-dessus
+     * moduleFields avec le tableu ci-dessus.
      */
     public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
@@ -288,10 +284,9 @@ class Solution
         return $this->moduleFields;
     }
 
-    
     /**
      * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
-     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées.
      */
     public function get_rule_custom_relationship($module, $type)
     {
@@ -387,7 +382,7 @@ class Solution
      * 		fields : rule field list, example : array('name','date_entered')
      * 		limit : max records that the rule can read (default limit is 100)
      * Expected output :
-     * 		Array with the list of records
+     * 		Array with the list of records.
      */
     public function read(array $param): ?array
     {
@@ -395,7 +390,6 @@ class Solution
     }
 
     /**
-     *
      * Permet de créer un enregistrement
      * $param contient  :
      *  -> le module destinataire
@@ -420,7 +414,7 @@ class Solution
      * (
      *   [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
      *   [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-     * )
+     * ).
      */
     public function createData(array $param): ?array
     {
@@ -471,12 +465,13 @@ class Solution
      * - input : array with the record's data
      * - output : the id of the new record
      * An exception has to be generated when an error happends during the creation.
-     * this exception will be caught by the createData method
+     * this exception will be caught by the createData method.
      */
     protected function create(array $param, $record)
     {
         return null;
     }
+
     /**
      * Permet de mettre à jour un enregistrement
      * Permet de créer un enregistrement
@@ -498,14 +493,14 @@ class Solution
      *     [id_sfaure01_001_target] => 52e58c482baaa
      *     [name] => myddl02
      *     [email1] => myddle02@test.test
-     *   )  
+     *   )
      * )
      * Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
      * Array
      * (
      *   [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
      *   [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-     * )
+     * ).
      */
     public function updateData(array $param)
     {
@@ -612,7 +607,7 @@ class Solution
     /**
      * Permet de renvoyer le mode de la règle en fonction du module target
      * Valeur par défaut "0"
-     * Si la règle n'est qu'en création, pas en modicication alors le mode est C
+     * Si la règle n'est qu'en création, pas en modicication alors le mode est C.
      */
     public function getRuleMode($module, $type)
     {
@@ -680,7 +675,7 @@ class Solution
      * [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
      * [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
      * La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
-     * Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle
+     * Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle.
      */
     public function beforeRuleSave($data, $type)
     {
@@ -690,7 +685,7 @@ class Solution
     /**
      * Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
      * Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté l'entrée ruleId au tableau
-     * Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');
+     * Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');.
      */
     public function afterRuleSave($data, $type)
     {

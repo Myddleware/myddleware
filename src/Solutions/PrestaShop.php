@@ -27,8 +27,8 @@ namespace App\Solutions;
 
 use App\Solutions\lib\PrestaShopWebservice;
 use App\Solutions\lib\PrestaShopWebserviceException;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class PrestaShop extends Solution
 {

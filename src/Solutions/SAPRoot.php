@@ -445,7 +445,6 @@ class SAPRoot extends Solution
         return $date->format('YmdHis');
     }
 
-
     // Lorsque SAP renvoie un résultat, le réponse est différente s'il y a une seule ligne dans le retour ou s'il y en a plusieurs
     // On formate de sorte que même s'il n'y a qu'une seule ligne, la réponse soit convertie en tableau comme s'il y avait plusieurs lignes
     protected function convertResponseTab($response)
