@@ -274,8 +274,8 @@ class File extends Solution
      * 		date_ref : la nouvelle date de référence
      *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
      * 			     exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
-     * 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....') 
-     * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
+     * 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
+     * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution.
      */
     public function readData($param)
     {

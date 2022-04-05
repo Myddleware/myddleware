@@ -754,9 +754,8 @@ class Magento extends Solution
         return $result;
     }
 
-
     /**
-     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle.
      */
     public function getRefFieldName($moduleSource, $ruleMode)
     {

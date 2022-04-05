@@ -137,7 +137,6 @@ class Hubspot extends Solution
         return $modules;
     }
 
-
     // Renvoie les champs du module passé en paramètre
     public function get_module_fields($module, $type = 'source', $param = null): array
     {
@@ -514,7 +513,6 @@ class Hubspot extends Solution
         return $result;
     }
 
-
     /**
      * Function create data.
      *
@@ -613,7 +611,6 @@ class Hubspot extends Solution
 
         return $result;
     }
-
 
     /**
      * Function update data.
@@ -718,7 +715,6 @@ class Hubspot extends Solution
 
         return $result;
     }
-
 
     // Change the result
     protected function beforeGenerateResult($identifyProfiles, $param)

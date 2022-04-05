@@ -83,7 +83,6 @@ class Eventbrite extends Solution
         }
     }
 
-
     public function get_modules(string $type = 'source'): array
     {
         try {
@@ -308,7 +307,7 @@ class Eventbrite extends Solution
      * Valeur de sortie est un tableau contenant :
      * 		count : Le nombre d'enregistrement trouvé
      * 		date_ref : la nouvelle date de référence
-     *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18)
+     *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18).
      */
     public function readData($param)
     {

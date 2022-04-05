@@ -26,7 +26,6 @@
 namespace App\Solutions;
 
 use App\Manager\RuleManager;
-use Illuminate\Support\Arr;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SAP extends SAPRoot

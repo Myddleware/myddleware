@@ -151,7 +151,6 @@ class CirrusShield extends Solution
         }
     }
 
-
     public function readData(array $param)
     {
         try {
