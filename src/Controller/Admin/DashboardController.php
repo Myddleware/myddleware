@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractDashboardController
 {
-    #[Route('/admin', name: 'admin')]
+    #[Route('/admin', name: 'admin_dashboard')]
     public function index(): Response
     {
         // Option 1. You can make your dashboard redirect to some common page of your backend
@@ -54,7 +54,7 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToCrud('Rule', 'fas fa-sync', Rule::class),
             MenuItem::section('Connectors'),
             MenuItem::linkToCrud('Connector', 'fa fa-link', Connector::class),
-            MenuItem::linkToCrud('Connection Parameters', 'fa fa-plug', ConnectorParam::class),
+            MenuItem::linkToCrud('Credentials', 'fa fa-plug', ConnectorParam::class),
             MenuItem::linkToCrud('Solution', 'fa fa-bullseye', Solution::class),
             MenuItem::section('Jobs'),
             MenuItem::linkToCrud('Job', 'fas fa-tasks', Job::class),
