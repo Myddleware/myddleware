@@ -140,11 +140,11 @@
             "symfony console doctrine:database:drop -f",
             "symfony console doctrine:database:create",
             "symfony console doctrine:schema:update -f",
-            "symfony console doctrine:fixtures:load -n"
+            "symfony console doctrine:fixtures:load -n --append"
         ],    
         "refresh": [
             "symfony console doctrine:schema:update -f",
-            "symfony console doctrine:fixtures:load -n"
+            "symfony console doctrine:fixtures:load -n --append"
         ],
         "post-root-package-install": [
             "SymfonyStandard\\Composer::hookRootPackageInstall"
