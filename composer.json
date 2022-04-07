@@ -136,6 +136,16 @@
     "zenstruck/foundry": "^1.17"
   },
     "scripts": {
+        "prepare": [
+            "symfony console doctrine:database:drop -f",
+            "symfony console doctrine:database:create",
+            "symfony console doctrine:schema:update -f",
+            "symfony console doctrine:fixtures:load -n"
+        ],    
+        "refresh": [
+            "symfony console doctrine:schema:update -f",
+            "symfony console doctrine:fixtures:load -n"
+        ],
         "post-root-package-install": [
             "SymfonyStandard\\Composer::hookRootPackageInstall"
         ],
@@ -167,9 +177,6 @@
         "symfony-var-dir": "var",
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
-        "branch-alias": {
-            "dev-master": "3.2-dev"
-        },
         "symfony": {
           "allow-contrib": false,
           "require": "5.4.*"
