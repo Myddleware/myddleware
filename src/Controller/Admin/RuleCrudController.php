@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Rule;
+use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -24,6 +25,19 @@ class RuleCrudController extends AbstractCrudController
         return Rule::class;
     }
 
+
+    public function createEntity(string $entityFqcn)
+    {
+        $user = $this->getUser();
+        $rule = new Rule();
+        $now = new DateTimeImmutable('now');
+        $rule->setDeleted(false);
+        $rule->setCreatedAt($now);
+        $rule->setUpdatedAt($now);
+        $rule->setCreatedBy($user);
+        return $rule;
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         $duplicate = Action::new(self::ACTION_DUPLICATE)->linkToCrudAction('duplicateRule')->setCssClass('btn btn-info');
@@ -36,6 +50,8 @@ class RuleCrudController extends AbstractCrudController
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
             TextField::new('nameSlug')->hideOnForm(),
+            AssociationField::new('connectorSource'),
+            AssociationField::new('connectorTarget'),
             AssociationField::new('sourceModule'),
             AssociationField::new('targetModule'),
             BooleanField::new('active'),

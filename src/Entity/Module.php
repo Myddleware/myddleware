@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=ModuleRepository::class)
  */
-class Module
+class Module implements \Stringable
 {
     /**
      * @ORM\Id
@@ -89,5 +89,10 @@ class Module
         $this->direction = $direction;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->nameKey;
     }
 }
