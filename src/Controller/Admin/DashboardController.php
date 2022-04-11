@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
+use App\Entity\Module;
 use App\Entity\Solution;
 use App\Entity\Connector;
 use App\Entity\JobScheduler;
@@ -63,7 +64,9 @@ class DashboardController extends AbstractDashboardController
                 MenuItem::linkToCrud('Credentials', 'fa fa-plug', ConnectorParam::class),
                 MenuItem::linkToCrud('Add credentials', 'fas fa-plus', Rule::class)->setAction(Crud::PAGE_NEW),
             ]),
+            MenuItem::section('Solutions'),
             MenuItem::linkToCrud('Solutions', 'fa fa-bullseye', Solution::class),
+            MenuItem::linkToCrud('Modules', 'fa fa-cubes', Module::class),
             MenuItem::section('Jobs'),
             MenuItem::linkToCrud('Job', 'fas fa-tasks', Job::class),
             MenuItem::linkToCrud('Job Scheduler', 'fa fa-calendar', JobScheduler::class),

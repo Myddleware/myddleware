@@ -71,16 +71,6 @@ class Rule
     private $modifiedBy;
 
     /**
-     * @ORM\Column(name="module_source", type="string", nullable=false)
-     */
-    private $moduleSource;
-
-    /**
-     * @ORM\Column(name="module_target", type="string", nullable=false)
-     */
-    private $moduleTarget;
-
-    /**
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
     private $active;
@@ -152,6 +142,18 @@ class Rule
      */
     private $documentRelationships;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Module::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $sourceModule;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=module::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $targetModule;
+
     public function __construct()
     {
         $this->params = new ArrayCollection();
@@ -182,30 +184,6 @@ class Rule
     public function getId(): string
     {
         return $this->id;
-    }
-
-    public function setModuleSource(string $moduleSource): self
-    {
-        $this->moduleSource = $moduleSource;
-
-        return $this;
-    }
-
-    public function getModuleSource(): string
-    {
-        return $this->moduleSource;
-    }
-
-    public function setModuleTarget(string $moduleTarget): self
-    {
-        $this->moduleTarget = $moduleTarget;
-
-        return $this;
-    }
-
-    public function getModuleTarget(): string
-    {
-        return $this->moduleTarget;
     }
 
     public function setActive(bool $active): self
@@ -662,6 +640,30 @@ class Rule
                 $relationship->setRule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSourceModule(): ?Module
+    {
+        return $this->sourceModule;
+    }
+
+    public function setSourceModule(?Module $sourceModule): self
+    {
+        $this->sourceModule = $sourceModule;
+
+        return $this;
+    }
+
+    public function getTargetModule(): ?module
+    {
+        return $this->targetModule;
+    }
+
+    public function setTargetModule(?module $targetModule): self
+    {
+        $this->targetModule = $targetModule;
 
         return $this;
     }

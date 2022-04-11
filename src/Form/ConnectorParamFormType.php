@@ -19,7 +19,7 @@ class ConnectorParamFormType extends AbstractType
         $builder
             ->add('name', EntityType::class, [
                 'label' => 'Name',
-                'class' => Connector::class,
+                'class' => ConnectorParam::class,
                 'choice_label' => 'name',
             ])
             ->add('value', TextType::class, [

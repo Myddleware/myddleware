@@ -26,7 +26,7 @@ class RuleCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $duplicate = Action::new(self::ACTION_DUPLICATE)->linkToCrudAction('duplicateRule');
+        $duplicate = Action::new(self::ACTION_DUPLICATE)->linkToCrudAction('duplicateRule')->setCssClass('btn btn-info');
         return $actions->add(Crud::PAGE_EDIT, $duplicate);
     }
 
@@ -36,8 +36,8 @@ class RuleCrudController extends AbstractCrudController
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
             TextField::new('nameSlug')->hideOnForm(),
-            CollectionField::new('moduleSource'),
-            CollectionField::new('moduleTarget'),
+            AssociationField::new('sourceModule'),
+            AssociationField::new('targetModule'),
             BooleanField::new('active'),
             BooleanField::new('deleted')->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),

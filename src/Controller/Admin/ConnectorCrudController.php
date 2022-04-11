@@ -44,10 +44,11 @@ class ConnectorCrudController extends AbstractCrudController
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
             AssociationField::new('solution'),
-            CollectionField::new('connectorParams', 'Connection Parameters')
+            CollectionField::new('connectorParams', 'Credentials')
                 ->setEntryIsComplex(true)
                 ->setEntryType(ConnectorParamFormType::class)
-                ->setTemplatePath('admin/connector_params.html.twig'),
+                // ->setTemplatePath('admin/connector_params.html.twig')
+                ,
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
             // CollectionField::new('solution')->setEntryIsComplex(true),
             // CollectionField::new('solution')->setTemplatePath('admin/solution.html.twig'),
