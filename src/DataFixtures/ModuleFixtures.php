@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Module;
+use App\Entity\Solution;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
@@ -10,15 +11,16 @@ class ModuleFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        $solutionRepository = $manager->getRepository(Solution::class);
         $modules = $this->getDefaultModuleData();
-        foreach ($modules as $module)
+        foreach ($modules as $moduleProperties)
         {
             $module = new Module();
-            $module->setName($module['name']);
-            $module->setNameKey($module['nameKey']);
-            // TODO: RELATIONSHIPS & NOT STRINGS (probs with a reference in SolutionFixtures.php)
-            $module->setSolution($module['solution']);
-            $module->setDirection($module['direction']);
+            $module->setName($moduleProperties['name']);
+            $module->setNameKey($moduleProperties['nameKey']);
+            $solution = $solutionRepository->findOneBy(['name' => $moduleProperties['solution']]);
+            $module->setSolution($solution);
+            $module->setDirection($moduleProperties['direction']);
             $manager->persist($module);
         } 
 
@@ -28,12 +30,12 @@ class ModuleFixtures extends Fixture
     public function getDefaultModuleData(): ?array
     {
         return [
-            ['name' => 'Organizer', 'nameKey' => 'Organizer', 'solution' => 'Eventbrite', 'direction' => 'both'],
-            ['name' => 'Events', 'nameKey' => 'Events', 'solution' => 'Eventbrite', 'direction' => 'both'],
-            ['name' => 'Tickets', 'nameKey' => 'Tickets', 'solution' => 'Eventbrite', 'direction' => 'both'],
-            ['name' => 'Venues', 'nameKey' => 'Venues', 'solution' => 'Eventbrite', 'direction' => 'both'],
-            ['name' => 'Attendees', 'nameKey' => 'Attendees', 'solution' => 'Eventbrite', 'direction' => 'source'],
-            ['name' => 'Users', 'nameKey' => 'Users', 'solution' => 'Eventbrite', 'direction' => 'both'],
+            // ['name' => 'Organizer', 'nameKey' => 'Organizer', 'solution' => 'Eventbrite', 'direction' => 'both'],
+            // ['name' => 'Events', 'nameKey' => 'Events', 'solution' => 'Eventbrite', 'direction' => 'both'],
+            // ['name' => 'Tickets', 'nameKey' => 'Tickets', 'solution' => 'Eventbrite', 'direction' => 'both'],
+            // ['name' => 'Venues', 'nameKey' => 'Venues', 'solution' => 'Eventbrite', 'direction' => 'both'],
+            // ['name' => 'Attendees', 'nameKey' => 'Attendees', 'solution' => 'Eventbrite', 'direction' => 'source'],
+            // ['name' => 'Users', 'nameKey' => 'Users', 'solution' => 'Eventbrite', 'direction' => 'both'],
             ['name' => 'associate_deal', 'nameKey' => 'Associate deals with companies/contacts', 'solution' => 'Hubspot', 'direction' => 'target'],
             ['name' => 'associate_deal_contact', 'nameKey' => 'Associate deals with contacts', 'solution' => 'Hubspot', 'direction' => 'source'],
             ['name' => 'associate_deal_company', 'nameKey' => 'Associate deals with companies', 'solution' => 'Hubspot', 'direction' => 'source'],
