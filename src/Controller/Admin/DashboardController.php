@@ -2,19 +2,20 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Connector;
-use App\Entity\ConnectorParam;
 use App\Entity\Job;
-use App\Entity\JobScheduler;
 use App\Entity\Rule;
-use App\Entity\Solution;
 use App\Entity\User;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use App\Entity\Solution;
+use App\Entity\Connector;
+use App\Entity\JobScheduler;
+use App\Entity\ConnectorParam;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 
 class DashboardController extends AbstractDashboardController
 {
@@ -51,15 +52,21 @@ class DashboardController extends AbstractDashboardController
         return [
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
             MenuItem::section('Rules'),
-            MenuItem::linkToCrud('Rule', 'fas fa-sync', Rule::class),
+            MenuItem::subMenu('Rules', 'fas fa-sync')->setSubItems([
+                MenuItem::linkToCrud('My rules', 'fas fa-eye', Rule::class),
+                MenuItem::linkToCrud('Create new rule', 'fas fa-plus', Rule::class)->setAction(Crud::PAGE_NEW),
+            ]),
             MenuItem::section('Connectors'),
-            MenuItem::linkToCrud('Connector', 'fa fa-link', Connector::class),
-            MenuItem::linkToCrud('Credentials', 'fa fa-plug', ConnectorParam::class),
-            MenuItem::linkToCrud('Solution', 'fa fa-bullseye', Solution::class),
+            MenuItem::subMenu('Connectors', 'fa fa-link')->setSubItems([
+                MenuItem::linkToCrud('My connectors', 'fa fa-eye', Connector::class),
+                MenuItem::linkToCrud('Add connector', 'fa fa-plus', Connector::class)->setAction(Crud::PAGE_NEW),
+                MenuItem::linkToCrud('Credentials', 'fa fa-plug', ConnectorParam::class),
+                MenuItem::linkToCrud('Add credentials', 'fas fa-plus', Rule::class)->setAction(Crud::PAGE_NEW),
+            ]),
+            MenuItem::linkToCrud('Solutions', 'fa fa-bullseye', Solution::class),
             MenuItem::section('Jobs'),
             MenuItem::linkToCrud('Job', 'fas fa-tasks', Job::class),
-            MenuItem::section('JobScheduler'),
-            MenuItem::linkToCrud('JobScheduler', 'fa fa-calendar', JobScheduler::class),
+            MenuItem::linkToCrud('Job Scheduler', 'fa fa-calendar', JobScheduler::class),
             MenuItem::section('Users'),
             MenuItem::linkToCrud('User', 'fa fa-user', User::class),
         ];
