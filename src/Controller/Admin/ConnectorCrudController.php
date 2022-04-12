@@ -30,9 +30,9 @@ class ConnectorCrudController extends AbstractCrudController
         $user = $this->getUser();
         $connector = new Connector();
         $connector->setDeleted(false);
-        $now = new DateTimeImmutable('now');
-        $connector->setCreatedAt($now);
-        $connector->setUpdatedAt($now);
+        // $now = new DateTimeImmutable('now');
+        // $connector->setCreatedAt($now);
+        // $connector->setUpdatedAt($now);
         $connector->setCreatedBy($user);
         $connector->setModifiedBy($user);
 
@@ -44,6 +44,16 @@ class ConnectorCrudController extends AbstractCrudController
         if(!$entityInstance instanceof Connector) return;
         $entityInstance->setUpdatedAt(new \DateTimeImmutable());
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if (!$entityInstance instanceof Connector) return;
+        foreach($entityInstance->getConnectorParams() as $connectorParam)
+        {
+            $entityManager->remove($connectorParam);
+        }
+        parent::deleteEntity($entityManager, $entityInstance);
     }
 
     public function configureFields(string $pageName): iterable

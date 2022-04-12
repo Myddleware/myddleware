@@ -25,4 +25,5 @@ class ConnectorParamSubscriber implements EventSubscriberInterface
         }
         //TODO: find a way to setconnector() when cascade persist from connector is used (from connectorcrudcontroller)
     }
+
 }
