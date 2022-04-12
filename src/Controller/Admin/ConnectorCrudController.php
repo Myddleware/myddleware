@@ -2,21 +2,20 @@
 
 namespace App\Controller\Admin;
 
-use DateTimeImmutable;
 use App\Entity\Connector;
 use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
@@ -30,9 +29,6 @@ class ConnectorCrudController extends AbstractCrudController
         $user = $this->getUser();
         $connector = new Connector();
         $connector->setDeleted(false);
-        // $now = new DateTimeImmutable('now');
-        // $connector->setCreatedAt($now);
-        // $connector->setUpdatedAt($now);
         $connector->setCreatedBy($user);
         $connector->setModifiedBy($user);
 
@@ -41,16 +37,20 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if(!$entityInstance instanceof Connector) return;
-        $entityInstance->setUpdatedAt(new \DateTimeImmutable());
+        if (!$entityInstance instanceof Connector) {
+            return;
+        }
+        $user = $this->getUser();
+        $entityInstance->setModifiedBy($user);
         parent::updateEntity($entityManager, $entityInstance);
     }
 
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if (!$entityInstance instanceof Connector) return;
-        foreach($entityInstance->getConnectorParams() as $connectorParam)
-        {
+        if (!$entityInstance instanceof Connector) {
+            return;
+        }
+        foreach ($entityInstance->getConnectorParams() as $connectorParam) {
             $entityManager->remove($connectorParam);
         }
         parent::deleteEntity($entityManager, $entityInstance);
@@ -64,7 +64,10 @@ class ConnectorCrudController extends AbstractCrudController
             AssociationField::new('solution'),
             CollectionField::new('connectorParams', 'Credentials')
                 ->setEntryIsComplex(true)
-                ->setEntryType(ConnectorParamFormType::class),
+                ->setEntryType(ConnectorParamFormType::class)
+                ->allowDelete(false)
+                ->renderExpanded()
+                ->showEntryLabel(),
                 // ->setTemplatePath('admin/connector_params.html.twig')
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
