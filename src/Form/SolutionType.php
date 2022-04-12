@@ -1,38 +1,36 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Form;
 
-use App\Entity\ConnectorParam;
+use App\Entity\Solution;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ConnectorParamFormType extends AbstractType
+/**
+ * Allows us to display the list of solutions even when Entities aren't explicitly related to each other
+ * E.g. in ConnectorParams Crud (credentials), we need to first select the solution
+ * before being shown the corresponding login fields.
+ */
+class SolutionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', EntityType::class, [
-                'label' => 'Name',
-                'class' => ConnectorParam::class,
+            ->add('solution', EntityType::class, [
+                'label' => 'Solution',
+                'class' => Solution::class,
                 'choice_label' => 'name',
                 'empty_data' => '',
             ])
-            ->add('value', TextType::class, [
-                'label' => 'Value',
-                'empty_data' => '',
-            ])
-            ;
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ConnectorParam::class,
+            'data_class' => Solution::class,
         ]);
     }
 }

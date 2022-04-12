@@ -44,7 +44,7 @@ class ConnectorParam implements \Stringable
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Connector", inversedBy="connectorParams")
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="connectorParams", cascade={"persist"})
      * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
      */
     private $connector;
@@ -64,7 +64,7 @@ class ConnectorParam implements \Stringable
         return $this->id;
     }
 
-    public function setConnector(Connector $connector): self
+    public function setConnector(?Connector $connector): self
     {
         $this->connector = $connector;
 

@@ -52,13 +52,13 @@ class Connector implements \Stringable
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector")
+     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
      */
     private $connectorParams;
 
     /**
      * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
-     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id", nullable=false)
      */
     private $solution;
 

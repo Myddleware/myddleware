@@ -72,11 +72,17 @@ class Solution implements \Stringable
     private $connector;
 
     /**
+     * @ORM\OneToMany(targetEntity=Module::class, mappedBy="solution", orphanRemoval=true)
+     */
+    private $modules;
+
+    /**
      * Constructor.
      */
     public function __construct()
     {
         $this->connector = new ArrayCollection();
+        $this->modules = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -157,5 +163,35 @@ class Solution implements \Stringable
     public function getLogo(): ?string
     {
         return $this->name.'.png';
+    }
+
+    /**
+     * @return Collection<int, Module>
+     */
+    public function getModules(): Collection
+    {
+        return $this->modules;
+    }
+
+    public function addModule(Module $module): self
+    {
+        if (!$this->modules->contains($module)) {
+            $this->modules[] = $module;
+            $module->setSolution($this);
+        }
+
+        return $this;
+    }
+
+    public function removeModule(Module $module): self
+    {
+        if ($this->modules->removeElement($module)) {
+            // set the owning side to null (unless already changed)
+            if ($module->getSolution() === $this) {
+                $module->setSolution(null);
+            }
+        }
+
+        return $this;
     }
 }
