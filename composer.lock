@@ -5825,16 +5825,16 @@
         },
         {
             "name": "roave/better-reflection",
-            "version": "5.3.0",
+            "version": "5.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/BetterReflection.git",
-                "reference": "e2e9062ec1c0f6bc95ee29a5d4277ecb708aaf4d"
+                "reference": "3e09db693322cd7712ed251244ade62d41747c71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/e2e9062ec1c0f6bc95ee29a5d4277ecb708aaf4d",
-                "reference": "e2e9062ec1c0f6bc95ee29a5d4277ecb708aaf4d",
+                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/3e09db693322cd7712ed251244ade62d41747c71",
+                "reference": "3e09db693322cd7712ed251244ade62d41747c71",
                 "shasum": ""
             },
             "require": {
@@ -5892,9 +5892,9 @@
             "description": "Better Reflection - an improved code reflection API",
             "support": {
                 "issues": "https://github.com/Roave/BetterReflection/issues",
-                "source": "https://github.com/Roave/BetterReflection/tree/5.3.0"
+                "source": "https://github.com/Roave/BetterReflection/tree/5.3.1"
             },
-            "time": "2022-03-22T15:47:53+00:00"
+            "time": "2022-04-11T09:44:21+00:00"
         },
         {
             "name": "roave/signature",
@@ -16297,16 +16297,16 @@
         },
         {
             "name": "zenstruck/foundry",
-            "version": "v1.17.0",
+            "version": "v1.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zenstruck/foundry.git",
-                "reference": "71f08af3d9b9e98d5c67848ff7330467f3373dad"
+                "reference": "b9d2ed33ec9a7e7f84852e065d75eecdd32a9c6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zenstruck/foundry/zipball/71f08af3d9b9e98d5c67848ff7330467f3373dad",
-                "reference": "71f08af3d9b9e98d5c67848ff7330467f3373dad",
+                "url": "https://api.github.com/repos/zenstruck/foundry/zipball/b9d2ed33ec9a7e7f84852e065d75eecdd32a9c6a",
+                "reference": "b9d2ed33ec9a7e7f84852e065d75eecdd32a9c6a",
                 "shasum": ""
             },
             "require": {
@@ -16320,7 +16320,7 @@
             },
             "require-dev": {
                 "bamarni/composer-bin-plugin": "^1.4",
-                "dama/doctrine-test-bundle": "^6.0",
+                "dama/doctrine-test-bundle": "^6.0|^7.0",
                 "doctrine/doctrine-bundle": "^2.0",
                 "doctrine/doctrine-migrations-bundle": "^2.2|^3.0",
                 "doctrine/mongodb-odm-bundle": "^3.1|^4.0",
@@ -16369,7 +16369,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zenstruck/foundry/issues",
-                "source": "https://github.com/zenstruck/foundry/tree/v1.17.0"
+                "source": "https://github.com/zenstruck/foundry/tree/v1.18.0"
             },
             "funding": [
                 {
@@ -16377,7 +16377,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-03-07T20:51:06+00:00"
+            "time": "2022-04-11T14:07:00+00:00"
         }
     ],
     "aliases": [],
