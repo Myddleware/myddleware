@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -21,6 +20,7 @@ class ConnectorParamFormType extends AbstractType
                 'label' => 'Name',
                 'class' => ConnectorParam::class,
                 'choice_label' => 'name',
+                'empty_data' => '',
             ])
             ->add('value', TextType::class, [
                 'label' => 'Value',

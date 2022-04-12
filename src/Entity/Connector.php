@@ -52,7 +52,7 @@ class Connector implements \Stringable
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector")
+     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
      */
     private $connectorParams;
 

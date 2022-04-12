@@ -10,8 +10,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Allows us to display the list of solutions even when Entities aren't explicitly related to each other
- * E.g. in ConnectorParams Crud (credentials), we need to first select the solution 
- * before being shown the corresponding login fields
+ * E.g. in ConnectorParams Crud (credentials), we need to first select the solution
+ * before being shown the corresponding login fields.
  */
 class SolutionType extends AbstractType
 {
@@ -22,7 +22,7 @@ class SolutionType extends AbstractType
                 'label' => 'Solution',
                 'class' => Solution::class,
                 'choice_label' => 'name',
-                'empty_data' => ''
+                'empty_data' => '',
             ])
         ;
     }

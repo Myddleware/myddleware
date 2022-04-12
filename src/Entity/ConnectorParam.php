@@ -27,9 +27,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Solution;
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ConnectorParamRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Table(name="connectorparam")
@@ -45,7 +44,7 @@ class ConnectorParam implements \Stringable
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="connectorParams")
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="connectorParams", cascade={"persist"})
      * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
      */
     private $connector;
@@ -60,21 +59,19 @@ class ConnectorParam implements \Stringable
      */
     private $value;
 
-    private $solution;
-
     public function getId(): int
     {
         return $this->id;
     }
 
-    public function setConnector(Connector $connector): self
+    public function setConnector(?Connector $connector): self
     {
         $this->connector = $connector;
 
         return $this;
     }
 
-    public function getConnector(): Connector
+    public function getConnector(): ?Connector
     {
         return $this->connector;
     }
@@ -106,17 +103,5 @@ class ConnectorParam implements \Stringable
     public function __toString(): string
     {
         return $this->name;
-    }
-
-    public function getSolution(): ?Solution
-    {
-        return $this->solution;
-    }
-
-    public function setSolution(?Solution $solution): self
-    {
-        $this->solution = $solution;
-
-        return $this;
     }
 }

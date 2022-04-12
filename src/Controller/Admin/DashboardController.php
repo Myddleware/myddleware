@@ -2,21 +2,21 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Job;
-use App\Entity\Rule;
-use App\Entity\User;
-use App\Entity\Module;
-use App\Entity\Solution;
 use App\Entity\Connector;
-use App\Entity\JobScheduler;
 use App\Entity\ConnectorParam;
+use App\Entity\Job;
+use App\Entity\JobScheduler;
+use App\Entity\Module;
+use App\Entity\Rule;
+use App\Entity\Solution;
+use App\Entity\User;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 
 class DashboardController extends AbstractDashboardController
 {
@@ -62,7 +62,7 @@ class DashboardController extends AbstractDashboardController
                 MenuItem::linkToCrud('My connectors', 'fa fa-eye', Connector::class),
                 MenuItem::linkToCrud('Add connector', 'fa fa-plus', Connector::class)->setAction(Crud::PAGE_NEW),
                 MenuItem::linkToCrud('Credentials', 'fa fa-plug', ConnectorParam::class),
-                MenuItem::linkToCrud('Add credentials', 'fas fa-plus', Rule::class)->setAction(Crud::PAGE_NEW),
+                MenuItem::linkToCrud('Add credentials', 'fas fa-plus', ConnectorParam::class)->setAction(Crud::PAGE_NEW),
             ]),
             MenuItem::section('Solutions'),
             MenuItem::linkToCrud('Solutions', 'fa fa-bullseye', Solution::class),

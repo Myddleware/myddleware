@@ -4,8 +4,8 @@ namespace App\DataFixtures;
 
 use App\Entity\Module;
 use App\Entity\Solution;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
 
 class ModuleFixtures extends Fixture
 {
@@ -13,8 +13,7 @@ class ModuleFixtures extends Fixture
     {
         $solutionRepository = $manager->getRepository(Solution::class);
         $modules = $this->getDefaultModuleData();
-        foreach ($modules as $moduleProperties)
-        {
+        foreach ($modules as $moduleProperties) {
             $module = new Module();
             $module->setName($moduleProperties['name']);
             $module->setNameKey($moduleProperties['nameKey']);
@@ -22,7 +21,7 @@ class ModuleFixtures extends Fixture
             $module->setSolution($solution);
             $module->setDirection($moduleProperties['direction']);
             $manager->persist($module);
-        } 
+        }
 
         $manager->flush();
     }
@@ -68,7 +67,7 @@ class ModuleFixtures extends Fixture
             ['name' => 'get_course_completion_by_date', 'nameKey' => 'Get course completion', 'solution' => 'Moodle', 'direction' => 'source'],
             ['name' => 'get_user_compentencies_by_date', 'nameKey' => 'Get user compentency', 'solution' => 'Moodle', 'direction' => 'source'],
             ['name' => 'get_competency_module_completion_by_date', 'nameKey' => 'Get compentency module completion', 'solution' => 'Moodle', 'direction' => 'source'],
-            ['name' => 'get_user_grades', 'nameKey' => 'Get user grades', 'solution' => 'Moodle', 'direction' => 'source'], 
+            ['name' => 'get_user_grades', 'nameKey' => 'Get user grades', 'solution' => 'Moodle', 'direction' => 'source'],
             ['name' => 'groups', 'nameKey' => 'Groups', 'solution' => 'Moodle', 'direction' => 'target'],
             ['name' => 'group_members', 'nameKey' => 'Group members', 'solution' => 'Moodle', 'direction' => 'target'],
             ['name' => 'manual_enrol_users', 'nameKey' => 'Manual enrol users', 'solution' => 'Moodle', 'direction' => 'target'],
@@ -91,7 +90,6 @@ class ModuleFixtures extends Fixture
             ['name' => 'posts', 'nameKey' => 'Posts', 'solution' => 'WordPress', 'direction' => 'source'],
             ['name' => 'pages', 'nameKey' => 'Pages', 'solution' => 'WordPress', 'direction' => 'source'],
             ['name' => 'comments', 'nameKey' => 'Comments', 'solution' => 'WordPress', 'direction' => 'source'],
-
         ];
     }
 }
