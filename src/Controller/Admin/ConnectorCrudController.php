@@ -3,19 +3,20 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Connector;
+use Doctrine\ORM\QueryBuilder;
 use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class ConnectorCrudController extends AbstractCrudController
 {
@@ -61,13 +62,35 @@ class ConnectorCrudController extends AbstractCrudController
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
-            AssociationField::new('solution'),
+            AssociationField::new('solution')
+            ->addCssClass('solution'),
+            // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
-                ->setEntryIsComplex(true)
-                ->setEntryType(ConnectorParamFormType::class)
-                ->allowDelete(false)
-                ->renderExpanded()
-                ->showEntryLabel(),
+            ->setEntryIsComplex(true)
+            ->setEntryType(ConnectorParamFormType::class)
+            ->setTemplatePath('admin/credentials.html.twig')
+            // AssociationField::new('connectorParams', 'Credentials')
+                // ->autocomplete()
+                // ->setFormTypeOption('choice_label', 'name')
+                // ->setFormTypeOption('by_reference', false)
+                            // ->autocomplete()
+                            // ->formatValue(static function ($value, Connector $connector): ?string {
+                            //     if (!$connectorParams = $connector->getConnectorParams()) {
+                            //         return null;
+                            //     }
+                            //     foreach($connectorParams as $connectorParam){
+                            //         return sprintf('%s&nbsp;(%s)', $connectorParam->getName(), $connectorParam->getConnector()->count());
+                            //     }
+                            // })
+                            // ->setQueryBuilder(function (QueryBuilder $qb) {
+                            //     $qb->andWhere('entity.enabled = :enabled')
+                            //         ->setParameter('enabled', true);
+                            // })
+                ,
+            // CollectionField::new('connectorParams', 'Credentials')
+            //     ->allowDelete(false)
+            //     ->renderExpanded()
+            //     ->showEntryLabel(),
                 // ->setTemplatePath('admin/connector_params.html.twig')
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),

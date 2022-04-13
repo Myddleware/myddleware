@@ -21,10 +21,12 @@ class ConnectorParamFormType extends AbstractType
                 'class' => ConnectorParam::class,
                 'choice_label' => 'name',
                 'empty_data' => '',
+                'attr' =>  [ 'data-controller' => 'solution' ]
             ])
             ->add('value', TextType::class, [
                 'label' => 'Value',
                 'empty_data' => '',
+                'attr' =>  [ 'data-controller' => 'solution' ]
             ])
             ;
     }

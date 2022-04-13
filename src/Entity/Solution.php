@@ -66,23 +66,19 @@ class Solution implements \Stringable
     private $target;
 
     /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Connector", mappedBy="solution", cascade={"persist", "remove", "merge"})
-     */
-    private $connector;
-
-    /**
      * @ORM\OneToMany(targetEntity=Module::class, mappedBy="solution", orphanRemoval=true)
      */
     private $modules;
 
     /**
-     * Constructor.
+     * @ORM\OneToMany(targetEntity=Connector::class, mappedBy="solution", orphanRemoval=true, cascade={"persist", "remove", "merge"})
      */
+    private $connectors;
+
     public function __construct()
     {
-        $this->connector = new ArrayCollection();
         $this->modules = new ArrayCollection();
+        $this->connectors = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -138,23 +134,6 @@ class Solution implements \Stringable
         return $this->target;
     }
 
-    public function addConnector(Connector $connector): self
-    {
-        $this->connector[] = $connector;
-
-        return $this;
-    }
-
-    public function removeConnector(Connector $connector)
-    {
-        $this->connector->removeElement($connector);
-    }
-
-    public function getConnector(): ?Collection
-    {
-        return $this->connector;
-    }
-
     public function __toString(): string
     {
         return $this->name;
@@ -189,6 +168,36 @@ class Solution implements \Stringable
             // set the owning side to null (unless already changed)
             if ($module->getSolution() === $this) {
                 $module->setSolution(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Connector>
+     */
+    public function getConnectors(): Collection
+    {
+        return $this->connectors;
+    }
+
+    public function addConnector(Connector $connector): self
+    {
+        if (!$this->connectors->contains($connector)) {
+            $this->connectors[] = $connector;
+            $connector->setSolution($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnector(Connector $connector): self
+    {
+        if ($this->connectors->removeElement($connector)) {
+            // set the owning side to null (unless already changed)
+            if ($connector->getSolution() === $this) {
+                $connector->setSolution(null);
             }
         }
 
