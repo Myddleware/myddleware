@@ -13,8 +13,11 @@ header{
 
   }
 
-  .home_item {
-
+  .home_item{
   }
 
 /* MAIN */
+
+.main_home{
+    font-family: sans-serif;
+}
