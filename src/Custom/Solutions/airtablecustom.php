@@ -9,7 +9,8 @@ class airtablecustom extends airtable {
 
 	protected $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
-								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr'
+								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
+								'app5ustIjI5taRXJS' => 'CONTACTS',
 							);
 
 	protected $modules = array(
@@ -21,6 +22,17 @@ class airtablecustom extends airtable {
 													),
 								'appX0PhUGIkBTcWBE' =>  array(
 														'Aiko Auto Supr' => 'Aiko Auto Supr'
+													),
+								'app5ustIjI5taRXJS' => array(
+														'tbl9mdPzLflpvbur1' => 'COUPONS',
+														'tbly0c6t476m2T5Dg' => 'CONTACTS',
+														'tblWNzJBu14hZBUtz' => 'Relation POLE',
+														'tbl3x3LNzyTVZeLuP' => 'COMPOSANTES',
+														'tblh6J3n0sn0ujXbj' => 'ETABLISSEMENTS',
+														'tbltK28hWtZhE7kfj' => 'EVENEMENTS',
+														'tbl823z6nTXKu56dT' => 'POLES',
+														'tblMGtDW80zma1GUs' => 'UTILISATEURS',
+														'tblcBJRaDCyrDZNYy' => 'PARTICIPATION RI'
 													),
 							);
 
