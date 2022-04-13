@@ -24,15 +24,15 @@ class airtablecustom extends airtable {
 														'Aiko Auto Supr' => 'Aiko Auto Supr'
 													),
 								'app5ustIjI5taRXJS' => array(
-														'tbl9mdPzLflpvbur1' => 'COUPONS',
-														'tbly0c6t476m2T5Dg' => 'CONTACTS',
-														'tblWNzJBu14hZBUtz' => 'Relation POLE',
-														'tbl3x3LNzyTVZeLuP' => 'COMPOSANTES',
-														'tblh6J3n0sn0ujXbj' => 'ETABLISSEMENTS',
-														'tbltK28hWtZhE7kfj' => 'EVENEMENTS',
-														'tbl823z6nTXKu56dT' => 'POLES',
-														'tblMGtDW80zma1GUs' => 'UTILISATEURS',
-														'tblcBJRaDCyrDZNYy' => 'PARTICIPATION RI'
+														'COUPONS' => 'COUPONS',
+														'CONTACTS' => 'CONTACTS',
+														'Relation POLE' => 'Relation POLE',
+														'COMPOSANTES' => 'COMPOSANTES',
+														'ETABLISSEMENTS' => 'ETABLISSEMENTS',
+														'EVENEMENTS' => 'EVENEMENTS',
+														'POLES' => 'POLES',
+														'UTILISATEURS' => 'UTILISATEURS',
+														'PARTICIPATION RI' => 'PARTICIPATION RI'
 													),
 							);
 
