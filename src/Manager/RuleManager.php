@@ -1282,19 +1282,14 @@ class rulecore
         }
         // Si la règle est en mode recherche alors on n'envoie pas de données
         // Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
-        if (
+		if (
                 'S' != $this->rule['mode']
             && (
                     in_array($status, ['Ready_to_send', 'Error_sending'])
                 || (
                         true === $response[$id_document]
-                    && (
-                            empty($response['doc_status'])
-                        || (
-                                !empty($response['doc_status'])
-                            && 'No_send' != $response['doc_status']
-                        )
-                    )
+                    && !empty($response['doc_status'])
+					&& in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
                 )
             )
         ) {
