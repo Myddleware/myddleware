@@ -37,10 +37,10 @@ class airtablecustom extends airtable {
 							);
 
     protected $FieldsDuplicate = array(
-        'CONTACTS' => array('ID COMET'),
-        'BINOMES' => array('ID COMET'),
-        'POLE' => array('nom du pole'),
-        'REFERENTS' => array('ID COMET')
+        'CONTACTS' => array('ID___COMET'),
+        'BINOMES' => array('ID___COMET'),
+        'POLE' => array('nom___du___pole'),
+        'REFERENTS' => array('ID___COMET')
         );
 
 
