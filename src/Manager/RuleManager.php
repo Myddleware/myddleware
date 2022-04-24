@@ -1288,13 +1288,8 @@ class rulecore
                     in_array($status, ['Ready_to_send', 'Error_sending'])
                 || (
                         true === $response[$id_document]
-                    && (
-                            empty($response['doc_status'])
-                        || (
-                                !empty($response['doc_status'])
-                            && 'No_send' != $response['doc_status']
-                        )
-                    )
+                    && !empty($response['doc_status'])
+					&& in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
                 )
             )
         ) {
