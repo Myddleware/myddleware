@@ -163,10 +163,10 @@ class DocumentManagerCustom extends DocumentManager {
 			AND	$this->document_data['rule_id'] == '61a930273441b' // Rule Aiko binome
 			AND $new_status == 'Predecessor_OK'
 			AND in_array($this->sourceData['statut_c'], array('termine','annule','accompagnement_termine'))
-			AND	$this->document_data['type'] == 'C' // Creation
+			AND	$this->documentType == 'C' // Creation
 		) {
 			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('Le statut du binôme est annulé ou terminé et le document genère une création donc on annule l\'envoi vers Airtable. '); 
+			$this->message .= utf8_decode('Le statut du binôme est annulé ou terminé et le document genère une création donc on annule l envoi vers Airtable. '); 
 		}
 		
 		// If relate_ko on rule Aiko binome - pole then we cancel the data transfer
