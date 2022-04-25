@@ -1045,15 +1045,15 @@
         "version": "v1.4.2"
     },
     "zenstruck/foundry": {
-        "version": "1.17",
+        "version": "1.18",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "master",
             "version": "1.10",
-            "ref": "934cdd918703a7fcfc3ef91723a2eac42a0f7690"
+            "ref": "37c2f894cc098ab4c08874b80cccc8e2f8de7976"
         },
         "files": [
-            "./config/packages/zenstruck_foundry.yaml"
+            "config/packages/zenstruck_foundry.yaml"
         ]
     }
 }
