@@ -1,0 +1,24 @@
+body{
+    background: #f1f5f9 !important;
+  
+}
+
+.register{
+    padding: 35px;
+    height: 50vh;
+    margin: 450px;
+    margin-top: 150px;
+    margin-bottom: 100px;
+    background: white;
+    box-shadow:0 10px 15px -3px rgba(15,23,41,0.1),0 4px 6px -2px rgba(15,23,41,0.05);
+}
+
+.register .form-group{
+    padding-bottom:18px;
+}
+
+.logo-register{
+    width: 408px;
+    margin-left: 565px;
+    margin-bottom: -125px;
+}
