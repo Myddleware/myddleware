@@ -27,6 +27,14 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['61a920fae25c5'] = 'Aiko Contacts';
 			$data['lst_rule']['61a900506e8f1'] = 'Aiko Pôles';
 			$data['lst_rule']['61a930273441b'] = 'Aiko Binomes';
+			// Pôle relationship for mobilisation
+			$data['lst_rule']['625961c5d5309'] = 'Mobilisation - Contacts';
+			$data['lst_rule']['62596c212a4cb'] = 'Mobilisation - Etablissements';
+			$data['lst_rule']['625fcd2ed442f'] = 'Mobilisation - Coupons';
+			$data['lst_rule']['625fd5aeb4d29'] = 'Mobilisation - Utilisateurs';
+			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
+			$data['lst_rule']['6267e9c106873'] = 'Mobilisation - Composantes';
+			$data['lst_rule']['62690f697e610'] = 'Mobilisation - Pôles';
 		}
 
 		// Une règle avec le module fp_events_contacts_c peut être liée aux module engagé et formation
@@ -34,6 +42,9 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce3621156127'] = 'Engagé';
 			$data['lst_rule']['5ce454613bb17'] = 'Formation';
 			$data['lst_rule']['60c09c8dd8db8'] = 'Formation session';
+			// Mobilisation
+			$data['lst_rule']['625961c5d5309'] = 'Mobilisation - Contacts';
+			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
 		}
 		
 		// Une règle avec le module Contacts de SuiteCRM peut être liée aux module user de MySQL
