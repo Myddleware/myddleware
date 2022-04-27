@@ -503,7 +503,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fld2tHcATRYAqbuO0'=> array( 'label' => 'utm_term', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'flduGYPQNiE1VnkAW'=> array( 'label' => 'apiengagement_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
     ),
-	'Relation POLE' => array(
+	'Relation_POLE' => array(
         
 		'fldNUZ1TkfO7uEjSF'=> array( 'label' => 'Label', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldaLPQ8EbyOpk61X'=> array( 'label' => 'record_type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -719,7 +719,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fldEZwKofQlvSJkMm'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 
 	),
-	'PARTICIPATION RI' => array(
+	'PARTICIPATION_RI' => array(
 		'fldiXX1KBp4Gl55zw'=> array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldYvyAHOntuqhWbC'=> array( 'label' => 'Date de modification', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldjyKAQSd1hDmgU9'=> array( 'label' => 'Supprimé', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
