@@ -26,13 +26,13 @@ class airtablecustom extends airtable {
 								'app5ustIjI5taRXJS' => array(
 														'COUPONS' => 'COUPONS',
 														'CONTACTS' => 'CONTACTS',
-														'Relation POLE' => 'Relation_POLE',
+														'Relation_POLE' => 'Relation POLE',
 														'COMPOSANTES' => 'COMPOSANTES',
 														'ETABLISSEMENTS' => 'ETABLISSEMENTS',
 														'EVENEMENTS' => 'EVENEMENTS',
 														'POLES' => 'POLES',
 														'UTILISATEURS' => 'UTILISATEURS',
-														'PARTICIPATION RI' => 'PARTICIPATION_RI'
+														'PARTICIPATION_RI' => 'PARTICIPATION RI'
 													),
 							);
 
