@@ -105,14 +105,9 @@ class suitecrmcustom extends suitecrm {
 					$param = array(
 							'id' => 'leadType',
 							'name' => 'leadType',
-							'type' => 'option',
+							'type' => 'text',
 							'label' => 'Coupon type',
-							'required'	=> false,
-							'option'	=> array(
-												'' => '',
-												'Accompagne' => 'Jeune accompagné',
-												'Benevole' => 'Bénévole'
-											)
+							'required'	=> false
 						);
 					return array($param);
 				}
@@ -146,7 +141,7 @@ class suitecrmcustom extends suitecrm {
 				$param['module'] == 'Leads'
 			AND !empty($param['ruleParams']['leadType'])	
 		) {
-			$query .= ' AND '.strtolower($param['module'])."_cstm.coupon_type_c = '".$param['ruleParams']['leadType']."' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.coupon_type_c IN '(".$param['ruleParams']['leadType'].")' ";
 		}
 		// filter by annee
 		if (in_array($param['module'], $this->moduleWithAnnee)) {
