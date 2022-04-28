@@ -387,7 +387,10 @@ class airtablecore extends solution
                             continue;
                         }
 
-                        if (true === $allFields[$fieldName]['relate']) {
+                        if (
+								$allFields[$fieldName]['relate'] == true
+							AND $allFields[$fieldName]['type'] != 'text'
+						) {
                             $arrayVal = [];
                             $arrayVal[] = $fieldVal;
                             $body['records'][$i]['fields'][$fieldName] = $arrayVal;
