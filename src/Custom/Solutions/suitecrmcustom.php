@@ -101,6 +101,21 @@ class suitecrmcustom extends suitecrm {
 						);
 					return array($param);
 				}
+				if ($module == 'Leads'){
+					$param = array(
+							'id' => 'leadType',
+							'name' => 'leadType',
+							'type' => 'option',
+							'label' => 'Coupon type',
+							'required'	=> false,
+							'option'	=> array(
+												'' => '',
+												'Accompagne' => 'Jeune accompagné',
+												'Benevole' => 'Bénévole'
+											)
+						);
+					return array($param);
+				}
 			}
 			return array();
 		}
@@ -125,6 +140,13 @@ class suitecrmcustom extends suitecrm {
 			} else {
 				$query .= ' AND '.strtolower($param['module'])."_cstm.contact_type_c = '".$param['ruleParams']['contactType']."' ";
 			}
+		}
+		// Add filter on lead type when the leads are read from SuiteCRM
+		if (
+				$param['module'] == 'Leads'
+			AND !empty($param['ruleParams']['leadType'])	
+		) {
+			$query .= ' AND '.strtolower($param['module'])."_cstm.coupon_type_c = '".$param['ruleParams']['leadType']."' ";
 		}
 		// filter by annee
 		if (in_array($param['module'], $this->moduleWithAnnee)) {
