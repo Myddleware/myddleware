@@ -188,6 +188,18 @@ class airtablecore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+			// There is a bug on the parameter returnFieldsByFieldId soit can't be used
+			// In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
+			foreach ($param['fields'] as $field) {
+				if (substr($field,0,3) == 'fld') {
+					include_once('lib/airtable/metadata.php');
+					if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
+						$fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
+						continue;
+					}
+				}
+				$fields[$field] = $field;
+			}
             // Get the reference date field name
             $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             $stop = false;
@@ -240,17 +252,17 @@ class airtablecore extends solution
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
-                        foreach ($param['fields'] as $field) {
+                        foreach ($fields as $key => $field) {
 							$fieldWithSpace = str_replace('___', ' ', $field);	
                             if (isset($record['fields'][$fieldWithSpace])) {
                                 // Depending on the field type, the result can be an array, in this case we take the first result
                                 if (is_array($record['fields'][$fieldWithSpace])) {
-                                    $result['values'][$record['id']][$field] = current($record['fields'][$fieldWithSpace]);
+                                    $result['values'][$record['id']][$key] = current($record['fields'][$fieldWithSpace]);
                                 } else {
-                                    $result['values'][$record['id']][$field] = $record['fields'][$fieldWithSpace];
+                                    $result['values'][$record['id']][$key] = $record['fields'][$fieldWithSpace];
                                 }
                             } else {
-                                $result['values'][$record['id']][$field] = '';
+                                $result['values'][$record['id']][$key] = '';
                             }
                         }
 
