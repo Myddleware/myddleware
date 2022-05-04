@@ -47,9 +47,9 @@ class airtablecustom extends airtable {
 	// Rededine read fucntion
 	public function readData($param) {
 		$result = parent::readData($param);
-		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression			
+		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression
 			if (!empty($result['values'])) {
-				foreach ($result['values'] as $docId => $values) {								
+				foreach ($result['values'] as $docId => $values) {
 					$deletionParam = array();
 					$ruleId = '';
 					switch ($values['SyncSource']):
@@ -97,12 +97,12 @@ class airtablecustom extends airtable {
 					}
 					
 					$ruleParam['ruleId'] = $ruleId; 
-					$ruleParam['jobId'] = $param['jobId']; 			
+					$ruleParam['jobId'] = $param['jobId'];
 					$ruleDeletion = new rule($this->logger, $this->container, $this->conn, $ruleParam);				
 
 					$deletionParam['values']['myddleware_deletion'] = true;
 					$deletionParam['values']['id'] = $values['IDCOMET'];
-					$deletionParam['values']['date_modified'] = gmdate('Y-m-d H:i:s');					
+					$deletionParam['values']['date_modified'] = gmdate('Y-m-d H:i:s');
 					$documents = $ruleDeletion->generateDocuments($values['IDCOMET'], false, $deletionParam); 
 				}	
 			}
