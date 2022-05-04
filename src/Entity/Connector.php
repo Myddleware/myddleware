@@ -57,12 +57,6 @@ class Connector implements \Stringable
     private $connectorParams;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
-     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id", nullable=false)
-     */
-    private $solution;
-
-    /**
      * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
      * @ORM\Column(length=50, nullable=false, name="name_slug")
      */
@@ -105,6 +99,12 @@ class Connector implements \Stringable
      */
     private $updatedAt;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Solution::class, inversedBy="connectors")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $solution;
+
     public function __construct()
     {
         $this->rulesWhereIsTarget = new ArrayCollection();
@@ -141,16 +141,16 @@ class Connector implements \Stringable
         return $this->nameSlug;
     }
 
-    public function setSolution(Solution $solution): self
+    public function getSolution(): ?Solution
+    {
+        return $this->solution;
+    }
+
+    public function setSolution(?Solution $solution): self
     {
         $this->solution = $solution;
 
         return $this;
-    }
-
-    public function getSolution(): ?Solution
-    {
-        return $this->solution;
     }
 
     public function addConnectorParam(ConnectorParam $connectorParam): self
