@@ -77,8 +77,8 @@ class Solution implements \Stringable
 
     public function __construct()
     {
-        $this->modules = new ArrayCollection();
         $this->connectors = new ArrayCollection();
+        $this->modules = new ArrayCollection();
     }
 
     public function getId(): ?int
