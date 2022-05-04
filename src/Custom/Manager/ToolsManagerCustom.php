@@ -28,7 +28,6 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['61a900506e8f1'] = 'Aiko Pôles';
 			$data['lst_rule']['61a930273441b'] = 'Aiko Binomes';
 			// Pôle relationship for mobilisation
-			$data['lst_rule']['625961c5d5309'] = 'Mobilisation - Contacts';
 			$data['lst_rule']['62596c212a4cb'] = 'Mobilisation - Etablissements';
 			$data['lst_rule']['625fcd2ed442f'] = 'Mobilisation - Coupons';
 			$data['lst_rule']['625fd5aeb4d29'] = 'Mobilisation - Utilisateurs';
@@ -42,10 +41,19 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce3621156127'] = 'Engagé';
 			$data['lst_rule']['5ce454613bb17'] = 'Formation';
 			$data['lst_rule']['60c09c8dd8db8'] = 'Formation session';
-			// Mobilisation
-			$data['lst_rule']['625961c5d5309'] = 'Mobilisation - Contacts';
+		}
+		
+		// Mobilisation
+		if (current(array_keys($data['source'])) == 'fp_events_leads_1_c') {
+			$data['lst_rule']['625fcd2ed442f'] = 'Mobilisation - Coupons';
 			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
 		}
+		// Mobilisation
+		if (current(array_keys($data['source'])) == 'PARTICIPATION_RI') {
+			$data['lst_rule']['625fcd2ed442f'] = 'Mobilisation - Coupons';
+			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
+		}
+		
 		
 		// Une règle avec le module Contacts de SuiteCRM peut être liée aux module user de MySQL
 		if (current(array_keys($data['source'])) == 'Contacts') {
