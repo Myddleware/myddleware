@@ -26,7 +26,7 @@ class DocumentManagerCustom extends DocumentManager {
 		) {
 			if (
 					strpos($this->message, 'No data for the field user_id.') !== false
-				AND strpos($this->message, 'in the rule Users.') !== false	
+				AND strpos($this->message, 'in the rule REEC - Users.') !== false	
 			) {	
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
@@ -40,7 +40,7 @@ class DocumentManagerCustom extends DocumentManager {
 		) {
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule Engagé.') !== false	
+				AND strpos($this->message, 'in the rule REEC - Engagé.') !== false	
 			) {	
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
@@ -54,14 +54,14 @@ class DocumentManagerCustom extends DocumentManager {
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule Contact - Composante.') !== false	
+				AND strpos($this->message, 'in the rule REEC - Contact - Composante.') !== false	
 			) {				
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
 			}
 		}
 	
-		if (
+		/* if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '5cffd54c8842b' // Rule Formation - Engagé
 		) {
@@ -91,7 +91,7 @@ class DocumentManagerCustom extends DocumentManager {
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('La formation est absente de la platforme REEC, il s\'agit probablement d\'une formation filtrée car de type réunion. Le lien Formation - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
 			}
-		}
+		} */
 		
 		if (
 				!empty($this->document_data['rule_id'])
@@ -99,7 +99,7 @@ class DocumentManagerCustom extends DocumentManager {
 		) {
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule Contact - Composante.') !== false	
+				AND strpos($this->message, 'in the rule REEC - Contact - Composante.') !== false	
 			) {		
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact composante est absent de la platforme REEC, il s\'agit probablement d\'une composante sans adresse email. Le lien Contact composante - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
@@ -140,6 +140,20 @@ class DocumentManagerCustom extends DocumentManager {
 			$this->message .= utf8_decode('Aucun filtrage appliqué sur la suppression d une composante. Cette composante doit réellement être supprimée dans REEC même si elle n a plus d établissement supérieur dans la COMET. '); 
 		}
 
+		// No error if the coupon doesn't exist in REEC (no update in this case)
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '62739b419755f' // REEC - Coupons vers REEC
+			AND $new_status == 'Relate_KO'
+		) {
+			if (
+					strpos($this->message, 'No data for the field Myddleware_element_id.') !== false
+				AND strpos($this->message, ' in the rule REEC - Coupons vers comet.') !== false	
+			) {	
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le coupon n\existe pas dans de la platforme REEC, la mise à jour est donc interrompue. '); 
+			}
+		}
 
 		/************************************************/
 		/************         AIKO         **************/
