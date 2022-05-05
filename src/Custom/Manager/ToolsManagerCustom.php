@@ -18,12 +18,14 @@ class ToolsManagerCustom extends ToolsManager {
 		}
 		
 		if (current(array_keys($data['source'])) == 'securitygroups_records') {
-			$data['lst_rule']['5cddddcce2e3e'] = 'Poles';
-			$data['lst_rule']['5ce362b962b63'] = 'Composante';
-			$data['lst_rule']['5ce3621156127'] = 'Engagé';
-			$data['lst_rule']['5ce454613bb17'] = 'Formation';
-			$data['lst_rule']['5d01a630c217c'] = 'Contact - Composante';
-			$data['lst_rule']['5f847b2242138'] = 'Etablissement sup';
+			$data['lst_rule']['5cddddcce2e3e'] = 'REEC - Poles';
+			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
+			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
+			$data['lst_rule']['5ce454613bb17'] = 'REEC - Formation';
+			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
+			$data['lst_rule']['5f847b2242138'] = 'REEC - Etablissement sup';
+			$data['lst_rule']['62738aabafcd2'] = 'REEC - Quartiers';
+			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
 			$data['lst_rule']['61a920fae25c5'] = 'Aiko Contacts';
 			$data['lst_rule']['61a900506e8f1'] = 'Aiko Pôles';
 			$data['lst_rule']['61a930273441b'] = 'Aiko Binomes';
@@ -38,9 +40,9 @@ class ToolsManagerCustom extends ToolsManager {
 
 		// Une règle avec le module fp_events_contacts_c peut être liée aux module engagé et formation
 		if (current(array_keys($data['source'])) == 'fp_events_contacts_c') {
-			$data['lst_rule']['5ce3621156127'] = 'Engagé';
-			$data['lst_rule']['5ce454613bb17'] = 'Formation';
-			$data['lst_rule']['60c09c8dd8db8'] = 'Formation session';
+			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
+			$data['lst_rule']['5ce454613bb17'] = 'REEC - Formation';
+			$data['lst_rule']['60c09c8dd8db8'] = 'REEC - Formation session';
 		}
 		
 		// Mobilisation
@@ -57,20 +59,20 @@ class ToolsManagerCustom extends ToolsManager {
 		
 		// Une règle avec le module Contacts de SuiteCRM peut être liée aux module user de MySQL
 		if (current(array_keys($data['source'])) == 'Contacts') {
-			$data['lst_rule']['5cf98651a17f3'] = 'User';
+			$data['lst_rule']['5cf98651a17f3'] = 'REEC - User';
 		}
 		
 		// Une règle avec le module Binôme de SuiteCRM peut être liée aux module user de MySQL
 		if (current(array_keys($data['source'])) == 'CRMC_binome') {
-			$data['lst_rule']['5cf98651a17f3'] = 'User';
+			$data['lst_rule']['5cf98651a17f3'] = 'REEC - User';
 			$data['lst_rule']['61a9190e40965'] = 'Aiko Référent';
 		}
 		
 		// Une règle avec le module accounts_contacts peut être liée aux module Composante et Contact - Composante
 		if (current(array_keys($data['source'])) == 'accounts_contacts') {
-			$data['lst_rule']['5ce362b962b63'] = 'Composante';
-			$data['lst_rule']['5d01a630c217c'] = 'Contact - Composante';
-			$data['lst_rule']['5ce3621156127'] = 'Engagé';
+			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
+			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
+			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
 		}
 		return $data;
 	}
