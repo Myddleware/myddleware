@@ -47,7 +47,7 @@ class DocumentManagerCustom extends DocumentManager {
 			}
 		}
 
-		// On annule la relation pôle - contact (engagé) si le contact (engagé) a été filtré
+		// On annule la relation pôle - contact (université) si le contact (université) a été filtré
 		if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact composante - Pôle
@@ -57,8 +57,42 @@ class DocumentManagerCustom extends DocumentManager {
 				AND strpos($this->message, 'in the rule REEC - Contact - Composante.') !== false	
 			) {				
 				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact université. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
+			}
+		}
+		
+		// We cancel the relation pôle - contact partenaire if he has been filtered
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '62743060350ed' // REEC - Contact partenaire - Pôle
+		) {			
+			if (
+					strpos($this->message, 'No data for the field record_id.') !== false
+				AND strpos($this->message, 'in the rule REEC - Contacts Partenaires.') !== false	
+			) {				
+				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
 			}
+		}
+		
+		// If we don't found the contact (COMET) in the coupon (REEC), we cancel the data transfer. 
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '6273b3b11c63e' // REEC - Relation Contacts Coupons
+			AND $new_status == 'Not_found'
+		) {			
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans REEC. Ce transfert de données est annulé. '); 
+		}
+		
+		// If we don't found the coupon (REEC) corresponding to the contact (COMET), we cancel the data transfer. 
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	in_array($this->document_data['rule_id'], array('6274428910b18','62744b95de96f')) // REEC - Fiche évaluation début/fin vers REEC
+			AND $new_status == 'Relate_KO'
+		) {			
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans REEC. Ce transfert de données est annulé. '); 
 		}
 	
 		/* if (
