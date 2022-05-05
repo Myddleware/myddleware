@@ -561,7 +561,8 @@ class mysqlcustom extends mysql {
 	
 	public function createData($param) {	
 		// Myddleware can change the email only if compte_reec_ok = 0
-		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63'))) {	// règle REEC - users, REEC - Composante
+		// règle REEC - users, REEC - Composante, REEC - Coupons vers REEC
+		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63', '62739b419755f'))) {	
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {				
 				// compte_reec_ok always equal to 0. It can be equal to "DO NOT SEND" in case of volontaire but only for update
@@ -570,11 +571,19 @@ class mysqlcustom extends mysql {
 						$param['data'][$idDoc]['compte_reec_ok'] = '0';				
 					}
 				}
+				// Do not send an empty etablissement on the composante
 				if (
 						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
 					AND empty($data['etablissement_sup_id'])
 				) {
 					unset($param['data'][$idDoc]['etablissement_sup_id']);
+				}
+				// Do not send an empty jeune on the coupon
+				if (
+						$param['rule']['id'] == '62739b419755f' // REEC - Coupons vers REEC
+					AND empty($data['jeune_id'])
+				) {
+					unset($param['data'][$idDoc]['jeune_id']);
 				}
 			}
 		}
@@ -583,7 +592,8 @@ class mysqlcustom extends mysql {
 	
 	public function updateData($param) {		
 		// Myddleware can change the email only if compte_reec_ok = 0
-		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63'))) {		// règle users , engagé , REEC - Composante
+		// règle users , engagé , REEC - Composante, REEC - Coupons vers REEC
+		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63','62739b419755f'))) {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {	
 				if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {		// règle users , engagé	
@@ -608,11 +618,19 @@ class mysqlcustom extends mysql {
 					// Never modify compte_reec_ok
 					unset($param['data'][$idDoc]['compte_reec_ok']);
 				}
+				// Do not send an empty etablissement on the composante
 				if (
 						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
 					AND empty($data['etablissement_sup_id'])
 				) {
 					unset($param['data'][$idDoc]['etablissement_sup_id']);
+				}
+				// Do not send an empty jeune on the coupon
+				if (
+						$param['rule']['id'] == '62739b419755f' // REEC - Coupons vers REEC
+					AND empty($data['jeune_id'])
+				) {
+					unset($param['data'][$idDoc]['jeune_id']);
 				}
 			}		
 		}
