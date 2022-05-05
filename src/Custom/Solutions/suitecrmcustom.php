@@ -30,6 +30,15 @@ class suitecrmcustom extends suitecrm {
 												'relate' => false
 											);						
 		}
+		if ($module == 'Accounts') {
+			$this->moduleFields['myd_filtered'] = array(
+												'label' => 'Filtre Myddleware',
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0,
+												'relate' => false
+											);						
+		}
 		return $this->moduleFields;
 	}
 	
@@ -77,6 +86,36 @@ class suitecrmcustom extends suitecrm {
 	public function readData($param) {		
 		$this->currentRule = $param['rule']['id'];		
 		return parent::readData($param);
+	}
+
+	
+	// Redifine read function
+	public function read($param) {
+		$read = parent::read($param);
+		if (
+				$param['rule']['id'] == '5ce362b962b63'
+			AND !empty($read)
+		) {
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read[$key]['myd_filtered'] = 1;
+				// Keep the composante if an university is link to it of if it has the type below
+					// Collège = 8
+					// École maternelle = ecole_maternelle
+					// École élémentaire = 10
+					// Lycée general et techno = 1
+					// Lycée professionnel = 11
+					// Lycée technique = 9
+					// Lycée polyvalent = lycee_polyvalent		
+				if (
+						!empty($record['MydCustRelSugarcrmc__etablissement_sup_accounts_1crmc__etablissement_sup_ida'])
+					 OR in_array($record['type_de_partenaire_c'], array('8','ecole_maternelle','10','1','11','9','lycee_polyvalent'))
+				) {
+					$read[$key]['myd_filtered'] = 0;
+				}			
+			}
+		}		
+		return $read;
 	}
 	
 	// Add filter for contact module

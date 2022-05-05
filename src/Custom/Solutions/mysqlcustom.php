@@ -22,6 +22,7 @@ class mysqlcustom extends mysql {
 	
 	protected $FieldsDuplicate = array(	
 										'contact' => array('email'),
+										'coupon' => array('jeune_id'),
 								  );
 
 	 /**
@@ -560,47 +561,60 @@ class mysqlcustom extends mysql {
 	
 	public function createData($param) {	
 		// Myddleware can change the email only if compte_reec_ok = 0
-		if ($param['rule']['id'] == '5cf98651a17f3') {	// règle users
+		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63'))) {	// règle REEC - users, REEC - Composante
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {				
 				// compte_reec_ok always equal to 0. It can be equal to "DO NOT SEND" in case of volontaire but only for update
-				if (!empty($param['data'][$idDoc]['compte_reec_ok'])) {
-					$param['data'][$idDoc]['compte_reec_ok'] = '0';				
-				}		
+				if ($param['rule']['id'] == '5cf98651a17f3') {	// règle users
+					if (!empty($param['data'][$idDoc]['compte_reec_ok'])) {
+						$param['data'][$idDoc]['compte_reec_ok'] = '0';				
+					}
+				}
+				if (
+						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
+					AND empty($data['etablissement_sup_id'])
+				) {
+					unset($param['data'][$idDoc]['etablissement_sup_id']);
+				}
 			}
 		}
 		return parent::createData($param);
 	}
 	
-	public function updateData($param) {	
+	public function updateData($param) {		
 		// Myddleware can change the email only if compte_reec_ok = 0
-		if (
-				$param['rule']['id'] == '5cf98651a17f3'	// règle users
-			 OR	$param['rule']['id'] == '5ce3621156127'	// règle engagé
-		) { 
+		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63'))) {		// règle users , engagé , REEC - Composante
 			// For every document
-			foreach($param['data'] as $idDoc => $data) {		
-				// If rule user and title = Volontaire, we never update the contact into REEC.
-				// Updates will be managed by the corresponding contact				
-				if (
-						$param['rule']['id'] == '5cf98651a17f3'	
-					AND $param['data'][$idDoc]['compte_reec_ok'] == 'DO NOT SEND IF UPDATE, 0 IF CREATE'
-				) {
-					$value = array(
-									'id' => $param['data'][$idDoc]['target_id'],
-									'error' => 'No update using rule user for volontaire, only rule engage can update contact volontaire'
-								);
-					$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
-					unset($param['data'][$idDoc]); // Do not send this document
+			foreach($param['data'] as $idDoc => $data) {	
+				if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {		// règle users , engagé	
+					// If rule user and title = Volontaire, we never update the contact into REEC.
+					// Updates will be managed by the corresponding contact				
+					if (
+							$param['rule']['id'] == '5cf98651a17f3'	
+						AND $param['data'][$idDoc]['compte_reec_ok'] == 'DO NOT SEND IF UPDATE, 0 IF CREATE'
+					) {
+						$value = array(
+										'id' => $param['data'][$idDoc]['target_id'],
+										'error' => 'No update using rule user for volontaire, only rule engage can update contact volontaire'
+									);
+						$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
+						unset($param['data'][$idDoc]); // Do not send this document
+					}
+							
+					// Send email only if compte_reec_ok is false
+					if (!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])) {				
+						unset($param['data'][$idDoc]['email']);
+					}		
+					// Never modify compte_reec_ok
+					unset($param['data'][$idDoc]['compte_reec_ok']);
 				}
-						
-				// Send email only if compte_reec_ok is false
-				if (!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])) {				
-					unset($param['data'][$idDoc]['email']);
-				}		
-				// Never modify compte_reec_ok
-				unset($param['data'][$idDoc]['compte_reec_ok']);			
-			}
+				if (
+						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
+					AND empty($data['etablissement_sup_id'])
+				) {
+					unset($param['data'][$idDoc]['etablissement_sup_id']);
+				}
+			}		
 		}
 	
 		// We send nouveau = 1 only in creation otherwise we don't send the field
@@ -667,4 +681,16 @@ class mysqlcustom extends mysql {
 		return $this->connexion_valide;		
 	}
 	
+	// Allow the search only mode on coupon module
+	public function getRuleMode($module, $type)
+    {
+        $ruleMode = parent::getRuleMode($module, $type);
+        if (
+                'target' == $type
+            AND $module == 'coupon'
+        ) {
+            $ruleMode['S'] = 'search_only';
+        }
+		return $ruleMode;
+    }
 }
