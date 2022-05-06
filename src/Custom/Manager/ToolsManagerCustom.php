@@ -53,6 +53,7 @@ class ToolsManagerCustom extends ToolsManager {
 		// Mobilisation
 		if (current(array_keys($data['source'])) == 'PARTICIPATION_RI') {
 			$data['lst_rule']['625fcd2ed442f'] = 'Mobilisation - Coupons';
+			$data['lst_rule']['62695220e54ba'] = 'Mobilisation - Coupons vers Comet';
 			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
 		}
 		
