@@ -74,6 +74,7 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
 			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
 			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
+			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
 		}
 		return $data;
 	}

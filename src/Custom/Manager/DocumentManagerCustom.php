@@ -151,6 +151,18 @@ class DocumentManagerCustom extends DocumentManager {
 			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact composante. Ce transfert de données est annulé. '); 
 		}
 		
+		// On annule tous les transferts de données en relate ko pour la règle composante - Contact partenaire
+		// En effet des la majorité des relations accounts_contacts ne sont pas des composante - Contact partenaire
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '62790c7db0a87' // REEC - Composante - Contact partenaire
+			AND $new_status == 'Relate_KO'
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact partenaire. Ce transfert de données est annulé. '); 
+		}
+		
+		
 		// On annule tous les transferts de données en relate ko pour la règle composante - Engagé
 		// En effet une partie des relations accounts_contacts ne sont pas des composante - Engagé
 		if (
