@@ -28,6 +28,7 @@
     "doctrine/doctrine-migrations-bundle": "^3.0",
     "doctrine/orm": "^2.7",
     "friendsofsymfony/jsrouting-bundle": "^2.3",
+    "hautelook/alice-bundle": "^2.9",
     "illuminate/encryption": "5.3.*@dev",
     "incenteev/composer-parameter-handler": "^2.0",
     "javanile/vtiger-client": "^0.0.13",
