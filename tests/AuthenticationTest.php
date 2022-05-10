@@ -30,7 +30,7 @@ class AuthenticationTest extends ApiTestCase
         $manager->flush();
 
         // retrieve a token
-        $response = $client->request('POST', '/api/v1_0/login_check', [
+        $response = $client->request('POST', '/api/login_check', [
             'headers' => ['Content-Type' => 'application/json'],
             'json' => [
                 'username' => 'test_user',

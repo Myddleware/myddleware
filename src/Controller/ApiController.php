@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
- * @Route("/api/v1_0", name="api_")
+ * @Route("/api", name="api_")
  */
 class ApiController extends AbstractController
 {
