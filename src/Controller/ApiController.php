@@ -83,7 +83,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
