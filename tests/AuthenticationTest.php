@@ -16,9 +16,13 @@ class AuthenticationTest extends ApiTestCase
 
         $user = new User();
         $user->setUsername('test_user');
+        $user->setUsernameCanonical('test_user');
         $user->setEmail('test@example.com');
+        $user->setEmailCanonical('test@example.com');
+        $user->setTimezone('UTC');
+        $user->setEnabled(1);
         $user->setPassword(
-            self::$container->get('security.user_password_hasher')->hashPassword($user, '$3CR3T')
+            self::$container->get('security.password_encoder')->encodePassword($user, 'password')
         );
 
         $manager = self::$container->get('doctrine')->getManager();
@@ -26,11 +30,11 @@ class AuthenticationTest extends ApiTestCase
         $manager->flush();
 
         // retrieve a token
-        $response = $client->request('POST', '/authentication_token', [
+        $response = $client->request('POST', '/api/v1_0/login_check', [
             'headers' => ['Content-Type' => 'application/json'],
             'json' => [
-                'email' => 'test@example.com',
-                'password' => '$3CR3T',
+                'username' => 'test_user',
+                'password' => 'password',
             ],
         ]);
 
