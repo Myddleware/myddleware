@@ -155,8 +155,8 @@ class airtablecore extends solution
         require 'lib/airtable/metadata.php';
         parent::get_module_fields($module, $type);
         try {
-            if (!empty($moduleFields[$module])) {
-                $this->moduleFields = $moduleFields[$module];
+            if (!empty($moduleFields[$this->projectID][$module])) {
+                $this->moduleFields = $moduleFields[$this->projectID][$module];
             }
 
             return $this->moduleFields;
@@ -188,6 +188,18 @@ class airtablecore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
+			// There is a bug on the parameter returnFieldsByFieldId soit can't be used
+			// In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
+			foreach ($param['fields'] as $field) {
+				if (substr($field,0,3) == 'fld') {
+					include_once('lib/airtable/metadata.php');
+					if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
+						$fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
+						continue;
+					}
+				}
+				$fields[$field] = $field;
+			}
             // Get the reference date field name
             $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             $stop = false;
@@ -211,6 +223,8 @@ class airtablecore extends solution
                     } else {
                         // Filter by specific field (for example to avoid duplicate records)
                         foreach ($param['query'] as $key => $queryParam) {
+							// Transform "___" into space (Myddleware can't have space in the field name)
+							$key = str_replace('___', ' ', $key);							
                             // TODO: improve this, for now we can only filter with ONE key,
                             // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
                             $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
@@ -238,16 +252,17 @@ class airtablecore extends solution
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
-                        foreach ($param['fields'] as $field) {
-                            if (isset($record['fields'][$field])) {
+                        foreach ($fields as $key => $field) {
+							$fieldWithSpace = str_replace('___', ' ', $field);	
+                            if (isset($record['fields'][$fieldWithSpace])) {
                                 // Depending on the field type, the result can be an array, in this case we take the first result
-                                if (is_array($record['fields'][$field])) {
-                                    $result['values'][$record['id']][$field] = current($record['fields'][$field]);
+                                if (is_array($record['fields'][$fieldWithSpace])) {
+                                    $result['values'][$record['id']][$key] = current($record['fields'][$fieldWithSpace]);
                                 } else {
-                                    $result['values'][$record['id']][$field] = $record['fields'][$field];
+                                    $result['values'][$record['id']][$key] = $record['fields'][$fieldWithSpace];
                                 }
                             } else {
-                                $result['values'][$record['id']][$field] = '';
+                                $result['values'][$record['id']][$key] = '';
                             }
                         }
 
@@ -288,43 +303,8 @@ class airtablecore extends solution
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
-
         return $result;
     }
-
-    /**
-     * Reads the last inserted record (latest) from the source application.
-     *
-     * @param array $param
-     *
-     * @return array
-     */
-    /*    public function read_last($param){
-            $result = array();
-            try{
-                //for simulation purposes, we create a new date_ref in the past
-                $param['ruleParams']['datereference'] = date('Y-m-d H:i:s', strtotime($this->delaySearch));
-                //get all instances of the module
-                $read = $this->read($param);
-                if (!empty($read['error'])) {
-                    $result['error'] = $read['error'];
-                } else {
-                    if (!empty($read['values'])) {
-                        $result['done'] = true;
-                        // Get only one record (the API sorts them by date by default, first one is therefore latest modified)
-                        $result['values'] = $read['values'][array_key_first($read['values'])];
-                    } else {
-                        $result['done'] = false;
-                    }
-                }
-            } catch (\Exception $e) {
-                $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                $result['done'] = -1;
-                $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            }
-            return $result;
-        }
-     */
 
     /**
      * Create data into target app.
@@ -419,7 +399,10 @@ class airtablecore extends solution
                             continue;
                         }
 
-                        if (true === $allFields[$fieldName]['relate']) {
+                        if (
+								$allFields[$fieldName]['relate'] == true
+							AND $allFields[$fieldName]['type'] != 'text'
+						) {
                             $arrayVal = [];
                             $arrayVal[] = $fieldVal;
                             $body['records'][$i]['fields'][$fieldName] = $arrayVal;
@@ -433,6 +416,23 @@ class airtablecore extends solution
                     }
                     ++$i;
                 }
+
+				// Airtable fiueld can contains space which is not compatible in Myddleware.
+				// Because we replace space by ___ in Myddleware, we change ___ to space before sending data to Airtable
+				if (!empty($body['records'])) {
+					foreach ($body['records'] as $keyRecord => $record) {
+						if (!empty($record['fields'])) {
+							foreach($record['fields'] as $key => $value) {
+								if (strpos($key, '___') !== false) {
+									$keyWithSpace = str_replace('___', ' ', $key);	
+									$body['records'][$keyRecord]['fields'][$keyWithSpace] = $value;
+									unset($body['records'][$keyRecord]['fields'][$key]);
+								}
+							}
+						}
+					}
+				}
+			
                 // Send records to Airtable
                 $client = HttpClient::create();
                 $options = [
