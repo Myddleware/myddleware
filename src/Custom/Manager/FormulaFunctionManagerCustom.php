@@ -5,7 +5,7 @@ use App\Manager\FormulaFunctionManager;
 
 class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 	
-	protected $namesCustom = array('Afev_serialize', 'Afev_removeEmoji');
+	protected $namesCustom = array('Afev_serialize', 'Afev_unserialize', 'Afev_removeEmoji');
 	
 	protected $pathCustom = "App\Custom\Manager\FormulaFunctionManagerCustom::";
 	
@@ -50,6 +50,17 @@ class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 			$values = explode(',', str_replace('^', '', $data));
 			if (!empty($values)) {
 				return serialize($values);
+			}
+		}
+		return '';
+	}
+	
+	// Fonction permettant de transformer les liste de SuiteCRM en une chaine serialisée
+	public static function Afev_unserialize($data) {
+		if (!empty($data)) {
+			$values = unserialize($data);
+			if (!empty($values)) {
+				return str_replace("^^", "", "^".implode("^,^", $values)."^");
 			}
 		}
 		return '';
