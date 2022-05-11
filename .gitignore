@@ -16,6 +16,9 @@
 /config/packages/public/parameters_smtp.yml
 /config/packages/public/parameters_custom.yml
 
+# LexikJWTAuthenticationBundle
+/config/jwt/
+
 # Parameters for Custom code
 /config/services_custom.yaml
 

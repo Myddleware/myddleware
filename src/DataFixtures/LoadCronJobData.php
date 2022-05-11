@@ -33,12 +33,12 @@ class LoadCronJobData implements FixtureInterface
 {
     private $manager;
     protected $cronJobData = [
-        ['period' => '*/5 * * * *', 'command' => 'php bin/console myddleware:synchro ALL', 'description' => 'Run every active rules'],
-        ['period' => '0 * * * *', 'command' => 'php bin/console myddleware:rerunerror 100 5', 'description' => 'Reload error : 1st level'],
-        ['period' => '0 0 * * *', 'command' => 'php bin/console myddleware:rerunerror 100 10', 'description' => 'Reload error : 2nd level'],
-        ['period' => '0 * * * *', 'command' => 'php bin/console myddleware:notification alert', 'description' => 'Alert when a task is blocked'],
-        ['period' => '0 0 * * *', 'command' => 'php bin/console myddleware:notification ALL', 'description' => 'Send notification every day'],
-        ['period' => '0 0 * * *', 'command' => 'php bin/console myddleware:cleardata', 'description' => 'Clean data'],
+        ['period' => '*/5 * * * *', 'command' => 'myddleware:synchro ALL', 'description' => 'Run every active rules'],
+        ['period' => '0 * * * *', 'command' => 'myddleware:rerunerror 100 5', 'description' => 'Reload error : 1st level'],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:rerunerror 100 10', 'description' => 'Reload error : 2nd level'],
+        ['period' => '0 * * * *', 'command' => 'myddleware:notification alert', 'description' => 'Alert when a task is blocked'],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:notification ALL', 'description' => 'Send notification every day'],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:cleardata', 'description' => 'Clean data'],
     ];
 
     public function load(ObjectManager $manager)

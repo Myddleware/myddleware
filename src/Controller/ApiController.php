@@ -2,23 +2,24 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Manager\JobManager;
-use App\Manager\rule;
-use App\Repository\DocumentRepository;
+use App\Manager\RuleManager;
+use Psr\Log\LoggerInterface;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use Exception;
-use Psr\Log\LoggerInterface;
+use App\Repository\DocumentRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
- * @Route("/api/v1_0", name="api_")
+ * @Route("/api", name="api_")
  */
 class ApiController extends AbstractController
 {
@@ -51,13 +52,16 @@ class ApiController extends AbstractController
      */
     private $jobManager;
 
+    private $parameterBag;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
         JobManager $jobManager,
         RuleRepository $ruleRepository,
         JobRepository $jobRepository,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+        ParameterBagInterface $parameterBag
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -66,6 +70,7 @@ class ApiController extends AbstractController
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
+        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -78,7 +83,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -244,7 +249,16 @@ class ApiController extends AbstractController
             $ruleParam['ruleId'] = $data['rule'];
             $ruleParam['jobId'] = $job->id;
             $ruleParam['api'] = 1;
-            $rule = new rule($this->container->get('logger'), $this->container, $connection, $ruleParam);
+            $rule = new RuleManager(
+                $this->container->get('logger'),
+                $connection, 
+                $this->entityManager,
+                $this->parameterBag,
+                // $ruleParam,
+                $this->formulaManager,
+                $this->solutionManager,
+                $this->documentManager
+                );
 
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
