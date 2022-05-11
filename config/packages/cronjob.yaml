@@ -1,0 +1,2 @@
+shapecode_cron:
+    timeout: 3600
