@@ -867,7 +867,7 @@ crontab:
     help: > 
              Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console shapecode:cron:run --env=background <BR>
              Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
-               */5 * * * * cd <myddleware_directory>; php bin/console shapecode:cron:run --env=background > /dev/null 2>&1
+               */5 * * * * cd <myddleware_directory>; php bin/console shapecode:cron:run --env=background
 duplicate_rule:
     duplicate: Dupliquer
     cancel: Annuler
