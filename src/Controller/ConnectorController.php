@@ -482,7 +482,7 @@ class ConnectorController extends AbstractController
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $this->entityManager->getRepository(Connector::class)
                                             ->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId()),
-                'maxPerPage' => $this->params['pager'],
+                'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 20,
                 'page' => $page,
             ]);
 

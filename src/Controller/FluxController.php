@@ -376,7 +376,7 @@ class FluxController extends AbstractController
         $r = $this->documentRepository->getFluxPagination($data);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $r,
-            'maxPerPage' => $this->params['pager'],
+            'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
             'page' => $page,
         ], false);
 
