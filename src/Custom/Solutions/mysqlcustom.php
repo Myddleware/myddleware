@@ -169,6 +169,16 @@ class mysqlcustom extends mysql {
 				unset($data['nb_seances_realisees']);
 			}
 		}
+		
+		// We can't send a field with id empty because of foreign key
+		if ($param['module'] == 'coupon') {
+			if (
+					isset($data['date_naissance'])
+				AND empty($data['date_naissance'])
+			) {
+				unset($data['date_naissance']);
+			}
+		}
 		return $data;		
 	}
 	

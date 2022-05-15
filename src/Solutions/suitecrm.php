@@ -99,9 +99,9 @@ class suitecrmcore extends solution
         'documents_cases' => ['label' => 'Relationship Document Case', 'module_name' => 'Documents', 'link_field_name' => 'cases', 'fields' => [], 'relationships' => ['document_id', 'case_id']],
         'documents_bugs' => ['label' => 'Relationship Document Bug', 'module_name' => 'Documents', 'link_field_name' => 'bugs', 'fields' => [], 'relationships' => ['document_id', 'bug_id']],
         'aos_quotes_aos_invoices' => ['label' => 'Relationship Quote Invoice', 'module_name' => 'AOS_Quotes', 'link_field_name' => 'aos_quotes_aos_invoices', 'fields' => [], 'relationships' => ['aos_quotes77d9_quotes_ida', 'aos_quotes6b83nvoices_idb']],
-        'fp_events_contacts' => ['label' => 'Relationship Event Contact', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_contacts', 'fields' => [], 'relationships' => ['fp_events_contactsfp_events_ida', 'fp_events_contactscontacts_idb']],
-        'fp_events_leads_1' => ['label' => 'Relationship Event Lead', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_leads_1', 'fields' => [], 'relationships' => ['fp_events_leads_1fp_events_ida', 'fp_events_leads_1leads_idb']],
-        'fp_events_prospects_1' => ['label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => [], 'relationships' => ['fp_events_prospects_1fp_events_ida', 'fp_events_prospects_1prospects_idb']],
+        'fp_events_contacts' => ['label' => 'Relationship Event Contact', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_contacts', 'fields' => ['accept_status','invite_status'], 'relationships' => ['fp_events_contactsfp_events_ida', 'fp_events_contactscontacts_idb']],
+        'fp_events_leads_1' => ['label' => 'Relationship Event Lead', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_leads_1', 'fields' => ['accept_status','invite_status'], 'relationships' => ['fp_events_leads_1fp_events_ida', 'fp_events_leads_1leads_idb']],
+        'fp_events_prospects_1' => ['label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => ['accept_status','invite_status'], 'relationships' => ['fp_events_prospects_1fp_events_ida', 'fp_events_prospects_1prospects_idb']],
     ];
 
     protected $customRelationship = 'MydCustRelSugar';
@@ -666,7 +666,9 @@ class suitecrmcore extends solution
                     'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
                     'name_value_list' => $dataSugar,
                 ];
+print_r( $set_relationship_params);				
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
+print_r( $set_relationship_result);				
 
                 if (!empty($set_relationship_result->created)) {
                     $result[$key] = [
@@ -690,6 +692,7 @@ class suitecrmcore extends solution
             $this->updateDocumentStatus($key, $result[$key], $param);
         }
 
+print_r( $result);				
         return $result;
     }
 
@@ -875,9 +878,12 @@ class suitecrmcore extends solution
                 'response_type' => 'JSON',
                 'rest_data' => $jsonEncodedData,
             ];
-
+print_r($post);
+echo '0'.chr(10);
             curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
             $result = curl_exec($curl_request);
+echo '1'.chr(10);
+print_r($result);
             curl_close($curl_request);
             if (empty($result)) {
                 return false;
