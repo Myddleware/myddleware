@@ -91,6 +91,15 @@ class suitecrmcustom extends suitecrm {
 	
 	// Redifine read function
 	public function read($param) {
+		
+		// No history read action for every the rules => no need of history for the migration
+		if (
+				$param['call_type'] == 'history'
+			AND $param['module'] == 'fp_events_leads_1'
+		) {			
+			return array();
+		} 
+		
 		$read = parent::read($param);
 		if (
 				$param['rule']['id'] == '5ce362b962b63'
@@ -116,6 +125,16 @@ class suitecrmcustom extends suitecrm {
 			}
 		}		
 		return $read;
+	}
+	
+	// We redefine update data to manage update many to many relationship
+    public function updateData($param)
+    {
+		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            return $this->createRelationship($param);
+        }
+		return parent::updateData($param);
 	}
 	
 	// Add filter for contact module
@@ -157,7 +176,19 @@ class suitecrmcustom extends suitecrm {
 			return array();
 		}
 	}
-	
+
+	public function getRuleMode($module, $type) {
+		// Authorize update for relationship fp_events_leads_1
+		if ($module == 'fp_events_leads_1') {
+			return [
+					'0' => 'create_modify',
+					'C' => 'create_only',
+				];
+		}
+		return parent::getRuleMode($module, $type);
+	}
+		
+		
 	// Build the query for read data to SuiteCRM
 	protected function generateQuery($param, $method){
 		// Call the standard function

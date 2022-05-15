@@ -666,9 +666,7 @@ class suitecrmcore extends solution
                     'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
                     'name_value_list' => $dataSugar,
                 ];
-print_r( $set_relationship_params);				
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
-print_r( $set_relationship_result);				
 
                 if (!empty($set_relationship_result->created)) {
                     $result[$key] = [
@@ -692,7 +690,6 @@ print_r( $set_relationship_result);
             $this->updateDocumentStatus($key, $result[$key], $param);
         }
 
-print_r( $result);				
         return $result;
     }
 
@@ -878,12 +875,9 @@ print_r( $result);
                 'response_type' => 'JSON',
                 'rest_data' => $jsonEncodedData,
             ];
-print_r($post);
-echo '0'.chr(10);
+
             curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
             $result = curl_exec($curl_request);
-echo '1'.chr(10);
-print_r($result);
             curl_close($curl_request);
             if (empty($result)) {
                 return false;
