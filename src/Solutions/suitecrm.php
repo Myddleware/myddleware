@@ -665,6 +665,7 @@ class suitecrmcore extends solution
                     'link_field_name' => $this->module_relationship_many_to_many[$param['module']]['link_field_name'],
                     'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
                     'name_value_list' => $dataSugar,
+					'delete' => (!empty($data['deleted']) ? 1 : 0)
                 ];
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
 
@@ -696,6 +697,11 @@ class suitecrmcore extends solution
     // Permet de mettre à jour un enregistrement
     public function updateData($param)
     {
+		// In case of many to many relationship, the update is done by using createRelationship function 
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            return $this->createRelationship($param);
+        }
+		
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -753,7 +759,12 @@ class suitecrmcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             $param['data'][$idDoc]['deleted'] = 1;
         }
-
+		
+		// In case of many to many relationship, the delettion is done by using createRelationship function 
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            return $this->createRelationship($param);
+        }
+		
         return $this->updateData($param);
     }
 

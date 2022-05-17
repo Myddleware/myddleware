@@ -127,15 +127,6 @@ class suitecrmcustom extends suitecrm {
 		return $read;
 	}
 	
-	// We redefine update data to manage update many to many relationship
-    public function updateData($param)
-    {
-		// Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            return $this->createRelationship($param);
-        }
-		return parent::updateData($param);
-	}
 	
 	// Add filter for contact module
 	public function getFieldsParamUpd($type, $module) {	
