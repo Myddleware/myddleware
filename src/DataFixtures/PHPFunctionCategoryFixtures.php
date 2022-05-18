@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\FuncCat;
+use App\Entity\PHPFunctionCategory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class FuncCatFixtures extends Fixture implements FixtureGroupInterface
+class PHPFunctionCategoryFixtures extends Fixture implements FixtureGroupInterface
 {
     public const MATHEMATICAL_FUNC_CAT_REFERENCE = 'mathematical-function';
     public const TEXT_FUNC_CAT_REFERENCE = 'text-function';
@@ -23,21 +23,21 @@ class FuncCatFixtures extends Fixture implements FixtureGroupInterface
 
     public function load(ObjectManager $manager): void
     {
-        $existingFunctionCategories = $manager->getRepository(FuncCat::class)->findAll();
+        $existingFunctionCategories = $manager->getRepository(PHPFunctionCategory::class)->findAll();
         if (!empty($existingFunctionCategories)) {
             foreach ($existingFunctionCategories as $existingFunctionCategory) {
                 foreach ($this->defaultFunctionCategories as $defaultFunctionCategory) {
                     if ($existingFunctionCategory->getName() === $defaultFunctionCategory['name']) {
-                        $functionCategory = new FuncCat();
+                        $functionCategory = new PHPFunctionCategory();
                         $functionCategory->setName($defaultFunctionCategory['name']);
                         $manager->persist($functionCategory);
                     }
                 }
             }
         } else {
-            $mathematical = new FuncCat();
-            $text = new FuncCat();
-            $date = new FuncCat();
+            $mathematical = new PHPFunctionCategory();
+            $text = new PHPFunctionCategory();
+            $date = new PHPFunctionCategory();
 
             $mathematical->setName('mathematical');
             $text->setName('text');
