@@ -192,7 +192,7 @@ class airtablecore extends solution
 			// In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
 			foreach ($param['fields'] as $field) {
 				if (substr($field,0,3) == 'fld') {
-					include_once('lib/airtable/metadata.php');
+					include('lib/airtable/metadata.php');
 					if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
 						$fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
 						continue;
