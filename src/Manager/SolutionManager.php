@@ -53,6 +53,7 @@ use App\Solutions\vtigercrm;
 use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
+use App\Solutions\yousign;
 use App\Solutions\zuora;
 use Exception;
 
@@ -92,7 +93,8 @@ class SolutionManager
         sugarcrm $sugarcrm,
         salesforce $salesforce,
         airtable $airtable,
-        sendinblue $sendinblue
+        sendinblue $sendinblue,
+        yousign $yousign
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -124,6 +126,7 @@ class SolutionManager
             'salesforce' => $salesforce,
             'airtable' => $airtable,
             'sendinblue' => $sendinblue,
+            'yousign' => $yousign,
         ];
     }
 

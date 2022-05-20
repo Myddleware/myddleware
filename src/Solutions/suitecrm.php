@@ -612,6 +612,13 @@ class suitecrmcore extends solution
                     if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
+					// Note are sent using setNoteAttachement function 
+					if (
+							$param['module'] == 'Notes'
+						AND $key == 'filecontents'	
+					) {
+						continue;
+					}
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
                 $setEntriesListParameters = [
@@ -622,6 +629,13 @@ class suitecrmcore extends solution
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
 
                 if (!empty($get_entry_list_result->id)) {
+					// In case of module note with attachement, we generate a second call to add the file
+ 					if (
+							$param['module'] == 'Notes'
+						AND !empty($data['filecontents'])	
+					) {
+						$this->setNoteAttachement($data, $get_entry_list_result->id);						
+					} 
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
@@ -717,10 +731,16 @@ class suitecrmcore extends solution
                     if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
-
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
                         continue;
                     }
+					// Note are sent using setNoteAttachement function 
+					if (
+							$param['module'] == 'Notes'
+						AND $key == 'filecontents'	
+					) {
+						continue;
+					}
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
                 $setEntriesListParameters = [
@@ -731,6 +751,13 @@ class suitecrmcore extends solution
 
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
                 if (!empty($get_entry_list_result->id)) {
+					// In case of module note with attachement, we generate a second call to add the file
+ 					if (
+							$param['module'] == 'Notes'
+						AND !empty($data['filecontents'])	
+					) {
+						$this->setNoteAttachement($data, $get_entry_list_result->id);						
+					} 
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
@@ -752,6 +779,29 @@ class suitecrmcore extends solution
         return $result;
     }
 
+	// Function to send a note
+	protected function setNoteAttachement($data, $noteId) {					
+		$setNoteAttachementParameters = array(
+			'session' => $this->session,
+			'note' => array(
+				'id' => $noteId,
+				'filename' => $data['filename'],
+				'file' => $data['filecontents'],
+			),
+		);
+
+		$set_not_attachement_result = $this->call('set_note_attachment', $setNoteAttachementParameters);
+		if (
+				empty($set_not_attachement_result->id)
+			 OR (
+					!empty($set_not_attachement_result->id)
+				AND $set_not_attachement_result->id == '-1'
+			)
+		) {
+			 throw new \Exception('Failed to create the attachement on the note. ');
+		}				
+	}
+	
     // Function to delete a record
     public function deleteData($param)
     {
