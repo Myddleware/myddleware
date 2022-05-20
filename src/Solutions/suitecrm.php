@@ -349,6 +349,21 @@ class suitecrmcore extends solution
                         }
                     }
                 }
+				// Note management : add field content (exist only from SuiteCRM 7.12)
+				if (
+						$module == 'Notes'
+					AND $type = 'target'
+					AND empty($this->moduleFields['filecontents'])
+				) {
+					$this->moduleFields['filecontents'] = [
+                                'label' => 'File contents',
+                                'type' => 'varchar(36)',
+                                'type_bdd' => 'varchar(36)',
+                                'required' => 0,
+                                'required_relationship' => 0,
+                                'relate' => false,
+                            ];
+				}
             }
 
             return $this->moduleFields;
