@@ -9,6 +9,7 @@ use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -21,6 +22,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class ConnectorCrudController extends AbstractCrudController
 {
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets
+                ->addWebpackEncoreEntry('admin');
+    }   
+    
     public static function getEntityFqcn(): string
     {
         return Connector::class;
@@ -65,10 +72,14 @@ class ConnectorCrudController extends AbstractCrudController
             TextField::new('name'),
             AssociationField::new('solution')
             ->addCssClass('solution')
-            ->setFormTypeOptions(['attr' =>  [ 'data-controller' => 'solution',
-                                                'data-action' => 'change->solution#onSelect'
-                                            ]
-                                ]),
+            ->setFormTypeOptions([
+                    'row_attr' => [
+                        'data-controller' => 'solution',
+                    ],
+                    'attr' =>  [ 
+                    'data-action' => 'change->solution#onSelect'
+                    ]
+                ]),
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
             ->setEntryIsComplex(true)
