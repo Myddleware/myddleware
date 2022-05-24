@@ -65,10 +65,14 @@ class ConnectorCrudController extends AbstractCrudController
             TextField::new('name'),
             AssociationField::new('solution')
             ->addCssClass('solution')
-            ->setFormTypeOptions(['attr' =>  [ 'data-controller' => 'solution',
-                                                'data-action' => 'change->solution#onSelect'
-                                            ]
-                                ]),
+            ->setFormTypeOptions([
+                    'row_attr' => [
+                        'data-controller' => 'solution',
+                    ],
+                    'attr' =>  [ 
+                    'data-action' => 'change->solution#onSelect'
+                    ]
+                ]),
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
             ->setEntryIsComplex(true)
