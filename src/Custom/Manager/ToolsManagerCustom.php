@@ -26,6 +26,7 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5f847b2242138'] = 'REEC - Etablissement sup';
 			$data['lst_rule']['62738aabafcd2'] = 'REEC - Quartiers';
 			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
+			$data['lst_rule']['62739b419755f'] = 'REEC - Coupons vers REEC';
 			$data['lst_rule']['61a920fae25c5'] = 'Aiko Contacts';
 			$data['lst_rule']['61a900506e8f1'] = 'Aiko Pôles';
 			$data['lst_rule']['61a930273441b'] = 'Aiko Binomes';

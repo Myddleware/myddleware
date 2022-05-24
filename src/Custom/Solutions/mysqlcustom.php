@@ -178,6 +178,18 @@ class mysqlcustom extends mysql {
 			) {
 				unset($data['date_naissance']);
 			}
+			if (
+							isset($data['reperant_id'])
+					AND empty($data['reperant_id'])
+			) {
+					unset($data['reperant_id']);
+			}
+			if (
+							isset($data['composante_id'])
+					AND empty($data['composante_id'])
+			) {
+					unset($data['composante_id']);
+			}
 		}
 		return $data;		
 	}

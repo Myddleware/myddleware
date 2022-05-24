@@ -700,7 +700,7 @@ class suitecrmcore extends solution
 
                 if (!empty($set_relationship_result->created)) {
                     $result[$key] = [
-                        'id' => $key, // On met $key car onn a pas l'id de la relation
+                        'id' => $set_relationship_params['module_id'].$set_relationship_params['related_ids'][0],
                         'error' => false,
                     ];
                 } else {

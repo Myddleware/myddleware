@@ -127,6 +127,16 @@ class DocumentManagerCustom extends DocumentManager {
 			}
 		} */
 		
+		// If we don't found the coupon (REEC) corresponding to the contact (COMET), we cancel the data transfer. 
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	in_array($this->document_data['rule_id'], array('628cdd961b093')) // REEC - Coupon - Pôles
+			AND $new_status == 'Relate_KO'
+		) {			
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le coupon de la relation pole - coupon n\'a pas été trouvé. Il s\'agit probablement d\'un coupon non mentoré. Ce transfert de données est annulé. '); 
+		}
+		
 		if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact composante - Pôle
