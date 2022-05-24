@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use DateTimeImmutable;
 use App\Entity\Connector;
+use Doctrine\ORM\QueryBuilder;
 use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -30,9 +31,6 @@ class ConnectorCrudController extends AbstractCrudController
         $user = $this->getUser();
         $connector = new Connector();
         $connector->setDeleted(false);
-        $now = new DateTimeImmutable('now');
-        $connector->setCreatedAt($now);
-        $connector->setUpdatedAt($now);
         $connector->setCreatedBy($user);
         $connector->setModifiedBy($user);
 
@@ -41,9 +39,23 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if(!$entityInstance instanceof Connector) return;
-        $entityInstance->setUpdatedAt(new \DateTimeImmutable());
+        if (!$entityInstance instanceof Connector) {
+            return;
+        }
+        $user = $this->getUser();
+        $entityInstance->setModifiedBy($user);
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if (!$entityInstance instanceof Connector) {
+            return;
+        }
+        foreach ($entityInstance->getConnectorParams() as $connectorParam) {
+            $entityManager->remove($connectorParam);
+        }
+        parent::deleteEntity($entityManager, $entityInstance);
     }
 
     public function configureFields(string $pageName): iterable
@@ -51,10 +63,39 @@ class ConnectorCrudController extends AbstractCrudController
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
-            AssociationField::new('solution'),
+            AssociationField::new('solution')
+            ->addCssClass('solution')
+            ->setFormTypeOptions(['attr' =>  [ 'data-controller' => 'solution',
+                                                'data-action' => 'change->solution#onSelect'
+                                            ]
+                                ]),
+            // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
-                ->setEntryIsComplex(true)
-                ->setEntryType(ConnectorParamFormType::class),
+            ->setEntryIsComplex(true)
+            ->setEntryType(ConnectorParamFormType::class)
+            ->setTemplatePath('admin/credentials.html.twig')
+            // AssociationField::new('connectorParams', 'Credentials')
+                // ->autocomplete()
+                // ->setFormTypeOption('choice_label', 'name')
+                // ->setFormTypeOption('by_reference', false)
+                            // ->autocomplete()
+                            // ->formatValue(static function ($value, Connector $connector): ?string {
+                            //     if (!$connectorParams = $connector->getConnectorParams()) {
+                            //         return null;
+                            //     }
+                            //     foreach($connectorParams as $connectorParam){
+                            //         return sprintf('%s&nbsp;(%s)', $connectorParam->getName(), $connectorParam->getConnector()->count());
+                            //     }
+                            // })
+                            // ->setQueryBuilder(function (QueryBuilder $qb) {
+                            //     $qb->andWhere('entity.enabled = :enabled')
+                            //         ->setParameter('enabled', true);
+                            // })
+                ,
+            // CollectionField::new('connectorParams', 'Credentials')
+            //     ->allowDelete(false)
+            //     ->renderExpanded()
+            //     ->showEntryLabel(),
                 // ->setTemplatePath('admin/connector_params.html.twig')
             // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),

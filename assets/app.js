@@ -9,6 +9,7 @@
 import './styles/app.css';
 import './styles/home.css';
 import './styles/install_requirements.css';
+import './styles/register.css';
 import './styles/global.scss';
 
 // You can specify which plugins you need

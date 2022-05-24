@@ -43,7 +43,9 @@ class RuleCrudController extends AbstractCrudController
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if(!$entityInstance instanceof Rule) return;
+        if (!$entityInstance instanceof Rule) {
+            return;
+        }
         $entityInstance->setUpdatedAt(new \DateTimeImmutable());
         parent::updateEntity($entityManager, $entityInstance);
     }
