@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Repository\ConfigRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class InstallRequirements extends AbstractController
 {
@@ -18,17 +18,16 @@ class InstallRequirements extends AbstractController
     // {
     //     $this->configRepository = $configRepository;
     // }
-    
+
     #[Route('/install_requirements', name: 'app_install_requirements')]
     public function requirements(): Response
     {
-        //$configs = $this->configRepository->findAll();
+        // $configs = $this->configRepository->findAll();
         $this->phpVersion = phpversion();
 
         return $this->render('install_setup/install_requirements.html.twig', [
             'php_version' => $this->phpVersion,
         ]);
-        
     }
     // public function installRequirements()
     // {
@@ -41,12 +40,11 @@ class InstallRequirements extends AbstractController
     //                     $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
     //                 }
     //             }
-               
+
     //         }
     //     } catch (Exception $e) {
     //         $this->logger->error($e->getMessage());
     //         $return['error'] = $e->getMessage();
-    //     }        
+    //     }
     // }
-
 }

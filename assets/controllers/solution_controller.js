@@ -6,14 +6,14 @@ export default class extends Controller {
     static targets = ['solution'];
 
     connect() {
-        console.log('hlelo');
         console.log(this.element);
-        console.log(element);
     }
 
     onSelect(event)
     {
-        console.log(event);
-        console.log(this.element);
+        // Solution ID 
+        console.log(event.currentTarget.value);
+        
+        // console.log(this.element);
     }
 }

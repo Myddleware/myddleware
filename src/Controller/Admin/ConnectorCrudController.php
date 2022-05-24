@@ -2,23 +2,22 @@
 
 namespace App\Controller\Admin;
 
-use DateTimeImmutable;
 use App\Entity\Connector;
-use Doctrine\ORM\QueryBuilder;
 use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
@@ -26,8 +25,8 @@ class ConnectorCrudController extends AbstractCrudController
     {
         return $assets
                 ->addWebpackEncoreEntry('admin');
-    }   
-    
+    }
+
     public static function getEntityFqcn(): string
     {
         return Connector::class;
@@ -76,9 +75,9 @@ class ConnectorCrudController extends AbstractCrudController
                     'row_attr' => [
                         'data-controller' => 'solution',
                     ],
-                    'attr' =>  [ 
-                    'data-action' => 'change->solution#onSelect'
-                    ]
+                    'attr' => [
+                    'data-action' => 'change->solution#onSelect',
+                    ],
                 ]),
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')

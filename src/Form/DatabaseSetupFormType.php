@@ -22,8 +22,8 @@ class DatabaseSetupFormType extends AbstractType
             ->add('name')
             ->add('user')
             ->add('password', PasswordType::class, [
-                //this field needs to be nullable as localhost is often root with no password
-                'required' => false,        
+                // this field needs to be nullable as localhost is often root with no password
+                'required' => false,
             ])
             ->add('Save', SubmitType::class, [
                 'attr' => [
