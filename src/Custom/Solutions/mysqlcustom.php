@@ -733,4 +733,13 @@ class mysqlcustom extends mysql {
         }
 		return $ruleMode;
     }
+	
+	// Generate ID for the document
+    protected function generateId($param, $record)
+    {
+		if ($param['rule']['id'] == '627153382dc34') { // Mobilisation - Participations RI
+			return $record->fp_events_leads_1fp_events_ida.$record->fp_events_leads_1leads_idb;
+		}
+        return parent::generateId($param, $record);
+    }
 }
