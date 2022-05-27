@@ -13,7 +13,7 @@
         <p>Let's check wheter your server meets the requirements to run a Myddleware project.</p>        
         {% if php_version %}
             <p>Php version : </p>
-            {{ php_version }}
+            <strong class="php-version">{{ php_version }}</strong>
         {% else %}
             <p> WARNING ! Could not find your PHP version</p>
         {% endif %}

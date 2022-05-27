@@ -14,16 +14,26 @@ class InstallRequirements extends AbstractController
 
     private $configRepository;
 
-    // public function __construct(ConfigRepository $configRepository)
-    // {
-    //     $this->configRepository = $configRepository;
-    // }
+    public function __construct(ConfigRepository $configRepository)
+    {
+        $this->configRepository = $configRepository;
+    }
     
     #[Route('/install_requirements', name: 'app_install_requirements')]
     public function requirements(): Response
     {
-        //$configs = $this->configRepository->findAll();
+        $configs = $this->configRepository->findAll();
         $this->phpVersion = phpversion();
+
+         //to help voter decide whether we allow access to install process again or not
+         $configs = $this->configRepository->findAll();
+         if (!empty($configs)) {
+             foreach ($configs as $config) {
+                 if ('allow_install' === $config->getName()) {
+                     $this->denyAccessUnlessGranted('DATABASE_VIEW', $config);
+                 }
+             }
+         }
 
         return $this->render('install_setup/install_requirements.html.twig', [
             'php_version' => $this->phpVersion,

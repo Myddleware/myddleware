@@ -9,14 +9,14 @@
     </div>
     <div class="install">
         <h3 class="install-title">Install Step 2 : setting up your Myddleware database</h3>
-        {{ form_start(databaseForm) }}
-            {{ form_row(databaseForm.host) }}
-            {{ form_row(databaseForm.port)}}
-            {{ form_row(databaseForm.name) }}
-            {{ form_row(databaseForm.user) }}
-            {{ form_row(databaseForm.password) }}
-            {{ form_row(databaseForm.Save) }}
-        {{ form_end(databaseForm) }}
+        {{ form_start(form) }}
+            {{ form_row(form.host) }}
+            {{ form_row(form.port)}}
+            {{ form_row(form.name) }}
+            {{ form_row(form.user) }}
+            {{ form_row(form.password) }}
+            {{ form_row(form.Save) }}
+        {{ form_end(form) }}
         <button class="home_item btn btn-primary"><a href="{{path('app_database_connection')}}">Next</a></button>
         <button class="home_item btn btn-primary"><a class="back_requirements" href="{{path('app_install_requirements')}}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">

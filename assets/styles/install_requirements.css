@@ -30,3 +30,7 @@ body{
     margin-left: 565px;
     margin-bottom: -125px;
 }
+
+.php-version{
+    color: rgb(4, 134, 32);
+}
