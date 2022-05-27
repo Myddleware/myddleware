@@ -472,6 +472,32 @@ class sendinbluecore extends solution
         return $identifier;
     }
 	
+	// Check data before create
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    {
+		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
+		return $this->setBooleanValues($data);
+    }
+	
+	// Check data before create
+    protected function checkDataBeforeUpdate($param, $data)
+    {
+		$data = parent::checkDataBeforeUpdate($param, $data);
+		return $this->setBooleanValues($data);
+    }
+	 
+	// Change text value true and false to boolean value
+	protected setBooleanValues($record) {
+		foreach ($record as $field => $value) {
+			if ($value === 'true') {
+				$record[$field] = true;
+			} elseif ($value === 'false') {
+				$record[$field] = false;
+			} 
+		}
+		return $record;
+	}
+	
 	// delete the record 
 	protected function delete($param, $record) {  
 		try {
