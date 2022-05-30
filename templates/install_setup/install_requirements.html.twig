@@ -4,7 +4,7 @@
 
 {% block body %}
     {# Logo myddleware #}
-    <div>
+    <div class="logo-row">
         <img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
     </div>
     <div class="install">
@@ -17,10 +17,10 @@
         {% else %}
             <p> WARNING ! Could not find your PHP version</p>
         {% endif %}
-        <p>Your system is ready to run Myddleware</p>
+        <p>{{ system_status }}</p>
         <p>Optional recommendations to improve your setup</p> 
 
-        <div>  
+        <div class="note-install">  
             <h4>NOTE</h4>
             <p>The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory</p>
             <p>symfony check:requirements</p>

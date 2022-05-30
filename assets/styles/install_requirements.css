@@ -2,12 +2,14 @@ body{
     background: #f1f5f9 !important;
 
 }
+.logo-row{
+    text-align: center;
+}
 
 .install{
     padding: 35px;
-    height: 75vh;
     margin: 450px;
-    margin-top: 150px;
+    margin-top: 0px;
     margin-bottom: 100px;
     background: white;
     box-shadow:0 10px 15px -3px rgba(15,23,41,0.1),0 4px 6px -2px rgba(15,23,41,0.05);
@@ -24,13 +26,13 @@ body{
     text-decoration: none !important;
 }
 
-
-.logo-register{
-    width: 408px;
-    margin-left: 565px;
-    margin-bottom: -125px;
-}
-
 .php-version{
     color: rgb(4, 134, 32);
+}
+
+.note-install{
+    background-color: antiquewhite;
+    text-align: center;
+    padding: 15px;
+    margin: 20px;
 }
