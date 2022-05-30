@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>An Error Occurred: {{ status_text }}</title>
-  </head>
-  <body>
-    <h1>Oops! An Error Occurred</h1>
-    <h2>The server returned a "{{ status_code }} {{ status_text }}".</h2>
- 
-    <div>
-      Something is broken. Please check your log file here : \myddleware\var\log\prod.log
-      <BR> 
-      <BR> 
-      You can post an issue on <a href="https://github.com/Myddleware/myddleware/issues" target="blank_">Myddleware Github project</a>  <BR><BR>
-      Sorry for the inconvenience.
-    </div>
-  </body>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>An Error Occurred:
+			{{ status_text }}</title>
+	</head>
+	<body>
+		<h1>Oops! An Error Occurred</h1>
+		<h2>The server returned a "{{ status_code }}
+			{{ status_text }}".</h2>
+
+		<div>
+			Something is broken. Please check your log file here : \myddleware\var\log\prod.log
+			<BR>
+			<BR>
+			You can post an issue on
+			<a href="https://github.com/Myddleware/myddleware/issues" target="blank_">Myddleware Github project</a>
+			<BR><BR>
+			Sorry for the inconvenience.
+		</div>
+	</body>
 </html>

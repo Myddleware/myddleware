@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Myddleware{% endblock %}</title>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />  
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}
-        {% endblock %}  
-        <footer>
-            {{ include('footer.html.twig')}}
-        </footer>
-    </body>
-</html>
+	<head>
+		<meta charset="UTF-8"/>
+		<title>
+			{% block title %}Myddleware
+			{% endblock %}
+		</title>
+		<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+		{% block javascripts %}
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
+	</head>
+	<body>
+		{% block body %}
+		</body>
+
+	{% endblock %}
+	<footer>
+		{{ include('footer.html.twig')}}</footer>
+</html></body></html>

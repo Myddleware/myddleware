@@ -13,8 +13,7 @@ export default class extends Controller {
         console.log(this.element);
     }
 
-    async onSelect(event)
-    {
+    async onSelect(event) {
         // event.preventDefault();
         // Solution ID 
         console.log(event.currentTarget.value);
