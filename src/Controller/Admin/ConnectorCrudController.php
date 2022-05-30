@@ -31,7 +31,8 @@ class ConnectorCrudController extends AbstractCrudController
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
-                ->addWebpackEncoreEntry('admin');
+                ->addWebpackEncoreEntry('admin')
+                ;
     }
 
     public static function getEntityFqcn(): string
@@ -73,6 +74,9 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $credentialsFormController = $this->generateUrl('credentials_form', [
+            // 'solutionId' => $user->getUserIdentifier(),
+        ]);
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
@@ -81,13 +85,20 @@ class ConnectorCrudController extends AbstractCrudController
             ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
+                        'data-solution-info-url-value' => $credentialsFormController,
+                        // 'data-solution-target' => 'credential'
                     ],
                     'attr' => [
-                    'data-action' => 'change->solution#onSelect',
+                        'data-action' => 'change->solution#onSelect',
                     ],
                 ]),
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
+            // ->setFormTypeOptions([
+            //     'row_attr' => [
+            //         'data-solution-target' => 'credential'
+            //     ]
+            // ])
             ->setEntryIsComplex(true)
             ->setEntryType(ConnectorParamFormType::class)
             ->setTemplatePath('admin/credentials.html.twig')

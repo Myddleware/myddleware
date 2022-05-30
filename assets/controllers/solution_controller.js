@@ -4,26 +4,32 @@ import axios from 'axios';
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
 
-    static targets = ['solution'];
+    static targets = ['solution', 'credential'];
+    static values = {
+        infoUrl: String
+    }
 
     connect() {
         console.log(this.element);
     }
 
-    onSelect(event)
+    async onSelect(event)
     {
+        // event.preventDefault();
         // Solution ID 
         console.log(event.currentTarget.value);
-        axios.get(this.infoUrlValue, {
+        await axios.get(this.infoUrlValue, {
             params: {
-                page: this.pageValue,
-                offset: this.offsetValue
+                // page: this.pageValue,
+                // offset: this.offsetValue
             }
         })
             .then((response) => {
-                this.tricksTarget.innerHTML += response.data;
-                this.removeFrameTitle();
-                this.appendLoadingButton(event);
+                // console.log(response.data);
+                // console.log(this.credentialTarget);
+                // this.credentialTarget.innerHTML += response.data;
+                this.element.parentNode.innerHTML += response.data;
+                console.log(this.element);
             });
     }
 }
