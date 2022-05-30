@@ -167,7 +167,7 @@ class AccountController extends AbstractController
             }
         }
 
-        return $this->render('account/resetPassword.html.twig', [
+        return $this->render('Account/resetPassword.html.twig', [
             'form' => $form->createView(),
         ]);
     }
