@@ -74,10 +74,4 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToCrud('User', 'fa fa-user', User::class),
         ];
     }
-
-
-    // public function configureAssets(): Assets
-    // {
-    //     return Assets::new();
-    // }
 }

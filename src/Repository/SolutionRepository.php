@@ -40,12 +40,12 @@ class SolutionRepository extends ServiceEntityRepository
     public function solutionActive()
     {
         return $this
-          ->createQueryBuilder('s')
-          ->select('s')
-          ->where('s.active = :active')
-          ->setParameter('active', 1)
-          ->getQuery()
-          ->getResult();
+            ->createQueryBuilder('s')
+            ->select('s')
+            ->where('s.active = :active')
+            ->setParameter('active', 1)
+            ->getQuery()
+            ->getResult();
     }
 
     // Liste des solutions en fonction des connecteurs
@@ -56,19 +56,19 @@ class SolutionRepository extends ServiceEntityRepository
         $field = (('target' == $type) ? 'target' : 'source');
 
         $qb->select('s', 'c')
-         ->innerJoin('s.connector', 'c');
+            ->innerJoin('s.connector', 'c');
 
         // si ce n'est pas le support alors on affecte l'id client sinon on affiche tout
         // On affiche uniquement les connecteurs du user
         if (false === $is_support) {
             $qb->where('s.active = :active AND s.'.$field.' = :type AND c.createdBy = :user_id')
-               ->setParameter('active', 1)
-               ->setParameter('type', 1)
-               ->setParameter('user_id', $id);
+                ->setParameter('active', 1)
+                ->setParameter('type', 1)
+                ->setParameter('user_id', $id);
         } else {
             $qb->where('s.active = :active AND s.'.$field.' = :type')
-               ->setParameter('active', 1)
-               ->setParameter('type', 1);
+                ->setParameter('active', 1)
+                ->setParameter('type', 1);
         }
 
         $qb->orderBy('s.name', 'ASC');
@@ -85,11 +85,11 @@ class SolutionRepository extends ServiceEntityRepository
         $field = (('target' == $type) ? 'target' : 'source');
 
         $qb->select('s.name')
-         ->where('s.active = :active AND s.'.$field.' = :type')
-         ->setParameter('active', 1)
-         ->setParameter('type', 1)
-         ->groupBy('s.name')
-         ->orderBy('s.name', 'ASC');
+            ->where('s.active = :active AND s.'.$field.' = :type')
+            ->setParameter('active', 1)
+            ->setParameter('type', 1)
+            ->groupBy('s.name')
+            ->orderBy('s.name', 'ASC');
 
         return $qb->getQuery()
                   ->getResult();

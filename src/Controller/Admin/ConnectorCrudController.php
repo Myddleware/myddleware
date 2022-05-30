@@ -2,32 +2,40 @@
 
 namespace App\Controller\Admin;
 
-use DateTimeImmutable;
 use App\Entity\Connector;
-use Doctrine\ORM\QueryBuilder;
 use App\Form\ConnectorParamFormType;
+use App\Repository\SolutionRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
+    private $solutionRepository;
+
+    public function __construct(SolutionRepository $solutionRepository)
+    {
+        $this->solutionRepository = $solutionRepository;
+    }
+
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
-                ->addWebpackEncoreEntry('admin');
-    }   
-    
+                ->addWebpackEncoreEntry('admin')
+                ;
+    }
+
     public static function getEntityFqcn(): string
     {
         return Connector::class;
@@ -67,6 +75,10 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $credentialsFormController = $this->generateUrl('credentials_form', [
+            // 'solutionId' => $user->getUserIdentifier(),
+        ]);
+
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
@@ -75,13 +87,20 @@ class ConnectorCrudController extends AbstractCrudController
             ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
+                        'data-solution-info-url-value' => $credentialsFormController,
+                        // 'data-solution-target' => 'credential'
                     ],
-                    'attr' =>  [ 
-                    'data-action' => 'change->solution#onSelect'
-                    ]
+                    'attr' => [
+                        'data-action' => 'change->solution#onSelect',
+                    ],
                 ]),
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
+            // ->setFormTypeOptions([
+            //     'row_attr' => [
+            //         'data-solution-target' => 'credential'
+            //     ]
+            // ])
             ->setEntryIsComplex(true)
             ->setEntryType(ConnectorParamFormType::class)
             ->setTemplatePath('admin/credentials.html.twig')

@@ -23,7 +23,7 @@ class SolutionType extends AbstractType
                 'class' => Solution::class,
                 'choice_label' => 'name',
                 'empty_data' => '',
-                'row_attr' =>  [ 'data-controller' => 'solution', ]
+                'row_attr' => ['data-controller' => 'solution'],
             ])
         ;
     }
