@@ -7,10 +7,7 @@ use App\Form\ConnectorParamFormType;
 use App\Repository\SolutionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -136,11 +133,6 @@ class ConnectorCrudController extends AbstractCrudController
             DateTimeField::new('updatedAt')->hideOnForm(),
             BooleanField::new('deleted')->hideOnForm(),
         ];
-    }
-
-    public function configureActions(Actions $actions): Actions
-    {
-        return $actions->add(Crud::PAGE_INDEX, Action::DETAIL);
     }
 
     public function configureFilters(Filters $filters): Filters

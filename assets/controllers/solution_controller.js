@@ -27,7 +27,8 @@ export default class extends Controller {
                 // console.log(response.data);
                 // console.log(this.credentialTarget);
                 // this.credentialTarget.innerHTML += response.data;
-                this.element.parentNode.innerHTML += response.data;
+                // this.element.parentNode.innerHTML += response.data;
+                this.element.parentNode.innerHTML += response.text;
                 console.log(this.element);
             });
     }

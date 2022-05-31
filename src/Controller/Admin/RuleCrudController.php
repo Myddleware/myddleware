@@ -58,7 +58,6 @@ class RuleCrudController extends AbstractCrudController
 
         return $actions->add(Crud::PAGE_EDIT, $duplicate)
             ->add(Crud::PAGE_DETAIL, $duplicate)
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE]);
     }
 
