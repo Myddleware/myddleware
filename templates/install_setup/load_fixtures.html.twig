@@ -11,10 +11,27 @@
         <div class="card-body">
             <h3 class="install-title">Install Step 4 : uploading database tables</h3>
             <h5>Loading database tables</h5>
-            <p>You can now go to the next page to set up your Myddleware use</p>
-
-              <button class="home_item btn btn-primary"><a href="{{path('app_register')}}">Next</a></button>
+            {% if connection_failed_message %}
+                <p class="alert-danger">{{ connection_failed_message }}</p>
+                <p>Go back to the previous page to reset your database connection</p>
+            {% else %}
+                <p class="alert-success">{{ connection_success_message }}</p>
+                {% if connection_success_message %}
+                    <p class="text-center">You can now go to the next page to set up your Myddleware user.</p>
+                {% endif %}
+            {% endif %}
+                <a href="{{ path('app_database_connection') }}" id="previous" role="button" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i>Previous
+                </a>
+            {% if connection_failed_message %}
+                <button class="btn btn-outline-secondary btn-lg" id="next-btn" disabled>
+                    <i class="fas fa-arrow-right"></i>Next
+                </button>
+            {% elseif connection_success_message %}
+                <a href="{{ path('app_register') }}" id="next" class="btn btn-primary btn-lg" role="button">
+                    <i class="fas fa-arrow-right"></i>Next
+                </a>
+            {% endif %}                            
         </div>   
-    </div>
-    
+    </div>    
 {% endblock %}

@@ -45,9 +45,9 @@ class InstallRequirements extends AbstractController
 
             $this->systemStatus = '';
             if (!$checkPassed) {
-                $this->systemStatus = 'install.system_status_not_ready';
+                $this->systemStatus = 'Your system is not ready to run Myddleware yet';
             } else {
-                $this->systemStatus ='install.system_status_ready';
+                $this->systemStatus ='Your system is ready to run Myddleware';
             }
 
             //allow access if no errors
