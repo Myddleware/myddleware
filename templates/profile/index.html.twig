@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block body %}
+	{# Logo myddleware #}
+	<div>
+		<img src="../build/images/logo/logo,.png" alt="Myddleware" class="logo-register">
+	</div>
+
+    <div class="install">
+        <h3>My profile</h3>
+        {% for role in app.user.roles %}
+            {% if role != 'ROLE_USER' %}
+                <p>
+                    <span class="fa fa-star"></span>
+                    <i>{{ role }}</i>
+                </p>
+            {% endif %}
+        {% endfor %}
+        {# <p>Enabled: <span class="badge badge-secondary">{{ app.user.enabled ? 'yes' : 'no' }}</span></p> #}
+        <p>Email: {{ app.user.email }}</p>
+        <p>Timezone: {{ app.user.timezone }}</p>
+        	<button class="home_item btn btn-primary">
+				<a href="">Return</a>
+			</button>
+    </div>
+
+
+{% endblock %}
