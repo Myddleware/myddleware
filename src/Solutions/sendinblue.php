@@ -487,7 +487,7 @@ class sendinbluecore extends solution
     }
 	 
 	// Change text value true and false to boolean value
-	protected setBooleanValues($record) {
+	protected function setBooleanValues($record) {
 		foreach ($record as $field => $value) {
 			if ($value === 'true') {
 				$record[$field] = true;
