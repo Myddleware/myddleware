@@ -53,7 +53,8 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         return [
-            MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
+            MenuItem::linkToDashboard('Dashboard', 'fas fa-dashboard'),
+            MenuItem::linkToRoute('Homepage', 'fas fa-home', 'app_home'),
             MenuItem::section('Rules'),
             MenuItem::subMenu('Rules', 'fas fa-sync')->setSubItems([
                 MenuItem::linkToCrud('My rules', 'fas fa-eye', Rule::class),

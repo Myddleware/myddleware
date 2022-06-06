@@ -131,7 +131,7 @@ class ConnectorCrudController extends AbstractCrudController
             AssociationField::new('modifiedBy')->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
-            BooleanField::new('deleted')->hideOnForm(),
+            BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
         ];
     }
 
