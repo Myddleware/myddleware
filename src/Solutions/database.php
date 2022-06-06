@@ -385,7 +385,7 @@ class databasecore extends solution
     }
 
     // Create the record
-    protected function create($param, $record)
+    protected function create($param, $record, $idDoc = null)
     {
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
@@ -433,7 +433,7 @@ class databasecore extends solution
     }
 
     // Update the record
-    protected function update($param, $record)
+    protected function update($param, $record, $idDoc = null)
     {
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';

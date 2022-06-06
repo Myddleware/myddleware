@@ -865,7 +865,6 @@ crontab:
             Add this task in your Linux or Windows task scheduler : php bin/console myddleware:cronrun --env=background <BR>
             For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
                */5 * * * * cd <myddleware_directory>; php bin/console myddleware:cronrun --env=background
-
 duplicate_rule:
     duplicate: Duplicate
     cancel: Cancel
