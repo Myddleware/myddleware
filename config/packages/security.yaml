@@ -1,8 +1,7 @@
-#app/config/security.yaml
 security:
     encoders:
         App\Entity\User:
-            algorithm: bcrypt
+            algorithm: auto
 
     providers:
         username_provider:
@@ -11,12 +10,11 @@ security:
                 property: username
 
     firewalls:
-        api_login:
-            pattern:  ^/api/v1_0/login
+        login:
+            pattern:  ^/api/login
             stateless: true
-            anonymous: true
             json_login:
-                check_path: /api/v1_0/login_check
+                check_path: /api/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
         api:
@@ -48,13 +46,9 @@ security:
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     access_control:
-        - { path: ^/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        #- { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        #- { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/, role: ROLE_ADMIN }
-        #- { path: ^/ajouter, role: ROLE_ADMIN }
         - { path: ^/rule/, role: ROLE_USER }
-
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-#        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

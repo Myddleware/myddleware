@@ -114,7 +114,7 @@ class TaskController extends AbstractController
         $jobs = $this->jobRepository->findBy([], ['status' => 'DESC', 'begin' => 'DESC'], 1000);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $jobs,
-            'maxPerPage' => $this->params['pager'],
+            'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
             'page' => $page,
         ], false);
 
@@ -151,7 +151,7 @@ class TaskController extends AbstractController
             $taskId = $task->getId();
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $em->getRepository(Log::class)->findBy(['job' => $taskId], ['id' => 'DESC']),
-                'maxPerPage' => $this->params['pager'],
+                'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
                 'page' => $page,
             ], false);
             //Check the user timezone
