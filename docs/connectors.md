@@ -1,4 +1,4 @@
-# Applications currently connected
+# Currently-supported Connectors
 
 - Airtable
 - Bittle
