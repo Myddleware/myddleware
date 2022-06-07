@@ -56,67 +56,68 @@ class DatabaseSetupController extends AbstractController
     {
         try {
             $submitted = false;
-            try {
-                // Do you have a DB ? Is it filled yet ? Do you have permission to install?
-                $config = $this->configRepository->findOneByAllowInstall('allow_install');
-            } catch (Exception $e) {
+            // try {
+            //     // Do you have a DB ? Is it filled yet ? Do you have permission to install?
+            //     $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            // } catch (Exception $e) {
                 
-             $this->logger->error($e->getMessage());
-             $return['error'] = $e->getMessage();
-             dd($e);
-                if ($e instanceof TableNotFoundException) {
-                    // DO NOTHING HERE, this means that you have a DB but it's still empty
-                }
-            }
+            //  $this->logger->error($e->getMessage());
+            //  $return['error'] = $e->getMessage();
+            //  dd($e);
+            //     if ($e instanceof TableNotFoundException) {
+            //         // DO NOTHING HERE, this means that you have a DB but it's still empty
+            //     }
+            // }
 
-            // to help voter decide whether we allow access to install process again or not
-            if (!empty($config)) {
-                if ('allow_install' === $config->getName()) {
-                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-                }
-            }
+            // // to help voter decide whether we allow access to install process again or not
+            // if (!empty($config)) {
+            //     if ('allow_install' === $config->getName()) {
+            //         $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+            //     }
+            // }
 
             // get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
-            $parameters = ['database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
-            foreach ($parameters as $parameter) {
-                // try {
-                    $value = $this->getParameter($parameter);
-                // } catch (Exception $e) {
-                //     // if parameters are not accessible yet
-                //     if ($e instanceof InvalidArgumentException) {
-                //         continue;
-                //     }
-                // }
+            // dd($database);
+            // $parameters = ['database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
+            // foreach ($parameters as $parameter) {
+            //     // try {
+            //         $value = $this->getParameter($parameter);
+            //     // } catch (Exception $e) {
+            //     //     // if parameters are not accessible yet
+            //     //     if ($e instanceof InvalidArgumentException) {
+            //     //         continue;
+            //     //     }
+            //     // }
 
-                if (!empty($value)) {
-                    switch ($parameter) {
-                        case 'database_driver':
-                            $database->setDriver($value);
-                            break;
-                        case 'database_host':
-                            $database->setHost($value);
-                            break;
-                        case 'database_port':
-                            $database->setPort($value);
-                            break;
-                        case 'database_name':
-                            $database->setName($value);
-                            break;
-                        case 'database_user':
-                            $database->setUser($value);
-                            break;
-                        case 'database_password':
-                            $database->setPassword($value);
-                            break;
-                        case 'secret':
-                            $database->setSecret($value);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
+            //     if (!empty($value)) {
+            //         switch ($parameter) {
+            //             case 'database_driver':
+            //                 $database->setDriver($value);
+            //                 break;
+            //             case 'database_host':
+            //                 $database->setHost($value);
+            //                 break;
+            //             case 'database_port':
+            //                 $database->setPort($value);
+            //                 break;
+            //             case 'database_name':
+            //                 $database->setName($value);
+            //                 break;
+            //             case 'database_user':
+            //                 $database->setUser($value);
+            //                 break;
+            //             case 'database_password':
+            //                 $database->setPassword($value);
+            //                 break;
+            //             case 'secret':
+            //                 $database->setSecret($value);
+            //                 break;
+            //             default:
+            //                 break;
+            //         }
+            //     }
+            //}
 
             // force user to change the default Symfony secret for security
             if ('Thissecretisnotsosecretchangeit' === $database->getSecret() || null === $database->getSecret() || empty($database)) {
@@ -153,13 +154,14 @@ class DatabaseSetupController extends AbstractController
         catch (Exception $e) {
              $this->logger->error($e->getMessage());
              $return['error'] = $e->getMessage();
-             dd($e);
+             dd('1',$e);
         if ($e instanceof ConnectionException | $e instanceof TableNotFoundException) {
             $submitted = false;
             
 
             // get all parameters from config/parameters.yml and push them in a new instance of DatabaseParameters()
             $database = new DatabaseParameter();
+
 
             $parameters = ['database_driver', 'database_host', 'database_port', 'database_name', 'database_user', 'database_password', 'secret'];
             foreach ($parameters as $parameter) {
@@ -196,7 +198,7 @@ class DatabaseSetupController extends AbstractController
                     
              $this->logger->error($e->getMessage());
              $return['error'] = $e->getMessage();
-             dd($e);
+             dd('2',$e);
                     if ($e instanceof InvalidArgumentException) {
                         // force user to change the default Symfony secret for security
                         if ('Thissecretisnotsosecretchangeit' === $database->getSecret() || null === $database->getSecret() || empty($database)) {
@@ -244,21 +246,21 @@ class DatabaseSetupController extends AbstractController
     public function connectDatabase(Request $request, KernelInterface $kernel): Response
     {
         try {
-            try {
-                // Do you have a DB ? Is it filled yet ? Do you have permission to install?
-                $config = $this->configRepository->findOneByAllowInstall('allow_install');
-            } catch (Exception $e) {
-                if ($e instanceof TableNotFoundException) {
-                    //DO NOTHING HERE, this means that you have a DB but it's still empty
-                }
-            }
+            // try {
+            //     // Do you have a DB ? Is it filled yet ? Do you have permission to install?
+            //     $config = $this->configRepository->findOneByAllowInstall('allow_install');
+            // } catch (Exception $e) {
+            //     if ($e instanceof TableNotFoundException) {
+            //         //DO NOTHING HERE, this means that you have a DB but it's still empty
+            //     }
+            // }
 
             // //to help voter decide whether we allow access to install process again or not
-            if (!empty($config)) {
-                if ('allow_install' === $config->getName()) {
-                    $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
-                }
-            }
+            // if (!empty($config)) {
+            //     if ('allow_install' === $config->getName()) {
+            //         $this->denyAccessUnlessGranted('DATABASE_EDIT', $config);
+            //     }
+            // }
             $env = $kernel->getEnvironment();
 
             $application = new Application($kernel);
@@ -301,7 +303,7 @@ class DatabaseSetupController extends AbstractController
             
             $this->logger->error($e->getMessage());
              $return['error'] = $e->getMessage();
-             dd($e);
+             dd('3', $e);
             // if the database doesn't exist yet, ask user to go create it
             if ($e instanceof ConnectionException) {
                 $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
