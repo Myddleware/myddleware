@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
+use App\Form\ConnectorParamFormType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -15,8 +16,9 @@ class ConnectorType extends AbstractType
     {
         $builder
             ->add('connectorParams', CollectionType::class, [
-                'entry_type' => ConnectorParamType::class,
-                'entry_options' => ['label' => false]
+                'entry_type' => ConnectorParamFormType::class,
+                'entry_options' => ['label' => false],
+                'row_attr' => [ 'class' => 'p-3']
             ])
             // ->add('name')
             // ->add('nameSlug')
