@@ -75,12 +75,8 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $credentialsFormController = $this->generateUrl('credentials_form', 
-        // [
-        //     // 'solutionId' => $user->getUserIdentifier(),
-        // ]
-    );
-// dd($credentialsFormController);
+        $credentialsFormController = $this->generateUrl('credentials_form');
+
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
@@ -97,40 +93,10 @@ class ConnectorCrudController extends AbstractCrudController
                     ],
                 ])->setHelp("Login fields: ")
                 ,
-            // AssociationField::new('connectorParams', 'Credentials')
-            CollectionField::new('connectorParams', 'Credentials')
-            // ->setFormTypeOptions([
-            //     'row_attr' => [
-            //         'data-solution-target' => 'credential'
-            //     ]
-            // ])
-            ->setEntryIsComplex(true)
-            ->setEntryType(ConnectorParamFormType::class)
-            ->setTemplatePath('admin/credentials.html.twig')
-            // AssociationField::new('connectorParams', 'Credentials')
-                // ->autocomplete()
-                // ->setFormTypeOption('choice_label', 'name')
-                // ->setFormTypeOption('by_reference', false)
-                            // ->autocomplete()
-                            // ->formatValue(static function ($value, Connector $connector): ?string {
-                            //     if (!$connectorParams = $connector->getConnectorParams()) {
-                            //         return null;
-                            //     }
-                            //     foreach($connectorParams as $connectorParam){
-                            //         return sprintf('%s&nbsp;(%s)', $connectorParam->getName(), $connectorParam->getConnector()->count());
-                            //     }
-                            // })
-                            // ->setQueryBuilder(function (QueryBuilder $qb) {
-                            //     $qb->andWhere('entity.enabled = :enabled')
-                            //         ->setParameter('enabled', true);
-                            // })
-                ,
             // CollectionField::new('connectorParams', 'Credentials')
-            //     ->allowDelete(false)
-            //     ->renderExpanded()
-            //     ->showEntryLabel(),
-                // ->setTemplatePath('admin/connector_params.html.twig')
-            // AssociationField::new('connectorParams')->setCrudController(ConnectorParamCrudController::class),
+            //     ->setEntryIsComplex(true)
+            //     ->setEntryType(ConnectorParamFormType::class)
+            //     ->setTemplatePath('admin/credentials.html.twig'),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),

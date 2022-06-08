@@ -2,5 +2,14 @@
 	<div>
 		<h3>{{ solution.name }}</h3>
 		<p>{{ solution.id }}</p>
+		{% for module in solution.modules %}
+			<p>{{ module.name }}</p>
+		{% endfor %}
+		{{ form(form) }}
+		{# {% for field in loginFields %} #}
+			{# <p> #}
+			{# {{ dump(loginFields) }} #}
+			{# </p> #}
+		{# {% endfor %} #}
 	</div>
 </div>
