@@ -26,22 +26,23 @@ export default class extends Controller {
     }
 
     async onSelect(event) {
-        // Solution ID 
+        // // Solution ID 
         this.solutionIdValue = event.currentTarget.value;
-        console.log(this.solutionIdValue);
-        await axios.get(this.infoUrlValue, {
-            params: {
-                solutionId: this.solutionIdValue
-                // page: this.pageValue,
-                // offset: this.offsetValue
-            }
-        })
-            .then((response) => {
-                // this.credentialTarget.innerHTML += response.data;
-                // this.element.parentNode.innerHTML += response.data;
-                // this.loginFieldsResponse = response.data;
-                this.load();
-            });
+        const response = await this.load();
+        // console.log(this.solutionIdValue);
+        // await axios.get(this.infoUrlValue, {
+        //     params: {
+        //         solutionId: this.solutionIdValue
+        //         // page: this.pageValue,
+        //         // offset: this.offsetValue
+        //     }
+        // })
+        //     .then((response) => {
+        //         // this.credentialTarget.innerHTML += response.data;
+        //         // this.element.parentNode.innerHTML += response.data;
+        //         // this.loginFieldsResponse = response.data;
+        //         this.load();
+        //     });
     }
 
     render() {
