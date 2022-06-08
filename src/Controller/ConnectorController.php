@@ -9,10 +9,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-    #[Route('/credentials/getform', name: 'credentials_form')]
-    public function getCredentialsForm(int $solutionId = null, SolutionRepository $solutionRepository): Response
+    // #[Route('/credentials/getform/{solutionId<\d+>}', name: 'credentials_form', methods: ['GET'], defaults:['solutionId' => ''])]
+    #[Route('/credentials/getform/{solutionId<\d+>}', name: 'credentials_form', methods: ['GET'])]
+    public function getCredentialsForm(string $solutionId, SolutionRepository $solutionRepository): Response
     {
-        // $solution = $solutionRepository->find($solutionId);
+        $solution = $solutionRepository->find(intval($solutionId));
+        // var_dump($solutionId);
+        // die();
         return $this->render('connector/index.html.twig', [
             // 'solution' => $solution
         ]);

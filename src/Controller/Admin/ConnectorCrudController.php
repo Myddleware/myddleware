@@ -75,10 +75,12 @@ class ConnectorCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $credentialsFormController = $this->generateUrl('credentials_form', [
-            // 'solutionId' => $user->getUserIdentifier(),
-        ]);
-
+        $credentialsFormController = $this->generateUrl('credentials_form', 
+        // [
+        //     // 'solutionId' => $user->getUserIdentifier(),
+        // ]
+    );
+// dd($credentialsFormController);
         return [
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
@@ -88,12 +90,13 @@ class ConnectorCrudController extends AbstractCrudController
                     'row_attr' => [
                         'data-controller' => 'solution',
                         'data-solution-info-url-value' => $credentialsFormController,
-                        // 'data-solution-target' => 'credential'
                     ],
                     'attr' => [
                         'data-action' => 'change->solution#onSelect',
+                        'data-solution-target' => 'credential'
                     ],
-                ]),
+                ])->setHelp("Login fields: ")
+                ,
             // AssociationField::new('connectorParams', 'Credentials')
             CollectionField::new('connectorParams', 'Credentials')
             // ->setFormTypeOptions([
