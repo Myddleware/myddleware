@@ -251,7 +251,7 @@ animate:
 create_connector:    
     title: Création d'un connecteur
     save: Enregistrer la connexion
-    connexion: Nom de la connexion
+    connection: Nom de la connexion
     test: Tester
     valid: Cliquez-ici pour créer un autre connecteur
     help: "Besoin d'aide ?"
@@ -550,7 +550,7 @@ solution:
         60_day: 60 jours
         
 error:
-    connexion: Connexion impossible
+    connection: Connexion impossible
     general: Erreur inattendue
     rule:
         valid: Règle non valide
@@ -777,7 +777,7 @@ login:
     index: Accueil
     user: Identifiant
     pwd: Mot de passe
-    connexion: Se connecter
+    connection: Se connecter
     error_session: Erreur de session
     text_up_right: Pour en savoir plus sur myddleware
     text_bottom_right: Vous serez redirigé vers notre site explicatif

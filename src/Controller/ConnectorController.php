@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use App\Form\ConnectorParamFormType;
 use App\Manager\SolutionManager;
@@ -19,6 +20,17 @@ class ConnectorController extends AbstractController
         assert(null !== $solution);
 
         $loginFields = $solutionManager->get($solution->getName())->getFieldsLogin();
+
+        $connector = new Connector();
+        $connector->setSolution($solution);
+
+        $form = $this->createForm(ConnectorType::class, $connector, [
+            'action' => $this->generateUrl('regle_connector_insert'),
+            'attr' => [
+                'loginFields' => $loginFields,
+                'secret' => $this->getParameter('secret'),
+            ],
+        ]);
 
         foreach ($loginFields as $loginField) {
             $connectorParam = new ConnectorParam();

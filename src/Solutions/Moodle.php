@@ -47,20 +47,20 @@ class Moodle extends Solution
 
     protected $delaySearch = '-1 year';
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $this->moodleClient = new curl();
             $params = [];
-            $this->paramConnexion['token'] = trim($this->paramConnexion['token']);
+            $this->connectionParam['token'] = trim($this->connectionParam['token']);
             $functionname = 'core_webservice_get_site_info';
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+            $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
             $response = $this->moodleClient->post($serverurl, $params);
             $xml = simplexml_load_string($response);
 
             if (!empty($xml->SINGLE->KEY[0]->VALUE)) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } elseif (!empty($xml->ERRORCODE)) {
                 throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
             } else {
@@ -138,7 +138,7 @@ class Moodle extends Solution
                     // Récupération de toutes les catégories existantes
                     $params = [];
                     $functionname = 'core_course_get_categories';
-                    $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                    $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
                     $response = $this->moodleClient->post($serverurl, $params);
                     $xml = simplexml_load_string($response);
                     if (!empty($xml->MULTIPLE->SINGLE)) {
@@ -168,7 +168,7 @@ class Moodle extends Solution
             $functionName = $this->getFunctionName($param);
 
             // Call to Moodle
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+            $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
@@ -251,7 +251,7 @@ class Moodle extends Solution
                         break;
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
 
@@ -362,7 +362,7 @@ class Moodle extends Solution
                         break;
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
 

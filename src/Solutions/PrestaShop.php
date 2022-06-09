@@ -89,12 +89,12 @@ class PrestaShop extends Solution
     protected $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
 
     // Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try { // try-catch Myddleware
             try { // try-catch PrestashopWebservice
-                $this->webService = new PrestaShopWebservice($this->paramConnexion['url'], $this->paramConnexion['apikey'], false);
+                $this->webService = new PrestaShopWebservice($this->connectionParam['url'], $this->connectionParam['apikey'], false);
 
                 // Pas de resource à préciser pour la connexion
                 $opt['resource'] = '';
@@ -105,7 +105,7 @@ class PrestaShop extends Solution
                 $xml = $this->webService->get($opt);
 
                 // Si le call s'est déroulé sans Exceptions, alors connexion valide
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } catch (PrestaShopWebserviceException $e) {
                 // Here we are dealing with errors
                 $trace = $e->getTrace();

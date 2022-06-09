@@ -250,7 +250,7 @@ animate:
 create_connector:    
     title: Creation of a connector
     save: Save the connection
-    connexion: Name of the connection
+    connection: Name of the connection
     test: Test
     valid: Click here to create an other connector
     help: Need assistance ?
@@ -549,7 +549,7 @@ solution:
         60_day: 60 days
 
 error:
-    connexion: Connection failed
+    connection: Connection failed
     general: Unexpected error
     rule:
         valid: Not valid rule
@@ -775,7 +775,7 @@ login:
     index: Home
     user: Login
     pwd: Password
-    connexion: Sign in
+    connection: Sign in
     error_session: Session error
     text_up_right: More information about Myddleware
     text_bottom_right: You will be redirected towards our site
@@ -783,7 +783,7 @@ login:
     disabled_account: Your account has been disabled
     platform:
         line1: Thanks for using the Platform.sh Continuous Deployment Cloud Hosting
-        line2: "For your first connexion, use this login/password : admin/admin"
+        line2: "For your first connection, use this login/password : admin/admin"
         line3: "Please change your password in 'My account'"
     btn:
         here: Click here

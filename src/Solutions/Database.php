@@ -38,14 +38,14 @@ class Database extends Solution
     protected $stringSeparatorOpen = '`';
     protected $stringSeparatorClose = '`';
 
-    public function login(array $paramConnexion)
+    public function login(array $connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             try {
                 $this->pdo = $this->generatePdo();
                 $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } catch (\PDOException $e) {
                 $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);

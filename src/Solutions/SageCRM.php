@@ -70,9 +70,9 @@ class SageCRM extends Solution
     protected $exclude_field_list = [];
 
     // Connexion à SageCRM
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             try {
                 // Define SOAP connection options.
@@ -82,9 +82,9 @@ class SageCRM extends Solution
                     'authentication' => SOAP_AUTHENTICATION_BASIC,
                     'exceptions' => true,
                 ];
-                $this->paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/file/'.$this->paramConnexion['wsdl'];
-                $client = new \SoapClient($this->paramConnexion['wsdl'], $options);
-                $login_details = ['username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']];
+                $this->connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sagecrm/file/'.$this->connectionParam['wsdl'];
+                $client = new \SoapClient($this->connectionParam['wsdl'], $options);
+                $login_details = ['username' => $this->connectionParam['login'], 'password' => $this->connectionParam['password']];
                 $response = $client->logon($login_details);
 
                 if (isset($response->result->sessionid)) {
@@ -96,10 +96,10 @@ class SageCRM extends Solution
                 $response = $client->logoff(['sessionId' => $sessionid]);
 
                 // Instanciation des variables de classes
-                $this->wsdl = $this->paramConnexion['wsdl'];
-                $this->username = $this->paramConnexion['login'];
-                $this->password = $this->paramConnexion['password'];
-                $this->connexion_valide = true;
+                $this->wsdl = $this->connectionParam['wsdl'];
+                $this->username = $this->connectionParam['login'];
+                $this->password = $this->connectionParam['password'];
+                $this->isConnectionValid = true;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
                     throw new \Exception($fault->getMessage());

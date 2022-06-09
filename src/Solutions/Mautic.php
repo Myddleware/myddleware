@@ -80,14 +80,14 @@ class Mautic extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Add login/password
             $settings = [
-                'userName' => $this->paramConnexion['login'],
-                'password' => $this->paramConnexion['password'],
+                'userName' => $this->connectionParam['login'],
+                'password' => $this->connectionParam['password'],
             ];
 
             // Ini api
@@ -96,13 +96,13 @@ class Mautic extends Solution
             $api = new MauticApi();
 
             // Get the current user to check the connection parameters
-            $userApi = $api->newApi('users', $auth, $this->paramConnexion['url']);
+            $userApi = $api->newApi('users', $auth, $this->connectionParam['url']);
             $user = $userApi->getSelf();
 
             // Managed API return. The API call is OK if the user id is found
             if (!empty($user['id'])) {
                 $this->auth = $auth;
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } elseif (!empty($user['error']['message'])) {
                 throw new \Exception('Failed to login to Mautic. Code '.$user['error']['code'].' : '.$user['error']['message']);
             } else {
@@ -143,7 +143,7 @@ class Mautic extends Solution
             if (in_array($module, ['contact', 'company'])) {
                 // Call Mautic to get the module fields
                 $api = new MauticApi();
-                $fieldApi = $api->newApi($module.'Fields', $this->auth, $this->paramConnexion['url']);
+                $fieldApi = $api->newApi($module.'Fields', $this->auth, $this->connectionParam['url']);
                 $fieldlist = $fieldApi->getList();
                 // Transform fields to Myddleware format
                 if (!empty($fieldlist['fields'])) {
@@ -241,7 +241,7 @@ class Mautic extends Solution
         $api = new MauticApi();
         $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
         $moduleResultKey = (!empty($this->moduleParameters[$param['module']]['resultKeyUpsert']) ? $this->moduleParameters[$param['module']]['resultKeyUpsert'] : $param['module']);
-        $moduleApi = $api->newApi($moduleName, $this->auth, $this->paramConnexion['url']);
+        $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -296,7 +296,7 @@ class Mautic extends Solution
         $api = new MauticApi();
         $moduleName = (!empty($this->moduleParameters[$module1]['plurial']) ? $this->moduleParameters[$module1]['plurial'] : $param['module']);
         // Init API instance
-        $moduleApi = $api->newApi($moduleName, $this->auth, $this->paramConnexion['url']);
+        $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -349,7 +349,7 @@ class Mautic extends Solution
             // Create API object depending on the module
             $api = new MauticApi();
             $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
-            $moduleApi = $api->newApi($moduleName, $this->auth, $this->paramConnexion['url']);
+            $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
             // For every document
             foreach ($param['data'] as $idDoc => $data) {

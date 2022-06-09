@@ -75,12 +75,12 @@ class Salesforce extends Solution {
 	protected $versionApi = 'v38.0';
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
-    public function login($paramConnexion) {
-		parent::login($paramConnexion);	
+    public function login($connectionParam) {
+		parent::login($connectionParam);	
 		try {
 			if (
-					!empty($this->paramConnexion['sandbox'])
-				&&	$this->paramConnexion['sandbox'] == 1
+					!empty($this->connectionParam['sandbox'])
+				&&	$this->connectionParam['sandbox'] == 1
 			) {
 				$token_url = 'https://test.salesforce.com/services/oauth2/token';
 			}
@@ -90,10 +90,10 @@ class Salesforce extends Solution {
 			
 		    $post_fields = array(
 		        'grant_type' => 'password',
-		        'client_id' => $this->paramConnexion['consumerkey'],
-		        'client_secret' => $this->paramConnexion['consumersecret'],
-		        'username' => $this->paramConnexion['login'],
-		        'password' => $this->paramConnexion['password'].$this->paramConnexion['token']
+		        'client_id' => $this->connectionParam['consumerkey'],
+		        'client_secret' => $this->connectionParam['consumersecret'],
+		        'username' => $this->connectionParam['login'],
+		        'password' => $this->connectionParam['password'].$this->connectionParam['token']
 		    );
 
 			$token_request_data = $this->call($token_url, $post_fields);
@@ -104,7 +104,7 @@ class Salesforce extends Solution {
 		    } else {
 			    $this->access_token = $token_request_data['access_token'];
 			    $this->instance_url = $token_request_data['instance_url'];
-				$this->connexion_valide = true;
+				$this->isConnectionValid = true;
 		    }
 		}
 		catch (\Exception $e) {

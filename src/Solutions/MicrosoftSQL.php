@@ -40,10 +40,10 @@ class MicrosoftSQL extends Database
     {
         $this->set_driver();
         if ('sqlsrv' == $this->driver) {
-            return new \PDO($this->driver.':Server='.$this->paramConnexion['host'].','.$this->paramConnexion['port'].';Database='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
+            return new \PDO($this->driver.':Server='.$this->connectionParam['host'].','.$this->connectionParam['port'].';Database='.$this->connectionParam['database_name'], $this->connectionParam['login'], $this->connectionParam['password']);
         }
 
-        return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
     // We use sqlsrv for windows and dblib for linux
@@ -59,7 +59,7 @@ class MicrosoftSQL extends Database
     // Query to get all the tables of the database
     protected function get_query_show_tables()
     {
-        return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
+        return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->connectionParam['database_name'].'\'';
     }
 
     // Query to get all the flieds of the table
