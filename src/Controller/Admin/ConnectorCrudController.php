@@ -6,7 +6,6 @@ use App\Entity\Connector;
 use App\Form\ConnectorParamFormType;
 use App\Repository\SolutionRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -89,10 +88,9 @@ class ConnectorCrudController extends AbstractCrudController
                     ],
                     'attr' => [
                         'data-action' => 'change->solution#onSelect',
-                        'data-solution-target' => 'credential'
+                        'data-solution-target' => 'credential',
                     ],
-                ])->setHelp("Login fields: ")
-                ,
+                ])->setHelp('Login fields: '),
             // CollectionField::new('connectorParams', 'Credentials')
             //     ->setEntryIsComplex(true)
             //     ->setEntryType(ConnectorParamFormType::class)
