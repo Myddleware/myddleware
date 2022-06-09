@@ -6,13 +6,16 @@ namespace App\Form;
 
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
-use App\Form\DataTransformer\ConnectorParamsValueTransformer;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\FormBuilderInterface;
+use App\Form\ConnectorParamFormType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\Valid;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\DataTransformer\ConnectorParamsValueTransformer;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class ConnectorType extends AbstractType
 {
@@ -61,7 +64,7 @@ class ConnectorType extends AbstractType
             'entry_options' => [
                 'attr' => [
                     'secret' => $secret,
-                    'fieldsLogin' => $fieldsLogin,
+                    'loginFields' => $loginFields,
                 ],
             ],
         ]);

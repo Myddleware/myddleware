@@ -17,6 +17,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ConnectorParamFormType extends AbstractType
 {
     private $transformer;
+    private $_secret;
+    private $_solutionLoginFields;
 
     public function __construct(ConnectorParamsValueTransformer $transformer)
     {
@@ -25,6 +27,8 @@ class ConnectorParamFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->_secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
+        $this->_solutionLoginFields = isset($options['attr']['loginFields']) ? $options['attr']['loginFields'] : null;
         $builder
             ->add('name', EntityType::class, [
                 'label' => 'Name',
@@ -36,8 +40,10 @@ class ConnectorParamFormType extends AbstractType
             ->add('value', TextType::class, [
                 'label' => 'Value',
                 'empty_data' => '',
+                'error_bubbling' => true,
                 'row_attr' => ['data-controller' => 'solution'],
             ]);
+
         $builder->get('value')
             ->addModelTransformer($this->transformer);
 
@@ -63,6 +69,32 @@ class ConnectorParamFormType extends AbstractType
                 if (null === $data->getName()) {
                     return;
                 }
+            }
+            $option['attr']['class'] = 'params';
+
+            $id = $data->getId();
+            $name = $data->getName();
+            $option['attr']['data-param'] = $name;
+
+            if ('wsdl' == $name or 'file' == $name) {
+                $option['attr']['readonly'] = 'readonly';
+                $option['attr']['data-id'] = $id;
+                $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
+            }
+
+            foreach ($this->_solutionLoginFields as $loginField) {
+                if ($loginField['name'] == $data->getName()) {
+                    $type = $loginField['type'];
+                    $option['label'] = 'solution.fields.'.$loginField['name'];
+                    if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
+                        $option['attr']['autocomplete'] = 'off';
+                        $option['attr']['value'] = $data->getValue(); // Force value of the password
+                    }
+                }
+            }
+
+            if (null === $data->getValue()) {
+                $form->add('name', HiddenType::class, ['data' => $name]);
             }
             // $form->remove('name');
         }
