@@ -8,6 +8,7 @@ use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -16,19 +17,25 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ConnectorParamFormType extends AbstractType
 {
-    private $transformer;
-    private $_secret;
-    private $_solutionLoginFields;
+    private ConnectorParamsValueTransformer $transformer;
+    private ?string $secret;
+    private array $solutionLoginFields;
 
-    public function __construct(ConnectorParamsValueTransformer $transformer)
+    public function __construct(
+        ConnectorParamsValueTransformer $transformer,
+        array                           $solutionLoginFields = [],
+        ?string                          $secret = null,
+    )
     {
         $this->transformer = $transformer;
+        $this->solutionLoginFields = $solutionLoginFields;
+        $this->secret = $secret;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->_secret = $options['attr']['secret'] ?? null;
-        $this->_solutionLoginFields = $options['attr']['loginFields'] ?? null;
+        $this->secret = $options['attr']['secret'] ?? null;
+        $this->solutionLoginFields = $options['attr']['loginFields'] ?? null;
         $builder
             ->add('name', EntityType::class, [
                 'label' => 'Name',
@@ -66,7 +73,7 @@ class ConnectorParamFormType extends AbstractType
         $data = $event->getData();
         if ($data) {
             if ($data instanceof ConnectorParam) {
-                if (null === $data->getName()) {
+                if ('' === $data->getName()) {
                     return;
                 }
             }
@@ -82,10 +89,10 @@ class ConnectorParamFormType extends AbstractType
                 $option['attr']['placeholder'] = 'create_connector.upload_placeholder';
             }
 
-            foreach ($this->_solutionLoginFields as $loginField) {
+            foreach ($this->solutionLoginFields as $loginField) {
                 if ($loginField['name'] == $data->getName()) {
                     $type = $loginField['type'];
-                    $option['label'] = 'solution.fields.' . $loginField['name'];
+                    $option['label'] = 'solution.fields.'.$loginField['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
                         $option['attr']['value'] = $data->getValue(); // Force value of the password
@@ -96,7 +103,6 @@ class ConnectorParamFormType extends AbstractType
             if (null === $data->getValue()) {
                 $form->add('name', HiddenType::class, ['data' => $name]);
             }
-            // $form->remove('name');
         }
     }
 }
