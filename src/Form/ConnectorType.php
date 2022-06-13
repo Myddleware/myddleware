@@ -6,44 +6,23 @@ namespace App\Form;
 
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
-use App\Form\ConnectorParamFormType;
+use App\Form\DataTransformer\ConnectorParamsValueTransformer;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Validator\Constraints\Valid;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use App\Form\DataTransformer\ConnectorParamsValueTransformer;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Validator\Constraints\Valid;
 
 class ConnectorType extends AbstractType
 {
-    // private $transformer;
-
-    // public function __construct(ConnectorParamsValueTransformer $transformer)
-    // {
-    //     $this->transformer = $transformer;
-    // }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // $builder
-        //     ->add('connectorParams', CollectionType::class, [
-        //         'entry_type' => ConnectorParamFormType::class,
-        //         'entry_options' => ['label' => false],
-        //         'row_attr' => ['class' => 'p-3'],
-        //     ]);
-        // $builder->get('connectorParams')
-        //         ->addModelTransformer($this->transformer);
-
-        // $builder->addEventListener(
-        //     FormEvents::POST_SET_DATA,
-        //     [$this, 'onPostSetData']
-        // );
-
-        $loginFields = isset($options['attr']['loginFields']) ? $options['attr']['loginFields'] : null;
-        $secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
+        $loginFields = $options['attr']['loginFields'] ?? null;
+        $secret = $options['attr']['secret'] ?? null;
         $options['attr']['loginFields'] = null;
         if (null != $options['data']->getSolution()) {
             // Init ConnectorParams
@@ -60,7 +39,7 @@ class ConnectorType extends AbstractType
         $builder->add('connectorParams', CollectionType::class, [
             'constraints' => new Valid(),
             'error_bubbling' => true,
-            'entry_type' => ConnectorParamType::class,
+            'entry_type' => ConnectorParamFormType::class,
             'entry_options' => [
                 'attr' => [
                     'secret' => $secret,
@@ -69,20 +48,6 @@ class ConnectorType extends AbstractType
             ],
         ]);
     }
-
-    // public function onPostSetData(FormEvent $event): void
-    // {
-    //     $form = $event->getForm();
-    //     $data = $event->getData();
-    //     if ($data) {
-    //         if ($data instanceof Connector) {
-    //             if (null === $data->getName()) {
-    //                 return;
-    //             }
-    //         }
-    //         // $form->remove('connectorParams');
-    //     }
-    // }
 
     public function configureOptions(OptionsResolver $resolver): void
     {

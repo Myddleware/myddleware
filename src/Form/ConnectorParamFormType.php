@@ -27,8 +27,8 @@ class ConnectorParamFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->_secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
-        $this->_solutionLoginFields = isset($options['attr']['loginFields']) ? $options['attr']['loginFields'] : null;
+        $this->_secret = $options['attr']['secret'] ?? null;
+        $this->_solutionLoginFields = $options['attr']['loginFields'] ?? null;
         $builder
             ->add('name', EntityType::class, [
                 'label' => 'Name',
@@ -85,7 +85,7 @@ class ConnectorParamFormType extends AbstractType
             foreach ($this->_solutionLoginFields as $loginField) {
                 if ($loginField['name'] == $data->getName()) {
                     $type = $loginField['type'];
-                    $option['label'] = 'solution.fields.'.$loginField['name'];
+                    $option['label'] = 'solution.fields.' . $loginField['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
                         $option['attr']['value'] = $data->getValue(); // Force value of the password

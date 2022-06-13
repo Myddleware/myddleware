@@ -3,25 +3,28 @@
 namespace App\Controller;
 
 use App\Entity\Connector;
-use App\Form\ConnectorType;
 use App\Entity\ConnectorParam;
-use App\Manager\SolutionManager;
 use App\Form\ConnectorParamFormType;
-use App\Repository\SolutionRepository;
+use App\Form\ConnectorType;
+use App\Manager\SolutionManager;
 use App\Repository\ConnectorRepository;
+use App\Repository\SolutionRepository;
+use Exception;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ConnectorController extends AbstractController
 {
-    #[Route('/credentials/getform/{solutionId<\d+>?null}', name: 'credentials_form', methods: ['GET', 'POST'])]
-    public function getCredentialsForm(string $solutionId, SolutionRepository $solutionRepository, SolutionManager $solutionManager,  ConnectorRepository $connectorRepository, Request $request): Response
+    /**
+     * @throws Exception
+     */
+    #[Route('/credentials/get-form/{solutionId<\d+>?null}', name: 'credentials_form', methods: ['GET', 'POST'])]
+    public function getCredentialsForm(string $solutionId, SolutionRepository $solutionRepository, SolutionManager $solutionManager, ConnectorRepository $connectorRepository, Request $request): Response
     {
         $solution = $solutionRepository->find(intval($solutionId));
         assert(null !== $solution);
-
         $loginFields = $solutionManager->get($solution->getName())->getFieldsLogin();
 
         $connector = new Connector();
@@ -36,23 +39,23 @@ class ConnectorController extends AbstractController
             ],
         ]);
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->connectorRepository->add($connector);
-        }
-        
-        
         foreach ($loginFields as $loginField) {
             $connectorParam = new ConnectorParam();
             $connectorParam->setName($loginField['name']);
-            $connectorParamForm = $this->createForm(ConnectorParamFormType::class, $connectorParam);
+//            dd($connectorParam);
+//            $connectorParamForm = $this->createForm(ConnectorParamFormType::class, $connectorParam);
+            $form->add(ConnectorParamFormType::class, $connectorParam);
         }
-    
-        
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $connectorRepository->add($connector);
+        }
+
         return $this->renderForm('connector/index.html.twig', [
             'solution' => $solution,
             'loginFields' => $loginFields,
-            'form' => $connectorParamForm,
+            'form' => $form,
         ]);
     }
 
@@ -60,6 +63,7 @@ class ConnectorController extends AbstractController
     public function createConnector(Request $request, SolutionRepository $solutionRepository)
     {
         dump($request);
+        die();
         // $type = '';
 
         // $solution = $solutionRepository->findOneBy(['name' => $this->sessionService->getParamConnectorSourceSolution()]);

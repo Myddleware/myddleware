@@ -22,9 +22,6 @@
     "automattic/woocommerce": {
         "version": "3.0.0"
     },
-    "babdev/pagerfanta-bundle": {
-        "version": "v3.6.1"
-    },
     "beberlei/doctrineextensions": {
         "version": "v1.3.0"
     },
@@ -232,12 +229,6 @@
     "jetbrains/phpstorm-stubs": {
         "version": "v2019.3"
     },
-    "jquery/jquery": {
-        "version": "3.5.1"
-    },
-    "jquery/jquery_ui": {
-        "version": "1.11.1"
-    },
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
@@ -312,9 +303,6 @@
     },
     "nikic/php-parser": {
         "version": "v4.13.2"
-    },
-    "pagerfanta/pagerfanta": {
-        "version": "v3.6.0"
     },
     "paragonie/random_compat": {
         "version": "v2.0.21"
