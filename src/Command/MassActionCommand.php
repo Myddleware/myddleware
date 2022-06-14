@@ -38,13 +38,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MassActionCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
-    /**
-     * @var JobManager
-     */
+
     private JobManager $jobManager;
 
     public function __construct(
@@ -86,13 +81,13 @@ class MassActionCommand extends Command
         $api = $input->getArgument('api');
 
         // to avoid unwanted apostrophes in SQL queries
-        $action = str_replace( '\'', '', $action);
-        $dataType = str_replace( '\'', '', $dataType);
-        $ids = str_replace( '\'', '', $ids);
-        $forceAll = str_replace( '\'', '', $forceAll);
-        $fromStatus = str_replace( '\'', '', $fromStatus);
-        $toStatus = str_replace( '\'', '', $toStatus);
-        $api = str_replace( '\'', '', $api);
+        $action = str_replace('\'', '', $action);
+        $dataType = str_replace('\'', '', $dataType);
+        $ids = str_replace('\'', '', $ids);
+        $forceAll = str_replace('\'', '', $forceAll);
+        $fromStatus = str_replace('\'', '', $fromStatus);
+        $toStatus = str_replace('\'', '', $toStatus);
+        $api = str_replace('\'', '', $api);
 
         // Set the API value
         $this->jobManager->setApi((bool) $api);

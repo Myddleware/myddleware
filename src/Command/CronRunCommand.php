@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use function count;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
+use Shapecode\Bundle\CronBundle\Command\BaseCommand;
 use Shapecode\Bundle\CronBundle\Console\Style\CronStyle;
 use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Shapecode\Bundle\CronBundle\Model\CronJobRunning;
 use Shapecode\Bundle\CronBundle\Service\CommandHelper;
+use function sleep;
+use function sprintf;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Console\Command\Command;
-use Shapecode\Bundle\CronBundle\Command\BaseCommand;
-
-use function count;
-use function sleep;
-use function sprintf;
 
 final class CronRunCommand extends BaseCommand
 {
@@ -45,7 +43,7 @@ final class CronRunCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $jobRepo = $this->getCronJobRepository();
-        $style   = new CronStyle($input, $output);
+        $style = new CronStyle($input, $output);
 
         $jobsToRun = $jobRepo->findAll();
 
@@ -60,14 +58,14 @@ final class CronRunCommand extends BaseCommand
 
         /** @var CronJobRunning[] $processes */
         $processes = [];
-        $em        = $this->getManager();
+        $em = $this->getManager();
 
         foreach ($jobsToRun as $job) {
             sleep(1);
 
             $style->section(sprintf('Running "%s"', $job->getFullCommand()));
 
-            if (! $job->isEnable()) {
+            if (!$job->isEnable()) {
                 $style->notice('cronjob is disabled');
 
                 continue;
@@ -95,14 +93,14 @@ final class CronRunCommand extends BaseCommand
             } else {
                 $style->success('cronjob started successfully and is running in background');
             }
-		
-			$style->info($job->getFullCommand() .' : Begin '.date('Y-m-d h:i:s'));			
-			$this->waitProcesses($processes);
-			$style->info($job->getFullCommand() .' : End '.date('Y-m-d h:i:s'));			
-			$processes = array();
+
+            $style->info($job->getFullCommand().' : Begin '.date('Y-m-d h:i:s'));
+            $this->waitProcesses($processes);
+            $style->info($job->getFullCommand().' : End '.date('Y-m-d h:i:s'));
+            $processes = [];
         }
 
-		$style->success('All jobs are finished.');
+        $style->success('All jobs are finished.');
 
         return CronJobResult::EXIT_CODE_SUCCEEDED;
     }
@@ -121,7 +119,7 @@ final class CronRunCommand extends BaseCommand
                 try {
                     $process->checkTimeout();
 
-                    if ($process->isRunning() === true) {
+                    if (true === $process->isRunning()) {
                         break;
                     }
                 } catch (ProcessTimedOutException $e) {
@@ -153,7 +151,7 @@ final class CronRunCommand extends BaseCommand
         $process->disableOutput();
 
         $timeout = $this->commandHelper->getTimeout();
-        if ($timeout !== null && $timeout > 0) {
+        if (null !== $timeout && $timeout > 0) {
             $process->setTimeout($timeout);
         }
 

@@ -152,17 +152,10 @@ class FluxController extends AbstractController
     }
 
     /**
-     *
-     * @param Request $request
-     * @param int $page
-     * @param int $search
-     *
-     * @return Response
-     *
      * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
      * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
      */
-    public function fluxListAction(Request $request, int $page= 1 , int $search = 1): Response
+    public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
         //--- Liste status traduction
         $lstStatusTwig = DocumentManager::lstStatus();
@@ -740,9 +733,8 @@ class FluxController extends AbstractController
      * @param $id
      * @param $solution
      *
-     * @return RedirectResponse
-     *
      * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
+     *
      * @throws Exception
      */
     public function fluxBtnDynAction($method, $id, $solution): RedirectResponse
@@ -806,7 +798,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
                 $compact['entities'] = $compact['pager']->getCurrentPageResults();
             } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException("Page not found." .$e->getMessage()." ".$e->getFile()." ".$e->getLine());
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
             return $compact;

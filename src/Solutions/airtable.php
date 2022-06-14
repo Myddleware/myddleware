@@ -188,18 +188,18 @@ class airtablecore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-			// There is a bug on the parameter returnFieldsByFieldId soit can't be used
-			// In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
-			foreach ($param['fields'] as $field) {
-				if (substr($field,0,3) == 'fld') {
-					include_once('lib/airtable/metadata.php');
-					if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
-						$fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
-						continue;
-					}
-				}
-				$fields[$field] = $field;
-			}
+            // There is a bug on the parameter returnFieldsByFieldId soit can't be used
+            // In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
+            foreach ($param['fields'] as $field) {
+                if ('fld' == substr($field, 0, 3)) {
+                    include_once 'lib/airtable/metadata.php';
+                    if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
+                        $fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
+                        continue;
+                    }
+                }
+                $fields[$field] = $field;
+            }
             // Get the reference date field name
             $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
             $stop = false;
@@ -223,8 +223,8 @@ class airtablecore extends solution
                     } else {
                         // Filter by specific field (for example to avoid duplicate records)
                         foreach ($param['query'] as $key => $queryParam) {
-							// Transform "___" into space (Myddleware can't have space in the field name)
-							$key = str_replace('___', ' ', $key);							
+                            // Transform "___" into space (Myddleware can't have space in the field name)
+                            $key = str_replace('___', ' ', $key);
                             // TODO: improve this, for now we can only filter with ONE key,
                             // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
                             $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
@@ -253,7 +253,7 @@ class airtablecore extends solution
                     foreach ($content as $record) {
                         ++$currentCount;
                         foreach ($fields as $key => $field) {
-							$fieldWithSpace = str_replace('___', ' ', $field);	
+                            $fieldWithSpace = str_replace('___', ' ', $field);
                             if (isset($record['fields'][$fieldWithSpace])) {
                                 // Depending on the field type, the result can be an array, in this case we take the first result
                                 if (is_array($record['fields'][$fieldWithSpace])) {
@@ -303,6 +303,7 @@ class airtablecore extends solution
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
+
         return $result;
     }
 
@@ -400,9 +401,9 @@ class airtablecore extends solution
                         }
 
                         if (
-								$allFields[$fieldName]['relate'] == true
-							AND $allFields[$fieldName]['type'] != 'text'
-						) {
+                                true == $allFields[$fieldName]['relate']
+                            and 'text' != $allFields[$fieldName]['type']
+                        ) {
                             $arrayVal = [];
                             $arrayVal[] = $fieldVal;
                             $body['records'][$i]['fields'][$fieldName] = $arrayVal;
@@ -417,22 +418,22 @@ class airtablecore extends solution
                     ++$i;
                 }
 
-				// Airtable fiueld can contains space which is not compatible in Myddleware.
-				// Because we replace space by ___ in Myddleware, we change ___ to space before sending data to Airtable
-				if (!empty($body['records'])) {
-					foreach ($body['records'] as $keyRecord => $record) {
-						if (!empty($record['fields'])) {
-							foreach($record['fields'] as $key => $value) {
-								if (strpos($key, '___') !== false) {
-									$keyWithSpace = str_replace('___', ' ', $key);	
-									$body['records'][$keyRecord]['fields'][$keyWithSpace] = $value;
-									unset($body['records'][$keyRecord]['fields'][$key]);
-								}
-							}
-						}
-					}
-				}
-			
+                // Airtable fiueld can contains space which is not compatible in Myddleware.
+                // Because we replace space by ___ in Myddleware, we change ___ to space before sending data to Airtable
+                if (!empty($body['records'])) {
+                    foreach ($body['records'] as $keyRecord => $record) {
+                        if (!empty($record['fields'])) {
+                            foreach ($record['fields'] as $key => $value) {
+                                if (false !== strpos($key, '___')) {
+                                    $keyWithSpace = str_replace('___', ' ', $key);
+                                    $body['records'][$keyRecord]['fields'][$keyWithSpace] = $value;
+                                    unset($body['records'][$keyRecord]['fields'][$key]);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Send records to Airtable
                 $client = HttpClient::create();
                 $options = [

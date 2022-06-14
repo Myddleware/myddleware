@@ -66,53 +66,28 @@ class jobcore
     protected $env;
     protected int $nbDayClearJob = 7;
 
-    /**
-     * @var ParameterBagInterface
-     */
     private ParameterBagInterface $parameterBagInterface;
-    /**
-     * @var RouterInterface
-     */
+
     private RouterInterface $router;
-    /**
-     * @var TemplateManager
-     */
+
     private TemplateManager $templateManager;
-    /**
-     * @var TranslatorInterface
-     */
+
     private TranslatorInterface $translator;
-    /**
-     * @var string
-     */
+
     private string $projectDir;
-    /**
-     * @var UpgradeManager
-     */
+
     private UpgradeManager $upgrade;
-    /**
-     * @var EntityManagerInterface
-     */
+
     private EntityManagerInterface $entityManager;
-    /**
-     * @var JobRepository
-     */
+
     private JobRepository $jobRepository;
-    /**
-     * @var DocumentRepository
-     */
+
     private DocumentRepository $documentRepository;
-    /**
-     * @var RuleRepository
-     */
+
     private RuleRepository $ruleRepository;
-    /**
-     * @var LogRepository
-     */
+
     private LogRepository $logRepository;
-    /**
-     * @var SessionInterface
-     */
+
     private SessionInterface $session;
 
     public function __construct(
@@ -374,6 +349,7 @@ class jobcore
     /**
      * @param $job
      * @param $param
+     *
      * @return false|string
      */
     public function runBackgroundJob($job, $param)
@@ -434,6 +410,7 @@ class jobcore
             // Renvoie du message en session
             $session = new Session();
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
+
             return $idJob;
         } catch (Exception $e) {
             $session = new Session();
@@ -1023,6 +1000,7 @@ class jobcore
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+
             return false;
         }
 
