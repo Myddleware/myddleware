@@ -41,6 +41,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Exception\NotValidCurrentPageException;
 use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -482,7 +483,7 @@ class ConnectorController extends AbstractController
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $this->entityManager->getRepository(Connector::class)
                                             ->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId()),
-                'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 20,
+                'maxPerPage' => $this->params['pager'] ?? 20,
                 'page' => $page,
             ]);
 
@@ -781,9 +782,9 @@ class ConnectorController extends AbstractController
                     ->getCurrentPageResults();
 
                 $compact['nb'] = $compact['pager']->getNbResults();
-            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
+            } catch (NotValidCurrentPageException $e) {
                 //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Cette page n'existe pas.");
+                throw $this->createNotFoundException('Page not found. '.$e->getMessage());
             }
 
             return $compact;
