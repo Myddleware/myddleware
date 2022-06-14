@@ -12,6 +12,16 @@ class LoginController extends AbstractController
     #[Route('/login', name: 'login')]
     public function index(AuthenticationUtils $authenticationUtils): Response
     {
+
+        $tokenInterface = $this->get('security.token_storage')->getToken();
+        $isAuthenticated = $tokenInterface->isAuthenticated();
+ 
+        if($isAuthenticated)
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }else{
+
+  
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
@@ -63,3 +73,6 @@ class LoginController extends AbstractController
         ]);
     }
 }
+}
+
+
