@@ -34,30 +34,30 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="connectorparam")
  * @ORM\Entity(repositoryClass=ConnectorParamRepository::class)
  */
-class ConnectorParam implements \Stringable
+class ConnectorParam  implements \Stringable
 {
     /**
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="connectorParams", cascade={"persist"})
      * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
      */
-    private $connector;
+    private ?Connector $connector;
 
     /**
      * @ORM\Column(name="name", type="string", length=684)
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(name="value", type="string", length=684)
      */
-    private $value;
+    private ?string $value;
 
     public function getId(): int
     {

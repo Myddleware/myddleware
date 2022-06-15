@@ -24,7 +24,7 @@ class ConnectorParamFormType extends AbstractType
     public function __construct(
         ConnectorParamsValueTransformer $transformer,
         array                           $solutionLoginFields = [],
-        ?string                          $secret = null,
+        ?string                         $secret = null,
     )
     {
         $this->transformer = $transformer;
@@ -37,13 +37,6 @@ class ConnectorParamFormType extends AbstractType
         $this->secret = $options['attr']['secret'] ?? null;
         $this->solutionLoginFields = $options['attr']['loginFields'] ?? null;
         $builder
-            ->add('name', EntityType::class, [
-                'label' => 'Name',
-                'class' => ConnectorParam::class,
-                'choice_label' => 'name',
-                'empty_data' => '',
-                'attr' => ['data-controller' => 'solution'],
-            ])
             ->add('value', TextType::class, [
                 'label' => 'Value',
                 'empty_data' => '',
@@ -64,6 +57,7 @@ class ConnectorParamFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ConnectorParam::class,
+            'inherit_data' => true,
         ]);
     }
 
@@ -71,6 +65,7 @@ class ConnectorParamFormType extends AbstractType
     {
         $form = $event->getForm();
         $data = $event->getData();
+        $type = TextType::class;
         if ($data) {
             if ($data instanceof ConnectorParam) {
                 if ('' === $data->getName()) {
@@ -90,16 +85,16 @@ class ConnectorParamFormType extends AbstractType
             }
 
             foreach ($this->solutionLoginFields as $loginField) {
-                if ($loginField['name'] == $data->getName()) {
+                if ($loginField['name'] === $data->getName()) {
                     $type = $loginField['type'];
-                    $option['label'] = 'solution.fields.'.$loginField['name'];
+                    $option['label'] = 'solution.fields.' . $loginField['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
                         $option['attr']['value'] = $data->getValue(); // Force value of the password
                     }
                 }
             }
-
+            $form->add('value', $type, $option);
             if (null === $data->getValue()) {
                 $form->add('name', HiddenType::class, ['data' => $name]);
             }

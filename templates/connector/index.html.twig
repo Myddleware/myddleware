@@ -1,10 +1,8 @@
 <section>
-	<div class="login-fields-form">
-		{# <h3>{{ solution.name }}</h3>
-		<p>{{ solution.id }}</p>
-		{% for module in solution.modules %}
-			<p>{{ module.name }}</p>
-		{% endfor %} #}
-		{{ form(form) }}
-	</div>
+    <div class="login-fields-form">
+{#		{{ dump(form) }}#}
+{#        {{ form(form) }}#}
+        {{ form_row(form.name) }}
+        {{ form_row(form.value) }}
+    </div>
 </section>

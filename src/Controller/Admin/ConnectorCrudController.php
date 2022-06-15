@@ -31,8 +31,7 @@ class ConnectorCrudController extends AbstractCrudController
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
-                ->addWebpackEncoreEntry('admin')
-                ;
+            ->addWebpackEncoreEntry('admin');
     }
 
     public static function getEntityFqcn(): string
@@ -80,8 +79,8 @@ class ConnectorCrudController extends AbstractCrudController
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
             AssociationField::new('solution')
-            ->addCssClass('solution')
-            ->setFormTypeOptions([
+                ->addCssClass('solution')
+                ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
                         'data-solution-info-url-value' => $credentialsFormController,
@@ -101,7 +100,7 @@ class ConnectorCrudController extends AbstractCrudController
             AssociationField::new('modifiedBy')->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
-            BooleanField::new('deleted')->hideOnForm(),
+            BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
         ];
     }
 
@@ -113,14 +112,13 @@ class ConnectorCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters->add('name')
-                        ->add('rulesWhereIsTarget')
-                        ->add('rulesWhereIsSource')
-                        ->add('createdBy')
-                        ->add('modifiedBy')
-                        ->add('createdAt')
-                        ->add('updatedAt')
-                        ->add('deleted')
-                        ->add('solution')
-                        ;
+            ->add('rulesWhereIsTarget')
+            ->add('rulesWhereIsSource')
+            ->add('createdBy')
+            ->add('modifiedBy')
+            ->add('createdAt')
+            ->add('updatedAt')
+            ->add('deleted')
+            ->add('solution');
     }
 }

@@ -8,13 +8,12 @@ use Symfony\Component\Form\DataTransformerInterface;
 
 class ConnectorParamsValueTransformer implements DataTransformerInterface
 {
-
     private ?string $secret;
     private Encrypter $encrypter;
 
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(ParameterBagInterface $parameterBag)
     {
-        $this->secret = $params->get('secret');
+        $this->secret = $parameterBag->get('secret');
         $this->encrypter = new Encrypter(substr($this->secret, -16));
     }
 
@@ -27,6 +26,10 @@ class ConnectorParamsValueTransformer implements DataTransformerInterface
 
     public function transform($value): mixed
     {
+        if (!$value) {
+            return null;
+        }
+
         $value->setValue($this->decryptParameters($value->getValue()));
 
         return $value;
