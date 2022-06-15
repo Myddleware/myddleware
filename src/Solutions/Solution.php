@@ -36,7 +36,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Solution
 {
-    public $connexion_valide = false;
+    public $isConnectionValid = false;
     public $js = 0;
     public $refresh_token = false;
     public $callback = false;
@@ -52,7 +52,7 @@ class Solution
     protected $required_fields = [];
 
     // URL de la solution pour atteindre les webservices
-    protected $paramConnexion;
+    protected $connectionParam;
 
     /**
      * @var LoggerInterface
@@ -117,27 +117,27 @@ class Solution
      * Param est un tableau contenant tous les paramètres nécessaires à la connexion
      * Cette méthode doit mettre à jour les attributs :
      * $this->session avec la session de la solution
-     * $this->connexion_valide (true si la connexion est réussie, false sinon).
+     * $this->isConnectionValid (true si la connexion est réussie, false sinon).
      */
-    public function login(array $paramConnexion)
+    public function login(array $connectionParam)
     {
         // Instanciate object to decrypte data
         $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
         // Decrypt connexion parameters
-        foreach ($paramConnexion as $key => $value) {
+        foreach ($connectionParam as $key => $value) {
             if (is_string($value)) {
                 try {
-                    $paramConnexion[$key] = $encrypter->decrypt($value);
+                    $connectionParam[$key] = $encrypter->decrypt($value);
                 } catch (\Exception $e) { // No error if decrypt failed because some data aren't crypted (eg reference date)
                 }
             }
         }
         // Check whether the URL input ends with /, if yes, remove it before making the call
-        if (isset($paramConnexion['url']) && '/' === substr($paramConnexion['url'], -1)) {
-            $paramConnexion['url'] = substr($paramConnexion['url'], 0, -1);
+        if (isset($connectionParam['url']) && '/' === substr($connectionParam['url'], -1)) {
+            $connectionParam['url'] = substr($connectionParam['url'], 0, -1);
         }
 
-        $this->paramConnexion = $paramConnexion;
+        $this->connectionParam = $connectionParam;
     }
 
     public function logout(): bool

@@ -401,19 +401,19 @@ class SessionService
 
     // ############ MAILCHIMP ###################
 
-    public function setMailchimpParamConnexion($redirectUri, $value)
+    public function setMailchimpParamConnection($redirectUri, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'] = $value;
+        $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['connectionParam'] = $value;
 
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function getMailchimpParamConnexion($redirectUri)
+    public function getMailchimpParamConnection($redirectUri)
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'];
+        return $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['connectionParam'];
     }
 
     // ############ MAILCHIMP ###################

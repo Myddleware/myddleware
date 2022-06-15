@@ -67,21 +67,21 @@ class WooCommerce extends Solution
     }
 
     // Logging in to Woocommerce
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $this->woocommerce = new Client(
-                $this->paramConnexion['url'],
-                $this->paramConnexion['consumerkey'],
-                $this->paramConnexion['consumersecret'],
+                $this->connectionParam['url'],
+                $this->connectionParam['consumerkey'],
+                $this->connectionParam['consumersecret'],
                 [
                     'wp_api' => true,
                     'version' => 'wc/v3',
                 ]
                 );
             if ($this->woocommerce->get('data')) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();

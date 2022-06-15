@@ -86,17 +86,17 @@ class Hubspot extends Solution
     }
 
     // Connect to Hubspot
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->paramConnexion['apikey']);
+            $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->connectionParam['apikey']);
             if (!empty($result['exec']['message'])) {
                 throw new \Exception($result['exec']['message']);
             } elseif (empty($result)) {
                 throw new \Exception('Failed to connect but no error returned by Hubspot. ');
             }
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -278,7 +278,7 @@ class Hubspot extends Solution
                         break;
                 }
             } else {
-                $result = $this->call($this->url.'properties/'.$this->version.'/'.$module.'/properties?hapikey='.$this->paramConnexion['apikey']);
+                $result = $this->call($this->url.'properties/'.$this->version.'/'.$module.'/properties?hapikey='.$this->connectionParam['apikey']);
                 $result = $result['exec'];
                 // Add fields to manage deals relationships
                 if ('deals' === $module) {
@@ -537,15 +537,15 @@ class Hubspot extends Solution
                 if ('companies' === $module || 'deal' === $module) {
                     $version = 'companies' === $module ? 'v2' : 'v1';
                     $id = 'companies' === $module ? 'companyId' : 'dealId';
-                    $url = $this->url.$param['module'].'/'.$version.'/'.$module.'?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.$param['module'].'/'.$version.'/'.$module.'?hapikey='.$this->connectionParam['apikey'];
                     $property = 'name';
                 } elseif ('contact' === $module) {
-                    $url = $this->url.$param['module'].'/v1/'.$module.'?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.$param['module'].'/v1/'.$module.'?hapikey='.$this->connectionParam['apikey'];
                     $id = 'vid';
                     $property = 'property';
                 // Engagement module (only note enabled for now)
                 } elseif ('engagements' == $module) {
-                    $url = $this->url.'engagements/v1/engagements?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.'engagements/v1/engagements?hapikey='.$this->connectionParam['apikey'];
                     $moduleArray = explode('_', $param['module']);
                     $data['type'] = strtoupper($moduleArray[1]); // For example : NOTE
                     unset($data['target_id']); // Used only in UPDATE
@@ -674,14 +674,14 @@ class Hubspot extends Solution
                 if ('associate_deal' === $param['module']) {
                     // Id profile is the deal_id. It is possible that we haven't target_id because the update function can be called by the create function
                     $idProfile = $data['deal_id'];
-                    $url = $this->url.'deals/'.$version.'/'.$module.'/'.$idProfile.'/associations/'.$data['object_type'].'?id='.$data['record_id'].'&hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.'deals/'.$version.'/'.$module.'/'.$idProfile.'/associations/'.$data['object_type'].'?id='.$data['record_id'].'&hapikey='.$this->connectionParam['apikey'];
                     $dataHubspot = [];
                 } elseif ('companies' === $module || 'deal' === $module) {
-                    $url = $this->url.$param['module'].'/'.$version.'/'.$module.'/'.$idProfile.'?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.$param['module'].'/'.$version.'/'.$module.'/'.$idProfile.'?hapikey='.$this->connectionParam['apikey'];
                 } elseif ('contact' === $module) {
-                    $url = $this->url.$param['module'].'/v1/'.$module.'/vid/'.$idProfile.'/profile'.'?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.$param['module'].'/v1/'.$module.'/vid/'.$idProfile.'/profile'.'?hapikey='.$this->connectionParam['apikey'];
                 } elseif ('engagements' === $module) {
-                    $url = $this->url.$module.'/v1/'.$module.'/'.$idProfile.'?hapikey='.$this->paramConnexion['apikey'];
+                    $url = $this->url.$module.'/v1/'.$module.'/'.$idProfile.'?hapikey='.$this->connectionParam['apikey'];
                 } else {
                     throw new \Exception('Module '.$module.' unknown.');
                 }
@@ -727,7 +727,7 @@ class Hubspot extends Solution
             ) {
                 foreach ($identifyProfiles as $key => $identifyProfile) {
                     // 20 => association Line item to deal
-                    $resultCall = $this->call($this->url.'crm-associations/v1/associations/'.$identifyProfile['objectId'].'/HUBSPOT_DEFINED/20?hapikey='.$this->paramConnexion['apikey']);
+                    $resultCall = $this->call($this->url.'crm-associations/v1/associations/'.$identifyProfile['objectId'].'/HUBSPOT_DEFINED/20?hapikey='.$this->connectionParam['apikey']);
                     if (!empty($resultCall['exec']['results'][0])) {
                         $identifyProfiles[$key]['dealdId'] = $resultCall['exec']['results'][0];
                     }
@@ -751,16 +751,16 @@ class Hubspot extends Solution
             // Calls can be differents depending on the modules
             switch ($module) {
                 case 'deal':
-                    $result['url'] = $this->url.'deals/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->paramConnexion['apikey'];
+                    $result['url'] = $this->url.'deals/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
                     break;
                 case 'contact':
-                    $result['url'] = $this->url.'contacts/'.$version.'/'.$module.'/vid/'.$param['query']['id'].'/profile?hapikey='.$this->paramConnexion['apikey'];
+                    $result['url'] = $this->url.'contacts/'.$version.'/'.$module.'/vid/'.$param['query']['id'].'/profile?hapikey='.$this->connectionParam['apikey'];
                     break;
                 case 'deals':
-                    $result['url'] = $this->url.'deals/'.$version.'/pipelines/'.$param['query']['id'].'?hapikey='.$this->paramConnexion['apikey'];
+                    $result['url'] = $this->url.'deals/'.$version.'/pipelines/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
                     break;
                 default:
-                    $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->paramConnexion['apikey'];
+                    $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
             }
 
             return $result;
@@ -768,16 +768,16 @@ class Hubspot extends Solution
 
         // Module with only one url
         if ('owners' === $module) {
-            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$param['module'].'?hapikey='.$this->paramConnexion['apikey'];
+            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$param['module'].'?hapikey='.$this->connectionParam['apikey'];
         } elseif ('deals' === $module) {
-            $result['url'] = $this->url.$module.'/'.$version.'/pipelines'.'?hapikey='.$this->paramConnexion['apikey'];
+            $result['url'] = $this->url.$module.'/'.$version.'/pipelines'.'?hapikey='.$this->connectionParam['apikey'];
         } elseif (!empty($this->objectModule[$module])) {
             // Build the query with the properties fields
             $properties = '';
             foreach ($this->objectModule[$param['module']]['properties'] as $field) {
                 $properties .= '&properties='.$field;
             }
-            $result['url'] = $this->url.'crm-objects/v1/objects/'.$module.'/paged?hapikey='.$this->paramConnexion['apikey'].$properties;
+            $result['url'] = $this->url.'crm-objects/v1/objects/'.$module.'/paged?hapikey='.$this->connectionParam['apikey'].$properties;
         } else {
             // calculate the difference between date_ref and now
             if (!is_numeric($param['date_ref'])) {
@@ -822,7 +822,7 @@ class Hubspot extends Solution
                                 $property .= '&properties='.$fields;
                             }
                         }
-                        $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/paged'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&limit='.$this->limitCall[$module];
+                        $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/paged'.'?hapikey='.$this->connectionParam['apikey'].$property.'&limit='.$this->limitCall[$module];
                         $result['offset'] = '&offset='.$offset;
                         break;
                     case 'contact':
@@ -831,11 +831,11 @@ class Hubspot extends Solution
                                 $property .= '&property='.$fields;
                             }
                         }
-                        $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/all/'.$param['module'].'/all'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&count='.$this->limitCall[$module];
+                        $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/all/'.$param['module'].'/all'.'?hapikey='.$this->connectionParam['apikey'].$property.'&count='.$this->limitCall[$module];
                         $result['offset'] = '&vidOffset='.$offset;
                         break;
                     case 'engagements':
-                        $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/paged'.'?hapikey='.$this->paramConnexion['apikey'].'&limit='.$this->limitCall[$module];
+                        $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/paged'.'?hapikey='.$this->connectionParam['apikey'].'&limit='.$this->limitCall[$module];
                         $result['offset'] = '&offset='.$offset;
                         break;
                     default:
@@ -852,9 +852,9 @@ class Hubspot extends Solution
                         }
                         // Calls are different for creation or modification
                         if ('ModificationDate' === $dateRefField) {
-                            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/recent/modified/'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
+                            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/recent/modified/'.'?hapikey='.$this->connectionParam['apikey'].$property.'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
                         } else {
-                            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/recent/created/'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&count='.$this->limitCall[$module];
+                            $result['url'] = $this->url.$param['module'].'/'.$version.'/'.$module.'/recent/created/'.'?hapikey='.$this->connectionParam['apikey'].$property.'&count='.$this->limitCall[$module];
                         }
                         break;
                     case 'contact':
@@ -865,13 +865,13 @@ class Hubspot extends Solution
                         }
                         // Calls are different for creation or modification
                         if ('ModificationDate' === $dateRefField) {
-                            $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/recently_updated/'.$param['module'].'/recent'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&count='.$this->limitCall[$module];
+                            $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/recently_updated/'.$param['module'].'/recent'.'?hapikey='.$this->connectionParam['apikey'].$property.'&count='.$this->limitCall[$module];
                         } else {
-                            $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/all/'.$param['module'].'/recent'.'?hapikey='.$this->paramConnexion['apikey'].$property.'&count='.$this->limitCall[$module];
+                            $result['url'] = $this->url.$param['module'].'/'.$version.'/lists/all/'.$param['module'].'/recent'.'?hapikey='.$this->connectionParam['apikey'].$property.'&count='.$this->limitCall[$module];
                         }
                         break;
                     case 'engagements':
-                        $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/recent/modified'.'?hapikey='.$this->paramConnexion['apikey'].'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
+                        $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/recent/modified'.'?hapikey='.$this->connectionParam['apikey'].'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
                         break;
                     default:
                        throw new \Exception('No API call with the module '.$module);

@@ -107,24 +107,24 @@ class SuiteCRM extends Solution
 
     protected $customRelationship = 'MydCustRelSugar';
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $login_paramaters = [
                 'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
+                    'user_name' => $this->connectionParam['login'],
+                    'password' => md5($this->connectionParam['password']),
                     'version' => '.01',
                 ],
                 'application_name' => 'myddleware',
             ];
             // remove index.php in the url
-            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+            $this->connectionParam['url'] = str_replace('index.php', '', $this->connectionParam['url']);
             // Add the suffix with rest parameters to the url
-            $this->paramConnexion['url'] .= $this->urlSuffix;
+            $this->connectionParam['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $result = $this->call('login', $login_paramaters, $this->connectionParam['url']);
 
             if (false != $result) {
                 if (empty($result->id)) {
@@ -132,7 +132,7 @@ class SuiteCRM extends Solution
                 }
 
                 $this->session = $result->id;
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 throw new \Exception('Please check url');
             }
@@ -148,7 +148,7 @@ class SuiteCRM extends Solution
     {
         try {
             $logout_parameters = ['session' => $this->session];
-            $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
+            $this->call('logout', $logout_parameters, $this->connectionParam['url']);
 
             return true;
         } catch (\Exception $e) {
@@ -855,7 +855,7 @@ class SuiteCRM extends Solution
         try {
             ob_start();
             $curl_request = curl_init();
-            curl_setopt($curl_request, CURLOPT_URL, $this->paramConnexion['url']);
+            curl_setopt($curl_request, CURLOPT_URL, $this->connectionParam['url']);
             curl_setopt($curl_request, CURLOPT_POST, 1);
             curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
             curl_setopt($curl_request, CURLOPT_HEADER, 1);

@@ -59,19 +59,19 @@ class Facebook extends Solution
     }
 
     // Login to Facebook
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Create Facebook object
             $this->facebook = new \Facebook\Facebook([
-                'app_id' => $this->paramConnexion['clientid'],
-                'app_secret' => $this->paramConnexion['clientsecret'],
+                'app_id' => $this->connectionParam['clientid'],
+                'app_secret' => $this->connectionParam['clientsecret'],
                 'default_graph_version' => $this->apiVersion,
             ]);
 
             // Set the user access token
-            $this->facebook->setDefaultAccessToken($this->paramConnexion['useraccesstoken']);
+            $this->facebook->setDefaultAccessToken($this->connectionParam['useraccesstoken']);
 
             // Test the access getting me info
             $response = $this->facebook->get('/me');
@@ -80,7 +80,7 @@ class Facebook extends Solution
             if (empty($meId)) {
                 throw new \Exception('Failed to get the access token from Facebook');
             }
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
 
             return;
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {

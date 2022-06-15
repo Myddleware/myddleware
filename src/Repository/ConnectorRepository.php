@@ -47,11 +47,11 @@ class ConnectorRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('c');
         $qb->select('c.id as id_connector, c.name')
-         ->leftJoin('c.solution', 's')
-         ->where('c.createdBy = :user_id')
-         ->andWhere('s.'.$type.' = 1')
-         ->andWhere('s.active = 1')
-         ->setParameter('user_id', $id);
+            ->leftJoin('c.solution', 's')
+            ->where('c.createdBy = :user_id')
+            ->andWhere('s.'.$type.' = 1')
+            ->andWhere('s.active = 1')
+            ->setParameter('user_id', $id);
 
         return $qb->getQuery()
                   ->getResult();
@@ -76,5 +76,29 @@ class ConnectorRepository extends ServiceEntityRepository
         $qb->orderBy('c.id', 'DESC');
 
         return $qb->getQuery();
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function add(Connector $entity, bool $flush = true): void
+    {
+        $this->_em->persist($entity);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function remove(Connector $entity, bool $flush = true): void
+    {
+        $this->_em->remove($entity);
+        if ($flush) {
+            $this->_em->flush();
+        }
     }
 }
