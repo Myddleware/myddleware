@@ -4,10 +4,15 @@
 {% endblock %}
 
 {% block body %}
-	<h1>Reset your password</h1>
-
-	{{ form_start(resetForm) }}
-	{{ form_row(resetForm.plainPassword) }}
-	<button class="btn btn-primary">Reset password</button>
-	{{ form_end(resetForm) }}
+{# Logo myddleware #}
+	<div>
+		<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
+	</div>
+	<div class="install">
+		<h1>Reset your password</h1>
+		{{ form_start(resetForm) }}
+		{{ form_row(resetForm.plainPassword) }}
+		<button class="btn btn-primary">Reset password</button>
+		{{ form_end(resetForm) }}
+	</div>
 {% endblock %}
