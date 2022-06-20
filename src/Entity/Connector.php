@@ -54,7 +54,7 @@ class Connector implements \Stringable
     /**
      * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
      */
-    private ArrayCollection $connectorParams;
+    private $connectorParams;
 
     /**
      * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
@@ -70,12 +70,12 @@ class Connector implements \Stringable
     /**
      * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorSource", orphanRemoval=true)
      */
-    private ArrayCollection $rulesWhereIsSource;
+    private $rulesWhereIsSource;
 
     /**
      * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorTarget", orphanRemoval=true)
      */
-    private ArrayCollection $rulesWhereIsTarget;
+    private $rulesWhereIsTarget;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
