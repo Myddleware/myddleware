@@ -25,7 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -39,14 +38,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MassActionCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    private LoggerInterface $logger;
+
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -73,7 +67,10 @@ class MassActionCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
@@ -83,16 +80,27 @@ class MassActionCommand extends Command
         $toStatus = $input->getArgument('toStatus');
         $api = $input->getArgument('api');
 
+        // to avoid unwanted apostrophes in SQL queries
+        $action = str_replace('\'', '', $action);
+        $dataType = str_replace('\'', '', $dataType);
+        $ids = str_replace('\'', '', $ids);
+        $forceAll = str_replace('\'', '', $forceAll);
+        $fromStatus = str_replace('\'', '', $fromStatus);
+        $toStatus = str_replace('\'', '', $toStatus);
+        $api = str_replace('\'', '', $api);
+
         // Set the API value
         $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('Mass '.$action.' on data type '.$dataType);
+        $paramJobString = "Mass $action on data type $dataType";
+
+        $data = $this->jobManager->initJob($paramJobString);
 
         if (false === $data['success']) {
-            $output->writeln('0;<error>'.$data['message'].'</error>');
+            $output->writeln('1;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
 
-            return 0;
+            return 1;
         }
 
         $output->writeln('1;'.$this->jobManager->getId());  // Do not remove, used for manual job and webservices (display logs)
@@ -136,7 +144,7 @@ class MassActionCommand extends Command
         $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($this->jobManager->getMessage())) {
-            if ($responseCloseJob['success']) {
+            if ($responseCloseJob) {
                 $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
                 $this->logger->info($this->jobManager->getMessage());
             } else {
@@ -145,6 +153,6 @@ class MassActionCommand extends Command
             }
         }
 
-        return 1;
+        return 0;
     }
 }

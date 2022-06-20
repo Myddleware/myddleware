@@ -1289,7 +1289,7 @@ class rulecore
                 || (
                         true === $response[$id_document]
                     && !empty($response['doc_status'])
-					&& in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
+                    && in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
                 )
             )
         ) {

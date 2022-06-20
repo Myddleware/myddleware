@@ -383,7 +383,7 @@ class erpnextcore extends solution
                         }
                     }
                     // Send data to ERPNExt
-                    $resultQuery = $this->call($url, $method, array('data' => json_encode($data)));
+                    $resultQuery = $this->call($url, $method, ['data' => json_encode($data)]);
 
                     if (!empty($resultQuery->data->name)) {
                         // utf8_decode because the id could be a name with special characters
