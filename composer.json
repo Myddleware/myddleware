@@ -42,7 +42,7 @@
     "mautic/api-library": "^2.15",
     "nelmio/cors-bundle": "^2.2",
     "pagerfanta/doctrine-orm-adapter": "^3.0",
-    "pagerfanta/pagerfanta": "^3.0",
+    "pagerfanta/pagerfanta": "^3.6",
     "phan/phan": "^4",
     "phpdocumentor/reflection-docblock": "^5.2",
     "prestashop/prestashop-webservice-lib": "dev-master",

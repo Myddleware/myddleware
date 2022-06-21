@@ -413,7 +413,7 @@ class solutioncore
                     // Check control before create
                     $record = $this->checkDataBeforeCreate($param, $record, $idDoc);
                     // Call create method
-                    $recordId = $this->create($param, $record);
+                    $recordId = $this->create($param, $record, $idDoc);
 
                     // Exception if no Id retruned
                     if (empty($recordId)) {
@@ -450,7 +450,7 @@ class solutioncore
     // - output : the id of the new record
     // An exception has to be generated when an error happends during the creation.
     // this exception will be catched by the method createData
-    protected function create($param, $record)
+    protected function create($param, $record, $idDoc = null)
     {
         return null;
     }
@@ -499,7 +499,7 @@ class solutioncore
                     // Check control before create
                     $record = $this->checkDataBeforeUpdate($param, $record);
                     // Call create methode
-                    $recordId = $this->update($param, $record);
+                    $recordId = $this->update($param, $record, $idDoc);
 
                     // Exception if no Id retruned
                     if (empty($recordId)) {
@@ -531,7 +531,7 @@ class solutioncore
         return $result;
     }
 
-    protected function update($param, $data)
+    protected function update($param, $data, $idDoc = null)
     {
         return null;
     }

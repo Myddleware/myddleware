@@ -722,7 +722,7 @@ class documentcore
             return true;
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
-            $this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
+            $this->docIdRefError = (is_array($result) and !empty($result['id']) ? $result['id'] : '');
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
@@ -1327,17 +1327,17 @@ class documentcore
             // Loop on every relationship and calculate the value
             if (isset($this->ruleRelationships)) {
                 // Récupération de l'ID target
-                foreach ($this->ruleRelationships as $ruleRelationships) {
-                    $value = $this->getTransformValue($this->sourceData, $ruleRelationships);
+                foreach ($this->ruleRelationships as $ruleRelationship) {
+                    $value = $this->getTransformValue($this->sourceData, $ruleRelationship);
                     if (!empty($this->transformError)) {
                         if (empty($ruleRelationship['errorMissing'])) {
-                            $this->message .= 'No value found for the target field '.$ruleRelationships['field_name_target'].' because "Error if missing" is set to false.';
+                            $this->message .= 'No value found for the target field '.$ruleRelationship['field_name_target'].' because "Error if missing" is set to false.';
                             $this->typeError = 'W';
                         } else {
                             throw new \Exception('Failed to transform relationship data.');
                         }
                     }
-                    $targetField[$ruleRelationships['field_name_target']] = $value;
+                    $targetField[$ruleRelationship['field_name_target']] = $value;
                 }
             }
             if (!empty($targetField)) {
@@ -1768,7 +1768,7 @@ class documentcore
                                 return 'U';
                             }
                         } else {
-                            throw new \Exception('The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.');
+                            throw new \Exception('The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty.');
                         }
                     }
                 }
@@ -2282,6 +2282,13 @@ class documentcore
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
+    }
+
+    public function generateDocLog($errorType, $message)
+    {
+        $this->typeError = $errorType;
+        $this->message = $message;
+        $this->createDocLog();
     }
 }
 class DocumentManager extends documentcore
