@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register
+{% block title %}{{ 'register' | trans }}
 {% endblock %}
 
 {% block body %}
@@ -8,17 +8,20 @@
 		<div class="alert alert-danger" role="alert">{{ flash_error }}</div>
 	{% endfor %}
 	<div>
-		<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
+		<img src="{{ asset('images/logo/logo1.png') }}" alt="Myddleware logo" class="logo-register" />
 	</div>
 	<div class="register">
-		<h1>Register</h1>
+		<h1>{{ 'registration' | trans }}</h1>
 		{{ form_start(registrationForm) }}
 		{{ form_row(registrationForm.email) }}
 		{{ form_row(registrationForm.plainPassword, {
                 label: 'Password'
             }) }}
 		{{ form_row(registrationForm.agreeTerms) }}
-		<button type="submit" class="btn btn-dark">Register</button>
+		<button type="submit" class="btn btn-dark">{{ 'create_account' | trans }}</button>
 		{{ form_end(registrationForm) }}
+		<div class="text-center mt-3">
+			<a href="{{path('login')}}">{{ 'account_already' | trans }}?</a>
+		</div>
 	</div>
 {% endblock %}
