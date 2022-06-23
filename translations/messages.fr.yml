@@ -867,4 +867,4 @@ password:
     enter_email: Veuillez saisir votre adresse email
     new: Nouveau mot de passe
     repeat: Réécrivez le mot de passe
-        mismatch: Les mots de passe doivent être identiques
+    mismatch: Les mots de passe doivent être identiques

@@ -862,4 +862,4 @@ password:
     enter_email: Please enter your email
     new: New password
     repeat: Repeat password
-        mismatch: The password fields must match
+    mismatch: The password fields must match

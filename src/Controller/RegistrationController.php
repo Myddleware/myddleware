@@ -24,6 +24,8 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
+    private LoggerInterface $logger;
+    private MailerInterface $mailer;
 
     public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger, MailerInterface $mailer)
     {
@@ -33,7 +35,7 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager,TranslatorInterface $translator): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -57,7 +59,7 @@ class RegistrationController extends AbstractController
                             ->from(new Address('no-reply@myddleware.com', 'Myddleware'))
                             ->to($user->getEmail())
                             ->subject('Please Confirm your Email')
-                            ->htmlTemplate('registration/confirmation_email.html.twig')
+                            ->htmlTemplate('registration/confirmation_email.html.twig'),
                     );
                     $this->addFlash(
                         'success',
@@ -112,7 +114,7 @@ class RegistrationController extends AbstractController
         // @TODO Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
-        return $this->redirectToRoute('app_login');
+        return $this->redirectToRoute('login');
     }
 
     #[Route('/verify/email/success', name: 'app_successful_verification')]

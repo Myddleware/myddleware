@@ -7,21 +7,29 @@
 	{% for flash_error in app.flashes('verify_email_error') %}
 		<div class="alert alert-danger" role="alert">{{ flash_error }}</div>
 	{% endfor %}
-	<div>
-		<img src="{{ asset('images/logo/logo1.png') }}" alt="Myddleware logo" class="logo-register" />
-	</div>
-	<div class="register">
-		<h1>{{ 'registration' | trans }}</h1>
-		{{ form_start(registrationForm) }}
-		{{ form_row(registrationForm.email) }}
-		{{ form_row(registrationForm.plainPassword, {
-                label: 'Password'
-            }) }}
-		{{ form_row(registrationForm.agreeTerms) }}
-		<button type="submit" class="btn btn-dark">{{ 'create_account' | trans }}</button>
-		{{ form_end(registrationForm) }}
-		<div class="text-center mt-3">
-			<a href="{{path('login')}}">{{ 'account_already' | trans }}?</a>
-		</div>
-	</div>
+	<section class="container">
+			<div class="row justify-content-center">
+				<div class="col text-center pt-5">
+					<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+				</div>
+			</div>
+			<div class="row justify-content-center">
+				<div class="card shadow rounded p-5 col-lg-8">
+					<h1 class="card-title text-center">{{ 'registration' | trans }}</h1>
+					{{ form_start(registrationForm) }}
+					{{ form_row(registrationForm.email) }}
+					{{ form_row(registrationForm.plainPassword, {
+						label: 'Password',
+					}) }}
+					{{ form_row(registrationForm.agreeTerms) }}
+					<div class="d-grid mt-5">
+						<button type="submit" class="btn btn-dark">{{ 'create_account' | trans }}</button>
+					</div>
+					{{ form_end(registrationForm) }}
+					<div class="text-center mt-3">
+						<a href="{{path('login')}}" class="card-link">{{ 'account_already' | trans }}?</a>
+					</div>
+				</div>
+			</div>
+	</section>
 {% endblock %}
