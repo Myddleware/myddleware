@@ -58,7 +58,7 @@ class Facebook extends Solution
         ];
     }
 
-    // Login to Facebook
+    // login to Facebook
     public function login($connectionParam)
     {
         parent::login($connectionParam);

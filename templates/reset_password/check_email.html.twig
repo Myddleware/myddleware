@@ -1,14 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Password Reset Email Sent
+{% block title %}{{ 'password_reset_email_sent' | trans }}
 {% endblock %}
 
 {% block body %}
-	<p>
-		If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-		        This link will expire in
-		{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
-	</p>
-	<p>If you don't receive an email please check your spam folder or
-		<a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+	<div class="">
+		<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+	</div>
+	<div class="install">
+		<p>
+			{{ 'check_email_link' | trans }}
+			{{ 'link_expires' | trans }}
+			{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+		</p>
+		<p>{{ 'check_spam_folder' | trans }} <a href="{{ path('app_forgot_password_request') }}">{{ 'try_again' | trans }}</a>.</p>
+	</div>
 {% endblock %}

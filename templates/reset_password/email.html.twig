@@ -1,10 +1,16 @@
-<h1>Hi!</h1>
+{% extends 'base.html.twig' %}
 
-<p>To reset your password, please visit the following link</p>
+{% block title %}{% endblock %}
 
-<a href="{{ url('app_reset_password', {token: resetToken.token}) }}">{{ url('app_reset_password', {token: resetToken.token}) }}</a>
-
-<p>This link will expire in
-	{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
-
-<p>Cheers!</p>
+{% block body %}
+	<div>
+		<img src="{{ asset('images/logo/logo1.png') }}" alt="Myddleware logo" class="logo-register" />
+	</div>
+	<div class="install">
+		<h1>{{'hi' | trans }}</h1>
+		<p>{{'reset_password_link' | trans }}</p>
+		<a href="{{ url('app_reset_password', {token: resetToken.token}) }}">{{ url('app_reset_password', {token: resetToken.token}) }}</a>
+		<p>{{ 'link_expires' | trans }} {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+		<p>{{ 'cheers' | trans }}</p>
+	</div>
+{% endblock %}

@@ -62,7 +62,7 @@ class Mailchimp extends Solution
             // Call the root function to check the API
             $result = $this->call($this->apiEndpoint);
             if (empty($result['account_id'])) {
-                throw new \Exception('Login error');
+                throw new \Exception('login error');
             }
             // Connection validation
             $this->isConnectionValid = true;

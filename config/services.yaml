@@ -13,6 +13,9 @@ parameters:
   fallbacks: ['%locale%', 'fr']
   secret: '%env(APP_SECRET)%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
+  admin_email_address: '%env(resolve:ADMIN_EMAIL)%'
+  admin_password: '%env(resolve:ADMIN_PASSWORD)%'
+  admin_username: '%env(resolve:ADMIN_USERNAME)%'
 
 services:
   # default configuration for services in *this* file

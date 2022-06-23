@@ -1,32 +1,8 @@
-# /*********************************************************************************
- # * This file is part of Myddleware.
-
- # * @package Myddleware
- # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- # * @link http://www.myddleware.com
- 
- # This file is part of Myddleware.
- 
- # Myddleware is free software: you can redistribute it and/or modify
- # it under the terms of the GNU General Public License as published by
- # the Free Software Foundation, either version 3 of the License, or
- # (at your option) any later version.
-
- # Myddleware is distributed in the hope that it will be useful,
- # but WITHOUT ANY WARRANTY; without even the implied warranty of
- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- # GNU General Public License for more details.
-
- # You should have received a copy of the GNU General Public License
- # along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-# *********************************************************************************/
-
 panel:
     solutions:
         title: Connectez dès à présent ces différentes solutions
         click: Cliquez pour savoir comment créer ce connecteur.
-    graph_tranfer_rule:
+    graph_transfer_rule:
         desc: Documents envoyés par règle
     graph_error:
         title: Nombre de documents par statut
@@ -126,8 +102,8 @@ create_rule:
         save_wait: Veuillez patienter... 
 
 filter:
-    content: contient
-    notcontent: ne contient pas
+    contains: contient
+    contains_not: ne contient pas
     begin: commence par
     end: se termine par
     gt: est supérieur à
@@ -140,10 +116,9 @@ filter:
     notin: n’est pas compris dans le tableau suivant séparé par des points virgules
 
 behavior_filters:
-    error_messing: Erreur si manquant
+    error_missing: Erreur si manquant
     skip_empty: Ignorer si vide
     skip_empty_wrong: Ignorer si vide ou faux
-            
 view_rule:
     action:
         exec_all: Exéc. les règles actives
@@ -152,11 +127,11 @@ view_rule:
         confirm_exec_error: Souhaitez-vous relancer tous les documents en erreur ?
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
-        duplic_rule: Dupliquer la règle
+        duplicate_rule: Dupliquer la règle
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
-        displayflux: Voir les documents
+        display_documents: Voir les documents
         new_rule: Créer une règle
     tabs:
         info: Informations
@@ -196,10 +171,9 @@ view_rule:
         rule : Règles
     filters:
         empty: Aucun filtre
-
     params:
         save: Sauvegarder
-        simule: Simuler documents
+        simulate: Simuler documents
         result: Nombre de documents estimé
         details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
 
@@ -243,10 +217,10 @@ animate:
         template: Choix des modèles prédéfinis
         name: Nom
         description: Description 
-        empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
-    tutoriel:
-        link: "http://community.myddleware.com/index.php/tutorial/#rules"
-        textlink: "Besoin d'aide ? Lisez notre tutoriel."
+        empty: Pas de modèle établi pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>
+    tutorial:
+        link: http://community.myddleware.com/index.php/tutorial/#rules
+        link_help: Besoin d'aide ? Lisez notre tutoriel.
 
 create_connector:    
     title: Création d'un connecteur
@@ -254,7 +228,7 @@ create_connector:
     connection: Nom de la connexion
     test: Tester
     valid: Cliquez-ici pour créer un autre connecteur
-    help: "Besoin d'aide ?"
+    help: Besoin d'aide ?
     source: Source
     target: Cible  
     upload_placeholder: Sélectionner votre fichier 
@@ -268,7 +242,7 @@ create_connector:
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
-    delete: "Désirez-vous supprimer ce connecteur ?"
+    delete: Souhaitez-vous supprimer ce connecteur ?
     total: Nombre de connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
     th: 
@@ -295,7 +269,7 @@ view_connector:
     help:
         link: http://community.myddleware.com/index.php/connector-guide/#
         
-list_flux:
+list_documents:
     start: Début
     end: Fin
     total: Nombre de documents
@@ -333,13 +307,13 @@ list_flux:
         target_id: Id cible
         date_created: Date de création
         date_modified: Date de modification
-        statut: Status
+        status: Statut
         source_date_modified: Date de référence
         type: Type
         source_field: Champ lié
         reference: Référence
         
-flux:
+flow:
     gbl_status:
         open: Ouvert
         close: Fermé
@@ -371,7 +345,7 @@ flux:
         search: Search
         delete: Delete
  
-view_flux:
+view_documents:
     empty: Pas de données
     empty_log: Aucune log
     target: Cible
@@ -492,7 +466,7 @@ function:
 solution:
     fields:
         login: Utilisateur
-        username: Utilisateur
+        username: Nom d'utilisateur
         password: Mot de passe
         accesskey: Access key
         url: Url
@@ -568,10 +542,10 @@ error:
         edit_document_error_open_admin: Au moins un document est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces documents avant d'éditer la règle.
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
         delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
-        delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
+        delete_relationship_exists: Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée
         update: Impossible d'éditer la règle. 
     account:
-        language_change: "Impossible de modifier le langage :"
+        language_change: Impossible de modifier le langage
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
@@ -609,8 +583,7 @@ menu:
     index: Accueil
     rule:
         title: Règles
-        createv1: Création (v1)
-        createv2: Création
+        create: Créer
         list: Liste
     connector:
         title: Connecteurs
@@ -626,7 +599,7 @@ menu:
         
 breadcrumb:
     rule_list: Liste des règles
-    transfert_list: Liste des documents
+    transfer_list: Liste des documents
     task_list: Liste des tâches
     connector_list: Liste des connecteurs
                                 
@@ -687,7 +660,7 @@ twitter:
     tweets:
         ref: > 
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
-    favoris:
+    favorites:
         ref: >
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
 
@@ -699,28 +672,28 @@ messages:
         another_task_running: Impossible de créer la tâche car une autre tâche est en cours. Veuillez attendre la fin de son exécution ou vous pouvez l'arrêter.
         failed_create_directory: Erreur lors de la création du repertoire temporaire.
     template:
-        nb_rule: "Nombre de règle générées: "
-        help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
+        nb_rule: Nombre de règle générées
+        help: Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles  <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
 
 email_notification:
     subject: Notification Myddleware
-    hello: Bonjour, 
-    introduction: "Voici les statistiques concernant vos documents avec la solution Myddleware:"
-    transfer_success: "- Nombre de documents envoyés avec succès: "
-    transfer_error: "- Nombre de documents en erreur: "
-    transfer_open: "- Nombre de documents ouverts: "
-    active_rule: "Vos règles actives dans Myddleware sont: "
-    no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
-    100_first_erros: "Voici les 100 premières erreurs: "
-    error_list: "Voici la liste des erreurs: "
-    best_regards: Bien cordialement, 
+    hello: Bonjour
+    introduction: Voici les statistiques concernant vos documents avec la solution Myddleware
+    transfer_success: Nombre de documents envoyés avec succès
+    transfer_error: Nombre de documents en erreur
+    transfer_open: Nombre de documents ouverts
+    active_rule: Vos règles actives dans Myddleware sont
+    no_active_rule: Vous n'avez pas de règle active dans Myddleware.
+    100_first_errors: Voici les 100 premières erreurs
+    error_list: Voici la liste des erreurs
+    kind_regards: Cordialement,
     signature: L'équipe Myddleware
 email_alert:
-    introduction: "Une tâche a excédé la limite que vous avez défini : "
+    introduction: Une tâche a excédé la limite que vous avez défini
     minute: minutes. 
     job_start: La tâche a démarré à 
-    job_id: ". ID de cette tâche : "
-    recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".
+    job_id: ID de cette tâche
+    recommendation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".
     subject: Alerte Myddleware
     body: |
         Bonjour,
@@ -730,7 +703,7 @@ email_alert:
         Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".<br/>
         %base_uri%</p>
 
-        Bien cordialement,
+        Cordialement,
 jobscheduler:
     command: Commande
     date_created: Date création
@@ -765,7 +738,7 @@ management_smtp:
     submit : Enregistrer configuration SMTP
     cancel: Annuler
     title : Configuration SMTP
-    description : "Vous pouvez configurez l'envoi des emails ici. Vous trouverez de la documentation ici : <a href='https://symfony.com/doc/4.4/email.html' target=_blank>https://symfony.com/doc/4.4/email.html</a>"
+    description : Vous pouvez configurez l'envoi des emails ici. Vous trouverez de la documentation ici <a href='https://symfony.com/doc/4.4/email.html' target=_blank>https://symfony.com/doc/4.4/email.html</a>
     sendtestmail: Envoyer un email de test
 
 management_smtp_sendmail:
@@ -773,11 +746,11 @@ management_smtp_sendmail:
     textMail: Ce message de test a été envoyé par Myddleware. 
 
 login:
-    title: Connexion
+    login: Se connecter
     index: Accueil
     user: Identifiant
-    pwd: Mot de passe
-    connection: Se connecter
+    password: Mot de passe
+    sign_in: Se connecter
     error_session: Erreur de session
     text_up_right: Pour en savoir plus sur myddleware
     text_bottom_right: Vous serez redirigé vers notre site explicatif
@@ -785,30 +758,30 @@ login:
     disabled_account: Votre compte est désactivé
     platform:
         line1: Merci d'utiliser le cloud d'hébergement et de déploiement continu Platform.sh
-        line2: Pour votre première connexion, utilisez les identifiants admin/admin
+        line2: "Pour votre première connexion, utilisez les identifiants admin/admin"
         line3: Veuillez modifier votre mot de passe dans la rubrique "Mon compte"
-    btn:
-        here: Cliquez ici
-        create: Créer un compte
-        pwd_forgot: Mot de passe oublié ?
+    here: Cliquez ici
+    create: Créer un compte
+    forgot_password: Mot de passe oublié ?
+    remember_me: Se souvenir de moi
 
 form:
-    group_name: 'Nom du groupe'
-    username: 'Nom d''utilisateur'
-    email: 'Adresse e-mail'
-    current_password: 'Mot de passe actuel'
-    password: 'Mot de passe'
-    password_confirmation: 'Répéter le mot de passe'
-    new_password: 'Nouveau mot de passe'
-    new_password_confirmation: 'Répéter le nouveau mot de passe'
+    group_name: Nom du groupe
+    username: Nom d'utilisateur
+    email: Adresse email
+    current_password: Mot de passe actuel
+    password: Mot de passe
+    password_confirmation: Répéter le mot de passe
+    new_password: Nouveau mot de passe
+    new_password_confirmation: Répéter le nouveau mot de passe
 
-fr: 'Français'
-en: 'Anglais'
+fr: Français
+en: Anglais
 
 flash: 
     password:
         reset:
-            success: 'Your password has been succesfully reset'
+            success: Your password has been succesfully reset
 
 password_reset:
     title: Modifier mon mot de passe
@@ -868,3 +841,30 @@ duplicate_rule:
     current_rule: règle actuelle
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
+
+app_name: Myddleware
+welcome: Bienvenue
+cheers: Merci!
+hi: Bonjour!
+your_email_address: Votre adresse email
+your_password: Votre mot de passe
+email_verification:
+    validate_account_email: Un email a été envoyé à votre addresse! Veuillez valider votre compte depuis cet email.
+    hello: Bonjour! Veuillez confirmer votre adresse email!
+    click_link: Veuillez confirmer votre adresse email en cliquant sur le lien suivant
+    confirm_email: Confirmer mon email
+    link_expires: Ce lien expirera dans
+    email_verified: Votre adresse email est vérifiée.
+register: S'inscrire
+registration: Inscription
+create_account: Créer un compte
+account_already: Vous avez déjà un compte
+agree_terms: Vous devez accepter les conditions d'utilisations.
+password:
+    min_length: Votre mot de passe doit comporter au moins
+    characters: caractères
+    enter_password: Veuillez saisir un mot de passe
+    enter_email: Veuillez saisir votre adresse email
+    new: Nouveau mot de passe
+    repeat: Réécrivez le mot de passe
+    mismatch: Les mots de passe doivent être identiques

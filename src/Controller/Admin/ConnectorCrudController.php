@@ -89,7 +89,7 @@ class ConnectorCrudController extends AbstractCrudController
                         'data-action' => 'change->solution#onSelect',
                         'data-solution-target' => 'credential',
                     ],
-                ])->setHelp('Login fields: '),
+                ])->setHelp('login fields: '),
             // CollectionField::new('connectorParams', 'Credentials')
             //     ->setEntryIsComplex(true)
             //     ->setEntryType(ConnectorParamFormType::class)

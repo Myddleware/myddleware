@@ -65,7 +65,7 @@ class Zuora extends Solution
         ];
     }
 
-    // Login to Zuora
+    // login to Zuora
     public function login($connectionParam)
     {
         parent::login($connectionParam);

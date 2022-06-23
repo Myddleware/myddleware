@@ -78,7 +78,7 @@ class ERPNext extends Solution
         ];
     }
 
-    // Login to Cirrus Shield
+    // login to Cirrus Shield
     public function login($connectionParam)
     {
         parent::login($connectionParam);
@@ -92,7 +92,7 @@ class ERPNext extends Solution
             $result = $this->call($url, 'GET', $parameters);
 
             if (empty($result->message)) {
-                throw new \Exception('Login error');
+                throw new \Exception('login error');
             }
             // Connection validation
             $this->isConnectionValid = true;
