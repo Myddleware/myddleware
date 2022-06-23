@@ -6,7 +6,6 @@ namespace App\Form;
 
 use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -23,10 +22,9 @@ class ConnectorParamFormType extends AbstractType
 
     public function __construct(
         ConnectorParamsValueTransformer $transformer,
-        array                           $solutionLoginFields = [],
-        ?string                         $secret = null,
-    )
-    {
+        array $solutionLoginFields = [],
+        ?string $secret = null,
+    ) {
         $this->transformer = $transformer;
         $this->solutionLoginFields = $solutionLoginFields;
         $this->secret = $secret;
@@ -87,7 +85,7 @@ class ConnectorParamFormType extends AbstractType
             foreach ($this->solutionLoginFields as $loginField) {
                 if ($loginField['name'] === $data->getName()) {
                     $type = $loginField['type'];
-                    $option['label'] = 'solution.fields.' . $loginField['name'];
+                    $option['label'] = 'solution.fields.'.$loginField['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
                         $option['attr']['value'] = $data->getValue(); // Force value of the password

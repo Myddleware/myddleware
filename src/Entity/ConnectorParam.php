@@ -34,7 +34,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="connectorparam")
  * @ORM\Entity(repositoryClass=ConnectorParamRepository::class)
  */
-class ConnectorParam  implements \Stringable
+class ConnectorParam implements \Stringable
 {
     /**
      * @ORM\Column(name="id", type="integer")

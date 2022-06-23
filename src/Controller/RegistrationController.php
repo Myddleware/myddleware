@@ -50,7 +50,7 @@ class RegistrationController extends AbstractController
                 );
                 $user->setTimeZone('UTC');
                 $entityManager->persist($user);
-                $entityManager->flush();// generate a signed url and email it to the user
+                $entityManager->flush(); // generate a signed url and email it to the user
                 try {
                     $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                         (new TemplatedEmail())
@@ -63,6 +63,7 @@ class RegistrationController extends AbstractController
                         'success',
                         $translator->trans('email_verification.validate_account_email')
                     );
+
                     return $this->redirectToRoute('admin_dashboard');
                 } catch (TransportExceptionInterface $e) {
                     $this->addFlash(
@@ -93,7 +94,7 @@ class RegistrationController extends AbstractController
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
             $userId = $request->query->get('id');
-            if(!$user = $this->getUser()){
+            if (!$user = $this->getUser()) {
                 if (!$user = $userRepository->find($userId)) {
                     throw $this->createNotFoundException();
                 }

@@ -36,7 +36,7 @@ class LoginController extends AbstractController
             'target_path' => $this->generateUrl('admin_dashboard'),
 
             // the label displayed for the username form field (the |trans filter is applied to it)
-            'username_label' =>  $translator->trans('your_email_address'),
+            'username_label' => $translator->trans('your_email_address'),
 
             // the label displayed for the password form field (the |trans filter is applied to it)
             'password_label' => $translator->trans('your_password'),
@@ -51,7 +51,7 @@ class LoginController extends AbstractController
             'forgot_password_path' => $this->generateUrl('app_forgot_password_request'),
 
             // the label displayed for the "forgot password?" link (the |trans filter is applied to it)
-            'forgot_password_label' =>  $translator->trans('login.forgot_password'),
+            'forgot_password_label' => $translator->trans('login.forgot_password'),
 
             // whether to enable or not the "remember me" checkbox (default: false)
             'remember_me_enabled' => true,
@@ -60,7 +60,7 @@ class LoginController extends AbstractController
             'remember_me_checked' => true,
 
             // the label displayed for the remember-me checkbox (the |trans filter is applied to it)
-            'remember_me_label' =>  $translator->trans('login.remember_me'),
+            'remember_me_label' => $translator->trans('login.remember_me'),
         ]);
     }
 }

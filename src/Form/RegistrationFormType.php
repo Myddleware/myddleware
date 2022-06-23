@@ -41,11 +41,11 @@ class RegistrationFormType extends AbstractType
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
                     new NotBlank([
-                        'message' =>  $this->translator->trans('password.enter_password')
+                        'message' => $this->translator->trans('password.enter_password'),
                     ]),
                     new Length([
                         'min' => 8,
-                        'minMessage' =>  $this->translator->trans('password.min_length').' {{ limit }} '.$this->translator->trans('password.characters'),
+                        'minMessage' => $this->translator->trans('password.min_length').' {{ limit }} '.$this->translator->trans('password.characters'),
                         // max length allowed by Symfony for security reasons
                         'max' => 4096,
                     ]),

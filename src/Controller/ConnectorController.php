@@ -41,7 +41,7 @@ class ConnectorController extends AbstractController
         foreach ($loginFields as $loginField) {
             $connectorParam = new ConnectorParam();
             $connectorParam->setName($loginField['name']);
-        //    $connectorParamForm = $this->createForm(ConnectorParamFormType::class, $connectorParam);
+            //    $connectorParamForm = $this->createForm(ConnectorParamFormType::class, $connectorParam);
             $form->add('connectorParams', ConnectorParamFormType::class, [
                 'attr' => [
                     'loginFields' => $loginFields,
@@ -66,6 +66,7 @@ class ConnectorController extends AbstractController
     public function createConnector(Request $request, SolutionRepository $solutionRepository)
     {
         dd($request);
+
         return;
     }
 }
