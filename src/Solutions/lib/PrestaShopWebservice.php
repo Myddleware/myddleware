@@ -97,22 +97,16 @@ class PrestaShopWebservice
                 break;
             case 204:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'No content'));
-                break;
             case 400:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Bad Request'));
-                break;
             case 401:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Unauthorized'));
-                break;
             case 404:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Not Found'));
-                break;
             case 405:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Method Not Allowed'));
-                break;
             case 500:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Internal Server Error'));
-                break;
             default:
                 throw new PrestaShopWebserviceException('This call to PrestaShop Web Services returned an unexpected HTTP status of:'.$status_code);
         }
@@ -125,7 +119,7 @@ class PrestaShopWebservice
      */
     protected function getCurlDefaultParams()
     {
-        $defaultParams = [
+        return [
             CURLOPT_HEADER => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLINFO_HEADER_OUT => true,
@@ -133,8 +127,6 @@ class PrestaShopWebservice
             CURLOPT_USERPWD => $this->key.':',
             CURLOPT_HTTPHEADER => ['Expect:'],
         ];
-
-        return $defaultParams;
     }
 
     /**

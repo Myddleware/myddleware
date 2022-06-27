@@ -119,17 +119,13 @@ class RingCentral extends Solution
     public function get_modules($type = 'source'): array
     {
         try {
-            $modules = [
+            return [
                 'call-log' => 'Call log',
                 'message-store' => 'Messages',
                 'presence' => 'Presence',
             ];
-
-            return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -159,7 +155,6 @@ class RingCentral extends Solution
             if ('ALL' == strtoupper($param['ruleParams']['extensionId'])) {
                 $pageNum = 1;
                 do {
-                    $extensions = [];
                     $extensions = $this->makeRequest($this->server, $this->token->access_token, '/restapi'.self::API_VERSION.'/account/~/extension?perPage='.$this->callLimit.'&page='.$pageNum);
                     if (!empty($extensions)) {
                         foreach ($extensions->records as $extension) {
@@ -226,8 +221,8 @@ class RingCentral extends Solution
                                 // If 2 dimensions
                                 if (!empty($fieldStructure[1])) {
                                     // Convert data to string
-                                    $entryName = (string) $fieldStructure[0];
-                                    $subEntryName = (string) $fieldStructure[1];
+                                    $entryName = $fieldStructure[0];
+                                    $subEntryName = $fieldStructure[1];
 
                                     // If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
                                     $record->$field = (isset($record->$entryName->$subEntryName) ? $record->$entryName->$subEntryName : '');
@@ -359,7 +354,6 @@ class RingCentral extends Solution
             $authPath = '/oauth\/token/';
             if (1 !== preg_match($authPath, $path)) {
                 $authHeader = 'Authorization: Bearer '.$token;
-                $contentType = 'Content-Type: application/json';
                 if ('POST' == $method && 'array' !== gettype($data)) {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
                     $data_string = json_encode($data);

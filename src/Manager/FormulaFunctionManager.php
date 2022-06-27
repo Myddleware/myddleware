@@ -84,9 +84,7 @@ class FormulaFunctionManager
         // Transform string into an array
         $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
         if (in_array($var, array_keys($arrayKeyToValue))) {
-            $var = $arrayKeyToValue[$var];
-
-            return $var;
+            return $arrayKeyToValue[$var];
         }
         if (!empty($acceptNull)) {
             return '';
@@ -107,9 +105,8 @@ class FormulaFunctionManager
                     $return .= $arrayKeyToValue[$varValue].$delimiter;
                 }
             }
-            $return = rtrim($return, $delimiter);
 
-            return $return;
+            return rtrim($return, $delimiter);
         }
     }
 

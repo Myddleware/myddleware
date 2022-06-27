@@ -306,7 +306,6 @@ $moduleFields = [
         'excluded' => ['label' => 'Excluded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'feedback' => ['label' => 'Feedback ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
         'feedbackformat' => ['label' => 'Feedback format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'information' => ['label' => 'Information ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
         'informationformat' => ['label' => 'Information format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'information' => ['label' => 'Information ', 'type' => TextType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
         'aggregationstatus' => ['label' => 'Aggregation status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

@@ -7,7 +7,7 @@ use SoapFault;
 
 class ZuoraFault extends Exception
 {
-    protected $previous = null;
+    protected $previous;
 
     public function __construct($message = '', SoapFault $previous = null, $request_headers = '', $last_request = '', $response_headers = '', $last_response = '')
     {

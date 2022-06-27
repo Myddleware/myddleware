@@ -25,13 +25,11 @@ class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
     private LoggerInterface $logger;
-    private MailerInterface $mailer;
 
-    public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger, MailerInterface $mailer)
+    public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger)
     {
         $this->emailVerifier = $emailVerifier;
         $this->logger = $logger;
-        $this->mailer = $mailer;
     }
 
     #[Route('/register', name: 'app_register')]

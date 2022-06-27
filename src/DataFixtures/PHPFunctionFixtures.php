@@ -29,17 +29,13 @@ class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, 
 
         // load all categories that already exist in the database
         $funcCats = $this->manager->getRepository(PHPFunctionCategory::class)->findAll();
-        if (!empty($funcCats)) {
-            foreach ($funcCats as $funcCat) {
-                $this->functionCats[$funcCat->getId()] = $funcCat;
-            }
+        foreach ($funcCats as $funcCat) {
+            $this->functionCats[$funcCat->getId()] = $funcCat;
         }
         // load all functions that already exist in the database
         $functions = $this->manager->getRepository(PHPFunction::class)->findAll();
-        if (!empty($functions)) {
-            foreach ($functions as $function) {
-                $this->functions[$function->getCategory()->getName()][$function->getId()] = $function->getName();
-            }
+        foreach ($functions as $function) {
+            $this->functions[$function->getCategory()->getName()][$function->getId()] = $function->getName();
         }
         $this->generateEntities();
         $this->manager->flush();

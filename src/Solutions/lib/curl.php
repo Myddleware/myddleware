@@ -38,12 +38,6 @@ class curl
 
     /** @var array */
     private $options;
-    /** @var string */
-    private $proxy_host = '';
-    private $proxy_auth = '';
-    private $proxy_type = '';
-    /** @var bool */
-    private $debug = false;
     private $cookie = false;
 
     /**
@@ -60,7 +54,6 @@ class curl
         // the options of curl should be init here.
         $this->resetopt();
         if (!empty($options['debug'])) {
-            $this->debug = true;
         }
         if (!empty($options['cookie'])) {
             if (true === $options['cookie']) {
@@ -424,9 +417,8 @@ class curl
                 $data[] = urlencode($k).'='.urlencode($v);
             }
         }
-        $convertedpostdata = implode('&', $data);
 
-        return $convertedpostdata;
+        return implode('&', $data);
     }
 
     /**
@@ -515,9 +507,8 @@ class curl
         if (!isset($options['CURLOPT_USERPWD'])) {
             $options['CURLOPT_USERPWD'] = 'anonymous: noreply@moodle.org';
         }
-        $ret = $this->request($url, $options);
 
-        return $ret;
+        return $this->request($url, $options);
     }
 
     /**
@@ -531,9 +522,8 @@ class curl
     public function trace($url, $options = [])
     {
         $options['CURLOPT_CUSTOMREQUEST'] = 'TRACE';
-        $ret = $this->request($url, $options);
 
-        return $ret;
+        return $this->request($url, $options);
     }
 
     /**
@@ -547,9 +537,8 @@ class curl
     public function options($url, $options = [])
     {
         $options['CURLOPT_CUSTOMREQUEST'] = 'OPTIONS';
-        $ret = $this->request($url, $options);
 
-        return $ret;
+        return $this->request($url, $options);
     }
 
     public function get_info()

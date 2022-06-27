@@ -17,11 +17,6 @@ class DemoteUserCommand extends Command
     protected static $defaultDescription = 'Demote an Myddleware existing user by removing a role';
 
     /**
-     * @var EntityManagerInterface
-     */
-    private $em;
-
-    /**
      * @var UserRepository
      */
     private $userRepository;

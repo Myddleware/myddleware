@@ -121,9 +121,7 @@ class ERPNext extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -284,7 +282,7 @@ class ERPNext extends Solution
                 $result['error'] = 'Request error';
             } elseif (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
-                foreach ($resultQuery as $key => $recordList) {
+                foreach ($resultQuery as $recordList) {
                     $record = null;
                     foreach ($param['fields'] as $field) {
                         $record[$field] = $recordList->$field;
@@ -355,23 +353,21 @@ class ERPNext extends Solution
                             if (empty($this->childModuleKey[$key])) {
                                 throw new \Exception('The childModuleKey is missing for the module '.$key);
                             }
-                            if (!empty($value)) {
-                                foreach ($value as $subIdDoc => $subData) {
-                                    // Save the subIdoc to change the sub data transfer status
-                                    $subDocIdArray[$subIdDoc] = ['id' => uniqid('', true)];
-                                    foreach ($subData as $subKey => $subValue) {
-                                        // We don't send Myddleware fields
-                                        if (in_array($subKey, ['target_id', 'id_doc_myddleware', 'source_date_modified'])) {
-                                            unset($subData[$subKey]);
-                                        // if the data is a link
-                                        } elseif ('link_doctype' == $subKey) {
-                                            $subData['links'] = [['link_doctype' => $subData[$subKey], 'link_name' => $subData['link_name']]];
-                                            unset($subData[$subKey]);
-                                            unset($subData['link_name']);
-                                        }
+                            foreach ($value as $subIdDoc => $subData) {
+                                // Save the subIdoc to change the sub data transfer status
+                                $subDocIdArray[$subIdDoc] = ['id' => uniqid('', true)];
+                                foreach ($subData as $subKey => $subValue) {
+                                    // We don't send Myddleware fields
+                                    if (in_array($subKey, ['target_id', 'id_doc_myddleware', 'source_date_modified'])) {
+                                        unset($subData[$subKey]);
+                                    // if the data is a link
+                                    } elseif ('link_doctype' == $subKey) {
+                                        $subData['links'] = [['link_doctype' => $subData[$subKey], 'link_name' => $subData['link_name']]];
+                                        unset($subData[$subKey]);
+                                        unset($subData['link_name']);
                                     }
-                                    $data[$this->childModuleKey[$key]][] = $subData;
                                 }
+                                $data[$this->childModuleKey[$key]][] = $subData;
                             }
                             // Remove the original array
                             unset($data[$key]);

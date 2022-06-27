@@ -21,11 +21,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
-    private $solutionRepository;
-
-    public function __construct(SolutionRepository $solutionRepository)
+    public function __construct()
     {
-        $this->solutionRepository = $solutionRepository;
     }
 
     public function configureAssets(Assets $assets): Assets

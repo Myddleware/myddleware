@@ -193,9 +193,7 @@ class SageCRM extends Solution
                 throw new \Exception('SOAP FAULT. Logon failed.');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -207,7 +205,6 @@ class SageCRM extends Solution
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $module, 2);
         $module = $tmp[1];
-        $prefix = $tmp[0];
         $dropdownvalues = [];
 
         try {
@@ -318,7 +315,6 @@ class SageCRM extends Solution
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
     {
-        $result = [];
         if (empty($param['limit'])) {
             $param['limit'] = 100;
         }
@@ -453,7 +449,6 @@ class SageCRM extends Solution
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
         $module = $tmp[1];
-        $prefix = $tmp[0];
 
         // Define SOAP connection options.
         $options = [
@@ -550,7 +545,6 @@ class SageCRM extends Solution
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
         $module = $tmp[1];
-        $prefix = $tmp[0];
 
         // Define SOAP connection options.
         $options = [

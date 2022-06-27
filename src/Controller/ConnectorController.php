@@ -66,7 +66,5 @@ class ConnectorController extends AbstractController
     public function createConnector(Request $request, SolutionRepository $solutionRepository)
     {
         dd($request);
-
-        return;
     }
 }

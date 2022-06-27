@@ -32,22 +32,22 @@ use Symfony\Component\HttpClient\HttpClient;
 class Airtable extends Solution
 {
     protected $sendDeletion = true;
-    protected $airtableURL = 'https://api.airtable.com/v0/';
-    protected $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
+    protected string $airtableURL = 'https://api.airtable.com/v0/';
+    protected string $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
     protected $required_fields = ['default' => ['createdTime', 'Last Modified']];
     /**
      * Airtable base.
      *
      * @var string
      */
-    protected $projectID;
+    protected string $projectID;
     /**
      * API key (provided by Airtable).
      *
      * @var string
      */
-    protected $token;
-    protected $delaySearch = '-1 month';
+    protected string $token;
+    protected string $delaySearch = '-1 month';
     /**
      * Name of the table / module that will be used as the default table to access the login() method
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
@@ -55,21 +55,21 @@ class Airtable extends Solution
      *
      * @var string
      */
-    protected $tableName;
+    protected string $tableName;
 
     /**
      * Can't be greater than 100.
      *
      * @var int
      */
-    protected $defaultLimit = 100;
+    protected int $defaultLimit = 100;
 
     /**
      * Max number of records posted by call.
      *
      * @var string
      */
-    protected $callPostLimit = 10;
+    protected string|int $callPostLimit = 10;
 
     // Log in form parameters
     public function getFieldsLogin(): array
@@ -107,7 +107,6 @@ class Airtable extends Solution
             $options = ['auth_bearer' => $this->token];
             $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
-            $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
             $content = $response->toArray();
             if (!empty($content) && 200 === $statusCode) {
@@ -138,9 +137,11 @@ class Airtable extends Solution
     /**
      * Retrieve the list of fields (metadata) associated to each module.
      *
-     * @param array $param
+     * @param string $module
+     * @param string $type
+     * @param null $param
      *
-     * @return array
+     * @return array|null
      */
     public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
@@ -164,7 +165,7 @@ class Airtable extends Solution
      *
      * @return array
      */
-    public function readData(array $param)
+    public function readData(array $param): array
     {
         try {
             $baseID = $this->connectionParam['projectid'];
@@ -432,8 +433,7 @@ class Airtable extends Solution
                 } else { // Create
                     $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
                 }
-                $statusCode = $response->getStatusCode();
-                $contentType = $response->getHeaders()['content-type'][0];
+                $response->getStatusCode();
                 $content = $response->getContent();
                 $content = $response->toArray();
                 if (!empty($content)) {

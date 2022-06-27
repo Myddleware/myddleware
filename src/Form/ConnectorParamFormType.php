@@ -17,22 +17,18 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ConnectorParamFormType extends AbstractType
 {
     private ConnectorParamsValueTransformer $transformer;
-    private ?string $secret;
     private array $solutionLoginFields;
 
     public function __construct(
         ConnectorParamsValueTransformer $transformer,
         array $solutionLoginFields = [],
-        ?string $secret = null,
     ) {
         $this->transformer = $transformer;
         $this->solutionLoginFields = $solutionLoginFields;
-        $this->secret = $secret;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->secret = $options['attr']['secret'] ?? null;
         $this->solutionLoginFields = $options['attr']['loginFields'] ?? null;
         $builder
             ->add('value', TextType::class, [

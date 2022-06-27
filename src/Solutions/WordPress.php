@@ -31,10 +31,10 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class WordPress extends Solution
 {
-    protected $apiSuffix = '/wp-json/wp/v2/';
-    protected $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
+    protected string $apiSuffix = '/wp-json/wp/v2/';
+    protected int $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
     // Module without reference date
-    protected $moduleWithoutReferenceDate = ['users', 'categories'];
+    protected array $moduleWithoutReferenceDate = ['users', 'categories'];
 
     public function getFieldsLogin(): array
     {
@@ -55,7 +55,6 @@ class WordPress extends Solution
             // we test the connection to the API with a request on pages
             $response = $client->request('GET', $this->connectionParam['url'].$this->apiSuffix.'pages');
             $statusCode = $response->getStatusCode();
-            $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
             $content = $response->toArray();
             if (!empty($content) && 200 === $statusCode) {
@@ -116,7 +115,7 @@ class WordPress extends Solution
         }
     }
 
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             $result = [];
@@ -235,7 +234,7 @@ class WordPress extends Solution
     }
 
     // for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
-    protected function convertResponse($param, $response)
+    protected function convertResponse($param, $response): array
     {
         $newResponse = [];
         if (!empty($response)) {
@@ -298,7 +297,7 @@ class WordPress extends Solution
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
-    public function referenceIsDate($module)
+    public function referenceIsDate($module): bool
     {
         // Le module users n'a pas de date de référence. On utilise donc l'ID comme référence
         if (in_array($module, $this->moduleWithoutReferenceDate)) {
