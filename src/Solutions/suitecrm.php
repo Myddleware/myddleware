@@ -265,6 +265,7 @@ class suitecrmcore extends solution
                             '_id' == substr($field->name, -3)
                         || '_ida' == substr($field->name, -4)
                         || '_idb' == substr($field->name, -4)
+						|| '_id_c' == substr($field->name, -5)
                         || (
                                 'id' == $field->type
                             && 'id' != $field->name
@@ -325,6 +326,7 @@ class suitecrmcore extends solution
                                 '_id' == substr($field->name, -3)
                             || '_ida' == substr($field->name, -4)
                             || '_idb' == substr($field->name, -4)
+							|| '_id_c' == substr($field->name, -5)
                             || (
                                     'id' == $field->type
                                 && 'id' != $field->name
