@@ -10,10 +10,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class InstallRequirements extends AbstractController
 {
-    private $phpVersion;
-
-    private $configRepository;
-
     // public function __construct(ConfigRepository $configRepository)
     // {
     //     $this->configRepository = $configRepository;

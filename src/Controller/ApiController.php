@@ -22,6 +22,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController
 {
+    public $entityManager;
+    public $parameterBag;
+    public $formulaManager;
+    public $solutionManager;
+    public $documentManager;
     /**
      * @var RuleRepository
      */
@@ -344,9 +349,9 @@ class ApiController extends AbstractController
             $arguments['action'] = $data['action'];
             $arguments['dataType'] = $data['dataType'];
             $arguments['ids'] = $data['ids'];
-            $arguments['forceAll'] = (!empty($data['forceAll']) ? $data['forceAll'] : '');
-            $arguments['fromStatus'] = (!empty($data['fromStatus']) ? $data['fromStatus'] : '');
-            $arguments['toStatus'] = (!empty($data['toStatus']) ? $data['toStatus'] : '');
+            $arguments['forceAll'] = (empty($data['forceAll']) ? '' : $data['forceAll']);
+            $arguments['fromStatus'] = (empty($data['fromStatus']) ? '' : $data['fromStatus']);
+            $arguments['toStatus'] = (empty($data['toStatus']) ? '' : $data['toStatus']);
             $input = new ArrayInput($arguments);
             $output = new BufferedOutput();
 

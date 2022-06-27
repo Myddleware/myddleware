@@ -94,10 +94,8 @@ class RegistrationController extends AbstractController
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
             $userId = $request->query->get('id');
-            if (!$user = $this->getUser()) {
-                if (!$user = $userRepository->find($userId)) {
-                    throw $this->createNotFoundException();
-                }
+            if (($user = $this->getUser()) === null && !$user = $userRepository->find($userId)) {
+                throw $this->createNotFoundException();
             }
             $this->emailVerifier->handleEmailConfirmation($request, $user);
             $this->logger->info('Email verification');

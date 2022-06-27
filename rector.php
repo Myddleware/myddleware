@@ -16,10 +16,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     // Define what rule sets will be applied
     $containerConfigurator->import(SetList::DEAD_CODE);
+    $containerConfigurator->import(SetList::CODE_QUALITY);
 
     // get services (needed for register a single rule)
-    // $services = $containerConfigurator->services();
+    $services = $containerConfigurator->services();
 
     // register a single rule
-    // $services->set(TypedPropertyRector::class);
+   //  $services->set(TypedPropertyRector::class);
 };
