@@ -219,12 +219,19 @@ class suitecrmcustom extends suitecrm {
 				$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire."%' ";
 			}
 		}
-		// Add a filter for contact universite (only the one with reec set to 1)
+		// Add a filter for contact universite 
 		if (
 				!empty($param['rule']['id'])
 			AND $param['rule']['id'] == '5d01a630c217c' // Contact - Université
 		){
-			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'Oui' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'contact_universite' ";
+		}
+		// Add a filter for contact reperant 
+		if (
+				!empty($param['rule']['id'])
+			AND $param['rule']['id'] == '6273905a05cb2' // REEC - Contacts repérants
+		){
+			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'contact_reperant' ";
 		}	
 		return $query;
 	}

@@ -577,6 +577,11 @@ class mysqlcustom extends mysql {
 						 ON email_addresses.id = email_addr_bean_rel.email_address_id
 						AND email_addresses.deleted = 0 ";	
 		}
+		
+		// Add record type filter for rule coupon - pole vers COMET
+		if (in_array($param['rule']['id'], array('62b30d5c4a3fe'))) { // règle coupon - pole vers COMET	
+			$query['where'] .= " AND record_type = 'Leads' ";
+		}
 		return parent::buildQuery($param, $query);
 	}
 	
