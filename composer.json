@@ -96,6 +96,7 @@
     "dama/doctrine-test-bundle": "^6.7",
     "doctrine/doctrine-fixtures-bundle": "^3.4",
     "friendsofphp/php-cs-fixer": "^3.8",
+    "icanhazstring/composer-unused": "^0.8.2",
     "phpstan/phpstan": "*",
     "phpstan/phpstan-doctrine": "*",
     "phpstan/phpstan-symfony": "*",
