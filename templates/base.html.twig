@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
 	<head>
-		<meta charset="UTF-8"/>
+		<meta charset="UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>
 			{% block title %}Myddleware
 			{% endblock %}
 		</title>
-		<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+		<link rel="icon" type="image/x-icon" href="{{absolute_url(asset('build/favicon_io/favicon.ico'))}}">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{absolute_url(asset('build/favicon_io/apple-touch-icon.png'))}}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{absolute_url(asset('build/favicon_io/favicon-32x32.png'))}}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{absolute_url(asset('build/favicon_io/favicon-16x16.png'))}}">
 		{% block stylesheets %}
 			{{ encore_entry_link_tags('app') }}
 		{% endblock %}
@@ -15,10 +20,31 @@
 		{% endblock %}
 	</head>
 	<body>
-		{% block body %}
-		</body>
-
-	{% endblock %}
-	<footer>
-		{{ include('footer.html.twig')}}</footer>
-</html></body></html>
+		{% block notifications %}
+			<div {{ stimulus_controller('toast') }}>
+				{% for label, messages in app.flashes(['success', 'warning', 'verify_email_error']) %}
+					{% for message in messages %}
+						<div class="position-fixed bottom-0 end-0 p-3 flash-{{ label }}" style="z-index: 99">
+							<div id="liveToast" class="toast show me-3 mb-5" role="alert" aria-live="assertive" aria-atomic="true" data-toast-target="toast">
+								<div class="toast-header d-flex justify-content-between">
+									<img src="{{ absolute_url(asset('build/images/logo/logo1.png')) }}" class="me-2" alt="" width="128" height="64">
+									<div>
+										<small class="me-0">Notifications</small>
+										<button type="button" class="btn-close me-2" data-bs-dismiss="toast" aria-label="Close"></button>
+									</div>
+								</div>
+								<div class="toast-body">
+									{{ message }}
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				{% endfor %}
+			</div>
+		{% endblock %}
+		{% block body %}{% endblock %}
+		<footer class="text-center position-absolute bottom-0">
+			{{ include('footer.html.twig')}}
+		</footer>
+	</body>
+</html>

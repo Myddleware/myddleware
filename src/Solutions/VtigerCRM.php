@@ -93,20 +93,20 @@ class VtigerCRM extends Solution
     /** @var VtigerClient */
     protected $vtigerClient;
 
-    public function login(array $paramConnexion): ?array
+    public function login(array $connectionParam): ?array
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
 
         try {
-            $client = new VtigerClient($this->paramConnexion['url']);
-            $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
+            $client = new VtigerClient($this->connectionParam['url']);
+            $result = $client->login(trim($this->connectionParam['username']), trim($this->connectionParam['accesskey']));
 
             if (!$result['success']) {
                 throw new \Exception($result['error']['message']);
             }
 
             $this->session = $client->getSessionName();
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
             $this->vtigerClient = $client;
         } catch (\Exception $e) {
             $error = $e->getMessage();

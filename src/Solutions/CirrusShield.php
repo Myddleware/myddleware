@@ -58,13 +58,13 @@ class CirrusShield extends Solution
         ];
     }
 
-    public function login(array $paramConnexion)
+    public function login(array $connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Generate parameters to connect to Cirrus Shield
-            $login = ['Username' => $this->paramConnexion['login'],
-                'password' => $this->paramConnexion['password'],
+            $login = ['Username' => $this->connectionParam['login'],
+                'password' => $this->connectionParam['password'],
             ];
             $url = sprintf('%s?%s', $this->url.'AuthToken', http_build_query($login));
 
@@ -75,7 +75,7 @@ class CirrusShield extends Solution
             }
 
             // Connection validation
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);

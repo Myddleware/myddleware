@@ -38,7 +38,7 @@ class PostgreSQL extends Database
 
     protected function generatePdo()
     {
-        return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
+        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'], $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
     // Generate query
@@ -168,7 +168,7 @@ class PostgreSQL extends Database
         return "	SELECT column_name, data_type
 					FROM information_schema.columns
 					WHERE
-							table_catalog = '".$this->paramConnexion['database_name']."'
+							table_catalog = '".$this->connectionParam['database_name']."'
 						AND table_schema = '".$tableParam[0]."'
 						AND table_name = '".$tableParam[1]."'";
     }

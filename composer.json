@@ -12,14 +12,13 @@
     }
   },
   "prefer-stable": true,
-    "require": {
+  "require": {
     "php": ">=8.0",
     "ext-ctype": "*",
     "ext-iconv": "*",
     "ext-json": "*",
     "api-platform/core": "^2.2.10",
     "automattic/woocommerce": "^3.0",
-    "babdev/pagerfanta-bundle": "^3.1",
     "beberlei/doctrineextensions": "^1.3",
     "composer/package-versions-deprecated": "^1.11.99.1",
     "doctrine/annotations": "^1.13",
@@ -33,8 +32,6 @@
     "illuminate/encryption": "5.3.*@dev",
     "incenteev/composer-parameter-handler": "^2.0",
     "javanile/vtiger-client": "^0.1.0",
-    "jquery/jquery": "^3.5.1",
-    "jquery/jquery_ui": "^1.11.1",
     "laminas/laminas-code": "~3.4.1|^4.0",
     "laminas/laminas-hydrator": "^4.1",
     "laminas/laminas-stdlib": "^3.3",
@@ -43,8 +40,6 @@
     "lexik/jwt-authentication-bundle": "^2.6",
     "mautic/api-library": "^2.15",
     "nelmio/cors-bundle": "^2.1",
-    "pagerfanta/doctrine-orm-adapter": "^3.0",
-    "pagerfanta/pagerfanta": "^3.0",
     "phan/phan": "^5.3",
     "phpdocumentor/reflection-docblock": "^5.2",
     "phpstan/phpdoc-parser": "^1.2",
@@ -98,31 +93,7 @@
     "twig/twig": "^2.12|^3.0",
     "twitter/bootstrap": "^4.6.0"
   },
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "jquery/jquery",
-                "version": "3.5.1",
-                "dist": {
-                    "url": "https://code.jquery.com/jquery-3.5.1.min.js",
-                    "type": "file"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "jquery/jquery_ui",
-                "version": "1.11.1",
-                "dist": {
-                    "url": "https://code.jquery.com/ui/1.11.1/jquery-ui.min.js",
-                    "type": "file"
-                }
-            }
-        }
-    ],
-    "require-dev": {
+  "require-dev": {
     "dama/doctrine-test-bundle": "^6.7",
     "doctrine/doctrine-fixtures-bundle": "^3.4",
     "phpstan/phpstan": "^0.12.64",
@@ -133,53 +104,53 @@
     "symfony/css-selector": "5.4.*",
     "symfony/maker-bundle": "^1.26",
     "symfony/phpunit-bridge": "^6.0",
+    "vimeo/psalm": "^4.23",
     "zenstruck/foundry": "^1.17"
   },
-    "scripts": {
-        "prepare": [
-            "symfony console doctrine:database:drop -f",
-            "symfony console doctrine:database:create",
-            "symfony console doctrine:schema:update -f",
-            "symfony console doctrine:fixtures:load -n --append"
-        ],    
-        "refresh": [
-            "symfony console doctrine:schema:update -f",
-            "symfony console doctrine:fixtures:load -n --append"
-        ],
-        "post-root-package-install": [
-            "SymfonyStandard\\Composer::hookRootPackageInstall"
-        ],
-        "post-install-cmd": [
-        ],
-        "post-update-cmd": [
-        ],
-        "auto-scripts": {
+  "scripts": {
+    "prepare": [
+      "symfony console doctrine:database:drop -f",
+      "symfony console doctrine:database:create",
+      "symfony console doctrine:schema:update -f",
+      "symfony console doctrine:fixtures:load -n --append"
+    ],
+    "refresh": [
+      "symfony console doctrine:schema:update -f",
+      "symfony console doctrine:fixtures:load -n --append"
+    ],
+    "post-root-package-install": [
+      "SymfonyStandard\\Composer::hookRootPackageInstall"
+    ],
+    "post-install-cmd": [
+    ],
+    "post-update-cmd": [
+    ],
+    "auto-scripts": {
       "requirements-checker": "script",
       "cache:clear": "symfony-cmd",
       "assets:install %PUBLIC_DIR%": "symfony-cmd"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true,
+      "symfony/flex": true
     },
-    "config": {
-        "allow-plugins": {
-          "composer/package-versions-deprecated": true,
-          "symfony/flex": true
-        },
-        "preferred-install": {
-          "*": "dist"
-      },
-      "sort-packages": true
-
+    "preferred-install": {
+      "*": "dist"
     },
-    "extra": {
-        "symfony-bin-dir": "bin",
-        "symfony-app-dir": "app",
-        "symfony-web-dir": "web",
-        "symfony-var-dir": "var",
-        "symfony-tests-dir": "tests",
-        "symfony-assets-install": "relative",
-        "symfony": {
-          "allow-contrib": false,
-          "require": "5.4.*"
-        }
+    "sort-packages": true
+  },
+  "extra": {
+    "symfony-bin-dir": "bin",
+    "symfony-app-dir": "app",
+    "symfony-web-dir": "web",
+    "symfony-var-dir": "var",
+    "symfony-tests-dir": "tests",
+    "symfony-assets-install": "relative",
+    "symfony": {
+      "allow-contrib": false,
+      "require": "5.4.*"
     }
+  }
 }

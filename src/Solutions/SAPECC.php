@@ -63,10 +63,10 @@ class SAPECC extends SAP
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        $paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sapecc/wsdl/'.$paramConnexion['wsdl'];
-        parent::login($paramConnexion);
+        $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sapecc/wsdl/'.$connectionParam['wsdl'];
+        parent::login($connectionParam);
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté

@@ -46,12 +46,12 @@ class Mailchimp extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Get the api key
-            $this->apiKey = $this->paramConnexion['apikey'];
+            $this->apiKey = $this->connectionParam['apikey'];
             // Api key has to cointain "-"
             if (false === strpos($this->apiKey, '-')) {
                 throw new \Exception('Invalid MailChimp API key supplied.');
@@ -62,10 +62,10 @@ class Mailchimp extends Solution
             // Call the root function to check the API
             $result = $this->call($this->apiEndpoint);
             if (empty($result['account_id'])) {
-                throw new \Exception('Login error');
+                throw new \Exception('login error');
             }
             // Connection validation
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);

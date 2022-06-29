@@ -74,14 +74,14 @@ class SugarCRM extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            $server = $this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/';
+            $server = $this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/';
             $credentials = [
-                'username' => $this->paramConnexion['login'],
-                'password' => $this->paramConnexion['password'],
+                'username' => $this->connectionParam['login'],
+                'password' => $this->connectionParam['password'],
                 'platform' => $this->sugarPlatform,
             ];
 
@@ -92,7 +92,7 @@ class SugarCRM extends Solution
             // Check the token
             $token = $this->sugarAPI->getToken();
             if (!empty($token->access_token)) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 return ['error' => 'Failed to connect to Sugar, no error returned.'];
             }
@@ -107,7 +107,7 @@ class SugarCRM extends Solution
     public function get_modules($type = 'source'): array
     {
         try {
-            $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
+            $modulesSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
             if (!empty($modulesSugar->full_module_list)) {
                 foreach ($modulesSugar->full_module_list as $module => $label) {
                     // hash isn't a Sugar module
@@ -119,7 +119,7 @@ class SugarCRM extends Solution
             }
 
             // Add many-to-many relationships
-            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            $relationshipsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
             if (!empty($relationshipsSugar->relationships)) {
                 foreach ($relationshipsSugar->relationships as $relationship => $value) {
                     // hash isn't a Sugar module
@@ -152,7 +152,7 @@ class SugarCRM extends Solution
                 !empty($module)
             and 'link_' == substr($module, 0, 5)
         ) {
-            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            $relationshipsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
             $relName = substr($module, 5);
             if (!empty($relationshipsSugar->relationships->$relName)) {
                 return $relationshipsSugar->relationships->$relName;
@@ -189,7 +189,7 @@ class SugarCRM extends Solution
                 return $this->moduleFields;
             }
             // Call teh detail of all Sugar fields for the module
-            $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
+            $fieldsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
             // Browse fields
             if (!empty($fieldsSugar->modules->$module->fields)) {
                 foreach ($fieldsSugar->modules->$module->fields as $field) {
@@ -223,7 +223,7 @@ class SugarCRM extends Solution
 
                     // Add option for enum fields
                     if (in_array($field->type, ['enum', 'multienum'])) {
-                        $fieldsList = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/'.$module.'/enum/'.$field->name);
+                        $fieldsList = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/'.$module.'/enum/'.$field->name);
                         if (
                                 !empty($fieldsList)
                             and is_array($fieldsList)

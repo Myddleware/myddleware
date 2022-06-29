@@ -4,12 +4,11 @@ namespace App\DataFixtures;
 
 use App\Entity\Module;
 use App\Entity\Solution;
-use App\DataFixtures\SolutionFixtures;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
 
-class ModuleFixtures extends Fixture  implements DependentFixtureInterface
+class ModuleFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {

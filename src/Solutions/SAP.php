@@ -76,10 +76,10 @@ class SAP extends SAPRoot
         'ET_BSEG' => ['Mandt', 'Bukrs', 'Belnr', 'Gjahr', 'Buzei'],
     ];
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        $paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sap/wsdl/'.$paramConnexion['wsdl'];
-        parent::login($paramConnexion);
+        $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sap/wsdl/'.$connectionParam['wsdl'];
+        parent::login($connectionParam);
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté

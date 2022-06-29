@@ -54,27 +54,27 @@ class File extends Solution
     private $login;
     private $password;
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             if (!extension_loaded('ssh2')) {
                 throw new \Exception('Please enable extension ssh2. Help here : http://php.net/manual/fr/ssh2.installation.php');
             }
             // Connect to the server
-            $this->connection = ssh2_connect($this->paramConnexion['host'], $this->paramConnexion['port']);
-            ssh2_auth_password($this->connection, $this->paramConnexion['login'], $this->paramConnexion['password']);
+            $this->connection = ssh2_connect($this->connectionParam['host'], $this->connectionParam['port']);
+            ssh2_auth_password($this->connection, $this->connectionParam['login'], $this->connectionParam['password']);
 
             // Check if the directory exist
-            $stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';pwd');
+            $stream = ssh2_exec($this->connection, 'cd '.$this->connectionParam['directory'].';pwd');
             stream_set_blocking($stream, true);
             $output = stream_get_contents($stream);
-            if (trim($this->paramConnexion['directory']) != trim($output)) {
-                throw new \Exception('Failed to access to the directory'.$this->paramConnexion['directory'].'. Could you check if this directory exists and if the user has the right to read it. ');
+            if (trim($this->connectionParam['directory']) != trim($output)) {
+                throw new \Exception('Failed to access to the directory'.$this->connectionParam['directory'].'. Could you check if this directory exists and if the user has the right to read it. ');
             }
 
-            // If all check are OK so connexion is valid
-            $this->connexion_valide = true;
+            // If all check are OK so connection is valid
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -119,7 +119,7 @@ class File extends Solution
     {
         try {
             // Get the subfolders of the current directory
-            $stream = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].';ls -d */');
+            $stream = ssh2_exec($this->connection, 'cd '.$this->connectionParam['directory'].';ls -d */');
             stream_set_blocking($stream, true);
             $output = stream_get_contents($stream);
             // Transform the directory list in an array
@@ -149,8 +149,8 @@ class File extends Solution
         try {
             if ('source' == $type) {
                 // Get the file with the way of this file
-                $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module, '1970-01-01 00:00:00');
-                $fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);
+                $file = $this->get_last_file($this->connectionParam['directory'].'/'.$module, '1970-01-01 00:00:00');
+                $fileName = trim($this->connectionParam['directory'].'/'.$module.$file);
                 // Open the file
                 $sftp = ssh2_sftp($this->connection);
                 $stream = fopen('ssh2.sftp://'.intval($sftp).$fileName, 'r');
@@ -285,7 +285,7 @@ class File extends Solution
         try {
             // Get the file with the way of this file. But we take the oldest file of the folder
             // If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
-            $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
+            $file = $this->get_last_file($this->connectionParam['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
             // If there is no file
             if (empty($file)) {
                 return;
@@ -295,7 +295,7 @@ class File extends Solution
                 $offset = $param['ruleParams'][$file];
             }
 
-            $fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
+            $fileName = $this->connectionParam['directory'].'/'.$param['module'].$file;
 
             // Open the file
             $sftp = ssh2_sftp($this->connection);
@@ -309,7 +309,7 @@ class File extends Solution
             $allRuleField[] = $param['ruleParams']['fieldId'];
 
             // Get the date of modification of the file
-            $new_date_ref = ssh2_exec($this->connection, 'cd '.$this->paramConnexion['directory'].'/'.$param['module'].';stat -c %y '.$file);
+            $new_date_ref = ssh2_exec($this->connection, 'cd '.$this->connectionParam['directory'].'/'.$param['module'].';stat -c %y '.$file);
             stream_set_blocking($new_date_ref, true);
             $new_date_ref = stream_get_contents($new_date_ref);
             $new_date_ref = trim($new_date_ref);

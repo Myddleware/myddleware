@@ -1,35 +1,38 @@
 import { Controller } from '@hotwired/stimulus';
-import axios from 'axios';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
 
     static targets = ['solution', 'credential'];
     static values = {
-        infoUrl: String
+        infoUrl: String,
+        solutionId: Number
     }
 
+    htmlOutput = null;
+
     connect() {
-        console.log(this.element);
+        this.htmlOutput = document.createElement('div');
     }
 
     async onSelect(event) {
-        // event.preventDefault();
-        // Solution ID 
-        console.log(event.currentTarget.value);
-        await axios.get(this.infoUrlValue, {
-            params: {
-                // page: this.pageValue,
-                // offset: this.offsetValue
-            }
+        // // Solution ID 
+        this.solutionIdValue = event.currentTarget.value;
+        const response = await this.load();
+    }
+
+    async load() {
+        const params = new URLSearchParams({
+            solutionId: this.solutionIdValue,
         })
-            .then((response) => {
-                // console.log(response.data);
-                // console.log(this.credentialTarget);
-                // this.credentialTarget.innerHTML += response.data;
-                // this.element.parentNode.innerHTML += response.data;
-                this.element.parentNode.innerHTML += response.text;
-                console.log(this.element);
+        const response = await fetch(`${this.infoUrlValue}/${this.solutionIdValue.toString()}`)
+            .then(response => response.text())
+            .then((html) => {
+                this.htmlOutput.innerHTML = html;
+                this.element.append(this.htmlOutput);
+            })
+            .catch(function(err) {  
+                console.log('Failed to fetch response: ', err);  
             });
     }
 }

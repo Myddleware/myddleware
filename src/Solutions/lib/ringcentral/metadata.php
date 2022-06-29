@@ -41,7 +41,7 @@ $moduleFields = [
         'action' => ['label' => 'Action', 'type' => 'string', 'type_bdd' => 'string', 'required' => 0, 'option' => [
             'Unknown' => 'Unknown',
             'Phone Call' => 'Phone Call',
-            'Phone Login' => 'Phone Login',
+            'Phone login' => 'Phone login',
             'Incoming Fax' => 'Incoming Fax',
             'Accept Call' => 'Accept Call',
             'FindMe' => 'FindMe',

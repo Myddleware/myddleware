@@ -58,17 +58,17 @@ class Eventbrite extends Solution
     protected $required_fields = ['default' => ['id', 'modified']];
     protected $eventStatuses = ''; // 'live,started,ended'
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $parameters = [];
-            $this->token = $this->paramConnexion['token'];
+            $this->token = $this->connectionParam['token'];
             $response = $this->call($this->urlBase.'user_list_organizers', $parameters);
 
             // Pour tester la validité du token, on vérifie le retour  du webservice user_list_organizers
             if (isset($response['organizers'])) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 if (!empty($response['error'])) {
                     $error = $response['error']->error_message;

@@ -65,18 +65,18 @@ class Zuora extends Solution
         ];
     }
 
-    // Login to Zuora
-    public function login($paramConnexion)
+    // login to Zuora
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Get the wsdl (temporary solution)
             $config = new \stdClass();
-            $config->wsdl = __DIR__.'/../Custom/Solutions/zuora/wsdl/'.$this->paramConnexion['wsdl'];
+            $config->wsdl = __DIR__.'/../Custom/Solutions/zuora/wsdl/'.$this->connectionParam['wsdl'];
             $this->instance = \Zuora_API::getInstance($config);
             if (
-                    !empty($this->paramConnexion['sandbox'])
-                && 1 == $this->paramConnexion['sandbox']
+                    !empty($this->connectionParam['sandbox'])
+                && 1 == $this->connectionParam['sandbox']
             ) {
                 $domain = 'https://apisandbox.zuora.com/';
             } else {
@@ -84,9 +84,9 @@ class Zuora extends Solution
             }
 
             $this->instance->setLocation($domain.'apps/services/a/'.$this->version);
-            $this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
+            $this->instance->login($this->connectionParam['login'], $this->connectionParam['password']);
 
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
@@ -101,7 +101,7 @@ class Zuora extends Solution
         try {
             require_once 'lib/zuora/lib_zuora.php';
             // Get all modules from te wsdl
-            $zuoraModules = getObjectListFromWSDL($this->paramConnexion['wsdl'], $this->debug);
+            $zuoraModules = getObjectListFromWSDL($this->connectionParam['wsdl'], $this->debug);
             if (!empty($zuoraModules)) {
                 // Generate the output array
                 foreach ($zuoraModules as $zuoraModule) {
@@ -123,7 +123,7 @@ class Zuora extends Solution
         parent::get_module_fields($module, $type);
         try {
             require_once 'lib/zuora/lib_zuora.php';
-            $zupraFields = \ZuoraAPIHelper::getFieldList($this->paramConnexion['wsdl'], $module);
+            $zupraFields = \ZuoraAPIHelper::getFieldList($this->connectionParam['wsdl'], $module);
             if (!empty($zupraFields)) {
                 // Add each field in the right list (relate fields or normal fields)
                 foreach ($zupraFields as $field) {

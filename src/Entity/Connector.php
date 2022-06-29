@@ -49,7 +49,7 @@ class Connector implements \Stringable
     /**
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
@@ -60,12 +60,12 @@ class Connector implements \Stringable
      * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
      * @ORM\Column(length=50, nullable=false, name="name_slug")
      */
-    private $nameSlug;
+    private ?string $nameSlug;
 
     /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":false})
      */
-    private $deleted;
+    private ?bool $deleted;
 
     /**
      * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorSource", orphanRemoval=true)
@@ -81,29 +81,29 @@ class Connector implements \Stringable
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="created_by")
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="modified_by")
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $createdAt;
+    private ?\DateTimeImmutable $createdAt;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $updatedAt;
+    private ?\DateTimeImmutable $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Solution::class, inversedBy="connectors")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $solution;
+    private ?Solution $solution;
 
     public function __construct()
     {

@@ -46,19 +46,19 @@ class SAPRoot extends Solution
     protected $required_fields = [];
     protected $relateFieldAllowed = [];
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             try {
                 // Define SOAP connection options.
-                $this->options['login'] = $paramConnexion['login'];
-                $this->options['password'] = $paramConnexion['password'];
+                $this->options['login'] = $connectionParam['login'];
+                $this->options['password'] = $connectionParam['password'];
 
-                $this->client = new \SoapClient($paramConnexion['wsdl'], $this->options);
+                $this->client = new \SoapClient($connectionParam['wsdl'], $this->options);
                 $response = $this->client->ZmydTestConnection();
                 if (true == $response->EvSuccess) {
-                    $this->connexion_valide = true;
+                    $this->isConnectionValid = true;
                 } else {
                     throw new \Exception('Failed to connect SAP CRM.');
                 }

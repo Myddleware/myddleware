@@ -10,8 +10,6 @@ use App\Entity\Module;
 use App\Entity\Rule;
 use App\Entity\Solution;
 use App\Entity\User;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -53,8 +51,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         return [
-            MenuItem::linkToDashboard('Dashboard', 'fas fa-dashboard'),
-            MenuItem::linkToRoute('Homepage', 'fas fa-home', 'app_home'),
+            MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
             MenuItem::section('Rules'),
             MenuItem::subMenu('Rules', 'fas fa-sync')->setSubItems([
                 MenuItem::linkToCrud('My rules', 'fas fa-eye', Rule::class),
@@ -76,10 +73,5 @@ class DashboardController extends AbstractDashboardController
             MenuItem::section('Users'),
             MenuItem::linkToCrud('User', 'fa fa-user', User::class),
         ];
-    }
-
-    public function configureActions(): Actions
-    {
-        return parent::configureActions()->add(Crud::PAGE_INDEX, Action::DETAIL);
     }
 }

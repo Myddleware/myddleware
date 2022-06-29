@@ -96,12 +96,12 @@ class Airtable extends Solution
      *
      * @return void
      */
-    public function login(array $paramConnexion)
+    public function login(array $connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            $this->projectID = $this->paramConnexion['projectid'];
-            $this->token = $this->paramConnexion['apikey'];
+            $this->projectID = $this->connectionParam['projectid'];
+            $this->token = $this->connectionParam['apikey'];
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
@@ -111,7 +111,7 @@ class Airtable extends Solution
             $content = $response->getContent();
             $content = $response->toArray();
             if (!empty($content) && 200 === $statusCode) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             }
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
@@ -167,7 +167,7 @@ class Airtable extends Solution
     public function readData(array $param)
     {
         try {
-            $baseID = $this->paramConnexion['projectid'];
+            $baseID = $this->connectionParam['projectid'];
             $result = [];
             $result['count'] = 0;
             $result['date_ref'] = $param['ruleParams']['datereference'];
@@ -350,7 +350,7 @@ class Airtable extends Solution
     public function upsert(string $method, array $param)
     {
         // Init parameters
-        $baseID = $this->paramConnexion['projectid'];
+        $baseID = $this->connectionParam['projectid'];
         $result = [];
         $param['method'] = $method;
         $module = ucfirst($param['module']);

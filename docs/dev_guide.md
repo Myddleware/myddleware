@@ -130,29 +130,29 @@ Now to connect your connector, we need to create a new function in your class, w
 
 Example code, available in the file ```myddleware/src/Solution/suitecrm.php```
 
-You have to add this function login to check the connexion with you application.
+You have to add this function login to check the connection with you application.
 
-Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
+Make sure every error is catched and "this->isConnectionValid = true" if the connection works.
 
 ```php
-         public function login($paramConnexion)
+         public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $login_paramaters = [
                 'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
+                    'user_name' => $this->connectionParam['login'],
+                    'password' => md5($this->connectionParam['password']),
                     'version' => '.01',
                 ],
                 'application_name' => 'myddleware',
             ];
             // remove index.php in the url
-            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+            $this->connectionParam['url'] = str_replace('index.php', '', $this->connectionParam['url']);
             // Add the suffix with rest parameters to the url
-            $this->paramConnexion['url'] .= $this->urlSuffix;
+            $this->connectionParam['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $result = $this->call('login', $login_paramaters, $this->connectionParam['url']);
 
             if (false != $result) {
                 if (empty($result->id)) {
@@ -160,7 +160,7 @@ Make sure every error is catched and "this->connexion_valide = true" if the conn
                 }
 
                 $this->session = $result->id;
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 throw new \Exception('Please check url');
             }
@@ -183,7 +183,7 @@ Still in your connector class, we need to create a function that will display th
 
 Here, you have to add the module you want to connect in the method.
 
-In input you have access to the type of connexion, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
+In input you have access to the type of connection, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
 
 You then return an array with a list of module:
 
