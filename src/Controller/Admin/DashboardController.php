@@ -87,24 +87,12 @@ class DashboardController extends AbstractDashboardController
         return parent::configureUserMenu($user)
             //->setAvatarUrl($user->getAvatarUrl())
             ->addMenuItems([
-                MenuItem::linkToUrl('My Profile', 'fas fa-user', $this->generateUrl('app_profile_show'))
+                MenuItem::linkToCrud('My profile', 'fa fa-user', User::class)
+                ->setController(ProfileCrudController::class),
+
             ]);
     }
-    // public function configureUserMenu(UserInterface $user): UserMenu
-    // {
-
-    //     return parent::configureUserMenu($user)
-    //         // use the given $user object to get the user name
-    //         //->setName($user->getUsername())
-
-    //         // you can use any type of menu item, except submenus
-    //         ->addMenuItems([
-    //             MenuItem::linkToRoute('My Profile', 'fa fa-id-card', $this->generateUrl('app_profile_show')),
-    //             //MenuItem::linkToRoute('Settings', 'fa fa-user-cog', '...', ['...' => '...']),
-    //             //MenuItem::section(),
-    //             //MenuItem::linkToLogout('Logout', 'fa fa-sign-out'),
-    //         ]);
-    // }
+  
     public function configureActions(): Actions
     {
         return parent::configureActions()->add(Crud::PAGE_INDEX, Action::DETAIL);
