@@ -4,7 +4,6 @@ namespace App\Controller\Admin;
 
 use App\Entity\Connector;
 use App\Form\ConnectorParamFormType;
-use App\Repository\SolutionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;

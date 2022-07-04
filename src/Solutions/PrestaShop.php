@@ -735,7 +735,8 @@ class PrestaShop extends Solution
                 $data['token'] = 'token';
             }
             try { // try-catch Myddleware
-                try { $opt = [
+                try {
+                    $opt = [
                         'resource' => $param['module'].'?schema=blank',
                     ];
 

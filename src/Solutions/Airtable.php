@@ -37,14 +37,10 @@ class Airtable extends Solution
     protected $required_fields = ['default' => ['createdTime', 'Last Modified']];
     /**
      * Airtable base.
-     *
-     * @var string
      */
     protected string $projectID;
     /**
      * API key (provided by Airtable).
-     *
-     * @var string
      */
     protected string $token;
     protected string $delaySearch = '-1 month';
@@ -52,15 +48,11 @@ class Airtable extends Solution
      * Name of the table / module that will be used as the default table to access the login() method
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
      * However, this can of course be changed to any table value already present in your Airtable base.
-     *
-     * @var string
      */
     protected string $tableName;
 
     /**
      * Can't be greater than 100.
-     *
-     * @var int
      */
     protected int $defaultLimit = 100;
 
@@ -137,11 +129,7 @@ class Airtable extends Solution
     /**
      * Retrieve the list of fields (metadata) associated to each module.
      *
-     * @param string $module
-     * @param string $type
      * @param null $param
-     *
-     * @return array|null
      */
     public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
@@ -162,8 +150,6 @@ class Airtable extends Solution
 
     /**
      * Read records in source application & transform them to fit standard Myddleware format.
-     *
-     * @return array
      */
     public function readData(array $param): array
     {

@@ -27,7 +27,6 @@ namespace App\Manager;
 use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Psr\Log\LoggerInterface;
 
 class JobSchedulerManager
 {
