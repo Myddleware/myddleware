@@ -1153,9 +1153,10 @@ class documentcore
         $read['call_type'] = 'history';
         $read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
         $read['document']['type'] = $this->documentType;
+        $read['document']['id'] = $this->id;
+        $read['jobId'] = $this->jobId;
         $dataTarget = $this->solutionTarget->readData($read);
         // If read method returns no result with no error
-
         if (
                 empty($dataTarget['values'])
             and empty($dataTarget['error'])

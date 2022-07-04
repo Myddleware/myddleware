@@ -4,6 +4,7 @@ namespace App\Custom\Solutions;
 
 use App\Solutions\airtable;
 use Myddleware\RegleBundle\Classes\rule;
+use App\Manager\DocumentManager;
 
 class airtablecustom extends airtable {
 
@@ -47,6 +48,27 @@ class airtablecustom extends airtable {
 	// Rededine read fucntion
 	public function readData($param) {
 		$result = parent::readData($param);
+
+		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
+		if  (
+				$param['rule']['conn_id_target'] == 8
+			AND $param['document']['type'] == 'U'
+			AND $param['call_type'] == 'history'
+			AND strpos($result['error'], '404 Not Found')
+		) {
+			// Change the document type 
+			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+			$paramDoc['id_doc_myddleware'] = $param['document']['id'];
+			$paramDoc['jobId'] = $param['jobId'];
+			$documentManager->setParam($paramDoc);
+			// Add a log
+			$documentManager->generateDocLog('W','La donnée a ete supprimee dans Airtable. Le type de document passe donc de Update à Create. ');
+			// Set the create type to the document
+			$documentManager->updateType('C');
+			// Clear the error
+			$result['error'] = '';
+		}
+		
 		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression
 			if (!empty($result['values'])) {
 				foreach ($result['values'] as $docId => $values) {
