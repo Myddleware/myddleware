@@ -10,10 +10,8 @@ use App\Manager\SolutionManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,7 +36,7 @@ class ApiController extends AbstractController
     private KernelInterface $kernel;
     private LoggerInterface $logger;
     private JobManager $jobManager;
-    private EntityManager $entityManager;
+    private EntityManagerInterface $entityManager;
     private FormulaManager $formulaManager;
     private SolutionManager $solutionManager;
     private DocumentManager $documentManager;
@@ -51,7 +49,7 @@ class ApiController extends AbstractController
         JobRepository $jobRepository,
         DocumentRepository $documentRepository,
         ParameterBagInterface $parameterBag,
-        EntityManager $entityManager,
+        EntityManagerInterface $entityManager,
         FormulaManager $formulaManager,
         SolutionManager $solutionManager,
         documentManager $documentManager
