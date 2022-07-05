@@ -165,22 +165,7 @@ class ApiController extends AbstractController
             $arguments['ruleId'] = $data['rule'];
             $arguments['filterQuery'] = $data['filterQuery'];
             $arguments['filterValues'] = $data['filterValues'];
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get result command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->jobRepository->find($return['jobId']);
@@ -347,22 +332,7 @@ class ApiController extends AbstractController
             $arguments['forceAll'] = (empty($data['forceAll']) ? '' : $data['forceAll']);
             $arguments['fromStatus'] = (empty($data['fromStatus']) ? '' : $data['fromStatus']);
             $arguments['toStatus'] = (empty($data['toStatus']) ? '' : $data['toStatus']);
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get result command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
@@ -397,7 +367,7 @@ class ApiController extends AbstractController
                 throw new Exception('limit parameter is missing. Please specify a number to limit the number of data transfer the program has to rerun. ');
             }
             if (empty($data['attempt'])) {
-                throw new Exception('attempt parameteris missing. Please specify the maximum number of attempt. If you set 10, the program will rerun only data transfer with attempt <= 10. ');
+                throw new Exception('attempt parameter is missing. Please specify the maximum number of attempt. If you set 10, the program will rerun only data transfer with attempt <= 10. ');
             }
 
             // Prepare command
@@ -412,22 +382,7 @@ class ApiController extends AbstractController
             // Prepare input/output parameters
             $arguments['limit'] = $data['limit'];
             $arguments['attempt'] = $data['attempt'];
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get resut command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
@@ -461,5 +416,33 @@ class ApiController extends AbstractController
         }
         // Send the response
         return $this->json($return);
+    }
+
+    /**
+     * @param array $arguments
+     * @param Application $application
+     * @param array $return
+     * @return array
+     * @throws Exception
+     */
+    public function getReturn(array $arguments, Application $application, array $return): array
+    {
+        $input = new ArrayInput($arguments);
+        $output = new BufferedOutput();
+
+        // Run the command
+        $application->run($input, $output);
+
+        // Get result command
+        $content = $output->fetch();
+        if (empty($content)) {
+            throw new Exception('No response from Myddleware. ');
+        }
+        // Log the result
+        $this->logger->info(print_r($content, true));
+
+        // Get the job task id, result is <jobId>.....
+        $return['jobId'] = substr($content, 0, 23);
+        return $return;
     }
 }
