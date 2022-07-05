@@ -78,7 +78,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data =  json_decode($request->getContent(), true);
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -417,10 +417,6 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @param array $arguments
-     * @param Application $application
-     * @param array $return
-     * @return array
      * @throws Exception
      */
     public function getReturn(array $arguments, Application $application, array $return): array
@@ -441,6 +437,7 @@ class ApiController extends AbstractController
 
         // Get the job task id, result is <jobId>.....
         $return['jobId'] = substr($content, 0, 23);
+
         return $return;
     }
 }
