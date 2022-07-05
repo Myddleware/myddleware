@@ -2,17 +2,22 @@
 
 namespace App\Controller;
 
+use App\Manager\DocumentManager;
+use App\Manager\FormulaManager;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
+use App\Manager\SolutionManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
+use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,39 +27,18 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController
 {
-    public $entityManager;
+    public EntityManager $entityManager;
     public $parameterBag;
-    public $formulaManager;
-    public $solutionManager;
-    public $documentManager;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var string
-     */
-    private $env;
-    /**
-     * @var KernelInterface
-     */
-    private $kernel;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    public FormulaManager $formulaManager;
+    public SolutionManager $solutionManager;
+    public DocumentManager $documentManager;
+    private RuleRepository $ruleRepository;
+    private JobRepository $jobRepository;
+    private DocumentRepository $documentRepository;
+    private string $env;
+    private KernelInterface $kernel;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         KernelInterface $kernel,
@@ -76,7 +60,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/synchro", name="synchro", methods={"POST"})
      */
-    public function synchroAction(Request $request)
+    public function synchroAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -107,7 +91,7 @@ class ApiController extends AbstractController
             // Run the command
             $application->run($input, $output);
 
-            // Get resut command
+            // Get result command
             $content = $output->fetch();
             if (empty($content)) {
                 throw new Exception('No response from Myddleware. ');
@@ -135,7 +119,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/read_record", name="read_record", methods={"POST"})
      */
-    public function readRecordAction(Request $request)
+    public function readRecordAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -174,7 +158,7 @@ class ApiController extends AbstractController
             // Run the command
             $application->run($input, $output);
 
-            // Get resut command
+            // Get result command
             $content = $output->fetch();
             if (empty($content)) {
                 throw new Exception('No response from Myddleware. ');
@@ -203,7 +187,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/delete_record", name="delete_record", methods={"POST"})
      */
-    public function deleteRecordAction(Request $request)
+    public function deleteRecordAction(Request $request): JsonResponse
     {
         try {
             $connection = $this->container->get('database_connection');
@@ -316,7 +300,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})
      */
-    public function massActionAction(Request $request)
+    public function massActionAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -388,7 +372,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/rerun_error", name="rerun_error", methods={"POST"})
      */
-    public function rerunErrorAction(Request $request)
+    public function rerunErrorAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -450,7 +434,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/statistics", name="statistics", methods={"POST"})
      */
-    public function statisticsAction(Request $request)
+    public function statisticsAction(Request $request): JsonResponse
     {
         try {
             $return = [];
