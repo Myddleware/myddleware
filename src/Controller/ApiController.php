@@ -12,26 +12,25 @@ use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/api/v1_0", name="api")
+ * @Route("/api", name="api_")
  */
 class ApiController extends AbstractController
 {
-    public EntityManager $entityManager;
-    public $parameterBag;
-    public FormulaManager $formulaManager;
-    public SolutionManager $solutionManager;
-    public DocumentManager $documentManager;
+    public ParameterBagInterface $parameterBag;
     private RuleRepository $ruleRepository;
     private JobRepository $jobRepository;
     private DocumentRepository $documentRepository;
@@ -39,6 +38,10 @@ class ApiController extends AbstractController
     private KernelInterface $kernel;
     private LoggerInterface $logger;
     private JobManager $jobManager;
+    private EntityManager $entityManager;
+    private FormulaManager $formulaManager;
+    private SolutionManager $solutionManager;
+    private DocumentManager $documentManager;
 
     public function __construct(
         KernelInterface $kernel,
@@ -46,7 +49,12 @@ class ApiController extends AbstractController
         JobManager $jobManager,
         RuleRepository $ruleRepository,
         JobRepository $jobRepository,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+        ParameterBagInterface $parameterBag,
+        EntityManager $entityManager,
+        FormulaManager $formulaManager,
+        SolutionManager $solutionManager,
+        documentManager $documentManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -55,6 +63,11 @@ class ApiController extends AbstractController
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
+        $this->parameterBag = $parameterBag;
+        $this->entityManager = $entityManager;
+        $this->formulaManager = $formulaManager;
+        $this->solutionManager = $solutionManager;
+        $this->documentManager = $documentManager;
     }
 
     /**
@@ -67,7 +80,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data =  json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -189,13 +202,11 @@ class ApiController extends AbstractController
      */
     public function deleteRecordAction(Request $request): JsonResponse
     {
+        $return = [];
+        $return['error'] = '';
+        $connection = $this->container->get('database_connection');
         try {
-            $connection = $this->container->get('database_connection');
             $connection->beginTransaction(); // -- BEGIN TRANSACTION
-
-            $return = [];
-            $return['error'] = '';
-
             // Get input data
             $data = $request->request->all();
 
@@ -342,7 +353,7 @@ class ApiController extends AbstractController
             // Run the command
             $application->run($input, $output);
 
-            // Get resut command
+            // Get result command
             $content = $output->fetch();
             if (empty($content)) {
                 throw new Exception('No response from Myddleware. ');
