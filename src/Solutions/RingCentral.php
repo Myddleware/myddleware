@@ -83,22 +83,22 @@ class RingCentral extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            if (empty($this->paramConnexion['sandbox'])) {
+            if (empty($this->connectionParam['sandbox'])) {
                 $this->server = self::SERVER_PRODUCTION;
             } else {
                 $this->server = self::SERVER_SANDBOX;
             }
 
             // Call to get the token
-            $this->apiKey = base64_encode($this->paramConnexion['apikey'].':'.$this->paramConnexion['apikeysecret']);
-            $this->token = $this->makeRequest($this->server, $this->apiKey, self::TOKEN_ENDPOINT, null, 'POST', 'username='.$this->paramConnexion['username'].'&password='.$this->paramConnexion['password'].'&grant_type=password');
+            $this->apiKey = base64_encode($this->connectionParam['apikey'].':'.$this->connectionParam['apikeysecret']);
+            $this->token = $this->makeRequest($this->server, $this->apiKey, self::TOKEN_ENDPOINT, null, 'POST', 'username='.$this->connectionParam['username'].'&password='.$this->connectionParam['password'].'&grant_type=password');
             if (!empty($this->token)) {
                 if (!empty($this->token->access_token)) {
-                    $this->connexion_valide = true;
+                    $this->isConnectionValid = true;
                 } elseif (!empty($this->token->error)) {
                     throw new \Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
                 } else {

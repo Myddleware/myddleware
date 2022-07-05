@@ -61,18 +61,18 @@ class Sendinblue extends Solution
     }
 
     // connect to Sendinblue
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
 
         // Configure API key authorization: api-key
-        $this->config = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->paramConnexion['apikey']);
+        $this->config = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->connectionParam['apikey']);
         $apiInstance = new \SendinBlue\Client\Api\AccountApi(new \GuzzleHttp\Client(), $this->config);
 
         try {
             $result = $apiInstance->getAccount();
             if (!empty($result->getEmail())) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 return ['error' => 'Failed to connect to Sendinblue: '.$result->message];
             }

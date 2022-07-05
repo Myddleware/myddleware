@@ -1,32 +1,8 @@
-# /*********************************************************************************
- # * This file is part of Myddleware.
-
- # * @package Myddleware
- # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- # * @link http://www.myddleware.com
- 
- # This file is part of Myddleware.
- 
- # Myddleware is free software: you can redistribute it and/or modify
- # it under the terms of the GNU General Public License as published by
- # the Free Software Foundation, either version 3 of the License, or
- # (at your option) any later version.
-
- # Myddleware is distributed in the hope that it will be useful,
- # but WITHOUT ANY WARRANTY; without even the implied warranty of
- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- # GNU General Public License for more details.
-
- # You should have received a copy of the GNU General Public License
- # along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-# *********************************************************************************/
-
 panel:
     solutions:
         title: Start by connecting these applications
         click: Click to see how to create this connector.
-    graph_tranfer_rule:
+    graph_transfer_rule:
         desc: Documents sent by rule
     graph_error:
         title: Number of documents by status
@@ -126,8 +102,8 @@ create_rule:
         save_wait: Please wait... 
 
 filter:
-    content: contains
-    notcontent: does not contain
+    contains: contains
+    contains_not: does not contain
     begin: starts with
     end: ends with
     gt: is greater than 
@@ -140,10 +116,9 @@ filter:
     notin: is not included in the following table separated by semicolon  
 
 behavior_filters:
-    error_messing: Error if missing
+    error_missing: Error if missing
     skip_empty: Skip if empty
     skip_empty_wrong: Skip if empty or wrong
-
 view_rule:
     action:
         exec_all: Execute all active rules
@@ -152,11 +127,11 @@ view_rule:
         confirm_exec_error: Do you want to rerun all documents in error?
         exec_rule: Run the rule
         edit_rule: Edit the rule
-        duplic_rule: Duplicate a rule
+        duplicate_rule: Duplicate a rule
         confirm_edit_rule: Do you want to change this rule?
         delete_rule: Delete the rule
         confirm_delete_rule: Do you want to delete this rule?
-        displayflux: Display the documents
+        display_documents: Display the documents
         new_rule: Create a new rule
     tabs:
         info: Information
@@ -198,9 +173,9 @@ view_rule:
         empty: No filter
     params:
         save: Save
-        simule: Simulate documents
+        simulate: Simulate documents
         result: Estimated documents
-        details: " Represents the number of documents that will be created for the next launch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
+        details: Represents the number of documents that will be created for the next launch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application.
 
 rule:
     source: Source
@@ -243,14 +218,14 @@ animate:
         name: Name
         description: Description 
         empty: No template for these solutions, if you want a template, please contact us via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
-    tutoriel:
+    tutorial:
         link: http://community.myddleware.com/index.php/tutorial/#rules
-        textlink: Do you need help ? Read our tutorial.
+        link_help: Do you need help ? Read our tutorial.
 
 create_connector:    
     title: Creation of a connector
     save: Save the connection
-    connexion: Name of the connection
+    connection: Name of the connection
     test: Test
     valid: Click here to create an other connector
     help: Need assistance ?
@@ -294,7 +269,7 @@ view_connector:
     help:
         link: http://community.myddleware.com/index.php/connector-guide/#
 
-list_flux:
+list_documents:
     start: Start
     end: End
     total: Number of documents
@@ -332,13 +307,13 @@ list_flux:
         target_id: Target id
         date_created: Creation date
         date_modified: Modification date
-        statut: Status
+        status: Status
         source_date_modified: Date of reference
         type: Type
         source_field: Field linked
         reference: Reference
 
-flux:
+flow:
     gbl_status:
         open: Opened
         close: Closed
@@ -370,7 +345,7 @@ flux:
         search: Search
         delete: Delete
         
-view_flux:
+view_documents:
     empty: No data
     empty_log: No log
     target: Target
@@ -549,7 +524,7 @@ solution:
         60_day: 60 days
 
 error:
-    connexion: Connection failed
+    connection: Connection failed
     general: Unexpected error
     rule:
         valid: Not valid rule
@@ -567,16 +542,16 @@ error:
         edit_document_error_open_admin: There is at least one document open or in error in this rule. We advise you to manage these documents before editing this rule.
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document: Failed to delete the rule because there is at least one document not deleted on this rule. Remove these documents to be able to delete this rule.
-        delete_relationship_exists: "Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  "
+        delete_relationship_exists: Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Related rule
         update: Failed to edit the rule.  
     account:
-        language_change: "Failed to change the language :"
+        language_change: Failed to change the language
     template:
         creation: Failed to generate the template. Please go to our forum and ask for our help  <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
         remove_with_rule: Failed to remove this connector because it is used by a rule. Please remove first the rule 
     document:
-        deleted_flag: This document is flagged deleted. It isn't used when Myddleware manage relationships and checks. 
+        deleted_flag: This document is flagged as deleted. It isn't used when Myddleware manages relationships and checks.
         
 title:
     account:
@@ -608,8 +583,7 @@ menu:
     index: Homepage
     rule:
         title: Rules
-        createv1: Creation (v1)
-        createv2: Creation
+        create: Create
         list: List
     connector:
         title: Connectors
@@ -625,7 +599,7 @@ menu:
 
 breadcrumb:
     rule_list: Rules list
-    transfert_list: Documents list
+    transfer_list: Documents list
     task_list: Tasks list
     connector_list: Connectors list
 
@@ -686,7 +660,7 @@ twitter:
     tweets:
         ref: > 
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
-    favoris:
+    favorites:
         ref: >
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
 
@@ -698,28 +672,28 @@ messages:
         another_task_running: Failed to create the task because another task is already running. Please wait for the end of this task or you can stop it manually.
         failed_create_directory: An error occured while creating your directory.
     template:
-        nb_rule: "Number of generated rules: "
-        help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
+        nb_rule: Number of generated rules
+        help: Please, read this tutorial to help you to activate your rules <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
 email_notification:
     subject: Myddleware notification
-    hello: Hi, 
-    introduction: "Here the statistics about your data transfers with Myddleware: "
-    transfer_success: "- Documents successfully sent: "
-    transfer_error: "- Documents in error: "
-    transfer_open: "- Documents still open:"
-    active_rule: "Active rules: "
+    hello: Hi
+    introduction: Here the statistics about your data transfers with Myddleware
+    transfer_success: Documents successfully sent
+    transfer_error: Documents in error
+    transfer_open: Documents still open
+    active_rule: Active rules
     no_active_rule: No active rule in Myddleware.
-    100_first_erros: "Here are the 100 first errors: "
-    error_list: "Here are the errors:"
-    best_regards: Best regards, 
+    100_first_errors: Here are the 100 first errors
+    error_list: Here are the errors
+    kind_regards: Kind regards,
     signature: The Myddleware team
 email_alert:
     subject: Myddleware alert
-    introduction: "A job is running beyond the limit you have set up : "
+    introduction: A job is running beyond the limit you have set up
     minute: minutes. 
     job_start: The job started at 
-    job_id: ". ID of this job : "
-    recommandation: Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".
+    job_id: ID of this job
+    recommendation: Please check whether this job is still transferring data. If it's not, please stop the job manually by opening the job and clicking on the button "Stop task".
     body: |
         Hello,
         <p>A job is running beyond the limit you have set up : %min% minutes<br/>
@@ -763,7 +737,7 @@ management_smtp:
     submit :  Save SMTP config
     cancel: Cancel
     title : SMTP Management
-    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
+    description : Here, you can configure email parameters. More info at <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>
     sendtestmail: Send test mail
 
 management_smtp_sendmail:
@@ -771,11 +745,11 @@ management_smtp_sendmail:
     textMail: This test message has been sent by Myddleware.
 
 login:
-    title: Connection
+    login: Log in
     index: Home
-    user: Login
-    pwd: Password
-    connexion: Sign in
+    user: login
+    password: Password
+    sign_in: Sign in
     error_session: Session error
     text_up_right: More information about Myddleware
     text_bottom_right: You will be redirected towards our site
@@ -783,33 +757,33 @@ login:
     disabled_account: Your account has been disabled
     platform:
         line1: Thanks for using the Platform.sh Continuous Deployment Cloud Hosting
-        line2: "For your first connexion, use this login/password : admin/admin"
-        line3: "Please change your password in 'My account'"
-    btn:
-        here: Click here
-        create: create an account
-        pwd_forgot: "Forgot your password ?"
+        line2: "For your first connection, use this login/password : admin/admin"
+        line3: Please change your password in My account
+    here: Click here
+    create: create an account
+    forgot_password: Forgot your password ?
+    remember_me: Remember me
 
 form:
-    group_name: 'Group name'
+    group_name: Group name
     username: Username
     email: Email
-    current_password: 'Current password'
+    current_password: Current password
     password: Password
-    password_confirmation: 'Repeat password'
-    new_password: 'New password'
-    new_password_confirmation: 'Repeat new password'
+    password_confirmation: Repeat password
+    new_password: New password
+    new_password_confirmation: Repeat new password
 
-fr: 'French'
-en: 'English'
+fr: French
+en: English
 flash: 
     password:
         reset:
-            success: 'Your password has been succesfully reset'
+            success: Your password has been succesfully reset
 
 password_reset:
     title: Change my password
-    invalid_message: 'Invalid password'
+    invalid_message: Invalid password
     first_options: New password
     second_options: Repeat new password
     identical: Both passwords must be the same
@@ -862,3 +836,30 @@ duplicate_rule:
     current_rule: Current rule
     new_rule: New rule
     success_duplicate: Your rule has been well duplicated
+
+app_name: Myddleware
+welcome: Welcome
+cheers: Cheers!
+hi: Hi!
+your_email_address: Your email address
+your_password: Your password
+email_verification:
+    validate_account_email: An email has been sent to your address! Please validate your account from there.
+    hello: Hi! Please confirm your email!
+    click_link: Please confirm your email address by clicking the following link
+    confirm_email: Confirm my Email
+    link_expires: This link will expire in
+    email_verified: Your email address has been verified.
+register: Register
+registration: Registration
+create_account: Create an account
+account_already: Already have an account
+agree_terms: You should agree to our terms.
+password:
+    min_length: Your password should be at least
+    characters: characters
+    enter_password: Please enter a password
+    enter_email: Please enter your email
+    new: New password
+    repeat: Repeat password
+    mismatch: The password fields must match

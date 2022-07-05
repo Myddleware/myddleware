@@ -23,8 +23,8 @@ class SolutionCrudController extends AbstractCrudController
             IdField::new('id')->onlyOnDetail(),
             TextField::new('name'),
             BooleanField::new('active'),
-            BooleanField::new('source'),
-            BooleanField::new('target'),
+            BooleanField::new('source')->renderAsSwitch(false),
+            BooleanField::new('target')->renderAsSwitch(false),
             CollectionField::new('connector'),
             ImageField::new('logo')->setBasePath('build/images/solution/'),
         ];

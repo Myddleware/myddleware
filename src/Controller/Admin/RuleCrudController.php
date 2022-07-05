@@ -72,7 +72,7 @@ class RuleCrudController extends AbstractCrudController
             AssociationField::new('sourceModule'),
             AssociationField::new('targetModule'),
             BooleanField::new('active'),
-            BooleanField::new('deleted')->hideOnForm(),
+            BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
         ];

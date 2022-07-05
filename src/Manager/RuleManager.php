@@ -206,8 +206,8 @@ class RuleManager
             $documents = [];
             if ($readSource) {
                 // Connection to source application
-                $connexionSolution = $this->connexionSolution('source');
-                if (false === $connexionSolution) {
+                $connectionSolution = $this->connectionSolution('source');
+                if (false === $connectionSolution) {
                     throw new \Exception('Failed to connect to the source solution.');
                 }
 
@@ -272,7 +272,7 @@ class RuleManager
     }
 
     // Connect to the source or target application
-    public function connexionSolution($type)
+    public function connectionSolution($type)
     {
         try {
             if ('source' == $type) {
@@ -313,12 +313,12 @@ class RuleManager
                 $this->solutionSource = $this->solutionManager->get($r['name']);
                 $this->solutionSource->setApi($this->api);
                 $loginResult = $this->solutionSource->login($params);
-                $c = (($this->solutionSource->connexion_valide) ? true : false);
+                $c = (($this->solutionSource->connection_valide) ? true : false);
             } else {
                 $this->solutionTarget = $this->solutionManager->get($r['name']);
                 $this->solutionTarget->setApi($this->api);
                 $loginResult = $this->solutionTarget->login($params);
-                $c = (($this->solutionTarget->connexion_valide) ? true : false);
+                $c = (($this->solutionTarget->connection_valide) ? true : false);
             }
             if (!empty($loginResult['error'])) {
                 return $loginResult;
@@ -529,7 +529,7 @@ class RuleManager
 
         // si champs vide
         if (!empty($read['fields'])) {
-            $connect = $this->connexionSolution('source');
+            $connect = $this->connectionSolution('source');
             if (true === $connect) {
                 $this->dataSource = $this->solutionSource->readData($read);
                 // If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
@@ -835,8 +835,8 @@ class RuleManager
         }
 
         if (!empty($documents)) {
-            // Connexion à la solution cible pour rechercher les données
-            $this->connexionSolution('target');
+            // connection à la solution cible pour rechercher les données
+            $this->connectionSolution('target');
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
                 $i = 0;
@@ -1412,8 +1412,8 @@ class RuleManager
                     return $response;
                 }
 
-                // Connexion à la cible
-                $connect = $this->connexionSolution('target');
+                // connection à la cible
+                $connect = $this->connectionSolution('target');
                 if (true === $connect) {
                     // Création des données dans la cible
                     if ('C' == $type) {

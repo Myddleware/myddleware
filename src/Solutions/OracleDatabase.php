@@ -38,7 +38,7 @@ class OracleDatabase extends Database
 
     protected function generatePdo()
     {
-        return new \PDO($this->driver.':dbname=//'.$this->paramConnexion['host'].':'.$this->paramConnexion['port'].'/'.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+        return new \PDO($this->driver.':dbname=//'.$this->connectionParam['host'].':'.$this->connectionParam['port'].'/'.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
     // Generate query

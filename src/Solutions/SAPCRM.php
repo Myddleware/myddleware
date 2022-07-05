@@ -83,10 +83,10 @@ class SAPCRM extends SAPRoot
         // )
     ];
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        $paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sapcrm/wsdl/'.$paramConnexion['wsdl'];
-        parent::login($paramConnexion);
+        $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sapcrm/wsdl/'.$connectionParam['wsdl'];
+        parent::login($connectionParam);
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté

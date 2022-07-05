@@ -78,24 +78,24 @@ class ERPNext extends Solution
         ];
     }
 
-    // Login to Cirrus Shield
-    public function login($paramConnexion)
+    // login to Cirrus Shield
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Generate parameters to connect to Cirrus Shield
-            $parameters = ['usr' => $this->paramConnexion['login'],
-                'pwd' => $this->paramConnexion['password'],
+            $parameters = ['usr' => $this->connectionParam['login'],
+                'pwd' => $this->connectionParam['password'],
             ];
-            $url = $this->paramConnexion['url'].'/api/method/login';
+            $url = $this->connectionParam['url'].'/api/method/login';
             // Connect to ERPNext
             $result = $this->call($url, 'GET', $parameters);
 
             if (empty($result->message)) {
-                throw new \Exception('Login error');
+                throw new \Exception('login error');
             }
             // Connection validation
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -109,7 +109,7 @@ class ERPNext extends Solution
     {
         try {
             // Get
-            $url = $this->paramConnexion['url'].'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';
+            $url = $this->connectionParam['url'].'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';
             $APImodules = $this->call($url, 'GET');
             if (!empty($APImodules->data)) {
                 foreach ($APImodules->data as $APImodule) {
@@ -136,7 +136,7 @@ class ERPNext extends Solution
             $modules = $this->get_modules();
 
             // Get the list field for a module
-            $url = $this->paramConnexion['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);
+            $url = $this->connectionParam['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);
             $recordList = $this->call($url, 'GET', '');
             // Format outpput data
             if (!empty($recordList->docs[0]->fields)) {
@@ -276,7 +276,7 @@ class ERPNext extends Solution
 
             // Send the query
             $q = http_build_query($data);
-            $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
+            $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
             $resultQuery = $this->call($url, 'GET', '');
 
             // If no result
@@ -327,7 +327,7 @@ class ERPNext extends Solution
         try {
             $result = [];
             $subDocIdArray = [];
-            $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']);
+            $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']);
             if ('update' == $method) {
                 $method = 'PUT';
             } else {
@@ -342,7 +342,7 @@ class ERPNext extends Solution
                                     'target_id' == $key
                                 and !empty($value)
                             ) {
-                                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
+                                $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
                             }
                             unset($data[$key]);
                         // if the data is a link
