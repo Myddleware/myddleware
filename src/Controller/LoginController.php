@@ -10,13 +10,19 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginController extends AbstractController
 {
-    #[Route('/login', name: 'login')]
+    #[Route('/login', name: 'login')]        
     public function index(AuthenticationUtils $authenticationUtils, TranslatorInterface $translator): Response
     {
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
+
+        //redirects if the user is logged in
+        if("" !== $lastUsername)
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
 
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'error' => $error,
@@ -64,3 +70,5 @@ class LoginController extends AbstractController
         ]);
     }
 }
+
+
