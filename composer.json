@@ -102,7 +102,7 @@
     "phpstan/phpstan-doctrine": "*",
     "phpstan/phpstan-symfony": "*",
     "phpunit/phpunit": "^9.5",
-    "rector/rector": "*",
+    "rector/rector": "^0.13.7",
     "symfony/browser-kit": "5.4.*",
     "symfony/css-selector": "5.4.*",
     "symfony/maker-bundle": "^1.26",
