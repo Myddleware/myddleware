@@ -80,7 +80,8 @@ class DashboardController extends AbstractDashboardController
     }
 
     /**
-     * @param UserInterface|User $user
+     * @param UserInterface $user
+     * @return UserMenu
      */
     public function configureUserMenu(UserInterface $user): UserMenu
     {
