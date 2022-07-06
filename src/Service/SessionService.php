@@ -28,9 +28,7 @@ class SessionService
      */
     public function getSession()
     {
-        $session = $this->requestStack->getSession();
-
-        return $session;
+        return $this->requestStack->getSession();
     }
 
     public function getMyddlewareSession()

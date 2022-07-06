@@ -261,7 +261,7 @@ class WooCommerce extends Solution
             $subModule = $param['module'];   // line_items
             $newResponse = [];
             if (!empty($response)) {
-                foreach ($response as $key => $record) {
+                foreach ($response as $record) {
                     foreach ($record->$subModule as $subRecord) {
                         $subRecord->date_modified = $record->date_modified;
                         // we add the ID of the parent field in the data (e.g. : for line_items, we add order_id)

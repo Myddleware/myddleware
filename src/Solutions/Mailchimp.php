@@ -90,9 +90,7 @@ class Mailchimp extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -217,7 +215,6 @@ class Mailchimp extends Solution
     // Create the url parameters depending the module
     protected function createUrlParam($param, $data, $method)
     {
-        $urlParam = '';
         // Manage parameters for list
         if ('members' == $param['module']) {
             if (empty($data['list_id'])) {

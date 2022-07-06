@@ -437,7 +437,6 @@ class Magento extends Solution
                     break;
                 default:
                     throw new \Exception('Fields unreadable');
-                    break;
             }
 
             // Add list here (field could exist in several fields or was part of a rrelate field)
@@ -456,7 +455,7 @@ class Magento extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $e->getMessage();
 
             return false;
         }
@@ -499,7 +498,6 @@ class Magento extends Solution
                     break;
                 default:
                     throw new \Exception('Module unknown. ');
-                    break;
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -549,7 +547,6 @@ class Magento extends Solution
 
             // Traitement des résultats
             if (!empty($resultList['items'])) {
-                $cpt = 0;
                 foreach ($resultList['items'] as $record) {
                     // if submodule, example addresses in the module customer
                     if (!empty($subModule)) {
@@ -577,34 +574,32 @@ class Magento extends Solution
                     }
 
                     // Transform data from Magento to create document in Myddleware
-                    if (!empty($subRecordsNoDimension)) {
-                        foreach ($subRecordsNoDimension as $subRecordNoDimension) {
-                            $row = [];
-                            // Ajout de l'ID, $fieldId vaut "customer_id" pour le module "customer" par exemple
-                            if (!empty($subRecordNoDimension[$fieldId])) {
-                                $row['id'] = $subRecordNoDimension[$fieldId];
-                            } else {
-                                throw new \Exception('Failed to find an Id for a record.');
-                            }
-                            foreach ($subRecordNoDimension as $key => $value) {
-                                if ($key == $dateRefField) {
-                                    $row['date_modified'] = $value;
-                                    // Sauvegarde de la date de référence
-                                    if (
-                                            empty($result['date_ref'])
-                                        || $value > $result['date_ref']
-                                    ) {
-                                        $result['date_ref'] = $value;
-                                    }
-                                }
-                                // Magento doens't return empty field
-                                if (in_array($key, $param['fields'])) {
-                                    $row[$key] = $value;
-                                }
-                            }
-                            $result['values'][$row['id']] = $row;
-                            ++$result['count'];
+                    foreach ($subRecordsNoDimension as $subRecordNoDimension) {
+                        $row = [];
+                        // Ajout de l'ID, $fieldId vaut "customer_id" pour le module "customer" par exemple
+                        if (!empty($subRecordNoDimension[$fieldId])) {
+                            $row['id'] = $subRecordNoDimension[$fieldId];
+                        } else {
+                            throw new \Exception('Failed to find an Id for a record.');
                         }
+                        foreach ($subRecordNoDimension as $key => $value) {
+                            if ($key == $dateRefField) {
+                                $row['date_modified'] = $value;
+                                // Sauvegarde de la date de référence
+                                if (
+                                        empty($result['date_ref'])
+                                    || $value > $result['date_ref']
+                                ) {
+                                    $result['date_ref'] = $value;
+                                }
+                            }
+                            // Magento doens't return empty field
+                            if (in_array($key, $param['fields'])) {
+                                $row[$key] = $value;
+                            }
+                        }
+                        $result['values'][$row['id']] = $row;
+                        ++$result['count'];
                     }
                 }
             }

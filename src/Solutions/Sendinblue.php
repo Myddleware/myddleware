@@ -149,7 +149,7 @@ class Sendinblue extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $e->getMessage();
 
             return false;
         }
@@ -349,7 +349,6 @@ class Sendinblue extends Solution
                 break;
             default:
                 throw new \Exception('Unknown module: '.$param['module']);
-                break;
         }
 
         // Recover all contact from sendinblue
@@ -435,7 +434,7 @@ class Sendinblue extends Solution
             // target_id contains the id of the record to be modified
             $identifier = $record['target_id'];
             $updateContact['attributes'] = $record;
-            $result = $apiInstance->updateContact($identifier, $updateContact);
+            $apiInstance->updateContact($identifier, $updateContact);
         } catch (\Exception $e) {
             throw new \Exception('Exception when calling ContactsApi->updateContact: '.$e->getMessage());
         }
@@ -548,14 +547,10 @@ class Sendinblue extends Solution
     {
         switch ($moduleSource) {
             case 'transactionalEmails':
-                return 'date';
-                break;
             case 'transactionalEmailActivity':
                 return 'date';
-                break;
             default:
                 return 'modifiedAt';
-                break;
         }
     }
 }

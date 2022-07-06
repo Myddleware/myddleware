@@ -2,54 +2,44 @@
 
 namespace App\Controller;
 
+use App\Manager\DocumentManager;
+use App\Manager\FormulaManager;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
+use App\Manager\SolutionManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/api/v1_0", name="api")
+ * @Route("/api", name="api_")
  */
 class ApiController extends AbstractController
 {
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var string
-     */
-    private $env;
-    /**
-     * @var KernelInterface
-     */
-    private $kernel;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    public ParameterBagInterface $parameterBag;
+    private RuleRepository $ruleRepository;
+    private JobRepository $jobRepository;
+    private DocumentRepository $documentRepository;
+    private string $env;
+    private KernelInterface $kernel;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private EntityManagerInterface $entityManager;
+    private FormulaManager $formulaManager;
+    private SolutionManager $solutionManager;
+    private DocumentManager $documentManager;
 
     public function __construct(
         KernelInterface $kernel,
@@ -57,7 +47,12 @@ class ApiController extends AbstractController
         JobManager $jobManager,
         RuleRepository $ruleRepository,
         JobRepository $jobRepository,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+        ParameterBagInterface $parameterBag,
+        EntityManagerInterface $entityManager,
+        FormulaManager $formulaManager,
+        SolutionManager $solutionManager,
+        documentManager $documentManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -66,19 +61,24 @@ class ApiController extends AbstractController
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
+        $this->parameterBag = $parameterBag;
+        $this->entityManager = $entityManager;
+        $this->formulaManager = $formulaManager;
+        $this->solutionManager = $solutionManager;
+        $this->documentManager = $documentManager;
     }
 
     /**
      * @Route("/synchro", name="synchro", methods={"POST"})
      */
-    public function synchroAction(Request $request)
+    public function synchroAction(Request $request): JsonResponse
     {
         try {
             $return = [];
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -102,7 +102,7 @@ class ApiController extends AbstractController
             // Run the command
             $application->run($input, $output);
 
-            // Get resut command
+            // Get result command
             $content = $output->fetch();
             if (empty($content)) {
                 throw new Exception('No response from Myddleware. ');
@@ -130,7 +130,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/read_record", name="read_record", methods={"POST"})
      */
-    public function readRecordAction(Request $request)
+    public function readRecordAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -163,22 +163,7 @@ class ApiController extends AbstractController
             $arguments['ruleId'] = $data['rule'];
             $arguments['filterQuery'] = $data['filterQuery'];
             $arguments['filterValues'] = $data['filterValues'];
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get resut command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->jobRepository->find($return['jobId']);
@@ -198,15 +183,13 @@ class ApiController extends AbstractController
     /**
      * @Route("/delete_record", name="delete_record", methods={"POST"})
      */
-    public function deleteRecordAction(Request $request)
+    public function deleteRecordAction(Request $request): JsonResponse
     {
+        $return = [];
+        $return['error'] = '';
+        $connection = $this->container->get('database_connection');
         try {
-            $connection = $this->container->get('database_connection');
             $connection->beginTransaction(); // -- BEGIN TRANSACTION
-
-            $return = [];
-            $return['error'] = '';
-
             // Get input data
             $data = $request->request->all();
 
@@ -311,7 +294,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})
      */
-    public function massActionAction(Request $request)
+    public function massActionAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -344,25 +327,10 @@ class ApiController extends AbstractController
             $arguments['action'] = $data['action'];
             $arguments['dataType'] = $data['dataType'];
             $arguments['ids'] = $data['ids'];
-            $arguments['forceAll'] = (!empty($data['forceAll']) ? $data['forceAll'] : '');
-            $arguments['fromStatus'] = (!empty($data['fromStatus']) ? $data['fromStatus'] : '');
-            $arguments['toStatus'] = (!empty($data['toStatus']) ? $data['toStatus'] : '');
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get resut command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $arguments['forceAll'] = (empty($data['forceAll']) ? '' : $data['forceAll']);
+            $arguments['fromStatus'] = (empty($data['fromStatus']) ? '' : $data['fromStatus']);
+            $arguments['toStatus'] = (empty($data['toStatus']) ? '' : $data['toStatus']);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
@@ -383,7 +351,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/rerun_error", name="rerun_error", methods={"POST"})
      */
-    public function rerunErrorAction(Request $request)
+    public function rerunErrorAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -397,7 +365,7 @@ class ApiController extends AbstractController
                 throw new Exception('limit parameter is missing. Please specify a number to limit the number of data transfer the program has to rerun. ');
             }
             if (empty($data['attempt'])) {
-                throw new Exception('attempt parameteris missing. Please specify the maximum number of attempt. If you set 10, the program will rerun only data transfer with attempt <= 10. ');
+                throw new Exception('attempt parameter is missing. Please specify the maximum number of attempt. If you set 10, the program will rerun only data transfer with attempt <= 10. ');
             }
 
             // Prepare command
@@ -412,22 +380,7 @@ class ApiController extends AbstractController
             // Prepare input/output parameters
             $arguments['limit'] = $data['limit'];
             $arguments['attempt'] = $data['attempt'];
-            $input = new ArrayInput($arguments);
-            $output = new BufferedOutput();
-
-            // Run the command
-            $application->run($input, $output);
-
-            // Get resut command
-            $content = $output->fetch();
-            if (empty($content)) {
-                throw new Exception('No response from Myddleware. ');
-            }
-            // Log the result
-            $this->logger->info(print_r($content, true));
-
-            // Get the job task id, result is <jobId>.....
-            $return['jobId'] = substr($content, 0, 23);
+            $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
@@ -445,7 +398,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/statistics", name="statistics", methods={"POST"})
      */
-    public function statisticsAction(Request $request)
+    public function statisticsAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -461,5 +414,30 @@ class ApiController extends AbstractController
         }
         // Send the response
         return $this->json($return);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getReturn(array $arguments, Application $application, array $return): array
+    {
+        $input = new ArrayInput($arguments);
+        $output = new BufferedOutput();
+
+        // Run the command
+        $application->run($input, $output);
+
+        // Get result command
+        $content = $output->fetch();
+        if (empty($content)) {
+            throw new Exception('No response from Myddleware. ');
+        }
+        // Log the result
+        $this->logger->info(print_r($content, true));
+
+        // Get the job task id, result is <jobId>.....
+        $return['jobId'] = substr($content, 0, 23);
+
+        return $return;
     }
 }

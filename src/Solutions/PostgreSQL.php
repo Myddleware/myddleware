@@ -73,9 +73,7 @@ class PostgreSQL extends Database
 
             return $modules;
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return $error;
+            return 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
     }
 
@@ -153,8 +151,6 @@ class PostgreSQL extends Database
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
             return false;
         }
     }

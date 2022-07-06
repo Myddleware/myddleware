@@ -176,7 +176,7 @@ class PrestaShop extends Solution
                     throw new \Exception('Call failed '.$e->getTrace());
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $e->getMessage();
             }
         } else {
             $modulesSource = $this->get_modules('source');
@@ -363,7 +363,7 @@ class PrestaShop extends Solution
                 throw new \Exception('Call failed '.$e->getTrace());
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $e->getMessage();
 
             return false;
         }
@@ -426,9 +426,7 @@ class PrestaShop extends Solution
     {
         // traitement spécial pour module de relation Customers / Groupe
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            $result = $this->readManyToMany($param);
-
-            return $result;
+            return $this->readManyToMany($param);
         }
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -527,7 +525,7 @@ class PrestaShop extends Solution
                         $optOrder['limit'] = 1;
                         $optOrder['resource'] = 'orders&date=1';
                         $optOrder['display'] = '[id]';
-                        $optOrder['filter[reference]'] = '['.(string) $data->order_reference.']';
+                        $optOrder['filter[reference]'] = '['.$data->order_reference.']';
                         $xml = $this->webService->get($optOrder);
                         $xml = $xml->asXML();
                         $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -672,7 +670,7 @@ class PrestaShop extends Solution
                             // Ajout de 1 car le filtre de la requête inclus la valeur minimum
                             $result['date_ref'] = $value + 1;
                             // Une date de modification est mise artificiellement car il n'en existe pas dans le module
-                            $record['date_modified'] = (string) date('Y-m-d H:i:s');
+                            $record['date_modified'] = date('Y-m-d H:i:s');
                         }
                         if (isset($value->language)) {
                             $record[$key] = (string) $value->language;
@@ -683,7 +681,7 @@ class PrestaShop extends Solution
                         if ('associations' == $key) {
                             foreach ($resultRecord->associations->$subModule->$subData as $data) {
                                 $subRecord = [];
-                                $idRelation = (string) $resultRecord->id.'_'.(string) $data->$subDataId;
+                                $idRelation = $resultRecord->id.'_'.$data->$subDataId;
                                 $subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]] = (string) $resultRecord->id;
                                 $subRecord[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]] = (string) $data->$subDataId;
                                 // Add fields in the relationship
@@ -737,8 +735,7 @@ class PrestaShop extends Solution
                 $data['token'] = 'token';
             }
             try { // try-catch Myddleware
-                try { // try-catch PrestashopWebservice
-                    $fields = [];
+                try {
                     $opt = [
                         'resource' => $param['module'].'?schema=blank',
                     ];
@@ -828,7 +825,6 @@ class PrestaShop extends Solution
                 try { // try-catch PrestashopWebservice
                     // Check control before update
                     $data = $this->checkDataBeforeUpdate($param, $data);
-                    $fields = [];
                     $submodule = [];
                     $module = $param['module'];
                     $targetId = (int) $data['target_id'];

@@ -180,9 +180,7 @@ class VtigerCRM extends Solution
 
             return $options ?: null;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -363,7 +361,7 @@ class VtigerCRM extends Solution
                     }
 
                     $entitys = [];
-                    foreach ($parentModules as $prefix => $moduleName) {
+                    foreach ($parentModules as $moduleName) {
                         $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderby LIMIT $param[offset], $nDataCall;");
                         if (empty($query) || !$query['success']) {
                             continue;

@@ -190,9 +190,8 @@ class ZuoraAPIHelper
     {
         $xml_obj = new SimpleXMLElement($xml);
         $xml_obj->registerXPathNamespace($prefix, $namespace);
-        $node = $xml_obj->xpath($xpath);
 
-        return $node;
+        return $xml_obj->xpath($xpath);
     }
 
     // ###############################################################################
@@ -392,31 +391,23 @@ class ZuoraAPIHelper
     public static function callAPIWithClient($client, $header, $soapRequest, $debug)
     {
         // global $maxZObjectCount;
-        try {
-            $client->myRequest = $soapRequest;
-            $soapMethod = ZuoraAPIHelper::getMethod($soapRequest);
-
-            // check that we're not trying to create more than the maximum count of objects.
-            $createCount = ZuoraAPIHelper::getZObjectCount($soapRequest, $soapMethod);
-            if ('create' == $soapMethod && $createCount > ZuoraAPIHelper::$maxZObjectCount) {
-                exit("\n\nERROR: zObjects maximum count of ".ZuoraAPIHelper::$maxZObjectCount.' exceeded. Actual count found: '.$createCount.'.');
-            }
-
-            $timeBefore = microtime(true);
-            $result = $client->__soapCall($soapMethod, [], null, $header);
-            $timeAfter = microtime(true);
-
-            // echo "Request: " . $soapRequest . " Duration: " . ($timeAfter - $timeBefore)/60 . " minutes.\n";
-
-            if ($debug) {
-                echo "\nResult:\n".ZuoraAPIHelper::xml_pretty_printer($client->myResponse);
-                echo "\nResponse Time: ".($timeAfter - $timeBefore);
-            }
-
-            return $client->myResponse;
-        } catch (Exception $e) {
-            throw $e;
+        $client->myRequest = $soapRequest;
+        $soapMethod = ZuoraAPIHelper::getMethod($soapRequest);
+        // check that we're not trying to create more than the maximum count of objects.
+        $createCount = ZuoraAPIHelper::getZObjectCount($soapRequest, $soapMethod);
+        if ('create' == $soapMethod && $createCount > ZuoraAPIHelper::$maxZObjectCount) {
+            exit("\n\nERROR: zObjects maximum count of ".ZuoraAPIHelper::$maxZObjectCount.' exceeded. Actual count found: '.$createCount.'.');
         }
+        $timeBefore = microtime(true);
+        $result = $client->__soapCall($soapMethod, [], null, $header);
+        $timeAfter = microtime(true);
+        // echo "Request: " . $soapRequest . " Duration: " . ($timeAfter - $timeBefore)/60 . " minutes.\n";
+        if ($debug) {
+            echo "\nResult:\n".ZuoraAPIHelper::xml_pretty_printer($client->myResponse);
+            echo "\nResponse Time: ".($timeAfter - $timeBefore);
+        }
+
+        return $client->myResponse;
     }
 
     // ###############################################################################
@@ -704,18 +695,14 @@ class ZuoraAPIHelper
     public static function getFileContents($wsdl)
     {
         $contents = '';
-        try {
-            if (!file_exists($wsdl)) {
-                throw new Exception("File '".$wsdl."' not found.");
-            }
-            $file = fopen($wsdl, 'r');
-            if (filesize($wsdl) > 0) {
-                $contents = fread($file, filesize($wsdl));
-            }
-            fclose($file);
-        } catch (Exception $e) {
-            throw $e;
+        if (!file_exists($wsdl)) {
+            throw new Exception("File '".$wsdl."' not found.");
         }
+        $file = fopen($wsdl, 'r');
+        if (filesize($wsdl) > 0) {
+            $contents = fread($file, filesize($wsdl));
+        }
+        fclose($file);
 
         return $contents;
     }
@@ -930,9 +917,8 @@ class ZuoraAPIHelper
             foreach ($values as $data) {
                 $payload .= str_repeat(' ', $offset).' <'.$apiNamespace.':ids>'.$data[$ID_FIELD].'</'.$apiNamespace.":ids>\n";
             }
-            $payload .= str_repeat(' ', $offset).'</'.$apiNamespace.":delete>\n";
 
-            return $payload;
+            return $payload.(str_repeat(' ', $offset).'</'.$apiNamespace.":delete>\n");
         }
 
         // Handle "query".
@@ -972,9 +958,8 @@ class ZuoraAPIHelper
             }
             */
         }
-        $payload .= str_repeat(' ', $offset).'</'.$apiNamespace.':'.$call.">\n";
 
-        return $payload;
+        return $payload.(str_repeat(' ', $offset).'</'.$apiNamespace.':'.$call.">\n");
     }
 
     // ###############################################################################

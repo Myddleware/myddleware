@@ -51,10 +51,6 @@ class UpgradeManager
      */
     private $logger;
     /**
-     * @var string
-     */
-    private $projectDir;
-    /**
      * @var KernelInterface
      */
     private $kernel;
@@ -74,7 +70,6 @@ class UpgradeManager
         $this->entityManager = $entityManager;
         $this->parameterBagInterface = $parameterBagInterface;
         $this->env = $kernel->getEnvironment();
-        $this->projectDir = $kernel->getProjectDir();
 
         // Get the php executable
         $phpBinaryFinder = new PhpExecutableFinder();
@@ -316,10 +311,8 @@ class UpgradeManager
     {
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
-        if (!empty($configs)) {
-            foreach ($configs as $config) {
-                $this->configParams[$config->getName()] = $config->getvalue();
-            }
+        foreach ($configs as $config) {
+            $this->configParams[$config->getName()] = $config->getvalue();
         }
     }
 

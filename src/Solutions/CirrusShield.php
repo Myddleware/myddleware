@@ -96,9 +96,7 @@ class CirrusShield extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 

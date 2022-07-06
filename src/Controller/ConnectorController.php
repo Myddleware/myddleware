@@ -23,7 +23,7 @@ class ConnectorController extends AbstractController
     #[Route('/credentials/get-form/{solutionId<\d+>?null}', name: 'credentials_form', methods: ['GET', 'POST'])]
     public function getCredentialsForm(string $solutionId, SolutionRepository $solutionRepository, SolutionManager $solutionManager, ConnectorRepository $connectorRepository, Request $request): Response
     {
-        $solution = $solutionRepository->find(intval($solutionId));
+        $solution = $solutionRepository->find((int) $solutionId);
         assert(null !== $solution);
         $loginFields = $solutionManager->get($solution->getName())->getFieldsLogin();
 
@@ -66,7 +66,5 @@ class ConnectorController extends AbstractController
     public function createConnector(Request $request, SolutionRepository $solutionRepository)
     {
         dd($request);
-
-        return;
     }
 }

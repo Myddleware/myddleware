@@ -207,7 +207,6 @@ class SAP extends SAPRoot
         }
         // Pas de lecture pour les autres modules FI, tout est lu via le module ET_BKPF et ses règles liées
         elseif (in_array($param['module'], ['ET_BSEG', 'ET_ABUZ', 'ET_ACCHD', 'ET_ACCCR', 'ET_ACCIT'])) {
-            return;
         }
     }
 

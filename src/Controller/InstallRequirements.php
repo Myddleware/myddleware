@@ -10,10 +10,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class InstallRequirements extends AbstractController
 {
-    private $phpVersion;
-
-    private $configRepository;
-
     // public function __construct(ConfigRepository $configRepository)
     // {
     //     $this->configRepository = $configRepository;
@@ -23,10 +19,10 @@ class InstallRequirements extends AbstractController
     public function requirements(): Response
     {
         // $configs = $this->configRepository->findAll();
-        $this->phpVersion = phpversion();
+        $phpVersion = phpversion();
 
         return $this->render('install_setup/install_requirements.html.twig', [
-            'php_version' => $this->phpVersion,
+            'php_version' => $phpVersion,
         ]);
     }
     // public function installRequirements()

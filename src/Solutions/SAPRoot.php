@@ -188,7 +188,7 @@ class SAPRoot extends Solution
                 throw new \Exception('SOAP FAULT. Logon failed.');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $e->getMessage();
         }
     }
 
@@ -239,138 +239,135 @@ class SAPRoot extends Solution
                     }
                     // Boucle sur tous les enregistrements récupérés dans SAP
 
-                    if (!empty($headers)) {
-                        foreach ($headers as $header) {
-                            $id = '';
-                            $structuresFound = [];
-                            $record = [];
-                            $record['date_modified'] = '';
-                            $fisrt = true;
+                    foreach ($headers as $header) {
+                        $structuresFound = [];
+                        $record = [];
+                        $record['date_modified'] = '';
+                        $fisrt = true;
 
-                            // On boucle sur tous le champs demandés
-                            foreach ($param['fields'] as $field) {
-                                $fieldDetails = explode('__', $field);
-                                // Recherche de la ou des lignes avec le guid de référence dans la table demandée que si on a changé de structure ou si on est sur la première recherche
-                                if (
-                                        $fisrt
-                                    || (
-                                            2 == count($fieldDetails)	// Structure simple (ex ET_ORDERADM_H__CREATED_AT)
-                                        && $fieldDetails[0] != $oldFieldDetails[0]
+                        // On boucle sur tous le champs demandés
+                        foreach ($param['fields'] as $field) {
+                            $fieldDetails = explode('__', $field);
+                            // Recherche de la ou des lignes avec le guid de référence dans la table demandée que si on a changé de structure ou si on est sur la première recherche
+                            if (
+                                    $fisrt
+                                || (
+                                        2 == count($fieldDetails)	// Structure simple (ex ET_ORDERADM_H__CREATED_AT)
+                                    && $fieldDetails[0] != $oldFieldDetails[0]
+                                )
+                                || (
+                                        3 == count($fieldDetails)	// Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
+                                    && (
+                                            $fieldDetails[0] != $oldFieldDetails[0]
+                                        || $fieldDetails[1] != $oldFieldDetails[1]
                                     )
-                                    || (
-                                            3 == count($fieldDetails)	// Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
-                                        && (
-                                                $fieldDetails[0] != $oldFieldDetails[0]
-                                            || $fieldDetails[1] != $oldFieldDetails[1]
+                                )
+                            ) {
+                                $structuresFound = [];
+                                $fisrt = false;
+                                // Transformation du nom de la structure (exemple ET_ORDERADM_H devient EtOrderadmH)
+                                $structureFromat = $this->transformName($fieldDetails[0]);
+                                // Récupère le nom du champ identifiant (Guid, RefGuid...)
+                                $guidName = $this->transformName($this->getGuidName($param['module'], $fieldDetails[0]));
+
+                                // Et s'il y a une clé pour la table demandé, alors il faut que la valeur soit celle attendue
+                                if (
+                                        !empty($response->$structureFromat->item->$guidName) // Si seulement 1 seule ligne dans la table
+                                    && $response->$structureFromat->item->$guidName == $header // Si on est sur la bonne opération
+                                    && (
+                                            empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si pas de filtrage dans la structure
+                                        || (
+                                                !empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si filtrage alors on vérifie la valeur
+                                            && $response->$structureFromat->item->$this->keySubStructure[$param['module']][$fieldDetails[0]] == $this->transformName($fieldDetails[2])
                                         )
                                     )
                                 ) {
-                                    $structuresFound = [];
-                                    $fisrt = false;
-                                    // Transformation du nom de la structure (exemple ET_ORDERADM_H devient EtOrderadmH)
-                                    $structureFromat = $this->transformName($fieldDetails[0]);
-                                    // Récupère le nom du champ identifiant (Guid, RefGuid...)
-                                    $guidName = $this->transformName($this->getGuidName($param['module'], $fieldDetails[0]));
-
-                                    // Et s'il y a une clé pour la table demandé, alors il faut que la valeur soit celle attendue
-                                    if (
-                                            !empty($response->$structureFromat->item->$guidName) // Si seulement 1 seule ligne dans la table
-                                        && $response->$structureFromat->item->$guidName == $header // Si on est sur la bonne opération
-                                        && (
-                                                empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si pas de filtrage dans la structure
-                                            || (
-                                                    !empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si filtrage alors on vérifie la valeur
-                                                && $response->$structureFromat->item->$this->keySubStructure[$param['module']][$fieldDetails[0]] == $this->transformName($fieldDetails[2])
-                                            )
-                                        )
-                                    ) {
-                                        $structuresFound[] = $response->$structureFromat->item;
-                                    } else { // Si plusieurs lignes dans la table
-                                        if (!empty($response->$structureFromat->item)) {
-                                            foreach ($response->$structureFromat->item as $item) {
-                                                // Récupération du champ de filtrage principal
-                                                $filterName = '';
-                                                if (!empty($this->keySubStructure[$param['module']][$fieldDetails[0]])) {
-                                                    $filterName = $this->transformName($this->keySubStructure[$param['module']][$fieldDetails[0]]);
-                                                }
-                                                if (
-                                                        $item->$guidName == $header // Si on est sur la bonne opération
-                                                    && (
-                                                            empty($filterName) // Si pas de filtrage dans la structure
-                                                         || (
-                                                                !empty($filterName) // Si filtrage alors on vérifie la valeur
-                                                            && !empty($item->$filterName)
-                                                            && $item->$filterName == $fieldDetails[1]
-                                                        )
+                                    $structuresFound[] = $response->$structureFromat->item;
+                                } else { // Si plusieurs lignes dans la table
+                                    if (!empty($response->$structureFromat->item)) {
+                                        foreach ($response->$structureFromat->item as $item) {
+                                            // Récupération du champ de filtrage principal
+                                            $filterName = '';
+                                            if (!empty($this->keySubStructure[$param['module']][$fieldDetails[0]])) {
+                                                $filterName = $this->transformName($this->keySubStructure[$param['module']][$fieldDetails[0]]);
+                                            }
+                                            if (
+                                                    $item->$guidName == $header // Si on est sur la bonne opération
+                                                && (
+                                                        empty($filterName) // Si pas de filtrage dans la structure
+                                                     || (
+                                                            !empty($filterName) // Si filtrage alors on vérifie la valeur
+                                                        && !empty($item->$filterName)
+                                                        && $item->$filterName == $fieldDetails[1]
                                                     )
-                                                ) {
-                                                    $structuresFound[] = $item;
-                                                }
+                                                )
+                                            ) {
+                                                $structuresFound[] = $item;
                                             }
                                         }
                                     }
                                 }
-                                // Récupération des données à renvoyer si on a trouvé une structure correspondant à la demande
-                                if (!empty($structuresFound)) {
-                                    // Si on a des filtres supplémentaire on les utilise
-                                    if (!empty($subStructureFilter[$param['module']][$fieldDetails[0]])) {
-                                        $structuresFoundFiltered = [];
-                                        foreach ($structuresFound as $structure) { // Pour chaque ligne
-                                            $strutureOk = true;
-                                            foreach ($subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
-                                                // Si un filtre est KO alors on ne garde pas la struture
-                                                if ($structure[$filterField] != $filterValue) {
-                                                    $strutureOk = false;
-                                                    break;
-                                                }
-                                            }
-                                            // Si tous les filtres sont passants alors on garde la struture
-                                            if ($strutureOk) {
-                                                $structuresFoundFiltered[] = $structure;
+                            }
+                            // Récupération des données à renvoyer si on a trouvé une structure correspondant à la demande
+                            if (!empty($structuresFound)) {
+                                // Si on a des filtres supplémentaire on les utilise
+                                if (!empty($subStructureFilter[$param['module']][$fieldDetails[0]])) {
+                                    $structuresFoundFiltered = [];
+                                    foreach ($structuresFound as $structure) { // Pour chaque ligne
+                                        $strutureOk = true;
+                                        foreach ($subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
+                                            // Si un filtre est KO alors on ne garde pas la struture
+                                            if ($structure[$filterField] != $filterValue) {
+                                                $strutureOk = false;
+                                                break;
                                             }
                                         }
-                                        $structuresFound = $structuresFoundFiltered;
+                                        // Si tous les filtres sont passants alors on garde la struture
+                                        if ($strutureOk) {
+                                            $structuresFoundFiltered[] = $structure;
+                                        }
                                     }
-                                    // Si toujours plusieurs erreur même après filtrage alors on envoi un warning
-                                    if (count($structuresFound) > 1) {
-                                        $record['ZmydMessage'] = ['type' => 'W', 'message' => 'Several rows found in the table '.$fieldDetails[0].'. Only the first one has been selected. '];
-                                    }
-                                    // On récupère ensuite la première trouvée même si plusieurs strutures étaient présentes
-                                    if (2 == count($fieldDetails)) { 	// Structure simple (ex ET_ORDERADM_H__CREATED_AT)
-                                        $fieldName = $this->transformName($fieldDetails[1]);
-                                        $record[$field] = $structuresFound[0]->$fieldName;
-                                    } else { // Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
-                                        $fieldName = $this->transformName($fieldDetails[2]);
-                                        $record[$field] = $structuresFound[0]->$fieldName;
-                                    }
+                                    $structuresFound = $structuresFoundFiltered;
+                                }
+                                // Si toujours plusieurs erreur même après filtrage alors on envoi un warning
+                                if (count($structuresFound) > 1) {
+                                    $record['ZmydMessage'] = ['type' => 'W', 'message' => 'Several rows found in the table '.$fieldDetails[0].'. Only the first one has been selected. '];
+                                }
+                                // On récupère ensuite la première trouvée même si plusieurs strutures étaient présentes
+                                if (2 == count($fieldDetails)) { 	// Structure simple (ex ET_ORDERADM_H__CREATED_AT)
+                                    $fieldName = $this->transformName($fieldDetails[1]);
+                                    $record[$field] = $structuresFound[0]->$fieldName;
+                                } else { // Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
+                                    $fieldName = $this->transformName($fieldDetails[2]);
+                                    $record[$field] = $structuresFound[0]->$fieldName;
+                                }
 
-                                    // Si on est sur le champ id (suppression des 0 à gauche pourvant être présent sur le PARTNER_NOou l'OBJECT_ID par exemple)
-                                    if (
-                                            !empty($this->idName[$param['module']][$fieldDetails[0]])
-                                        && $fieldName == $this->transformName($this->idName[$param['module']][$fieldDetails[0]])
-                                    ) {
-                                        $record['id'] = ltrim($structuresFound[0]->$fieldName, '0');
-                                    }
-                                    // On ajoute la date de modification, le champ peut être nommé différemment en fonction des module
-                                    elseif ('ChangedAt' == $fieldName) {
-                                        $record['date_modified'] = $structuresFound[0]->$fieldName;
-                                    }
-                                    // Poru partner, l'heure et la date sont dans 2 champs différents
-                                    elseif ('Chdat' == $fieldName) {
-                                        $record['date_modified'] = $structuresFound[0]->$fieldName.$record['date_modified'];
-                                    } elseif ('Chtim' == $fieldName) {
-                                        $record['date_modified'] = $record['date_modified'].' '.$structuresFound[0]->$fieldName;
-                                    }
+                                // Si on est sur le champ id (suppression des 0 à gauche pourvant être présent sur le PARTNER_NOou l'OBJECT_ID par exemple)
+                                if (
+                                        !empty($this->idName[$param['module']][$fieldDetails[0]])
+                                    && $fieldName == $this->transformName($this->idName[$param['module']][$fieldDetails[0]])
+                                ) {
+                                    $record['id'] = ltrim($structuresFound[0]->$fieldName, '0');
                                 }
-                                // Sauvegarde du champ précédent pour éviter de refaire la recherche si on demande la même struture
-                                $oldFieldDetails = $fieldDetails;
+                                // On ajoute la date de modification, le champ peut être nommé différemment en fonction des module
+                                elseif ('ChangedAt' == $fieldName) {
+                                    $record['date_modified'] = $structuresFound[0]->$fieldName;
+                                }
+                                // Poru partner, l'heure et la date sont dans 2 champs différents
+                                elseif ('Chdat' == $fieldName) {
+                                    $record['date_modified'] = $structuresFound[0]->$fieldName.$record['date_modified'];
+                                } elseif ('Chtim' == $fieldName) {
+                                    $record['date_modified'] = $record['date_modified'].' '.$structuresFound[0]->$fieldName;
+                                }
                             }
-                            if (!empty($record['id'])) {
-                                // Sauvegarde des données du document
-                                $result['values'][$record['id']] = $record;
-                            } else {
-                                $record['ZmydMessage'] = ['type' => 'E', 'message' => 'No ID for the document.'];
-                            }
+                            // Sauvegarde du champ précédent pour éviter de refaire la recherche si on demande la même struture
+                            $oldFieldDetails = $fieldDetails;
+                        }
+                        if (!empty($record['id'])) {
+                            // Sauvegarde des données du document
+                            $result['values'][$record['id']] = $record;
+                        } else {
+                            $record['ZmydMessage'] = ['type' => 'E', 'message' => 'No ID for the document.'];
                         }
                     }
                 }

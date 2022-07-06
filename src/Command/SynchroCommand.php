@@ -65,7 +65,6 @@ class SynchroCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $step = 1;
         try {
             // Source -------------------------------------------------
             // alias de la règle en params
@@ -93,7 +92,7 @@ class SynchroCommand extends Command
                             $rules[] = $rule;
                         }
                         if (!empty($rules)) {
-                            foreach ($rules as $key => $value) {
+                            foreach ($rules as $value) {
                                 // Don't display rule id if the command is called from the api
                                 if (empty($api)) {
                                     echo $value.chr(10);

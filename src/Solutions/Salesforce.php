@@ -183,8 +183,7 @@ class Salesforce extends Solution {
 			return ((isset($modules)) ? $modules : false );
 		}
 		catch (\Exception $e){
-			$error = $e->getMessage();
-			return $error;
+			return $e->getMessage();
 		}
 	}
 
@@ -675,8 +674,7 @@ class Salesforce extends Solution {
 		}
 		// Suppression de la dernière virgule en laissant le +
 		$querySelect = rtrim($querySelect,'+'); 
-		$querySelect = rtrim($querySelect,','); 
-		return $querySelect;
+		return rtrim($querySelect,',');
 	}
 	
 	// Génération du FROM
@@ -833,8 +831,7 @@ class Salesforce extends Solution {
 		$tab = explode('T', $dateTime);
 		$dateTime = $tab[0] . ' ' . $tab[1];
 		$tab = explode('.', $dateTime);
-		$dateTime = $tab[0];
-		return $dateTime;
+		return $tab[0];
 	}
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
@@ -842,8 +839,7 @@ class Salesforce extends Solution {
 	{
 		$tab = explode(' ', $dateTime);
 		$date = $tab[0] . 'T' . $tab[1];
-		$date .= '+00:00';
-		return $date;
+		return $date . '+00:00';
 	}
     
 }

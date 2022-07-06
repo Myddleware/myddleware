@@ -14,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,17 +24,15 @@ class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
     private LoggerInterface $logger;
-    private MailerInterface $mailer;
 
-    public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger, MailerInterface $mailer)
+    public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger)
     {
         $this->emailVerifier = $emailVerifier;
         $this->logger = $logger;
-        $this->mailer = $mailer;
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager,TranslatorInterface $translator): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -96,10 +93,8 @@ class RegistrationController extends AbstractController
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
             $userId = $request->query->get('id');
-            if (!$user = $this->getUser()) {
-                if (!$user = $userRepository->find($userId)) {
-                    throw $this->createNotFoundException();
-                }
+            if (($user = $this->getUser()) === null && !$user = $userRepository->find($userId)) {
+                throw $this->createNotFoundException();
             }
             $this->emailVerifier->handleEmailConfirmation($request, $user);
             $this->logger->info('Email verification');

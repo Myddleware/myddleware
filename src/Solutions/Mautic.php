@@ -415,7 +415,6 @@ class Mautic extends Solution
             // Build the URL (delete if exists / to be sure to not have 2 / in a row)
             return rtrim($url, '/').'/s/'.$this->moduleParameters[$module]['plurial'].'/view/'.$recordId;
         } catch (\Exception $e) {
-            return;
         }
     }
 

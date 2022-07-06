@@ -111,9 +111,7 @@ class Zuora extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -551,7 +549,6 @@ class Zuora extends Solution
         }
 
         $totalEnd = time();
-        $totalElapsed = $totalEnd - $totalStart;
 
         return $recordsArray;
     }
