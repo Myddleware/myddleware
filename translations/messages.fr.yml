@@ -859,7 +859,7 @@ registration: Inscription
 create_account: Créer un compte
 account_already: Vous avez déjà un compte
 agree_terms: Vous devez accepter les conditions d'utilisations.
-succesfully_registered: Succesfully register !
+successfully_registered: Succesfully register !
 password:
     min_length: Votre mot de passe doit comporter au moins
     characters: caractères

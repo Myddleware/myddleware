@@ -859,7 +859,7 @@ registration: Registration
 create_account: Create an account
 account_already: Already have an account
 agree_terms: You should agree to our terms.
-succesfully_registered: Succesfully register !
+successfully_registered: Successfully register !
 password:
     min_length: Your password should be at least
     characters: characters
