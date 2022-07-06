@@ -35,7 +35,7 @@ class ConnectorCrudController extends AbstractCrudController
         return Connector::class;
     }
 
-    public function createEntity(string $entityFqcn)
+    public function createEntity(string $entityFqcn): Connector
     {
         $user = $this->getUser();
         $connector = new Connector();
@@ -98,11 +98,6 @@ class ConnectorCrudController extends AbstractCrudController
             DateTimeField::new('updatedAt')->hideOnForm(),
             BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
         ];
-    }
-
-    public function configureActions(Actions $actions): Actions
-    {
-        return $actions->add(Crud::PAGE_INDEX, Action::DETAIL);
     }
 
     public function configureFilters(Filters $filters): Filters

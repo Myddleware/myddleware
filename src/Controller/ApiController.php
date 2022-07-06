@@ -330,7 +330,7 @@ class ApiController extends AbstractController
             $arguments['forceAll'] = (empty($data['forceAll']) ? '' : $data['forceAll']);
             $arguments['fromStatus'] = (empty($data['fromStatus']) ? '' : $data['fromStatus']);
             $arguments['toStatus'] = (empty($data['toStatus']) ? '' : $data['toStatus']);
-            
+
             $return = $this->getReturn($arguments, $application, $return);
 
             // Get the job statistics
