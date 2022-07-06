@@ -783,7 +783,7 @@ flash:
         reset:
             success: Your password has been succesfully reset
 
-password_reset:
+reset_password:
     title: Change my password
     invalid_message: Invalid password
     first_options: New password
@@ -854,12 +854,22 @@ email_verification:
     confirm_email: Confirm my Email
     link_expires: This link will expire in
     email_verified: Your email address has been verified.
+reset_password_email_link: Enter your email address and we will send you a link to reset your password.
+password_reset_email_sent: Password Reset Email Sent
+successful_registration: Successful registration
+successfully_registered: Congrats ! You've successfully activated your Myddleware account.
+reset_your_password: Reset your password
+send_password_reset_email: Send password reset email
+check_email_link: If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
+link_expires: This link will expire in
+check_spam_folder: If you don't receive an email please check your spam folder or
+try_again: try again
+reset_password_link: To reset your password, please visit the following link
 register: Register
 registration: Registration
 create_account: Create an account
 account_already: Already have an account
 agree_terms: You should agree to our terms.
-successfully_registered: Successfully register !
 password:
     min_length: Your password should be at least
     characters: characters

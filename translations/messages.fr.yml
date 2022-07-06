@@ -854,12 +854,23 @@ email_verification:
     confirm_email: Confirmer mon email
     link_expires: Ce lien expirera dans
     email_verified: Votre adresse email est vérifiée.
+reset_password_email_link: Saisissez votre adresse email et nous vous enverrons un lien pour modifier votre mot de passe.
+password_reset_email_sent: Email envoyé - mise à jour du mot de passe
 register: S'inscrire
 registration: Inscription
 create_account: Créer un compte
 account_already: Vous avez déjà un compte
 agree_terms: Vous devez accepter les conditions d'utilisations.
-successfully_registered: Succesfully register !
+successful_registration: Inscription validée
+successfully_registered: Félicitations ! Votre compte Myddleware a été activé avec succès.
+reset_password: Modifier le mot de passe
+reset_your_password: Modifier votre mot de passe
+send_password_reset_email: Envoyer un email pour mettre à jour le mot de passe
+check_email_link: Si l'adresse email saisie est juste, un email vous a été envoyé contenant un lien pour mettre à jour votre mot de passe.
+link_expires: Ce lien expirera dans
+check_spam_folder: Si vous ne recevez pas d'email, veuillez vérifier votre dossier pourriels (spams) ou
+try_again: essayer à nouveau
+reset_password_link: Pour mettre à jour votre mot de passe, veuillez cliquer sur ce lien
 password:
     min_length: Votre mot de passe doit comporter au moins
     characters: caractères

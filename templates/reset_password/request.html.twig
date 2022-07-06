@@ -1,25 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'reset_your_password' | trans }}{% endblock %}
+{% block title %}{{ 'reset_password.title' | trans }}{% endblock %}
 
 {% block body %}
-	<div>
-        <img src="{{ asset('images/logo/logo1.png') }}" alt="Myddleware logo" class="logo-register" />
-	</div>
-	<div class="install">
-        {% for flash_error in app.flashes('reset_password_error') %}
-            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-        {% endfor %}
-        <h1>{{ 'reset_your_password' | trans }}</h1>
-
-        {{ form_start(requestForm) }}
-            {{ form_row(requestForm.email) }}
-            <div class="mb-3">
-                <small class="form-text">
-                    {{ 'reset_password_email_link' | trans }}
-                </small>
+    <section class="container">
+        <div class="row justify-content-center">
+            <div class="col text-center pt-5">
+                <img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
             </div>
-            <button class="btn btn-primary">{{ 'submit' | trans }}</button>
-        {{ form_end(requestForm) }}
-    </div>
+        </div>
+        <div class="row justify-content-center">
+            {% for flash_error in app.flashes('reset_password_error') %}
+                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+            {% endfor %}
+            <h1>{{ 'reset_password.title' | trans }}</h1>
+
+            {{ form_start(requestForm) }}
+                {{ form_row(requestForm.email) }}
+                <div class="mb-3">
+                    <small class="form-text">
+                        {{ 'reset_password_email_link' | trans }}
+                    </small>
+                </div>
+                <button class="btn btn-primary">{{ 'password_reset.submit' | trans }}</button>
+            {{ form_end(requestForm) }}
+        </div>
+    </section>
 {% endblock %}
