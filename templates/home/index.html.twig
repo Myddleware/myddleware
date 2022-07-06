@@ -5,14 +5,14 @@
 	<header>
 		<div class="home_container">
 			<img class="logo" src="build/images/logo/logo1.png" alt="logo_myddleware">
-			{% if user == "" %}
+			{% if user %}
 				<button class="first_home_item btn btn-primary">
-						<a href="{{path('login')}}">Login</a>
+					<a href="{{path('admin_dashboard')}}">Dashboard</a>
 				</button>
 			{% else %}
 				<button class="first_home_item btn btn-primary">
-					<a href="{{path('admin_dashboard')}}">Dashboard</a>
-				</button>			
+					<a href="{{path('login')}}">Login</a>
+				</button>
 			{% endif %}			
 			<button class="home_item btn btn-primary">
 				<a href="">Install Myddleware</a>
