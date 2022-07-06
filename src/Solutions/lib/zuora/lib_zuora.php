@@ -406,7 +406,6 @@ class ZuoraAPIHelper
             echo "\nResult:\n".ZuoraAPIHelper::xml_pretty_printer($client->myResponse);
             echo "\nResponse Time: ".($timeAfter - $timeBefore);
         }
-
         return $client->myResponse;
     }
 
@@ -918,7 +917,7 @@ class ZuoraAPIHelper
                 $payload .= str_repeat(' ', $offset).' <'.$apiNamespace.':ids>'.$data[$ID_FIELD].'</'.$apiNamespace.":ids>\n";
             }
 
-            return $payload.(str_repeat(' ', $offset).'</'.$apiNamespace.":delete>\n");
+            return $payload . (str_repeat(' ', $offset).'</'.$apiNamespace.":delete>\n");
         }
 
         // Handle "query".
@@ -959,7 +958,7 @@ class ZuoraAPIHelper
             */
         }
 
-        return $payload.(str_repeat(' ', $offset).'</'.$apiNamespace.':'.$call.">\n");
+        return $payload . (str_repeat(' ', $offset).'</'.$apiNamespace.':'.$call.">\n");
     }
 
     // ###############################################################################
