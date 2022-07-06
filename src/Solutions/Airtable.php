@@ -129,11 +129,7 @@ class Airtable extends Solution
     /**
      * Retrieve the list of fields (metadata) associated to each module.
      *
-     * @param string $module
-     * @param string $type
      * @param null $param
-     *
-     * @return array|null
      */
     public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
     {
