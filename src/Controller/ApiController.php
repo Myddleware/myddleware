@@ -28,6 +28,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController
 {
+<<<<<<< HEAD
     public ParameterBagInterface $parameterBag;
     private RuleRepository $ruleRepository;
     private JobRepository $jobRepository;
@@ -40,6 +41,41 @@ class ApiController extends AbstractController
     private FormulaManager $formulaManager;
     private SolutionManager $solutionManager;
     private DocumentManager $documentManager;
+=======
+    public $entityManager;
+    public $parameterBag;
+    public $formulaManager;
+    public $solutionManager;
+    public $documentManager;
+    /**
+     * @var RuleRepository
+     */
+    private $ruleRepository;
+    /**
+     * @var JobRepository
+     */
+    private $jobRepository;
+    /**
+     * @var DocumentRepository
+     */
+    private $documentRepository;
+    /**
+     * @var string
+     */
+    private $env;
+    /**
+     * @var KernelInterface
+     */
+    private $kernel;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    /**
+     * @var JobManager
+     */
+    private $jobManager;
+>>>>>>> c37b32c (refactor: Rector: Code Quality run)
 
     public function __construct(
         KernelInterface $kernel,
@@ -330,7 +366,26 @@ class ApiController extends AbstractController
             $arguments['forceAll'] = (empty($data['forceAll']) ? '' : $data['forceAll']);
             $arguments['fromStatus'] = (empty($data['fromStatus']) ? '' : $data['fromStatus']);
             $arguments['toStatus'] = (empty($data['toStatus']) ? '' : $data['toStatus']);
+<<<<<<< HEAD
             $return = $this->getReturn($arguments, $application, $return);
+=======
+            $input = new ArrayInput($arguments);
+            $output = new BufferedOutput();
+
+            // Run the command
+            $application->run($input, $output);
+
+            // Get resut command
+            $content = $output->fetch();
+            if (empty($content)) {
+                throw new Exception('No response from Myddleware. ');
+            }
+            // Log the result
+            $this->logger->info(print_r($content, true));
+
+            // Get the job task id, result is <jobId>.....
+            $return['jobId'] = substr($content, 0, 23);
+>>>>>>> c37b32c (refactor: Rector: Code Quality run)
 
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');

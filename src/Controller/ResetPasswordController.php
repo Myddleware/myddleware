@@ -143,7 +143,11 @@ class ResetPasswordController extends AbstractController
         ]);
 
         // Do not reveal whether a user account was found or not.
+<<<<<<< HEAD
         if (null === $user) {
+=======
+        if ($user === null) {
+>>>>>>> c37b32c (refactor: Rector: Code Quality run)
             return $this->redirectToRoute('app_check_email');
         }
 
