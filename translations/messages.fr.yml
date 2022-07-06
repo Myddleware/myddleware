@@ -580,7 +580,6 @@ title:
         view: Achats d'interventions
            
 menu:
-    index: Accueil
     rule:
         title: Règles
         create: Créer
@@ -868,3 +867,8 @@ password:
     new: Nouveau mot de passe
     repeat: Réécrivez le mot de passe
     mismatch: Les mots de passe doivent être identiques
+homepage: Accueil
+connect_your_apps: Connectez vos applications, exploitez mieux vos données
+complex_integration_easier: Myddleware simplifie les opérations de transfert de données
+free_open_source: Myddleware est gratuit et open-source
+install_instructions: Installez directement sur votre serveur et suivez nos tutoriels et guide directement sur le site de notre documentation

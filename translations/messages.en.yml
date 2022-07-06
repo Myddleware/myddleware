@@ -580,7 +580,6 @@ title:
         view: Interventions purchases
 
 menu:
-    index: Homepage
     rule:
         title: Rules
         create: Create
@@ -796,7 +795,7 @@ password_reset:
     submit: Submit
 
 install:
-    title: Myddleware Installation
+    title: Install Myddleware
     database_setup: Setting up your database
     test_button: Connect to database
     requirements_checker: Myddleware Requirements Checker
@@ -863,3 +862,8 @@ password:
     new: New password
     repeat: Repeat password
     mismatch: The password fields must match
+homepage: Homepage
+connect_your_apps: Connect your applications, exploit your data better
+complex_integration_easier: Myddleware makes complex data integration operations easier
+free_open_source: Myddleware is free and open-source
+install_instructions: Install it directly on your server and follow our tutorials on our documentation website to set up your integration rules

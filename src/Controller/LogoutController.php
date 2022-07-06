@@ -14,7 +14,7 @@ class LogoutController extends AbstractController
      * @return void
      */
     #[Route('/logout', name: 'logout')]
-    public function logout()
+    public function logout(): void
     {
     }
 }
