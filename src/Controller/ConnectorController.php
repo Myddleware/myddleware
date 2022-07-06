@@ -65,6 +65,6 @@ class ConnectorController extends AbstractController
     #[Route('/connector/create', name: 'app_create_connector', methods: ['GET', 'POST', 'PUT'])]
     public function createConnector(Request $request, SolutionRepository $solutionRepository)
     {
-        dd($request);
+        return;
     }
 }

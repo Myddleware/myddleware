@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}Home to Myddleware
+{% block title %} {{ 'app_name' | trans }} - {{ 'homepage' | trans }}
 {% endblock %}
 {% block body %}
 	<header>
@@ -15,16 +15,16 @@
 				</button>
 			{% endif %}			
 			<button class="home_item btn btn-primary">
-				<a href="">Install Myddleware</a>
+				<a href="">{{ 'install.title' | trans }}</a>
 			</button>
 		</div>
 	</header>
 	<main class="main_home">
 		<section>
-			<h2>Connect your applications, exploit your data better.</h2>
-			<h4>Myddleware makes complex data integration operations easier</h4>
-			<p>Myddleware is free and open-source !</p>
-			<p>Install it directly on your server and follow our tutorials on the community website to set up your integration rules.</p>
+			<h2>{{ 'connect_your_apps' | trans }}</h2>
+			<h4>{{ 'complex_integration_easier' | trans }}</h4>
+			<p>{{ 'free_open_source' | trans }} !</p>
+			<p>{{ 'install_instructions' | trans }} : <a href="https://myddleware.github.io/myddleware/#/" target="_blank">https://myddleware.github.io/myddleware</a></p>
 		</section>
 	</main>
 {% endblock %}
