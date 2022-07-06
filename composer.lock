@@ -14028,8 +14028,6 @@
         {
             "name": "friendsofphp/php-cs-fixer",
             "version": "v3.8.0",
-<<<<<<< HEAD
-=======
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer.git",
@@ -14119,7 +14117,6 @@
         {
             "name": "myclabs/deep-copy",
             "version": "1.11.0",
->>>>>>> 1dfdb3c (chore: Install & Init Rector)
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer.git",
@@ -15325,7 +15322,6 @@
                 }
             ],
             "time": "2022-06-19T12:14:25+00:00"
-<<<<<<< HEAD
         },
         {
             "name": "rector/rector",
@@ -15386,8 +15382,6 @@
                 }
             ],
             "time": "2022-06-29T12:00:57+00:00"
-=======
->>>>>>> 5cb9a84 (chore: update dependencies)
         },
         {
             "name": "rector/rector",
