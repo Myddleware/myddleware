@@ -22,6 +22,7 @@ class ConnectorParamFormType extends AbstractType
     public function __construct(
         ConnectorParamsValueTransformer $transformer,
         array $solutionLoginFields = [],
+        ?string $secret = null,
     ) {
         $this->transformer = $transformer;
         $this->solutionLoginFields = $solutionLoginFields;
