@@ -703,6 +703,7 @@ email_alert:
         %base_uri%</p>
 
         Cordialement,
+
 jobscheduler:
     command: Commande
     date_created: Date création
@@ -831,7 +832,6 @@ crontab:
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     create: Créer crontab
-    note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware 
 
 duplicate_rule:
     duplicate: Dupliquer
@@ -859,6 +859,7 @@ registration: Inscription
 create_account: Créer un compte
 account_already: Vous avez déjà un compte
 agree_terms: Vous devez accepter les conditions d'utilisations.
+succesfully_registered: Succesfully register !
 password:
     min_length: Votre mot de passe doit comporter au moins
     characters: caractères

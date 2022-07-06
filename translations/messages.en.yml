@@ -673,6 +673,7 @@ messages:
     template:
         nb_rule: Number of generated rules
         help: Please, read this tutorial to help you to activate your rules <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
+
 email_notification:
     subject: Myddleware notification
     hello: Hi
@@ -702,6 +703,7 @@ email_alert:
         %base_uri%</p>
 
         Kind regards,
+
 jobscheduler:
     command: Command
     date_created: Date created
@@ -775,6 +777,7 @@ form:
 
 fr: French
 en: English
+
 flash: 
     password:
         reset:
@@ -814,6 +817,7 @@ install:
     errors_to_do_message: You need to do the following before continuing
     recommendations_to_do_message: Optional recommendations to improve your setup
     note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
+
 crontab:
     title: Jobscheduler with crontab
     title_cron: Crontab
@@ -828,6 +832,7 @@ crontab:
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
     create: Create crontab
+
 duplicate_rule:
     duplicate: Duplicate
     cancel: Cancel
@@ -854,6 +859,7 @@ registration: Registration
 create_account: Create an account
 account_already: Already have an account
 agree_terms: You should agree to our terms.
+succesfully_registered: Succesfully register !
 password:
     min_length: Your password should be at least
     characters: characters
