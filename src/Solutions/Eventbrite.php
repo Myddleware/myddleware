@@ -114,9 +114,7 @@ class Eventbrite extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
@@ -288,7 +286,6 @@ class Eventbrite extends Solution
                     break;
                 default:
                     throw new \Exception('Fields unreadable');
-                    break;
             }
 
             return $this->moduleFields;
@@ -340,7 +337,6 @@ class Eventbrite extends Solution
             try {
                 // Check control before create
                 $parametersEvent = $this->checkDataBeforeCreate($param, $parametersEvent);
-                $idDoc = '';
                 // array_shift permet de supprimer la première entrée du tableau contenant l'id du docuement et de la sauvegarder dans la variable idDoc
                 $idDoc = array_shift($parametersEvent);
                 $responseEvent = $this->call($this->urlBase.$moduleSingle.'_new', $parametersEvent);
@@ -385,7 +381,6 @@ class Eventbrite extends Solution
             try {
                 // Check control before update
                 $parametersEvent = $this->checkDataBeforeUpdate($param, $parametersEvent);
-                $idDoc = '';
                 // array_shift permet de supprimer la première entrée du tableau contenant l'id du docuement et de la sauvegarder dans la variable idDoc
                 $idDoc = array_shift($parametersEvent);
                 // On renomme l'entrée target_id en id
@@ -642,8 +637,6 @@ class Eventbrite extends Solution
                                     if (strtotime($value) <= strtotime($param['date_ref'])) {
                                         break 2;
                                     }
-
-                                    $dateRefTmp = $value;
                                 }
                             }
                             $result['values'][$id] = $record;
@@ -696,12 +689,9 @@ class Eventbrite extends Solution
             curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $json_data = curl_exec($ch);
-            $resp_info = curl_getinfo($ch);
             curl_close($ch);
 
-            $response = get_object_vars(json_decode($json_data));
-
-            return $response;
+            return get_object_vars(json_decode($json_data));
         } catch (\Exception $e) {
             return false;
         }

@@ -63,7 +63,6 @@ $moduleFields = [
         'variate_settings__winner_criteria' => ['label' => 'Winning Criteria', 'type' => 'text', 'required' => 0, 'option' => ['opens' => 'opens', 'clicks' => 'clicks', 'manual' => 'manual', 'total_revenue' => 'total_revenue']],
         'variate_settings__wait_time' => ['label' => 'Wait_time', 'type' => 'text', 'required' => 0],
         'variate_settings__test_size' => ['label' => 'Test size', 'type' => 'text', 'required' => 0],
-        'variate_settings__test_size' => ['label' => 'Test size', 'type' => 'text', 'required' => 0],
         'tracking__opens' => ['label' => 'Opens', 'type' => 'bool', 'required' => 0, 'option' => ['1' => 'True', '2' => 'False']],
         'tracking__html_clicks' => ['label' => 'HTML Click Tracking', 'type' => 'bool', 'required' => 0, 'option' => ['1' => 'True', '2' => 'False']],
         'tracking__text_clicks' => ['label' => 'Plain-Text Click Tracking', 'type' => 'bool', 'required' => 0, 'option' => ['1' => 'True', '2' => 'False']],

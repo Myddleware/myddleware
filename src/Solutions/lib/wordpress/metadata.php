@@ -3,7 +3,6 @@
 $moduleFields = [
     'pages' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'date' => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'date_gmt' => ['label' => 'Date GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'guid' => ['label' => 'Guid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'modified' => ['label' => 'Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -27,7 +26,6 @@ $moduleFields = [
     ],
     'posts' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'date' => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'date_gmt' => ['label' => 'Date GMT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'guid' => ['label' => 'Guid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'modified' => ['label' => 'Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

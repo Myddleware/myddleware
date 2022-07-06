@@ -47,13 +47,6 @@ class File extends Solution
     protected $required_fields = ['default' => ['id', 'date_modified']];
     protected $columnWidth = [];
 
-    private $driver;
-    private $host;
-    private $port;
-    private $dbname;
-    private $login;
-    private $password;
-
     public function login($connectionParam)
     {
         parent::login($connectionParam);
@@ -128,17 +121,13 @@ class File extends Solution
             // Add the current directory
             $modules['/'] = 'Root directory';
             // Add the sub directories if exist
-            if (!empty($directories)) {
-                foreach ($directories as $directory) {
-                    $modules[$directory] = $directory;
-                }
+            foreach ($directories as $directory) {
+                $modules[$directory] = $directory;
             }
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 

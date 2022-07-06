@@ -202,7 +202,6 @@ class Moodle extends Solution
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-                $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     // We don't send Myddleware_element_id field to Moodle
@@ -248,7 +247,6 @@ class Moodle extends Solution
                         break;
                     default:
                         throw new \Exception('Module unknown. ');
-                        break;
                 }
 
                 $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
@@ -311,7 +309,6 @@ class Moodle extends Solution
             try {
                 // Check control before update
                 $data = $this->checkDataBeforeUpdate($param, $data);
-                $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     if ('target_id' == $key) {
@@ -359,7 +356,6 @@ class Moodle extends Solution
                         break;
                     default:
                         throw new \Exception('Module unknown. ');
-                        break;
                 }
 
                 $serverurl = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$functionname;
@@ -507,13 +503,10 @@ class Moodle extends Solution
         switch ($moduleSource) {
             case 'get_course_completion_by_date':
                 return 'timecompleted';
-                break;
             case 'get_users_last_access':
                 return 'lastaccess';
-                break;
             default:
                 return 'timemodified';
-                break;
         }
     }
 }

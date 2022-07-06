@@ -1,37 +1,8 @@
-# Email spool folder
-/app/spool/*
-
-# Cache, session files and logs (Symfony3)
-/var/cache/*
-/var/log/*
-/var/logs/*
-/var/sessions/*
-!var/cache/.gitkeep
-!var/logs/.gitkeep
-!var/sessions/.gitkeep
-
-# Parameters for Custom code
-/config/services_custom.yaml
-
-
-# Custom directory
-/src/Custom/*
-
-# Managed by Composer
-/app/bootstrap.php.cache
-/var/bootstrap.php.cache
-/bin/*
-!bin/console
-/vendor/
-/public/bundles
-/public/js/*
-/public/css/*
 ###> friendsofphp/php-cs-fixer ###
 /.php_cs
 /.php_cs.cache
 .php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
-
 
 ###> lexik/jwt-authentication-bundle ###
 /config/packages/jwt/*.pem
@@ -44,11 +15,8 @@
 ###< symfony/phpunit-bridge ###
 
 ###> local env file ###
-.env.local
-.env.local.php
 .env.prod
 .env.dev
-/.env.*.local
 ###< env file ###
 
 ##> vscode & extensions and other IDE parameters ## 
@@ -66,7 +34,6 @@
 /docker/etc/openvpn/*
 ##< Docker ##
 
-.php-version
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -91,5 +58,25 @@ yarn-error.log
 .pnp.*
 ###< symfony/webpack-encore-bundle ###
 
-
 /migrations
+.php-version
+
+# Cache, session files and logs (Symfony3)
+/var/cache/*
+/var/log/*
+/var/logs/*
+/var/sessions/*
+!var/cache/.gitkeep
+!var/logs/.gitkeep
+!var/sessions/.gitkeep
+
+# Parameters for Custom code
+/config/services_custom.yaml
+
+# Custom directory
+/src/Custom/*
+
+# Managed by Composer
+/bin/*
+!bin/console
+/public/bundles

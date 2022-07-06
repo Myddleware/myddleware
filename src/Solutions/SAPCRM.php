@@ -286,7 +286,6 @@ class SAPCRM extends SAPRoot
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-                $dataSugar = [];
                 foreach ($data as $key => $value) {
                     $tabValue = explode('__', $key);
                     if (
@@ -363,7 +362,6 @@ class SAPCRM extends SAPRoot
             try {
                 // Check control before update
                 $data = $this->checkDataBeforeUpdate($param, $data);
-                $dataSugar = [];
                 // Récupération des modifications seulement
                 $diff = array_diff($data, $param['dataHistory'][$idDoc]);
                 foreach ($diff as $key => $value) {

@@ -46,9 +46,9 @@ class Zuora_API
      *
      * @var Zuora_API
      */
-    protected static $_instance = null;
+    protected static $_instance;
 
-    protected static $_config = null;
+    protected static $_config;
 
     /**
      * Soap Client.
@@ -62,7 +62,7 @@ class Zuora_API
      */
     protected $_header;
 
-    protected $_endpoint = null;
+    protected $_endpoint;
 
     protected static $_classmap = [
         'zObject' => 'Zuora_Object',
@@ -553,15 +553,6 @@ class Zuora_API
         }
 
         return $result;
-    }
-
-    /**
-     * Enforce singleton; disallow cloning.
-     *
-     * @return void
-     */
-    private function __clone()
-    {
     }
 
     /**
