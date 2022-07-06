@@ -15233,6 +15233,7 @@
                 }
             ],
             "time": "2022-06-19T12:14:25+00:00"
+<<<<<<< HEAD
         },
         {
             "name": "rector/rector",
@@ -15293,6 +15294,8 @@
                 }
             ],
             "time": "2022-06-29T12:00:57+00:00"
+=======
+>>>>>>> 5cb9a84 (chore: update dependencies)
         },
         {
             "name": "sebastian/cli-parser",
@@ -17017,6 +17020,7 @@
         },
         {
             "name": "zenstruck/foundry",
+<<<<<<< HEAD
             "version": "v1.21.0",
             "source": {
                 "type": "git",
@@ -17027,6 +17031,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/zenstruck/foundry/zipball/a535f83ef65680a63f615d64b04219cdeee35f1b",
                 "reference": "a535f83ef65680a63f615d64b04219cdeee35f1b",
+=======
+            "version": "v1.20.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zenstruck/foundry.git",
+                "reference": "60094990d082308b7adaf7b57e30b7ecb80ad1be"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zenstruck/foundry/zipball/60094990d082308b7adaf7b57e30b7ecb80ad1be",
+                "reference": "60094990d082308b7adaf7b57e30b7ecb80ad1be",
+>>>>>>> 5cb9a84 (chore: update dependencies)
                 "shasum": ""
             },
             "require": {
@@ -17089,7 +17105,11 @@
             ],
             "support": {
                 "issues": "https://github.com/zenstruck/foundry/issues",
+<<<<<<< HEAD
                 "source": "https://github.com/zenstruck/foundry/tree/v1.21.0"
+=======
+                "source": "https://github.com/zenstruck/foundry/tree/v1.20.0"
+>>>>>>> 5cb9a84 (chore: update dependencies)
             },
             "funding": [
                 {
@@ -17097,7 +17117,11 @@
                     "type": "github"
                 }
             ],
+<<<<<<< HEAD
             "time": "2022-06-27T18:52:09+00:00"
+=======
+            "time": "2022-06-20T13:49:14+00:00"
+>>>>>>> 5cb9a84 (chore: update dependencies)
         }
     ],
     "aliases": [],
