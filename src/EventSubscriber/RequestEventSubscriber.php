@@ -43,6 +43,7 @@ class RequestEventSubscriber implements EventSubscriberInterface
             $request->request->set($key, $value);
         }
     }
+
     /**
      * @return array<string, mixed>
      */

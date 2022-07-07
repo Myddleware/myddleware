@@ -30,11 +30,14 @@ class MySQL extends Database
     protected $driver = 'mysql';
 
     protected $fieldName = 'Field';
+
     protected $fieldLabel = 'Field';
+
     protected $fieldType = 'Type';
 
     // Enable to delete data
     protected $sendDeletion = true;
+
     protected $readDeletion = true;
 
     protected function generatePdo()

@@ -42,36 +42,67 @@ class DocumentManager
     public $id;
 
     protected $entityManager;
+
     protected $typeError = 'S';
+
     protected $message = '';
+
     protected $dateCreated;
+
     protected $connection;
+
     protected $ruleName;
+
     protected $ruleMode;
+
     protected $ruleId;
+
     protected $ruleFields;
+
     protected $ruleRelationships;
+
     protected $ruleParams;
+
     protected $sourceId;
+
     protected $targetId;
+
     protected $parentId;
+
     protected $sourceData;
+
     protected $data;
+
     protected $documentType;
+
     protected $jobActive = true;
+
     protected $attempt;
+
     protected $userId;
+
     protected $status;
+
     protected $document_data;
+
     protected $solutionTarget;
+
     protected $solutionSource;
+
     protected $jobId;
+
     protected $key;
+
     protected $docIdRefError;
+
     protected $transformError = false;
+
     protected $tools;
+
     protected $api;    // Specify if the class is called by the API
+
     protected $ruleDocuments;
+
     protected $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
@@ -94,23 +125,29 @@ class DocumentManager
     ];
 
     protected $container;
+
     protected $logger;
+
     /**
      * @var formulaManager
      */
     protected $formulaManager;
+
     /**
      * @var DocumentRepository
      */
     private $documentRepository;
+
     /**
      * @var RuleRelationshipRepository
      */
     private $ruleRelationshipsRepository;
+
     /**
      * @var ParameterBagInterface
      */
     protected $parameterBagInterface;
+
     /**
      * @var SolutionManager
      */

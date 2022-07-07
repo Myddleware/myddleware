@@ -35,7 +35,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SynchroCommand extends Command
 {
     protected static $defaultName = 'myddleware:synchro';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
 
     public function __construct(

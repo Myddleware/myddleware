@@ -32,10 +32,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class Database extends Solution
 {
     protected $driver;
+
     protected $pdo;
+
     protected $charset = 'utf8';
 
     protected $stringSeparatorOpen = '`';
+
     protected $stringSeparatorClose = '`';
 
     public function login(array $connectionParam)

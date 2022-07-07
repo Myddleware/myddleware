@@ -31,8 +31,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class Facebook extends Solution
 {
     protected $baseUrl = 'https://graph.facebook.com';
+
     protected $apiVersion = 'v11.0';
+
     protected $facebook;
+
     protected $readLast = false;
 
     protected $required_fields = ['default' => ['id', 'created_time']];

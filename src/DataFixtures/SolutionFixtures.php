@@ -35,6 +35,7 @@ use Doctrine\Persistence\ObjectManager;
 class SolutionFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
+
     protected $solutionData = [
         ['name' => 'Airtable',			'active' => true, 'source' => true, 'target' => true],
         ['name' => 'CirrusShield',		'active' => false, 'source' => true, 'target' => true],

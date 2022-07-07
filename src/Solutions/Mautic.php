@@ -44,6 +44,7 @@ class Mautic extends Solution
         'company' => ['plurial' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
         'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
     ];
+
     protected $required_fields = [
         'default' => ['id', 'dateModified', 'dateAdded'],
         'company' => ['id'],

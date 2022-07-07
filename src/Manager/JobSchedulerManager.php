@@ -31,8 +31,11 @@ use Exception;
 class JobSchedulerManager
 {
     protected $env;
+
     protected $entityManager;
+
     protected $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
+
     /**
      * @var RuleRepository
      */

@@ -42,41 +42,53 @@ use Twig\Environment;
 class NotificationManager
 {
     protected $entityManager;
+
     protected $emailAddresses;
+
     protected $configParams;
+
     protected $tools;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var ParameterBagInterface
      */
     private $params;
+
     /**
      * @var Connection
      */
     private $connection;
+
     /**
      * @var UserRepository
      */
     private $userRepository;
+
     /**
      * @var TranslatorInterface
      */
     private $translator;
+
     /**
      * @var JobRepository
      */
     private $jobRepository;
+
     /**
      * @var RuleRepository
      */
     private $ruleRepository;
+
     /**
      * @var mixed|string
      */
     private $fromEmail;
+
     /**
      * @var Environment
      */

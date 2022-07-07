@@ -35,6 +35,7 @@ use Doctrine\Persistence\ObjectManager;
 class ConfigFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
+
     protected $configData = [
         ['name' => 'allow_install', 'value' => true, 'update' => false],
         ['name' => 'extension_allowed', 'value' => '["xml","wsdl"]', 'update' => false],

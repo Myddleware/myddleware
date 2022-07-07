@@ -42,6 +42,7 @@ class Eventbrite extends Solution
     ];
 
     private $token;
+
     private $urlBase = 'https://www.eventbrite.com/json/';
 
     public function getFieldsLogin(): array
@@ -56,6 +57,7 @@ class Eventbrite extends Solution
     }
 
     protected $required_fields = ['default' => ['id', 'modified']];
+
     protected $eventStatuses = ''; // 'live,started,ended'
 
     public function login($connectionParam)

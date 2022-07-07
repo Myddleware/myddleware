@@ -32,6 +32,7 @@ class ExceptionEventSubscriber implements EventSubscriberInterface
             $event->setResponse($response);
         }
     }
+
     /**
      * @return array<string, mixed>
      */

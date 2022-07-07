@@ -41,19 +41,27 @@ use Symfony\Component\Process\Process;
 class UpgradeManager
 {
     protected $env;
+
     protected $em;
+
     protected $phpExecutable = 'php';
+
     protected $message = '';
+
     protected $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
+
     protected $configParams;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var KernelInterface
      */
     private $kernel;
+
     /**
      * @var EntityManagerInterface
      */

@@ -31,7 +31,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class SageCRM extends Solution
 {
     private $wsdl = '';
+
     private $username = '';
+
     private $password = '';
 
     protected $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
@@ -62,6 +64,7 @@ class SageCRM extends Solution
     ];
 
     private $access_token;
+
     private $instance_url;
 
     // Listes des modules et des champs à exclure

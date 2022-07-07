@@ -28,16 +28,22 @@ class curl
 {
     /** @var bool */
     public $cache = false;
+
     public $proxy = false;
+
     /** @var array */
     public $response = [];
+
     public $header = [];
+
     /** @var string */
     public $info;
+
     public $error;
 
     /** @var array */
     private $options;
+
     private $cookie = false;
 
     /**

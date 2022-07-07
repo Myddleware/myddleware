@@ -37,8 +37,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ReadRecordCommand extends Command
 {
     protected static $defaultName = 'myddleware:readrecord';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
+
     private RuleRepository $ruleRepository;
 
     public function __construct(

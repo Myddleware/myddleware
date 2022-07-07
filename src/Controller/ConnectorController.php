@@ -17,9 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-    public function __construct(private string $secret)
-    {
-    }
     /**
      * @throws Exception
      */
@@ -66,8 +63,8 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/connector/create', name: 'app_create_connector', methods: ['GET', 'POST', 'PUT'])]
-    public function createConnector(Request $request, SolutionRepository $solutionRepository): \Symfony\Component\HttpFoundation\Response
+    public function createConnector(Request $request, SolutionRepository $solutionRepository): Response
     {
-        return;
+        return new Response();
     }
 }

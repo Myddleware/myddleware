@@ -30,8 +30,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class Mailchimp extends Solution
 {
     protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+
     protected $apiKey;
+
     protected $verify_ssl = true;
+
     protected $update = false;
     public const TIMEOUT = 60;
 

@@ -34,13 +34,19 @@ class SugarCRM extends Solution
 {
     // Enable to read deletion and to delete data
     protected $readDeletion = true;
+
     protected $sendDeletion = true;
 
     protected $sugarAPI;
+
     protected $sugarAPIVersion = 'v11';
+
     protected $sugarPlatform = 'base';
+
     protected $defaultLimit = 100;
+
     protected $bulkLimit = 250;
+
     protected $delaySearch = '-1 month';
 
     protected $required_fields = ['default' => ['id', 'date_modified']];

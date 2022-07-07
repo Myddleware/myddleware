@@ -34,7 +34,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ClearDataCommand extends Command
 {
     protected static $defaultName = 'myddleware:cleardata';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
 
     public function __construct(

@@ -40,9 +40,13 @@ class RingCentral extends Solution
     public const API_VERSION = '/v1.0';
 
     protected $apiKey;
+
     protected $token;
+
     protected $server;
+
     protected $callLimit = 100;
+
     protected $readLimit = 1000;
 
     protected $required_fields = [

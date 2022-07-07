@@ -14,6 +14,7 @@ class ResponseEventSubscriber implements EventSubscriberInterface
         $event->getResponse()->headers->set('X-XSS-Protection', '1; mode=block');
         $event->getResponse()->headers->set('X-Content-Type-Options', 'nosniff');
     }
+
     /**
      * @return array<string, mixed>
      */

@@ -31,6 +31,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class SAPRoot extends Solution
 {
     protected $limit = 100;
+
     protected $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
         'soap_version' => 'SOAP_1_2',
         'authentication' => 'SOAP_AUTHENTICATION_BASIC',
@@ -40,10 +41,15 @@ class SAPRoot extends Solution
     ];
 
     protected $keySubStructure = [];
+
     protected $subStructureFilter = [];
+
     protected $guidName = [];
+
     protected $idName = [];
+
     protected $required_fields = [];
+
     protected $relateFieldAllowed = [];
 
     public function login($connectionParam)

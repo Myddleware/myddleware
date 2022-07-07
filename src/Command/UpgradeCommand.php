@@ -35,7 +35,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UpgradeCommand extends Command
 {
     protected static $defaultName = 'myddleware:upgrade';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
 
     public function __construct(

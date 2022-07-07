@@ -9,6 +9,7 @@ use Symfony\Component\Form\DataTransformerInterface;
 class ConnectorParamsValueTransformer implements DataTransformerInterface
 {
     private ?string $secret;
+
     private Encrypter $encrypter;
 
     public function __construct(ParameterBagInterface $parameterBag)

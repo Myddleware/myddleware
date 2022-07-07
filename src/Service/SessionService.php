@@ -12,7 +12,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class SessionService
 {
     public const MYDDLEWARE_SESSION_INDEX = 'myddlewareSession';
+
     private $_session;
+
     private $requestStack;
 
     public const ERROR_CREATE_RULE_INDEX = 'create_rule';

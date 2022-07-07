@@ -34,7 +34,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PruneDatabaseCommand extends Command
 {
     protected static $defaultName = 'myddleware:prunedatabase';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
 
     public function __construct(

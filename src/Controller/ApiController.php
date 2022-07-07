@@ -27,17 +27,29 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApiController extends AbstractController
 {
     public ParameterBagInterface $parameterBag;
+
     private RuleRepository $ruleRepository;
+
     private JobRepository $jobRepository;
+
     private DocumentRepository $documentRepository;
+
     private string $env;
+
     private KernelInterface $kernel;
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
+
     private EntityManagerInterface $entityManager;
+
     private FormulaManager $formulaManager;
+
     private SolutionManager $solutionManager;
+
     private DocumentManager $documentManager;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
@@ -64,8 +76,9 @@ class ApiController extends AbstractController
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
     }
+
     #[Route(path: '/synchro', name: 'synchro', methods: ['POST'])]
-    public function synchroAction(Request $request) : JsonResponse
+    public function synchroAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -120,8 +133,9 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     #[Route(path: '/read_record', name: 'read_record', methods: ['POST'])]
-    public function readRecordAction(Request $request) : JsonResponse
+    public function readRecordAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -170,8 +184,9 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     #[Route(path: '/delete_record', name: 'delete_record', methods: ['POST'])]
-    public function deleteRecordAction(Request $request) : JsonResponse
+    public function deleteRecordAction(Request $request): JsonResponse
     {
         $return = [];
         $return['error'] = '';
@@ -276,8 +291,9 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     #[Route(path: '/mass_action', name: 'mass_action', methods: ['POST'])]
-    public function massActionAction(Request $request) : JsonResponse
+    public function massActionAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -331,8 +347,9 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     #[Route(path: '/rerun_error', name: 'rerun_error', methods: ['POST'])]
-    public function rerunErrorAction(Request $request) : JsonResponse
+    public function rerunErrorAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -375,8 +392,9 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     #[Route(path: '/statistics', name: 'statistics', methods: ['POST'])]
-    public function statisticsAction(Request $request) : JsonResponse
+    public function statisticsAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -393,6 +411,7 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
+
     /**
      * @throws Exception
      */

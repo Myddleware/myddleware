@@ -34,6 +34,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class GenerateTemplateCommand extends Command
 {
     protected static $defaultName = 'myddleware:generateTemplate';
+
     private JobManager $jobManager;
 
     public function __construct(JobManager $jobManager, string $name = null)

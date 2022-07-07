@@ -36,7 +36,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MassActionCommand extends Command
 {
     protected static $defaultName = 'myddleware:massaction';
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
 
     public function __construct(

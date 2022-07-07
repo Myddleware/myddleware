@@ -35,7 +35,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class NotificationCommand extends Command
 {
     protected static $defaultName = 'myddleware:notification';
+
     private NotificationManager $notificationManager;
+
     private JobManager $jobManager;
 
     public function __construct(

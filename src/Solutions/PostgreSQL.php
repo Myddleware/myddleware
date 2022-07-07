@@ -31,9 +31,11 @@ class PostgreSQL extends Database
 
     // Enable to delete data
     protected $sendDeletion = true;
+
     protected $readDeletion = true;
 
     protected $stringSeparatorOpen = '';
+
     protected $stringSeparatorClose = '';
 
     protected function generatePdo()

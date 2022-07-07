@@ -39,8 +39,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class JobSchedulerCommand extends Command
 {
     protected static $defaultName = 'myddleware:jobScheduler';
+
     private JobSchedulerRepository $jobSchedulerRepository;
+
     private LoggerInterface $logger;
+
     private EntityManagerInterface $entityManager;
 
     public function __construct(

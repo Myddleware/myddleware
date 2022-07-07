@@ -78,6 +78,7 @@ class PrestaShop extends Solution
         'target' => [],
         'source' => [],
     ];
+
     protected $exclude_field_list = [];
 
     protected $fieldsDuplicate = [

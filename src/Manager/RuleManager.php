@@ -49,66 +49,97 @@ use Symfony\Component\Routing\RouterInterface;
 class RuleManager
 {
     protected $connection;
+
     protected $logger;
+
     protected $ruleId;
+
     protected $rule;
+
     protected $ruleFields;
+
     protected $ruleParams;
+
     protected $sourceFields;
+
     protected $targetFields;
+
     protected $ruleRelationships;
+
     protected $ruleFilters;
+
     protected $solutionSource;
+
     protected $solutionTarget;
+
     protected $jobId;
+
     protected $manual;
+
     protected $key;
+
     protected $limit = 100;
+
     protected $offset = 0;
+
     protected $limitReadCommit = 1000;
+
     protected $tools;
+
     protected $configParams;
+
     protected $api;    // Specify if the class is called by the API
+
     /**
      * @var EntityManagerInterface
      */
     protected $entityManager;
+
     /**
      * @var ParameterBagInterface
      */
     protected $parameterBagInterface;
+
     /**
      * @var DocumentManager
      */
     protected $documentManager;
+
     /**
      * @var string
      */
     private $env;
+
     /**
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var RuleRepository
      */
     private $ruleRepository;
+
     /**
      * @var RuleRelationShipRepository
      */
     private $ruleRelationShipRepository;
+
     /**
      * @var SolutionManager
      */
     protected $solutionManager;
+
     /**
      * @var DocumentRepository
      */
     private $documentRepository;
+
     /**
      * @var RuleOrderRepository
      */
     private $ruleOrderRepository;
+
     private $requestStack;
 
     /**

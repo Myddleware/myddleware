@@ -36,7 +36,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class RerunErrorCommand extends Command
 {
     protected static $defaultName = 'myddleware:rerunerror';
+
     private JobManager $jobManager;
+
     private LoggerInterface $logger;
 
     public function __construct(

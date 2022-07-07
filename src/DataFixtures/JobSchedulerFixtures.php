@@ -37,6 +37,7 @@ use Doctrine\Persistence\ObjectManager;
 class JobSchedulerFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $manager;
+
     protected $jobSchedulerData = [
         ['command' => 'synchro', 		'paramName1' => 'rule', 'paramValue1' => 'ALL', 	'paramName2' => '',			'paramValue2' => '', 	'period' => 5,		'jobOrder' => 10,	'active' => true],
         ['command' => 'rerunerror',	'paramName1' => 'limit', 'paramValue1' => '100', 	'paramName2' => 'attempt',	'paramValue2' => '5',	'period' => 60, 	'jobOrder' => 100,	'active' => true],
