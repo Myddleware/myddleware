@@ -79,10 +79,6 @@ class DashboardController extends AbstractDashboardController
         ];
     }
 
-    /**
-     * @param UserInterface $user
-     * @return UserMenu
-     */
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         return parent::configureUserMenu($user)
