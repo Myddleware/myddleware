@@ -38,18 +38,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class JobSchedulerCommand extends Command
 {
-    /**
-     * @var JobSchedulerRepository
-     */
-    private $jobSchedulerRepository;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    protected static $defaultName = 'myddleware:jobScheduler';
+    private JobSchedulerRepository $jobSchedulerRepository;
+    private LoggerInterface $logger;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -65,9 +57,7 @@ class JobSchedulerCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:jobScheduler')
-            ->setDescription('Run every job in the scheduler')
+        $this->setDescription('Run every job in the scheduler')
         ;
     }
 

@@ -1,10 +1,12 @@
 <?php
 
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
-class RequestListener
+class RequestEventSubscriber implements EventSubscriberInterface
 {
     public function onKernelRequest(RequestEvent $event)
     {
@@ -40,5 +42,12 @@ class RequestListener
             }
             $request->request->set($key, $value);
         }
+    }
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [KernelEvents::REQUEST => 'onKernelRequest'];
     }
 }

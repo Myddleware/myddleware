@@ -1,14 +1,16 @@
 <?php
 
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class ExceptionListener
+class ExceptionEventSubscriber implements EventSubscriberInterface
 {
     private UrlGeneratorInterface $router;
 
@@ -29,5 +31,12 @@ class ExceptionListener
             $response = new RedirectResponse($urlInstall);
             $event->setResponse($response);
         }
+    }
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [KernelEvents::EXCEPTION => ''];
     }
 }

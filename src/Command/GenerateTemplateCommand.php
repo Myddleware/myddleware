@@ -33,10 +33,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class GenerateTemplateCommand extends Command
 {
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:generateTemplate';
+    private JobManager $jobManager;
 
     public function __construct(JobManager $jobManager, string $name = null)
     {
@@ -46,9 +44,7 @@ class GenerateTemplateCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:generateTemplate')
-            ->setDescription('Génération de template')
+        $this->setDescription('Génération de template')
             ->addArgument('nomTemplate', InputArgument::REQUIRED, 'Nom')
             ->addArgument('descriptionTemplate', InputArgument::REQUIRED, 'Description')
             ->addArgument('rulesId', InputArgument::REQUIRED, 'Rules IDs') // Ids separated by ,
@@ -74,7 +70,5 @@ class GenerateTemplateCommand extends Command
 
             return Command::FAILURE;
         }
-
-        return Command::SUCCESS;
     }
 }

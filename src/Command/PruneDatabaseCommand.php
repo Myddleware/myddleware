@@ -33,14 +33,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PruneDatabaseCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:prunedatabase';
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -54,9 +49,7 @@ class PruneDatabaseCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:prunedatabase')
-            ->setDescription('Remove all data flagged as deleted in Myddleware')
+        $this->setDescription('Remove all data flagged as deleted in Myddleware')
         ;
     }
 

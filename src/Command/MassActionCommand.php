@@ -35,14 +35,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MassActionCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:massaction';
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -56,9 +51,7 @@ class MassActionCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:massaction')
-            ->setDescription('Action massive sur les flux')
+        $this->setDescription('Action massive sur les flux')
             ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore or changeStatus)')
             ->addArgument('dataType', InputArgument::REQUIRED, 'Data type (rule or document)')
             ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ";"

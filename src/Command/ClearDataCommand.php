@@ -33,14 +33,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ClearDataCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:cleardata';
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -54,9 +49,7 @@ class ClearDataCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:cleardata')
-            ->setDescription('SUPPRESSION DES DONNEES DU CLIENT')
+        $this->setDescription('SUPPRESSION DES DONNEES DU CLIENT')
         ;
     }
 

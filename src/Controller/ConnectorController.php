@@ -17,6 +17,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
+    public function __construct(private string $secret)
+    {
+    }
     /**
      * @throws Exception
      */
@@ -34,7 +37,7 @@ class ConnectorController extends AbstractController
             'action' => $this->generateUrl('app_create_connector'),
             'attr' => [
                 'loginFields' => $loginFields,
-                'secret' => $this->getParameter('secret'),
+                'secret' => $this->secret,
             ],
         ]);
 
@@ -45,7 +48,7 @@ class ConnectorController extends AbstractController
             $form->add('connectorParams', ConnectorParamFormType::class, [
                 'attr' => [
                     'loginFields' => $loginFields,
-                    'secret' => $this->getParameter('secret'),
+                    'secret' => $this->secret,
                 ],
             ]);
         }
@@ -63,7 +66,7 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/connector/create', name: 'app_create_connector', methods: ['GET', 'POST', 'PUT'])]
-    public function createConnector(Request $request, SolutionRepository $solutionRepository)
+    public function createConnector(Request $request, SolutionRepository $solutionRepository): \Symfony\Component\HttpFoundation\Response
     {
         return;
     }

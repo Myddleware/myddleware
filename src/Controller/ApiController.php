@@ -23,9 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/api", name="api_")
- */
+#[Route(path: '/api', name: 'api_')]
 class ApiController extends AbstractController
 {
     public ParameterBagInterface $parameterBag;
@@ -40,7 +38,6 @@ class ApiController extends AbstractController
     private FormulaManager $formulaManager;
     private SolutionManager $solutionManager;
     private DocumentManager $documentManager;
-
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
@@ -52,7 +49,7 @@ class ApiController extends AbstractController
         EntityManagerInterface $entityManager,
         FormulaManager $formulaManager,
         SolutionManager $solutionManager,
-        documentManager $documentManager
+        DocumentManager $documentManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -67,11 +64,8 @@ class ApiController extends AbstractController
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
     }
-
-    /**
-     * @Route("/synchro", name="synchro", methods={"POST"})
-     */
-    public function synchroAction(Request $request): JsonResponse
+    #[Route(path: '/synchro', name: 'synchro', methods: ['POST'])]
+    public function synchroAction(Request $request) : JsonResponse
     {
         try {
             $return = [];
@@ -126,11 +120,8 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
-    /**
-     * @Route("/read_record", name="read_record", methods={"POST"})
-     */
-    public function readRecordAction(Request $request): JsonResponse
+    #[Route(path: '/read_record', name: 'read_record', methods: ['POST'])]
+    public function readRecordAction(Request $request) : JsonResponse
     {
         try {
             $return = [];
@@ -179,11 +170,8 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
-    /**
-     * @Route("/delete_record", name="delete_record", methods={"POST"})
-     */
-    public function deleteRecordAction(Request $request): JsonResponse
+    #[Route(path: '/delete_record', name: 'delete_record', methods: ['POST'])]
+    public function deleteRecordAction(Request $request) : JsonResponse
     {
         $return = [];
         $return['error'] = '';
@@ -251,7 +239,6 @@ class ApiController extends AbstractController
             // Stop the process if document hasn't been created
             return $this->json($return);
         }
-
         // Send the document just created
         try {
             // db transaction managed into the method actionDocument
@@ -265,7 +252,6 @@ class ApiController extends AbstractController
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
         }
-
         // Close job if it has been created
         try {
             $connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -290,11 +276,8 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
-    /**
-     * @Route("/mass_action", name="mass_action", methods={"POST"})
-     */
-    public function massActionAction(Request $request): JsonResponse
+    #[Route(path: '/mass_action', name: 'mass_action', methods: ['POST'])]
+    public function massActionAction(Request $request) : JsonResponse
     {
         try {
             $return = [];
@@ -348,11 +331,8 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
-    /**
-     * @Route("/rerun_error", name="rerun_error", methods={"POST"})
-     */
-    public function rerunErrorAction(Request $request): JsonResponse
+    #[Route(path: '/rerun_error', name: 'rerun_error', methods: ['POST'])]
+    public function rerunErrorAction(Request $request) : JsonResponse
     {
         try {
             $return = [];
@@ -395,11 +375,8 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
-    /**
-     * @Route("/statistics", name="statistics", methods={"POST"})
-     */
-    public function statisticsAction(Request $request): JsonResponse
+    #[Route(path: '/statistics', name: 'statistics', methods: ['POST'])]
+    public function statisticsAction(Request $request) : JsonResponse
     {
         try {
             $return = [];
@@ -416,7 +393,6 @@ class ApiController extends AbstractController
         // Send the response
         return $this->json($return);
     }
-
     /**
      * @throws Exception
      */
