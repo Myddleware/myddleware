@@ -171,7 +171,6 @@ class RuleManagerCustom extends RuleManager {
 				}
 			}	
 		} catch (\Exception $e) {
-			$doc->setMessage('Error : '.$e->getMessage());
 			$this->logger->error( 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )' );					
 		}
 	}

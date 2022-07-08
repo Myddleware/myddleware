@@ -62,7 +62,7 @@ class airtablecustom extends airtable {
 			$paramDoc['jobId'] = $param['jobId'];
 			$documentManager->setParam($paramDoc);
 			// Add a log
-			$documentManager->generateDocLog('W','La donnée a ete supprimee dans Airtable. Le type de document passe donc de Update à Create. ');
+			$documentManager->generateDocLog('W','La donnee a ete supprimee dans Airtable. Le type de document passe donc de Update a Create. ');
 			// Set the create type to the document
 			$documentManager->updateType('C');
 			// Clear the error
