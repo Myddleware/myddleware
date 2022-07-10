@@ -82,7 +82,8 @@ create_rule:
             label: Synchronization type
             create_modify: Create and update data
             create_only: Create data only
-            search_only: Retrieving existing data only          
+            search_only: Retrieving existing data only   
+            update_only: Update data only            
         deletion:
             label: Allow deletion from target application
             yes: Yes

@@ -829,7 +829,7 @@ class suitecrmcore extends solution
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
     public function getRefFieldName($moduleSource, $RuleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($RuleMode, ['0', 'S', 'U'])) {
             return 'date_modified';
         } elseif ('C' == $RuleMode) {
             return 'date_entered';
