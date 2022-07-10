@@ -599,6 +599,7 @@ class solutioncore
         return [
             '0' => 'create_modify',
             'C' => 'create_only',
+			'U' => 'update_only',
         ];
     }
 

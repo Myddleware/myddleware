@@ -412,7 +412,9 @@ class airtablecore extends solution
                     // Add the record id in the body if update
                     if ('update' == $method) {
                         $body['records'][$i]['id'] = $data['target_id'];
-                        unset($body['records'][$i]['fields']['target_id']);
+						if (isset($body['records'][$i]['fields']['target_id'])) {
+							unset($body['records'][$i]['fields']['target_id']);
+						}
                     }
                     ++$i;
                 }
