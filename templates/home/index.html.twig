@@ -3,19 +3,80 @@
 {% block body %}
 <header>
     <div class ="home_container">
-        <img class="logo" src="build/images/logo/logo1.png" alt="logo_myddleware">
+        <img class="logo" src="build/images/logo/logo_2.jpg" alt="logo_myddleware">
         <div class="home-button">
         <strong><a href="{{path('login')}}" class="connection">Connection</a></strong>
-        <strong><a href="" class="registration">Registration</a></strong>
+        <strong><a href="" class="btn-home">{{ 'install.title' | trans }}</a></strong>
         </div>
     </div>
 </header>
 <main class="main_home">
     <section class="main-content">
-        <h2>Connect your applications, exploit your data better.</h2>
-        <h4>Myddleware makes complex data integration operations easier</h4>
+        <h2><strong>Connect <span>your applications</span>, exploit your data better.</strong></h2>
+        <p>Myddleware makes complex data integration operations easier</p>
         <p>Myddleware is free and open-source !</p>
-        <p>Install it directly on your server and follow our tutorials on the community website to set up your integration rules. </p>
+        <p>Install it directly on your server and follow our tutorials on the community website to set up your integration rules. <a href ="https://myddleware.github.io/myddleware/#/"><i class="fas fa-arrow-right"></i></a></p>
+        <strong><a href="https://myddleware.github.io/myddleware/#/" class="btn-home">Documentation</a></strong>
+    </section>
+    <section class="main-carousel">
+        <div class="slider">
+	<div class="slide-track">
+		<div class="slide">
+			<img src="build/images/solution/airtable.png" alt="airtable_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/woocommerce.png"  alt="woocommerce_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/suitecrm.png" alt="suitecrm_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/vtigercrm.png" alt="vtigercrm_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/sugarcrm.png" alt="sugarcrm_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/moodle.png" alt="moodle_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/prestashop.png" alt="prestashop_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/zuora.png" alt="zuora_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/sendinblue.png" alt="sendinblue_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/bittle.png" alt="bittle_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/drupal.png" alt="drupal_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/erpnext.png" alt="erpnext_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/dolist.png" alt="dolist_logo" />
+		</div>
+		<div class="slide">
+			<img src="build/images/solution/shopify.png" alt="shopify_logo" />
+		</div>
+        <div class="slide">
+			<img src="build/images/solution/hubspot.png" alt="hubspot_logo" />
+		</div>
+        <div class="slide">
+			<img src="build/images/solution/joomla.png" alt="joomla_logo" />
+		</div>
+        <div class="slide">
+			<img src="build/images/solution/mantis.png" alt="mantis_logo" />
+		</div>
+        <div class="slide">
+			<img src="build/images/solution/mautic.png" alt="mautic_logo" />
+		</div>
+	</div>
+</div>
     </section>
 </main>
 {% endblock %}
