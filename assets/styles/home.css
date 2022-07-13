@@ -28,7 +28,7 @@ header{
     background-color: #282828;
     color: white;
     padding: 15px;
-    border-radius: 6px;
+    border-radius: 30px;
     margin-left: 30px;
     margin-right: 30px;
     
@@ -51,25 +51,38 @@ main {
     flex: 1;
 }
 main p{
-    font-size: 1.5em;
+    font-size: 1.3em;
+    margin-bottom: 65px;
 }
 .main_home{
     padding-top: 30px;
-    background-image:linear-gradient(180deg, rgb(255 255 255 / 24%) 0%,
-     #ffffff 80%),linear-gradient(180deg, #cdf3ff 29%, #ffffff 95%);
+    background-image:linear-gradient(306deg, rgba(0, 157, 255, 0) 100%, #ffffff 50%),linear-gradient(113deg, #ffffff 50%, #14b3d6 50%)
+    /* background-image:linear-gradient(180deg, rgb(255 255 255 / 24%) 0%,
+     #ffffff 80%),linear-gradient(180deg, #cdf3ff 29%, #ffffff 95%); */
+     /* background-image: linear-gradient(180deg, rgb(255 255 255 / 0%) 0%, #ffffff 80%),linear-gradient(135deg, #8bd8ff 50%, #ffffff 50%); */
+     /* background-image: linear-gradient(175deg, rgb(255 255 255 / 24%) 94%, #ffffff 80%),linear-gradient(151deg, #cdf3ff 50%, #ffffff 50%); */
 }
 .main-content{
-    text-align: center;
+    /* text-align: center; */
     font-family: sans-serif;
-    width: 90%;
+    /* width: 90%;
     margin: auto;
-    margin-top: 100px;
+    margin-top: 100px; */
+    width: 40%;
+    margin: 60px;
 }
 .main_home h2{
     font-size: 3rem;
 }
 span{
     color: #14b3d6;
+}
+.btn-doc{
+    padding: 18px;
+    padding-left: 250px;
+    padding-right: 250px;
+    text-align: center;
+    margin-left: 0px;
 }
 /* FOOTER */
 
@@ -111,7 +124,7 @@ footer p span{
 	height: 100px;
 	overflow:hidden;
 	position: relative;
-	
+    width: 1800px;
 }
 .slide-track {
     animation: scroll 40s linear infinite;
