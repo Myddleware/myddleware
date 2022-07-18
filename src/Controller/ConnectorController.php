@@ -17,6 +17,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
+
+    private $secret;
+
+    public function __construct($secret)
+    {
+        $this->secret = $secret;
+    }
+
     /**
      * @throws Exception
      */
