@@ -778,7 +778,7 @@ class RuleManager
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckParentDocument();
+                    $response[$document['id']] = $this->documentManager->checkParentDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
