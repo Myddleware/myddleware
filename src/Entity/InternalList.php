@@ -5,8 +5,6 @@ namespace App\Entity;
 use App\Repository\InternalListRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-//test git
-
 /**
  * @ORM\Entity(repositoryClass=InternalListRepository::class)
  */
