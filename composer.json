@@ -98,6 +98,7 @@
     "doctrine/doctrine-fixtures-bundle": "^3.4",
     "friendsofphp/php-cs-fixer": "^3.8",
     "icanhazstring/composer-unused": "^0.8.2",
+    "phpmd/phpmd": "^2.12",
     "phpstan/extension-installer": "^1.1",
     "phpstan/phpstan": "^1.8",
     "phpstan/phpstan-beberlei-assert": "^1.0",
