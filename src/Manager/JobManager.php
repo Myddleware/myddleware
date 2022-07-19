@@ -193,7 +193,7 @@ class JobManager
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     public function ckeckPredecessorDocuments()
     {
-        $this->ruleManager->ckeckPredecessorDocuments();
+        $this->ruleManager->checkPredecessorDocuments();
     }
 
     // Permet de filtrer les documents en fonction des filtres de la règle
@@ -205,7 +205,7 @@ class JobManager
     // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
     public function ckeckParentDocuments()
     {
-        $this->ruleManager->ckeckParentDocuments();
+        $this->ruleManager->checkParentDocuments();
     }
 
     // Permet de trasformer les documents
