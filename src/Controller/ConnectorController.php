@@ -20,11 +20,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConnectorController extends AbstractController
 {
 
-    private string $secret;
+    private mixed $secret;
 
-    public function __construct(string $secret)
+    public function __construct()
     {
-        $this->secret = $secret;
+        $this->secret = $this->getParameter('secret');
     }
 
     /**
