@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Manager\DocumentManager;
@@ -12,6 +14,8 @@ use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -185,6 +189,10 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     #[Route(path: '/delete_record', name: 'delete_record', methods: ['POST'])]
     public function deleteRecordAction(Request $request): JsonResponse
     {
@@ -222,7 +230,7 @@ class ApiController extends AbstractController
             $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
 
             // Create job instance
-            $job = $this->container->get('myddleware_job.job');
+            $job = $this->container->getParameter('myddleware_job.job');
             $job->setApi(1);
             $job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
 

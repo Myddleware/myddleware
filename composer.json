@@ -109,7 +109,7 @@
     "symfony/css-selector": "5.4.*",
     "symfony/maker-bundle": "^1.26",
     "symfony/phpunit-bridge": "^6.0",
-    "vimeo/psalm": "^4.23",
+    "vimeo/psalm": "^4.24",
     "zenstruck/foundry": "^1.17"
   },
   "scripts": {

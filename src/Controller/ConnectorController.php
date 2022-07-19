@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Connector;
@@ -18,9 +20,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConnectorController extends AbstractController
 {
 
-    private $secret;
+    private string $secret;
 
-    public function __construct($secret)
+    public function __construct(string $secret)
     {
         $this->secret = $secret;
     }
