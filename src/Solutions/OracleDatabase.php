@@ -35,9 +35,9 @@ class OracleDatabase extends Database
 
     protected $fieldType = 'Type';
 
-    protected $stringSeparatorOpen = '';
+    protected string $stringSeparatorOpen = '';
 
-    protected $stringSeparatorClose = '';
+    protected string $stringSeparatorClose = '';
 
     protected function generatePdo()
     {

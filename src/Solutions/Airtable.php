@@ -65,10 +65,8 @@ class Airtable extends Solution
 
     /**
      * Max number of records posted by call.
-     *
-     * @var string
      */
-    protected string|int $callPostLimit = 10;
+    protected int $callPostLimit = 10;
 
     // Log in form parameters
     public function getFieldsLogin(): array
@@ -240,7 +238,7 @@ class Airtable extends Solution
                             $dateModified = $record['fields'][$dateRefField];
                         // createdTime not allowed for reading action, only to get an history or a duplicate field
                         } elseif (
-                                !empty($record['createdTime'])
+                            !empty($record['createdTime'])
                             and !empty($param['query'])
                         ) {
                             $dateModified = $record['createdTime'];
@@ -269,8 +267,8 @@ class Airtable extends Solution
                 and !empty($offset) // Only if there is more data to be read
             );
         } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
         }
 
         return $result;
@@ -310,8 +308,6 @@ class Airtable extends Solution
 
     /**
      * Create data into target app.
-     *
-     * @return void
      */
     public function createData(array $param): ?array
     {
@@ -320,18 +316,14 @@ class Airtable extends Solution
 
     /**
      * Update existing data into target app.
-     *
-     * @param [type] $param
-     *
-     * @return void
      */
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         return $this->upsert('update', $param);
     }
 
     // Delete a record
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         return $this->upsert('delete', $param);
     }
@@ -341,7 +333,7 @@ class Airtable extends Solution
      *
      * @param string $method create|update
      */
-    public function upsert(string $method, array $param)
+    public function upsert(string $method, array $param): array
     {
         // Init parameters
         $baseID = $this->connectionParam['projectid'];
@@ -435,9 +427,9 @@ class Airtable extends Solution
                         $record = $content['records'][$i];
                         if (!empty($record['id'])) {
                             $result[$idDoc] = [
-                                                    'id' => $record['id'],
-                                                    'error' => false,
-                                            ];
+                                'id' => $record['id'],
+                                'error' => false,
+                            ];
                         } else {
                             $result[$idDoc] = [
                                 'id' => '-1',
@@ -472,14 +464,17 @@ class Airtable extends Solution
         return $response;
     }
 
-    // retrun the reference date field name
-    public function getDateRefName($moduleSource, $ruleMode)
+    // rerun the reference date field name
+    public function getDateRefName($moduleSource, $ruleMode): string
     {
         return 'Last Modified';
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06 to 2020-07-08 12:33:06
+    /**
+     * @throws \Exception
+     * Convert date to Myddleware format
+     * 2020-07-08T12:33:06 to 2020-07-08 12:33:06
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -487,7 +482,10 @@ class Airtable extends Solution
         return $dto->format('Y-m-d H:i:s');  // TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
     }
 
-    // convert from Myddleware format to Airtable format
+    /**
+     * @throws \Exception
+     * convert from Myddleware format to Airtable format
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);

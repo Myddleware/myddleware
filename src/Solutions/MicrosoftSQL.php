@@ -35,9 +35,9 @@ class MicrosoftSQL extends Database
 
     protected $fieldType = 'DATA_TYPE';
 
-    protected $stringSeparatorOpen = '[';
+    protected string $stringSeparatorOpen = '[';
 
-    protected $stringSeparatorClose = ']';
+    protected string $stringSeparatorClose = ']';
 
     // Generate PDO object
     protected function generatePdo()

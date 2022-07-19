@@ -234,7 +234,7 @@ class RuleManager
                 $read['jobId'] = $this->jobId;
                 $dataSource = $this->solutionSource->readData($read);
                 if (!empty($dataSource['error'])) {
-                    throw new \Exception('Failed to read record ' . $idSource . ' in the module ' . $read['module'] . ' of the source solution. ' . (!empty($dataSource['error']) ? $dataSource['error'] : ''));
+                    throw new \Exception('Failed to read record '.$idSource.' in the module '.$read['module'].' of the source solution. '.(!empty($dataSource['error']) ? $dataSource['error'] : ''));
                 }
             } else {
                 $dataSource['values'][] = $param['values'];
@@ -259,7 +259,7 @@ class RuleManager
                     $childDocument->setParam($docParam, true);
                     $createDocument = $childDocument->createDocument();
                     if (!$createDocument) {
-                        throw new \Exception('Failed to create document : ' . $this->documentManager->getMessage());
+                        throw new \Exception('Failed to create document : '.$this->documentManager->getMessage());
                     }
                     $documents[] = $childDocument;
                 }
@@ -269,7 +269,7 @@ class RuleManager
             return $documents;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             $errorObj = new \stdClass();
             $errorObj->error = $error;
@@ -333,7 +333,7 @@ class RuleManager
 
             return $c;
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
             return false;
         }
@@ -419,12 +419,12 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to create documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to create documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         } // On affiche pas d'erreur si la lecture est désactivée
         elseif (empty($this->ruleParams['disableRead'])) {
-            $readSource['error'] = 'The rule ' . $this->rule['name_slug'] . (1 == $this->rule['deleted'] ? ' is deleted.' : ' is disabled.');
+            $readSource['error'] = 'The rule '.$this->rule['name_slug'].(1 == $this->rule['deleted'] ? ' is deleted.' : ' is disabled.');
         }
 
         return $readSource;
@@ -455,7 +455,7 @@ class RuleManager
             ]);
         // Every rules should have the param datereference
         if (empty($param)) {
-            throw new \Exception('No reference date for the rule ' . $this->ruleId . '.');
+            throw new \Exception('No reference date for the rule '.$this->ruleId.'.');
         } else {
             // Save param modification in the audit table
             if ($param->getValue() != $this->dataSource['date_ref']) {
@@ -565,7 +565,7 @@ class RuleManager
             } elseif (!empty($connect['error'])) {
                 return $connect;
             } else {
-                return ['error' => 'Failed to connect to the source with rule : ' . $this->ruleId . ' .'];
+                return ['error' => 'Failed to connect to the source with rule : '.$this->ruleId.' .'];
             }
         }
 
@@ -619,7 +619,7 @@ class RuleManager
                     or $this->ruleParams['datereference'] == $this->dataSource['date_ref']
                 )
             ) {
-                return ['error' => 'All records read have the same reference date in rule ' . $this->rule['name'] . '. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.'];
+                return ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.'];
             }
 
             return true;
@@ -663,8 +663,8 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to filter documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to filter documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -707,8 +707,8 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to check predecessors : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to check predecessors : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -755,8 +755,8 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to check parents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to check parents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -803,8 +803,8 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to transform documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to transform documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -857,8 +857,8 @@ class RuleManager
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                $this->logger->error('Failed to create documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-                $readSource['error'] = 'Failed to create documents : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -896,7 +896,7 @@ class RuleManager
             'remove' => $this->changeDeleteFlag($id_document, true),
             'restore' => $this->changeDeleteFlag($id_document, false),
             'changeStatus' => $this->changeStatus($id_document, $param1),
-            default => 'Action ' . $event . ' unknown. Failed to run this action. ',
+            default => 'Action '.$event.' unknown. Failed to run this action. ',
         };
     }
 
@@ -906,7 +906,7 @@ class RuleManager
             'ALL' => $this->runMyddlewareJob('ALL'),
             'ERROR' => $this->runMyddlewareJob('ERROR'),
             'runMyddlewareJob' => $this->runMyddlewareJob($this->ruleId, $jobName),
-            default => 'Action ' . $event . ' unknown. Failed to run this action. ',
+            default => 'Action '.$event.' unknown. Failed to run this action. ',
         };
     }
 
@@ -958,7 +958,7 @@ class RuleManager
                 } else {
                     $successMessages[] = $message['message'];
                 }
-                $data['testMessage'] .= $message['type'] . ' : ' . $message['message'] . chr(10);
+                $data['testMessage'] .= $message['type'].' : '.$message['message'].chr(10);
             }
             if (!empty($errorMessages)) {
                 $session->set('error', $errorMessages);
@@ -1075,7 +1075,8 @@ class RuleManager
     }
 
     /**
-     * Remove a document
+     * Remove a document.
+     *
      * @throws Exception
      */
     protected function changeDeleteFlag($id_document, $deleteFlag): void
@@ -1129,7 +1130,7 @@ class RuleManager
             // Get the php executable
             $php = $this->tools->getPhpVersion();
 
-            $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/job/' . $guid . '.txt';
+            $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/job/'.$guid.'.txt';
             $fs = new Filesystem();
             try {
                 $fs->mkdir(dirname($fileTmp));
@@ -1138,12 +1139,12 @@ class RuleManager
             }
             // if user clicked on cancel all transfers of a rule
             if ('cancelDocumentJob' === $event) {
-                exec($php . ' ' . __DIR__ . '/../../bin/console myddleware:massaction cancel rule ' . $ruleId . ' --env=' . $this->env . ' > ' . $fileTmp . ' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
             // if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
-                exec($php . ' ' . __DIR__ . '/../../bin/console myddleware:massaction remove rule ' . $ruleId . ' Y --env=' . $this->env . ' > ' . $fileTmp . ' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
             } else {
-                exec($php . ' ' . __DIR__ . '/../../bin/console myddleware:synchro ' . $ruleId . ' --env=' . $this->env . ' > ' . $fileTmp . ' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
@@ -1174,9 +1175,9 @@ class RuleManager
             $result = explode(';', $firstLine);
             // Renvoie du message en session
             if ($result[0]) {
-                $session->set('info', ['<a href="' . $this->router->generate('task_view', ['id' => trim($result[1])]) . '" target="blank_">' . $this->tools->getTranslation(['messages', 'rule', 'open_running_task']) . '</a>.']);
+                $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => trim($result[1])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>.']);
             } else {
-                $session->set('error', [$result[1] . (!empty($result[2]) ? '<a href="' . $this->router->generate('task_view', ['id' => trim($result[2])]) . '" target="blank_">' . $this->tools->getTranslation(['messages', 'rule', 'open_running_task']) . '</a>' : '')]);
+                $session->set('error', [$result[1].(!empty($result[2]) ? '<a href="'.$this->router->generate('task_view', ['id' => trim($result[2])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>' : '')]);
             }
 
             return $result[0];
@@ -1218,11 +1219,11 @@ class RuleManager
         if (in_array($status, ['New', 'Filter_KO'])) {
             $response = $this->filterDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change => Filter_OK';
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
             } elseif (-1 == $response[$id_document]) {
-                $msg_info[] = 'Transfer id ' . $id_document . ' : Status change => Filter';
+                $msg_info[] = 'Transfer id '.$id_document.' : Status change => Filter';
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer => Filter_KO';
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
             }
             // Update status if an action has been executed
             $status = $this->documentManager->getStatus();
@@ -1230,9 +1231,9 @@ class RuleManager
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
             $response = $this->checkPredecessorDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change => Predecessor_OK';
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer => Predecessor_KO';
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
             }
             // Update status if an action has been executed
             $status = $this->documentManager->getStatus();
@@ -1240,9 +1241,9 @@ class RuleManager
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
             $response = $this->checkParentDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change => Relate_OK';
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer => Relate_KO';
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
             }
             // Update status if an action has been executed
             $status = $this->documentManager->getStatus();
@@ -1250,9 +1251,9 @@ class RuleManager
         if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
             $response = $this->transformDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change : Transformed';
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer : Error_transformed';
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
             }
             // Update status if an action has been executed
             $status = $this->documentManager->getStatus();
@@ -1260,9 +1261,9 @@ class RuleManager
         if (in_array($status, ['Transformed', 'Error_checking', 'Not_found'])) {
             $response = $this->getTargetDataDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change : ' . $response['doc_status'];
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer : ' . $response['doc_status'];
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
             }
             // Update status if an action has been executed
             $status = $this->documentManager->getStatus();
@@ -1291,9 +1292,9 @@ class RuleManager
                 && empty($response[$id_document]['error'])
                 && empty($response['error']) // Error can be on the document or can be a general error too
             ) {
-                $msg_success[] = 'Transfer id ' . $id_document . ' : Status change : Send';
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
             } else {
-                $msg_error[] = 'Transfer id ' . $id_document . ' : Error, status transfer : Error_sending. ' . (!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
+                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
             }
         }
         // If the job is manual, we display error in the UI
@@ -1355,7 +1356,7 @@ class RuleManager
                 return true;
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 
         return false;
@@ -1424,7 +1425,7 @@ class RuleManager
                         }
                     } else {
                         $response[$documentId] = false;
-                        $response['error'] = 'Type transfer ' . $type . ' unknown. ';
+                        $response['error'] = 'Type transfer '.$type.' unknown. ';
                     }
                 } else {
                     $response[$documentId] = false;
@@ -1432,7 +1433,7 @@ class RuleManager
                 }
             }
         } catch (\Exception $e) {
-            $response['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             if (!$this->api) {
                 echo $response['error'];
             }
@@ -1511,7 +1512,7 @@ class RuleManager
             }
             // Exception if all documents has been removed from data
             if (empty($send['data'])) {
-                $send['error'] = 'Every deletion record haven been cancelled for the rule ' . $this->ruleId . '. Nothing to send.';
+                $send['error'] = 'Every deletion record haven been cancelled for the rule '.$this->ruleId.'. Nothing to send.';
             }
         }
 
@@ -1603,7 +1604,7 @@ class RuleManager
 
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1623,7 +1624,7 @@ class RuleManager
                 return false;
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1633,7 +1634,7 @@ class RuleManager
     public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
     {
         // Init $limit parameter
-        $limit = ' LIMIT ' . $this->limit;
+        $limit = ' LIMIT '.$this->limit;
         // Si un document est en paramètre alors on filtre la requête sur le document
         if (!empty($documentId)) {
             $documentFilter = " document.id = '$documentId'";
@@ -1745,7 +1746,7 @@ class RuleManager
                 $this->sourceFields = array_unique($this->sourceFields);
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1767,7 +1768,7 @@ class RuleManager
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1785,7 +1786,7 @@ class RuleManager
             $result = $stmt->executeQuery();
             $this->ruleRelationships = $result->fetchAllAssociative();
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1814,13 +1815,14 @@ class RuleManager
             $result = $stmt->executeQuery();
             $this->ruleFilters = $result->fetchAllAssociative();
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
     /**
      * Get the child rules of the current rule
-     * Return the relationships between the parent and the child rules
+     * Return the relationships between the parent and the child rules.
+     *
      * @throws \Exception
      */
     public function getChildRules(): array
@@ -1838,7 +1840,7 @@ class RuleManager
 
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
-            throw new \Exception('failed to get the child rules : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            throw new \Exception('failed to get the child rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1856,7 +1858,7 @@ class RuleManager
                 return json_decode($documentDataEntity->getData(), true);
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error getSourceData  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 
         return false;
@@ -1877,7 +1879,8 @@ class RuleManager
     }
 
     /**
-     * Commit function with check if job is still active
+     * Commit function with check if job is still active.
+     *
      * @throws Exception
      * @throws \Exception
      */
@@ -1917,7 +1920,7 @@ class RuleManager
             'RuleParam' => [
                 'limit' => '100',
                 'delete' => '60',
-                'datereference' => date('Y-m-d') . ' 00:00:00',
+                'datereference' => date('Y-m-d').' 00:00:00',
             ],
         ];
     }

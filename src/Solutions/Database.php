@@ -35,11 +35,11 @@ class Database extends Solution
 
     protected $pdo;
 
-    protected $charset = 'utf8';
+    protected string $charset = 'utf8';
 
-    protected $stringSeparatorOpen = '`';
+    protected string $stringSeparatorOpen = '`';
 
-    protected $stringSeparatorClose = '`';
+    protected string $stringSeparatorClose = '`';
 
     public function login(array $connectionParam)
     {
