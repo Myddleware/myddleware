@@ -28,11 +28,15 @@ namespace App\Solutions;
 class MicrosoftSQL extends Database
 {
     protected $driver;
+
     protected $fieldName = 'COLUMN_NAME';
+
     protected $fieldLabel = 'COLUMN_NAME';
+
     protected $fieldType = 'DATA_TYPE';
 
     protected $stringSeparatorOpen = '[';
+
     protected $stringSeparatorClose = ']';
 
     // Generate PDO object

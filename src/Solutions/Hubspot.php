@@ -30,8 +30,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class Hubspot extends Solution
 {
     protected $url = 'https://api.hubapi.com/';
+
     protected $version = 'v1';
+
     protected $readLast = false;
+
     protected $migrationMode = false;
 
     protected $fieldsDuplicate = [

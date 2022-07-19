@@ -32,10 +32,12 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class SuiteCRM extends Solution
 {
     protected $limitCall = 100;
+
     protected $urlSuffix = '/service/v4_1/rest.php';
 
     // Enable to read deletion and to delete data
     protected $readDeletion = true;
+
     protected $sendDeletion = true;
 
     protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];

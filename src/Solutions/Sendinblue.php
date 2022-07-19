@@ -36,12 +36,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class Sendinblue extends Solution
 {
     protected $config;
+
     protected $required_fields = [
                                     'default' => ['id', 'modifiedAt'],
                                     'transactionalEmails' => ['uuid', 'date'],
                                     'transactionalEmailActivity' => ['messageId', 'event', 'date'],
                                 ];
+
     protected $fieldsDuplicate = ['contacts' => ['email']];
+
     protected $limitEmailActivity = 100;
 
     public function getFieldsLogin(): array

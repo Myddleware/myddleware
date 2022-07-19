@@ -169,20 +169,32 @@ function printTemplateWithNS($wsdl, $call, $object, $debug, $offset, $apiNamespa
 class ZuoraAPIHelper
 {
     public static $maxZObjectCount = 50;
+
     public static $defaultApiNamespace = 'ns1';
+
     public static $defaultApiNamespaceURL = 'http://api.zuora.com/';
+
     public static $defaultObjectNamespace = 'ns2';
+
     public static $defaultObjectNamespaceURL = 'http://object.api.zuora.com/';
+
     public static $SEPARATOR = ',';
+
     public static $TEXT_QUALIFIER = '"';
+
     public static $MAX_QUERY_RETURN_COUNT = 100;
+
     public static $MAX_QUERY_WHERE_CLAUSE_COUNT = 500;
 
     // Call Globals
     public static $lastLoginTime = 0;
+
     public static $loginToken = '';
+
     public static $client = 0;
+
     public static $header = 0;
+
     public static $batchSize = 0;
 
     // ###############################################################################
@@ -1435,8 +1447,11 @@ class ZuoraAPIHelper
 class MySoapClient extends SoapClient
 {
     public $myRequest = '';
+
     public $myResponse = '';
+
     public $myDebug = 0;
+
     public $myLocation = '';
 
     public function __construct($wsdl, $options = [])

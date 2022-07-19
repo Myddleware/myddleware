@@ -32,18 +32,25 @@ use Symfony\Component\HttpClient\HttpClient;
 class Airtable extends Solution
 {
     protected $sendDeletion = true;
+
     protected string $airtableURL = 'https://api.airtable.com/v0/';
+
     protected string $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
+
     protected $required_fields = ['default' => ['createdTime', 'Last Modified']];
+
     /**
      * Airtable base.
      */
     protected string $projectID;
+
     /**
      * API key (provided by Airtable).
      */
     protected string $token;
+
     protected string $delaySearch = '-1 month';
+
     /**
      * Name of the table / module that will be used as the default table to access the login() method
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.

@@ -31,9 +31,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class CirrusShield extends Solution
 {
     protected $url = 'https://www.cirrus-shield.net/RestApi/';
+
     protected $token;
+
     protected $update;
+
     protected $organizationTimezoneOffset;
+
     protected $limitCall = 1;
 
     protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];

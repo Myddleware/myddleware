@@ -32,7 +32,9 @@ use Symfony\Component\HttpClient\HttpClient;
 class WordPress extends Solution
 {
     protected string $apiSuffix = '/wp-json/wp/v2/';
+
     protected int $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
+
     // Module without reference date
     protected array $moduleWithoutReferenceDate = ['users', 'categories'];
 

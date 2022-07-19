@@ -32,6 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class Moodle extends Solution
 {
     protected $moodleClient;
+
     protected $required_fields = [
         'default' => ['id'],
         'get_users_completion' => ['id', 'timemodified'],

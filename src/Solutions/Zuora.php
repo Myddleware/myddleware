@@ -31,9 +31,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class Zuora extends Solution
 {
     protected $instance;
+
     protected $debug = 0;
+
     protected $version = '85.0'; // Maw limit : 50
+
     protected $update = false;
+
     protected $limitCall = 10; // Maw limit : 50
 
     protected $required_fields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];

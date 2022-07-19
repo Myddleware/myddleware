@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Admin;
 
 use App\Entity\Module;
@@ -21,10 +23,9 @@ class ModuleCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-                ->setPermission(Action::DELETE, 'ROLE_SUPER_ADMIN')
-                ->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN')
-                ->setPermission(Action::EDIT, 'ROLE_SUPER_ADMIN')
-                ;
+            ->setPermission(Action::DELETE, 'ROLE_SUPER_ADMIN')
+            ->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN')
+            ->setPermission(Action::EDIT, 'ROLE_SUPER_ADMIN');
     }
 
     public function configureFields(string $pageName): iterable
@@ -40,9 +41,7 @@ class ModuleCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters->add('name')
-                        ->add('nameKey')
-                        ->add('solution')
-
-        ;
+            ->add('nameKey')
+            ->add('solution');
     }
 }

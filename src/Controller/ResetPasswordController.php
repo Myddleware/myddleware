@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -28,7 +30,9 @@ class ResetPasswordController extends AbstractController
     use ResetPasswordControllerTrait;
 
     private ResetPasswordHelperInterface $resetPasswordHelper;
+
     private EntityManagerInterface $entityManager;
+
     private LoggerInterface $logger;
 
     public function __construct(ResetPasswordHelperInterface $resetPasswordHelper, EntityManagerInterface $entityManager, LoggerInterface $logger)

@@ -47,26 +47,41 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class TemplateManager
 {
     protected $lang;
+
     protected $solutionSourceName;
+
     protected $solutionTarget;
+
     protected $connectorSource;
+
     protected $connectorTarget;
+
     protected $idUser;
+
     protected $templateDir;
+
     protected $rules;
+
     protected $ruleNameSlugArray;
+
     protected $entityManager;
+
     protected $sourceSolution;
+
     protected $targetSolution;
+
     protected $connection;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var string
      */
     private $projectDir;
+
     /**
      * @var SolutionManager
      */

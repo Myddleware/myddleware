@@ -28,6 +28,7 @@ namespace App\Manager;
 class FormulaManager
 {
     public $parse = [];
+
     public $formulaFunctionManager;
 
     public function __construct(FormulaFunctionManager $formulaFunctionManager)

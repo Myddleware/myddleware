@@ -34,16 +34,23 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class ERPNext extends Solution
 {
     protected $token;
+
     protected $update;
+
     protected $organizationTimezoneOffset;
+
     protected $limitCall = 100;
+
     protected $required_fields = ['default' => ['name', 'creation', 'modified']];
+
     protected $fieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
         'Item' => ['item_code'],
     ];
+
     // Module list that allows to make parent relationships
     protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
+
     protected $childModuleKey = [
         'Sales Invoice Item' => 'items',
         'Sales Order Item' => 'items',
@@ -54,6 +61,7 @@ class ERPNext extends Solution
         'Assessment Result Detail' => 'details',
         'Sales Taxes and Charges' => 'taxes',
     ];
+
     // Get isTable parameter for each module
     protected $isTableModule = [];
 

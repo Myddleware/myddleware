@@ -36,10 +36,15 @@ use Symfony\Component\Yaml\Yaml;
 class ToolsManager
 {
     protected $connection;
+
     protected $container;
+
     protected $logger;
+
     protected $language;
+
     protected $translations;
+
     /**
      * @var string
      */

@@ -34,15 +34,19 @@ use Psr\Log\LoggerInterface;
 class HomeManager
 {
     protected $connection;
+
     protected $logger;
 
     public const historicDays = 7;
     public const nbHistoricJobs = 5;
+
     protected $historicDateFormat = 'M-d';
+
     /**
      * @var JobRepository
      */
     private $jobRepository;
+
     /**
      * @var DocumentRepository
      */

@@ -9,6 +9,7 @@ class Zuora_SubscribeOptions extends Zuora_Object
     protected $zType = 'SubscribeOptions';
 
     protected $zGenerateInvoice;
+
     protected $zProcessPayments;
 
     public function __construct(

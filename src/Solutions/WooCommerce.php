@@ -31,12 +31,19 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class WooCommerce extends Solution
 {
     protected $apiUrlSuffix = '/wp-json/wc/v3/';
+
     protected $url;
+
     protected $consumerKey;
+
     protected $consumerSecret;
+
     protected $woocommerce;
+
     protected $callLimit = 100;       // WooCommerce API only allows 100 records per page read
+
     protected $delaySearch = '-1 month';
+
     protected $subModules = [
                                 'line_items' => [
                                     'parent_module' => 'orders',

@@ -37,8 +37,11 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Solution
 {
     public $isConnectionValid = false;
+
     public $js = 0;
+
     public $refresh_token = false;
+
     public $callback = false;
 
     // Session de la connexion webservice
@@ -80,6 +83,7 @@ class Solution
 
     // Disable to read deletion and to delete data
     protected $readDeletion = false;
+
     protected $sendDeletion = false;
 
     // Specify if the class is called by the API
@@ -91,10 +95,12 @@ class Solution
      * @var Connection
      */
     protected $connection;
+
     /**
      * @var ParameterBagInterface
      */
     protected $parameterBagInterface;
+
     /**
      * @var EntityManagerInterface
      */

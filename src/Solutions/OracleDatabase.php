@@ -30,10 +30,13 @@ class OracleDatabase extends Database
     protected $driver = 'oci';
 
     protected $fieldName = 'Name';
+
     protected $fieldLabel = 'Name';
+
     protected $fieldType = 'Type';
 
     protected $stringSeparatorOpen = '';
+
     protected $stringSeparatorClose = '';
 
     protected function generatePdo()

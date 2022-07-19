@@ -36,18 +36,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ReadRecordCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
+    protected static $defaultName = 'myddleware:readrecord';
+
+    private LoggerInterface $logger;
+
+    private JobManager $jobManager;
+
+    private RuleRepository $ruleRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -63,9 +58,7 @@ class ReadRecordCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:readrecord')
-            ->setDescription('Read specific records for a rule')
+        $this->setDescription('Read specific records for a rule')
             ->addArgument('ruleId', InputArgument::REQUIRED, 'Rule used to read the records')
             ->addArgument('filterQuery', InputArgument::REQUIRED, 'Filter used to read data in the source application, eg : id')
             ->addArgument('filterValues', InputArgument::REQUIRED, 'Values corresponding to the fileter separated by comma, eg : 1256,4587')
@@ -73,6 +66,9 @@ class ReadRecordCommand extends Command
         ;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $ruleId = $input->getArgument('ruleId');

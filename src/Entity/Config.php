@@ -22,8 +22,8 @@ class Config
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Unique
      */
+    #[Assert\Unique]
     private $name;
 
     /**

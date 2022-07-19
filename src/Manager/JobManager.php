@@ -37,34 +37,52 @@ use Symfony\Component\Routing\RouterInterface;
 class JobManager
 {
     protected $id;
+
     public $message = '';
+
     public $createdJob = false;
+
     protected $container;
+
     protected $connection;
+
     protected $logger;
+
     protected $tools;
+
     protected $ruleManager;
+
     protected $ruleId;
+
     protected $logData;
+
     protected $start;
+
     protected $paramJob;
+
     protected $manual;
+
     protected $api = 0; 	// Specify if the class is called by the API
+
     protected $env;
+
     protected $nbDayClearJob = 7;
 
     /**
      * @var ParameterBagInterface
      */
     private $parameterBagInterface;
+
     /**
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var TemplateManager
      */
     private $templateManager;
+
     /**
      * @var UpgradeManager
      */

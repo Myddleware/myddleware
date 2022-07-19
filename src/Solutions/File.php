@@ -34,17 +34,27 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class File extends Solution
 {
     protected $baseUrl;
+
     protected $messages = [];
+
     protected $duplicateDoc = [];
+
     protected $connection;
+
     protected $delimiter = ';';
+
     protected $enclosure = '"';
+
     protected $escape = '';
+
     protected $removeChar = [' ', '/', '\'', '.', '(', ')'];
+
     protected $readLimit = 1000;
+
     protected $lineNumber = 0;
 
     protected $required_fields = ['default' => ['id', 'date_modified']];
+
     protected $columnWidth = [];
 
     public function login($connectionParam)
