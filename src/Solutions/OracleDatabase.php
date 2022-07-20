@@ -90,7 +90,7 @@ class OracleDatabase extends Database
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
             // Query building
-            $requestSQL = $this->get_query_select_header($param, 'read');
+            $requestSQL = $this->getQuerySelectHeader($param, 'read');
 
             foreach ($param['fields'] as $field) {
                 $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose.', '; // Ajout de chaque champ souhaité

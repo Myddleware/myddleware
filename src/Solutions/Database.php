@@ -1,31 +1,32 @@
 <?php
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
 use App\Entity\Rule;
+use Exception;
+use PDO;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -41,25 +42,21 @@ class Database extends Solution
 
     protected string $stringSeparatorClose = '`';
 
-    public function login(array $connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
             try {
                 $this->pdo = $this->generatePdo();
-                $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
+                $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 $this->isConnectionValid = true;
             } catch (\PDOException $e) {
                 $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
-
-                return ['error' => $error];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -95,7 +92,7 @@ class Database extends Solution
     }
 
     // Get all tables from the database
-    public function getModules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): array
     {
         try {
             $modules = [];
@@ -106,7 +103,7 @@ class Database extends Solution
             // Error management
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Show Tables: '.$errorInfo[2]);
+                throw new Exception('Show Tables: '.$errorInfo[2]);
             }
             // Get every table and add them to the module list
             $fetchAll = $q->fetchAll();
@@ -117,10 +114,8 @@ class Database extends Solution
             }
 
             return $modules;
-        } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return $error;
+        } catch (Exception $e) {
+            return ['error' => 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'];
         }
     }
 
@@ -135,7 +130,7 @@ class Database extends Solution
             $exec = $q->execute();
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
+                throw new Exception('CheckTable: (Describe) '.$errorInfo[2]);
             }
             // Format the fields
             $fields = $q->fetchAll();
@@ -154,7 +149,7 @@ class Database extends Solution
                     'relate' => false,
                 ];
                 if (
-                        'ID' == strtoupper(substr($field[$this->fieldName], 0, 2))
+                    'ID' == strtoupper(substr($field[$this->fieldName], 0, 2))
                     or 'ID' == strtoupper(substr($field[$this->fieldName], -2))
                 ) {
                     $this->moduleFields[$field[$this->fieldName]] = [
@@ -195,10 +190,10 @@ class Database extends Solution
                 ];
             }
             // Add relationship fields coming from other rules
-            $this->get_module_fields_relate($module, $param);
+            $this->getModuleFieldsRelate($module, $param);
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 
             return false;
@@ -222,10 +217,10 @@ class Database extends Solution
 
             // Add the deletion field into the list field to be read if deletion is enabled on the rule
             if (
-                    !empty($param['ruleParams']['deletion'])
+                !empty($param['ruleParams']['deletion'])
                 and !empty($param['ruleParams']['deletionField'])
-                and 'compareTable' != $param['ruleParams']['deletionField']	// Not a physical field, only used to compare table and Myddleware
-                and 'history' != $param['call_type'] 	// Deletion flag is requireed only for read action, this field belongs to the source not the target application
+                and 'compareTable' != $param['ruleParams']['deletionField']    // Not a physical field, only used to compare table and Myddleware
+                and 'history' != $param['call_type']    // Deletion flag is requireed only for read action, this field belongs to the source not the target application
             ) {
                 $param['fields'][] = $param['ruleParams']['deletionField'];
             }
@@ -234,17 +229,17 @@ class Database extends Solution
             // fieldId and fieldDateRef are required for a read action from a rule execution
             if ('read' == $param['call_type']) {
                 if (!isset($param['ruleParams']['fieldId'])) {
-                    throw new \Exception('FieldId has to be specified for the read.');
+                    throw new Exception('FieldId has to be specified for the read.');
                 }
                 if (!isset($param['ruleParams']['fieldDateRef'])) {
-                    throw new \Exception('"fieldDateRef" has to be specified for the read.');
+                    throw new Exception('"fieldDateRef" has to be specified for the read.');
                 }
                 $this->requiredFields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
             }
             // fieldId and fieldDateRef are required for a read action from a rule execution
             if ('history' == $param['call_type']) {
                 if (!isset($param['ruleParams']['targetFieldId'])) {
-                    throw new \Exception('targetFieldId has to be specified for read the data in the target table.');
+                    throw new Exception('targetFieldId has to be specified for read the data in the target table.');
                 }
                 $this->requiredFields = ['default' => [$param['ruleParams']['targetFieldId']]];
             }
@@ -258,7 +253,7 @@ class Database extends Solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
             // Query building
-            $query['select'] = $this->get_query_select_header($param, 'read');
+            $query['select'] = $this->getQuerySelectHeader($param, 'read');
             // Build field list
             foreach ($param['fields'] as $field) {
                 // myddleware_generated isn't a real field in the database
@@ -280,10 +275,10 @@ class Database extends Solution
                     // Manage query with id, to be replaced by the ref Id fieldname
                     if ('id' == $queryKey) {
                         if (
-                                !empty($param['ruleParams']['fieldId'])
+                            !empty($param['ruleParams']['fieldId'])
                             and 'myddleware_generated' == $param['ruleParams']['fieldId']
                         ) {
-                            throw new \Exception('Not possible to read a specific record when myddleware_generated is selected as the Primary key in your source table');
+                            throw new Exception('Not possible to read a specific record when myddleware_generated is selected as the Primary key in your source table');
                         }
                         // The query key is different if the functyion is call from a read data (database is source) or a read history (database is target)
                         if ('history' == $param['call_type']) {
@@ -319,9 +314,9 @@ class Database extends Solution
 
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
+                throw new Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
-            $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+            $fetchAll = $q->fetchAll(PDO::FETCH_ASSOC);
 
             $row = [];
             if (!empty($fetchAll)) {
@@ -331,7 +326,7 @@ class Database extends Solution
                     $row['id'] = ''; // init in case of simulation (when a rule is created)
                     // Generate an id in case myddleware_generated is selected in the rule
                     if (
-                            !empty($param['ruleParams']['fieldId'])
+                        !empty($param['ruleParams']['fieldId'])
                         and 'myddleware_generated' == $param['ruleParams']['fieldId']
                     ) {
                         $row['id'] = $this->generateId($param, $elem);
@@ -363,7 +358,7 @@ class Database extends Solution
                         }
                         // Manage deletion by adding the flag Myddleware_deletion to the record (only for read action)
                         if (
-                                'read' == $param['call_type']
+                            'read' == $param['call_type']
                             and !empty($param['ruleParams']['deletion'])
                             and $param['ruleParams']['deletionField'] === $key
                             and !empty($value)
@@ -376,19 +371,22 @@ class Database extends Solution
             }
             // Search for delete data
             $result = $this->searchDeletionByComparison($param, $result);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // Create the record
+
+    /**
+     * @throws Exception
+     */
     protected function create($param, $record)
     {
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
-            throw new \Exception('targetFieldId has to be specified for the data creation.');
+            throw new Exception('targetFieldId has to be specified for the data creation.');
         }
 
         // Query init
@@ -398,13 +396,13 @@ class Database extends Solution
         foreach ($record as $key => $value) {
             if ('target_id' == $key) {
                 continue;
-            // If the target reference field is in data sent, we save it to update the document
+                // If the target reference field is in data sent, we save it to update the document
             } elseif ($key == $param['ruleParams']['targetFieldId']) {
                 $idTarget = $value;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method getModuleFields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= "'".$this->escape($value)."',";
+            $sql .= $this->stringSeparatorOpen . rawurldecode($key) . $this->stringSeparatorClose . ',';
+            $values .= "'" . $this->escape($value) . "',";
         }
 
         // Remove the last coma
@@ -419,7 +417,7 @@ class Database extends Solution
         $exec = $q->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
         }
 
         // If the target reference field isn't in data sent
@@ -431,11 +429,13 @@ class Database extends Solution
         return $idTarget;
     }
 
-    // Update the record
+    /**
+     * @throws Exception
+     */
     protected function update($param, $record)
     {
         // Query init
-        $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
+        $sql = 'UPDATE ' . $this->stringSeparatorOpen . $param['module'] . $this->stringSeparatorClose . ' SET ';
         // We build the query with every fields
         // Boucle sur chaque champ du document
         foreach ($record as $key => $value) {
@@ -458,7 +458,7 @@ class Database extends Solution
         // Query error
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
         }
         // No modification
         if (0 == $q->rowCount()) {
@@ -466,7 +466,7 @@ class Database extends Solution
         }
         // Several modifications
         if ($q->rowCount() > 1) {
-            throw new \Exception('Update query has modified several records. It shoudl never happens. Please check that your id in your database is unique. Query : '.$sql);
+            throw new Exception('Update query has modified several records. It shoudl never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
         return $record['target_id'];
@@ -478,11 +478,11 @@ class Database extends Solution
         // Check control before delete
         $record = $this->checkDataBeforeDelete($param, $record);
         if (empty($record['target_id'])) {
-            throw new \Exception('No target id found. Failed to delete the record.');
+            throw new Exception('No target id found. Failed to delete the record.');
         }
         // Query init
-        $sql = 'DELETE FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' ';
-        $sql .= ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$record['target_id']."'";
+        $sql = 'DELETE FROM ' . $this->stringSeparatorOpen . $param['module'] . $this->stringSeparatorClose . ' ';
+        $sql .= ' WHERE ' . $this->stringSeparatorOpen . $param['ruleParams']['targetFieldId'] . $this->stringSeparatorClose . "='" . $record['target_id'] . "'";
         // Query validation
         $sql = $this->queryValidation($param, 'delete', $sql, $record);
 
@@ -491,17 +491,20 @@ class Database extends Solution
         $exec = $q->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Delete: ' . $errorInfo[2] . ' . Query : ' . $sql);
         }
 
         return $record['target_id'];
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function searchDeletionByComparison($param, $result)
     {
         // If check deletion by comparaison is selected on the rule param
         if (
-                !empty($param['ruleParams']['deletion'])
+            !empty($param['ruleParams']['deletion'])
             and !empty($param['ruleParams']['deletionField'])
             and 'compareTable' == $param['ruleParams']['deletionField']
         ) {
@@ -511,9 +514,9 @@ class Database extends Solution
             $exec = $q->execute();
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
+                throw new Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
-            $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+            $fetchAll = $q->fetchAll(PDO::FETCH_ASSOC);
             // If result is empty, we stop the process because it would remove all data
             if (!empty($fetchAll)) {
                 // Format result
@@ -540,8 +543,8 @@ class Database extends Solution
                     // and if no deletion document has alreday been generated for this record
                     // we generate a deletetion document
                     if (
-                            !isset($sourceTableRecords[$document['source_id']])
-                        and false === strpos($document['type'], 'D')
+                        !isset($sourceTableRecords[$document['source_id']])
+                        and !str_contains($document['type'], 'D')
                     ) {
                         $row = [];
                         // Init all fields of the document
@@ -569,7 +572,7 @@ class Database extends Solution
     }
 
     // Get the strings which can identify what field is an id in the table
-    protected function getIdFields($module, $type, $fields)
+    protected function getIdFields($module, $type, $fields): array
     {
         // default is id
         return ['id'];
@@ -582,25 +585,29 @@ class Database extends Solution
     }
 
     // Get the header of the select query in the read last function
-    protected function get_query_select_header($param, $method)
+    protected function getQuerySelectHeader($param, $method): string
     {
         return 'SELECT ';
     }
 
     // Function to buid the SELECT query
-    protected function buildQuery($param, $query)
+    protected function buildQuery($param, $query): string
     {
-        return $query['select'].$query['from'].$query['where'].(!empty($query['order']) ? $query['order'] : '').$query['limit'];
+        return $query['select'] . $query['from'] . $query['where'] . (!empty($query['order']) ? $query['order'] : '') . $query['limit'];
     }
 
     // Get the fieldId from the other rules to add them into the source relationship list field
-    protected function get_module_fields_relate($module, $param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function getModuleFieldsRelate($module, $param)
     {
         if (!empty($param)) {
             // Get the rule list with the same connectors (both directions) to get the relate ones
             $ruleListRelation = $this->entityManager->getRepository(Rule::class)->createQueryBuilder('r')
-                            ->select('r.id')
-                            ->where('(
+                ->select('r.id')
+                ->where('(
 												r.connectorSource= ?1 
 											AND r.connectorTarget= ?2
 											AND r.name != ?3
@@ -612,11 +619,11 @@ class Database extends Solution
 											AND r.name != ?3
 											AND r.deleted = 0
 									)')
-                            ->setParameter(1, (int) $param['connectorSourceId'])
-                            ->setParameter(2, (int) $param['connectorTargetId'])
-                            ->setParameter(3, $param['ruleName'])
-                            ->getQuery()
-                            ->getResult();
+                ->setParameter(1, (int) $param['connectorSourceId'])
+                ->setParameter(2, (int) $param['connectorTargetId'])
+                ->setParameter(3, $param['ruleName'])
+                ->getQuery()
+                ->getResult();
             if (!empty($ruleListRelation)) {
                 // Prepare query to get the fieldId from the orther rules with the same connectors
                 $sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
@@ -716,13 +723,13 @@ class Database extends Solution
             }
 
             return [];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [];
         }
     }
 
     // Generate ID for the document
-    protected function generateId($param, $record)
+    protected function generateId($param, $record): string
     {
         return uniqid('', true);
     }

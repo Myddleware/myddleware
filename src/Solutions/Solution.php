@@ -2,27 +2,26 @@
 
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
@@ -40,9 +39,9 @@ class Solution
 {
     public bool $isConnectionValid = false;
 
-    public $js = 0;
+    public int $js = 0;
 
-    public bool $refresh_token = false;
+    public bool $refreshToken = false;
 
     public bool $callback = false;
 
@@ -260,7 +259,6 @@ class Solution
 
     public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        $this->moduleFields = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
         $this->moduleFields['Myddleware_element_id'] = [
             'label' => 'ID '.$module,
@@ -716,7 +714,7 @@ class Solution
         // Add the ref field if it isn't already in the array
         $dateRefField = $this->getRefFieldName($module, $mode);
         if (
-                !empty($dateRefField)
+            !empty($dateRefField)
             and false === array_search($dateRefField, $fields)
         ) {
             $fields[] = $dateRefField;
@@ -952,7 +950,7 @@ class Solution
         $sqlSolutionName = 'SELECT solution.name  
 				FROM connector
 					INNER JOIN solution 
-						ON solution.id  = connector.sol_id
+						ON solution.id  = connector.solution_id
 				WHERE connector.id = :connId';
         $stmt = $this->connection->prepare($sqlSolutionName);
         $stmt->bindValue('connId', $connId);
@@ -970,7 +968,7 @@ class Solution
         $params = [];
 
         if (!empty($connectorParams)) {
-            foreach ($connectorParams as $key => $value) {
+            foreach ($connectorParams as $value) {
                 $params[$value['name']] = $value['value'];
                 $params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
             }

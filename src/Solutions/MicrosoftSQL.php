@@ -92,13 +92,13 @@ class MicrosoftSQL extends Database
         return str_replace("'", "''", $value);
     }
 
-    protected function get_query_select_header($param, $method)
+    protected function getQuerySelectHeader($param, $method)
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {
             return 'SELECT TOP 1 ';
         }
 
-        return parent::get_query_select_header($param, $method);
+        return parent::getQuerySelectHeader($param, $method);
     }
 }

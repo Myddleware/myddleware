@@ -149,7 +149,7 @@ class PostgreSQL extends Database
                 ];
             }
             // Add relationship fields coming from other rules
-            $this->get_module_fields_relate($module, $param);
+            $this->getModuleFieldsRelate($module, $param);
 
             return $this->moduleFields;
         } catch (\Exception $e) {

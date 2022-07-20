@@ -25,9 +25,15 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class Airtable extends Solution
 {
@@ -88,12 +94,20 @@ class Airtable extends Solution
         ];
     }
 
+//    /**
+//     * Request to attempt to log in to Airtable.
+//     *
+//     * @return void
+//     */
+
     /**
-     * Request to attempt to log in to Airtable.
-     *
-     * @return void
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
      */
-    public function login(array $connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -109,11 +123,9 @@ class Airtable extends Solution
             if (!empty($content) && 200 === $statusCode) {
                 $this->isConnectionValid = true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -146,8 +158,8 @@ class Airtable extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
 
             return null;
         }
@@ -155,6 +167,8 @@ class Airtable extends Solution
 
     /**
      * Read records in source application & transform them to fit standard Myddleware format.
+     *
+     * @throws TransportExceptionInterface
      */
     public function readData(array $param): array
     {
@@ -243,7 +257,7 @@ class Airtable extends Solution
                         ) {
                             $dateModified = $record['createdTime'];
                         } else {
-                            throw new \Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
+                            throw new Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
                         }
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModified);
                         $result['values'][$record['id']]['id'] = $record['id'];
@@ -266,9 +280,9 @@ class Airtable extends Solution
                 and $result['count'] < $param['limit'] // count < rule limit
                 and !empty($offset) // Only if there is more data to be read
             );
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+        } catch (Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
 
         return $result;
@@ -345,7 +359,7 @@ class Airtable extends Solution
          * In order to load relationships, we MUST first load all fields.
          */
         $allFields = $this->getModuleFields($param['module'], 'source');
-        // $relationships = $this->get_module_fields_relate($param['module'], 'source');
+        // $relationships = $this->getModuleFieldsRelate($param['module'], 'source');
 
         // Group records for each calls
         // Split the data into several array using the limite size
@@ -364,8 +378,7 @@ class Airtable extends Solution
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
                         $data = $this->checkDataBeforeUpdate($param, $data);
-                    }
-                    // Recard are stored in the URL for a deletionj
+                    } // Recard are stored in the URL for a deletionj
                     elseif ('delete' === $method) {
                         $data = $this->checkDataBeforeDelete($param, $data);
                         $urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
@@ -441,9 +454,9 @@ class Airtable extends Solution
                         $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
                     }
                 } else {
-                    throw new \Exception('Failed to send the record but no error returned by Airtable. ');
+                    throw new Exception('Failed to send the record but no error returned by Airtable. ');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 foreach ($records as $idDoc => $data) {
                     $result[$idDoc] = [
@@ -471,9 +484,9 @@ class Airtable extends Solution
     }
 
     /**
-     * @throws \Exception
-     * Convert date to Myddleware format
-     * 2020-07-08T12:33:06 to 2020-07-08 12:33:06
+     * @throws Exception
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06 to 2020-07-08 12:33:06
      */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
@@ -483,8 +496,8 @@ class Airtable extends Solution
     }
 
     /**
-     * @throws \Exception
-     * convert from Myddleware format to Airtable format
+     * @throws Exception
+     *                   convert from Myddleware format to Airtable format
      */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
