@@ -40,7 +40,11 @@ class MySQL extends Database
 
     protected bool $readDeletion = true;
 
-
+    // Generate query
+    protected function getQueryShowTables(): string
+    {
+        return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
+    }
 
 
 }

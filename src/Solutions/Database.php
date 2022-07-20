@@ -34,7 +34,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Database extends Solution
 {
-
     protected PDO $pdo;
 
     protected string $driver;
@@ -108,7 +107,7 @@ class Database extends Solution
     // Generate query
     protected function getQueryShowTables(): string
     {
-        return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
+        return '';
     }
 
     // Get all tables from the database
@@ -216,6 +215,7 @@ class Database extends Solution
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return null;
         }
     }
