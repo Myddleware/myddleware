@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\InternalListValueRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,7 +18,8 @@ class InternalListValue
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity=InternalList::class, mappedBy="idValue")
+     * @ORM\ManyToOne(targetEntity=InternalList::class, inversedBy="value")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $listId;
 
@@ -59,42 +58,19 @@ class InternalListValue
      */
     private $data;
 
-    public function __construct()
-    {
-        $this->listId = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @return Collection<int, InternalList>
-     */
-    public function getListId(): Collection
+    public function getListId(): ?InternalList
     {
         return $this->listId;
     }
 
-    public function addListId(InternalList $listId): self
+    public function setListId(?InternalList $listId): self
     {
-        if (!$this->listId->contains($listId)) {
-            $this->listId[] = $listId;
-            $listId->setIdValue($this);
-        }
-
-        return $this;
-    }
-
-    public function removeListId(InternalList $listId): self
-    {
-        if ($this->listId->removeElement($listId)) {
-            // set the owning side to null (unless already changed)
-            if ($listId->getIdValue() === $this) {
-                $listId->setIdValue(null);
-            }
-        }
+        $this->listId = $listId;
 
         return $this;
     }
