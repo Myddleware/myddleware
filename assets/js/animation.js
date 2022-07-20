@@ -561,8 +561,6 @@ function animConfirm(choice_lst) {
 		},
 		url: path_validation,	
 		beforeSend:	function() {	
-			console.log(choice_lst);	
-			console.log(template);	
 			$('#btn_validation').empty();
 			$('#btn_validation').html(wait);
 			$('#btn_validation').removeAttr('id');
@@ -574,7 +572,7 @@ function animConfirm(choice_lst) {
 			else if(data == 'template') {
 				$(location).attr('href',path_listrule);
 			}else if (data == 'error'){
-				$('#validation').append('<p>There is no active transaction</p>');
+				$('#validation').append('<p>There is an error</p>');
 			}
 		},
 		error: function(data, exeption){
