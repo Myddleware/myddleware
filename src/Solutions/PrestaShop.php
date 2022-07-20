@@ -73,13 +73,13 @@ class PrestaShop extends Solution
     private $webService;
 
     // Listes des modules et des champs à exclure de Salesforce
-    protected array $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
 
-    protected array $exclude_field_list = [];
+    protected array $excludedFields = [];
 
     protected $fieldsDuplicate = [
         'customers' => ['email'],
@@ -158,7 +158,7 @@ class PrestaShop extends Solution
                             continue;
                         }
                         // On ne renvoie que les modules autorisés
-                        if (!in_array($module, $this->exclude_module_list)) {
+                        if (!in_array($module, $this->excludedModules)) {
                             $modules[$module] = $value['description'];
                         }
                     }

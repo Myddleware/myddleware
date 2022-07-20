@@ -44,7 +44,7 @@ class PostgreSQL extends Database
     }
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function getQueryShowTables()
     {
         return "SELECT *
 				FROM pg_catalog.pg_tables
@@ -58,7 +58,7 @@ class PostgreSQL extends Database
         try {
             $modules = [];
             // Send the query to the database
-            $q = $this->pdo->prepare($this->get_query_show_tables());
+            $q = $this->pdo->prepare($this->getQueryShowTables());
             $exec = $q->execute();
             // Error management
             if (!$exec) {

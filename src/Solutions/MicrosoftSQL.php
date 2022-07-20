@@ -61,7 +61,7 @@ class MicrosoftSQL extends Database
     }
 
     // Query to get all the tables of the database
-    protected function get_query_show_tables()
+    protected function getQueryShowTables()
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->connectionParam['database_name'].'\'';
     }

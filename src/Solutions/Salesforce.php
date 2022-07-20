@@ -50,7 +50,7 @@ class Salesforce extends Solution {
 	protected $instance_url;
 	
 	// Listes des modules et des champs à exclure de Salesforce
-	protected array $exclude_module_list = array(
+	protected array $excludedModules = array(
 										'default' => 
 											array("AccountFeed", "AccountShare", "ActivityHistory", "AggregateResult", "ApexClass", "ApexComponent", "ApexLog", "ApexPage","AccountHistory","CaseHistory", "ContactHistory","ContractHistory","LeadHistory", "OpportunityHistory",
 											"ApexTestQueueItem", "ApexTestResult", "ApexTrigger", "AssetFeed", "AsyncApexJob", "BrandTemplate", "CampaignFeed", "CampaignShare", "CaseFeed", "CaseHistory","SolutionHistory",
@@ -66,7 +66,7 @@ class Salesforce extends Solution {
 										'target' => array()
 										);
 										
-	protected array $exclude_field_list = array(
+	protected array $excludedFields = array(
 										'default' => array('CreatedDate','LastModifiedDate','SystemModstamp'),
 										"Contact" => array("Name"), 
 										"Case" => array("CaseNumber")
@@ -170,8 +170,8 @@ class Salesforce extends Solution {
 			foreach ($query_request_data['sobjects'] as $object) {
 				// On ne renvoie que les modules autorisés
 				if (
-						!in_array($object['name'],$this->exclude_module_list['default'])
-					&&	!in_array($object['name'],$this->exclude_module_list[$type])
+						!in_array($object['name'],$this->excludedModules['default'])
+					&&	!in_array($object['name'],$this->excludedModules[$type])
 				) {
 					if($object['label'] == 'Groupe'){ // A travailler
 						$modules[$object['name']] = $object['label'].' ('.$object['name'].')';
@@ -205,12 +205,12 @@ class Salesforce extends Solution {
 				if(in_array($field['name'],$calculateFields) && $type == 'target') {
 					continue;
 				}
-				if(isset($this->exclude_field_list['default'])){
-					if(in_array($field['name'], $this->exclude_field_list['default']) && $type == 'target')
+				if(isset($this->excludedFields['default'])){
+					if(in_array($field['name'], $this->excludedFields['default']) && $type == 'target')
 						continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD Salesforce
 				}
-            	if(isset($this->exclude_field_list[$module])) {
-	            	if(in_array($field['name'], $this->exclude_field_list[$module]) && $type == 'target') {
+            	if(isset($this->excludedFields[$module])) {
+	            	if(in_array($field['name'], $this->excludedFields[$module]) && $type == 'target') {
 	            		continue; // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD Salesforce
 					}
 				}
@@ -220,7 +220,7 @@ class Salesforce extends Solution {
                 else if ($field['type'] == "boolean"){
                     $type_bdd = 'bool';
                 }
-                else if (!in_array($field['type'],$this->type_valide)) { 
+                else if (!in_array($field['type'],$this->validDatabaseTypes)) {
                     $type_bdd = 'varchar(255)';
                 }
                 else {

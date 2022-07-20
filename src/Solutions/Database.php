@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -91,6 +92,12 @@ class Database extends Solution
         ];
     }
 
+    // Generate query
+    protected function getQueryShowTables(): string
+    {
+        return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
+    }
+
     // Get all tables from the database
     public function getModules(string $type = 'source'): array
     {
@@ -98,7 +105,7 @@ class Database extends Solution
             $modules = [];
 
             // Send the query to the database
-            $q = $this->pdo->prepare($this->get_query_show_tables());
+            $q = $this->pdo->prepare($this->getQueryShowTables());
             $exec = $q->execute();
             // Error management
             if (!$exec) {
@@ -626,11 +633,11 @@ class Database extends Solution
                 ->getResult();
             if (!empty($ruleListRelation)) {
                 // Prepare query to get the fieldId from the orther rules with the same connectors
-                $sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
+                $sql = "SELECT value FROM ruleparam WHERE ruleparam.name = 'fieldId' AND ruleparam.rule_id  in (";
                 foreach ($ruleListRelation as $ruleRelation) {
                     $sql .= "'$ruleRelation[id]',";
                 }
-                // Remove the last coma
+                // Remove the last comma
                 $sql = substr($sql, 0, -1);
                 $sql .= ')';
                 $stmt = $this->connection->prepare($sql);

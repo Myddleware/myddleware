@@ -45,14 +45,8 @@ class MySQL extends Database
         return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
-    // Generate query
-    protected function get_query_show_tables()
-    {
-        return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
-    }
-
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
     }

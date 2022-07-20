@@ -57,13 +57,13 @@ class SuiteCRM extends Solution
     ];
 
     // liste des modules à exclure pour chaque solution
-    protected array $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => ['Home', 'Calendar', 'Documents', 'Administration', 'Currencies', 'CustomFields', 'Connectors', 'Dropdown', 'Dynamic', 'DynamicFields', 'DynamicLayout', 'EditCustomFields', 'Help', 'Import', 'MySettings', 'FieldsMetaData', 'UpgradeWizard', 'Sync', 'Versions', 'LabelEditor', 'Roles', 'OptimisticLock', 'TeamMemberships', 'TeamSets', 'TeamSetModule', 'Audit', 'MailMerge', 'MergeRecords', 'Schedulers', 'Schedulers_jobs', 'Groups', 'InboundEmail', 'ACLActions', 'ACLRoles', 'DocumentRevisions', 'ACL', 'Configurator', 'UserPreferences', 'SavedSearch', 'Studio', 'SugarFeed', 'EAPM', 'OAuthKeys', 'OAuthTokens'],
         'target' => [],
         'source' => [],
     ];
 
-    protected array $exclude_field_list = [
+    protected array $excludedFields = [
         'default' => ['date_entered', 'date_modified', 'created_by_name', 'modified_by_name', 'created_by', 'modified_user_id'],
         'Contacts' => ['c_accept_status_fields', 'm_accept_status_fields', 'accept_status_id', 'accept_status_name', 'opportunity_role_fields', 'opportunity_role_id', 'opportunity_role', 'email'],
         'Leads' => ['email'],
@@ -193,8 +193,8 @@ class SuiteCRM extends Solution
                 foreach ($get_available_modules->modules as $module) {
                     // On ne renvoie que les modules autorisés
                     if (
-                            !in_array($module->module_key, $this->exclude_module_list['default'])
-                        && !in_array($module->module_key, $this->exclude_module_list[$type])
+                            !in_array($module->module_key, $this->excludedModules['default'])
+                        && !in_array($module->module_key, $this->excludedModules[$type])
                     ) {
                         $modules[$module->module_key] = $module->module_label;
                     }
@@ -247,16 +247,16 @@ class SuiteCRM extends Solution
 
                 $get_module_fields = $this->call('getModuleFields', $get_module_fields_parameters);
                 foreach ($get_module_fields->module_fields as $field) {
-                    if (isset($this->exclude_field_list['default'])) {
+                    if (isset($this->excludedFields['default'])) {
                         // Certains champs ne peuvent pas être modifiés
-                        if (in_array($field->name, $this->exclude_field_list['default']) && 'target' == $type) {
+                        if (in_array($field->name, $this->excludedFields['default']) && 'target' == $type) {
                             continue;
                         } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
                     }
 
-                    if (!in_array($field->type, $this->type_valide)) {
-                        if (isset($this->exclude_field_list[$module])) {
-                            if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
+                    if (!in_array($field->type, $this->validDatabaseTypes)) {
+                        if (isset($this->excludedFields[$module])) {
+                            if (in_array($field->name, $this->excludedFields[$module]) && 'target' == $type) {
                                 continue;
                             } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
                         }
@@ -309,14 +309,14 @@ class SuiteCRM extends Solution
                 // Ajout des champ type link (custom relationship ou custom module souvent)
                 if (!empty($get_module_fields->link_fields)) {
                     foreach ($get_module_fields->link_fields as $field) {
-                        if (isset($this->exclude_field_list['default'])) {
-                            if (in_array($field->name, $this->exclude_field_list['default']) && 'target' == $type) {
+                        if (isset($this->excludedFields['default'])) {
+                            if (in_array($field->name, $this->excludedFields['default']) && 'target' == $type) {
                                 continue;
                             } // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
                         }
-                        if (!in_array($field->type, $this->type_valide)) {
-                            if (isset($this->exclude_field_list[$module])) {
-                                if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
+                        if (!in_array($field->type, $this->validDatabaseTypes)) {
+                            if (isset($this->excludedFields[$module])) {
+                                if (in_array($field->name, $this->excludedFields[$module]) && 'target' == $type) {
                                     continue;
                                 } // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
                             }

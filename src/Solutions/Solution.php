@@ -51,21 +51,20 @@ class Solution
 
     protected array $requiredFields = [];
 
-    protected $connectionParam;
+    protected array $connectionParam;
 
     protected LoggerInterface $logger;
 
-    // Tableau comportant les différents types de BDD valides
-    protected array $type_valide = ['text'];
+    protected array $validDatabaseTypes = ['text'];
 
     // Liste des modules à exclure pour chaque solution
-    protected array $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
 
-    protected array $exclude_field_list = [];
+    protected array $excludedFields = [];
 
     // Module list that allows to make parent relationships
     protected array $allowParentRelationship = [];
@@ -715,7 +714,7 @@ class Solution
         $dateRefField = $this->getRefFieldName($module, $mode);
         if (
             !empty($dateRefField)
-            and false === array_search($dateRefField, $fields)
+            and !in_array($dateRefField, $fields)
         ) {
             $fields[] = $dateRefField;
         }
@@ -725,8 +724,8 @@ class Solution
 
     protected function addRequiredRelationship($module): void
     {
-        if (!isset($this->required_relationships[$module])) {
-            $this->required_relationships[$module] = [];
+        if (!isset($this->requiredRelationships[$module])) {
+            $this->requiredRelationships[$module] = [];
         }
         // Boucle sur tous les champs obligatoires
         foreach ($this->required_relationships[$module] as $required_relationship) {

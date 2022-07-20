@@ -68,9 +68,9 @@ class SageCRM extends Solution
     private $instance_url;
 
     // Listes des modules et des champs à exclure
-    protected array $exclude_module_list = [];
+    protected array $excludedModules = [];
 
-    protected array $exclude_field_list = [];
+    protected array $excludedFields = [];
 
     // Connexion à SageCRM
     public function login($connectionParam)
@@ -262,7 +262,7 @@ class SageCRM extends Solution
                 $response = $client->logoff(['sessionId' => $sessionid]);
 
                 foreach ($metadata->result->records as $field) {
-                    if (!in_array(substr($field->type, 3), $this->type_valide)) {
+                    if (!in_array(substr($field->type, 3), $this->validDatabaseTypes)) {
                         $type_bdd = 'varchar(255)';
                     } else {
                         $type_bdd = $field->type;

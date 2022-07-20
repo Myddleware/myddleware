@@ -52,13 +52,13 @@ class VtigerCRM extends Solution
         'default' => [''],
     ];
 
-    protected array $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => ['Users', 'Documents'],
         'target' => [],
         'source' => [],
     ];
 
-    protected array $exclude_field_list = [
+    protected array $excludedFields = [
         'default' => [
             'default' => [
                 'id',
@@ -169,7 +169,7 @@ class VtigerCRM extends Solution
                 return null;
             }
 
-            $escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
+            $escludedModule = $this->excludedModules[$type] ?: $this->excludedModules['default'];
             $options = [];
             foreach ($modules['information'] as $moduleName => $moduleInfo) {
                 if (!in_array($moduleName, $escludedModule)) {
@@ -239,7 +239,7 @@ class VtigerCRM extends Solution
                 return false;
             }
 
-            $escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
+            $escludeField = $this->excludedFields[$module] ?? $this->excludedFields['default'];
             $escludeField = $escludeField[$type] ?? $escludeField['default'];
             $this->moduleFields = [];
             foreach ($fields as $field) {

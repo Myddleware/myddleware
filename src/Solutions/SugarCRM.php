@@ -207,9 +207,9 @@ class SugarCRM extends Solution
                     }
 
                     // Calculate the database type
-                    if (!in_array($field->type, $this->type_valide)) {
-                        if (isset($this->exclude_field_list[$module])) {
-                            if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
+                    if (!in_array($field->type, $this->validDatabaseTypes)) {
+                        if (isset($this->excludedFields[$module])) {
+                            if (in_array($field->name, $this->excludedFields[$module]) && 'target' == $type) {
                                 continue;
                             } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
                         }
