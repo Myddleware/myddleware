@@ -32,7 +32,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class erpnextcore extends solution
 {
-    // protected $url = 'https://www.cirrus-shield.net/RestApi/';
     protected $token;
     protected $update;
     protected $organizationTimezoneOffset;
@@ -92,6 +91,7 @@ class erpnextcore extends solution
             $parameters = ['usr' => $this->paramConnexion['login'],
                 'pwd' => $this->paramConnexion['password'],
             ];
+
             $url = $this->paramConnexion['url'].'/api/method/login';
             // Connect to ERPNext
             $result = $this->call($url, 'GET', $parameters);
@@ -347,7 +347,7 @@ class erpnextcore extends solution
                                     'target_id' == $key
                                 and !empty($value)
                             ) {
-                                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
+                                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.rawurlencode($value);
                             }
                             unset($data[$key]);
                         // if the data is a link
@@ -384,6 +384,7 @@ class erpnextcore extends solution
                     }
                     // Send data to ERPNExt
                     $resultQuery = $this->call($url, $method, ['data' => json_encode($data)]);
+
                     if (!empty($resultQuery->data->name)) {
                         // utf8_decode because the id could be a name with special characters
                         $result[$idDoc] = ['id' => utf8_decode($resultQuery->data->name), 'error' => ''];
@@ -500,13 +501,14 @@ class erpnextcore extends solution
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $response = curl_exec($ch);
+
         // if Traceback found, we have an error
         if (
                 'GET' != $method
             and false !== strpos($response, 'Traceback')
         ) {
-            // Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'
-            return substr($response, strpos($response, 'Traceback'), strpos(substr($response, strpos($response, 'Traceback')), '</pre>'));
+            // Extraction of the error from traceback'
+            return substr($response, strpos($response, 'Traceback') - strlen($response));
         }
         curl_close($ch);
 

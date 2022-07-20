@@ -175,20 +175,20 @@ class postgresqlcore extends database
 						AND table_name = '".$tableParam[1]."'";
     }
 
-    protected function create($param, $record)
+    protected function create($param, $record, $idDoc = null)
     {
         // Change separator for PostgreSQL
         $record = array_map('pg_escape_string', $record);
 
-        return parent::create($param, $record);
+        return parent::create($param, $record, $idDoc);
     }
 
-    protected function update($param, $record)
+    protected function update($param, $record, $idDoc = null)
     {
         // Change separator for PostgreSQL
         $record = array_map('pg_escape_string', $record);
 
-        return parent::update($param, $record);
+        return parent::update($param, $record, $idDoc);
     }
 
     // Get the limit operator of the select query in the read last function

@@ -46,9 +46,9 @@ security:
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     access_control:
-        - { path: ~/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ~/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ~/admin/, role: ROLE_ADMIN }
-        - { path: ~/rule/, role: ROLE_USER }
-        - { path: ~/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ~/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: /$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/rule/, role: ROLE_USER }
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

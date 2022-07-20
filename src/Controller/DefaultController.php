@@ -228,7 +228,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser()),
-                    'maxPerPage' => $this->params['pager'],
+                    'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 20,
                     'page' => $page,
                 ]);
 
