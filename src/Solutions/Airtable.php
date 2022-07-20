@@ -94,13 +94,8 @@ class Airtable extends Solution
         ];
     }
 
-//    /**
-//     * Request to attempt to log in to Airtable.
-//     *
-//     * @return void
-//     */
-
     /**
+     * Request to attempt to log in to Airtable.
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
@@ -250,7 +245,7 @@ class Airtable extends Solution
                         // Get the reference date
                         if (!empty($record['fields'][$dateRefField])) {
                             $dateModified = $record['fields'][$dateRefField];
-                        // createdTime not allowed for reading action, only to get an history or a duplicate field
+                            // createdTime not allowed for reading action, only to get an history or a duplicate field
                         } elseif (
                             !empty($record['createdTime'])
                             and !empty($param['query'])

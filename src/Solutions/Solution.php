@@ -279,7 +279,7 @@ class Solution
     }
 
     // Helper function for the read call
-    public function readData(array $param)
+    public function readData(array $param): ?array
     {
         try {
             $result['count'] = 0;
@@ -682,8 +682,9 @@ class Solution
     }
 
     // Fonction permettant de faire l'appel REST
-    protected function call($method, $parameters): void
+    protected function call($method, $parameters): mixed
     {
+        return;
     }
 
     // Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible
@@ -835,8 +836,9 @@ class Solution
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName(string $moduleSource, $ruleMode): void
+    public function getRefFieldName(string $moduleSource, $ruleMode): string
     {
+        return '';
     }
 
     // Return the name of the field used for the id
