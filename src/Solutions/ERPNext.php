@@ -41,7 +41,7 @@ class ERPNext extends Solution
 
     protected $limitCall = 100;
 
-    protected $required_fields = ['default' => ['name', 'creation', 'modified']];
+    protected array $requiredFields = ['default' => ['name', 'creation', 'modified']];
 
     protected $fieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
@@ -49,7 +49,7 @@ class ERPNext extends Solution
     ];
 
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
+    protected array $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
 
     protected $childModuleKey = [
         'Sales Invoice Item' => 'items',
@@ -113,7 +113,7 @@ class ERPNext extends Solution
     }
 
     // Get the modules available
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
         try {
             // Get
@@ -134,12 +134,12 @@ class ERPNext extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Call get modules to fill the isTableModule array and ge the module list.
-            $modules = $this->get_modules();
+            $modules = $this->getModules();
 
             // Get the list field for a module
             $url = $this->connectionParam['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);

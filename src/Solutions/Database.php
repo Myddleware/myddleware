@@ -95,7 +95,7 @@ class Database extends Solution
     }
 
     // Get all tables from the database
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         try {
             $modules = [];
@@ -125,11 +125,11 @@ class Database extends Solution
     }
 
     // Get all fields from the table selected
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
-            // parent::get_module_fields($module, $type);
+            // parent::getModuleFields($module, $type);
             // Get all fields of the table in input
             $q = $this->pdo->prepare($this->get_query_describe_table($module));
             $exec = $q->execute();
@@ -209,7 +209,7 @@ class Database extends Solution
     public function readData($param)
     {
         $result = [];
-        // Decode field name (converted in method get_module_fields)
+        // Decode field name (converted in method getModuleFields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
         try {
             // On contrôle la date de référence, si elle est vide on met 0 (cas fréquent si l'utilisateur oublie de la remplir)
@@ -239,14 +239,14 @@ class Database extends Solution
                 if (!isset($param['ruleParams']['fieldDateRef'])) {
                     throw new \Exception('"fieldDateRef" has to be specified for the read.');
                 }
-                $this->required_fields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
+                $this->requiredFields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
             }
             // fieldId and fieldDateRef are required for a read action from a rule execution
             if ('history' == $param['call_type']) {
                 if (!isset($param['ruleParams']['targetFieldId'])) {
                     throw new \Exception('targetFieldId has to be specified for read the data in the target table.');
                 }
-                $this->required_fields = ['default' => [$param['ruleParams']['targetFieldId']]];
+                $this->requiredFields = ['default' => [$param['ruleParams']['targetFieldId']]];
             }
 
             if (!isset($param['fields'])) {
@@ -358,7 +358,7 @@ class Database extends Solution
                             }
                         }
                         if (in_array($key, $param['fields'])) {
-                            // Encode the field to match with the fields retruned by method get_module_fields
+                            // Encode the field to match with the fields retruned by method getModuleFields
                             $row[rawurlencode($key)] = $value;
                         }
                         // Manage deletion by adding the flag Myddleware_deletion to the record (only for read action)
@@ -402,7 +402,7 @@ class Database extends Solution
             } elseif ($key == $param['ruleParams']['targetFieldId']) {
                 $idTarget = $value;
             }
-            // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
+            // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method getModuleFields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
             $values .= "'".$this->escape($value)."',";
         }
@@ -443,7 +443,7 @@ class Database extends Solution
             if ('target_id' == $key) {
                 continue;
             }
-            // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
+            // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method getModuleFields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."='".$this->escape($value)."',";
         }
 
@@ -652,7 +652,7 @@ class Database extends Solution
     public function getFieldsParamUpd(string $type, string $module): array
     {
         try {
-            $fieldsSource = $this->get_module_fields($module, $type, false);
+            $fieldsSource = $this->getModuleFields($module, $type, false);
             // List only real database field so we remove the Myddleware_element_id field
             unset($fieldsSource['Myddleware_element_id']);
             if (!empty($fieldsSource)) {

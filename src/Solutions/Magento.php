@@ -46,7 +46,7 @@ class Magento extends Solution
         'customers' => ['email'],
     ];
 
-    protected $required_fields = ['default' => ['updated_at']];
+    protected array $requiredFields = ['default' => ['updated_at']];
 
     protected $callLimit = 100;
 
@@ -93,7 +93,7 @@ class Magento extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -111,9 +111,9 @@ class Magento extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Pour chaque module, traitement différent
             switch ($module) {

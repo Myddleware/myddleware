@@ -39,7 +39,7 @@ class File extends Solution
 
     protected $duplicateDoc = [];
 
-    protected $connection;
+    protected \Doctrine\DBAL\Connection $connection;
 
     protected $delimiter = ';';
 
@@ -53,7 +53,7 @@ class File extends Solution
 
     protected $lineNumber = 0;
 
-    protected $required_fields = ['default' => ['id', 'date_modified']];
+    protected array $requiredFields = ['default' => ['id', 'date_modified']];
 
     protected $columnWidth = [];
 
@@ -118,7 +118,7 @@ class File extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             // Get the subfolders of the current directory
@@ -142,9 +142,9 @@ class File extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if ('source' == $type) {
                 // Get the file with the way of this file
@@ -494,7 +494,7 @@ class File extends Solution
         try {
             // $fieldsSource = array();
             if ('source' == $type) {
-                $this->get_module_fields($module, $type);
+                $this->getModuleFields($module, $type);
                 if (!empty($this->moduleFields)) {
                     $idParam = [
                         'id' => 'fieldId',

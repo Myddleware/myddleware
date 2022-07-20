@@ -42,7 +42,7 @@ class Hubspot extends Solution
     ];
 
     // Requiered fields for each modules
-    protected $required_fields = [
+    protected array $requiredFields = [
         'companies' => ['hs_lastmodifieddate'],
         'deal' => ['hs_lastmodifieddate'],
         'contact' => ['lastmodifieddate'],
@@ -108,7 +108,7 @@ class Hubspot extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         $modules = [
             'companies' => 'Companies',
@@ -141,9 +141,9 @@ class Hubspot extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             $engagement = 'engagement' === explode('_', $module)[0] ? true : false;
             $engagement_module = explode('_', $module);

@@ -59,7 +59,7 @@ class SAPECC extends SAP
         ],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
@@ -70,7 +70,7 @@ class SAPECC extends SAP
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',

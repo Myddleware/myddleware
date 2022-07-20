@@ -30,9 +30,9 @@ class PostgreSQL extends Database
     protected $driver = 'pgsql';
 
     // Enable to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $readDeletion = true;
+    protected bool $readDeletion = true;
 
     protected string $stringSeparatorOpen = '';
 
@@ -53,7 +53,7 @@ class PostgreSQL extends Database
     }
 
     // Get all tables from the database
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             $modules = [];
@@ -80,7 +80,7 @@ class PostgreSQL extends Database
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
         try {
             // Get all fields of the table in input

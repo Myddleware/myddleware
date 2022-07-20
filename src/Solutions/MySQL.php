@@ -36,9 +36,9 @@ class MySQL extends Database
     protected $fieldType = 'Type';
 
     // Enable to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $readDeletion = true;
+    protected bool $readDeletion = true;
 
     protected function generatePdo()
     {

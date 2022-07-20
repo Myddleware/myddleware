@@ -45,7 +45,7 @@ class Mautic extends Solution
         'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => ['id', 'dateModified', 'dateAdded'],
         'company' => ['id'],
     ];
@@ -55,7 +55,7 @@ class Mautic extends Solution
     ];
 
     // Enable to read deletion and to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
     // If you have Mautic 2 or lower, you must change this parameter to your version number
     protected $mauticVersion = 3;
@@ -118,7 +118,7 @@ class Mautic extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         // Modules available in source and target
         $modules = [
@@ -136,9 +136,9 @@ class Mautic extends Solution
     }
 
     // Get the fields available
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Use Mautic call to get company and contact fields (custom field can exist)
             if (in_array($module, ['contact', 'company'])) {

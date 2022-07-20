@@ -32,7 +32,7 @@ class Salesforce extends Solution {
 
 	protected $limitCall = 100;
 
-	protected $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
+	protected array $requiredFields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
 	protected $fieldsDuplicate = array(
 										'Contact' => array('Email','LastName'),
@@ -50,7 +50,7 @@ class Salesforce extends Solution {
 	protected $instance_url;
 	
 	// Listes des modules et des champs à exclure de Salesforce
-	protected $exclude_module_list = array(
+	protected array $exclude_module_list = array(
 										'default' => 
 											array("AccountFeed", "AccountShare", "ActivityHistory", "AggregateResult", "ApexClass", "ApexComponent", "ApexLog", "ApexPage","AccountHistory","CaseHistory", "ContactHistory","ContractHistory","LeadHistory", "OpportunityHistory",
 											"ApexTestQueueItem", "ApexTestResult", "ApexTrigger", "AssetFeed", "AsyncApexJob", "BrandTemplate", "CampaignFeed", "CampaignShare", "CaseFeed", "CaseHistory","SolutionHistory",
@@ -66,7 +66,7 @@ class Salesforce extends Solution {
 										'target' => array()
 										);
 										
-	protected $exclude_field_list = array(
+	protected array $exclude_field_list = array(
 										'default' => array('CreatedDate','LastModifiedDate','SystemModstamp'),
 										"Contact" => array("Name"), 
 										"Case" => array("CaseNumber")
@@ -158,7 +158,7 @@ class Salesforce extends Solution {
 	}
 
 	// Renvoie les modules disponibles du compte Salesforce connecté
-	public function get_modules($type = 'source'): array
+	public function getModules($type = 'source'): array
 	{
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
@@ -188,9 +188,9 @@ class Salesforce extends Solution {
 	}
 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $param = null): array
+	public function getModuleFields($module, $type = 'source', $param = null): array
 	{
-		parent::get_module_fields($module, $type);
+		parent::getModuleFields($module, $type);
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
 		// Accès au service de SalesForce renvoyant la liste des champs du module passé en paramètre
@@ -462,7 +462,7 @@ class Salesforce extends Solution {
 			throw new \Exception ('Data missing for create');
 		}
 		// Get the type of each fields by calling Salesforce
-		$moduleFields = $this->get_module_fields($param['module'],'target');
+		$moduleFields = $this->getModuleFields($param['module'],'target');
 		try{
 			$parameters = array();
 			$i=0;
@@ -579,7 +579,7 @@ class Salesforce extends Solution {
 			throw new \Exception ('Data missing for update');
 		}
 		// Get the type of each fields by calling Salesforce
-		$moduleFields = $this->get_module_fields($param['module'],'target');		
+		$moduleFields = $this->getModuleFields($param['module'],'target');
 		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update

@@ -33,9 +33,9 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class SugarCRM extends Solution
 {
     // Enable to read deletion and to delete data
-    protected $readDeletion = true;
+    protected bool $readDeletion = true;
 
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
     protected $sugarAPI;
 
@@ -49,7 +49,7 @@ class SugarCRM extends Solution
 
     protected $delaySearch = '-1 month';
 
-    protected $required_fields = ['default' => ['id', 'date_modified']];
+    protected array $requiredFields = ['default' => ['id', 'date_modified']];
 
     protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
@@ -110,7 +110,7 @@ class SugarCRM extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             $modulesSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
@@ -168,9 +168,9 @@ class SugarCRM extends Solution
         return false;
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // If module is a many-to-many relationship
             $rel = $this->isManyToManyRel($module);
@@ -601,7 +601,7 @@ class SugarCRM extends Solution
         return rtrim($url, '/').'/#'.$module.'/'.$recordId;
     }
 
-    // Used only for metadata (get_modules and )
+    // Used only for metadata (getModules and )
     protected function customCall($url, $parameters = null, $method = null)
     {
         try {

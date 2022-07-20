@@ -32,7 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class PrestaShop extends Solution
 {
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => ['id', 'date_upd', 'date_add'],
         'product_options' => ['id'],
         'product_option_values' => ['id'],
@@ -73,13 +73,13 @@ class PrestaShop extends Solution
     private $webService;
 
     // Listes des modules et des champs à exclure de Salesforce
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [];
+    protected array $exclude_field_list = [];
 
     protected $fieldsDuplicate = [
         'customers' => ['email'],
@@ -141,14 +141,14 @@ class PrestaShop extends Solution
     }
 
     // Renvoie les modules disponibles
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
             try { // try-catch Myddleware
                 try { // try-catch PrestashopWebservice
                     $opt['resource'] = '';
                     // Function to modify opt (used for custom needs)
-                    $opt = $this->updateOptions('get_modules', $opt, $type);
+                    $opt = $this->updateOptions('getModules', $opt, $type);
 
                     $xml = $this->webService->get($opt);
                     $presta_data = json_decode(json_encode((array) $xml), true);
@@ -180,7 +180,7 @@ class PrestaShop extends Solution
                 $e->getMessage();
             }
         } else {
-            $modulesSource = $this->get_modules('source');
+            $modulesSource = $this->getModules('source');
             $authorized = [
                 'categories' => 'The product categories',
                 'customers' => 'The e-shop customers',
@@ -197,9 +197,9 @@ class PrestaShop extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $extension = false): array
+    public function getModuleFields($module, $type = 'source', $extension = false): array
     {
-        parent::get_module_fields($module, $type, $extension);
+        parent::getModuleFields($module, $type, $extension);
         try { // try-catch Myddleware
             // Si le module est un module "fictif" relation créé pour Myddleware
             if (array_key_exists($module, $this->module_relationship_many_to_many)) {
@@ -230,7 +230,7 @@ class PrestaShop extends Solution
                 $opt['resource'] = $module.'?schema=synopsis';
 
                 // Function to modify opt (used for custom needs)
-                $opt = $this->updateOptions('get_module_fields', $opt, $module);
+                $opt = $this->updateOptions('getModuleFields', $opt, $module);
 
                 // Call
                 $xml = $this->webService->get($opt);

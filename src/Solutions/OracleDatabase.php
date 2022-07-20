@@ -79,7 +79,7 @@ class OracleDatabase extends Database
             if (!isset($param['ruleParams']['fieldDateRef'])) {
                 throw new \Exception('"fieldDateRef" has to be specified for the read.');
             }
-            $this->required_fields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
+            $this->requiredFields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
 
             if (!isset($param['fields'])) {
                 $param['fields'] = [];

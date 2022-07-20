@@ -98,7 +98,7 @@ class WooCommerce extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         return [
             'customers' => 'Customers',
@@ -115,10 +115,10 @@ class WooCommerce extends Solution
         ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         require 'lib/woocommerce/metadata.php';
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);

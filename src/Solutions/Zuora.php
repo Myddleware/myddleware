@@ -40,7 +40,7 @@ class Zuora extends Solution
 
     protected $limitCall = 10; // Maw limit : 50
 
-    protected $required_fields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
+    protected array $requiredFields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
 
     // Connection parameters
     public function getFieldsLogin(): array
@@ -100,7 +100,7 @@ class Zuora extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         try {
             require_once 'lib/zuora/lib_zuora.php';
@@ -120,9 +120,9 @@ class Zuora extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             require_once 'lib/zuora/lib_zuora.php';
             $zupraFields = \ZuoraAPIHelper::getFieldList($this->connectionParam['wsdl'], $module);

@@ -40,7 +40,7 @@ class CirrusShield extends Solution
 
     protected $limitCall = 1;
 
-    protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
+    protected array $requiredFields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
 
     protected $fieldsDuplicate = ['Contact' => ['Email', 'Name'],
         'default' => ['Name'],
@@ -88,7 +88,7 @@ class CirrusShield extends Solution
         }
     }
 
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         try {
             $apiModules = $this->call($this->url.'DescribeAll?authToken='.$this->token);
@@ -104,9 +104,9 @@ class CirrusShield extends Solution
         }
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             $apiFields = $this->call($this->url.'Describe/'.$module.'?authToken='.$this->token);
             if (!empty($apiFields['Fields'])) {

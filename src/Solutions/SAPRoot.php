@@ -48,7 +48,7 @@ class SAPRoot extends Solution
 
     protected $idName = [];
 
-    protected $required_fields = [];
+    protected array $requiredFields = [];
 
     protected $relateFieldAllowed = [];
 
@@ -104,7 +104,7 @@ class SAPRoot extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         try {
             try {

@@ -31,13 +31,13 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class Airtable extends Solution
 {
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
     protected string $airtableURL = 'https://api.airtable.com/v0/';
 
     protected string $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
 
-    protected $required_fields = ['default' => ['createdTime', 'Last Modified']];
+    protected array $requiredFields = ['default' => ['createdTime', 'Last Modified']];
 
     /**
      * Airtable base.
@@ -122,7 +122,7 @@ class Airtable extends Solution
      *
      * @param string $type source|target
      */
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
         if (!empty($this->modules[$this->projectID])) {
             return $this->modules[$this->projectID];
@@ -136,10 +136,10 @@ class Airtable extends Solution
      *
      * @param null $param
      */
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         require 'lib/airtable/metadata.php';
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = $moduleFields[$module];
@@ -344,7 +344,7 @@ class Airtable extends Solution
         /**
          * In order to load relationships, we MUST first load all fields.
          */
-        $allFields = $this->get_module_fields($param['module'], 'source');
+        $allFields = $this->getModuleFields($param['module'], 'source');
         // $relationships = $this->get_module_fields_relate($param['module'], 'source');
 
         // Group records for each calls

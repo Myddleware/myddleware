@@ -38,7 +38,7 @@ class SageCRM extends Solution
 
     protected $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
 
-    protected $required_fields = ['default' => ['updateddate', 'createddate']];
+    protected array $requiredFields = ['default' => ['updateddate', 'createddate']];
 
     protected $fieldsDuplicate = [];
 
@@ -68,9 +68,9 @@ class SageCRM extends Solution
     private $instance_url;
 
     // Listes des modules et des champs à exclure
-    protected $exclude_module_list = [];
+    protected array $exclude_module_list = [];
 
-    protected $exclude_field_list = [];
+    protected array $exclude_field_list = [];
 
     // Connexion à SageCRM
     public function login($connectionParam)
@@ -147,7 +147,7 @@ class SageCRM extends Solution
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             try {
@@ -201,9 +201,9 @@ class SageCRM extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
 
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $module, 2);

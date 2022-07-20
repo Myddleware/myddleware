@@ -37,7 +37,7 @@ class Sendinblue extends Solution
 {
     protected $config;
 
-    protected $required_fields = [
+    protected array $requiredFields = [
                                     'default' => ['id', 'modifiedAt'],
                                     'transactionalEmails' => ['uuid', 'date'],
                                     'transactionalEmailActivity' => ['messageId', 'event', 'date'],
@@ -88,7 +88,7 @@ class Sendinblue extends Solution
     }
 
     // Get module list
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -104,9 +104,9 @@ class Sendinblue extends Solution
     }
 
     // Returns the fields of the module passed in parameter
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
 
         // Use Sendinblue metadata
         require 'lib/sendinblue/metadata.php';

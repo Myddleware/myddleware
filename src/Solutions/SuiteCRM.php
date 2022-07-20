@@ -36,11 +36,11 @@ class SuiteCRM extends Solution
     protected $urlSuffix = '/service/v4_1/rest.php';
 
     // Enable to read deletion and to delete data
-    protected $readDeletion = true;
+    protected bool $readDeletion = true;
 
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+    protected array $requiredFields = ['default' => ['id', 'date_modified', 'date_entered']];
 
     protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
@@ -57,13 +57,13 @@ class SuiteCRM extends Solution
     ];
 
     // liste des modules à exclure pour chaque solution
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => ['Home', 'Calendar', 'Documents', 'Administration', 'Currencies', 'CustomFields', 'Connectors', 'Dropdown', 'Dynamic', 'DynamicFields', 'DynamicLayout', 'EditCustomFields', 'Help', 'Import', 'MySettings', 'FieldsMetaData', 'UpgradeWizard', 'Sync', 'Versions', 'LabelEditor', 'Roles', 'OptimisticLock', 'TeamMemberships', 'TeamSets', 'TeamSetModule', 'Audit', 'MailMerge', 'MergeRecords', 'Schedulers', 'Schedulers_jobs', 'Groups', 'InboundEmail', 'ACLActions', 'ACLRoles', 'DocumentRevisions', 'ACL', 'Configurator', 'UserPreferences', 'SavedSearch', 'Studio', 'SugarFeed', 'EAPM', 'OAuthKeys', 'OAuthTokens'],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [
+    protected array $exclude_field_list = [
         'default' => ['date_entered', 'date_modified', 'created_by_name', 'modified_by_name', 'created_by', 'modified_user_id'],
         'Contacts' => ['c_accept_status_fields', 'm_accept_status_fields', 'accept_status_id', 'accept_status_name', 'opportunity_role_fields', 'opportunity_role_id', 'opportunity_role', 'email'],
         'Leads' => ['email'],
@@ -182,7 +182,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             $get_available_modules_parameters = [
@@ -214,9 +214,9 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Si le module est un module "fictif" relation créé pour Myddlewar
             if (array_key_exists($module, $this->module_relationship_many_to_many)) {
@@ -245,7 +245,7 @@ class SuiteCRM extends Solution
                     'module_name' => $module,
                 ];
 
-                $get_module_fields = $this->call('get_module_fields', $get_module_fields_parameters);
+                $get_module_fields = $this->call('getModuleFields', $get_module_fields_parameters);
                 foreach ($get_module_fields->module_fields as $field) {
                     if (isset($this->exclude_field_list['default'])) {
                         // Certains champs ne peuvent pas être modifiés
@@ -829,7 +829,7 @@ class SuiteCRM extends Solution
             'session' => $this->session,
             'module_name' => $module,
         ];
-        $get_module_fields = $this->call('get_module_fields', $get_module_fields_parameters);
+        $get_module_fields = $this->call('getModuleFields', $get_module_fields_parameters);
         // Get all custom relationship fields
         if (!empty($get_module_fields->link_fields)) {
             foreach ($get_module_fields->link_fields as $field) {

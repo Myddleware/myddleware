@@ -78,7 +78,7 @@ class Mailchimp extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         try {
             if ('target' == $type) {
@@ -98,9 +98,9 @@ class Mailchimp extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             require 'lib/mailchimp/metadata.php';
 
@@ -118,7 +118,7 @@ class Mailchimp extends Solution
     public function createUpdate($method, $param)
     {
         // Get module fields to check if the fiels is a boolean
-        $this->get_module_fields($param['module'], 'target');
+        $this->getModuleFields($param['module'], 'target');
 
         // Tranform Myddleware data to Mailchimp data
         foreach ($param['data'] as $idDoc => $data) {

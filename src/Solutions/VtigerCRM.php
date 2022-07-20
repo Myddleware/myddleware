@@ -32,11 +32,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class VtigerCRM extends Solution
 {
     // Enable to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
     protected $limitPerCall = 100;
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => [
             'id',
             'modifiedtime',
@@ -52,13 +52,13 @@ class VtigerCRM extends Solution
         'default' => [''],
     ];
 
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => ['Users', 'Documents'],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [
+    protected array $exclude_field_list = [
         'default' => [
             'default' => [
                 'id',
@@ -85,7 +85,7 @@ class VtigerCRM extends Solution
     ];
 
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Quotes', 'SalesOrder'];
+    protected array $allowParentRelationship = ['Quotes', 'SalesOrder'];
 
     /** @var array */
     protected $moduleList;
@@ -150,7 +150,7 @@ class VtigerCRM extends Solution
         ];
     }
 
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         try {
             if (empty($this->vtigerClient)) {
@@ -219,9 +219,9 @@ class VtigerCRM extends Solution
      *
      * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (empty($this->vtigerClient)) {
                 return false;
@@ -309,7 +309,7 @@ class VtigerCRM extends Solution
 
             $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
             if ('*' != $queryParam) {
-                $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
+                $requiredField = $this->requiredFields[$param['module']] ?? $this->requiredFields['default'];
                 $queryParam = implode(',', $requiredField).','.$queryParam;
                 $queryParam = str_replace(['my_value,', 'my_value'], '', $queryParam);
             }

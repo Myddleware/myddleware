@@ -49,7 +49,7 @@ class RingCentral extends Solution
 
     protected $readLimit = 1000;
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => ['id'],
         'call-log' => ['id', 'startTime'],
         'message-store' => ['id', 'lastModifiedTime'],
@@ -120,7 +120,7 @@ class RingCentral extends Solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             return [
@@ -134,9 +134,9 @@ class RingCentral extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             require 'lib/ringcentral/metadata.php';
             if (!empty($moduleFields[$module])) {

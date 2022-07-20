@@ -60,7 +60,7 @@ class SAP extends SAPRoot
         ],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
@@ -83,7 +83,7 @@ class SAP extends SAPRoot
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -95,8 +95,8 @@ class SAP extends SAPRoot
         ];
     }
 
-    // On appelle la fonction get_module_fields de SAP standard et on ajoute les champ de relation spécifique
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    // On appelle la fonction getModuleFields de SAP standard et on ajoute les champ de relation spécifique
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         // Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
         if ('ET_BSEG' == $module) {
@@ -108,12 +108,12 @@ class SAP extends SAPRoot
             ];
         }
 
-        return parent::get_module_fields($module, $type);
+        return parent::getModuleFields($module, $type);
     }
 
     // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
     // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
-    public function get_rule_custom_relationship($module, $type)
+    public function getRuleCustomRelationship($module, $type)
     {
         // Si module est ET_BSEG alors on autorise les règles PARTNER de SAP CRM
         if ('source' == $type) {

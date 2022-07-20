@@ -70,7 +70,7 @@ class WordPress extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         return [
             'posts' => 'Posts',
@@ -92,9 +92,9 @@ class WordPress extends Solution
             ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             require_once 'lib/wordpress/metadata.php';
             if (!empty($moduleFields[$module])) {

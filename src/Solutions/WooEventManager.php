@@ -35,7 +35,7 @@ class WooEventManager extends WordPress
     // Module without reference date
     protected array $moduleWithoutReferenceDate = ['mep_cat', 'mep_org'];
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' === $type) {
             return [

@@ -56,7 +56,7 @@ class Eventbrite extends Solution
         ];
     }
 
-    protected $required_fields = ['default' => ['id', 'modified']];
+    protected array $requiredFields = ['default' => ['id', 'modified']];
 
     protected $eventStatuses = ''; // 'live,started,ended'
 
@@ -85,7 +85,7 @@ class Eventbrite extends Solution
         }
     }
 
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
         try {
             // Le module attendee n'est accessible d'en source
@@ -121,9 +121,9 @@ class Eventbrite extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Pour chaque module, traitement différent
             switch ($module) {

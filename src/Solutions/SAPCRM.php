@@ -68,7 +68,7 @@ class SAPCRM extends SAPRoot
         'BU_PARTNER' => ['ET_BUT000' => 'PARTNER'],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'CRMD_ORDER' => ['ET_ORDERADM_H__CHANGED_AT', 'ET_ORDERADM_H__OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000__CHDAT', 'ET_BUT000__CHTIM', 'ET_BUT000__PARTNER'],
     ];
@@ -90,7 +90,7 @@ class SAPCRM extends SAPRoot
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ($type = 'source') {
             return [
@@ -105,7 +105,7 @@ class SAPCRM extends SAPRoot
         ];
     }
 
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         if ('target' == $type) {
             switch ($module) {
@@ -192,7 +192,7 @@ class SAPCRM extends SAPRoot
             return $this->moduleFields;
         }
 
-        return parent::get_module_fields($module, $type);
+        return parent::getModuleFields($module, $type);
     }
 
     // Permet de modifier les nom des champs pour le read_last
@@ -200,7 +200,7 @@ class SAPCRM extends SAPRoot
     protected function convertFieldReadLast($param, $values, $mode)
     {
         try {
-            $this->get_module_fields($param['module'], 'target');
+            $this->getModuleFields($param['module'], 'target');
             if (!empty($this->moduleFields)) {
                 if (!empty($param['fields'])) {
                     $convertFields = [];
