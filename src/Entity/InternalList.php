@@ -64,6 +64,12 @@ class InternalList
      */
     private $deleted;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=InternalListValue::class, inversedBy="listId")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $idValue;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -149,6 +155,18 @@ class InternalList
     public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getIdValue(): ?InternalListValue
+    {
+        return $this->idValue;
+    }
+
+    public function setIdValue(?InternalListValue $idValue): self
+    {
+        $this->idValue = $idValue;
 
         return $this;
     }

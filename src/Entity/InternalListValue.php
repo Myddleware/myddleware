@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\InternalListValueRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,41 +20,32 @@ class InternalListValue
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=InternalList::class, cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity=InternalList::class, mappedBy="idValue")
      */
     private $listId;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="string", length=50)
      */
     private $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="string", length=50)
      */
     private $modifiedBy;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+     * @ORM\Column(type="datetime")
      */
     private $dateCreated;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
+     * @ORM\Column(type="datetime")
      */
     private $dateModified;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+     * @ORM\Column(type="boolean")
      */
     private $deleted;
 
@@ -62,47 +55,68 @@ class InternalListValue
     private $reference;
 
     /**
-     * @var array
-     *
-     * @ORM\Column(name="data", type="array", nullable=false)
+     * @ORM\Column(type="text")
      */
     private $data;
+
+    public function __construct()
+    {
+        $this->listId = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getListId(): ?InternalList
+    /**
+     * @return Collection<int, InternalList>
+     */
+    public function getListId(): Collection
     {
         return $this->listId;
     }
 
-    public function setListId(InternalList $listId): self
+    public function addListId(InternalList $listId): self
     {
-        $this->listId = $listId;
+        if (!$this->listId->contains($listId)) {
+            $this->listId[] = $listId;
+            $listId->setIdValue($this);
+        }
 
         return $this;
     }
 
-    public function getCreatedBy(): ?User
+    public function removeListId(InternalList $listId): self
+    {
+        if ($this->listId->removeElement($listId)) {
+            // set the owning side to null (unless already changed)
+            if ($listId->getIdValue() === $this) {
+                $listId->setIdValue(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?string
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(?User $createdBy): self
+    public function setCreatedBy(string $createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    public function getModifiedBy(): ?User
+    public function getModifiedBy(): ?string
     {
         return $this->modifiedBy;
     }
 
-    public function setModifiedBy(?User $modifiedBy): self
+    public function setModifiedBy(string $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 
@@ -157,12 +171,12 @@ class InternalListValue
         return $this;
     }
 
-    public function getData(): ?array
+    public function getData(): ?string
     {
         return $this->data;
     }
 
-    public function setData(array $data): self
+    public function setData(string $data): self
     {
         $this->data = $data;
 
