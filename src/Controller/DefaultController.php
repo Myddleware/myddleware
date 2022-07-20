@@ -2717,8 +2717,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                         $user = $this->getUser();
                         try {
                             $this->template->convertTemplate($ruleName, $templateName, $connectorSourceId, $connectorTargetId, $user);
-                        
-                       
                         } catch (Exception $e) {
                             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
                             return  new Response('error');
