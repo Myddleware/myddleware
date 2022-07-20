@@ -329,6 +329,9 @@
 	line-height: 2.5em;
 	text-align: center;
 }
+#validation{
+	color: red;
+}
 
 #simulation #simulation_tab li {
     border-bottom: 1px solid #ccc;
