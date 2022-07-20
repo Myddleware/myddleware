@@ -40,11 +40,6 @@ class MySQL extends Database
 
     protected bool $readDeletion = true;
 
-    protected function generatePdo()
-    {
-        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
-    }
-
     // Query to get all the flieds of the table
     protected function get_query_describe_table($table): string
     {

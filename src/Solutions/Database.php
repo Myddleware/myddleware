@@ -92,6 +92,11 @@ class Database extends Solution
         ];
     }
 
+    protected function generatePdo(): PDO
+    {
+        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
+    }
+
     // Generate query
     protected function getQueryShowTables(): string
     {
@@ -105,15 +110,15 @@ class Database extends Solution
             $modules = [];
 
             // Send the query to the database
-            $q = $this->pdo->prepare($this->getQueryShowTables());
-            $exec = $q->execute();
+            $query = $this->pdo->prepare($this->getQueryShowTables());
+            $result = $query->execute();
             // Error management
-            if (!$exec) {
+            if (!$result) {
                 $errorInfo = $this->pdo->errorInfo();
                 throw new Exception('Show Tables: '.$errorInfo[2]);
             }
             // Get every table and add them to the module list
-            $fetchAll = $q->fetchAll();
+            $fetchAll = $query->fetchAll();
             foreach ($fetchAll as $table) {
                 if (isset($table[0])) {
                     $modules[$table[0]] = $table[0];
