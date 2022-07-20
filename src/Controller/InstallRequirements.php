@@ -19,7 +19,7 @@ class InstallRequirements extends AbstractController
     {
         $this->configRepository = $configRepository;
     }
-    
+
     #[Route('/install_requirements', name: 'app_install_requirements')]
     public function requirements(): Response
     {
@@ -35,19 +35,17 @@ class InstallRequirements extends AbstractController
                     $checkPassed = false;
                 }
             }
-
             $recommendationMesssages = [];
             foreach ($this->symfonyRequirements->getRecommendations() as $req) {
                 if (!$req->isFulfilled()) {
                     $recommendationMesssages[] = $req->getHelpText();
                 }
             }
-
             $this->systemStatus = '';
             if (!$checkPassed) {
                 $this->systemStatus = 'Your system is not ready to run Myddleware yet';
             } else {
-                $this->systemStatus ='Your system is ready to run Myddleware';
+                $this->systemStatus = 'Your system is ready to run Myddleware';
             }
 
             //allow access if no errors
@@ -58,7 +56,6 @@ class InstallRequirements extends AbstractController
                 'system_status' => $this->systemStatus,
             ]);
         } catch (Exception $e) {
-            
             //to help voter decide whether we allow access to install process again or not
             $configs = $this->configRepository->findAll();
             if (!empty($configs)) {
@@ -68,6 +65,6 @@ class InstallRequirements extends AbstractController
                     }
                 }
             }
-        }        
+        }
     }
 }
