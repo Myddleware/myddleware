@@ -27,32 +27,20 @@ namespace App\Solutions;
 
 class MySQL extends Database
 {
-    protected $driver = 'mysql';
+    protected string $driver = 'mysql';
 
-    protected $fieldName = 'Field';
+    protected string $fieldName = 'Field';
 
-    protected $fieldLabel = 'Field';
+    protected string $fieldLabel = 'Field';
 
-    protected $fieldType = 'Type';
+    protected string $fieldType = 'Type';
 
     // Enable to delete data
     protected bool $sendDeletion = true;
 
     protected bool $readDeletion = true;
 
-    // Query to get all the flieds of the table
-    protected function get_query_describe_table($table): string
-    {
-        return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
-    }
 
-    // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
-    {
-        if (empty($param['offset'])) {
-            $param['offset'] = 0;
-        }
 
-        return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
-    }
+
 }

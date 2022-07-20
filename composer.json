@@ -17,6 +17,7 @@
     "ext-ctype": "*",
     "ext-iconv": "*",
     "ext-json": "*",
+    "ext-pdo": "*",
     "api-platform/core": "^2.2.10",
     "automattic/woocommerce": "^3.0",
     "beberlei/doctrineextensions": "^1.3",

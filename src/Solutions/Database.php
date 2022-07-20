@@ -26,6 +26,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Solutions;
 
 use App\Entity\Rule;
+use Doctrine\DBAL\Result;
 use Exception;
 use PDO;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -33,15 +34,22 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Database extends Solution
 {
-    protected $driver;
 
-    protected $pdo;
+    protected PDO $pdo;
+
+    protected string $driver;
 
     protected string $charset = 'utf8';
 
     protected string $stringSeparatorOpen = '`';
 
     protected string $stringSeparatorClose = '`';
+
+    protected string $fieldName;
+
+    protected string $fieldLabel;
+
+    protected string $fieldType;
 
     public function login(array $connectionParam): void
     {
@@ -138,14 +146,14 @@ class Database extends Solution
         try {
             // parent::getModuleFields($module, $type);
             // Get all fields of the table in input
-            $q = $this->pdo->prepare($this->get_query_describe_table($module));
-            $exec = $q->execute();
-            if (!$exec) {
+            $stmt = $this->pdo->prepare($this->getQueryDescribeTable($module));
+            $result = $stmt->execute();
+            if (!$result) {
                 $errorInfo = $this->pdo->errorInfo();
                 throw new Exception('CheckTable: (Describe) '.$errorInfo[2]);
             }
             // Format the fields
-            $fields = $q->fetchAll();
+            $fields = $stmt->fetchAll();
             // Get field ID
             $idFields = $this->getIdFields($module, $type, $fields);
 
@@ -176,7 +184,7 @@ class Database extends Solution
                 // If the field contains the id indicator, we add it to the moduleFields list
                 if (!empty($idFields)) {
                     foreach ($idFields as $idField) {
-                        if (false !== strpos($field[$this->fieldName], $idField)) {
+                        if (str_contains($field[$this->fieldName], $idField)) {
                             $this->moduleFields[$field[$this->fieldName]] = [
                                 'label' => $field[$this->fieldLabel],
                                 'type' => $field[$this->fieldType],
@@ -207,13 +215,13 @@ class Database extends Solution
             return $this->moduleFields;
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return false;
+            $this->logger->error($error);
+            return null;
         }
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array|Result
     {
         $result = [];
         // Decode field name (converted in method getModuleFields)
@@ -284,7 +292,7 @@ class Database extends Solution
                 $nbFilter = count($param['query']);
                 $query['where'] .= ' WHERE ';
                 foreach ($param['query'] as $queryKey => $queryValue) {
-                    // Manage query with id, to be replaced by the ref Id fieldname
+                    // Manage query with id, to be replaced by the ref Id field name
                     if ('id' == $queryKey) {
                         if (
                             !empty($param['ruleParams']['fieldId'])
@@ -292,7 +300,7 @@ class Database extends Solution
                         ) {
                             throw new Exception('Not possible to read a specific record when myddleware_generated is selected as the Primary key in your source table');
                         }
-                        // The query key is different if the functyion is call from a read data (database is source) or a read history (database is target)
+                        // The query key is different if the function is call from a read data (database is source) or a read history (database is target)
                         if ('history' == $param['call_type']) {
                             $queryKey = $param['ruleParams']['targetFieldId'];
                         } elseif ('read' == $param['call_type']) {
@@ -313,7 +321,7 @@ class Database extends Solution
             if ('read' == $param['call_type']) {
                 $query['order'] = ' ORDER BY '.$this->stringSeparatorOpen.$param['ruleParams']['fieldDateRef'].$this->stringSeparatorClose.' ASC'; // Tri par date utilisateur
             }
-            $query['limit'] = $this->get_query_select_limit_offset($param, 'read'); // Add query limit
+            $query['limit'] = $this->getQuerySelectLimitOffset($param, 'read'); // Add query limit
 
             // Build query
             $requestSQL = $this->buildQuery($param, $query);
@@ -390,11 +398,10 @@ class Database extends Solution
         return $result;
     }
 
-
     /**
      * @throws Exception
      */
-    protected function create($param, $record)
+    protected function create($param, $record): bool|string|null
     {
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
@@ -408,13 +415,13 @@ class Database extends Solution
         foreach ($record as $key => $value) {
             if ('target_id' == $key) {
                 continue;
-                // If the target reference field is in data sent, we save it to update the document
+            // If the target reference field is in data sent, we save it to update the document
             } elseif ($key == $param['ruleParams']['targetFieldId']) {
                 $idTarget = $value;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method getModuleFields)
-            $sql .= $this->stringSeparatorOpen . rawurldecode($key) . $this->stringSeparatorClose . ',';
-            $values .= "'" . $this->escape($value) . "',";
+            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
+            $values .= "'".$this->escape($value)."',";
         }
 
         // Remove the last coma
@@ -434,7 +441,7 @@ class Database extends Solution
 
         // If the target reference field isn't in data sent
         if (!isset($idTarget)) {
-            // If the target reference field is a primary key auto increment, we retrive the value here
+            // If the target reference field is a primary key auto increment, we retrieve the value here
             $idTarget = $this->pdo->lastInsertId();
         }
 
@@ -447,7 +454,7 @@ class Database extends Solution
     protected function update($param, $record)
     {
         // Query init
-        $sql = 'UPDATE ' . $this->stringSeparatorOpen . $param['module'] . $this->stringSeparatorClose . ' SET ';
+        $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
         // Boucle sur chaque champ du document
         foreach ($record as $key => $value) {
@@ -493,8 +500,8 @@ class Database extends Solution
             throw new Exception('No target id found. Failed to delete the record.');
         }
         // Query init
-        $sql = 'DELETE FROM ' . $this->stringSeparatorOpen . $param['module'] . $this->stringSeparatorClose . ' ';
-        $sql .= ' WHERE ' . $this->stringSeparatorOpen . $param['ruleParams']['targetFieldId'] . $this->stringSeparatorClose . "='" . $record['target_id'] . "'";
+        $sql = 'DELETE FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' ';
+        $sql .= ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$record['target_id']."'";
         // Query validation
         $sql = $this->queryValidation($param, 'delete', $sql, $record);
 
@@ -503,7 +510,7 @@ class Database extends Solution
         $exec = $q->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new Exception('Delete: ' . $errorInfo[2] . ' . Query : ' . $sql);
+            throw new Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
         }
 
         return $record['target_id'];
@@ -511,8 +518,9 @@ class Database extends Solution
 
     /**
      * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
-    protected function searchDeletionByComparison($param, $result)
+    protected function searchDeletionByComparison($param, $result): array|Result
     {
         // If check deletion by comparaison is selected on the rule param
         if (
@@ -605,7 +613,7 @@ class Database extends Solution
     // Function to buid the SELECT query
     protected function buildQuery($param, $query): string
     {
-        return $query['select'] . $query['from'] . $query['where'] . (!empty($query['order']) ? $query['order'] : '') . $query['limit'];
+        return $query['select'].$query['from'].$query['where'].(!empty($query['order']) ? $query['order'] : '').$query['limit'];
     }
 
     // Get the fieldId from the other rules to add them into the source relationship list field
@@ -744,5 +752,21 @@ class Database extends Solution
     protected function generateId($param, $record): string
     {
         return uniqid('', true);
+    }
+
+    // Query to get all the fields of the table
+    protected function getQueryDescribeTable($table): string
+    {
+        return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
+    }
+
+    // Get the limit operator of the select query in the read last function
+    protected function getQuerySelectLimitOffset($param, $method): string
+    {
+        if (empty($param['offset'])) {
+            $param['offset'] = 0;
+        }
+
+        return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
 }
