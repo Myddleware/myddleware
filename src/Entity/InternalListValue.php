@@ -18,18 +18,20 @@ class InternalListValue
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=InternalList::class, inversedBy="value")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity=InternalList::class)
+     * @ORM\JoinColumn(name="list_id", nullable=false)
      */
     private $listId;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
     private $modifiedBy;
 
@@ -44,7 +46,7 @@ class InternalListValue
     private $dateModified;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", options={"default":0})
      */
     private $deleted;
 
@@ -75,24 +77,24 @@ class InternalListValue
         return $this;
     }
 
-    public function getCreatedBy(): ?string
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(string $createdBy): self
+    public function setCreatedBy(?User $createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    public function getModifiedBy(): ?string
+    public function getModifiedBy(): ?User
     {
         return $this->modifiedBy;
     }
 
-    public function setModifiedBy(string $modifiedBy): self
+    public function setModifiedBy(?User $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 

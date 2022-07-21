@@ -40,7 +40,8 @@ class internallistcore extends database
 
     protected function generatePdo()
     {
-        return new \PDO($this->driver . ':host=' . 'localhost' . ';port=' . $this->paramConnexion['port'] . ';dbname=' . $this->paramConnexion['database_name'] . ';charset=' . $this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+        // return new \PDO($this->driver . ':host=' . 'localhost' . ';port=' . $this->paramConnexion['port'] . ';dbname=' . $this->paramConnexion['database_name'] . ';charset=' . $this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
+        return new \PDO($this->driver . ':host=' . 'localhost' . ';port=' . $this->paramConnexion['port'] . ';dbname=' . $this->paramConnexion['database_name'] . ';charset=' . $this->charset);
     }
 
     // Generate query

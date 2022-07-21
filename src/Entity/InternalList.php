@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\InternalListRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -30,52 +28,31 @@ class InternalList
     private $type;
 
     /**
-     * @var User
-     *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;
 
     /**
-     * @var User
-     *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
     private $modifiedBy;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+     * @ORM\Column(type="datetime")
      */
     private $dateCreated;
 
     /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
+     * @ORM\Column(type="datetime")
      */
     private $dateModified;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+     * @ORM\Column(type="boolean", options={"default":0})
      */
     private $deleted;
-
-    /**
-     * @ORM\OneToMany(targetEntity=InternalListValue::class, mappedBy="listId")
-     */
-    private $value;
-
-    public function __construct()
-    {
-        $this->value = new ArrayCollection();
-    }
-
 
     public function getId(): ?int
     {
@@ -162,36 +139,6 @@ class InternalList
     public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, InternalListValue>
-     */
-    public function getValue(): Collection
-    {
-        return $this->value;
-    }
-
-    public function addValue(InternalListValue $value): self
-    {
-        if (!$this->value->contains($value)) {
-            $this->value[] = $value;
-            $value->setListId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeValue(InternalListValue $value): self
-    {
-        if ($this->value->removeElement($value)) {
-            // set the owning side to null (unless already changed)
-            if ($value->getListId() === $this) {
-                $value->setListId(null);
-            }
-        }
 
         return $this;
     }
