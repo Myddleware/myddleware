@@ -55,6 +55,8 @@ class Solution
 
     protected array $fieldsRelate = [];
 
+    protected array $requiredRelationships = [];
+
     protected array $connectionParam;
 
     protected LoggerInterface $logger;
@@ -732,11 +734,10 @@ class Solution
         if (!isset($this->requiredRelationships[$module])) {
             $this->requiredRelationships[$module] = [];
         }
-        // Boucle sur tous les champs obligatoires
-        foreach ($this->required_relationships[$module] as $required_relationship) {
-            if (!in_array($required_relationship, array_keys($this->moduleFields))) {
-                $this->moduleFields[$required_relationship] = [
-                    'label' => $required_relationship,
+        foreach ($this->requiredRelationships[$module] as $requiredRelationship) {
+            if (!in_array($requiredRelationship, array_keys($this->moduleFields))) {
+                $this->moduleFields[$requiredRelationship] = [
+                    'label' => $requiredRelationship,
                     'type' => 'text',
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
@@ -744,7 +745,7 @@ class Solution
                     'relate' => true,
                 ];
             } else {
-                $this->moduleFields[$required_relationship]['required_relationship'] = 1;
+                $this->moduleFields[$requiredRelationship]['required_relationship'] = 1;
             }
         }
 
