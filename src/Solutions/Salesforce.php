@@ -9,22 +9,22 @@ declare(strict_types=1);
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com	
-	
-	This file is part of Myddleware.
-	
-	Myddleware is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
 
-	Myddleware is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+This file is part of Myddleware.
 
-	You should have received a copy of the GNU General Public License
-	along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
@@ -33,173 +33,171 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Salesforce extends Solution {
 
-	protected $limitCall = 100;
+    protected int $limitCall = 100;
 
-	protected array $requiredFields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
+    protected array $requiredFields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
-	protected $fieldsDuplicate = array(
-										'Contact' => array('Email','LastName'),
-										'Lead' => array('Email','LastName'),
-										'Account' => array('Email', 'Name'),
-										'default' => array('Name')
-									);
+    protected array $fieldsDuplicate = array(
+        'Contact' => array('Email','LastName'),
+        'Lead' => array('Email','LastName'),
+        'Account' => array('Email', 'Name'),
+        'default' => array('Name')
+    );
 
-	protected $required_relationships = array(
-												'default' => array(),
-												'Contact' => array()
-											);
+    protected array $requiredRelationships = array(
+        'default' => array(),
+        'Contact' => array()
+    );
 
-	private $access_token;
-	protected $instance_url;
-	
-	// Listes des modules et des champs à exclure de Salesforce
-	protected array $excludedModules = array(
-										'default' => 
-											array("AccountFeed", "AccountShare", "ActivityHistory", "AggregateResult", "ApexClass", "ApexComponent", "ApexLog", "ApexPage","AccountHistory","CaseHistory", "ContactHistory","ContractHistory","LeadHistory", "OpportunityHistory",
-											"ApexTestQueueItem", "ApexTestResult", "ApexTrigger", "AssetFeed", "AsyncApexJob", "BrandTemplate", "CampaignFeed", "CampaignShare", "CaseFeed", "CaseHistory","SolutionHistory",
-											"CaseShare", "CaseTeamTemplate", "CaseTeamTemplateRecord", "CategoryNode", "ChatterActivity", "ClientBrowser", "CollaborationGroupFeed", "CollaborationGroupMemberRequest",
-											"CollaborationInvitation", "ContactFeed", "ContactShare", "ContentDocumentFeed", "ContentDocumentHistory", "ContentDocumentLink", "ContentVersion", "ContentVersionHistory", "ContentWorkspaceDoc",
-											"ContractFeed", "CronTrigger", "CustomConsoleComponent", "DashboardComponent", "DashboardComponentFeed", "DashboardFeed", "DocumentAttachmentMap",
-											"DomainSite", "EntitySubscription", "EventFeed", "FeedComment", "FeedItem", "FeedLike", "FeedTrackedChange", "FieldPermissions", "FiscalYearSettings", "ForecastShare",
-											"HashtagDefinition", "IdeaComment", "LeadFeed", "LeadShare", "LoginHistory", "LoginIp", "ObjectPermissions", "OpenActivity", "OpportunityFeed",
-											"OpportunityFieldHistory", "OpportunityShare", "PermissionSet", "PermissionSetAssignment", "Pricebook2History",
-											"ProcessInstanceHistory", "ProcessInstanceStep", "ProcessInstanceWorkitem", "Product2Feed", "QueueSobject", "ReportFeed", "SetupEntityAccess", "SiteFeed", "SolutionFeed",
-											"TaskFeed", "UserFeed", "UserLicense", "UserPreference", "UserProfileFeed", "UserRecordAccess", "UserRole", "UserShare", "Vote"),
-										'source' => array(),
-										'target' => array()
-										);
-										
-	protected array $excludedFields = array(
-										'default' => array('CreatedDate','LastModifiedDate','SystemModstamp'),
-										"Contact" => array("Name"), 
-										"Case" => array("CaseNumber")
-									);
-									
-	protected $versionApi = 'v38.0';
+    private $accessToken;
+    protected $instanceUrl;
 
-	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
-    public function login($connectionParam) {
-		parent::login($connectionParam);	
-		try {
-			if (
-					!empty($this->connectionParam['sandbox'])
-				&&	$this->connectionParam['sandbox'] == 1
-			) {
-				$token_url = 'https://test.salesforce.com/services/oauth2/token';
-			}
-			else {
-				$token_url = 'https://login.salesforce.com/services/oauth2/token';
-			}
-			
-		    $post_fields = array(
-		        'grant_type' => 'password',
-		        'client_id' => $this->connectionParam['consumerkey'],
-		        'client_secret' => $this->connectionParam['consumersecret'],
-		        'username' => $this->connectionParam['login'],
-		        'password' => $this->connectionParam['password'].$this->connectionParam['token']
-		    );
+    // Listes des modules et des champs à exclure de Salesforce
+    protected array $excludedModules = array(
+        'default' =>
+            array("AccountFeed", "AccountShare", "ActivityHistory", "AggregateResult", "ApexClass", "ApexComponent", "ApexLog", "ApexPage","AccountHistory","CaseHistory", "ContactHistory","ContractHistory","LeadHistory", "OpportunityHistory",
+                "ApexTestQueueItem", "ApexTestResult", "ApexTrigger", "AssetFeed", "AsyncApexJob", "BrandTemplate", "CampaignFeed", "CampaignShare", "CaseFeed", "CaseHistory","SolutionHistory",
+                "CaseShare", "CaseTeamTemplate", "CaseTeamTemplateRecord", "CategoryNode", "ChatterActivity", "ClientBrowser", "CollaborationGroupFeed", "CollaborationGroupMemberRequest",
+                "CollaborationInvitation", "ContactFeed", "ContactShare", "ContentDocumentFeed", "ContentDocumentHistory", "ContentDocumentLink", "ContentVersion", "ContentVersionHistory", "ContentWorkspaceDoc",
+                "ContractFeed", "CronTrigger", "CustomConsoleComponent", "DashboardComponent", "DashboardComponentFeed", "DashboardFeed", "DocumentAttachmentMap",
+                "DomainSite", "EntitySubscription", "EventFeed", "FeedComment", "FeedItem", "FeedLike", "FeedTrackedChange", "FieldPermissions", "FiscalYearSettings", "ForecastShare",
+                "HashtagDefinition", "IdeaComment", "LeadFeed", "LeadShare", "LoginHistory", "LoginIp", "ObjectPermissions", "OpenActivity", "OpportunityFeed",
+                "OpportunityFieldHistory", "OpportunityShare", "PermissionSet", "PermissionSetAssignment", "Pricebook2History",
+                "ProcessInstanceHistory", "ProcessInstanceStep", "ProcessInstanceWorkitem", "Product2Feed", "QueueSobject", "ReportFeed", "SetupEntityAccess", "SiteFeed", "SolutionFeed",
+                "TaskFeed", "UserFeed", "UserLicense", "UserPreference", "UserProfileFeed", "UserRecordAccess", "UserRole", "UserShare", "Vote"),
+        'source' => array(),
+        'target' => array()
+    );
 
-			$token_request_data = $this->call($token_url, $post_fields);
+    protected array $excludedFields = array(
+        'default' => array('CreatedDate','LastModifiedDate','SystemModstamp'),
+        "Contact" => array("Name"),
+        "Case" => array("CaseNumber")
+    );
 
-		    if (!isset($token_request_data['access_token'])||
-		        !isset($token_request_data['instance_url'])){
-				throw new \Exception("Missing expected data from ".print_r($token_request_data, true));
-		    } else {
-			    $this->access_token = $token_request_data['access_token'];
-			    $this->instance_url = $token_request_data['instance_url'];
-				$this->isConnectionValid = true;
-		    }
-		}
-		catch (\Exception $e) {
-			$error = $e->getMessage();
-			$this->logger->error($error);
-			return array('error' => $error);
-		}
-	}
-	
-	// Fonction qui renvoie les données de connexion
-	public function getToken() {
-		return array('sf_access_token' => $this->access_token,
-					'sf_instance_url' => $this->instance_url);
-	} 
+    protected string $versionApi = 'v38.0';
 
-	// Liste des paramètres de connexion
-	public function getFieldsLogin() : array
-	{	
+    // Connexion à Salesforce - Instancie la classe salesforce et affecte accessToken et instanceUrl
+    public function login($connectionParam): void
+    {
+        parent::login($connectionParam);
+        try {
+            if (
+                !empty($this->connectionParam['sandbox'])
+                &&	$this->connectionParam['sandbox'] == 1
+            ) {
+                $token_url = 'https://test.salesforce.com/services/oauth2/token';
+            } else {
+                $token_url = 'https://login.salesforce.com/services/oauth2/token';
+            }
+
+            $post_fields = array(
+                'grant_type' => 'password',
+                'client_id' => $this->connectionParam['consumerkey'],
+                'client_secret' => $this->connectionParam['consumersecret'],
+                'username' => $this->connectionParam['login'],
+                'password' => $this->connectionParam['password'].$this->connectionParam['token']
+            );
+
+            $token_request_data = $this->call($token_url, $post_fields);
+
+            if (!isset($token_request_data['accessToken'])||
+                !isset($token_request_data['instanceUrl'])){
+                throw new \Exception("Missing expected data from ".print_r($token_request_data, true));
+            } else {
+                $this->accessToken = $token_request_data['accessToken'];
+                $this->instanceUrl = $token_request_data['instanceUrl'];
+                $this->isConnectionValid = true;
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $this->logger->error($error);
+        }
+    }
+
+    // Fonction qui renvoie les données de connexion
+    public function getToken(): array
+    {
+        return array('sf_access_token' => $this->accessToken,
+            'sf_instance_url' => $this->instanceUrl);
+    }
+
+    // Liste des paramètres de connexion
+    public function getFieldsLogin(): array
+    {
         return array(
-                    array(
-                            'name' => 'login',
-                            'type' => TextType::class,
-                            'label' => 'solution.fields.login'
-                        ),
-                    array(
-                            'name' => 'password',
-                            'type' => PasswordType::class,
-                            'label' => 'solution.fields.password'
-                        ),
-                    array(
-                            'name' => 'consumerkey',
-                            'type' => PasswordType::class,
-                            'label' => 'solution.fields.consumerkey'
-                        ),
-                    array(
-                            'name' => 'consumersecret',
-                            'type' => PasswordType::class,
-                            'label' => 'solution.fields.consumersecret'
-                        ),
-                    array(
-                            'name' => 'token',
-                            'type' => PasswordType::class,
-                            'label' => 'solution.fields.token'
-                        ),
-                    array(
-                            'name' => 'sandbox',
-                            'type' => TextType::class,
-                            'label' => 'solution.fields.sandbox'
-                        )
+            array(
+                'name' => 'login',
+                'type' => TextType::class,
+                'label' => 'solution.fields.login'
+            ),
+            array(
+                'name' => 'password',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.password'
+            ),
+            array(
+                'name' => 'consumerkey',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumerkey'
+            ),
+            array(
+                'name' => 'consumersecret',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumersecret'
+            ),
+            array(
+                'name' => 'token',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.token'
+            ),
+            array(
+                'name' => 'sandbox',
+                'type' => TextType::class,
+                'label' => 'solution.fields.sandbox'
+            )
         );
-	}
+    }
 
-	// Renvoie les modules disponibles du compte Salesforce connecté
-	public function getModules($type = 'source'): array
-	{
-		$token = $this->getToken();
-		$instance_url = $token['sf_instance_url'];
-		// Accès au service de SalesForce renvoyant la liste des objets disponibles propres à l'organisation
-		$query_url = $instance_url.'/services/data/'.$this->versionApi.'/sobjects/';
-		try{
-			$query_request_data = $this->call($query_url, false);
+    // Renvoie les modules disponibles du compte Salesforce connecté
+    public function getModules($type = 'source'): array
+    {
+        $token = $this->getToken();
+        $instance_url = $token['sf_instance_url'];
+        // Accès au service de SalesForce renvoyant la liste des objets disponibles propres à l'organisation
+        $query_url = $instance_url . '/services/data/' . $this->versionApi . '/sobjects/';
+        try{
+            $query_request_data = $this->call($query_url, false);
 
-			foreach ($query_request_data['sobjects'] as $object) {
-				// On ne renvoie que les modules autorisés
-				if (
-						!in_array($object['name'],$this->excludedModules['default'])
-					&&	!in_array($object['name'],$this->excludedModules[$type])
-				) {
-					if($object['label'] == 'Groupe'){ // A travailler
-						$modules[$object['name']] = $object['label'].' ('.$object['name'].')';
-					} else {
-						$modules[$object['name']] = $object['label'];						
+            foreach ($query_request_data['sobjects'] as $object) {
+                // On ne renvoie que les modules autorisés
+                if (
+                    !in_array($object['name'], $this->excludedModules['default'])
+                    && !in_array($object['name'], $this->excludedModules[$type])
+                ) {
+                    if($object['label'] == 'Groupe'){ // A travailler
+                        $modules[$object['name']] = $object['label'].' ('.$object['name'].')';
+                    } else {
+                        $modules[$object['name']] = $object['label'];
 					}
-				}
-			}
-			return ((isset($modules)) ? $modules : false );
-		}
-		catch (\Exception $e){
-			return $e->getMessage();
-		}
-	}
+                }
+            }
+            return ((isset($modules)) ? $modules : false );
+        } catch (\Exception $e){
+            return $e->getMessage();
+        }
+    }
 
-	// Renvoie les champs du module passé en paramètre
-	public function getModuleFields($module, $type = 'source', $param = null): array
-	{
-		parent::getModuleFields($module, $type);
-		$token = $this->getToken();
-		$instance_url = $token['sf_instance_url'];
-		// Accès au service de SalesForce renvoyant la liste des champs du module passé en paramètre
-		$query_url = $instance_url.'/services/data/'.$this->versionApi.'/sobjects/' . $module . '/describe/';
-		try {
-			$query_request_data = $this->call($query_url, false);		
+    // Renvoie les champs du module passé en paramètre
+    public function getModuleFields($module, $type = 'source', $param = null): array
+    {
+        parent::getModuleFields($module, $type);
+        $token = $this->getToken();
+        $instance_url = $token['sf_instance_url'];
+        // Accès au service de SalesForce renvoyant la liste des champs du module passé en paramètre
+        $query_url = $instance_url.'/services/data/'.$this->versionApi.'/sobjects/' . $module . '/describe/';
+        try {
+            $query_request_data = $this->call($query_url, false);
             // Ces champs ne doivent pas apparaître comme requis
             $calculateFields = array("NumberOfLeads", "NumberOfConvertedLeads", "NumberOfContacts","NumberOfResponses","NumberOfOpportunities","NumberOfWonOpportunities","AmountAllOpportunities","AmountWonOpportunities","ForecastCategory");
             
@@ -365,7 +363,7 @@ class Salesforce extends Solution {
 			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
 			// Construction de la requête pour Salesforce
-			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
+			$baseQuery = $this->instanceUrl."/services/data/".$this->versionApi."/query/?q=";
 			
 			// Gestion du SELECT
 			$querySelect = $this->getSelect($param);	
@@ -459,7 +457,7 @@ class Salesforce extends Solution {
 	// Permet de créer des données
 	public function createData($param): array
 	{
-		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
+		$query_url = $this->instanceUrl."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for create');
@@ -589,7 +587,7 @@ class Salesforce extends Solution {
 				$data = $this->checkDataBeforeUpdate($param, $data);
 				$parameters = array();
 				// Instanciation de l'URL d'appel				
-				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
+				$query_url = $this->instanceUrl."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
 					// On n'envoie jamais le champ Myddleware_element_id à Salesforce
 					if (in_array($key, array('Myddleware_element_id'))) {
@@ -772,14 +770,14 @@ class Salesforce extends Solution {
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: OAuth '.$this->access_token));
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: OAuth '.$this->accessToken));
 		} 
 		elseif ($update === false) { // Si l'appel en revanche possède des paramètres dans $parameters, on exécute un POST en curl
 		    curl_setopt($ch, CURLOPT_URL, $url);
 		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 			if(!isset($parameters['grant_type'])) // A ne pas ajouter pour la connexion
-		    	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
+		    	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->accessToken, "Content-type: application/json"));
 		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
 		    curl_setopt($ch, CURLOPT_POST, TRUE);
 		    curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
@@ -790,7 +788,7 @@ class Salesforce extends Solution {
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->accessToken, "Content-type: application/json"));
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
 		}
 		

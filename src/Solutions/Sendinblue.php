@@ -367,10 +367,10 @@ class Sendinblue extends Solution
                 foreach ($param['fields'] as $field) {
                     if (!empty($record[$field])) {
                         $result[$record[$idField]][$field] = $record[$field];
-                    // Result attribute can be an object (example function getContacts())
+                        // Result attribute can be an object (example function getContacts())
                     } elseif (!empty($record['attributes']->$field)) {
                         $result[$record[$idField]][$field] = $record['attributes']->$field;
-                    // Result attribute can be an array (example function getContactInfo())
+                        // Result attribute can be an array (example function getContactInfo())
                     } elseif (
                         is_array($record['attributes'])
                         and !empty($record['attributes'][$field])
@@ -397,28 +397,6 @@ class Sendinblue extends Solution
         }
 
         return $dateEndObj->format('Y-m-d');
-    }
-
-    public function getTransactionalEmails($param): ?GetEmailEventReport
-    {
-        $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->config);
-        $startDate = '2020-01-01';
-        $endDate = '2020-01-01';
-        $messageId = '<202112150919.44488315490@smtp-relay.mailin.fr>';
-        $templateId = 2;
-
-        try {
-            return $apiInstance->getEmailEventReport(
-                startDate: $startDate,
-                endDate: $endDate,
-                messageId: $messageId,
-                templateId: $templateId
-            );
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
-
-            return null;
-        }
     }
 
     /**

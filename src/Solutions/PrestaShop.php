@@ -92,7 +92,7 @@ class PrestaShop extends Solution
 
     protected $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
 
-    // Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
+    // Connexion à Salesforce - Instancie la classe salesforce et affecte accessToken et instanceUrl
     public function login($connectionParam)
     {
         parent::login($connectionParam);

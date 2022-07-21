@@ -107,12 +107,12 @@ class Facebook extends Solution
         try {
             $modules = [];
             // Get the account's pages
-            $responsePages = $this->facebook->get('me/accounts?fields=name,access_token&type=page');
+            $responsePages = $this->facebook->get('me/accounts?fields=name,accessToken&type=page');
             $bodyPages = $responsePages->getDecodedBody();
             if (!empty($bodyPages['data'])) {
                 foreach ($bodyPages['data'] as $page) {
                     // Get the page's lead forms
-                    $responseLeadForms = $this->facebook->get($page['id'].'/leadgen_forms', $page['access_token']);
+                    $responseLeadForms = $this->facebook->get($page['id'].'/leadgen_forms', $page['accessToken']);
                     $bodyForms = $responseLeadForms->getDecodedBody();
                     // Build the module list
                     if (!empty($bodyForms['data'])) {
