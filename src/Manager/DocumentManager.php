@@ -1012,6 +1012,13 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
+			// Error ff rule mode is update only and the document is a creation
+			if (
+                    $this->documentType == 'C'
+                and $this->ruleMode == 'U'
+            ) {
+                throw new \Exception('The document is a creation but the rule mode is UPDATE ONLY. ');
+            }
         } catch (\Exception $e) {
             $this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
