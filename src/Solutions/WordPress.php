@@ -107,10 +107,10 @@ class WordPress extends Solution
 
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
+        $moduleFields = [];
+        $fieldsRelate = [];
         parent::getModuleFields($module, $type);
         try {
-            $moduleFields = [];
-            $fieldsRelate = [];
             require_once 'lib/wordpress/metadata.php';
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
