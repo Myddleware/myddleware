@@ -477,7 +477,7 @@ class SugarCRM extends Solution
                         ],
                     ];
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel];
-                // Create record
+                    // Create record
                 } elseif ('create' == $method) {
                     // Myddleware field empty when data transfer type is create
                     unset($data['target_id']);
@@ -545,7 +545,7 @@ class SugarCRM extends Solution
                     ++$i;
                 }
             } else {
-                throw new \Exception('Error ' . $response->getStatus() . ' : ' . $response->getError());
+                throw new \Exception('Error '.$response->getStatus().' : '.$response->getError());
             }
             // Modification du statut du flux
         } catch (\Exception $e) {
@@ -597,9 +597,9 @@ class SugarCRM extends Solution
         return rtrim($url, '/').'/#'.$module.'/'.$recordId;
     }
 
-
     /**
-     *  Used only for metadata (getModules and )
+     *  Used only for metadata (getModules and ).
+     *
      * @throws Exception
      */
     protected function customCall($url, $parameters = null, $method = null)
