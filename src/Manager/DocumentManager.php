@@ -1012,7 +1012,7 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
-			// Error ff rule mode is update only and the document is a creation
+			// Error if rule mode is update only and the document is a creation
 			if (
                     $this->documentType == 'C'
                 and $this->ruleMode == 'U'
