@@ -26,53 +26,44 @@
 
 namespace App\Solutions;
 
-class internallistcore extends database
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+class internallistcore extends mysql
 {
-    protected $driver = 'mysql';
 
-    protected $fieldName = 'Field';
-    protected $fieldLabel = 'Field';
-    protected $fieldType = 'Type';
 
-    // Enable to delete data
-    protected $sendDeletion = true;
-    protected $readDeletion = true;
+    public function getFieldsLogin()
 
-    protected function generatePdo()
     {
-        // return new \PDO($this->driver . ':host=' . 'localhost' . ';port=' . $this->paramConnexion['port'] . ';dbname=' . $this->paramConnexion['database_name'] . ';charset=' . $this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
-        return new \PDO($this->driver . ':host=' . 'localhost' . ';port=' . $this->paramConnexion['port'] . ';dbname=' . $this->paramConnexion['database_name'] . ';charset=' . $this->charset);
+        return [
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+        ];
     }
 
-    // Generate query
-    protected function get_query_show_tables()
-    {
-        return 'SHOW TABLES FROM ' . $this->stringSeparatorOpen . $this->paramConnexion['database_name'] . $this->stringSeparatorClose;
-    }
 
-    // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    public function login($paramConnexion)
     {
-        return 'DESCRIBE ' . $this->stringSeparatorOpen . $table . $this->stringSeparatorClose;
-    }
+        parent::login($paramConnexion);
+        try {
+            try {
+                $this->connexion_valide = true;
+            } catch (\PDOException $e) {
+                $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->logger->error($error);
 
-    // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
-    {
-        if (empty($param['offset'])) {
-            $param['offset'] = 0;
+                return ['error' => $error];
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
-
-        return ' LIMIT ' . $param['limit'] . ' OFFSET ' . $param['offset'];
     }
-
-    //todo take the data from the database 
-
-    //todo get the id of the rule
-
-    //todo send the data according to the rule
-
-
 } // class mysqlcore
 
 class internallist extends internallistcore
