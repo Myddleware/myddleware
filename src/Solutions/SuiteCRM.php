@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -25,15 +28,16 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class SuiteCRM extends Solution
 {
-    protected $limitCall = 100;
+    protected int $limitCall = 100;
 
-    protected $urlSuffix = '/service/v4_1/rest.php';
+    protected string $urlSuffix = '/service/v4_1/rest.php';
 
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
@@ -42,7 +46,7 @@ class SuiteCRM extends Solution
 
     protected array $requiredFields = ['default' => ['id', 'date_modified', 'date_entered']];
 
-    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected array $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -50,13 +54,12 @@ class SuiteCRM extends Solution
         'default' => ['name'],
     ];
 
-    protected $required_relationships = [
+    protected array $required_relationships = [
         'default' => [],
         'Contacts' => [],
         'Cases' => [],
     ];
 
-    // liste des modules à exclure pour chaque solution
     protected array $excludedModules = [
         'default' => ['Home', 'Calendar', 'Documents', 'Administration', 'Currencies', 'CustomFields', 'Connectors', 'Dropdown', 'Dynamic', 'DynamicFields', 'DynamicLayout', 'EditCustomFields', 'Help', 'Import', 'MySettings', 'FieldsMetaData', 'UpgradeWizard', 'Sync', 'Versions', 'LabelEditor', 'Roles', 'OptimisticLock', 'TeamMemberships', 'TeamSets', 'TeamSetModule', 'Audit', 'MailMerge', 'MergeRecords', 'Schedulers', 'Schedulers_jobs', 'Groups', 'InboundEmail', 'ACLActions', 'ACLRoles', 'DocumentRevisions', 'ACL', 'Configurator', 'UserPreferences', 'SavedSearch', 'Studio', 'SugarFeed', 'EAPM', 'OAuthKeys', 'OAuthTokens'],
         'target' => [],
@@ -71,8 +74,7 @@ class SuiteCRM extends Solution
         'Cases' => ['case_number'],
     ];
 
-    // Tableau représentant les relation many-to-many de Sugar
-    protected $module_relationship_many_to_many = [
+    protected array $moduleRelationshipManyToMany = [
         'calls_contacts' => ['label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['call_id', 'contact_id']],
         'calls_users' => ['label' => 'Relationship Call User', 'module_name' => 'Calls', 'link_field_name' => 'users', 'fields' => [], 'relationships' => ['call_id', 'user_id']],
         'calls_leads' => ['label' => 'Relationship Call Lead', 'module_name' => 'Calls', 'link_field_name' => 'leads', 'fields' => [], 'relationships' => ['call_id', 'lead_id']],
@@ -107,13 +109,13 @@ class SuiteCRM extends Solution
         'fp_events_prospects_1' => ['label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => [], 'relationships' => ['fp_events_prospects_1fp_events_ida', 'fp_events_prospects_1prospects_idb']],
     ];
 
-    protected $customRelationship = 'MydCustRelSugar';
+    protected string $customRelationship = 'MydCustRelSugar';
 
-    public function login($connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
-            $login_paramaters = [
+            $loginParameters = [
                 'user_auth' => [
                     'user_name' => $this->connectionParam['login'],
                     'password' => md5($this->connectionParam['password']),
@@ -126,23 +128,21 @@ class SuiteCRM extends Solution
             // Add the suffix with rest parameters to the url
             $this->connectionParam['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->connectionParam['url']);
+            $result = $this->call('login', $loginParameters, $this->connectionParam['url']);
 
-            if (false != $result) {
+            if ($result) {
                 if (empty($result->id)) {
-                    throw new \Exception($result->description);
+                    throw new Exception($result->description);
                 }
 
                 $this->session = $result->id;
                 $this->isConnectionValid = true;
             } else {
-                throw new \Exception('Please check url');
+                throw new Exception('Please check url');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -153,7 +153,7 @@ class SuiteCRM extends Solution
             $this->call('logout', $logout_parameters, $this->connectionParam['url']);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error logout REST '.$e->getMessage());
 
             return false;
@@ -182,7 +182,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function getModules($type = 'source'): array
+    public function getModules($type = 'source'): ?array
     {
         try {
             $get_available_modules_parameters = [
@@ -193,7 +193,7 @@ class SuiteCRM extends Solution
                 foreach ($get_available_modules->modules as $module) {
                     // On ne renvoie que les modules autorisés
                     if (
-                            !in_array($module->module_key, $this->excludedModules['default'])
+                        !in_array($module->module_key, $this->excludedModules['default'])
                         && !in_array($module->module_key, $this->excludedModules[$type])
                     ) {
                         $modules[$module->module_key] = $module->module_label;
@@ -201,26 +201,27 @@ class SuiteCRM extends Solution
                 }
             }
             // Création des modules type relationship
-            if (!empty($this->module_relationship_many_to_many)) {
-                foreach ($this->module_relationship_many_to_many as $key => $value) {
+            if (!empty($this->moduleRelationshipManyToMany)) {
+                foreach ($this->moduleRelationshipManyToMany as $key => $value) {
                     $modules[$key] = $value['label'];
                 }
             }
 
-            return (isset($modules)) ? $modules : false;
-        } catch (\Exception $e) {
-            return false;
+            return (isset($modules)) ? $modules : null;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            return null;
         }
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function getModuleFields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
         try {
             // Si le module est un module "fictif" relation créé pour Myddlewar
-            if (array_key_exists($module, $this->module_relationship_many_to_many)) {
-                foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {
+            if (array_key_exists($module, $this->moduleRelationshipManyToMany)) {
+                foreach ($this->moduleRelationshipManyToMany[$module]['fields'] as $name) {
                     $this->moduleFields[$name] = [
                         'label' => $name,
                         'type' => 'varchar(255)',
@@ -229,7 +230,7 @@ class SuiteCRM extends Solution
                         'relate' => false,
                     ];
                 }
-                foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
+                foreach ($this->moduleRelationshipManyToMany[$module]['relationships'] as $relationship) {
                     $this->moduleFields[$relationship] = [
                         'label' => $relationship,
                         'type' => 'varchar(36)',
@@ -265,11 +266,11 @@ class SuiteCRM extends Solution
                         $type_bdd = $field->type;
                     }
                     if (
-                            '_id' == substr($field->name, -3)
-                        || '_ida' == substr($field->name, -4)
-                        || '_idb' == substr($field->name, -4)
+                        str_ends_with($field->name, '_id')
+                        || str_ends_with($field->name, '_ida')
+                        || str_ends_with($field->name, '_idb')
                         || (
-                                'id' == $field->type
+                            'id' == $field->type
                             && 'id' != $field->name
                         )
                         || 'created_by' == $field->name
@@ -282,8 +283,7 @@ class SuiteCRM extends Solution
                             'required_relationship' => 0,
                             'relate' => true,
                         ];
-                    }
-                    // To enable to take out all fields where there are 'relate' in the type of the field
+                    } // To enable to take out all fields where there are 'relate' in the type of the field
                     else {
                         // Le champ id n'est envoyé qu'en source
                         if ('id' != $field->name || 'source' == $type) {
@@ -297,7 +297,7 @@ class SuiteCRM extends Solution
                         }
                         // Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
                         if (
-                                !empty($field->options)
+                            !empty($field->options)
                             && !in_array($field->type, ['datetime', 'bool'])
                         ) {
                             foreach ($field->options as $option) {
@@ -325,11 +325,11 @@ class SuiteCRM extends Solution
                             $type_bdd = $field->type;
                         }
                         if (
-                                '_id' == substr($field->name, -3)
-                            || '_ida' == substr($field->name, -4)
-                            || '_idb' == substr($field->name, -4)
+                            str_ends_with($field->name, '_id')
+                            || str_ends_with($field->name, '_ida')
+                            || str_ends_with($field->name, '_idb')
                             || (
-                                    'id' == $field->type
+                                'id' == $field->type
                                 && 'id' != $field->name
                             )
                         ) {
@@ -355,11 +355,15 @@ class SuiteCRM extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            return null;
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function read($param): ?array
     {
         $result = [];
@@ -378,10 +382,10 @@ class SuiteCRM extends Solution
         $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+        if (array_key_exists($param['module'], $this->moduleRelationshipManyToMany)) {
             $paramSave = $param;
             $param['fields'] = [];
-            $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
+            $param['module'] = $this->moduleRelationshipManyToMany[$paramSave['module']]['module_name'];
         }
 
         // Built the query
@@ -389,7 +393,7 @@ class SuiteCRM extends Solution
         // Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
         $link_name_to_fields_array = [];
         foreach ($param['fields'] as $field) {
-            if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+            if (str_starts_with($field, $this->customRelationship)) {
                 // Get all custom relationships
                 if (empty($customRelationshipList)) {
                     $customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
@@ -400,7 +404,7 @@ class SuiteCRM extends Solution
                     foreach ($customRelationshipListFields as $key => $value) {
                         // If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
                         if (
-                                $value['id'] == $field
+                            $value['id'] == $field
                             or $value['name'] == $field
                         ) {
                             $link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
@@ -445,7 +449,7 @@ class SuiteCRM extends Solution
                     }
                     // Manage deletion by adding the flag Myddleware_deletion to the record
                     if (
-                            true == $deleted
+                        $deleted
                         and !empty($entry->name_value_list->deleted->value)
                     ) {
                         $record['myddleware_deletion'] = true;
@@ -453,22 +457,22 @@ class SuiteCRM extends Solution
 
                     // All custom relationships will be added even the ones no requested (Myddleware will ignore them later)
                     if (!empty($customRelationshipListFields)) {
-                        // For each fields requested corresponding to a custom relationship
+                        // For each field requested corresponding to a custom relationship
                         foreach ($param['fields'] as $field) {
                             // Check if the field is a custom relationship
                             foreach ($customRelationshipListFields as $key => $value) {
                                 if (
-                                        $field == $value['id']
+                                    $field == $value['id']
                                     or $field == $value['name']
                                 ) {
                                     // Init field even if the relationship is empty. Myddleware needs the field to be set
                                     $record[$value['id']] = '';
                                     $record[$value['name']] = '';
 
-                                    // Find the the right relationship into SuiteCRM result call
+                                    // Find the right relationship into SuiteCRM result call
                                     foreach ($get_entry_list_result->relationship_list[$i]->link_list as $relationship) {
                                         if (
-                                                !empty($relationship->name)
+                                            !empty($relationship->name)
                                             and $relationship->name == $key
                                         ) {
                                             // Save relationship values
@@ -491,15 +495,14 @@ class SuiteCRM extends Solution
             } else {
                 if (!empty($get_entry_list_result->number)) {
                     // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
-                    throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
+                    throw new Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
                 } else {
                     // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
-                    throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
+                    throw new Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
                 }
                 break; // Stop the loop if an error happened
             }
-        }
-        // On continue si le nombre de résultat du dernier appel est égal à la limite
+        } // On continue si le nombre de résultat du dernier appel est égal à la limite
         while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
         // Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
         if (!empty($paramSave)) {
@@ -507,8 +510,7 @@ class SuiteCRM extends Solution
             // Récupération des données sauf de la date de référence qui dépend des enregistrements parent
             if (!empty($resultRel['count'])) {
                 $result = $resultRel['values'];
-            }
-            // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
+            } // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
             else {
                 return null;
             }
@@ -518,16 +520,16 @@ class SuiteCRM extends Solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): ?string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {
             $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-            $module = $rule->getModuleSource();
+            $module = $rule->getSourceModule();
             $recordId = $document->getSource();
         } else {
             $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-            $module = $rule->getModuleTarget();
+            $module = $rule->getTargetModule();
             $recordId = $document->gettarget();
         }
 
@@ -535,7 +537,7 @@ class SuiteCRM extends Solution
         return rtrim($url, '/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
     }
 
-    protected function readRelationship($param, $dataParent)
+    protected function readRelationship($param, $dataParent): array
     {
         if (empty($param['limit'])) {
             $param['limit'] = 100;
@@ -544,7 +546,7 @@ class SuiteCRM extends Solution
         $i = 0;
         // Pour toutes les données parents, on récupère toutes les données liées de la relation
         if (!empty($dataParent['values'])) {
-            $module_relationship_many_to_many = $this->module_relationship_many_to_many[$param['module']];
+            $module_relationship_many_to_many = $this->moduleRelationshipManyToMany[$param['module']];
 
             foreach ($dataParent['values'] as $parent) {
                 $get_relationships_parameters = [
@@ -592,10 +594,15 @@ class SuiteCRM extends Solution
         return $result;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): ?array
     {
+        $result = [];
+
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+        if (array_key_exists($param['module'], $this->moduleRelationshipManyToMany)) {
             return $this->createRelationship($param);
         }
 
@@ -610,7 +617,7 @@ class SuiteCRM extends Solution
                         continue;
                     }
                     // Si un champ est une relation custom alors on enlève le prefix
-                    if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                    if (str_starts_with($key, $this->customRelationship)) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
                     $dataSugar[] = ['name' => $key, 'value' => $value];
@@ -628,9 +635,9 @@ class SuiteCRM extends Solution
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
+                    throw new Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
@@ -644,16 +651,20 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    // Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
-    protected function createRelationship($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
+     */
+    protected function createRelationship($param): array
     {
+        $result = [];
         foreach ($param['data'] as $key => $data) {
             try {
                 // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+                $data = $this->checkDataBeforeCreate($param, $data, $key);
                 $dataSugar = [];
-                if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
-                    foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
+                if (!empty($this->moduleRelationshipManyToMany[$param['module']]['fields'])) {
+                    foreach ($this->moduleRelationshipManyToMany[$param['module']]['fields'] as $field) {
                         if (isset($data[$field])) {
                             $dataSugar[] = ['name' => $field, 'value' => $data[$field]];
                         }
@@ -661,10 +672,10 @@ class SuiteCRM extends Solution
                 }
                 $set_relationship_params = [
                     'session' => $this->session,
-                    'module_name' => $this->module_relationship_many_to_many[$param['module']]['module_name'],
-                    'module_id' => $data[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]],
-                    'link_field_name' => $this->module_relationship_many_to_many[$param['module']]['link_field_name'],
-                    'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
+                    'module_name' => $this->moduleRelationshipManyToMany[$param['module']]['module_name'],
+                    'module_id' => $data[$this->moduleRelationshipManyToMany[$param['module']]['relationships'][0]],
+                    'link_field_name' => $this->moduleRelationshipManyToMany[$param['module']]['link_field_name'],
+                    'related_ids' => [$data[$this->moduleRelationshipManyToMany[$param['module']]['relationships'][1]]],
                     'name_value_list' => $dataSugar,
                 ];
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
@@ -680,7 +691,7 @@ class SuiteCRM extends Solution
                         'error' => '01',
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$key] = [
                     'id' => '-1',
@@ -694,8 +705,12 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
+        $result = [];
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -708,7 +723,7 @@ class SuiteCRM extends Solution
                         $key = 'id';
                     }
                     // Si un champ est une relation custom alors on enlève le prefix
-                    if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                    if (str_starts_with($key, $this->customRelationship)) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
 
@@ -730,9 +745,9 @@ class SuiteCRM extends Solution
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
+                    throw new Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
@@ -746,7 +761,10 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    public function deleteData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function deleteData($param): array
     {
         // We set the flag deleted to 1 and we call the update function
         foreach ($param['data'] as $idDoc => $data) {
@@ -756,10 +774,10 @@ class SuiteCRM extends Solution
         return $this->updateData($param);
     }
 
-    protected function generateQuery($param, $method)
+    protected function generateQuery($param, $method): string
     {
         $query = '';
-        // if a specific query is requeted we don't use date_ref
+        // if a specific query is requested we don't use date_ref
         if (!empty($param['query'])) {
             foreach ($param['query'] as $key => $value) {
                 if (!empty($query)) {
@@ -797,11 +815,11 @@ class SuiteCRM extends Solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         if (
-                'target' == $type
-            && array_key_exists($module, $this->module_relationship_many_to_many)
+            'target' == $type
+            && array_key_exists($module, $this->moduleRelationshipManyToMany)
         ) {
             return [
                 'C' => 'create_only',
@@ -811,19 +829,22 @@ class SuiteCRM extends Solution
         return parent::getRuleMode($module, $type);
     }
 
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * @throws Exception
+     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         if (in_array($ruleMode, ['0', 'S'])) {
             return 'date_modified';
         } elseif ('C' == $ruleMode) {
             return 'date_entered';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship
-    protected function getCustomRelationshipListFields($module)
+    protected function getCustomRelationshipListFields($module): array
     {
         $get_module_fields_parameters = [
             'session' => $this->session,
@@ -834,11 +855,11 @@ class SuiteCRM extends Solution
         if (!empty($get_module_fields->link_fields)) {
             foreach ($get_module_fields->link_fields as $field) {
                 if (
-                        '_id' == substr($field->name, -3)
-                    || '_ida' == substr($field->name, -4)
-                    || '_idb' == substr($field->name, -4)
+                    str_ends_with($field->name, '_id')
+                    || str_ends_with($field->name, '_ida')
+                    || str_ends_with($field->name, '_idb')
                     || (
-                            'id' == $field->type
+                        'id' == $field->type
                         && 'id' != $field->name
                     )
                 ) {
@@ -852,7 +873,7 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    protected function call($method, $parameters)
+    protected function call($method, $parameters): mixed
     {
         try {
             ob_start();
@@ -884,7 +905,7 @@ class SuiteCRM extends Solution
             ob_end_flush();
 
             return $response;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }

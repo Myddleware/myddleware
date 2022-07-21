@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -278,7 +281,7 @@ class File extends Solution
      *                 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
      * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution.
      */
-    public function readData($param)
+    public function readData($param): ?array
     {
         $count = 0;
         $offset = 0;
@@ -289,7 +292,7 @@ class File extends Solution
             $file = $this->getLastFile($this->connectionParam['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
             // If there is no file
             if (empty($file)) {
-                return;
+                return null;
             }
             // If the file has already been read, we get the offset to read from this line
             if (!empty($param['ruleParams'][$file])) {

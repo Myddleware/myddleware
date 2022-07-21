@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -25,9 +27,15 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class WordPress extends Solution
 {
@@ -41,15 +49,22 @@ class WordPress extends Solution
     public function getFieldsLogin(): array
     {
         return [
-                    [
-                        'name' => 'url',
-                        'type' => TextType::class,
-                        'label' => 'solution.fields.url',
-                    ],
-                ];
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+        ];
     }
 
-    public function login($connectionParam)
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -62,11 +77,9 @@ class WordPress extends Solution
             if (!empty($content) && 200 === $statusCode) {
                 $this->isConnectionValid = true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -89,13 +102,15 @@ class WordPress extends Solution
             // 'blocks' =>	'Blocks',
             // 'block-renderer' =>	'Block renderer',
             // 'plugins' =>'Plugins'
-            ];
+        ];
     }
 
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
         try {
+            $moduleFields = [];
+            $fieldsRelate = [];
             require_once 'lib/wordpress/metadata.php';
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
@@ -110,13 +125,20 @@ class WordPress extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return null;
         }
     }
 
+    /**
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws TransportExceptionInterface
+     */
     public function readData($param): array
     {
         try {
@@ -127,6 +149,8 @@ class WordPress extends Solution
             // Change the date format only for module with a date as a reference
             if (!in_array($module, $this->moduleWithoutReferenceDate)) {
                 $dateRefWPFormat = $this->dateTimeFromMyddleware($param['date_ref']);
+            } else {
+                $dateRefWPFormat = $param['date_ref'];
             }
 
             // for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
@@ -142,11 +166,9 @@ class WordPress extends Solution
 
             if (empty($param['limit'])) {
                 $param['limit'] = $this->callLimit;
-            } else {
+            } elseif ($param['limit'] < $this->callLimit) {
                 // to handle situations in which limit set by user is higher than actual WP API limit (100)
-                if ($param['limit'] < $this->callLimit) {
-                    $this->callLimit = $param['limit'];
-                }
+                $this->callLimit = $param['limit'];
             }
             $stop = false;
             $count = 0;
@@ -156,7 +178,7 @@ class WordPress extends Solution
                 $client = HttpClient::create();
                 // In case a specific record is requested
                 if (!empty($param['query']['id'])) {
-                    $response = $client->request('GET', $this->connectionParam['url'].'/wp-json/wp/v2/'.$module.'/'.$param['query']['id']);
+                    $response = $client->request('GET', $this->connectionParam['url'] . '/wp-json/wp/v2/' . $module . '/' . $param['query']['id']);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content2 = $response->getContent();
@@ -165,15 +187,14 @@ class WordPress extends Solution
                     $content[] = $content2;
                 } else {
                     try {
-                        $response = $client->request('GET', $this->connectionParam['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->callLimit.'&page='.$page.'&orderby=modified');
+                        $response = $client->request('GET', $this->connectionParam['url'] . '/wp-json/wp/v2/' . $module . '?per_page=' . $this->callLimit . '&page=' . $page . '&orderby=modified');
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content = $response->getContent();
                         $content = $response->toArray();
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         if (!($e instanceof ClientException)) {
-                            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                        } else {
+                            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                         }
                     }
                 }
@@ -214,9 +235,7 @@ class WordPress extends Solution
                                     $result['date_ref'] = $record['id'];
                                 }
                             } elseif ($result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
-                                if ($result['values'][$record['id']]['date_modified'] > $result['date_ref']) {
-                                    $result['date_ref'] = $result['values'][$record['id']]['date_modified'];
-                                }
+                                $result['date_ref'] = $result['values'][$record['id']]['date_modified'];
                             }
 
                             ++$result['count'];
@@ -228,7 +247,7 @@ class WordPress extends Solution
                 }
                 ++$page;
             } while (!$stop && $count < $param['limit']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
@@ -279,8 +298,12 @@ class WordPress extends Solution
         return $response;
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    /**
+     * Convert date to Myddleware format
+     * 2020-07-08T12:33:06 to 2020-07-08 10:33:06.
+     *
+     * @throws Exception
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -290,7 +313,11 @@ class WordPress extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    // convert from Myddleware format to Woocommerce format
+    /**
+     * convert from Myddleware format to WordPress format.
+     *
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);

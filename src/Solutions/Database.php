@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -221,7 +223,7 @@ class Database extends Solution
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param): array|Result
+    public function readData($param): array
     {
         $result = [];
         // Decode field name (converted in method getModuleFields)

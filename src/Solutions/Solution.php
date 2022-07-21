@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -50,6 +52,8 @@ class Solution
     protected array $moduleFields = [];
 
     protected array $requiredFields = [];
+
+    protected array $fieldsRelate = [];
 
     protected array $connectionParam;
 
@@ -684,7 +688,7 @@ class Solution
     // Fonction permettant de faire l'appel REST
     protected function call($method, $parameters): mixed
     {
-        return;
+        return null;
     }
 
     // Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible
@@ -862,8 +866,9 @@ class Solution
 
     // Build the direct link to the record (used in data transfer view)
     // Type : source or target
-    public function getDirectLink(Rule $rule, Document $document, string $type): void
+    public function getDirectLink(Rule $rule, Document $document, string $type): ?string
     {
+        return null;
     }
 
     // Get a connector param decrypted

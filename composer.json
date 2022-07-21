@@ -18,6 +18,8 @@
     "ext-iconv": "*",
     "ext-json": "*",
     "ext-pdo": "*",
+    "ext-ssh2": "*",
+    "ext-curl": "*",
     "api-platform/core": "^2.2.10",
     "automattic/woocommerce": "^3.0",
     "beberlei/doctrineextensions": "^1.3",

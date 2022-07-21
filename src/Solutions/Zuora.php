@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -32,17 +35,16 @@ class Zuora extends Solution
 {
     protected $instance;
 
-    protected $debug = 0;
+    protected int $debug = 0;
 
-    protected $version = '85.0'; // Maw limit : 50
+    protected string $version = '85.0'; // Maw limit : 50
 
-    protected $update = false;
+    protected bool $update = false;
 
-    protected $limitCall = 10; // Maw limit : 50
+    protected int $limitCall = 10; // Maw limit : 50
 
     protected array $requiredFields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
 
-    // Connection parameters
     public function getFieldsLogin(): array
     {
         return [
@@ -69,8 +71,7 @@ class Zuora extends Solution
         ];
     }
 
-    // login to Zuora
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -79,7 +80,7 @@ class Zuora extends Solution
             $config->wsdl = __DIR__.'/../Custom/Solutions/zuora/wsdl/'.$this->connectionParam['wsdl'];
             $this->instance = \Zuora_API::getInstance($config);
             if (
-                    !empty($this->connectionParam['sandbox'])
+                !empty($this->connectionParam['sandbox'])
                 && 1 == $this->connectionParam['sandbox']
             ) {
                 $domain = 'https://apisandbox.zuora.com/';
@@ -87,19 +88,16 @@ class Zuora extends Solution
                 $domain = 'https://api.zuora.com/';
             }
 
-            $this->instance->setLocation($domain.'apps/services/a/'.$this->version);
+            $this->instance->setLocation($domain . 'apps/services/a/' . $this->version);
             $this->instance->login($this->connectionParam['login'], $this->connectionParam['password']);
 
             $this->isConnectionValid = true;
         } catch (\Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Get the modules available
     public function getModules($type = 'source'): ?array
     {
         try {
@@ -115,7 +113,7 @@ class Zuora extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            return $e->getMessage();
+            return ['error' => $e->getMessage()];
         }
     }
 

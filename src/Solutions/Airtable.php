@@ -111,7 +111,7 @@ class Airtable extends Solution
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
-            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
+            $response = $client->request('GET', $this->airtableURL . $this->projectID . '/' . $this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
             $content = $response->getContent();
             $content = $response->toArray();
@@ -119,7 +119,7 @@ class Airtable extends Solution
                 $this->isConnectionValid = true;
             }
         } catch (Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+            $error = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
             $this->logger->error($error);
         }
     }
@@ -356,8 +356,8 @@ class Airtable extends Solution
         $allFields = $this->getModuleFields($param['module'], 'source');
         // $relationships = $this->getModuleFieldsRelate($param['module'], 'source');
 
-        // Group records for each calls
-        // Split the data into several array using the limite size
+        // Group records for each call
+        // Split the data into several arrays using the limite size
         $recordsArray = array_chunk($param['data'], $this->callPostLimit, true);
         foreach ($recordsArray as $records) {
             // Airtable expects data to come in a 'records' array
@@ -373,7 +373,7 @@ class Airtable extends Solution
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
                         $data = $this->checkDataBeforeUpdate($param, $data);
-                    } // Recard are stored in the URL for a deletionj
+                    } // Records are stored in the URL for a deletion
                     elseif ('delete' === $method) {
                         $data = $this->checkDataBeforeDelete($param, $data);
                         $urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
