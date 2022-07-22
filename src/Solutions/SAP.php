@@ -10,21 +10,21 @@ declare(strict_types=1);
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
@@ -74,12 +74,12 @@ class SAP extends SAPRoot
     ];
 
     // Permet d'indiquer quels champs génères l'id de chaque module
-    protected $buildId = [
+    protected array $buildId = [
         'ET_BKPF' => ['Mandt', 'Bukrs', 'Belnr', 'Gjahr'],
         'ET_BSEG' => ['Mandt', 'Bukrs', 'Belnr', 'Gjahr', 'Buzei'],
     ];
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sap/wsdl/'.$connectionParam['wsdl'];
         parent::login($connectionParam);
@@ -114,25 +114,28 @@ class SAP extends SAPRoot
         return parent::getModuleFields($module, $type);
     }
 
-    // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
-    // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
-    public function getRuleCustomRelationship($module, $type)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
+     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+     */
+    public function getRuleCustomRelationship($module, $type): ?array
     {
         // Si module est ET_BSEG alors on autorise les règles PARTNER de SAP CRM
         if ('source' == $type) {
             if ('ET_BSEG' == $module) {
                 $sql = "SELECT 
-							Rule.id, 
-							Rule.name, 
-							Rule.version 
-						FROM Rule
+							rule.id, 
+							rule.name, 
+							rule.version 
+						FROM rule
 						WHERE
-								Rule.deleted = 0
-							AND Rule.module_source = 'BU_PARTNER'";
-                $stmt = $this->conn->prepare($sql);
+								rule.deleted = 0
+							AND rule.source_module_id = 'BU_PARTNER'";
+                $stmt = $this->connection->prepare($sql);
                 $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
-                $stmt->execute();
-                $rules = $stmt->fetchAll();
+                $result = $stmt->executeQuery();
+                $rules = $result->fetchAllAssociative();
                 if (!empty($rules)) {
                     return $rules;
                 }
@@ -290,7 +293,7 @@ class SAP extends SAPRoot
 								WHERE
 										Rule.deleted = 0
 									AND RuleRelationShip.field_id = :idHeaderRule';
-                        $stmt = $this->conn->prepare($sql);
+                        $stmt = $this->connection->prepare($sql);
                         $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
                         $stmt->execute();
                         $rules = $stmt->fetchAll();
@@ -308,7 +311,7 @@ class SAP extends SAPRoot
                                 if (!empty($childData)) {
                                     // Si le module de la règle est présent dans la réponse du webservice, on génère l'objet règle
                                     $param['ruleId'] = $rule['id'];
-                                    $ruleMyddleware = new RuleManager($this->logger, $this->container, $this->conn, $param);
+                                    $ruleMyddleware = new RuleManager($this->logger, $this->container, $this->connection, $param);
                                     // Pour toutes les lignes du module fils on génère un document fils
                                     foreach ($childData as $childDocument) {
                                         $data = '';

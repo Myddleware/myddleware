@@ -280,8 +280,9 @@ class Solution
      * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
      * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées.
      */
-    public function getRuleCustomRelationship($module, $type): void
+    public function getRuleCustomRelationship($module, $type): ?array
     {
+        return null;
     }
 
     // Helper function for the read call
