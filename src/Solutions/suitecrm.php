@@ -708,7 +708,7 @@ class suitecrmcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
-                $data = $this->checkDataBeforeUpdate($param, $data);
+                $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                 $dataSugar = [];
                 foreach ($data as $key => $value) {
                     // Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création

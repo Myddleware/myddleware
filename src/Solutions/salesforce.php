@@ -577,7 +577,7 @@ class salesforcecore extends solution {
 		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update
-				$data = $this->checkDataBeforeUpdate($param, $data);
+				$data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
 				$parameters = array();
 				// Instanciation de l'URL d'appel				
 				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';

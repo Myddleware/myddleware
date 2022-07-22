@@ -375,7 +375,7 @@ class airtablecore extends solution
                         // trigger to add custom code if needed
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
-                        $data = $this->checkDataBeforeUpdate($param, $data);
+                        $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                     }
                     // Recard are stored in the URL for a deletionj
                     elseif ('delete' === $method) {
