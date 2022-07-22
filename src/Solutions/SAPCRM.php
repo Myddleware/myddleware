@@ -34,7 +34,7 @@ class SAPCRM extends SAPRoot
 {
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
-    protected $keySubStructure = ['CRMD_ORDER' => [
+    protected array $keySubStructure = ['CRMD_ORDER' => [
         'ET_PARTNER' => 'PARTNER_FCT',
         'ET_STATUS' => 'USER_STAT_PROC',
         'ET_APPOINTMENT' => 'APPT_TYPE',
@@ -48,13 +48,13 @@ class SAPCRM extends SAPRoot
     ];
 
     // Permet d'ajouter des filtres sur les tables, on ne prend que les partenaires principaux sur la table des partenaire par exemple
-    protected $subStructureFilter = ['CRMD_ORDER' => [
+    protected array $subStructureFilter = ['CRMD_ORDER' => [
         'ET_PARTNER' => ['MAINPARTNER' => 'X'],
     ],
     ];
 
     // Permet d'avoir les GUID pour chaque sous-structure et ainsi de savoirà quel partner/order... appartiennent les autre sstructures
-    protected $guidName = ['CRMD_ORDER' => [
+    protected array $guidName = ['CRMD_ORDER' => [
         'ET_ORDERADM_H' => 'GUID',
         'ET_ACTIVITY_H' => 'GUID',
         'ET_STATUS' => 'GUID',
@@ -66,7 +66,7 @@ class SAPCRM extends SAPRoot
     ];
 
     // Permet d'indiquer quel est l'id pour chaque module
-    protected $idName = [
+    protected array $idName = [
         'CRMD_ORDER' => ['ET_ORDERADM_H' => 'OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000' => 'PARTNER'],
     ];
@@ -76,7 +76,7 @@ class SAPCRM extends SAPRoot
         'BU_PARTNER' => ['ET_BUT000__CHDAT', 'ET_BUT000__CHTIM', 'ET_BUT000__PARTNER'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'CRMD_ORDER' => [
             // 'ET_ORDERADM_H' => array('OBJECT_ID'=> array('label' =>  'Object ID','required_relationship' => false)),
             'ET_PARTNER' => ['PARTNER_NO' => ['label' => 'Partner number', 'required_relationship' => false]],

@@ -33,7 +33,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SAP extends SAPRoot
 {
-    protected $limit = 5;
+    protected int $limit = 5;
 
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
@@ -50,7 +50,7 @@ class SAP extends SAPRoot
                                                         ),
                                         );
     */
-    protected $guidName = ['ET_BKPF' => [
+    protected array $guidName = ['ET_BKPF' => [
         'ET_BKPF' => 'BELNR',
         'ET_BSEG' => 'BELNR',
         'ET_ABUZ' => 'BELNR',
@@ -67,7 +67,7 @@ class SAP extends SAPRoot
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'ET_BSEG' => [
             'KUNNR' => ['label' => 'Partner number', 'required_relationship' => false],
         ],
