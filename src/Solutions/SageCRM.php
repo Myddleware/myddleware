@@ -28,29 +28,30 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SageCRM extends Solution
 {
-    private $wsdl = '';
+    private string $wsdl = '';
 
-    private $username = '';
+    private string $username = '';
 
-    private $password = '';
+    private string $password = '';
 
-    protected $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
+    protected array $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
 
     protected array $requiredFields = ['default' => ['updateddate', 'createddate']];
 
-    protected $fieldsDuplicate = [];
+    protected array $fieldsDuplicate = [];
 
-    protected $required_relationships = [
+    protected array $required_relationships = [
         'default' => [],
     ];
 
     // Tableau de correspondance Module / ID pour les modules qui n'ont pas d'id de type "nommodule"."id"
-    protected $IdByModule = [
+    protected array $IdByModule = [
         'Orders' => 'orderquoteid',
         'Address_Link' => 'addresslinkid',
         'Comm_Link' => 'commlinkid',
@@ -66,9 +67,9 @@ class SageCRM extends Solution
         'Users' => 'userid',
     ];
 
-    private $access_token;
+    private $accessToken;
 
-    private $instance_url;
+    private $instanceUrl;
 
     // Listes des modules et des champs à exclure
     protected array $excludedModules = [];
@@ -76,7 +77,7 @@ class SageCRM extends Solution
     protected array $excludedFields = [];
 
     // Connexion à SageCRM
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -94,12 +95,12 @@ class SageCRM extends Solution
                 $response = $client->logon($login_details);
 
                 if (isset($response->result->sessionid)) {
-                    $sessionid = $response->result->sessionid;
+                    $sessionId = $response->result->sessionid;
                 } else {
-                    throw new \Exception('No SessionID. Logon failed.');
+                    throw new Exception('No SessionID. Logon failed.');
                 }
 
-                $response = $client->logoff(['sessionId' => $sessionid]);
+                $response = $client->logoff(['sessionId' => $sessionId]);
 
                 // Instanciation des variables de classes
                 $this->wsdl = $this->connectionParam['wsdl'];
@@ -108,23 +109,23 @@ class SageCRM extends Solution
                 $this->isConnectionValid = true;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Logon failed.');
+                throw new Exception('SOAP FAULT. Logon failed.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
     // Fonction qui renvoie les données de connexion
-    public function getToken()
+    public function getToken(): array
     {
-        return ['sf_access_token' => $this->access_token,
-            'sf_instance_url' => $this->instance_url, ];
+        return [
+            'sf_access_token' => $this->accessToken,
+            'sf_instance_url' => $this->instanceUrl,
+        ];
     }
 
     // Liste des paramètres de connexion
@@ -167,14 +168,14 @@ class SageCRM extends Solution
                 $response = $client->logon($login_details);
 
                 if (isset($response->result->sessionid)) {
-                    $sessionid = $response->result->sessionid;
+                    $sessionId = $response->result->sessionid;
                 } else {
-                    throw new \Exception('No SessionID. Logon failed.');
+                    throw new Exception('No SessionID. Logon failed.');
                 }
 
                 // Création du SoapHeader
                 $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-								<sessionId>".$sessionid.'</sessionId>
+								<sessionId>".$sessionId.'</sessionId>
 							</SessionHeader>';
                 $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
                 $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
@@ -185,7 +186,7 @@ class SageCRM extends Solution
                 $tables = $client->getallmetadata();
 
                 // Déconnexion
-                $response = $client->logoff(['sessionId' => $sessionid]);
+                $response = $client->logoff(['sessionId' => $sessionId]);
 
                 foreach ($tables->result->tables as $object) {
                     $modules[$object->prefix.'_'.$object->tablename] = $object->tablename;
@@ -194,24 +195,24 @@ class SageCRM extends Solution
                 return (isset($modules)) ? $modules : false;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Logon failed.');
+                throw new Exception('SOAP FAULT. Logon failed.');
             }
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            return ['error' => $e->getMessage()];
         }
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function getModuleFields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
 
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $module, 2);
         $module = $tmp[1];
-        $dropdownvalues = [];
+        $dropdownValues = [];
 
         try {
             try {
@@ -228,14 +229,14 @@ class SageCRM extends Solution
                 $response = $client->logon($login_details);
 
                 if (isset($response->result->sessionid)) {
-                    $sessionid = $response->result->sessionid;
+                    $sessionId = $response->result->sessionid;
                 } else {
-                    throw new \Exception('No SessionID. Logon failed.');
+                    throw new Exception('No SessionID. Logon failed.');
                 }
 
                 // Création du SoapHeader
                 $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-								<sessionId>".$sessionid.'</sessionId>
+								<sessionId>".$sessionId.'</sessionId>
 							</SessionHeader>';
                 $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
                 $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
@@ -253,16 +254,16 @@ class SageCRM extends Solution
                     foreach ($lists->result->records as $list) {
                         // Some lists aren't array
                         if (
-                                !empty($list->records)
+                            !empty($list->records)
                             and is_array($list->records)
                         ) {
-                            $dropdownvalues[$list->fieldname] = $list->records;
+                            $dropdownValues[$list->fieldname] = $list->records;
                         }
                     }
                 }
 
                 // Déconnexion
-                $response = $client->logoff(['sessionId' => $sessionid]);
+                $response = $client->logoff(['sessionId' => $sessionId]);
 
                 foreach ($metadata->result->records as $field) {
                     if (!in_array(substr($field->type, 3), $this->validDatabaseTypes)) {
@@ -273,7 +274,7 @@ class SageCRM extends Solution
                     // Si le champ finit par "id"
                     // Et si le champ ne fait pas partie des champs du tableau $fieldsNotRelate
                     if (
-                            'id' == substr($field->name, -2)
+                            str_ends_with($field->name, 'id')
                         && !isset($this->fieldsNotRelate[$module][$field->name])
                     ) {
                         // Si le champ n'est pas $module + "id" concaténés
@@ -300,8 +301,8 @@ class SageCRM extends Solution
                             'required' => $field->required,
                             'relate' => false,
                         ];
-                        if (!empty($dropdownvalues[$field->name])) {
-                            $this->moduleFields[$field->name]['option'] = $dropdownvalues[$field->name];
+                        if (!empty($dropdownValues[$field->name])) {
+                            $this->moduleFields[$field->name]['option'] = $dropdownValues[$field->name];
                         }
                     }
                 }
@@ -309,17 +310,19 @@ class SageCRM extends Solution
                 return $this->moduleFields;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Logon failed.');
+                throw new Exception('SOAP FAULT. Logon failed.');
             }
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
+            return null;
         }
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         if (empty($param['limit'])) {
             $param['limit'] = 100;
@@ -332,7 +335,7 @@ class SageCRM extends Solution
         $result = [];
         try {
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 
             // Define SOAP connection options.
             $options = [
@@ -347,14 +350,14 @@ class SageCRM extends Solution
             $response = $client->logon($login_details);
 
             if (isset($response->result->sessionid)) {
-                $sessionid = $response->result->sessionid;
+                $sessionId = $response->result->sessionid;
             } else {
-                throw new \Exception('No SessionID. Logon failed.');
+                throw new Exception('No SessionID. Logon failed.');
             }
 
             // Création du SoapHeader
             $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-							<sessionId>".$sessionid.'</sessionId>
+							<sessionId>".$sessionId.'</sessionId>
 						</SessionHeader>';
             $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
             $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
@@ -370,7 +373,7 @@ class SageCRM extends Solution
             $param['fields'] = array_values($param['fields']);
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
-            $queryrecord = ['fieldlist' => '', 'queryString' => $prefix.'_'.$DateRefField." > '".$this->dateConverter($param['date_ref'], 1)."'", 'entityname' => $module, 'orderby' => $prefix.'_'.$DateRefField.' ASC'];
+            $queryRecord = ['fieldlist' => '', 'queryString' => $prefix.'_'.$dateRefField." > '".$this->dateConverter($param['date_ref'], 1)."'", 'entityname' => $module, 'orderby' => $prefix.'_'.$dateRefField.' ASC'];
 
             // Ajout du champ id, obligatoire mais spécifique au module
             if (isset($this->IdByModule[$module])) { // Si le champ id existe dans le tableau
@@ -378,19 +381,19 @@ class SageCRM extends Solution
             } else { // S'il n'existe pas alors on met "companyid" par exemple pour le module Company
                 $fieldID = strtolower($module).'id';
             }
-            $queryrecord['fieldlist'] = $prefix.'_'.$fieldID.',';
+            $queryRecord['fieldlist'] = $prefix.'_'.$fieldID.',';
 
             foreach ($param['fields'] as $field) {
-                $queryrecord['fieldlist'] .= $prefix.'_'.$field.',';
+                $queryRecord['fieldlist'] .= $prefix.'_'.$field.',';
             }
             // Supprime l'espace et la dernière virgule
-            $queryrecord['fieldlist'] = rtrim($queryrecord['fieldlist'], ' ');
-            $queryrecord['fieldlist'] = rtrim($queryrecord['fieldlist'], ',');
+            $queryRecord['fieldlist'] = rtrim($queryRecord['fieldlist'], ' ');
+            $queryRecord['fieldlist'] = rtrim($queryRecord['fieldlist'], ',');
             // Appel de la requête
-            $request = $client->queryrecord($queryrecord);
+            $request = $client->queryrecord($queryRecord);
 
             // Déconnexion
-            $response = $client->logoff(['sessionId' => $sessionid]);
+            $response = $client->logoff(['sessionId' => $sessionId]);
 
             // Traitement des résultats
             if (!empty($request->result->records)) {
@@ -404,7 +407,7 @@ class SageCRM extends Solution
                         }
                         $row['id'] = $recordFields[$fieldID]; // Ajout de l'ID, $fieldID vaut "companyid" pour le module "company" par exemple
                         foreach ($recordFields as $key => $value) {
-                            if ($key == $DateRefField) {
+                            if ($key == $dateRefField) {
                                 $row['date_modified'] = $this->dateConverter($value);
                                 $result['date_ref'] = $this->dateConverter($value);
                             }
@@ -429,7 +432,7 @@ class SageCRM extends Solution
                     }
                     $row['id'] = $recordFields[$fieldID]; // Ajout de l'ID, $fieldID vaut "companyid" pour le module "company" par exemple
                     foreach ($recordFields as $key => $value) {
-                        if ($key == $DateRefField) {
+                        if ($key == $dateRefField) {
                             $row['date_modified'] = $this->dateConverter($value);
                             $result['date_ref'] = $this->dateConverter($value);
                         }
@@ -442,16 +445,21 @@ class SageCRM extends Solution
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 
             return $result;
         }
     }
 
-    // Permet de créer des données
+    /**
+     * @throws \SoapFault
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     public function createData($param): array
     {
+        $result = [];
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
         $module = $tmp[1];
@@ -469,14 +477,14 @@ class SageCRM extends Solution
         $response = $client->logon($login_details);
 
         if (isset($response->result->sessionid)) {
-            $sessionid = $response->result->sessionid;
+            $sessionId = $response->result->sessionid;
         } else {
-            throw new \Exception('No SessionID. Logon failed.');
+            throw new Exception('No SessionID. Logon failed.');
         }
 
         // Création du SoapHeader
         $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-						<sessionId>".$sessionid.'</sessionId>
+						<sessionId>".$sessionId.'</sessionId>
 					</SessionHeader>';
         $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
         $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
@@ -484,7 +492,7 @@ class SageCRM extends Solution
         $client->__setSoapHeaders([$session_header]);
 
         if (!(isset($param['data']))) {
-            throw new \Exception('Data missing for create');
+            throw new Exception('Data missing for create');
         }
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -502,7 +510,7 @@ class SageCRM extends Solution
                 }
                 $record['assigneduserid'] = '1';
                 if (empty($record)) {
-                    throw new \Exception('Values missing for create');
+                    throw new Exception('Values missing for create');
                 }
                 // create soap variable to send
                 foreach ($record as $key => $value) {
@@ -531,7 +539,7 @@ class SageCRM extends Solution
                         'error' => 'Failed to create Data in Salesforce '.curl_error($ch),
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
@@ -545,9 +553,14 @@ class SageCRM extends Solution
         return $result;
     }
 
-    // Permet de modifier des données
-    public function updateData($param)
+    /**
+     * @throws \SoapFault
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function updateData($param): array
     {
+        $result= [];
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
         $module = $tmp[1];
@@ -565,14 +578,14 @@ class SageCRM extends Solution
         $response = $client->logon($login_details);
 
         if (isset($response->result->sessionid)) {
-            $sessionid = $response->result->sessionid;
+            $sessionId = $response->result->sessionid;
         } else {
-            throw new \Exception('No SessionID. Logon failed.');
+            throw new Exception('No SessionID. Logon failed.');
         }
 
         // Création du SoapHeader
         $header = "<SessionHeader xmlns='http://tempuri.org/type'>
-						<sessionId>".$sessionid.'</sessionId>
+						<sessionId>".$sessionId.'</sessionId>
 					</SessionHeader>';
         $session_var = new \SoapVar($header, XSD_ANYXML, null, 'http://www.w3.org/2001/XMLSchema-instance', null);
         $session_header = new \SoapHeader('http://tempuri.org/type', 'SessionHeader', $session_var);
@@ -580,7 +593,7 @@ class SageCRM extends Solution
         $client->__setSoapHeaders([$session_header]);
 
         if (!(isset($param['data']))) {
-            throw new \Exception('Data missing for create');
+            throw new Exception('Data missing for create');
         }
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -598,10 +611,10 @@ class SageCRM extends Solution
                     }
                 }
                 if (empty($target_id)) {
-                    throw new \Exception('Target ID missing for update');
+                    throw new Exception('Target ID missing for update');
                 }
                 if (empty($record)) {
-                    throw new \Exception('Values missing for update');
+                    throw new Exception('Values missing for update');
                 }
                 // Ajout du champ id spécifique au module pour modifier l'élément cible
                 if (isset($this->IdByModule[$module])) { // Si le champ id existe dans le tableau
@@ -636,7 +649,7 @@ class SageCRM extends Solution
                         'error' => 'Failed to create Data in Salesforce ',
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
@@ -650,19 +663,24 @@ class SageCRM extends Solution
         return $result;
     }
 
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * @throws Exception
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         if (in_array($ruleMode, ['0', 'S'])) {
             return 'updateddate';
         } elseif ('C' == $ruleMode) {
             return 'createddate';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
-    // Function de conversion de date format solution à une date format Myddleware
-    protected function dateConverter($dateTime, $sens = 0)
+    /**
+     * Function de conversion de date format solution à une date format Myddleware
+     * @throws Exception
+     */
+    protected function dateConverter($dateTime, $sens = 0): string
     {
         if ($sens) { // Vers SageCRM
             $formatReturn = "Y-m-d\TH:i:s";
@@ -672,7 +690,7 @@ class SageCRM extends Solution
             $formatReturn = 'Y-m-d H:i:s';
         }
         if (empty($dateTime)) {
-            throw new \Exception('Date empty. Failed to convert it.');
+            throw new Exception('Date empty. Failed to convert it.');
         }
         if (date_create_from_format($format, $dateTime)) {
             $date = date_create_from_format($format, $dateTime);
@@ -680,7 +698,7 @@ class SageCRM extends Solution
             $date = date_create_from_format('Y-m-d', $dateTime);
             $date->setTime(0, 0, 0);
         } else {
-            throw new \Exception('Wrong format for your date. Please check your date format. Contact us for help.');
+            throw new Exception('Wrong format for your date. Please check your date format. Contact us for help.');
         }
 
         return $date->format($formatReturn);
