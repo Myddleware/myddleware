@@ -2033,6 +2033,8 @@ class documentcore
             $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
+			// Change the document type for the current process
+			$this->documentType = $new_type;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
