@@ -53,12 +53,11 @@ use App\Solutions\VtigerCRM;
 use App\Solutions\WooCommerce;
 use App\Solutions\WooEventManager;
 use App\Solutions\WordPress;
-use App\Solutions\Zuora;
 use Exception;
 
 class SolutionManager
 {
-    private $classes = [];
+    private array $classes = [];
 
     public function __construct(
         Airtable $airtable,
@@ -89,7 +88,6 @@ class SolutionManager
         WooCommerce $woocommerce,
         WooEventManager $wooeventmanager,
         WordPress $wordpress,
-        Zuora $zuora
     ) {
         $this->classes = [
             'Airtable' => $airtable,
@@ -120,10 +118,12 @@ class SolutionManager
             'WooCommerce' => $woocommerce,
             'WooEventManager' => $wooeventmanager,
             'WordPress' => $wordpress,
-            'Zuora' => $zuora,
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
