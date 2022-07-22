@@ -67,7 +67,7 @@ class SAPECC extends SAP
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sapecc/wsdl/'.$connectionParam['wsdl'];
         parent::login($connectionParam);
@@ -132,7 +132,7 @@ class SAPECC extends SAP
     /**
      * @throws Exception
      */
-    public function readData($param)
+    public function readData($param): ?array
     {
         // Initialisation de la limit
         if (empty($param['limit'])) {
@@ -157,9 +157,8 @@ class SAPECC extends SAP
             return $this->readFiDocument($param, $parameters, false);
         } // Pas de lecture pour les autres modules FI, tout est lu via le module ET_BKPF et ses règles liées
         elseif (in_array($param['module'], ['ET_BSEG', 'ET_ABUZ', 'ET_ACCHD', 'ET_ACCCR', 'ET_ACCIT'])) {
-            return;
+            return null;
         }
-
         /* if ($param['module'] == 'BU_PARTNER') {
             $parameters = array(
                         'IvDateRef' => $param['date_ref_format'],
@@ -169,6 +168,7 @@ class SAPECC extends SAP
                     );
             return $this->readMultiStructure($param, $parameters,false);
         } */
+        return null;
     }
 
     // Permet de lire les document FI

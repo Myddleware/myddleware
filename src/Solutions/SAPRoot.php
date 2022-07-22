@@ -166,7 +166,7 @@ class SAPRoot extends Solution
                                     foreach ($substructures as $key => $value) {
                                         foreach ($structureField->ZmydValues->item as $field) {
                                             if (!empty($this->relateFieldAllowed[$moduleKey][$structure][$field->ZzmydKey])) {
-                                                $this->fields[$structure.'__'.(!empty($value) ? $key.'__' : '').$field->ZzmydKey] = [
+                                                $fields[$structure.'__'.(!empty($value) ? $key.'__' : '').$field->ZzmydKey] = [
                                                     'label' => $this->relateFieldAllowed[$moduleKey][$structure][$field->ZzmydKey]['label'].' - '.$key,
                                                     'type' => 'varchar(255)',
                                                     'type_bdd' => 'varchar(255)',
@@ -323,11 +323,11 @@ class SAPRoot extends Solution
                             // Récupération des données à renvoyer si on a trouvé une structure correspondant à la demande
                             if (!empty($structuresFound)) {
                                 // Si on a des filtres supplémentaire on les utilise
-                                if (!empty($subStructureFilter[$param['module']][$fieldDetails[0]])) {
+                                if (!empty($this->subStructureFilter[$param['module']][$fieldDetails[0]])) {
                                     $structuresFoundFiltered = [];
                                     foreach ($structuresFound as $structure) { // Pour chaque ligne
                                         $strutureOk = true;
-                                        foreach ($subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
+                                        foreach ($this->subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
                                             // Si un filtre est KO alors on ne garde pas la struture
                                             if ($structure[$filterField] != $filterValue) {
                                                 $strutureOk = false;
