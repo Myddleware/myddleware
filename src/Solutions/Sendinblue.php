@@ -1,35 +1,40 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
 use ApiPlatform\Core\OpenApi\Model\Contact;
 use DateTime;
 use DoctrineExtensions\Query\Mysql\Field;
+use Exception;
 use PhpParser\Node\Name;
+use SendinBlue\Client\ApiException;
 use SendinBlue\Client\Model\GetContacts;
+use SendinBlue\Client\Model\GetEmailEventReport;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -37,15 +42,15 @@ class Sendinblue extends Solution
 {
     protected $config;
 
-    protected $required_fields = [
-                                    'default' => ['id', 'modifiedAt'],
-                                    'transactionalEmails' => ['uuid', 'date'],
-                                    'transactionalEmailActivity' => ['messageId', 'event', 'date'],
-                                ];
+    protected array $requiredFields = [
+        'default' => ['id', 'modifiedAt'],
+        'transactionalEmails' => ['uuid', 'date'],
+        'transactionalEmailActivity' => ['messageId', 'event', 'date'],
+    ];
 
-    protected $fieldsDuplicate = ['contacts' => ['email']];
+    protected array $fieldsDuplicate = ['contacts' => ['email']];
 
-    protected $limitEmailActivity = 100;
+    protected int $limitEmailActivity = 100;
 
     public function getFieldsLogin(): array
     {
@@ -64,7 +69,7 @@ class Sendinblue extends Solution
     }
 
     // connect to Sendinblue
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
 
@@ -76,25 +81,24 @@ class Sendinblue extends Solution
             $result = $apiInstance->getAccount();
             if (!empty($result->getEmail())) {
                 $this->isConnectionValid = true;
-            } else {
-                return ['error' => 'Failed to connect to Sendinblue: '.$result->message];
             }
-        } catch (\Exception $e) {
+
+            $error = 'Failed to connect to Sendinblue';
+            $this->logger->error($error);
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
     // Get module list
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
-               'contacts' => 'Contacts',
-               'transactionalEmails' => 'Transactional emails',
-               'transactionalEmailActivity' => 'Transactional email activity',
+                'contacts' => 'Contacts',
+                'transactionalEmails' => 'Transactional emails',
+                'transactionalEmailActivity' => 'Transactional email activity',
             ];
         }
 
@@ -104,9 +108,11 @@ class Sendinblue extends Solution
     }
 
     // Returns the fields of the module passed in parameter
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        $moduleFields = [];
+        $fieldsRelate = [];
+        parent::getModuleFields($module, $type);
 
         // Use Sendinblue metadata
         require 'lib/sendinblue/metadata.php';
@@ -151,23 +157,26 @@ class Sendinblue extends Solution
             ];
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            $e->getMessage();
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return null;
         }
     }
 
-    // Read all fields
+    /**
+     * @throws ApiException
+     * @throws Exception
+     */
     public function read($param): ?array
     {
         $result = [];
-        // Function are differents depending on the type of record we read from Sendinblue
+        // Function are different depending on the type of record we read from Sendinblue
         switch ($param['module']) {
-               case 'transactionalEmailActivity':
+            case 'transactionalEmailActivity':
                 // event is required
                 if (empty($param['ruleParams']['event'])) {
-                    throw new \Exception('No event selected. Please select an event on your rule. ');
+                    throw new Exception('No event selected. Please select an event on your rule. ');
                 }
 
                 // As we build the id (it doesn't exist in Sendinblue), we add it to the param field
@@ -175,7 +184,6 @@ class Sendinblue extends Solution
 
                 // ini call parameters
                 $nbCall = 1;
-                // $limitCall = $this->limitEmailActivity;
                 $offset = 0;
                 $records = [];
                 $dateStart = null;
@@ -192,12 +200,12 @@ class Sendinblue extends Solution
                     if (!empty($searchParam[0])) {
                         $messageId = $searchParam[0];
                     } else {
-                        throw new \Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
+                        throw new Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
                     }
                     if (!empty($searchParam[1])) {
                         $event = $searchParam[1];
                     } else {
-                        throw new \Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
+                        throw new Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
                     }
                     // Set call parameters when we read transactional email using reference date
                 } else {
@@ -211,10 +219,8 @@ class Sendinblue extends Solution
                     if ('simulation' == $param['call_type']) {
                         $dateStartObj = new \DateTime('NOW');
                         $dateStartObj->sub(new \DateInterval('P30D'));
-                    // $dateStart = $dateStartObj->format('Y-m-d');
                     } else {
                         $dateStartObj = new \DateTime($param['date_ref']);
-                        // $dateEndObj = new \DateTime($param['date_ref']);
                     }
                     // Only date (not datetime) are used to filter transaction email activity
                     $dateStart = $dateStartObj->format('Y-m-d');
@@ -232,7 +238,7 @@ class Sendinblue extends Solution
                     // Nb call depend on limit param
                     if ($param['limit'] > $this->limitEmailActivity) {
                         $nbCall = floor($param['limit'] / $this->limitEmailActivity);
-                        // Add 1 call if needid (using modulo function)
+                        // Add 1 call if needed (using modulo function)
                         if ($param['limit'] % $this->limitEmailActivity != 0) {
                             $limitLastCall = $param['limit'] % $this->limitEmailActivity;
                             ++$nbCall;
@@ -250,7 +256,7 @@ class Sendinblue extends Solution
                 }
                 $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->config);
 
-                $contactRequested = array_search('contactId', $param['fields']);
+                $contactRequested = in_array('contactId', $param['fields']);
                 if (false !== $contactRequested) {
                     $apiContactInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
                 }
@@ -258,7 +264,7 @@ class Sendinblue extends Solution
                 for ($i = 1; $i <= $nbCall; ++$i) {
                     // The limit can be different for the last call (in case of several call)
                     if (
-                            $i == $nbCall
+                        $i == $nbCall
                         and $nbCall > 1
                     ) {
                         $limitCall = $limitLastCall;
@@ -280,7 +286,7 @@ class Sendinblue extends Solution
                                     if (!empty(current($resultContactApi)['id'])) {
                                         $record['contactId'] = current($resultContactApi)['id'];
                                     }
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     $record['contactId'] = '';
                                 }
                             }
@@ -291,7 +297,7 @@ class Sendinblue extends Solution
                             // Date ref will also be changed
                             $dateRecordObj = new \DateTime($record['date']);
                             if (
-                                    empty($param['query']['id'])	// No offset management if search by id
+                                empty($param['query']['id'])	// No offset management if search by id
                                 and $dateRecordObj->format('Y-m-d') != $dateStartObj->format('Y-m-d')
                             ) {
                                 $dateStartObj = $dateRecordObj;
@@ -320,24 +326,24 @@ class Sendinblue extends Solution
                 // Read with a specific id or email
                 if (
                     !empty($param['query']['id'])
-                or !empty($param['query']['email'])
-                    ) {
+                    or !empty($param['query']['email'])
+                ) {
                     // Search key for contact can be email or id
                     $shearchKey = (!empty($param['query']['id']) ? $param['query']['id'] : $param['query']['email']);
                     // Get the info from contact, an exception is generated by getContactInfo if the contact isn't found
                     try {
                         $resultApi = $apiInstance->getContactInfo($shearchKey);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $error = $e->getMessage();
                         // No exception if history call (check if the contact exists) and contact not found
                         if (
-                                'history' == $param['call_type']
-                            and false !== strpos($error, 'document_not_found')
+                            'history' == $param['call_type']
+                            and str_contains($error, 'document_not_found')
                         ) {
-                            return false;
+                            return null;
                         }
                         // exception generated if not history call
-                        throw new \Exception('Exception when calling ContactsApi->getContactInfo: '.$error);
+                        throw new Exception('Exception when calling ContactsApi->getContactInfo: '.$error);
                     }
                     // Format results
                     if (!empty(current($resultApi))) {
@@ -351,7 +357,7 @@ class Sendinblue extends Solution
                 }
                 break;
             default:
-                throw new \Exception('Unknown module: '.$param['module']);
+                throw new Exception('Unknown module: '.$param['module']);
         }
 
         // Recover all contact from sendinblue
@@ -361,12 +367,12 @@ class Sendinblue extends Solution
                 foreach ($param['fields'] as $field) {
                     if (!empty($record[$field])) {
                         $result[$record[$idField]][$field] = $record[$field];
-                    // Result attribute can be an object (example function getContacts())
+                        // Result attribute can be an object (example function getContacts())
                     } elseif (!empty($record['attributes']->$field)) {
                         $result[$record[$idField]][$field] = $record['attributes']->$field;
-                    // Result attribute can be an array (example function getContactInfo())
+                        // Result attribute can be an array (example function getContactInfo())
                     } elseif (
-                            is_array($record['attributes'])
+                        is_array($record['attributes'])
                         and !empty($record['attributes'][$field])
                     ) {
                         $result[$record[$idField]][$field] = $record['attributes'][$field];
@@ -380,7 +386,7 @@ class Sendinblue extends Solution
         return $result;
     }
 
-    protected function getDateEnd($dateObj)
+    protected function getDateEnd($dateObj): string
     {
         $dateEndObj = clone $dateObj;
         $dateEndObj->add(new \DateInterval('P30D'));
@@ -393,29 +399,10 @@ class Sendinblue extends Solution
         return $dateEndObj->format('Y-m-d');
     }
 
-    // fonction for get all your transactional email activity
-    public function EmailTransactional($param)
-    {
-        $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->config);
-        $limit = 50;
-        $offset = 0;
-        $startDate = '2020-01-01';
-        $endDate = '2020-01-01';
-        $messageId = '<202112150919.44488315490@smtp-relay.mailin.fr>';
-        $templateId = 2;
-
-        try {
-            $result = $apiInstance->getEmailEventReport($limit, $offset, $startDate, $endDate, $messageId, $templateId);
-            print_r($result);
-        } catch (\Exception $e) {
-            echo 'Exception when calling TransactionalEmailsApi->getEmailEventReport: ', $e->getMessage();
-        }
-
-        return $result;
-    }
-
-    // Create the record
-    protected function create($param, $record)
+    /**
+     * @throws ApiException
+     */
+    protected function create($param, $record): ?int
     {
         // Import or create new contact for sendinblue
         $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
@@ -428,7 +415,9 @@ class Sendinblue extends Solution
         return $result->getId();
     }
 
-    // Update the record
+    /**
+     * @throws Exception
+     */
     protected function update($param, $record)
     {
         try {
@@ -438,15 +427,18 @@ class Sendinblue extends Solution
             $identifier = $record['target_id'];
             $updateContact['attributes'] = $record;
             $apiInstance->updateContact($identifier, $updateContact);
-        } catch (\Exception $e) {
-            throw new \Exception('Exception when calling ContactsApi->updateContact: '.$e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Exception when calling ContactsApi->updateContact: ' . $e->getMessage());
         }
 
         return $identifier;
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    /**
+     * @throws Exception
+     * Convert date to Myddleware format
+     * 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -454,7 +446,10 @@ class Sendinblue extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    // convert from Myddleware format to Sendinble format
+    /**
+     * @throws Exception
+     * convert from Myddleware format to Sendinblue format
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -462,7 +457,10 @@ class Sendinblue extends Solution
         return $dto->format('Y-m-d\TH:i:s.uP');
     }
 
-    protected function dateTimeToDate($dateTime)
+    /**
+     * @throws Exception
+     */
+    protected function dateTimeToDate($dateTime): string
     {
         $dto = new \DateTime($dateTime);
 
@@ -494,41 +492,25 @@ class Sendinblue extends Solution
                         'label' => 'Event',
                         'required' => true,
                         'option' => [
-                                        'delivered' => 'delivered',
-                                        'bounces' => 'bounces',
-                                        'hardBounces' => 'hardBounces',
-                                        'softBounces' => 'softBounces',
-                                        'spam' => 'spam',
-                                        'requests' => 'requests',
-                                        'opened' => 'opened',
-                                        'clicks' => 'clicks',
-                                        'invalid' => 'invalid',
-                                        'deferred' => 'deferred',
-                                        'blocked' => 'blocked',
-                                        'unsubscribed' => 'unsubscribed',
-                                        'error' => 'error',
-                                    ],
+                            'delivered' => 'delivered',
+                            'bounces' => 'bounces',
+                            'hardBounces' => 'hardBounces',
+                            'softBounces' => 'softBounces',
+                            'spam' => 'spam',
+                            'requests' => 'requests',
+                            'opened' => 'opened',
+                            'clicks' => 'clicks',
+                            'invalid' => 'invalid',
+                            'deferred' => 'deferred',
+                            'blocked' => 'blocked',
+                            'unsubscribed' => 'unsubscribed',
+                            'error' => 'error',
+                        ],
                     ];
                     $params[] = $templateId;
                 }
-            } /* else { // target
-                if ($module == 'contacts') {
-                    // Add param to store the fieldname corresponding to the record id
-                    $fieldId = [
-                        'id' => 'fieldId',
-                        'name' => 'fieldId',
-                        'type' => 'option',
-                        'label' => 'Reference field (do not change it if documents have already been sent)',
-                        'required' => true,
-                        'option' => array(
-                                        'id' => 'Id (recommended)',
-                                        'email' => 'Email (only if you use Transactional email module)'
-                                    ),
-                    ];
-                    $params[] = $fieldId;
-                }
-            } */
-        } catch (\Exception $e) {
+            }
+        } catch (Exception $e) {
             return [];
         }
 
@@ -546,14 +528,11 @@ class Sendinblue extends Solution
     }
 
     // Returns the name of the reference date field according to the module and mode of the rule
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
-        switch ($moduleSource) {
-            case 'transactionalEmails':
-            case 'transactionalEmailActivity':
-                return 'date';
-            default:
-                return 'modifiedAt';
-        }
+        return match ($moduleSource) {
+            'transactionalEmails', 'transactionalEmailActivity' => 'date',
+            default => 'modifiedAt',
+        };
     }
 }

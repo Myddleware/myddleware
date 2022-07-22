@@ -7,3 +7,10 @@ parameters:
 		# or with Symfony 5+
 		containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
 	editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
+	excludePaths:
+	    - src/Solutions/Zuora.php
+	    - src/Solutions/lib/zuora/*
+	    - src/Solutions/lib/curl.php
+	    - src/Solutions/lib/curl_cache.php
+	    - src/Solutions/lib/PrestaShopWebservice.php
+	    - src/Solutions/lib/PrestaShopWebserviceException.php

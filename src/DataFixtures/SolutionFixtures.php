@@ -64,7 +64,6 @@ class SolutionFixtures extends Fixture implements FixtureGroupInterface
         ['name' => 'WooCommerce',		'active' => true, 'source' => true, 'target' => true],
         ['name' => 'WooEventManager',	'active' => false, 'source' => true, 'target' => true],
         ['name' => 'WordPress',		    'active' => false, 'source' => true, 'target' => true],
-        ['name' => 'Zuora',			    'active' => true, 'source' => true, 'target' => true],
     ];
 
     public function load(ObjectManager $manager)

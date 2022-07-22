@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -7,32 +10,34 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
+use Exception;
+use SoapClient;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SAPRoot extends Solution
 {
-    protected $limit = 100;
+    protected int $limit = 100;
 
-    protected $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
+    protected array $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
         'soap_version' => 'SOAP_1_2',
         'authentication' => 'SOAP_AUTHENTICATION_BASIC',
         'exceptions' => 1,
@@ -40,19 +45,21 @@ class SAPRoot extends Solution
         'encoding' => 'ISO-8859-1',
     ];
 
-    protected $keySubStructure = [];
+    protected array $keySubStructure = [];
 
-    protected $subStructureFilter = [];
+    protected array $subStructureFilter = [];
 
-    protected $guidName = [];
+    protected array $guidName = [];
 
-    protected $idName = [];
+    protected array $idName = [];
 
-    protected $required_fields = [];
+    protected array $requiredFields = [];
 
-    protected $relateFieldAllowed = [];
+    protected array $relateFieldAllowed = [];
 
-    public function login($connectionParam)
+    protected SoapClient $client;
+
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -61,24 +68,22 @@ class SAPRoot extends Solution
                 $this->options['login'] = $connectionParam['login'];
                 $this->options['password'] = $connectionParam['password'];
 
-                $this->client = new \SoapClient($connectionParam['wsdl'], $this->options);
+                $this->client = new SoapClient($connectionParam['wsdl'], $this->options);
                 $response = $this->client->ZmydTestConnection();
-                if (true == $response->EvSuccess) {
+                if ($response->EvSuccess) {
                     $this->isConnectionValid = true;
                 } else {
-                    throw new \Exception('Failed to connect SAP CRM.');
+                    throw new Exception('Failed to connect SAP CRM.');
                 }
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Logon failed.');
+                throw new Exception('SOAP FAULT. Logon failed.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -104,8 +109,9 @@ class SAPRoot extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
+        $fields =[];
         try {
             try {
                 $multistructure = false;
@@ -118,7 +124,7 @@ class SAPRoot extends Solution
                 if (!$multistructure) {
                     foreach ($response->EtFields->item->ZmydValues->item as $field) {
                         if (!empty($this->relateFieldAllowed[$module][$field->ZzmydKey])) {
-                            $fields[$module.'__'.$field->ZzmydKey] = [
+                            $fields[$module . '__' . $field->ZzmydKey] = [
                                 'label' => $this->relateFieldAllowed[$module][$field->ZzmydKey]['label'],
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
@@ -136,8 +142,7 @@ class SAPRoot extends Solution
                             ];
                         }
                     }
-                }
-                // Le module est en multi structure mais peut n'avoir qu'une seule struture selectionnée
+                } // Le module est en multi structure mais peut n'avoir qu'une seule struture selectionnée
                 else {
                     // Boucle sur tous les modules sélectionnés
                     foreach ($module[$moduleKey] as $structure => $substructures) {
@@ -161,7 +166,7 @@ class SAPRoot extends Solution
                                     foreach ($substructures as $key => $value) {
                                         foreach ($structureField->ZmydValues->item as $field) {
                                             if (!empty($this->relateFieldAllowed[$moduleKey][$structure][$field->ZzmydKey])) {
-                                                $this->fields[$structure.'__'.(!empty($value) ? $key.'__' : '').$field->ZzmydKey] = [
+                                                $fields[$structure.'__'.(!empty($value) ? $key.'__' : '').$field->ZzmydKey] = [
                                                     'label' => $this->relateFieldAllowed[$moduleKey][$structure][$field->ZzmydKey]['label'].' - '.$key,
                                                     'type' => 'varchar(255)',
                                                     'type_bdd' => 'varchar(255)',
@@ -189,17 +194,18 @@ class SAPRoot extends Solution
                 return $fields;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Logon failed.');
+                throw new Exception('SOAP FAULT. Logon failed.');
             }
-        } catch (\Exception $e) {
-            $e->getMessage();
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
+        return $fields;
     }
 
     // Permet de lire des données et de les sauvegarder dans plusieurs structures
-    public function readMultiStructure($param, $function, $parameters, $readLast)
+    public function readMultiStructure($param, $function, $parameters, $readLast): array
     {
         try {
             try {
@@ -214,7 +220,7 @@ class SAPRoot extends Solution
                 // formattage de la réponse
                 $response = $this->formatReadResponse($param, $response);
                 if ('E' == $response->EvTypeMessage) {
-                    throw new \Exception('Read record failed : '.$response->EvTypeMessage);
+                    throw new Exception('Read record failed : '.$response->EvTypeMessage);
                 }
 
                 // Récupération de la table principale
@@ -232,7 +238,7 @@ class SAPRoot extends Solution
                         if (!empty($response->$headerStructure->item->$guidField)) {
                             $headers[] = $response->$headerStructure->item->$guidField;
                         } else {
-                            throw new \Exception('One record found but guid not readable');
+                            throw new Exception('One record found but guid not readable');
                         }
                     } else {
                         if (!empty($response->$headerStructure->item)) {
@@ -240,7 +246,7 @@ class SAPRoot extends Solution
                                 $headers[] = $obj->$guidField;
                             }
                         } else {
-                            throw new \Exception('Several records found but guid not readable');
+                            throw new Exception('Several records found but guid not readable');
                         }
                     }
                     // Boucle sur tous les enregistrements récupérés dans SAP
@@ -256,15 +262,15 @@ class SAPRoot extends Solution
                             $fieldDetails = explode('__', $field);
                             // Recherche de la ou des lignes avec le guid de référence dans la table demandée que si on a changé de structure ou si on est sur la première recherche
                             if (
-                                    $fisrt
+                                $fisrt
                                 || (
-                                        2 == count($fieldDetails)	// Structure simple (ex ET_ORDERADM_H__CREATED_AT)
+                                    2 == count($fieldDetails)    // Structure simple (ex ET_ORDERADM_H__CREATED_AT)
                                     && $fieldDetails[0] != $oldFieldDetails[0]
                                 )
                                 || (
-                                        3 == count($fieldDetails)	// Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
+                                    3 == count($fieldDetails)    // Structure complexe (ex ET_PARTNER__0000022__ADDR_NP)
                                     && (
-                                            $fieldDetails[0] != $oldFieldDetails[0]
+                                        $fieldDetails[0] != $oldFieldDetails[0]
                                         || $fieldDetails[1] != $oldFieldDetails[1]
                                     )
                                 )
@@ -278,12 +284,12 @@ class SAPRoot extends Solution
 
                                 // Et s'il y a une clé pour la table demandé, alors il faut que la valeur soit celle attendue
                                 if (
-                                        !empty($response->$structureFromat->item->$guidName) // Si seulement 1 seule ligne dans la table
+                                    !empty($response->$structureFromat->item->$guidName) // Si seulement 1 seule ligne dans la table
                                     && $response->$structureFromat->item->$guidName == $header // Si on est sur la bonne opération
                                     && (
-                                            empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si pas de filtrage dans la structure
+                                        empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si pas de filtrage dans la structure
                                         || (
-                                                !empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si filtrage alors on vérifie la valeur
+                                            !empty($this->keySubStructure[$param['module']][$fieldDetails[0]]) // Si filtrage alors on vérifie la valeur
                                             && $response->$structureFromat->item->$this->keySubStructure[$param['module']][$fieldDetails[0]] == $this->transformName($fieldDetails[2])
                                         )
                                     )
@@ -298,11 +304,11 @@ class SAPRoot extends Solution
                                                 $filterName = $this->transformName($this->keySubStructure[$param['module']][$fieldDetails[0]]);
                                             }
                                             if (
-                                                    $item->$guidName == $header // Si on est sur la bonne opération
+                                                $item->$guidName == $header // Si on est sur la bonne opération
                                                 && (
-                                                        empty($filterName) // Si pas de filtrage dans la structure
-                                                     || (
-                                                            !empty($filterName) // Si filtrage alors on vérifie la valeur
+                                                    empty($filterName) // Si pas de filtrage dans la structure
+                                                    || (
+                                                        !empty($filterName) // Si filtrage alors on vérifie la valeur
                                                         && !empty($item->$filterName)
                                                         && $item->$filterName == $fieldDetails[1]
                                                     )
@@ -317,11 +323,11 @@ class SAPRoot extends Solution
                             // Récupération des données à renvoyer si on a trouvé une structure correspondant à la demande
                             if (!empty($structuresFound)) {
                                 // Si on a des filtres supplémentaire on les utilise
-                                if (!empty($subStructureFilter[$param['module']][$fieldDetails[0]])) {
+                                if (!empty($this->subStructureFilter[$param['module']][$fieldDetails[0]])) {
                                     $structuresFoundFiltered = [];
                                     foreach ($structuresFound as $structure) { // Pour chaque ligne
                                         $strutureOk = true;
-                                        foreach ($subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
+                                        foreach ($this->subStructureFilter[$param['module']][$fieldDetails[0]] as $filterField => $filterValue) { // On vérifie le filtre
                                             // Si un filtre est KO alors on ne garde pas la struture
                                             if ($structure[$filterField] != $filterValue) {
                                                 $strutureOk = false;
@@ -350,16 +356,14 @@ class SAPRoot extends Solution
 
                                 // Si on est sur le champ id (suppression des 0 à gauche pourvant être présent sur le PARTNER_NOou l'OBJECT_ID par exemple)
                                 if (
-                                        !empty($this->idName[$param['module']][$fieldDetails[0]])
+                                    !empty($this->idName[$param['module']][$fieldDetails[0]])
                                     && $fieldName == $this->transformName($this->idName[$param['module']][$fieldDetails[0]])
                                 ) {
                                     $record['id'] = ltrim($structuresFound[0]->$fieldName, '0');
-                                }
-                                // On ajoute la date de modification, le champ peut être nommé différemment en fonction des module
+                                } // On ajoute la date de modification, le champ peut être nommé différemment en fonction des module
                                 elseif ('ChangedAt' == $fieldName) {
                                     $record['date_modified'] = $structuresFound[0]->$fieldName;
-                                }
-                                // Poru partner, l'heure et la date sont dans 2 champs différents
+                                } // Poru partner, l'heure et la date sont dans 2 champs différents
                                 elseif ('Chdat' == $fieldName) {
                                     $record['date_modified'] = $structuresFound[0]->$fieldName.$record['date_modified'];
                                 } elseif ('Chtim' == $fieldName) {
@@ -394,13 +398,13 @@ class SAPRoot extends Solution
                 return $result;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Read record failed.');
+                throw new Exception('SOAP FAULT. Read record failed.');
             }
-        } catch (\Exception $e) {
-            $error = 'Failed to read record from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
-            echo $error.';';
+        } catch (Exception $e) {
+            $error = 'Failed to read record from sapcrm : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ' . $e->getLine() . '. ';
+            echo $error . ';';
             $this->logger->error($error);
             if ($readLast) {
                 return ['done' => -1];
@@ -411,22 +415,22 @@ class SAPRoot extends Solution
     }
 
     // Transformation du nom de la structure (exemple ET_ORDERADM_H devient EtOrderadmH)
-    protected function transformName($name)
+    protected function transformName($name): string
     {
         $result = '';
         $nameArray = explode('_', $name);
         foreach ($nameArray as $nameCut) {
-            $result .= strtoupper(substr($nameCut, 0, 1)).strtolower(substr($nameCut, 1));
+            $result .= strtoupper(substr($nameCut, 0, 1)) . strtolower(substr($nameCut, 1));
         }
 
         return $result;
     }
 
     // Permet de récupérer le nom de l'id en fonction de la structure et du module
-    protected function getGuidName($module, $struture)
+    protected function getGuidName($module, $structure)
     {
-        if (!empty($this->guidName[$module][$struture])) {
-            return $this->guidName[$module][$struture];
+        if (!empty($this->guidName[$module][$structure])) {
+            return $this->guidName[$module][$structure];
         } elseif (!empty($this->guidName[$module]['default'])) {
             return $this->guidName[$module]['default'];
         }
@@ -434,6 +438,9 @@ class SAPRoot extends Solution
         return 'REF_GUID';
     }
 
+    /**
+     * @throws Exception
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
@@ -441,6 +448,9 @@ class SAPRoot extends Solution
         return $date->format('Y-m-d H:i:s');
     }
 
+    /**
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
@@ -450,7 +460,7 @@ class SAPRoot extends Solution
 
     // Lorsque SAP renvoie un résultat, le réponse est différente s'il y a une seule ligne dans le retour ou s'il y en a plusieurs
     // On formate de sorte que même s'il n'y a qu'une seule ligne, la réponse soit convertie en tableau comme s'il y avait plusieurs lignes
-    protected function convertResponseTab($response)
+    protected function convertResponseTab($response): array
     {
         if (!is_array($response)) {
             $result[] = $response;

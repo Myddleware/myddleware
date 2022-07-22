@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -35,29 +38,29 @@ class File extends Solution
 {
     protected $baseUrl;
 
-    protected $messages = [];
+    protected array $messages = [];
 
-    protected $duplicateDoc = [];
+    protected array $duplicateDoc = [];
 
-    protected $connection;
+    protected \Doctrine\DBAL\Connection $connection;
 
-    protected $delimiter = ';';
+    protected string $delimiter = ';';
 
-    protected $enclosure = '"';
+    protected string $enclosure = '"';
 
-    protected $escape = '';
+    protected string $escape = '';
 
-    protected $removeChar = [' ', '/', '\'', '.', '(', ')'];
+    protected array $removeChar = [' ', '/', '\'', '.', '(', ')'];
 
-    protected $readLimit = 1000;
+    protected int $readLimit = 1000;
 
-    protected $lineNumber = 0;
+    protected int $lineNumber = 0;
 
-    protected $required_fields = ['default' => ['id', 'date_modified']];
+    protected array $requiredFields = ['default' => ['id', 'date_modified']];
 
-    protected $columnWidth = [];
+    protected array $columnWidth = [];
 
-    public function login($connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -81,8 +84,6 @@ class File extends Solution
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -118,7 +119,7 @@ class File extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             // Get the subfolders of the current directory
@@ -142,13 +143,13 @@ class File extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if ('source' == $type) {
                 // Get the file with the way of this file
-                $file = $this->get_last_file($this->connectionParam['directory'].'/'.$module, '1970-01-01 00:00:00');
+                $file = $this->getLastFile($this->connectionParam['directory'].'/'.$module, '1970-01-01 00:00:00');
                 $fileName = trim($this->connectionParam['directory'].'/'.$module.$file);
                 // Open the file
                 $sftp = ssh2_sftp($this->connection);
@@ -178,7 +179,7 @@ class File extends Solution
                     $idFields = $this->getIdFields($module, $type);
                     if (!empty($idFields)) {
                         foreach ($idFields as $idField) {
-                            if (false !== strpos($field, $idField)) {
+                            if (str_contains($field, $idField)) {
                                 $this->moduleFields[str_replace($this->removeChar, '', $field)] = [
                                     'label' => $field,
                                     'type' => 'varchar(255)',
@@ -196,7 +197,7 @@ class File extends Solution
                 $this->moduleFields = [];
             }
             // Add relationship fields coming from other rules
-            $this->get_module_fields_relate($module, $param);
+            $this->getModuleFieldsRelate($module, $param);
 
             return $this->moduleFields;
         } catch (\Exception $e) {
@@ -208,12 +209,16 @@ class File extends Solution
     }
 
     // Get the fieldId from the other rules to add them into the source relationship list field
-    public function get_module_fields_relate($module, $param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getModuleFieldsRelate($module, $param)
     {
         // Get the rule list with the same connectors (both directions) to get the relate ones
-        $ruleListRelation = $this->getEntityManager->getRepository(Rule::class)->createQueryBuilder('r')
-                        ->select('r.id')
-                        ->where('(
+        $ruleListRelation = $this->entityManager->getRepository(Rule::class)->createQueryBuilder('r')
+            ->select('r.id')
+            ->where('(
 											r.connectorSource= ?1 
 										AND r.connectorTarget= ?2
 										AND r.name != ?3
@@ -225,11 +230,11 @@ class File extends Solution
 										AND r.name != ?3
 										AND r.deleted = 0
 								)')
-                        ->setParameter(1, (int) $param['connectorSourceId'])
-                        ->setParameter(2, (int) $param['connectorTargetId'])
-                        ->setParameter(3, $param['ruleName'])
-                        ->getQuery()
-                        ->getResult();
+            ->setParameter(1, (int) $param['connectorSourceId'])
+            ->setParameter(2, (int) $param['connectorTargetId'])
+            ->setParameter(3, $param['ruleName'])
+            ->getQuery()
+            ->getResult();
         if (!empty($ruleListRelation)) {
             // Prepare query to get the fieldId from the orther rules with the same connectors
             $sql = "SELECT value FROM RuleParam WHERE RuleParam.name = 'fieldId' AND RuleParam.rule_id  in (";
@@ -239,9 +244,9 @@ class File extends Solution
             // Remove the last coma
             $sql = substr($sql, 0, -1);
             $sql .= ')';
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
-            $fields = $stmt->fetchAll();
+            $stmt = $this->connection->prepare($sql);
+            $result = $stmt->executeQuery();
+            $fields = $result->fetchAllAssociative();
             if (!empty($fields)) {
                 // Add relate fields to display them in the rule edit view (relationship tab, source list fields)
                 foreach ($fields as $field) {
@@ -264,19 +269,19 @@ class File extends Solution
     /**
      * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
      * Param contient :
-     * 	date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
-     * 	module : le module appelé
-     * 	fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
-     * 	limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
+     *    date_ref : la date de référence à partir de laquelle on récupère les enregistrements, format bdd AAAA-MM-JJ hh:mm:ss
+     *    module : le module appelé
+     *    fields : les champs demandés sous forme de tableau, exemple : array('name','date_entered')
+     *    limit : la limite du nombre d'enregistrement récupéré (la limite par défaut étant 100)
      * Valeur de sortie est un tableau contenant :
-     * 		count : Le nombre d'enregistrement trouvé
-     * 		date_ref : la nouvelle date de référence
-     *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
-     * 			     exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
-     * 				 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
+     *    count : Le nombre d'enregistrement trouvé
+     *    date_ref : la nouvelle date de référence
+     *    values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), L'id est en clé du tableau de valeur pour chaque docuement
+     *                 exemple Array([454664654654] => array( ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18))
+     *                 Values peut contenir le tableau ZmydMessage contenant un table de message array (type => 'E', 'message' => 'erreur lors....')
      * Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution.
      */
-    public function readData($param)
+    public function readData($param): ?array
     {
         $count = 0;
         $offset = 0;
@@ -284,10 +289,10 @@ class File extends Solution
         try {
             // Get the file with the way of this file. But we take the oldest file of the folder
             // If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
-            $file = $this->get_last_file($this->connectionParam['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
+            $file = $this->getLastFile($this->connectionParam['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
             // If there is no file
             if (empty($file)) {
-                return;
+                return null;
             }
             // If the file has already been read, we get the offset to read from this line
             if (!empty($param['ruleParams'][$file])) {
@@ -333,16 +338,16 @@ class File extends Solution
             }
             if (
                 (
-                        !empty($difFields)
+                    !empty($difFields)
                     && count($difFields) > 1
                 )
                 || (
-                        !empty($difFields)
+                    !empty($difFields)
                     && 1 == count($difFields)
                     && 'myddleware_generated' != current($difFields)
                 )
             ) {
-                throw new \Exception('File is not compatible. Missing fields : '.implode(';', $difFields));
+                throw new \Exception('File is not compatible. Missing fields : ' . implode(';', $difFields));
             }
             // Control all lines of the file
             $values = [];
@@ -364,7 +369,7 @@ class File extends Solution
                 $rowFile = $this->transformRow($buffer, $param);
 
                 $checkRow = $this->checkRow($rowFile, $param);
-                if (false == $checkRow) {
+                if (!$checkRow) {
                     ++$this->lineNumber;
                     continue;
                 }
@@ -377,7 +382,7 @@ class File extends Solution
                     $column = array_search($field, $header);
                     // If the column isn't found we skip it
                     if (
-                            false === $column
+                        false === $column
                         and 'myddleware_generated' != $field
                     ) {
                         $row[$field] = '';
@@ -395,7 +400,7 @@ class File extends Solution
                 }
                 $row['date_modified'] = $new_date_ref;
                 $validateRow = $this->validateRow($row, $idRow, $count);
-                if (false == $validateRow) {
+                if (!$validateRow) {
                     ++$this->lineNumber;
                     continue;
                 }
@@ -405,7 +410,7 @@ class File extends Solution
                     $skip = false;
                     foreach ($param['query'] as $key => $value) {
                         if (
-                                !isset($row[$key])
+                            !isset($row[$key])
                             or $row[$key] != $value
                         ) {
                             $skip = true;
@@ -460,7 +465,7 @@ class File extends Solution
     }
 
     // Check if teh limit has been reached
-    protected function limitReached($param, $count)
+    protected function limitReached($param, $count): bool
     {
         if ($count >= $this->readLimit) {
             return true;
@@ -470,14 +475,14 @@ class File extends Solution
     }
 
     // Convert the first line of the file to an array with all fields
-    protected function getFileHeader($stream, $param)
+    protected function getFileHeader($stream, $param): array
     {
         $headerString = trim(fgets($stream));
         $fields = $this->transformRow($headerString, $param);
         $i = 1;
         foreach ($fields as $field) {
             if (empty($field)) {
-                $header[] = 'Column_'.$i;
+                $header[] = 'Column_' . $i;
             } else {
                 // Spaces aren't accepted in a field name
                 $header[] = str_replace($this->removeChar, '', $field);
@@ -494,7 +499,7 @@ class File extends Solution
         try {
             // $fieldsSource = array();
             if ('source' == $type) {
-                $this->get_module_fields($module, $type);
+                $this->getModuleFields($module, $type);
                 if (!empty($this->moduleFields)) {
                     $idParam = [
                         'id' => 'fieldId',
@@ -520,18 +525,18 @@ class File extends Solution
     }
 
     // Generate ID for the document
-    protected function generateId($param, $rowFile)
+    protected function generateId($param, $rowFile): string
     {
         return uniqid('', true);
     }
 
-    protected function checkRow($rowFile, $param)
+    protected function checkRow($rowFile, $param): bool
     {
         return true;
     }
 
     // Transformm the buffer to and array of fields
-    protected function transformRow($buffer, $param)
+    protected function transformRow($buffer, $param): array
     {
         // If the module contains file with a fix column width (if attribute $columnWidth is set up for your module)
         // Then we manage row using the width of each column
@@ -557,30 +562,33 @@ class File extends Solution
     }
 
     // Get the enclosure
-    protected function getEnclosure($param)
+    protected function getEnclosure($param): string
     {
         return $this->enclosure;
     }
 
     // Get the escape
-    protected function getEscape($param)
+    protected function getEscape($param): string
     {
         return $this->escape;
     }
 
-    protected function validateRow($row, $idRow, $rowNumber)
+    /**
+     * @throws \Exception
+     */
+    protected function validateRow($row, $idRow, $rowNumber): bool
     {
         // We do "++" because we don't take the "header" so the first line and we have a line to delete
         $rowNumber = $rowNumber + 2;
         // If there are not the id of the line, display an error
         if (empty($idRow)) {
-            throw new \Exception('File is rejected because the id of the line '.$rowNumber.' is empty');
+            throw new \Exception('File is rejected because the id of the line ' . $rowNumber . ' is empty');
         }
 
         return true;
     }
 
-    protected function get_last_file($directory, $date_ref)
+    protected function getLastFile($directory, $date_ref): string
     {
         $stream = ssh2_exec($this->connection, 'cd '.$directory.';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
         stream_set_blocking($stream, true);
@@ -591,7 +599,7 @@ class File extends Solution
     }
 
     // Get the strings which can identify what field is an id in the table
-    protected function getIdFields($module, $type)
+    protected function getIdFields($module, $type): array
     {
         // default is id
         return ['id'];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -28,14 +30,14 @@ namespace App\Solutions;
 class WooEventManager extends WordPress
 {
     protected $subModules = [
-                                    'mep_event_more_date' => ['parent_module' => 'mep_events',
-                                                                    'parent_id' => 'event_id', ],
-                                    ];
+        'mep_event_more_date' => ['parent_module' => 'mep_events',
+            'parent_id' => 'event_id', ],
+    ];
 
     // Module without reference date
     protected array $moduleWithoutReferenceDate = ['mep_cat', 'mep_org'];
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' === $type) {
             return [
@@ -46,7 +48,9 @@ class WooEventManager extends WordPress
                 // these modules are part of the PRO subscription to the Woocommerce Event Manager Plugin
                 // 'mep_event_speaker'	 => 'Event Speaker List',
                 // 'mep_event_attendee' =>	'Event Attendee List',
-                ];
+            ];
         }
+
+        return [];
     }
 }

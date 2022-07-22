@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -35,9 +38,9 @@ class OracleDatabase extends Database
 
     protected $fieldType = 'Type';
 
-    protected $stringSeparatorOpen = '';
+    protected string $stringSeparatorOpen = '';
 
-    protected $stringSeparatorClose = '';
+    protected string $stringSeparatorClose = '';
 
     protected function generatePdo()
     {
@@ -45,7 +48,7 @@ class OracleDatabase extends Database
     }
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function getQueryShowTables()
     {
         return "SELECT * FROM (SELECT CONCAT(CONCAT(owner, '.'), table_name) AS \"TableName\", owner FROM all_tables UNION SELECT CONCAT(CONCAT(owner, '.'), view_name) AS \"ViewName\", owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
         // return "SELECT * FROM (SELECT table_name, owner FROM all_tables UNION SELECT view_name, owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
@@ -79,7 +82,7 @@ class OracleDatabase extends Database
             if (!isset($param['ruleParams']['fieldDateRef'])) {
                 throw new \Exception('"fieldDateRef" has to be specified for the read.');
             }
-            $this->required_fields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
+            $this->requiredFields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
 
             if (!isset($param['fields'])) {
                 $param['fields'] = [];
@@ -90,7 +93,7 @@ class OracleDatabase extends Database
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
             // Query building
-            $requestSQL = $this->get_query_select_header($param, 'read');
+            $requestSQL = $this->getQuerySelectHeader($param, 'read');
 
             foreach ($param['fields'] as $field) {
                 $requestSQL .= $this->stringSeparatorOpen.$field.$this->stringSeparatorClose.', '; // Ajout de chaque champ souhaité

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -25,12 +28,13 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class CirrusShield extends Solution
 {
-    protected $url = 'https://www.cirrus-shield.net/RestApi/';
+    protected string $url = 'https://www.cirrus-shield.net/RestApi/';
 
     protected $token;
 
@@ -38,11 +42,12 @@ class CirrusShield extends Solution
 
     protected $organizationTimezoneOffset;
 
-    protected $limitCall = 1;
+    protected int $limitCall = 1;
 
-    protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
+    protected array $requiredFields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
 
-    protected $fieldsDuplicate = ['Contact' => ['Email', 'Name'],
+    protected array $fieldsDuplicate = [
+        'Contact' => ['Email', 'Name'],
         'default' => ['Name'],
     ];
 
@@ -62,7 +67,7 @@ class CirrusShield extends Solution
         ];
     }
 
-    public function login(array $connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -75,22 +80,21 @@ class CirrusShield extends Solution
             // Get the token
             $this->token = $this->call($url, 'login');
             if (empty($this->token)) {
-                throw new \Exception('login error');
+                throw new Exception('login error');
             }
 
             // Connection validation
             $this->isConnectionValid = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         try {
+            $modules = [];
             $apiModules = $this->call($this->url.'DescribeAll?authToken='.$this->token);
             if (!empty($apiModules)) {
                 foreach ($apiModules as $apiModule) {
@@ -99,14 +103,14 @@ class CirrusShield extends Solution
             }
 
             return $modules;
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            return ['error' => 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'];
         }
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             $apiFields = $this->call($this->url.'Describe/'.$module.'?authToken='.$this->token);
             if (!empty($apiFields['Fields'])) {
@@ -114,7 +118,7 @@ class CirrusShield extends Solution
                 foreach ($apiFields['Fields'] as $field) {
                     // Field not editable can't be display on the target side
                     if (
-                            empty($field['IsEditable'])
+                        empty($field['IsEditable'])
                         and 'target' == $type
                     ) {
                         continue;
@@ -148,12 +152,15 @@ class CirrusShield extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
             return null;
         }
     }
 
-    public function readData(array $param)
+    public function readData(array $param): ?array
     {
         try {
             $result['date_ref'] = $param['date_ref'];
@@ -171,7 +178,7 @@ class CirrusShield extends Solution
                 $this->getOrganizationTimezone();
                 // If the organization timezone is still empty, we generate an error
                 if (empty($this->organizationTimezoneOffset)) {
-                    throw new \Exception('Failed to get the organization Timezone. This timezone is requierd to save the reference date.');
+                    throw new Exception('Failed to get the organization Timezone. This timezone is requierd to save the reference date.');
                 }
             }
 
@@ -212,30 +219,28 @@ class CirrusShield extends Solution
                 // Function called as a standard read, we use the reference date
             } else {
                 $query .= ' WHERE '.$dateRefField.' > '.$param['date_ref'].$this->organizationTimezoneOffset;
-                // $query .= " WHERE ".$dateRefField." > 2017-03-30 14:42:35-05 ";
             }
 
             // Buid the parameters to call the solution
-            $selectparam = ['authToken' => $this->token,
+            $selectParam = ['authToken' => $this->token,
                 'selectQuery' => $query,
             ];
-            $url = sprintf('%s?%s', $this->url.'Query', http_build_query($selectparam));
+            $url = sprintf('%s?%s', $this->url.'Query', http_build_query($selectParam));
             $resultQuery = $this->call($url);
 
             // If the query return an error
             if (!empty($resultQuery['Message'])) {
-                throw new \Exception($resultQuery['Message']);
+                throw new Exception($resultQuery['Message']);
             }
             // If no result
             if (!empty($resultQuery[$param['module']])) {
                 // If only one record, we add a dimension to be able to use the foreach below
                 if (empty($resultQuery[$param['module']][0])) {
+                    // TODO: fix this error : NullArrayAccess: Cannot access array value on null variable $resultQuery
                     $tmp[$param['module']][0] = $resultQuery[$param['module']];
                     $resultQuery = $tmp;
                 }
-                // For each records
                 foreach ($resultQuery[$param['module']] as $record) {
-                    // For each fields expected
                     foreach ($param['fields'] as $field) {
                         if ('id' == $field) {
                             $field = 'Id';
@@ -271,7 +276,7 @@ class CirrusShield extends Solution
                     $row = [];
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
@@ -280,6 +285,7 @@ class CirrusShield extends Solution
 
     public function createData(array $param): ?array
     {
+        $result = [];
         try {
             $i = 0;
             $nb_record = count($param['data']);
@@ -299,7 +305,7 @@ class CirrusShield extends Solution
                 foreach ($data as $key => $value) {
                     // Field only used for the update and contains the ID of the record in the target solution
                     if ('target_id' == $key) {
-                        // If updade then we change the key in Id
+                        // If update then we change the key in Id
                         if (!empty($value)) {
                             $key = 'Id';
                         } else { // If creation, we skip this field
@@ -312,25 +318,25 @@ class CirrusShield extends Solution
 
                 // If we have finished to read all data or if the package is full we send the data to Sallesforce
                 if (
-                        $i == $nb_record
-                     || 0 == $i % $this->limitCall
+                    $i == $nb_record
+                    || 0 == $i % $this->limitCall
                 ) {
                     $xmlData .= '</Data>';
 
                     // Set parameters to send data to the target solution (creation or modification)
-                    $selectparam = ['authToken' => $this->token,
+                    $selectParam = ['authToken' => $this->token,
                         'action' => ($this->update ? 'update' : 'insert'),
                         'matchingFieldName' => 'Id',
                         'useExternalId' => 'false',
                     ];
-                    $url = sprintf('%s?%s', $this->url.'DataAction/'.$param['module'], http_build_query($selectparam));
+                    $url = sprintf('%s?%s', $this->url.'DataAction/'.$param['module'], http_build_query($selectParam));
                     // Send data to the target solution
                     $resultCall = $this->call($url, 'POST', urlencode($xmlData));
                     if (empty($resultCall)) {
-                        throw new \Exception('Result from Cirrus Shield empty');
+                        throw new Exception('Result from Cirrus Shield empty');
                     }
                     if (!empty($resultCall['Message'])) {
-                        throw new \Exception($resultCall['Message']);
+                        throw new Exception($resultCall['Message']);
                     }
                     // XML initialisation (for the next call)
                     $xmlData = '<Data>';
@@ -345,7 +351,7 @@ class CirrusShield extends Solution
                         foreach ($resultCall[$param['module']] as $record) {
                             // General error
                             if (!empty($record['Message'])) {
-                                throw new \Exception($record['Message']);
+                                throw new Exception($record['Message']);
                             }
                             // We use orderId as id document only when we execute to mass upsert. In this case this field orderid has to be created in Cirrus
                             if (!empty($record['orderid'])) {
@@ -377,7 +383,7 @@ class CirrusShield extends Solution
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['error'] = $error;
         }
@@ -386,7 +392,7 @@ class CirrusShield extends Solution
     }
 
     // Cirrus Shield use the same function for record's creation and modification
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         $this->update = true;
         $result = $this->createData($param);
@@ -395,19 +401,25 @@ class CirrusShield extends Solution
         return $result;
     }
 
-    // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * @throws Exception
+     * return the reference date field name
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
             return 'ModificationDate';
-        // Creation mode only
+            // Creation mode only
         } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getOrganizationTimezone()
     {
         // Get the organization in Cirrus
@@ -419,7 +431,7 @@ class CirrusShield extends Solution
         $url = sprintf('%s?%s', $this->url.'Query', http_build_query($selectparam));
         $resultQuery = $this->call($url);
         if (empty($resultQuery['Organization']['DefaultTimeZoneSidKey'])) {
-            throw new \Exception('Failed to retrieve the organisation timezone : no organization found '.$resultQuery['Organization']['DefaultTimeZoneSidKey'].'. ');
+            throw new Exception('Failed to retrieve the organisation timezone : no organization found '.$resultQuery['Organization']['DefaultTimeZoneSidKey'].'. ');
         }
 
         // Get the list of timeZone  Cirrus
@@ -439,11 +451,11 @@ class CirrusShield extends Solution
         }
         // Error management
         if (empty($this->organizationTimezoneOffset)) {
-            throw new \Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');
+            throw new Exception('Failed to retrieve the organisation timezone : no timezone found for the value ');
         }
     }
 
-    protected function call($url, $method = 'GET', $xmlData = '', $timeout = 300)
+    protected function call($url, $method = 'GET', $xmlData = '', $timeout = 300): mixed
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
@@ -479,6 +491,6 @@ class CirrusShield extends Solution
 
             return json_decode($result, true);
         }
-        throw new \Exception('curl extension is missing!');
+        throw new Exception('curl extension is missing!');
     }
 }

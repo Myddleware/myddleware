@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -35,9 +38,9 @@ class MicrosoftSQL extends Database
 
     protected $fieldType = 'DATA_TYPE';
 
-    protected $stringSeparatorOpen = '[';
+    protected string $stringSeparatorOpen = '[';
 
-    protected $stringSeparatorClose = ']';
+    protected string $stringSeparatorClose = ']';
 
     // Generate PDO object
     protected function generatePdo()
@@ -61,7 +64,7 @@ class MicrosoftSQL extends Database
     }
 
     // Query to get all the tables of the database
-    protected function get_query_show_tables()
+    protected function getQueryShowTables()
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->connectionParam['database_name'].'\'';
     }
@@ -92,13 +95,13 @@ class MicrosoftSQL extends Database
         return str_replace("'", "''", $value);
     }
 
-    protected function get_query_select_header($param, $method)
+    protected function getQuerySelectHeader($param, $method)
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {
             return 'SELECT TOP 1 ';
         }
 
-        return parent::get_query_select_header($param, $method);
+        return parent::getQuerySelectHeader($param, $method);
     }
 }

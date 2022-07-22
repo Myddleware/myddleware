@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -33,7 +36,7 @@ class Moodle extends Solution
 {
     protected $moodleClient;
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => ['id'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
@@ -92,7 +95,7 @@ class Moodle extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             if ('source' == $type) {
@@ -124,9 +127,9 @@ class Moodle extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Use Moodle metadata
             require 'lib/moodle/metadata.php';
