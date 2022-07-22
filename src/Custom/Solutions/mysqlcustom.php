@@ -65,9 +65,9 @@ class mysqlcustom extends mysql {
 	}
 	
 	// Clean id empty for foreign key
-	protected function checkDataBeforeUpdate($param, $data){
+	protected function checkDataBeforeUpdate($param, $data, $idDoc){
 		// Call standard function
-		$data = parent::checkDataBeforeUpdate($param, $data);
+		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		return $this->checkData($param, $data);	
 	}
 	

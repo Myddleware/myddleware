@@ -33,7 +33,8 @@ class airtablecustom extends airtable {
 														'EVENEMENTS' => 'EVENEMENTS',
 														'POLES' => 'POLES',
 														'UTILISATEURS' => 'UTILISATEURS',
-														'PARTICIPATION_RI' => 'PARTICIPATION RI'
+														'PARTICIPATION_RI' => 'PARTICIPATION RI',
+														'RECONDUCTION' => 'RECONDUCTION'
 													),
 							);
 

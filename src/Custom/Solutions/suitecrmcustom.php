@@ -17,6 +17,13 @@ class suitecrmcustom extends suitecrm {
 	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';
 	protected $currentRule;
 	
+	protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
+        'Accounts' => ['email1', 'name'],
+        'Users' => ['email1', 'last_name'],
+        'Leads' => ['email1', 'last_name'],
+        'Prospects' => ['email1', 'name'],
+        'default' => ['name'],
+    ];
 	
 	// Add aiko field to be able to filter on it
 	public function get_module_fields($module, $type = 'source', $param = null) {
@@ -127,6 +134,63 @@ class suitecrmcustom extends suitecrm {
 		return $read;
 	}
 	
+	   // Permet de mettre à jour un enregistrement
+    public function updateData($param)
+    {
+		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
+			$fieldToBeOverriden = array(
+										'dispo_lundi_c', 
+										'dispo_lundi_fin_c',
+										'dispo_mardi_c', 
+										'dispo_mardi_fin_c',
+										'dispo_mercredi_c', 
+										'dispo_mercredi_fin_c',
+										'dispo_jeudi_c', 
+										'dispo_jeudi_fin_c',
+										'dispo_vendredi_c', 
+										'dispo_vendredi_fin_c',
+										'dispo_samedi_c', 
+										'dispo_samedi_fin_c',
+										'dispo_dimanche_c', 
+										'dispo_dimanche_fin_c'
+										);
+			// Do not replace empty field into the COMET expect for sepcific fields
+			foreach ($param['data'] as $idDoc => $data) {
+				foreach ($data as $key => $value) {
+					if (in_array($key, $fieldToBeOverriden)) {
+						continue;
+					}
+					if (empty($value)) {
+						unset($param['data'][$idDoc][$key]);
+					}
+					
+				}
+			}
+		}
+		return parent::updateData($param);
+    }
+	
+	// Custom check before update
+	protected function checkDataBeforeUpdate($param, $data, $idDoc) {
+		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
+			$now = new \DateTime();
+			$currentYear = $now->format('Y');
+			// academic year calculation
+			$currentAcademicYear = ($now->format('m') < 8 ? ($currentYear - 1).'_'.$currentYear : $currentYear.'_'.($currentYear + 1));
+			
+			// Manage annee_scolaire_c field using the history
+			if (empty($param['dataHistory'][$idDoc]['annee_scolaire_c'])) {
+				throw new \Exception('Failed to execute the reconduction. No value in fiedl annee_scolaire_c in the history for the document '.$idDoc.'.');
+			}
+			if (strpos($currentAcademicYear, $param['dataHistory'][$idDoc]['annee_scolaire_c'])) {
+				throw new \Exception('Failed to execute the reconduction. The contact is already active on the current year ('.$currentAcademicYear.'). ');	
+			}
+			// Add the academic year to the annee_scolaire_c field
+			$data['annee_scolaire_c'] = $param['dataHistory'][$idDoc]['annee_scolaire_c'] . '^' . $currentAcademicYear . '^';
+			return $data;
+		}
+		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
+	}
 	
 	// Add filter for contact module
 	public function getFieldsParamUpd($type, $module) {	
@@ -205,7 +269,10 @@ class suitecrmcustom extends suitecrm {
 			$query .= " AND ".strtolower($param['module'])."_cstm.coupon_type_c IN (".$param['ruleParams']['leadType'].") ";
 		}
 		// filter by annee
-		if (in_array($param['module'], $this->moduleWithAnnee)) {
+		if (
+				in_array($param['module'], $this->moduleWithAnnee)
+			AND $param['call_type'] != 'history'
+		) {
 			// Allows to filter on 2 years for Aïko (to be removed once the data are fixed) 
 			if (
 					!empty($param['rule']['id'])
