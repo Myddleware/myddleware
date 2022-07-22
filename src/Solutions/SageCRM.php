@@ -560,7 +560,7 @@ class SageCRM extends Solution
      */
     public function updateData($param): array
     {
-        $result= [];
+        $result = [];
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
         $module = $tmp[1];
@@ -677,7 +677,8 @@ class SageCRM extends Solution
     }
 
     /**
-     * Function de conversion de date format solution à une date format Myddleware
+     * Function de conversion de date format solution à une date format Myddleware.
+     *
      * @throws Exception
      */
     protected function dateConverter($dateTime, $sens = 0): string
