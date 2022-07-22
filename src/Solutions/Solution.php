@@ -688,7 +688,7 @@ class Solution
     }
 
     // Fonction permettant de faire l'appel REST
-    protected function call($method, $parameters): mixed
+    protected function call(string $url, string $method = 'GET', mixed $parameters = []): mixed
     {
         return null;
     }
