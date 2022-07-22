@@ -128,7 +128,7 @@ class SuiteCRM extends Solution
             // Add the suffix with rest parameters to the url
             $this->connectionParam['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $loginParameters, $this->connectionParam['url']);
+            $result = $this->call(url: $this->connectionParam['url'], method: 'login', parameters: $loginParameters);
 
             if ($result) {
                 if (empty($result->id)) {
@@ -150,7 +150,7 @@ class SuiteCRM extends Solution
     {
         try {
             $logout_parameters = ['session' => $this->session];
-            $this->call('logout', $logout_parameters, $this->connectionParam['url']);
+            $this->call(url: $this->connectionParam['url'], method: 'logout', parameters: $logout_parameters);
 
             return true;
         } catch (Exception $e) {
@@ -188,7 +188,7 @@ class SuiteCRM extends Solution
             $get_available_modules_parameters = [
                 'session' => $this->session,
             ];
-            $get_available_modules = $this->call('get_available_modules', $get_available_modules_parameters);
+            $get_available_modules = $this->call(method: 'get_available_modules', parameters: $get_available_modules_parameters);
             if (!empty($get_available_modules->modules)) {
                 foreach ($get_available_modules->modules as $module) {
                     // On ne renvoie que les modules autorisés
@@ -209,7 +209,8 @@ class SuiteCRM extends Solution
 
             return (isset($modules)) ? $modules : null;
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
             return null;
         }
     }
@@ -246,7 +247,7 @@ class SuiteCRM extends Solution
                     'module_name' => $module,
                 ];
 
-                $get_module_fields = $this->call('getModuleFields', $get_module_fields_parameters);
+                $get_module_fields = $this->call(method: 'getModuleFields', parameters: $get_module_fields_parameters);
                 foreach ($get_module_fields->module_fields as $field) {
                     if (isset($this->excludedFields['default'])) {
                         // Certains champs ne peuvent pas être modifiés
@@ -356,7 +357,8 @@ class SuiteCRM extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
             return null;
         }
     }
@@ -434,7 +436,7 @@ class SuiteCRM extends Solution
                 'deleted' => $deleted,
                 'Favorites' => '',
             ];
-            $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
+            $get_entry_list_result = $this->call(method: 'get_entry_list', parameters: $get_entry_list_parameters);
             // Construction des données de sortie
             if (isset($get_entry_list_result->result_count)) {
                 $currentCount = $get_entry_list_result->result_count;
@@ -562,7 +564,7 @@ class SuiteCRM extends Solution
                     'offset' => 0,
                     'limit' => $param['limit'],
                 ];
-                $get_entry_list_result = $this->call('get_relationships', $get_relationships_parameters);
+                $get_entry_list_result = $this->call(method: 'get_relationships', parameters: $get_relationships_parameters);
 
                 if (!empty($get_entry_list_result)) {
                     $record = [];
@@ -627,7 +629,7 @@ class SuiteCRM extends Solution
                     'module_name' => $param['module'],
                     'name_value_lists' => $dataSugar,
                 ];
-                $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
+                $get_entry_list_result = $this->call(method: 'set_entry', parameters: $setEntriesListParameters);
 
                 if (!empty($get_entry_list_result->id)) {
                     $result[$idDoc] = [
@@ -653,7 +655,7 @@ class SuiteCRM extends Solution
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
+     *                                  Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
      */
     protected function createRelationship($param): array
     {
@@ -678,7 +680,7 @@ class SuiteCRM extends Solution
                     'related_ids' => [$data[$this->moduleRelationshipManyToMany[$param['module']]['relationships'][1]]],
                     'name_value_list' => $dataSugar,
                 ];
-                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
+                $set_relationship_result = $this->call(method: 'set_relationship', parameters: $set_relationship_params);
 
                 if (!empty($set_relationship_result->created)) {
                     $result[$key] = [
@@ -738,7 +740,7 @@ class SuiteCRM extends Solution
                     'name_value_lists' => $dataSugar,
                 ];
 
-                $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
+                $get_entry_list_result = $this->call(method: 'set_entry', parameters: $setEntriesListParameters);
                 if (!empty($get_entry_list_result->id)) {
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
@@ -774,6 +776,9 @@ class SuiteCRM extends Solution
         return $this->updateData($param);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function generateQuery($param, $method): string
     {
         $query = '';
@@ -831,7 +836,7 @@ class SuiteCRM extends Solution
 
     /**
      * @throws Exception
-     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
+     *                   Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
      */
     public function getRefFieldName($moduleSource, $ruleMode): string
     {
@@ -846,11 +851,12 @@ class SuiteCRM extends Solution
     // Get the list of field (name and id) for each custom relationship
     protected function getCustomRelationshipListFields($module): array
     {
+        $result = [];
         $get_module_fields_parameters = [
             'session' => $this->session,
             'module_name' => $module,
         ];
-        $get_module_fields = $this->call('getModuleFields', $get_module_fields_parameters);
+        $get_module_fields = $this->call(method: 'getModuleFields', parameters: $get_module_fields_parameters);
         // Get all custom relationship fields
         if (!empty($get_module_fields->link_fields)) {
             foreach ($get_module_fields->link_fields as $field) {
@@ -873,7 +879,16 @@ class SuiteCRM extends Solution
         return $result;
     }
 
-    protected function call($method, $parameters): mixed
+    /**
+     * @param string $method eg. 'login', 'getModuleFields'
+     *
+     * TODO: consider a renaming or further refactoring because there is a huge potential for confusion
+     * due to the fact that the parent method has the following signature :
+     * call(string $url, string $method = 'GET', mixed $parameters = []): mixed
+     * but here we use $method as a parameter for a completely different thing since it refers to an endpoint(method to be executed) within the SuiteCRM API
+     * instead of an HTTP method in all other implementations of the parent method call()
+     */
+    protected function call(string $url = '', string $method = '', mixed $parameters = []): mixed
     {
         try {
             ob_start();
