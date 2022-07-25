@@ -79,7 +79,6 @@ class DatabaseSetupController extends AbstractController
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
             $return['error'] = $e->getMessage();
-            dd('1', $e);
             if ($e instanceof ConnectionException | $e instanceof TableNotFoundException) {
                 $submitted = false;
 
@@ -206,7 +205,6 @@ class DatabaseSetupController extends AbstractController
 
             $this->logger->error($e->getMessage());
             $return['error'] = $e->getMessage();
-            dd('3', $e);
             // if the database doesn't exist yet, ask user to go create it
             if ($e instanceof ConnectionException) {
                 $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. ' . $e->getMessage();

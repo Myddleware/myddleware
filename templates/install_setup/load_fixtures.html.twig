@@ -9,27 +9,27 @@
     </div>
     <div class="install">
         <div class="card-body">
-            <h3 class="install-title">Install Step 4 : uploading database tables</h3>
-            <h5>Loading database tables</h5>
+            <h3 class="install-title">{{'install.install_step_4' | trans }}</h3>
+            <h5>{{'install.step_4_loading' | trans }}</h5>
             {% if connection_failed_message %}
                 <p class="alert-danger">{{ connection_failed_message }}</p>
-                <p>Go back to the previous page to reset your database connection</p>
+                <p>{{'install.step_3_go_back' | trans }}</p>
             {% else %}
                 <p class="alert-success">{{ connection_success_message }}</p>
                 {% if connection_success_message %}
-                    <p class="text-center">You can now go to the next page to set up your Myddleware user.</p>
+                    <p class="text-center">{{'install.next_step' | trans }}</p>
                 {% endif %}
             {% endif %}
                 <a href="{{ path('app_database_connection') }}" id="previous" role="button" class="btn btn-secondary btn-lg">
-                    <i class="fas fa-arrow-left"></i>Previous
+                    <i class="fas fa-arrow-left"></i>{{ 'install.previous' | trans }}
                 </a>
             {% if connection_failed_message %}
                 <button class="btn btn-outline-secondary btn-lg" id="next-btn" disabled>
-                    <i class="fas fa-arrow-right"></i>Next
+                    <i class="fas fa-arrow-right"></i>{{ 'install.next' | trans }}
                 </button>
             {% elseif connection_success_message %}
                 <a href="{{ path('app_register') }}" id="next" class="btn btn-primary btn-lg" role="button">
-                    <i class="fas fa-arrow-right"></i>Next
+                    <i class="fas fa-arrow-right"></i>{{ 'install.next' | trans }}
                 </a>
             {% endif %}                            
         </div>   

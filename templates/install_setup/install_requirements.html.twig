@@ -8,25 +8,25 @@
         <img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
     </div>
     <div class="install">
-        <h3 class="install-title">Install Step 1 : checking Myddleware requirements</h3>
-        <h4 class="install-check">Myddleware requirements checker</h4>
-        <p>Let's check wheter your server meets the requirements to run a Myddleware project.</p>        
+        <h3 class="install-title">{{ 'install.install_step_1' | trans }}</h3>
+        <h4 class="install-check">{{ 'install.requirements_checker' | trans }}</h4>
+        <p>{{ 'install.requirements_info' | trans }}</p>        
         {% if php_version %}
             <p>Php version : </p>
             <strong class="php-version">{{ php_version }}</strong>
         {% else %}
-            <p> WARNING ! Could not find your PHP version</p>
+            <p>{{ 'install.php_version_not_found' | trans }}</p>
         {% endif %}
         <p>{{ system_status }}</p>
-        <p>Optional recommendations to improve your setup</p> 
+        <p>{{ 'install.recommendations_to_do_message' | trans }}</p> 
 
         <div class="note-install">  
             <h4>NOTE</h4>
-            <p>The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory</p>
+            <p>{{ 'install.note_message' | trans }}</p>
             <p>symfony check:requirements</p>
         </div>
 
-         <button class="home_item btn btn-primary"><a href="">Check now</a></button>
-         <button class="home_item btn btn-primary"><a href="{{path('app_database_setup')}}">Next</a></button>
+         <button class="home_item btn btn-primary"><a href=""> {{ 'install.check_button' | trans }}</a></button>
+         <button class="home_item btn btn-primary"><a href="{{path('app_database_setup')}}">{{ 'install.next' | trans }}</a></button>
     </div>    
 {% endblock %}

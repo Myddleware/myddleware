@@ -6,6 +6,7 @@ use App\Repository\ConfigRepository;
 use Symfony\Requirements\SymfonyRequirements;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -21,7 +22,7 @@ class InstallRequirements extends AbstractController
     }
 
     #[Route('/install_requirements', name: 'app_install_requirements')]
-    public function requirements(): Response
+    public function requirements(TranslatorInterface $translator): Response
     {
         try {
             $this->symfonyRequirements = new SymfonyRequirements();
@@ -43,9 +44,9 @@ class InstallRequirements extends AbstractController
             }
             $this->systemStatus = '';
             if (!$checkPassed) {
-                $this->systemStatus = 'Your system is not ready to run Myddleware yet';
+                $this->systemStatus = $translator->trans('install.system_status_not_ready');
             } else {
-                $this->systemStatus = 'Your system is ready to run Myddleware';
+                $this->systemStatus = $translator->trans('install.system_status_ready');
             }
 
             //allow access if no errors

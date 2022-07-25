@@ -8,7 +8,7 @@
         <img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
     </div>
     <div class="install">
-        <h3 class="install-title">Install Step 2 : setting up your Myddleware database</h3>
+        <h3 class="install-title">{{ 'install.install_step_2' | trans }}</h3>
         {{ form_start(form) }}
             {{ form_row(form.host) }}
             {{ form_row(form.port)}}
@@ -20,12 +20,12 @@
          {% if submitted %}
             <div class="d-grid mt-4 mb-4">
                 <a href="{{ path('app_database_connection') }}" class="btn btn-primary btn-lg">
-                    Next
+                    {{ 'install.next' | trans }}
                 </a>
             </div>
         {% else %}
             <div class="d-grid mt-4 mb-4">
-                <button type="button" class="btn btn-light btn-lg" disabled> Next </button>
+                <button type="button" class="btn btn-light btn-lg" disabled> {{ 'install.next' | trans }} </button>
             </div>
         {% endif %} 
         <div>
@@ -33,7 +33,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                 </svg>
-                Go back to requirements check
+                {{ 'install.step_2_go_back' | trans }}
             </a>
         </div>
     </div>    

@@ -823,6 +823,14 @@ password_reset:
 
 install:
     title: Myddleware Installation
+    install_step_1: Install Step 1 - checking Myddleware requirements
+    install_step_2: Install Step 2 - setting up your Myddleware database
+    install_step_3: Install Step 3 - checking Myddleware is connected to the database
+    install_step_4: Install Step 4 - uploading database tables
+    step_2_go_back: Go back to requirements check
+    step_3_check: Database connection check
+    step_3_go_back: Go back to the previous page to reset your database connection
+    step_4_loading: Loading database tables
     database_setup: Setting up your database
     test_button: Connect to database
     requirements_checker: Myddleware Requirements Checker
