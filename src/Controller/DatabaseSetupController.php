@@ -164,6 +164,7 @@ class DatabaseSetupController extends AbstractController
             $env = $kernel->getEnvironment();
             $application = new Application($kernel);
             $application->setAutoExit(false);
+            $config = null;
 
             // we execute Doctrine console commands to test the connection to the database
             $input = new ArrayInput([
@@ -185,14 +186,17 @@ class DatabaseSetupController extends AbstractController
                 $this->connectionFailedMessage = strstr($this->connectionFailedMessage, 'Exception trace', true);
             }
 
-            // will be used by the InstallVoter to determine access to all install routes
-            if (empty($config)) {
+            // get the content of config
+            $allowInstalls = $this->configRepository->findBy(['name' => 'allow_install']);
+
+            // will be used by the InstallVoter to determine access to all install routes       
+            if (empty($config) && empty($allowInstalls)) {
                 $config = new Config();
                 $config->setName('allow_install');
-            }
-            $config->setValue('true');
-            $this->entityManager->persist($config);
-            $this->entityManager->flush();
+                $config->setValue('true');
+                $this->entityManager->persist($config);
+                $this->entityManager->flush();
+            }            
 
             return $this->render('install_setup/database_connection.html.twig', [
                 'connection_success_message' => $this->connectionSuccessMessage,
