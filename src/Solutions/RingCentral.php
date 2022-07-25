@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -90,7 +91,7 @@ class RingCentral extends Solution
         ];
     }
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -107,18 +108,16 @@ class RingCentral extends Solution
                 if (!empty($this->token->access_token)) {
                     $this->isConnectionValid = true;
                 } elseif (!empty($this->token->error)) {
-                    throw new \Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
+                    throw new Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
                 } else {
-                    throw new \Exception('Result from Ring Central : '.print_r($this->token, true));
+                    throw new Exception('Result from Ring Central : '.print_r($this->token, true));
                 }
             } else {
-                throw new \Exception('No response from Ring Central. ');
+                throw new Exception('No response from Ring Central. ');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -131,13 +130,14 @@ class RingCentral extends Solution
                 'message-store' => 'Messages',
                 'presence' => 'Presence',
             ];
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
         }
     }
 
     // Get the fields available for the module in input
-    public function getModuleFields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
         try {
@@ -147,8 +147,8 @@ class RingCentral extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            return null;
         }
     }
 
@@ -177,7 +177,7 @@ class RingCentral extends Solution
                 $extensionIds[] = '~';
             }
             if (empty($extensionIds)) {
-                throw new \Exception('Failed to get the extension ID. Failed to read data from RingCentral. Please make sur the rule parameter Extension ID is correct.');
+                throw new Exception('Failed to get the extension ID. Failed to read data from RingCentral. Please make sur the rule parameter Extension ID is correct.');
             }
             $result['count'] = 0;
             $i = 0;
@@ -205,7 +205,7 @@ class RingCentral extends Solution
                     ++$pageNum;
                     // Error managment
                     if (!empty($records->errorCode)) {
-                        throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
+                        throw new Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
                     }
 
                     // Transform result by adding a dimension for the presence module (only one record for each call)
@@ -273,7 +273,7 @@ class RingCentral extends Solution
                     break;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result = '';
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
@@ -306,7 +306,7 @@ class RingCentral extends Solution
             ];
 
             return $params;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [];
             // return $e->getMessage();
         }
@@ -317,7 +317,7 @@ class RingCentral extends Solution
     {
         try {
             if (empty($dateTime)) {
-                throw new \Exception('Date empty. Failed to send data. ');
+                throw new Exception('Date empty. Failed to send data. ');
             }
             if (date_create_from_format('Y-m-d H:i:s', $dateTime)) {
                 $date = date_create_from_format('Y-m-d H:i:s', $dateTime);
@@ -326,12 +326,12 @@ class RingCentral extends Solution
                 if ($date) {
                     $date->setTime(0, 0, 0);
                 } else {
-                    throw new \Exception('Wrong format for your date. Please check your date format. Contact us for help.');
+                    throw new Exception('Wrong format for your date. Please check your date format. Contact us for help.');
                 }
             }
 
             return $date->format('Y-m-d\TH:i:s.Z\Z');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = $e->getMessage();
 
             return $result;
@@ -383,6 +383,6 @@ class RingCentral extends Solution
 
             return $result ? json_decode($result) : false;
         }
-        throw new \Exception('curl extension is missing!');
+        throw new Exception('curl extension is missing!');
     }
 }

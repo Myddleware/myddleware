@@ -199,7 +199,7 @@ $moduleFields = [
             'course' => 'Course',
             'site' => 'Site',
         ]],
-        'text' => ['label' => 'Text', 'type' =>  'varchar(255)', 'type_bdd' => 'text', 'required' => 0],
+        'text' => ['label' => 'Text', 'type' => 'varchar(255)', 'type_bdd' => 'text', 'required' => 0],
         'format' => ['label' => 'Format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => [
             '0' => 'MOODLE',
             '1' => 'HTML',
@@ -304,7 +304,7 @@ $moduleFields = [
         'exported' => ['label' => 'Exported', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'overridden' => ['label' => 'Overridden', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'excluded' => ['label' => 'Excluded', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'feedback' => ['label' => 'Feedback ', 'type' =>  'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'feedback' => ['label' => 'Feedback ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'feedbackformat' => ['label' => 'Feedback format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'informationformat' => ['label' => 'Information format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'information' => ['label' => 'Information ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

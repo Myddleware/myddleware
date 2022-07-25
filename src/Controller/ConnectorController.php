@@ -19,7 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-
     private mixed $secret;
 
     public function __construct()

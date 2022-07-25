@@ -48,6 +48,4 @@ class MySQL extends Database
     {
         return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
     }
-
-
 }

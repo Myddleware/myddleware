@@ -147,7 +147,8 @@ class WooCommerce extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+
             return null;
         }
     }
@@ -175,8 +176,7 @@ class WooCommerce extends Solution
                     } elseif (!empty($this->subModules[$param['module']])
                         and $this->subModules[$param['module']]['parent_id'] == $key) {
                         // in case of query on sub module, we check if that the search field is the parent id
-                        $query = strval('/' . $value);
-
+                        $query = strval('/'.$value);
                     }
                 }
             }
@@ -204,7 +204,7 @@ class WooCommerce extends Solution
                         'order' => 'asc',
                         'per_page' => $this->callLimit,
                         'page' => $page, ]);
-                    // get all data, sorted by date_modified
+                // get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, ['orderby' => 'modified',
                         'per_page' => $this->callLimit,
@@ -311,7 +311,7 @@ class WooCommerce extends Solution
                 } else {
                     $targetId = $data['target_id'];
                     unset($data['target_id']);
-                    $recordResult = $this->woocommerce->put($module . '/' . $targetId, $data);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
                 }
 
                 $response = $recordResult;
@@ -323,7 +323,7 @@ class WooCommerce extends Solution
                             'error' => false,
                         ];
                     } else {
-                        throw new Exception('Error during ' . print_r($response));
+                        throw new Exception('Error during '.print_r($response));
                     }
                 }
             } catch (Exception $e) {
@@ -358,8 +358,8 @@ class WooCommerce extends Solution
 
     /**
      * @throws Exception
-     * Convert date to Myddleware format
-     * 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06 to 2020-07-08 10:33:06
      */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
@@ -369,7 +369,8 @@ class WooCommerce extends Solution
     }
 
     /**
-     * convert from Myddleware format to Woocommerce format
+     * convert from Myddleware format to Woocommerce format.
+     *
      * @throws Exception
      */
     protected function dateTimeFromMyddleware(string $dateTime): string

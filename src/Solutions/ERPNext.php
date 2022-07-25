@@ -42,11 +42,11 @@ class ERPNext extends Solution
 
     protected $organizationTimezoneOffset;
 
-    protected $limitCall = 100;
+    protected int $limitCall = 100;
 
     protected array $requiredFields = ['default' => ['name', 'creation', 'modified']];
 
-    protected $fieldsDuplicate = ['Contact' => ['last_name'],
+    protected array $fieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
         'Item' => ['item_code'],
     ];
@@ -54,7 +54,7 @@ class ERPNext extends Solution
     // Module list that allows to make parent relationships
     protected array $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
 
-    protected $childModuleKey = [
+    protected array $childModuleKey = [
         'Sales Invoice Item' => 'items',
         'Sales Order Item' => 'items',
         'Payment Entry Reference' => 'references',
@@ -66,7 +66,7 @@ class ERPNext extends Solution
     ];
 
     // Get isTable parameter for each module
-    protected $isTableModule = [];
+    protected array $isTableModule = [];
 
     public function getFieldsLogin(): array
     {
@@ -89,8 +89,7 @@ class ERPNext extends Solution
         ];
     }
 
-    // login to Cirrus Shield
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -110,18 +109,16 @@ class ERPNext extends Solution
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Get the modules available
     public function getModules(string $type = 'source'): array
     {
+        $modules = [];
         try {
             // Get
             $url = $this->connectionParam['url'].'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';
-            $APImodules = $this->call($url, 'GET');
+            $APImodules = $this->call($url);
             if (!empty($APImodules->data)) {
                 foreach ($APImodules->data as $APImodule) {
                     $modules[$APImodule->name] = $APImodule->name;
@@ -129,14 +126,16 @@ class ERPNext extends Solution
                     $this->isTableModule[$APImodule->name] = $APImodule->istable;
                 }
             }
-
-            return $modules;
         } catch (\Exception $e) {
-            return $e->getMessage();
+            $error = $e->getMessage();
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
+
+        return $modules;
     }
 
-    // Get the fields available for the module in input
     public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
@@ -164,7 +163,7 @@ class ERPNext extends Solution
                         ];
                     // Add field to manage dymamic links
                     } elseif (
-                            'Table' == $field->fieldtype
+                        'Table' == $field->fieldtype
                         and 'Dynamic Link' == $field->options
                     ) {
                         $this->moduleFields['link_doctype'] = [
@@ -210,7 +209,7 @@ class ERPNext extends Solution
 
             // If the module is a table and the solution is used in target, we add 3 fields
             if (
-                    'target' == $type
+                'target' == $type
                 and !empty($this->isTableModule[$module])
             ) {
                 // Parenttype => relate module/DocType de la relation (eg for Sales Invoice Item, it will be Sales Invoice)

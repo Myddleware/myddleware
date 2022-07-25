@@ -142,17 +142,16 @@ class DocumentManager
 
     // Instanciation de la classe de génération de log Symfony
     public function __construct(
-        LoggerInterface            $logger,
-        Connection                 $dbalConnection,
-        EntityManagerInterface     $entityManager,
-        SolutionManager            $solutionManager = null,
-        FormulaManager             $formulaManager = null,
-        DocumentRepository         $documentRepository = null,
+        LoggerInterface $logger,
+        Connection $dbalConnection,
+        EntityManagerInterface $entityManager,
+        SolutionManager $solutionManager = null,
+        FormulaManager $formulaManager = null,
+        DocumentRepository $documentRepository = null,
         RuleRelationshipRepository $ruleRelationshipsRepository = null,
-        ParameterBagInterface      $parameterBagInterface = null,
-        ToolsManager               $tools = null
-    )
-    {
+        ParameterBagInterface $parameterBagInterface = null,
+        ToolsManager $tools = null
+    ) {
         $this->connection = $dbalConnection;
         $this->logger = $logger;
         $this->entityManager = $entityManager;
@@ -250,10 +249,10 @@ class DocumentManager
                 $this->data['id'] = $documentEntity->getSource();
                 $this->data['source_date_modified'] = $documentEntity->getSourceDateModified()->format('Y-m-d H:i:s');
             } else {
-                $this->logger->error('Failed to retrieve Document ' . $id_doc . '.');
+                $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
-            $this->message .= 'Failed to retrieve document : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to retrieve document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
@@ -521,6 +520,7 @@ class DocumentManager
                 } else {
                     return true;
                 }
+                // no break
             case 'notcontent':
                 $pos = stripos($fieldValue, $filterValue);
                 if (false === $pos) {
@@ -528,6 +528,7 @@ class DocumentManager
                 } else {
                     return false;
                 }
+                // no break
             case 'begin':
                 $begin = substr($fieldValue, 0, strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -535,6 +536,7 @@ class DocumentManager
                 } else {
                     return false;
                 }
+                // no break
             case 'end':
                 $begin = substr($fieldValue, 0 - strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -542,56 +544,65 @@ class DocumentManager
                 } else {
                     return false;
                 }
+                // no break
             case 'in':
                 if (in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'notin':
                 if (!in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'gt':
                 if ($fieldValue > $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'lt':
                 if ($fieldValue < $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'lteq':
                 if ($fieldValue <= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'gteq':
                 if ($fieldValue >= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'equal':
                 if (strtoupper($fieldValue) == strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'different':
                 if (strtoupper($fieldValue) != strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             default:
-                $this->message .= 'Failed to filter. Operator ' . $operator . ' unknown. ';
+                $this->message .= 'Failed to filter. Operator '.$operator.' unknown. ';
 
                 return false;
         }
@@ -635,7 +646,7 @@ class DocumentManager
 
             // if id found, we stop to send an error
             if (!empty($result['id'])) {
-                throw new \Exception('The document ' . $result['id'] . ' is on the same record and is not closed. This document is queued. ');
+                throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
             }
 
             // Check predecessor in the opposite bidirectional rule
@@ -647,7 +658,7 @@ class DocumentManager
                 $result = $stmt->executeQuery();
                 $result = $result->fetchAssociative();
                 if (!empty($result['id'])) {
-                    throw new \Exception('The document ' . $result['id'] . ' is on the same record on the bidirectional rule ' . $this->ruleParams['bidirectional'] . '. This document is not closed. This document is queued. ');
+                    throw new \Exception('The document '.$result['id'].' is on the same record on the bidirectional rule '.$this->ruleParams['bidirectional'].'. This document is not closed. This document is queued. ');
                 }
             }
 
@@ -699,7 +710,7 @@ class DocumentManager
                     $result = $stmt->executeQuery();
                     $result = $result->fetchAssociative();
                     if (!empty($result['id'])) {
-                        throw new \Exception('The document ' . $result['id'] . ' is on the same record on the rule ' . $childRule['rule_id'] . '. This document is not closed. This document is queued. ');
+                        throw new \Exception('The document '.$result['id'].' is on the same record on the rule '.$childRule['rule_id'].'. This document is not closed. This document is queued. ');
                     }
                 }
             }
@@ -764,7 +775,7 @@ class DocumentManager
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
             $this->docIdRefError = (!empty($result['id']) ? $result['id'] : '');
-            $this->message .= 'Failed to check document predecessor : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
             $this->logger->error($this->message);
@@ -839,7 +850,7 @@ class DocumentManager
                     $result = $stmt->executeQuery();
                     $ruleResult = $result->fetchAssociative();
                     $direction = $this->getRelationshipDirection($ruleRelationship);
-                    throw new \Exception('Failed to retrieve a related document. No data for the field ' . $ruleRelationship['field_name_source'] . '. There is not record with the ID ' . ('1' == $direction ? 'source' : 'target') . ' ' . $this->sourceData[$ruleRelationship['field_name_source']] . ' in the rule ' . $ruleResult['name'] . '. This document is queued. ');
+                    throw new \Exception('Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
                 }
             }
             // Get the parent document to save it in the table Document for the child document
@@ -863,7 +874,7 @@ class DocumentManager
 
             return true;
         } catch (\Exception $e) {
-            $this->message .= 'Failed to check document related : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Relate_KO');
             $this->logger->error($this->message);
@@ -900,7 +911,7 @@ class DocumentManager
                         if ($this->updateTargetId($this->targetId)) {
                             $this->updateType('U');
                         } else {
-                            throw new \Exception('The type of this document is Update. Failed to update the target id ' . $this->targetId . ' on this document. This document is queued. ');
+                            throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
                         }
                     }
                 }
@@ -913,7 +924,7 @@ class DocumentManager
                     $this->checkRecordExist($this->document_data['source_id']);
                     if (!empty($this->targetId)) {
                         if (!$this->updateTargetId($this->targetId)) {
-                            throw new \Exception('The type of this document is Update. Failed to update the target id ' . $this->targetId . ' on this document. This document is queued. ');
+                            throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
                         }
                     } else {
                         throw new \Exception('The type of this document is Update. The id of the target is missing. This document is queued. ');
@@ -926,7 +937,7 @@ class DocumentManager
 
             return true;
         } catch (\Exception $e) {
-            $this->message .= 'Failed to transform document : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Error_transformed');
             $this->logger->error($this->message);
@@ -979,7 +990,7 @@ class DocumentManager
                 if (-1 !== $history) {
                     $this->updateStatus('Ready_to_send');
                 } else {
-                    throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : ' . $this->targetId . '. Check this record is not deleted.');
+                    throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : '.$this->targetId.'. Check this record is not deleted.');
                 }
             } // Else if create or search document, if we have duplicate_fields, we search the data in target application
             elseif (!empty($this->ruleParams['duplicate_fields'])) {
@@ -1014,7 +1025,7 @@ class DocumentManager
                     if (!empty($searchFields)) {
                         $this->message .= 'Found ';
                         foreach ($searchFields as $key => $value) {
-                            $this->message .= $key . ' = ' . $value . ' ; ';
+                            $this->message .= $key.' = '.$value.' ; ';
                         }
                     }
                     // If search document we close it.
@@ -1041,7 +1052,7 @@ class DocumentManager
                 $this->checkNoChange($history);
             }
         } catch (\Exception $e) {
-            $this->message .= $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             if ('S' == $this->documentType) {
                 $this->updateStatus('Not_found');
@@ -1109,7 +1120,7 @@ class DocumentManager
                         // If a child is in error, we stop the whole processus : child document not saved (roolback) and parent document in error checking
                         if (!empty($errors)) {
                             // The error should be clear because the child document won't be saved
-                            throw new \Exception('Child document in error (rule ' . $childRuleId['field_id'] . ')  : ' . $errors[0] . ' The child document has not be saved. Check the log (app/logs/' . $this->parameterBagInterface->get('kernel.environment') . '.log) for more information. ');
+                            throw new \Exception('Child document in error (rule '.$childRuleId['field_id'].')  : '.$errors[0].' The child document has not be saved. Check the log (app/logs/'.$this->parameterBagInterface->get('kernel.environment').'.log) for more information. ');
                         }
                     }
                 }
@@ -1240,7 +1251,7 @@ class DocumentManager
                 return json_decode($documentDataEntity->getData(), true);
             }
         } catch (\Exception $e) {
-            $this->message .= 'Error getSourceData  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
@@ -1316,7 +1327,7 @@ class DocumentManager
             $documentData->setData($dataInsert); // Encode in JSON
             $this->entityManager->persist($documentData);
         } catch (\Exception $e) {
-            $this->message .= 'Failed : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
 
@@ -1337,7 +1348,7 @@ class DocumentManager
 
                 return true;
             } catch (Exception $e) {
-                $this->message .= 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->typeError = 'E';
                 $this->logger->error($this->message);
             }
@@ -1355,7 +1366,7 @@ class DocumentManager
                 foreach ($this->ruleFields as $ruleField) {
                     $value = $this->getTransformValue($this->sourceData, $ruleField);
                     if (!empty($this->transformError)) {
-                        throw new \Exception('Failed to transform the field ' . $ruleField['target_field_name'] . '.');
+                        throw new \Exception('Failed to transform the field '.$ruleField['target_field_name'].'.');
                     }
                     $targetField[$ruleField['target_field_name']] = $value;
                 }
@@ -1381,7 +1392,7 @@ class DocumentManager
 
             return true;
         } catch (Exception $e) {
-            $this->message .= 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
@@ -1429,7 +1440,7 @@ class DocumentManager
                                 $$fieldNameDyn = (!empty($source[$listFields]) ? $source[$listFields] : ''); // Dynamic variable (e.g $name = name)
                             } else {
                                 // Erreur
-                                throw new \Exception('The field ' . $listFields . ' is unknow in the formula ' . $ruleField['formula'] . '. ');
+                                throw new \Exception('The field '.$listFields.' is unknow in the formula '.$ruleField['formula'].'. ');
                             }
                         }
                     }
@@ -1451,20 +1462,20 @@ class DocumentManager
                     try {
                         // Trigger to redefine formula
                         $formula = $this->changeFormula($formula);
-                        eval($f . ';'); // exec
+                        eval($f.';'); // exec
                     } catch (\ParseError $e) {
-                        throw new \Exception('FATAL error because of Invalid formula "' . $ruleField['formula'] . ';" : ' . $e->getMessage());
+                        throw new \Exception('FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());
                     }
                     // Execute eval only if formula is valid
-                    eval('$rFormula = ' . $f . ';'); // exec
+                    eval('$rFormula = '.$f.';'); // exec
                     if (isset($rFormula)) {
                         // affectation du résultat
                         return $rFormula;
                     } else {
-                        throw new \Exception('Invalid formula (failed to retrieve formula) : ' . $ruleField['formula']);
+                        throw new \Exception('Invalid formula (failed to retrieve formula) : '.$ruleField['formula']);
                     }
                 } else {
-                    throw new \Exception('Invalid formula (failed to execute) : ' . $ruleField['formula']);
+                    throw new \Exception('Invalid formula (failed to execute) : '.$ruleField['formula']);
                 }
                 // -- -- -- Gestion des formules
             } // S'il s'agit d'un champ relation
@@ -1484,7 +1495,7 @@ class DocumentManager
                 if (!empty($targetId['record_id'])) {
                     return $targetId['record_id'];
                 } else {
-                    throw new \Exception('Target id not found for id source ' . $source[$ruleField['field_name_source']] . ' of the rule ' . $ruleField['field_id']);
+                    throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
                 }
             } // Si le champ est envoyé sans transformation
             elseif (isset($source[$ruleField['source_field_name']])) {
@@ -1497,11 +1508,11 @@ class DocumentManager
             } elseif (null === $source[$ruleField['source_field_name']]) {
                 return null;
             } else {
-                throw new \Exception('Field ' . $ruleField['source_field_name'] . ' not found in source data.------' . print_r($ruleField, true));
+                throw new \Exception('Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField, true));
             }
         } catch (\Exception $e) {
             $this->typeError = 'E';
-            $this->message .= 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
             // Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
             $this->transformError = true;
@@ -1540,7 +1551,7 @@ class DocumentManager
             }
         } catch (\Exception $e) {
             $this->typeError = 'E';
-            $this->message .= 'Error getRule  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error getRule  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
     }
@@ -1584,7 +1595,7 @@ class DocumentManager
             return $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->typeError = 'E';
-            $this->message .= 'Error getTargetFields  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
     }
@@ -1667,7 +1678,7 @@ class DocumentManager
             return null;
         } catch (\Exception $e) {
             $this->typeError = 'E';
-            $this->message .= 'Error getTargetFields  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
     }
@@ -1689,7 +1700,7 @@ class DocumentManager
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -1800,7 +1811,7 @@ class DocumentManager
                                 return 'U';
                             }
                         } else {
-                            throw new \Exception('The field ' . $ruleRelationship['field_name_source'] . ' used in the relationship is empty. Failed to create the document.');
+                            throw new \Exception('The field '.$ruleRelationship['field_name_source'].' used in the relationship is empty. Failed to create the document.');
                         }
                     }
                 }
@@ -1886,7 +1897,7 @@ class DocumentManager
             return 'C';
         } catch (\Exception $e) {
             $this->typeError = 'E';
-            $this->message .= 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
 
             return null;
@@ -1951,7 +1962,7 @@ class DocumentManager
 									id = :id
 								';
             if (!$this->api) {
-                echo 'status ' . $new_status . ' id = ' . $this->id . '  ' . $now . chr(10);
+                echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
             // Suppression de la dernière virgule
             $stmt = $this->connection->prepare($query);
@@ -1961,7 +1972,7 @@ class DocumentManager
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            $this->message .= 'Status : ' . $new_status;
+            $this->message .= 'Status : '.$new_status;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
@@ -1991,19 +2002,19 @@ class DocumentManager
 									id = :id
 								';
             if (!$this->api) {
-                echo (!empty($deleted) ? 'Remove' : 'Restore') . ' document id = ' . $this->id . '  ' . $now . chr(10);
+                echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);
             }
             $stmt = $this->connection->prepare($query);
             $stmt->bindValue(':now', $now);
             $stmt->bindValue(':deleted', $deleted);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            $this->message .= (!empty($deleted) ? 'Remove' : 'Restore') . ' document';
+            $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Failed to ' . (!empty($deleted) ? 'Remove ' : 'Restore ') . ' : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
@@ -2019,11 +2030,11 @@ class DocumentManager
             $documentRelationship->setDocument($this->id);
             $documentRelationship->setDocRelId($docRelId);
             $documentRelationship->setCreatedAt(new \DateTimeImmutable());
-            $documentRelationship->setCreatedBy((int)$this->userId);
+            $documentRelationship->setCreatedBy((int) $this->userId);
             $documentRelationship->setSourceField($ruleRelationship['field_name_source']);
             $this->entityManager->persist($documentRelationship);
         } catch (\Exception $e) {
-            $this->message .= 'Failed to save the document relationship for the field ' . $ruleRelationship['field_name_source'] . ' : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Failed to save the document relationship for the field '.$ruleRelationship['field_name_source'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'W';
             $this->logger->error($this->message);
 
@@ -2065,12 +2076,12 @@ class DocumentManager
             $stmt->bindValue(':new_type', $new_type);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            $this->message .= 'Type  : ' . $new_type;
+            $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Error type   : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
@@ -2101,14 +2112,14 @@ class DocumentManager
             $stmt->bindValue(':target_id', utf8_encode($target_id));
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            $this->message .= 'Target id : ' . $target_id;
+            $this->message .= 'Target id : '.$target_id;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
 
             return true;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Error target id  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
@@ -2189,7 +2200,7 @@ class DocumentManager
 								ORDER BY date_created DESC
 								LIMIT 1";
             } else {
-                throw new \Exception('Failed to find the direction of the relationship with the rule_id ' . $ruleRelationship['field_id'] . '. ');
+                throw new \Exception('Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ');
             }
 
             // A mass process exist for migration mode
@@ -2244,7 +2255,7 @@ class DocumentManager
 
             return null;
         } catch (\Exception $e) {
-            $this->message .= 'Error getTargetId  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
@@ -2276,7 +2287,7 @@ class DocumentManager
 									AND document.deleted = 0 
 								LIMIT 1';
             } else {
-                throw new \Exception('Failed to find the direction of the relationship with the rule_id ' . $ruleRelationship['field_id'] . '. ');
+                throw new \Exception('Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ');
             }
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':ruleRelateId', $ruleRelationship['field_id']);
@@ -2288,7 +2299,7 @@ class DocumentManager
                 return $result;
             }
         } catch (\Exception $e) {
-            $this->message .= 'Error searchRelateDocumentByStatus  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
 
@@ -2315,10 +2326,10 @@ class DocumentManager
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
-            $query_header = "INSERT INTO 
+            $query_header = 'INSERT INTO 
                 log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) 
                 VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)
-                ";
+                ';
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $this->typeError);
@@ -2332,7 +2343,7 @@ class DocumentManager
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->logger->error('Failed to create log : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 }

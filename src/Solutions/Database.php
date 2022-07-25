@@ -432,10 +432,11 @@ class Database extends Solution
         $values .= ')'; // VALUES (value1,value2,value3,...)
         $sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
         // Query validation
+        // TODO: If I'm not mistaken, surely $record isn't attainable here? Should we place all this code inside the foreach statement?
         $sql = $this->queryValidation($param, 'create', $sql, $record);
 
-        $q = $this->pdo->prepare($sql);
-        $exec = $q->execute();
+        $query = $this->pdo->prepare($sql);
+        $exec = $query->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
             throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
@@ -623,7 +624,7 @@ class Database extends Solution
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    protected function getModuleFieldsRelate($module, $param)
+    protected function getModuleFieldsRelate($module, array $param): void
     {
         if (!empty($param)) {
             // Get the rule list with the same connectors (both directions) to get the relate ones

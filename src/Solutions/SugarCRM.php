@@ -477,12 +477,12 @@ class SugarCRM extends Solution
                         ],
                     ];
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel];
-                    // Create record
+                // Create record
                 } elseif ('create' == $method) {
                     // Myddleware field empty when data transfer type is create
                     unset($data['target_id']);
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'], 'method' => 'POST', 'data' => $data];
-                    // Update record
+                // Update record
                 } elseif ('delete' == $method) {
                     // The record id is stored in $data['target_id']
                     $targetId = $data['target_id'];
@@ -557,8 +557,8 @@ class SugarCRM extends Solution
 
     /**
      * @throws Exception
-     * Convert date to Myddleware format
-     * 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
      */
     protected function dateTimeToMyddleware(string $dateTime): string
     {

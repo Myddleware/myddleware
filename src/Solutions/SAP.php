@@ -117,8 +117,8 @@ class SAP extends SAPRoot
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas.
-     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+     *                                  Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas.
+     *                                  Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
      */
     public function getRuleCustomRelationship($module, $type, array $parameters = []): ?array
     {
@@ -152,7 +152,7 @@ class SAP extends SAPRoot
             $params = [];
             if ('source' == $type) {
                 // Ajout du paramètre de l'exercice comptable obligatoire pour FI
-                if ($module == 'ET_BKPF') {
+                if ('ET_BKPF' == $module) {
                     $gjahrParam = [
                         'id' => 'GJAHR',
                         'name' => 'GJAHR',
@@ -169,7 +169,7 @@ class SAP extends SAPRoot
                 }
 
                 // Ajout du paramètre correspondant à la société
-                if ($module == 'ET_BKPF') {
+                if ('ET_BKPF' == $module) {
                     $bukrsParam = [
                         'id' => 'BUKRS',
                         'name' => 'BUKRS',
@@ -216,6 +216,7 @@ class SAP extends SAPRoot
 
             return $this->readFiDocument($param, $parameters, false);
         } // Pas de lecture pour les autres modules FI, tout est lu via le module ET_BKPF et ses règles liées
+
         return null;
     }
 
@@ -325,7 +326,7 @@ class SAP extends SAPRoot
                                             if ('Kunnr' == $key) {
                                                 $value = ltrim($value, '0');
                                             }
-                                            $data['values'][$rule['module_source'] . '__' . strtoupper($key)] = $value;
+                                            $data['values'][$rule['module_source'].'__'.strtoupper($key)] = $value;
                                         }
                                         // Ajout des champs obligatoire date_modufied en id
                                         $data['values']['date_modified'] = $record['date_modified'];
@@ -365,8 +366,9 @@ class SAP extends SAPRoot
                 throw new Exception('SOAP FAULT. Read order failed.');
             }
         } catch (Exception $e) {
-            $error = 'Failed to read FI document from sapcrm : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ' . $e->getLine() . '. ';
+            $error = 'Failed to read FI document from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
             $this->logger->error($error);
+
             return ['error' => $error];
         }
     }
@@ -398,7 +400,7 @@ class SAP extends SAPRoot
             return $id;
         }
 
-        throw new Exception('Failed to generate id for the module ' . $module . '. No table for id.');
+        throw new Exception('Failed to generate id for the module '.$module.'. No table for id.');
     }
 
     public function getRuleMode($module, $type): array
