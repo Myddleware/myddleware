@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use App\Form\ConnectorParamFormType;
+use App\Form\DataTransformer\ConnectorParamsValueTransformer;
+use App\Repository\ConnectorParamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -19,6 +21,17 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class ConnectorCrudController extends AbstractCrudController
 {
+    // private RequestStack $requestStack;
+    // private ConnectorParamRepository $connectorParamRepository;
+    // private ConnectorParamsValueTransformer $connectorParamsValueTransformer;
+    //
+    // public function __construct(RequestStack $requestStack, EntityManagerInterface $entityManager, ConnectorParamsValueTransformer $connectorParamsValueTransformer)
+    // {
+    //     $this->requestStack = $requestStack;
+    //     $this->entityManager = $entityManager;
+    //     $this->connectorParamsValueTransformer = $connectorParamsValueTransformer;
+    // }
+
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
@@ -46,6 +59,7 @@ class ConnectorCrudController extends AbstractCrudController
         if (!$entityInstance instanceof Connector) {
             return;
         }
+
         $user = $this->getUser();
         $entityInstance->setModifiedBy($user);
         parent::updateEntity($entityManager, $entityInstance);
@@ -65,6 +79,7 @@ class ConnectorCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         $credentialsFormController = $this->generateUrl('credentials_form');
+        $credentialsFormEditController = $this->generateUrl('credentials_form_edit');
 
         return [
             IdField::new('id')->onlyOnDetail(),
@@ -74,7 +89,7 @@ class ConnectorCrudController extends AbstractCrudController
                 ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
-                        'data-solution-info-url-value' => $credentialsFormController,
+                        'data-solution-info-url-value' => $pageName === 'edit' ? $credentialsFormEditController : $credentialsFormController,
                     ],
                     'attr' => [
                         'data-action' => 'change->solution#onSelect',
