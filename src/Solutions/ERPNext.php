@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace App\Solutions;
 
 use DateTime;
+use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -102,11 +103,11 @@ class ERPNext extends Solution
             $result = $this->call($url, 'GET', $parameters);
 
             if (empty($result->message)) {
-                throw new \Exception('login error');
+                throw new Exception('login error');
             }
             // Connection validation
             $this->isConnectionValid = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
         }
@@ -126,7 +127,7 @@ class ERPNext extends Solution
                     $this->isTableModule[$APImodule->name] = $APImodule->istable;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
 
@@ -204,7 +205,7 @@ class ERPNext extends Solution
                     }
                 }
             } else {
-                throw new \Exception('No data in the module '.$module.'. Failed to get the field list.');
+                throw new Exception('No data in the module '.$module.'. Failed to get the field list.');
             }
 
             // If the module is a table and the solution is used in target, we add 3 fields
@@ -241,18 +242,13 @@ class ERPNext extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return false;
         }
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
     public function read(array $param): ?array
     {
         try {
@@ -302,7 +298,7 @@ class ERPNext extends Solution
                     $result[] = $record; // last record
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }
 
@@ -314,23 +310,12 @@ class ERPNext extends Solution
         return $this->createUpdate('create', $param);
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         return $this->createUpdate('update', $param);
     }
 
-    /**
-     * @param $method
-     * @param $param
-     *
-     * @return array
-     */
-    public function createUpdate($method, $param)
+    public function createUpdate($method, $param): array
     {
         try {
             $result = [];
@@ -361,7 +346,7 @@ class ERPNext extends Solution
                         // If the data is a submodule (eg : invoice lines)
                         } elseif (is_array($value)) {
                             if (empty($this->childModuleKey[$key])) {
-                                throw new \Exception('The childModuleKey is missing for the module '.$key);
+                                throw new Exception('The childModuleKey is missing for the module '.$key);
                             }
                             foreach ($value as $subIdDoc => $subData) {
                                 // Save the subIdoc to change the sub data transfer status
@@ -389,11 +374,11 @@ class ERPNext extends Solution
                         // utf8_decode because the id could be a name with special characters
                         $result[$idDoc] = ['id' => utf8_decode($resultQuery->data->name), 'error' => ''];
                     } elseif (!empty($resultQuery)) {
-                        throw new \Exception($resultQuery);
+                        throw new Exception($resultQuery);
                     } else {
-                        throw new \Exception('No result from ERPNext. ');
+                        throw new Exception('No result from ERPNext. ');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => $e->getMessage(),
@@ -411,7 +396,7 @@ class ERPNext extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['error'] = $error;
         }
@@ -419,8 +404,10 @@ class ERPNext extends Solution
         return $result;
     }
 
-    // return the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * @throws Exception
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
@@ -429,10 +416,10 @@ class ERPNext extends Solution
         } elseif ('C' == $ruleMode) {
             return 'creation';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
@@ -474,19 +461,19 @@ class ERPNext extends Solution
      *
      * @return mixed|void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function call($url, $method = 'GET', $parameters = [], $timeout = 300)
     {
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
-            throw new \Exception('curl extension is missing!');
+            throw new Exception('curl extension is missing!');
         }
         $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/solutions/erpnext/erpnext.txt';
         $fs = new Filesystem();
         try {
             $fs->mkdir(dirname($fileTmp));
         } catch (IOException $e) {
-            throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
+            throw new Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
         }
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, true);
