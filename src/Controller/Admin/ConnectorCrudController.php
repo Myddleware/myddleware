@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Connector;
+use App\Entity\ConnectorParam;
 use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -14,13 +15,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ConnectorCrudController extends AbstractCrudController
 {
-    public function __construct()
-    {
-    }
-
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
@@ -82,11 +80,9 @@ class ConnectorCrudController extends AbstractCrudController
                         'data-action' => 'change->solution#onSelect',
                         'data-solution-target' => 'credential',
                     ],
-                ])->setHelp('login fields: '),
-            // CollectionField::new('connectorParams', 'Credentials')
-            //     ->setEntryIsComplex(true)
-            //     ->setEntryType(ConnectorParamFormType::class)
-            //     ->setTemplatePath('admin/credentials.html.twig'),
+                ])->setHelp('login fields: ')
+                ->setFormTypeOption('disabled','edit' === $pageName ? 'disabled' : '')
+            ,
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),

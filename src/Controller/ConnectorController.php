@@ -27,38 +27,15 @@ class ConnectorController extends AbstractController
         assert(null !== $solution);
         $loginFields = $solutionManager->get($solution->getName())->getFieldsLogin();
 
-        $connector = new Connector();
-        $connector->setSolution($solution);
-        $form = $this->createForm(ConnectorType::class, $connector, [
-            'method' => 'PUT',
-            'action' => $this->generateUrl('app_create_connector'),
-            'attr' => [
-                'loginFields' => $loginFields,
-                'secret' => $this->getParameter('secret'),
-            ],
-        ]);
-
+        $form = $this->createFormBuilder([]);
         foreach ($loginFields as $loginField) {
-            $connectorParam = new ConnectorParam();
-            $connectorParam->setName($loginField['name']);
-            //    $connectorParamForm = $this->createForm(ConnectorParamFormType::class, $connectorParam);
-            $form->add('connectorParams', ConnectorParamFormType::class, [
-                'attr' => [
-                    'loginFields' => $loginFields,
-                    'secret' => $this->getParameter('secret'),
-                ],
-            ]);
+            $form->add($loginField['name'], $loginField['type']);
         }
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $connectorRepository->add($connector);
-        }
+        $form = $form->getForm();
 
         return $this->renderForm('connector/index.html.twig', [
-            'solution' => $solution,
-            'loginFields' => $loginFields,
-            'form' => $form,
+            'form' => $form
         ]);
     }
 
