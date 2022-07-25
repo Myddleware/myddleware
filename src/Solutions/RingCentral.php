@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use DateTime;
 use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -52,6 +53,8 @@ class RingCentral extends Solution
     protected $callLimit = 100;
 
     protected $readLimit = 1000;
+
+    protected array $moduleFields;
 
     protected array $requiredFields = [
         'default' => ['id'],
@@ -148,11 +151,12 @@ class RingCentral extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage().''.$e->getFile().);
             return null;
         }
     }
 
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             // Init the result date ref even if the date_ref isn't updated here. Indeed, the date ref is requiered in output of this function.
@@ -162,7 +166,7 @@ class RingCentral extends Solution
             if ('ALL' == strtoupper($param['ruleParams']['extensionId'])) {
                 $pageNum = 1;
                 do {
-                    $extensions = $this->makeRequest($this->server, $this->token->access_token, '/restapi'.self::API_VERSION.'/account/~/extension?perPage='.$this->callLimit.'&page='.$pageNum);
+                    $extensions = $this->makeRequest($this->server, $this->token->access_token, '/restapi' . self::API_VERSION . '/account/~/extension?perPage=' . $this->callLimit . '&page=' . $pageNum);
                     if (!empty($extensions)) {
                         foreach ($extensions->records as $extension) {
                             $extensionIds[] = $extension->id;
@@ -170,7 +174,7 @@ class RingCentral extends Solution
                     }
                     ++$pageNum;
                 } while (count($extensions->records) == $this->callLimit);
-            // /restapi/v1.0/account/{accountId}/extension
+                // /restapi/v1.0/account/{accountId}/extension
             } elseif (!empty($param['ruleParams']['extensionId'])) {
                 $extensionIds = explode(';', $param['ruleParams']['extensionId']);
             } else {
@@ -232,14 +236,14 @@ class RingCentral extends Solution
                                     $subEntryName = $fieldStructure[1];
 
                                     // If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
-                                    $record->$field = (isset($record->$entryName->$subEntryName) ? $record->$entryName->$subEntryName : '');
+                                    $record->$field = ($record->$entryName->$subEntryName ?? '');
                                 }
                                 if (isset($record->$field)) {
                                     if ($field == $dateRefField) {
                                         $dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
                                         // Add one second to the date modified (and so reference date) to not read the last record 2 times
                                         // Read function for Ring central allows only ">=" not ">"
-                                        $date = new \DateTime($dateMyddlewareFormat);
+                                        $date = new DateTime($dateMyddlewareFormat);
                                         $date = date_modify($date, '+1 seconde');
                                         $row['date_modified'] = $date->format('Y-m-d H:i:s');
                                     }
@@ -250,7 +254,7 @@ class RingCentral extends Solution
                             }
                             // date ref management
                             if (
-                                    !empty($row['date_modified'])
+                                !empty($row['date_modified'])
                                 && $dateRefExt[$extensionId] <= $row['date_modified']
                             ) {
                                 $dateRefExt[$extensionId] = $row['date_modified'];
@@ -274,15 +278,13 @@ class RingCentral extends Solution
                 }
             }
         } catch (Exception $e) {
-            $result = '';
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         if ('call-log' == $moduleSource) {
             return 'startTime';
@@ -291,6 +293,7 @@ class RingCentral extends Solution
         } elseif ('presence' == $moduleSource) {
             return 'date_modified';
         }
+        return '';
     }
 
     // Add the filed extensionId on the rule
@@ -312,7 +315,11 @@ class RingCentral extends Solution
         }
     }
 
-    // Function de conversion de datetime format Myddleware à un datetime format solution
+    /**
+     * @param string $dateTime
+     * @return string
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         try {
@@ -332,21 +339,23 @@ class RingCentral extends Solution
 
             return $date->format('Y-m-d\TH:i:s.Z\Z');
         } catch (Exception $e) {
-            $result['error'] = $e->getMessage();
-
-            return $result;
+            return $e->getMessage();
         }
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+    /**
+     * @throws Exception
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
-        $date = new \DateTime($dateTime);
+        $date = new DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
 
-    // HTTP Request function
+    /**
+     * @throws Exception
+     */
     public function makeRequest($server, $token, $path, $args = null, $method = 'GET', $data = null)
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
@@ -373,9 +382,7 @@ class RingCentral extends Solution
             }
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                $authHeader, ]
-            );
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [$authHeader]);
             // Execute request
             $result = curl_exec($ch);
             // Close Connection
