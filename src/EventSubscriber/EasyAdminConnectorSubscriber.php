@@ -87,7 +87,16 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
                     'name' => $paramKey,
                     'connector' => $entity
                 ]);
-                $connectorParam->setValue($paramValue);
+
+                if ($connectorParam) {
+                    $connectorParam->setValue($paramValue);
+                } else {
+                    $connectorParam = new ConnectorParam();
+                    $connectorParam->setConnector($entity);
+                    $connectorParam->setName($paramKey);
+                    $connectorParam->setValue($paramValue);
+                }
+
                 $connectorParam = $this->connectorParamsValueTransformer->reverseTransform($connectorParam);
                 $this->entityManager->persist($connectorParam);
             }

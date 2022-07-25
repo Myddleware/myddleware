@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
 use App\Manager\SolutionManager;
+use App\Repository\ConnectorParamRepository;
 use App\Repository\ConnectorRepository;
 use App\Repository\SolutionRepository;
 use Exception;
@@ -40,18 +41,26 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/credentials/get-form-edit/{connectorId}', name: 'credentials_form_edit', methods: ['GET', 'POST', 'PUT'])]
-    public function getCredentialsEditForm(ConnectorRepository $connectorRepository, ConnectorParamsValueTransformer $connectorParamsValueTransformer, SolutionManager $solutionManager, ?string $connectorId = null): Response
+    public function getCredentialsEditForm(ConnectorRepository $connectorRepository, ConnectorParamRepository $connectorParamRepository, ConnectorParamsValueTransformer $connectorParamsValueTransformer, SolutionManager $solutionManager, ?string $connectorId = null): Response
     {
         $connector = $connectorRepository->find($connectorId);
         $loginFields = $solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
 
         $form = $this->createFormBuilder([]);
-        /** @var ConnectorParam $param */
-        foreach ($connector->getConnectorParams() as $param) {
-            $transformParam = $connectorParamsValueTransformer->transform($param);
-            $form->add($param->getName(), TextType::class, [
-                'data' => $transformParam->getValue()
+        foreach ($loginFields as $loginField) {
+            $connectorParam = $connectorParamRepository->findOneBy([
+                'name' => $loginField['name'],
+                'connector' => $connector
             ]);
+
+            if ($connectorParam) {
+                $transformParam = $connectorParamsValueTransformer->transform($connectorParam);
+                $form->add($connectorParam->getName(), TextType::class, [
+                    'data' => $transformParam->getValue()
+                ]);
+            } else {
+                $form->add($loginField['name'], $loginField['type']);
+            }
         }
 
         $form = $form->getForm();
