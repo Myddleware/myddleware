@@ -30,32 +30,32 @@ namespace App\Solutions;
 
 class OracleDatabase extends Database
 {
-    protected $driver = 'oci';
+    protected string $driver = 'oci';
 
-    protected $fieldName = 'Name';
+    protected string $fieldName = 'Name';
 
-    protected $fieldLabel = 'Name';
+    protected string $fieldLabel = 'Name';
 
-    protected $fieldType = 'Type';
+    protected string $fieldType = 'Type';
 
     protected string $stringSeparatorOpen = '';
 
     protected string $stringSeparatorClose = '';
 
-    protected function generatePdo()
+    protected function generatePdo(): \PDO
     {
         return new \PDO($this->driver.':dbname=//'.$this->connectionParam['host'].':'.$this->connectionParam['port'].'/'.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
     // Generate query
-    protected function getQueryShowTables()
+    protected function getQueryShowTables(): string
     {
         return "SELECT * FROM (SELECT CONCAT(CONCAT(owner, '.'), table_name) AS \"TableName\", owner FROM all_tables UNION SELECT CONCAT(CONCAT(owner, '.'), view_name) AS \"ViewName\", owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
         // return "SELECT * FROM (SELECT table_name, owner FROM all_tables UNION SELECT view_name, owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
     }
 
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         $table = substr($table, (strpos($table, '.') ?: -1) + 1);
 
@@ -63,7 +63,7 @@ class OracleDatabase extends Database
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         $result = [];
         try {
@@ -128,14 +128,14 @@ class OracleDatabase extends Database
             $requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
             // Appel de la requête
-            $q = $this->pdo->prepare($requestSQL);
-            $exec = $q->execute();
+            $query = $this->pdo->prepare($requestSQL);
+            $exec = $query->execute();
 
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
                 throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
-            $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+            $fetchAll = $query->fetchAll(\PDO::FETCH_ASSOC);
 
             $row = [];
             if (!empty($fetchAll)) {
@@ -147,14 +147,14 @@ class OracleDatabase extends Database
                             $row['id'] = $value;
                         }
                         if ($key === $param['ruleParams']['fieldDateRef']) {
-                            $strtime = strtotime($value);
+                            $strTime = strtotime($value);
                             // If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
-                            if ((bool) $strtime) {
-                                $row['date_modified'] = date('Y-m-d H:i:s', $strtime);
+                            if ((bool) $strTime) {
+                                $row['date_modified'] = date('Y-m-d H:i:s', $strTime);
                             } else {
                                 $row['date_modified'] = date('Y-m-d H:i:s');
                             }
-                            $result['date_ref'] = date('Y-m-d H:i:s', $strtime);
+                            $result['date_ref'] = date('Y-m-d H:i:s', $strTime);
                         }
                         if (in_array($key, $param['fields'])) {
                             $row[$key] = $value;
@@ -171,7 +171,7 @@ class OracleDatabase extends Database
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
+    protected function get_query_select_limit_offset($param, $method): string
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;

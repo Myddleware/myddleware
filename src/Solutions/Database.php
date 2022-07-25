@@ -601,7 +601,7 @@ class Database extends Solution
     }
 
     // Function to check, modify or validate the query
-    protected function queryValidation($param, $functionName, $requestSQL, $record)
+    protected function queryValidation($param, $functionName, $requestSQL, array $record = [])
     {
         return $requestSQL;
     }

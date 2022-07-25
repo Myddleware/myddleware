@@ -48,22 +48,22 @@ class PrestaShop extends Solution
         'order_payments' => ['id', 'date_add', 'order_reference'],
     ];
 
-    protected $notWrittableFields = ['products' => ['manufacturer_name', 'quantity']];
+    protected array $notWrittableFields = ['products' => ['manufacturer_name', 'quantity']];
 
     // Module dépendants du langage
-    protected $moduleWithLanguage = ['products', 'categories'];
+    protected array $moduleWithLanguage = ['products', 'categories'];
 
     // Module without reference date
-    protected $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables'];
+    protected array $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables'];
 
-    protected $required_relationships = [
+    protected array $required_relationships = [
         'default' => [],
     ];
 
-    protected $fieldsIdNotRelate = ['id_gender', 'id_supply_order_state'];
+    protected array $fieldsIdNotRelate = ['id_gender', 'id_supply_order_state'];
 
     // List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
-    protected $module_relationship_many_to_many = [
+    protected array $module_relationship_many_to_many = [
         'groups_customers' => ['label' => 'Association groups - customers', 'fields' => [], 'relationships' => ['customer_id', 'groups_id'], 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'],
         'carts_products' => ['label' => 'Association carts - products', 'fields' => ['quantity' => 'Quantity', 'id_product_attribute' => 'id_product_attribute', 'id_address_delivery' => 'id_address_delivery'], 'relationships' => ['cart_id', 'id_product'], 'searchModule' => 'carts', 'subModule' => 'cart_rows', 'subData' => 'cart_row', 'subDataId' => 'id_product'],
         'products_options_values' => ['label' => 'Association products options - values', 'fields' => [], 'relationships' => ['product_option_id', 'product_option_values_id'], 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'],
@@ -84,13 +84,13 @@ class PrestaShop extends Solution
 
     protected array $excludedFields = [];
 
-    protected $fieldsDuplicate = [
+    protected array $fieldsDuplicate = [
         'customers' => ['email'],
         'products' => ['ean13', 'name', 'reference'],
         'stock_availables' => ['id_product'],
     ];
 
-    protected $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
+    protected array $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
 
     // Connexion à Salesforce - Instancie la classe salesforce et affecte accessToken et instanceUrl
     public function login($connectionParam)
