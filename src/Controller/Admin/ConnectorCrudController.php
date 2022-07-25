@@ -3,17 +3,12 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Connector;
-use App\Entity\ConnectorParam;
-use App\Form\ConnectorParamFormType;
-use App\Form\DataTransformer\ConnectorParamsValueTransformer;
-use App\Repository\ConnectorParamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -21,17 +16,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class ConnectorCrudController extends AbstractCrudController
 {
-    // private RequestStack $requestStack;
-    // private ConnectorParamRepository $connectorParamRepository;
-    // private ConnectorParamsValueTransformer $connectorParamsValueTransformer;
-    //
-    // public function __construct(RequestStack $requestStack, EntityManagerInterface $entityManager, ConnectorParamsValueTransformer $connectorParamsValueTransformer)
-    // {
-    //     $this->requestStack = $requestStack;
-    //     $this->entityManager = $entityManager;
-    //     $this->connectorParamsValueTransformer = $connectorParamsValueTransformer;
-    // }
-
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
@@ -82,7 +66,7 @@ class ConnectorCrudController extends AbstractCrudController
         $credentialsFormEditController = $this->generateUrl('credentials_form_edit');
 
         return [
-            IdField::new('id')->onlyOnDetail(),
+            IdField::new('id')->hideOnForm(),
             TextField::new('name'),
             AssociationField::new('solution')
                 ->addCssClass('solution')
@@ -101,9 +85,9 @@ class ConnectorCrudController extends AbstractCrudController
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),
-            AssociationField::new('modifiedBy')->hideOnForm(),
+            AssociationField::new('modifiedBy')->hideOnForm()->hideOnIndex(),
             DateTimeField::new('createdAt')->hideOnForm(),
-            DateTimeField::new('updatedAt')->hideOnForm(),
+            DateTimeField::new('updatedAt')->hideOnForm()->hideOnIndex(),
             BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
         ];
     }

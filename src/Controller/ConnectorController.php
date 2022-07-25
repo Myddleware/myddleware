@@ -34,14 +34,16 @@ class ConnectorController extends AbstractController
         $form = $form->getForm();
 
         return $this->renderForm('connector/index.html.twig', [
-            'form' => $form
+            'form' => $form,
+            'loginFields' => $loginFields
         ]);
     }
 
     #[Route('/credentials/get-form-edit/{connectorId}', name: 'credentials_form_edit', methods: ['GET', 'POST', 'PUT'])]
-    public function getCredentialsEditForm(ConnectorRepository $connectorRepository, ConnectorParamsValueTransformer $connectorParamsValueTransformer, ?string $connectorId = null): Response
+    public function getCredentialsEditForm(ConnectorRepository $connectorRepository, ConnectorParamsValueTransformer $connectorParamsValueTransformer, SolutionManager $solutionManager, ?string $connectorId = null): Response
     {
         $connector = $connectorRepository->find($connectorId);
+        $loginFields = $solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
 
         $form = $this->createFormBuilder([]);
         /** @var ConnectorParam $param */
@@ -55,7 +57,8 @@ class ConnectorController extends AbstractController
         $form = $form->getForm();
 
         return $this->renderForm('connector/index.html.twig', [
-            'form' => $form
+            'form' => $form,
+            'loginFields' => $loginFields
         ]);
     }
 

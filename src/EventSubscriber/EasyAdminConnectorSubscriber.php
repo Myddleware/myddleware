@@ -44,6 +44,7 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
         }
 
         $currentRequest = $this->requestStack->getCurrentRequest();
+
         if ($currentRequest->request->has('form')) {
             $connectorParamsForm = $currentRequest->request->get('form');
 

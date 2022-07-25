@@ -1,5 +1,7 @@
 <section>
     <div class="login-fields-form">
-        {{ form(form) }}
+        {% for loginField in loginFields %}
+            {{ form_row(form[loginField.name]) }}
+        {% endfor %}
     </div>
 </section>
