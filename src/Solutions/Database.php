@@ -764,7 +764,7 @@ class Database extends Solution
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function getQuerySelectLimitOffset($param, $method): string
+    protected function getQuerySelectLimitOffset($param, $method): ?string
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;
