@@ -7,6 +7,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -21,6 +22,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class RuleCrudController extends AbstractCrudController
 {
     public const ACTION_DUPLICATE = 'duplicate';
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets
+            ->addWebpackEncoreEntry('admin');
+    }
 
     public static function getEntityFqcn(): string
     {
@@ -65,13 +72,38 @@ class RuleCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
+            BooleanField::new('active'),
             TextField::new('name'),
             TextField::new('nameSlug')->hideOnForm(),
-            AssociationField::new('connectorSource'),
-            AssociationField::new('connectorTarget'),
-            AssociationField::new('sourceModule'),
-            AssociationField::new('targetModule'),
-            BooleanField::new('active'),
+            AssociationField::new('connectorSource')
+                ->addCssClass('rule')
+                ->setFormTypeOptions([
+                    'row_attr' => [
+                        'data-controller' => 'rule',
+                        // 'data-solution-info-url-value' => $getModulesController,
+                    ],
+                    'attr' => [
+                        'data-action' => 'change->rule#onSelectSource',
+                        'data-solution-target' => 'module',
+                    ],
+                ])
+                ->setHelp('Modules disponibles: ')
+            ,
+            AssociationField::new('connectorTarget')
+                ->setFormTypeOptions([
+                    'row_attr' => [
+                        'data-controller' => 'rule',
+                        // 'data-solution-info-url-value' => $getModulesController,
+                    ],
+                    'attr' => [
+                        'data-action' => 'change->rule#onSelectTarget',
+                        'data-solution-target' => 'module',
+                    ],
+                ])
+                ->setHelp('Modules disponibles: ')
+            ,
+            // AssociationField::new('sourceModule'),
+            // AssociationField::new('targetModule'),
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
