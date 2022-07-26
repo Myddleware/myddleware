@@ -104,21 +104,21 @@ class RingCentral extends Solution
             }
 
             // Call to get the token
-            $this->apiKey = base64_encode($this->connectionParam['apikey'] . ':' . $this->connectionParam['apikeysecret']);
-            $this->token = $this->makeRequest($this->server, $this->apiKey, self::TOKEN_ENDPOINT, null, 'POST', 'username=' . $this->connectionParam['username'] . '&password=' . $this->connectionParam['password'] . '&grant_type=password');
+            $this->apiKey = base64_encode($this->connectionParam['apikey'].':'.$this->connectionParam['apikeysecret']);
+            $this->token = $this->makeRequest($this->server, $this->apiKey, self::TOKEN_ENDPOINT, null, 'POST', 'username='.$this->connectionParam['username'].'&password='.$this->connectionParam['password'].'&grant_type=password');
             if (!empty($this->token)) {
                 if (!empty($this->token->access_token)) {
                     $this->isConnectionValid = true;
                 } elseif (!empty($this->token->error)) {
-                    throw new Exception($this->token->error . (!empty($this->token->error_description) ? ': ' . $this->token->error_description : ''));
+                    throw new Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
                 } else {
-                    throw new Exception('Result from Ring Central : ' . print_r($this->token, true));
+                    throw new Exception('Result from Ring Central : '.print_r($this->token, true));
                 }
             } else {
                 throw new Exception('No response from Ring Central. ');
             }
         } catch (Exception $e) {
-            $error = $e->getMessage() . ' ' . __CLASS__ . ' Line : ( ' . $e->getLine();
+            $error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine();
             $this->logger->error($error);
         }
     }
@@ -143,7 +143,8 @@ class RingCentral extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . $e->getFile() . $e->getLine());
+            $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+
             return null;
         }
     }
@@ -158,7 +159,7 @@ class RingCentral extends Solution
             if ('ALL' == strtoupper($param['ruleParams']['extensionId'])) {
                 $pageNum = 1;
                 do {
-                    $extensions = $this->makeRequest($this->server, $this->token->access_token, '/restapi' . self::API_VERSION . '/account/~/extension?perPage=' . $this->callLimit . '&page=' . $pageNum);
+                    $extensions = $this->makeRequest($this->server, $this->token->access_token, '/restapi'.self::API_VERSION.'/account/~/extension?perPage='.$this->callLimit.'&page='.$pageNum);
                     if (!empty($extensions)) {
                         foreach ($extensions->records as $extension) {
                             $extensionIds[] = $extension->id;
@@ -166,7 +167,7 @@ class RingCentral extends Solution
                     }
                     ++$pageNum;
                 } while (count($extensions->records) == $this->callLimit);
-                // /restapi/v1.0/account/{accountId}/extension
+            // /restapi/v1.0/account/{accountId}/extension
             } elseif (!empty($param['ruleParams']['extensionId'])) {
                 $extensionIds = explode(';', $param['ruleParams']['extensionId']);
             } else {
@@ -197,18 +198,18 @@ class RingCentral extends Solution
                 // Call RingCEntral
                 do {
                     $nbRecord = 0;
-                    $records = $this->makeRequest($this->server, $this->token->access_token, '/restapi' . self::API_VERSION . '/account/~/extension/' . $extensionId . '/' . $param['module'] . '?dateFrom=' . $dateRef . '&perPage=' . $this->callLimit . '&page=' . $pageNum);
+                    $records = $this->makeRequest($this->server, $this->token->access_token, '/restapi'.self::API_VERSION.'/account/~/extension/'.$extensionId.'/'.$param['module'].'?dateFrom='.$dateRef.'&perPage='.$this->callLimit.'&page='.$pageNum);
                     ++$pageNum;
                     // Error managment
                     if (!empty($records->errorCode)) {
-                        throw new Exception($records->errorCode . (!empty($records->message) ? ': ' . $records->message : ''));
+                        throw new Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
                     }
 
                     // Transform result by adding a dimension for the presence module (only one record for each call)
                     if ('presence' == $param['module']) {
                         $recordsObj = new \stdClass();
                         // No/date ref id in the presence module
-                        $records->id = uniqid('', true) . '_' . $records->extension->extensionNumber;
+                        $records->id = uniqid('', true).'_'.$records->extension->extensionNumber;
                         $records->$dateRefField = date('Y-m-d H:i:s');
                         $recordsObj->records = [$records];
                         $records = $recordsObj;
@@ -270,7 +271,7 @@ class RingCentral extends Solution
                 }
             }
         } catch (Exception $e) {
-            $result['error'] = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
@@ -285,6 +286,7 @@ class RingCentral extends Solution
         } elseif ('presence' == $moduleSource) {
             return 'date_modified';
         }
+
         return '';
     }
 
@@ -307,8 +309,6 @@ class RingCentral extends Solution
     }
 
     /**
-     * @param string $dateTime
-     * @return string
      * @throws Exception
      */
     protected function dateTimeFromMyddleware(string $dateTime): string
@@ -351,7 +351,7 @@ class RingCentral extends Solution
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             // The URL to use
-            $ch = curl_init($server . $path);
+            $ch = curl_init($server.$path);
             // Make sure params is empty or an array
             if (!empty($args)) {
                 $value = json_encode($args);
@@ -360,14 +360,14 @@ class RingCentral extends Solution
             // Set authorization header properly
             $authPath = '/oauth\/token/';
             if (1 !== preg_match($authPath, $path)) {
-                $authHeader = 'Authorization: Bearer ' . $token;
+                $authHeader = 'Authorization: Bearer '.$token;
                 if ('POST' == $method && 'array' !== gettype($data)) {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
                     $data_string = json_encode($data);
                     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
                 }
             } else {
-                $authHeader = 'Authorization: Basic ' . $token;
+                $authHeader = 'Authorization: Basic '.$token;
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             }
