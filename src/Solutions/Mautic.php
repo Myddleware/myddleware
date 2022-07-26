@@ -42,7 +42,7 @@ class Mautic extends Solution
     protected $auth;
 
     // Modules name depending on the context (call to create date, result of a search, result of a creation/update)
-    protected $moduleParameters = [
+    protected array $moduleParameters = [
         'contact' => ['plurial' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
         'company' => ['plurial' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
         'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
@@ -53,7 +53,7 @@ class Mautic extends Solution
         'company' => ['id'],
     ];
 
-    protected $fieldsDuplicate = [
+    protected array $fieldsDuplicate = [
         'contact' => ['email'],
     ];
 
@@ -61,7 +61,7 @@ class Mautic extends Solution
     protected bool $sendDeletion = true;
 
     // If you have Mautic 2 or lower, you must change this parameter to your version number
-    protected $mauticVersion = 3;
+    protected int $mauticVersion = 3;
 
     public function getFieldsLogin(): array
     {
@@ -84,7 +84,7 @@ class Mautic extends Solution
         ];
     }
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
