@@ -148,7 +148,6 @@ class WooCommerce extends Solution
             return $this->moduleFields;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
             return null;
         }
     }
@@ -311,7 +310,7 @@ class WooCommerce extends Solution
                 } else {
                     $targetId = $data['target_id'];
                     unset($data['target_id']);
-                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
+                    $recordResult = $this->woocommerce->put($module . '/' . $targetId, $data);
                 }
 
                 $response = $recordResult;
@@ -358,8 +357,8 @@ class WooCommerce extends Solution
 
     /**
      * @throws Exception
-     *                   Convert date to Myddleware format
-     *                   2020-07-08T12:33:06 to 2020-07-08 10:33:06
+     * Convert date to Myddleware format
+     * 2020-07-08T12:33:06 to 2020-07-08 10:33:06
      */
     protected function dateTimeToMyddleware(string $dateTime): string
     {

@@ -52,9 +52,9 @@ class RingCentral extends Solution
     protected int $callLimit = 100;
 
     protected int $readLimit = 1000;
-
+    
     protected array $moduleFields;
-
+    
     protected array $requiredFields = [
         'default' => ['id'],
         'call-log' => ['id', 'startTime'],

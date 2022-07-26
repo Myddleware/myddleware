@@ -403,14 +403,14 @@ class CirrusShield extends Solution
 
     /**
      * @throws Exception
-     *                   return the reference date field name
+     * return the reference date field name
      */
     public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
             return 'ModificationDate';
-        // Creation mode only
+            // Creation mode only
         } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }

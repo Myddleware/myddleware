@@ -280,7 +280,7 @@ class SAPCRM extends SAPRoot
 
             return $this->readMultiStructure($param, 'ZmydSearchBp', $parameters, false);
         }
-
+        
         return [];
     }
 
