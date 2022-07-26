@@ -157,7 +157,7 @@ class DatabaseSetupController extends AbstractController
     }
 
     #[Route('/database_connection', name: 'app_database_connection')]
-    public function connectDatabase(Request $request, KernelInterface $kernel): Response
+    public function connectDatabase(Request $request, KernelInterface $kernel, TranslatorInterface $translator): Response
     {
         try {
             $env = $kernel->getEnvironment();
@@ -207,7 +207,7 @@ class DatabaseSetupController extends AbstractController
             $return['error'] = $e->getMessage();
             // if the database doesn't exist yet, ask user to go create it
             if ($e instanceof ConnectionException) {
-                $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. ' . $e->getMessage();
+                $this->connectionFailedMessage = $translator->trans('install.connection_failed_message'). $e->getMessage();
                 return $this->render('install_setup/database_connection.html.twig', [
                     'connection_success_message' => $this->connectionSuccessMessage,
                     'connection_failed_message' => $this->connectionFailedMessage,

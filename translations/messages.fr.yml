@@ -834,6 +834,7 @@ install:
     step_3_check: Vérification de la connexion à la base de données
     step_3_go_back: Retournez à la page précédente pour réinitialiser votre connexion à la base de données
     step_4_loading: Chargement des tables de la base de données
+    connection_failed_message: Base de données inconnue. Veuillez vous assurer que votre base de données existe
     database_setup : Configuration de la base de données
     test_button: Se connecter à la base de données
     user_setup: Création de vos identifiants utilisateur Myddleware

@@ -831,6 +831,7 @@ install:
     step_3_check: Database connection check
     step_3_go_back: Go back to the previous page to reset your database connection
     step_4_loading: Loading database tables
+    connection_failed_message: Unknown database. Please make sure your database exists
     database_setup: Setting up your database
     test_button: Connect to database
     requirements_checker: Myddleware Requirements Checker

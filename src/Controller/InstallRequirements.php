@@ -25,6 +25,11 @@ class InstallRequirements extends AbstractController
     public function requirements(TranslatorInterface $translator): Response
     {
         try {
+
+            if($this->getUser()){
+                return $this->redirectToRoute('app_home');
+            }
+            
             $this->symfonyRequirements = new SymfonyRequirements();
             $this->phpVersion = phpversion();
             $checkPassed = true;
