@@ -419,7 +419,6 @@ class ERPNext extends Solution
         throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
-
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);

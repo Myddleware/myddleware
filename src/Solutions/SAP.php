@@ -117,8 +117,8 @@ class SAP extends SAPRoot
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas.
-     * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+     *                                  Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas.
+     *                                  Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
      */
     public function getRuleCustomRelationship($module, $type, array $parameters = []): ?array
     {

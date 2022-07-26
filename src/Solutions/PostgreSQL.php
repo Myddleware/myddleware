@@ -61,7 +61,7 @@ class PostgreSQL extends Database
             // Error management
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Show Tables: ' . $errorInfo[2]);
+                throw new \Exception('Show Tables: '.$errorInfo[2]);
             }
             // Get every table and add them to the module list
             $fetchAll = $q->fetchAll();
@@ -167,9 +167,9 @@ class PostgreSQL extends Database
         return "	SELECT column_name, data_type
 					FROM information_schema.columns
 					WHERE
-							table_catalog = '" . $this->connectionParam['database_name'] . "'
-						AND table_schema = '" . $tableParam[0] . "'
-						AND table_name = '" . $tableParam[1] . "'";
+							table_catalog = '".$this->connectionParam['database_name']."'
+						AND table_schema = '".$tableParam[0]."'
+						AND table_name = '".$tableParam[1]."'";
     }
 
     protected function create($param, $record): bool|string|null

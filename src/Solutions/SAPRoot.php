@@ -124,7 +124,7 @@ class SAPRoot extends Solution
                 if (!$multistructure) {
                     foreach ($response->EtFields->item->ZmydValues->item as $field) {
                         if (!empty($this->relateFieldAllowed[$module][$field->ZzmydKey])) {
-                            $fields[$module . '__' . $field->ZzmydKey] = [
+                            $fields[$module.'__'.$field->ZzmydKey] = [
                                 'label' => $this->relateFieldAllowed[$module][$field->ZzmydKey]['label'],
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
@@ -421,7 +421,7 @@ class SAPRoot extends Solution
         $result = '';
         $nameArray = explode('_', $name);
         foreach ($nameArray as $nameCut) {
-            $result .= strtoupper(substr($nameCut, 0, 1)) . strtolower(substr($nameCut, 1));
+            $result .= strtoupper(substr($nameCut, 0, 1)).strtolower(substr($nameCut, 1));
         }
 
         return $result;

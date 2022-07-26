@@ -347,7 +347,7 @@ class File extends Solution
                     && 'myddleware_generated' != current($difFields)
                 )
             ) {
-                throw new \Exception('File is not compatible. Missing fields : ' . implode(';', $difFields));
+                throw new \Exception('File is not compatible. Missing fields : '.implode(';', $difFields));
             }
             // Control all lines of the file
             $values = [];
@@ -482,7 +482,7 @@ class File extends Solution
         $i = 1;
         foreach ($fields as $field) {
             if (empty($field)) {
-                $header[] = 'Column_' . $i;
+                $header[] = 'Column_'.$i;
             } else {
                 // Spaces aren't accepted in a field name
                 $header[] = str_replace($this->removeChar, '', $field);
@@ -582,7 +582,7 @@ class File extends Solution
         $rowNumber = $rowNumber + 2;
         // If there are not the id of the line, display an error
         if (empty($idRow)) {
-            throw new \Exception('File is rejected because the id of the line ' . $rowNumber . ' is empty');
+            throw new \Exception('File is rejected because the id of the line '.$rowNumber.' is empty');
         }
 
         return true;

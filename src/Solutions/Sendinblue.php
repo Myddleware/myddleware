@@ -34,7 +34,6 @@ use Exception;
 use PhpParser\Node\Name;
 use SendinBlue\Client\ApiException;
 use SendinBlue\Client\Model\GetContacts;
-use SendinBlue\Client\Model\GetEmailEventReport;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -367,10 +366,10 @@ class Sendinblue extends Solution
                 foreach ($param['fields'] as $field) {
                     if (!empty($record[$field])) {
                         $result[$record[$idField]][$field] = $record[$field];
-                        // Result attribute can be an object (example function getContacts())
+                    // Result attribute can be an object (example function getContacts())
                     } elseif (!empty($record['attributes']->$field)) {
                         $result[$record[$idField]][$field] = $record['attributes']->$field;
-                        // Result attribute can be an array (example function getContactInfo())
+                    // Result attribute can be an array (example function getContactInfo())
                     } elseif (
                         is_array($record['attributes'])
                         and !empty($record['attributes'][$field])
@@ -436,8 +435,8 @@ class Sendinblue extends Solution
 
     /**
      * @throws Exception
-     * Convert date to Myddleware format
-     * 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06 to 2020-07-08 10:33:06
      */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
@@ -448,7 +447,7 @@ class Sendinblue extends Solution
 
     /**
      * @throws Exception
-     * convert from Myddleware format to Sendinblue format
+     *                   convert from Myddleware format to Sendinblue format
      */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {

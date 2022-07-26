@@ -1021,5 +1021,4 @@ class PrestaShop extends Solution
     {
         return $opt;
     }
-
 }

@@ -178,7 +178,7 @@ class WordPress extends Solution
                 $client = HttpClient::create();
                 // In case a specific record is requested
                 if (!empty($param['query']['id'])) {
-                    $response = $client->request('GET', $this->connectionParam['url'] . '/wp-json/wp/v2/' . $module . '/' . $param['query']['id']);
+                    $response = $client->request('GET', $this->connectionParam['url'].'/wp-json/wp/v2/'.$module.'/'.$param['query']['id']);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content2 = $response->getContent();
@@ -187,7 +187,7 @@ class WordPress extends Solution
                     $content[] = $content2;
                 } else {
                     try {
-                        $response = $client->request('GET', $this->connectionParam['url'] . '/wp-json/wp/v2/' . $module . '?per_page=' . $this->callLimit . '&page=' . $page . '&orderby=modified');
+                        $response = $client->request('GET', $this->connectionParam['url'].'/wp-json/wp/v2/'.$module.'?per_page='.$this->callLimit.'&page='.$page.'&orderby=modified');
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content = $response->getContent();
