@@ -182,11 +182,11 @@ class suitecrmcustom extends suitecrm {
 			if (empty($param['dataHistory'][$idDoc]['annee_scolaire_c'])) {
 				throw new \Exception('Failed to execute the reconduction. No value in fiedl annee_scolaire_c in the history for the document '.$idDoc.'.');
 			}
-			if (strpos($currentAcademicYear, $param['dataHistory'][$idDoc]['annee_scolaire_c'])) {
+			if (strpos($param['dataHistory'][$idDoc]['annee_scolaire_c'], $currentAcademicYear) !== false) {
 				throw new \Exception('Failed to execute the reconduction. The contact is already active on the current year ('.$currentAcademicYear.'). ');	
 			}
 			// Add the academic year to the annee_scolaire_c field
-			$data['annee_scolaire_c'] = $param['dataHistory'][$idDoc]['annee_scolaire_c'] . '^' . $currentAcademicYear . '^';
+			$data['annee_scolaire_c'] = $param['dataHistory'][$idDoc]['annee_scolaire_c'] . ',^' . $currentAcademicYear . '^';
 			return $data;
 		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
