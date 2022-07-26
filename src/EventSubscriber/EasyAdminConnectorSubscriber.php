@@ -9,6 +9,7 @@ use App\Repository\ConnectorParamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeCrudActionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -31,7 +32,8 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
     {
         return [
             AfterEntityPersistedEvent::class => ['createConnectorParams'],
-            AfterEntityUpdatedEvent::class => ['updateConnectorParams']
+            AfterEntityUpdatedEvent::class => ['updateConnectorParams'],
+            BeforeCrudActionEvent::class => ['beforeShow'],
         ];
     }
 
@@ -103,5 +105,24 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
         }
 
         $this->entityManager->flush();
+    }
+
+    public function beforeShow(BeforeCrudActionEvent $event)
+    {
+        $crud = $event->getAdminContext()->getCrud();
+
+        if ($crud->getEntityFqcn() !== Connector::class || $crud->getCurrentAction() !== 'detail') {
+            return;
+        }
+
+        $entityDto = $event->getAdminContext()->getEntity();
+        /** @var Connector $connector */
+        $connector = $entityDto->getInstance();
+
+        $params = $connector->getConnectorParams();
+        /** @var ConnectorParam $param */
+        foreach ($params as $param) {
+            $this->connectorParamsValueTransformer->transform($param);
+        }
     }
 }

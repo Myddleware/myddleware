@@ -3,7 +3,6 @@
 namespace App\Form\DataTransformer;
 
 use Illuminate\Encryption\Encrypter;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\DataTransformerInterface;
 
 class ConnectorParamsValueTransformer implements DataTransformerInterface

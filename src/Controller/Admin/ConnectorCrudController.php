@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Connector;
-use App\Entity\ConnectorParam;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -14,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class ConnectorCrudController extends AbstractCrudController
 {
@@ -84,7 +82,6 @@ class ConnectorCrudController extends AbstractCrudController
                 ])->setHelp('login fields: ')
                 ->setFormTypeOption('disabled','edit' === $pageName ? 'disabled' : '')
             ,
-            CollectionField::new('connectorParams')->onlyOnDetail()->useEntryCrudForm(ConnectorParamCrudController::class),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),
@@ -92,6 +89,7 @@ class ConnectorCrudController extends AbstractCrudController
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm()->hideOnIndex(),
             BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
+            CollectionField::new('connectorParams')->onlyOnDetail(),
         ];
 
         return $fields;

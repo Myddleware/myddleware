@@ -2,15 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
 use App\Manager\SolutionManager;
 use App\Repository\ConnectorParamRepository;
 use App\Repository\ConnectorRepository;
 use App\Repository\SolutionRepository;
+use App\Solutions\Solution;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,15 +29,22 @@ class ConnectorController extends AbstractController
         $loginFields = $solutionManager->get($solution->getName())->getFieldsLogin();
 
         $form = $this->createFormBuilder([]);
+        // Iterate on each login fields from the given solution and add needed inputs
         foreach ($loginFields as $loginField) {
-            $form->add($loginField['name'], $loginField['type']);
+            $form->add($loginField['name'], $loginField['type'], [
+                'attr' => [
+                    'data-connector-target' => 'testing',
+                ],
+            ]);
         }
 
         $form = $form->getForm();
 
         return $this->renderForm('connector/index.html.twig', [
             'form' => $form,
-            'loginFields' => $loginFields
+            'loginFields' => $loginFields,
+            'urlTest' => $this->generateUrl('test_connexion'),
+            'solution' => $solution->getName()
         ]);
     }
 
@@ -53,13 +61,21 @@ class ConnectorController extends AbstractController
                 'connector' => $connector
             ]);
 
+            // If connector param does not exist add an empty input.
             if ($connectorParam) {
                 $transformParam = $connectorParamsValueTransformer->transform($connectorParam);
                 $form->add($connectorParam->getName(), TextType::class, [
-                    'data' => $transformParam->getValue()
+                    'data' => $transformParam->getValue(),
+                    'attr' => [
+                        'data-connector-target' => 'testing',
+                    ],
                 ]);
             } else {
-                $form->add($loginField['name'], $loginField['type']);
+                $form->add($loginField['name'], $loginField['type'], [
+                    'attr' => [
+                        'data-connector-target' => 'testing',
+                    ],
+                ]);
             }
         }
 
@@ -67,13 +83,35 @@ class ConnectorController extends AbstractController
 
         return $this->renderForm('connector/index.html.twig', [
             'form' => $form,
-            'loginFields' => $loginFields
+            'loginFields' => $loginFields,
+            'urlTest' => $this->generateUrl('test_connexion'),
+            'solution' => $connector->getSolution()->getName()
         ]);
     }
 
-    #[Route('/connector/create', name: 'app_create_connector', methods: ['GET', 'POST', 'PUT'])]
-    public function createConnector(Request $request, SolutionRepository $solutionRepository)
+    #[Route('/connector/test-connexion', name: 'test_connexion', methods: ['POST'])]
+    public function testConnection(Request $request, SolutionManager $solutionManager)
     {
-        return;
+        $content = json_decode($request->getContent(), true);
+
+        /** @var Solution $solution */
+        $solution = $solutionManager->get($content['solution']);
+
+        $connectionParams = [];
+        foreach ($content['connectorParams'] as $paramData) {
+            $connectionParams[$paramData['name']] = $paramData['value'];
+        }
+
+        // Check login
+        $solution->login($connectionParams);
+        if ($isValid = $solution->isConnectionValid) {
+            $statusCode = Response::HTTP_OK;
+        } else {
+            $statusCode = Response::HTTP_FORBIDDEN;
+        }
+
+        return $this->render('connector/test-connector-params.html.twig', [
+            'isCredentialsValid' => $isValid
+        ], new Response(null, $statusCode));
     }
 }

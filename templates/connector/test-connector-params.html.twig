@@ -1,0 +1,11 @@
+<div style="margin-top:20px;">
+    {% if isCredentialsValid %}
+        <div class="alert alert-success" role="alert">
+            Paramètres de connexion OK !
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            Impossible de se connecter
+        </div>
+    {% endif %}
+</div>
