@@ -534,7 +534,6 @@ function animValidation() {
 }
 
 function animConfirm(choice_lst) {
-	
 	template = '';	
 	if(choice_lst == 'template') {
 		$('#template').find('tr').each(function(){
@@ -551,7 +550,6 @@ function animConfirm(choice_lst) {
 			// }
 		});		
 	}	
-			
 	$.ajax({
 		type: "POST",
 		data:{
@@ -562,7 +560,7 @@ function animConfirm(choice_lst) {
 			template : template,
 		},
 		url: path_validation,	
-		beforeSend:	function() {
+		beforeSend:	function() {	
 			$('#btn_validation').empty();
 			$('#btn_validation').html(wait);
 			$('#btn_validation').removeAttr('id');
@@ -573,7 +571,15 @@ function animConfirm(choice_lst) {
 			}
 			else if(data == 'template') {
 				$(location).attr('href',path_listrule);
+			}else if (data == 'error'){
+				$('#validation').append('<p>There is an error</p>');
 			}
+		},
+		error: function(data, exeption){
+			if(data === undefined){
+				alert ('Exeption:', exeption);
+			}
+			
 		}
 	});	
 }
