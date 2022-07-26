@@ -39,4 +39,43 @@ class RuleController extends AbstractController
             'origin' => $origin
         ]);
     }
+    /**
+     * @throws Exception
+     */
+    #[Route('/get-fields/{connectorId<\d+>?null}', name: 'get-modules', methods: ['GET'])]
+    public function getFieldsForm(string $origin, string $connectorId, ConnectorRepository $connectorRepository, ModuleRepository $moduleRepository): Response
+    {
+        $connector = $connectorRepository->find($connectorId);
+        $solution = $connector->getSolution();
+
+
+        // @todo Je n'ai pas pu finir il me manque les module fields
+        // mais l'idée serait d'utiliser ce controller pour renvoyer la liste des fields par connector
+        // et ensuite pouvoir manipuler ça côté JS
+        // Si on veut rester à utiliser les formulaires symfony je vous invite à lire le code que j'ai mis dans le subscriber EASY ADMIN
+        // la logique des 2 eventsubscriber devrait vous permettre de faire la même chose pour la suite
+        // Bonne continuation !
+
+        $form = $this->createFormBuilder([]);
+        if (method_exists($connector, 'get_module_fields')) {
+            $fields = $solution->get_module_fields();
+
+            $choices = [];
+            foreach ($fields as $fieldId => $field) {
+                $choices[$field['label']] = $fieldId;
+            }
+
+            $form->add('fieldSelect', ChoiceType::class, [
+                'choices' => $choices,
+                'expanded' => true,
+                'multiple' => true
+            ]);
+        }
+
+        $form = $form->getForm();
+
+        return $this->renderForm('rule/module_field_form.html.twig', [
+            'form' => $form,
+        ]);
+    }
 }
