@@ -134,6 +134,7 @@ class RingCentral extends Solution
 
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
+        $moduleFields = [];
         parent::getModuleFields($module, $type);
         try {
             require 'lib/ringcentral/metadata.php';
