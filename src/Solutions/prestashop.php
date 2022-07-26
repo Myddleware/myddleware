@@ -846,7 +846,7 @@ class prestashopcore extends solution
             try { // try-catch Myddleware
                 try { // try-catch PrestashopWebservice
                     // Check control before update
-                    $data = $this->checkDataBeforeUpdate($param, $data);
+                    $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                     $fields = [];
                     $submodule = [];
                     $module = $param['module'];

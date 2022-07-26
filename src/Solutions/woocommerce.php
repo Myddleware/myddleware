@@ -349,7 +349,7 @@ class woocommercecore extends solution
 
     // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);

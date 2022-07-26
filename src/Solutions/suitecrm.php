@@ -265,6 +265,7 @@ class suitecrmcore extends solution
                             '_id' == substr($field->name, -3)
                         || '_ida' == substr($field->name, -4)
                         || '_idb' == substr($field->name, -4)
+						|| '_id_c' == substr($field->name, -5)
                         || (
                                 'id' == $field->type
                             && 'id' != $field->name
@@ -325,6 +326,7 @@ class suitecrmcore extends solution
                                 '_id' == substr($field->name, -3)
                             || '_ida' == substr($field->name, -4)
                             || '_idb' == substr($field->name, -4)
+							|| '_id_c' == substr($field->name, -5)
                             || (
                                     'id' == $field->type
                                 && 'id' != $field->name
@@ -706,7 +708,7 @@ class suitecrmcore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
-                $data = $this->checkDataBeforeUpdate($param, $data);
+                $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                 $dataSugar = [];
                 foreach ($data as $key => $value) {
                     // Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
@@ -827,7 +829,7 @@ class suitecrmcore extends solution
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
     public function getRefFieldName($moduleSource, $RuleMode)
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($RuleMode, ['0', 'S', 'U'])) {
             return 'date_modified';
         } elseif ('C' == $RuleMode) {
             return 'date_entered';
