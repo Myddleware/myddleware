@@ -294,16 +294,15 @@ class RingCentral extends Solution
     // Add the filed extensionId on the rule
     public function getFieldsParamUpd($type, $module): array
     {
-        try {
-            $params[] = [
-                'id' => 'extensionId',
-                'name' => 'extensionId',
-                'type' => TextType::class,
-                'label' => 'Extension Id',
-                'required' => false,
-            ];
+        $params[] = [
+            'id' => 'extensionId',
+            'name' => 'extensionId',
+            'type' => TextType::class,
+            'label' => 'Extension Id',
+            'required' => false,
+        ];
 
-            return $params;
+        return $params;
     }
 
     /**
