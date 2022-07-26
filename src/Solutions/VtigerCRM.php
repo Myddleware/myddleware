@@ -108,6 +108,8 @@ class VtigerCRM extends Solution
             $this->session = $client->getSessionName();
             $this->isConnectionValid = true;
             $this->vtigerClient = $client;
+
+            return $result;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
