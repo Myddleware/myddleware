@@ -82,7 +82,8 @@ create_rule:
             label: Type de synchronisation
             create_modify: Création et modification de données
             create_only: Création de données seulement
-            search_only: Récupération de données existantes seulement  
+            search_only: Récupération de données existantes seulement
+            update_only: Mise à jour de données seulement
         deletion:
             label: Activer la suppression dans l'application cible
             yes: Oui     

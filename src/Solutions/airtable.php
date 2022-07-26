@@ -375,7 +375,7 @@ class airtablecore extends solution
                         // trigger to add custom code if needed
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
-                        $data = $this->checkDataBeforeUpdate($param, $data);
+                        $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                     }
                     // Recard are stored in the URL for a deletionj
                     elseif ('delete' === $method) {
@@ -413,7 +413,9 @@ class airtablecore extends solution
                     // Add the record id in the body if update
                     if ('update' == $method) {
                         $body['records'][$i]['id'] = $data['target_id'];
-                        unset($body['records'][$i]['fields']['target_id']);
+                        if (isset($body['records'][$i]['fields']['target_id'])) {
+							unset($body['records'][$i]['fields']['target_id']);
+						}
                     }
                     ++$i;
                 }
