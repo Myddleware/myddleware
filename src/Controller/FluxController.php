@@ -42,6 +42,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Exception\NotValidCurrentPageException;
 use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -151,17 +152,10 @@ class FluxController extends AbstractController
     }
 
     /**
-     * LISTE DES FLUX.
-     *
-     * @param $page
-     * @param int $search
-     *
-     * @return Response
-     *
      * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
      * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
      */
-    public function fluxListAction(Request $request, $page, $search = 1)
+    public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
         //--- Liste status traduction
         $lstStatusTwig = DocumentManager::lstStatus();
@@ -376,7 +370,7 @@ class FluxController extends AbstractController
         $r = $this->documentRepository->getFluxPagination($data);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $r,
-            'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
+            'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
         ], false);
 
@@ -734,18 +728,16 @@ class FluxController extends AbstractController
         }
     }
 
-    // Exécute une action d'un bouton dynamique
-
     /**
      * @param $method
      * @param $id
      * @param $solution
      *
-     * @return RedirectResponse
-     *
      * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
+     *
+     * @throws Exception
      */
-    public function fluxBtnDynAction($method, $id, $solution)
+    public function fluxBtnDynAction($method, $id, $solution): RedirectResponse
     {
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
@@ -790,22 +782,7 @@ class FluxController extends AbstractController
             */
 
         if (is_array($params)) {
-            /* DOC :
-                * $pager->setCurrentPage($page);
-                $pager->getNbResults();
-                $pager->getMaxPerPage();
-                $pager->getNbPages();
-                $pager->haveToPaginate();
-                $pager->hasPreviousPage();
-                $pager->getPreviousPage();
-                $pager->hasNextPage();
-                $pager->getNextPage();
-                $pager->getCurrentPageResults();
-            */
-
             $compact = [];
-
-            //On passe l’adapter au bundle qui va s’occuper de la pagination
             if ($orm) {
                 $queryBuilder = $params['adapter_em_repository'];
                 $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
@@ -813,20 +790,15 @@ class FluxController extends AbstractController
             } else {
                 $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
             }
-
-            //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
-            $compact['pager']->setMaxPerPage($params['maxPerPage']);
+            $maxPerPage = intval($params['maxPerPage']);
+            $currentPage = intval($params['page']);
+            $compact['pager']->setMaxPerPage($maxPerPage);
             try {
-                $compact['entities'] = $compact['pager']
-                    //On indique au pager quelle page on veut
-                    ->setCurrentPage($params['page'])
-                    //On récupère les résultats correspondant
-                    ->getCurrentPageResults();
-
+                $compact['pager']->setCurrentPage($currentPage);
                 $compact['nb'] = $compact['pager']->getNbResults();
-            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-                //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException('Page not found. '.$e->getMessage());
+                $compact['entities'] = $compact['pager']->getCurrentPageResults();
+            } catch (NotValidCurrentPageException $e) {
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
             return $compact;

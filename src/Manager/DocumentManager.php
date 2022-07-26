@@ -722,7 +722,7 @@ class documentcore
             return true;
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
-            $this->docIdRefError = (is_array($result) AND !empty($result['id']) ? $result['id'] : '');
+            $this->docIdRefError = (is_array($result) and !empty($result['id']) ? $result['id'] : '');
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
@@ -1012,14 +1012,6 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
-			
-			// Error if rule mode is update only and the document is a creation
-			if (
-                    $this->documentType == 'C'
-                and $this->ruleMode == 'U'
-            ) {
-                throw new \Exception('The document is a creation but the rule mode is UPDATE ONLY. ');
-            }
         } catch (\Exception $e) {
             $this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -1155,26 +1147,15 @@ class documentcore
         // Get all fields for document type D (delete) to backup the whole record before delete it
         ('D' == $this->documentType ? $all = true : $all = false);
         $read['fields'] = $this->getTargetFields($all);
-		$read['query'] = array();
-		if (!empty($searchFields)) {
-			foreach($searchFields as $key => $value) {
-				// replace Myddleware_element_id by id when Myddleware will search the history of the record 
-				if ($key == 'Myddleware_element_id') {
-					$key = 'id';
-				}
-				$read['query'][$key] = $value;
-			}
-		}	
-		
+        $read['query'] = $searchFields;
         $read['ruleParams'] = $this->ruleParams;
         $read['rule'] = $rule;
         $read['call_type'] = 'history';
         $read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
         $read['document']['type'] = $this->documentType;
-        $read['document']['id'] = $this->id;
-        $read['jobId'] = $this->jobId;
         $dataTarget = $this->solutionTarget->readData($read);
         // If read method returns no result with no error
+
         if (
                 empty($dataTarget['values'])
             and empty($dataTarget['error'])
@@ -2043,8 +2024,6 @@ class documentcore
             $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
-			// Change the document type for the current process
-			$this->documentType = $new_type;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -2304,12 +2283,13 @@ class documentcore
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
-	
-	public function generateDocLog($errorType, $message) {
- 		$this->typeError = $errorType;
- 		$this->message = $message;
- 		$this->createDocLog();
- 	}
+
+    public function generateDocLog($errorType, $message)
+    {
+        $this->typeError = $errorType;
+        $this->message = $message;
+        $this->createDocLog();
+    }
 }
 class DocumentManager extends documentcore
 {

@@ -248,6 +248,7 @@ class TemplateManager
         int $connectorTargetId,
         User $user
     ) {
+
         /** @var ConnectorRepository $connectorRepository */
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
         $connectorSource = $connectorRepository->find($connectorSourceId);
@@ -257,6 +258,7 @@ class TemplateManager
         $solutionSourceName = $connectorSource->getSolution()->getName();
         $solutionTargetName = $connectorTarget->getSolution()->getName();
 
+        $this->entityManager->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION      
         try {
             $sourceSolution = $this->solutionManager->get($solutionSourceName);
             $targetSolution = $this->solutionManager->get($solutionTargetName);
@@ -411,6 +413,8 @@ class TemplateManager
                         $relationshipObjecy->setFieldId($this->ruleNameSlugArray[$relationship['fieldId']]);
                         $relationshipObjecy->setParent($relationship['parent']);
                         $relationshipObjecy->setDeleted(0);
+                        $relationshipObjecy->setErrorEmpty(0);
+                        $relationshipObjecy->setErrorMissing(1);
                         $this->entityManager->persist($relationshipObjecy);
                     }
                 }
@@ -442,7 +446,7 @@ class TemplateManager
 
             // Commit the rules in the database
             $this->entityManager->flush();
-
+            $this->entityManager->getConnection()->commit(); // -- COMMIT TRANSACTION
             // Set the message in Myddleware UI
             $this->session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
         } catch (Exception $e) {

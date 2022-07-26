@@ -18,6 +18,7 @@
 
 # LexikJWTAuthenticationBundle
 /config/jwt/
+/config/jwt/*.pem
 
 # Parameters for Custom code
 /config/services_custom.yaml

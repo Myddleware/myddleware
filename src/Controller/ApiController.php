@@ -2,21 +2,22 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
-use Psr\Log\LoggerInterface;
+use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use App\Repository\DocumentRepository;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * @Route("/api", name="api_")
@@ -26,33 +27,35 @@ class ApiController extends AbstractController
     /**
      * @var RuleRepository
      */
-    private $ruleRepository;
+    private RuleRepository $ruleRepository;
     /**
      * @var JobRepository
      */
-    private $jobRepository;
+    private JobRepository $jobRepository;
     /**
      * @var DocumentRepository
      */
-    private $documentRepository;
+    private DocumentRepository $documentRepository;
     /**
      * @var string
      */
-    private $env;
+    private string $env;
     /**
      * @var KernelInterface
      */
-    private $kernel;
+    private KernelInterface $kernel;
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
     /**
      * @var JobManager
      */
-    private $jobManager;
+    private JobManager $jobManager;
 
-    private $parameterBag;
+    private ParameterBagInterface $parameterBag;
+
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         KernelInterface $kernel,
@@ -61,7 +64,8 @@ class ApiController extends AbstractController
         RuleRepository $ruleRepository,
         JobRepository $jobRepository,
         DocumentRepository $documentRepository,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        EntityManagerInterface $entityManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -71,12 +75,13 @@ class ApiController extends AbstractController
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
         $this->parameterBag = $parameterBag;
+        $this->entityManager = $entityManager;
     }
 
     /**
      * @Route("/synchro", name="synchro", methods={"POST"})
      */
-    public function synchroAction(Request $request)
+    public function synchroAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $return = [];
@@ -135,7 +140,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/read_record", name="read_record", methods={"POST"})
      */
-    public function readRecordAction(Request $request)
+    public function readRecordAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $return = [];
@@ -203,7 +208,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/delete_record", name="delete_record", methods={"POST"})
      */
-    public function deleteRecordAction(Request $request)
+    public function deleteRecordAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $connection = $this->container->get('database_connection');
@@ -251,7 +256,7 @@ class ApiController extends AbstractController
             $ruleParam['api'] = 1;
             $rule = new RuleManager(
                 $this->container->get('logger'),
-                $connection, 
+                $connection,
                 $this->entityManager,
                 $this->parameterBag,
                 // $ruleParam,
@@ -316,7 +321,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})
      */
-    public function massActionAction(Request $request)
+    public function massActionAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $return = [];
@@ -388,7 +393,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/rerun_error", name="rerun_error", methods={"POST"})
      */
-    public function rerunErrorAction(Request $request)
+    public function rerunErrorAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $return = [];
@@ -450,7 +455,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/statistics", name="statistics", methods={"POST"})
      */
-    public function statisticsAction(Request $request)
+    public function statisticsAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
         try {
             $return = [];

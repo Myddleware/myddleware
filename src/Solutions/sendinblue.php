@@ -44,8 +44,8 @@ class sendinbluecore extends solution
                                 ];
     protected $FieldsDuplicate = ['contacts' => ['email', 'SMS']];
     protected $limitEmailActivity = 100;
-	protected $sendDeletion = true;
-	
+    protected $sendDeletion = true;
+
     public function getFieldsLogin()
     {
         return [
@@ -471,47 +471,53 @@ class sendinbluecore extends solution
 
         return $identifier;
     }
-	
-	// Check data before create
+
+    // Check data before create
     protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
-		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
-		return $this->setBooleanValues($data);
+        $data = parent::checkDataBeforeCreate($param, $data, $idDoc);
+
+        return $this->setBooleanValues($data);
     }
-	
-	// Check data before create
-    protected function checkDataBeforeUpdate($param, $data, $idDoc)
+
+    // Check data before create
+    protected function checkDataBeforeUpdate($param, $data)
     {
-		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
-		return $this->setBooleanValues($data);
+        $data = parent::checkDataBeforeUpdate($param, $data);
+
+        return $this->setBooleanValues($data);
     }
-	 
-	// Change text value true and false to boolean value
-	protected function setBooleanValues($record) {
-		foreach ($record as $field => $value) {
-			if ($value === 'true') {
-				$record[$field] = true;
-			} elseif ($value === 'false') {
-				$record[$field] = false;
-			} 
-		}
-		return $record;
-	}
-	
-	// delete the record 
-	protected function delete($param, $record) {  
-		try {
-			$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
-			$updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
-			// target_id contains the id of the record to be modified        
-			$identifier = $record['target_id'];                                 
-			$updateContact['attributes'] = $record;            
-			$result = $apiInstance->deleteContact($identifier);
-		} catch (\Exception $e) {
-			throw new \Exception('Exception when calling ContactsApi->deleteContact: '. $e->getMessage());			
-		}    
-		return $identifier;
-	}
+
+    // Change text value true and false to boolean value
+    protected function setBooleanValues($record)
+    {
+        foreach ($record as $field => $value) {
+            if ('true' === $value) {
+                $record[$field] = true;
+            } elseif ('false' === $value) {
+                $record[$field] = false;
+            }
+        }
+
+        return $record;
+    }
+
+    // delete the record
+    protected function delete($param, $record)
+    {
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
+            // target_id contains the id of the record to be modified
+            $identifier = $record['target_id'];
+            $updateContact['attributes'] = $record;
+            $result = $apiInstance->deleteContact($identifier);
+        } catch (\Exception $e) {
+            throw new \Exception('Exception when calling ContactsApi->deleteContact: '.$e->getMessage());
+        }
+
+        return $identifier;
+    }
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
