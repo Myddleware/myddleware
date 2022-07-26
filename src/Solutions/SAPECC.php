@@ -258,7 +258,6 @@ class SAPECC extends SAP
             }
         } catch (Exception $e) {
             $error = 'Failed to read FI document from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
-            echo $error.';';
             $this->logger->error($error);
 
             return ['error' => $error];

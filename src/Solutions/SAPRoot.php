@@ -111,7 +111,7 @@ class SAPRoot extends Solution
     // Renvoie les champs du module passé en paramètre
     public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        $fields =[];
+        $fields = [];
         try {
             try {
                 $multistructure = false;
@@ -124,7 +124,7 @@ class SAPRoot extends Solution
                 if (!$multistructure) {
                     foreach ($response->EtFields->item->ZmydValues->item as $field) {
                         if (!empty($this->relateFieldAllowed[$module][$field->ZzmydKey])) {
-                            $fields[$module . '__' . $field->ZzmydKey] = [
+                            $fields[$module.'__'.$field->ZzmydKey] = [
                                 'label' => $this->relateFieldAllowed[$module][$field->ZzmydKey]['label'],
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
@@ -201,6 +201,7 @@ class SAPRoot extends Solution
         } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
+
         return $fields;
     }
 
@@ -403,8 +404,8 @@ class SAPRoot extends Solution
                 throw new Exception('SOAP FAULT. Read record failed.');
             }
         } catch (Exception $e) {
-            $error = 'Failed to read record from sapcrm : ' . $e->getMessage() . ' ' . __CLASS__ . ' Line : ' . $e->getLine() . '. ';
-            echo $error . ';';
+            $error = 'Failed to read record from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
+            echo $error.';';
             $this->logger->error($error);
             if ($readLast) {
                 return ['done' => -1];
@@ -420,7 +421,7 @@ class SAPRoot extends Solution
         $result = '';
         $nameArray = explode('_', $name);
         foreach ($nameArray as $nameCut) {
-            $result .= strtoupper(substr($nameCut, 0, 1)) . strtolower(substr($nameCut, 1));
+            $result .= strtoupper(substr($nameCut, 0, 1)).strtolower(substr($nameCut, 1));
         }
 
         return $result;

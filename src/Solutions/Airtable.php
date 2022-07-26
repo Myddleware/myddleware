@@ -96,6 +96,7 @@ class Airtable extends Solution
 
     /**
      * Request to attempt to log in to Airtable.
+     *
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
@@ -111,7 +112,7 @@ class Airtable extends Solution
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
             $options = ['auth_bearer' => $this->token];
-            $response = $client->request('GET', $this->airtableURL . $this->projectID . '/' . $this->tableName[$this->projectID], $options);
+            $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
             $content = $response->getContent();
             $content = $response->toArray();
@@ -119,7 +120,7 @@ class Airtable extends Solution
                 $this->isConnectionValid = true;
             }
         } catch (Exception $e) {
-            $error = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
+            $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $this->logger->error($error);
         }
     }
@@ -154,7 +155,7 @@ class Airtable extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return null;
         }
@@ -245,7 +246,7 @@ class Airtable extends Solution
                         // Get the reference date
                         if (!empty($record['fields'][$dateRefField])) {
                             $dateModified = $record['fields'][$dateRefField];
-                            // createdTime not allowed for reading action, only to get an history or a duplicate field
+                        // createdTime not allowed for reading action, only to get an history or a duplicate field
                         } elseif (
                             !empty($record['createdTime'])
                             and !empty($param['query'])
