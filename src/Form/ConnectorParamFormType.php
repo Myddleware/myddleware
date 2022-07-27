@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Form;
 
+use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
 use Symfony\Component\Form\AbstractType;
@@ -32,12 +33,14 @@ class ConnectorParamFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->solutionLoginFields = $options['attr']['loginFields'] ?? null;
+
         $builder
             ->add('value', TextType::class, [
                 'label' => 'Value',
                 'empty_data' => '',
                 'error_bubbling' => true,
                 'row_attr' => ['data-controller' => 'solution'],
+                'mapped' => false,
             ]);
 
         $builder->get('value')
@@ -52,8 +55,8 @@ class ConnectorParamFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ConnectorParam::class,
-            'inherit_data' => true,
+            // 'data_class' => ConnectorParam::class,
+            'inherit_data' => true
         ]);
     }
 

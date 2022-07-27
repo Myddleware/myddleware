@@ -102,6 +102,6 @@ class ConnectorParam implements \Stringable
 
     public function __toString(): string
     {
-        return $this->name;
+        return $this->name.' : '.$this->value;
     }
 }
