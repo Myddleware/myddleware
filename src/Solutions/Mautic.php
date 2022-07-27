@@ -114,7 +114,7 @@ class Mautic extends Solution
                 throw new Exception('Failed to login to Mautic. No error message returned by the API.');
             }
         } catch (Exception $e) {
-            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $error = $e->getMessage().$e->getFile().$e->getLine();
             $this->logger->error($error);
         }
     }
@@ -189,8 +189,9 @@ class Mautic extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $error = $e->getMessage().$e->getFile().$e->getLine();
             $this->logger->error($error);
+
             return ['error' => $error];
         }
     }
