@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -25,6 +28,7 @@
 namespace App\Solutions;
 
 use DateTime;
+use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -34,17 +38,24 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class ERPNext extends Solution
 {
     protected $token;
+
     protected $update;
+
     protected $organizationTimezoneOffset;
-    protected $limitCall = 100;
-    protected $required_fields = ['default' => ['name', 'creation', 'modified']];
-    protected $fieldsDuplicate = ['Contact' => ['last_name'],
+
+    protected int $limitCall = 100;
+
+    protected array $requiredFields = ['default' => ['name', 'creation', 'modified']];
+
+    protected array $fieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
         'Item' => ['item_code'],
     ];
+
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
-    protected $childModuleKey = [
+    protected array $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
+
+    protected array $childModuleKey = [
         'Sales Invoice Item' => 'items',
         'Sales Order Item' => 'items',
         'Payment Entry Reference' => 'references',
@@ -54,8 +65,9 @@ class ERPNext extends Solution
         'Assessment Result Detail' => 'details',
         'Sales Taxes and Charges' => 'taxes',
     ];
+
     // Get isTable parameter for each module
-    protected $isTableModule = [];
+    protected array $isTableModule = [];
 
     public function getFieldsLogin(): array
     {
@@ -78,39 +90,36 @@ class ERPNext extends Solution
         ];
     }
 
-    // Login to Cirrus Shield
-    public function login($paramConnexion)
+    public function login($connectionParam): void
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Generate parameters to connect to Cirrus Shield
-            $parameters = ['usr' => $this->paramConnexion['login'],
-                'pwd' => $this->paramConnexion['password'],
+            $parameters = ['usr' => $this->connectionParam['login'],
+                'pwd' => $this->connectionParam['password'],
             ];
-            $url = $this->paramConnexion['url'].'/api/method/login';
+            $url = $this->connectionParam['url'].'/api/method/login';
             // Connect to ERPNext
             $result = $this->call($url, 'GET', $parameters);
 
             if (empty($result->message)) {
-                throw new \Exception('Login error');
+                throw new Exception('login error');
             }
             // Connection validation
-            $this->connexion_valide = true;
-        } catch (\Exception $e) {
+            $this->isConnectionValid = true;
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Get the modules available
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
+        $modules = [];
         try {
             // Get
-            $url = $this->paramConnexion['url'].'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';
-            $APImodules = $this->call($url, 'GET');
+            $url = $this->connectionParam['url'].'/api/resource/DocType?limit_page_length=1000&fields=[%22name%22,%20%22istable%22]';
+            $APImodules = $this->call($url);
             if (!empty($APImodules->data)) {
                 foreach ($APImodules->data as $APImodule) {
                     $modules[$APImodule->name] = $APImodule->name;
@@ -118,25 +127,25 @@ class ERPNext extends Solution
                     $this->isTableModule[$APImodule->name] = $APImodule->istable;
                 }
             }
-
-            return $modules;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
+
+        return $modules;
     }
 
-    // Get the fields available for the module in input
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Call get modules to fill the isTableModule array and ge the module list.
-            $modules = $this->get_modules();
+            $modules = $this->getModules();
 
             // Get the list field for a module
-            $url = $this->paramConnexion['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);
+            $url = $this->connectionParam['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);
             $recordList = $this->call($url, 'GET', '');
             // Format outpput data
             if (!empty($recordList->docs[0]->fields)) {
@@ -155,7 +164,7 @@ class ERPNext extends Solution
                         ];
                     // Add field to manage dymamic links
                     } elseif (
-                            'Table' == $field->fieldtype
+                        'Table' == $field->fieldtype
                         and 'Dynamic Link' == $field->options
                     ) {
                         $this->moduleFields['link_doctype'] = [
@@ -196,12 +205,12 @@ class ERPNext extends Solution
                     }
                 }
             } else {
-                throw new \Exception('No data in the module '.$module.'. Failed to get the field list.');
+                throw new Exception('No data in the module '.$module.'. Failed to get the field list.');
             }
 
             // If the module is a table and the solution is used in target, we add 3 fields
             if (
-                    'target' == $type
+                'target' == $type
                 and !empty($this->isTableModule[$module])
             ) {
                 // Parenttype => relate module/DocType de la relation (eg for Sales Invoice Item, it will be Sales Invoice)
@@ -233,18 +242,13 @@ class ERPNext extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return false;
         }
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
     public function read(array $param): ?array
     {
         try {
@@ -276,7 +280,7 @@ class ERPNext extends Solution
 
             // Send the query
             $q = http_build_query($data);
-            $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
+            $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']).'?'.$q;
             $resultQuery = $this->call($url, 'GET', '');
 
             // If no result
@@ -284,7 +288,7 @@ class ERPNext extends Solution
                 $result['error'] = 'Request error';
             } elseif (count($resultQuery->data) > 0) {
                 $resultQuery = $resultQuery->data;
-                foreach ($resultQuery as $key => $recordList) {
+                foreach ($resultQuery as $recordList) {
                     $record = null;
                     foreach ($param['fields'] as $field) {
                         $record[$field] = $recordList->$field;
@@ -294,7 +298,7 @@ class ERPNext extends Solution
                     $result[] = $record; // last record
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }
 
@@ -306,28 +310,17 @@ class ERPNext extends Solution
         return $this->createUpdate('create', $param);
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         return $this->createUpdate('update', $param);
     }
 
-    /**
-     * @param $method
-     * @param $param
-     *
-     * @return array
-     */
-    public function createUpdate($method, $param)
+    public function createUpdate($method, $param): array
     {
         try {
             $result = [];
             $subDocIdArray = [];
-            $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']);
+            $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']);
             if ('update' == $method) {
                 $method = 'PUT';
             } else {
@@ -342,7 +335,7 @@ class ERPNext extends Solution
                                     'target_id' == $key
                                 and !empty($value)
                             ) {
-                                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
+                                $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
                             }
                             unset($data[$key]);
                         // if the data is a link
@@ -353,25 +346,23 @@ class ERPNext extends Solution
                         // If the data is a submodule (eg : invoice lines)
                         } elseif (is_array($value)) {
                             if (empty($this->childModuleKey[$key])) {
-                                throw new \Exception('The childModuleKey is missing for the module '.$key);
+                                throw new Exception('The childModuleKey is missing for the module '.$key);
                             }
-                            if (!empty($value)) {
-                                foreach ($value as $subIdDoc => $subData) {
-                                    // Save the subIdoc to change the sub data transfer status
-                                    $subDocIdArray[$subIdDoc] = ['id' => uniqid('', true)];
-                                    foreach ($subData as $subKey => $subValue) {
-                                        // We don't send Myddleware fields
-                                        if (in_array($subKey, ['target_id', 'id_doc_myddleware', 'source_date_modified'])) {
-                                            unset($subData[$subKey]);
-                                        // if the data is a link
-                                        } elseif ('link_doctype' == $subKey) {
-                                            $subData['links'] = [['link_doctype' => $subData[$subKey], 'link_name' => $subData['link_name']]];
-                                            unset($subData[$subKey]);
-                                            unset($subData['link_name']);
-                                        }
+                            foreach ($value as $subIdDoc => $subData) {
+                                // Save the subIdoc to change the sub data transfer status
+                                $subDocIdArray[$subIdDoc] = ['id' => uniqid('', true)];
+                                foreach ($subData as $subKey => $subValue) {
+                                    // We don't send Myddleware fields
+                                    if (in_array($subKey, ['target_id', 'id_doc_myddleware', 'source_date_modified'])) {
+                                        unset($subData[$subKey]);
+                                    // if the data is a link
+                                    } elseif ('link_doctype' == $subKey) {
+                                        $subData['links'] = [['link_doctype' => $subData[$subKey], 'link_name' => $subData['link_name']]];
+                                        unset($subData[$subKey]);
+                                        unset($subData['link_name']);
                                     }
-                                    $data[$this->childModuleKey[$key]][] = $subData;
                                 }
+                                $data[$this->childModuleKey[$key]][] = $subData;
                             }
                             // Remove the original array
                             unset($data[$key]);
@@ -383,11 +374,11 @@ class ERPNext extends Solution
                         // utf8_decode because the id could be a name with special characters
                         $result[$idDoc] = ['id' => utf8_decode($resultQuery->data->name), 'error' => ''];
                     } elseif (!empty($resultQuery)) {
-                        throw new \Exception($resultQuery);
+                        throw new Exception($resultQuery);
                     } else {
-                        throw new \Exception('No result from ERPNext. ');
+                        throw new Exception('No result from ERPNext. ');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => $e->getMessage(),
@@ -405,7 +396,7 @@ class ERPNext extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['error'] = $error;
         }
@@ -413,8 +404,10 @@ class ERPNext extends Solution
         return $result;
     }
 
-    // return the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * @throws Exception
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
@@ -423,10 +416,9 @@ class ERPNext extends Solution
         } elseif ('C' == $ruleMode) {
             return 'creation';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $date = new \DateTime($dateTime);
@@ -468,19 +460,19 @@ class ERPNext extends Solution
      *
      * @return mixed|void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function call($url, $method = 'GET', $parameters = [], $timeout = 300)
     {
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
-            throw new \Exception('curl extension is missing!');
+            throw new Exception('curl extension is missing!');
         }
         $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/solutions/erpnext/erpnext.txt';
         $fs = new Filesystem();
         try {
             $fs->mkdir(dirname($fileTmp));
         } catch (IOException $e) {
-            throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
+            throw new Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
         }
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, true);

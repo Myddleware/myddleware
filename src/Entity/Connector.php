@@ -49,7 +49,7 @@ class Connector implements \Stringable
     /**
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
-    private $name;
+    private ?string $name = null;
 
     /**
      * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
@@ -57,21 +57,15 @@ class Connector implements \Stringable
     private $connectorParams;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
-     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id", nullable=false)
-     */
-    private $solution;
-
-    /**
      * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
      * @ORM\Column(length=50, nullable=false, name="name_slug")
      */
-    private $nameSlug;
+    private ?string $nameSlug;
 
     /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":false})
      */
-    private $deleted;
+    private ?bool $deleted;
 
     /**
      * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="connectorSource", orphanRemoval=true)
@@ -87,23 +81,29 @@ class Connector implements \Stringable
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="created_by")
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="modified_by")
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $createdAt;
+    private ?\DateTimeImmutable $createdAt;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $updatedAt;
+    private ?\DateTimeImmutable $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Solution::class, inversedBy="connectors")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Solution $solution;
 
     public function __construct()
     {
@@ -141,16 +141,16 @@ class Connector implements \Stringable
         return $this->nameSlug;
     }
 
-    public function setSolution(Solution $solution): self
+    public function getSolution(): ?Solution
+    {
+        return $this->solution;
+    }
+
+    public function setSolution(?Solution $solution): self
     {
         $this->solution = $solution;
 
         return $this;
-    }
-
-    public function getSolution(): ?Solution
-    {
-        return $this->solution;
     }
 
     public function addConnectorParam(ConnectorParam $connectorParam): self
@@ -297,7 +297,7 @@ class Connector implements \Stringable
 
     public function __toString(): string
     {
-        return $this->name;
+        return $this->name ?? '';
     }
 
     public function addRulesWhereIsSource(Rule $rulesWhereIsSource): self

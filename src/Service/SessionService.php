@@ -12,7 +12,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class SessionService
 {
     public const MYDDLEWARE_SESSION_INDEX = 'myddlewareSession';
+
     private $_session;
+
     private $requestStack;
 
     public const ERROR_CREATE_RULE_INDEX = 'create_rule';
@@ -28,9 +30,7 @@ class SessionService
      */
     public function getSession()
     {
-        $session = $this->requestStack->getSession();
-
-        return $session;
+        return $this->requestStack->getSession();
     }
 
     public function getMyddlewareSession()
@@ -401,19 +401,19 @@ class SessionService
 
     // ############ MAILCHIMP ###################
 
-    public function setMailchimpParamConnexion($redirectUri, $value)
+    public function setMailchimpParamConnection($redirectUri, $value)
     {
         $myddlewareSession = $this->getMyddlewareSession();
-        $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'] = $value;
+        $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['connectionParam'] = $value;
 
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function getMailchimpParamConnexion($redirectUri)
+    public function getMailchimpParamConnection($redirectUri)
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'];
+        return $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['connectionParam'];
     }
 
     // ############ MAILCHIMP ###################

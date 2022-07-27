@@ -13,59 +13,43 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
-#[UniqueEntity(fields: ['email', 'username'], message: 'There is already an account with this email')]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
+     * The hashed password.
      */
-    private $password;
+    #[ORM\Column(type: 'string')]
+    private string $password;
 
-    /**
-     * @Assert\Timezone
-     * @ORM\Column(type="string", length=255)
-     */
-    private $timezone;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Timezone()]
+    private ?string $timezone;
 
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
-    private $email;
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Assert\NotBlank()]
+    #[Assert\Email()]
+    private ?string $email;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isVerified = false;
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $username;
+    #[ORM\Column(type: 'string', length: 180, unique: true, nullable: true)]
+    private string $username;
 
-    /**
-     * @ORM\OneToMany(targetEntity=DocumentAudit::class, mappedBy="modifiedBy")
-     */
+    #[ORM\OneToMany(mappedBy: 'modifiedBy', targetEntity: DocumentAudit::class)]
     private $documentAudits;
 
-    /**
-     * @ORM\OneToMany(targetEntity=RuleParamAudit::class, mappedBy="modifiedBy")
-     */
+    #[ORM\OneToMany(mappedBy: 'modifiedBy', targetEntity: RuleParamAudit::class)]
     private $ruleParamAudits;
 
     public function __construct()

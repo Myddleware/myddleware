@@ -1,0 +1,16 @@
+<section>
+    <div class="login-fields-form">
+        {% for loginField in loginFields %}
+            {{ form_row(form[loginField.name]) }}
+        {% endfor %}
+    </div>
+    <div class="test-credentials"
+         data-controller="connector"
+         data-connector-fields-value="{{ loginFields|json_encode() }}"
+         data-connector-url-value="{{ urlTest }}"
+         data-connector-solution-value="{{ solution }}">
+        <div class="btn btn-primary" data-action="click->connector#testConnector">
+            Test connexion
+        </div>
+    </div>
+</section>

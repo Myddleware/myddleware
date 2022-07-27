@@ -41,23 +41,27 @@ use Symfony\Component\Process\Process;
 class UpgradeManager
 {
     protected $env;
+
     protected $em;
+
     protected $phpExecutable = 'php';
+
     protected $message = '';
+
     protected $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
+
     protected $configParams;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
-    /**
-     * @var string
-     */
-    private $projectDir;
+
     /**
      * @var KernelInterface
      */
     private $kernel;
+
     /**
      * @var EntityManagerInterface
      */
@@ -74,7 +78,6 @@ class UpgradeManager
         $this->entityManager = $entityManager;
         $this->parameterBagInterface = $parameterBagInterface;
         $this->env = $kernel->getEnvironment();
-        $this->projectDir = $kernel->getProjectDir();
 
         // Get the php executable
         $phpBinaryFinder = new PhpExecutableFinder();
@@ -185,7 +188,7 @@ class UpgradeManager
     {
         // Change the command composer if php isn't the default php version
         // TODO: $command must be an array of commands with its arguments as a separate entry
-        $process = new Process('composer install --ignore-platform-reqs');
+        $process = new Process(['composer', 'install', '--ignore-platform-reqs']);
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -197,14 +200,14 @@ class UpgradeManager
     protected function yarnAction()
     {
         // TODO: $command must be an array of commands with its arguments as a separate entry
-        $process = new Process('yarn install');
+        $process = new Process(['yarn', 'install']);
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
         // TODO: $command must be an array of commands with its arguments as a separate entry
-        $process = new Process('yarn build');
+        $process = new Process(['yarn', 'build']);
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -215,7 +218,7 @@ class UpgradeManager
     // Clear boostrap cache
     protected function clearBoostrapCache()
     {
-        $process = new Process($this->phpExecutable.' vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
+        $process = new Process([$this->phpExecutable, 'vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php']);
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -316,10 +319,8 @@ class UpgradeManager
     {
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
-        if (!empty($configs)) {
-            foreach ($configs as $config) {
-                $this->configParams[$config->getName()] = $config->getvalue();
-            }
+        foreach ($configs as $config) {
+            $this->configParams[$config->getName()] = $config->getvalue();
         }
     }
 

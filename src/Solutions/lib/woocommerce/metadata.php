@@ -112,7 +112,6 @@ $moduleFields = [
                             'billing__city' => ['label' => 'Billing : City', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__postcode' => ['label' => 'Billing : Postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__country' => ['label' => 'Billing : Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                            'billing__state' => ['label' => 'Billing : State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__email' => ['label' => 'Billing : Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__phone' => ['label' => 'Billing : Phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__state' => ['label' => 'Billing : State', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -161,7 +160,6 @@ $moduleFields = [
                             'billing__city' => ['label' => 'Billing city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__postcode' => ['label' => 'Billing postcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__country' => ['label' => 'Billing country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                            'billing__state' => ['label' => 'Billing state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__email' => ['label' => 'Billing email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__phone' => ['label' => 'Billing phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'billing__state' => ['label' => 'Billing state', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -195,7 +193,6 @@ $moduleFields = [
                         'line_items' => [
                             'id' => ['label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                            'product_id' => ['label' => 'Product ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'variation_id' => ['label' => 'Variation ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'quantity' => ['label' => 'Quantity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                             'tax_class' => ['label' => 'Tax class', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],

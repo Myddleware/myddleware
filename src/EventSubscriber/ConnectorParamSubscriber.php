@@ -8,8 +8,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConnectorParamSubscriber implements EventSubscriberInterface
 {
-
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             BeforeEntityPersistedEvent::class => ['setConnector'],
@@ -23,6 +22,6 @@ class ConnectorParamSubscriber implements EventSubscriberInterface
         if (!($entity instanceof ConnectorParam)) {
             return;
         }
-        //TODO: find a way to setconnector() when cascade persist from connector is used (from connectorcrudcontroller)
+        // TODO: find a way to setconnector() when cascade persist from connector is used (from connectorcrudcontroller)
     }
 }

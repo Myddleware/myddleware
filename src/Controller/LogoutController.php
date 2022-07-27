@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +16,7 @@ class LogoutController extends AbstractController
      * @return void
      */
     #[Route('/logout', name: 'logout')]
-    public function logout()
+    public function logout(): void
     {
     }
 }

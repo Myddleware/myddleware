@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -26,13 +29,17 @@
 namespace App\Solutions;
 
 use App\Solutions\lib\curl;
+use DateTime;
+use Exception;
+use SimpleXMLElement;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class Moodle extends Solution
 {
     protected $moodleClient;
-    protected $required_fields = [
+
+    protected array $requiredFields = [
         'default' => ['id'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
@@ -40,37 +47,35 @@ class Moodle extends Solution
         'get_user_grades' => ['id', 'timemodified'],
     ];
 
-    protected $fieldsDuplicate = [
+    protected array $fieldsDuplicate = [
         'users' => ['email', 'username'],
         'courses' => ['shortname', 'idnumber'],
     ];
 
-    protected $delaySearch = '-1 year';
+    protected string $delaySearch = '-1 year';
 
-    public function login($paramConnexion)
+    public function login($connectionParam): void
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $this->moodleClient = new curl();
             $params = [];
-            $this->paramConnexion['token'] = trim($this->paramConnexion['token']);
-            $functionname = 'core_webservice_get_site_info';
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-            $response = $this->moodleClient->post($serverurl, $params);
+            $this->connectionParam['token'] = trim($this->connectionParam['token']);
+            $methodName = 'core_webservice_get_site_info';
+            $url = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$methodName;
+            $response = $this->moodleClient->post($url, $params);
             $xml = simplexml_load_string($response);
 
             if (!empty($xml->SINGLE->KEY[0]->VALUE)) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } elseif (!empty($xml->ERRORCODE)) {
-                throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
+                throw new Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
             } else {
-                throw new \Exception('Error unknown. ');
+                throw new Exception('Error unknown. ');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -90,73 +95,70 @@ class Moodle extends Solution
         ];
     }
 
-    // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
-        try {
-            if ('source' == $type) {
-                return [
-                    'users' => 'Users',
-                    'courses' => 'Courses',
-                    'get_users_completion' => 'Get course activity completion',
-                    'get_users_last_access' => 'Get users last access',
-                    'get_enrolments_by_date' => 'Get enrolments',
-                    'get_course_completion_by_date' => 'Get course completion',
-                    'get_user_compentencies_by_date' => 'Get user compentency',
-                    'get_competency_module_completion_by_date' => 'Get compentency module completion',
-                    'get_user_grades' => 'Get user grades',
-                ];
-            }
-
+        if ('source' == $type) {
             return [
                 'users' => 'Users',
                 'courses' => 'Courses',
-                'groups' => 'Groups',
-                'group_members' => 'Group members',
-                'manual_enrol_users' => 'Manual enrol users',
-                'manual_unenrol_users' => 'Manual unenrol users',
-                'notes' => 'Notes',
+                'get_users_completion' => 'Get course activity completion',
+                'get_users_last_access' => 'Get users last access',
+                'get_enrolments_by_date' => 'Get enrolments',
+                'get_course_completion_by_date' => 'Get course completion',
+                'get_user_compentencies_by_date' => 'Get user compentency',
+                'get_competency_module_completion_by_date' => 'Get compentency module completion',
+                'get_user_grades' => 'Get user grades',
             ];
-        } catch (\Exception $e) {
-            return false;
         }
+
+        return [
+            'users' => 'Users',
+            'courses' => 'Courses',
+            'groups' => 'Groups',
+            'group_members' => 'Group members',
+            'manual_enrol_users' => 'Manual enrol users',
+            'manual_unenrol_users' => 'Manual unenrol users',
+            'notes' => 'Notes',
+        ];
     }
 
-    // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        $moduleFields = [];
+        parent::getModuleFields($module, $type);
         try {
-            // Use Moodle metadata
             require 'lib/moodle/metadata.php';
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
-            // If the field catagory ID exist we fill it by requesting Moodle
+            // If the field category ID exist we fill it by requesting Moodle
             if (!empty($this->moduleFields['categoryid'])) {
                 try {
                     // Récupération de toutes les catégories existantes
                     $params = [];
-                    $functionname = 'core_course_get_categories';
-                    $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                    $response = $this->moodleClient->post($serverurl, $params);
+                    $methodName = 'core_course_get_categories';
+                    $url = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$methodName;
+                    $response = $this->moodleClient->post($url, $params);
                     $xml = simplexml_load_string($response);
                     if (!empty($xml->MULTIPLE->SINGLE)) {
                         foreach ($xml->MULTIPLE as $category) {
                             $this->moduleFields['categoryid']['option'][$category->SINGLE->KEY[0]->VALUE->__toString()] = $category->SINGLE->KEY[1]->VALUE->__toString();
                         }
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
+                    $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
                 }
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // Read data in Moodle
     public function read($param): array
     {
         try {
@@ -165,14 +167,14 @@ class Moodle extends Solution
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
             // Get function to call Moodle
-            $functionName = $this->getFunctionName($param);
+            $methodName = $this->getMethodName($param);
 
             // Call to Moodle
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
-            $response = $this->moodleClient->post($serverurl, $parameters);
+            $url = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$methodName;
+            $response = $this->moodleClient->post($url, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
-                throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
+                throw new Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
             }
 
             // Transform the data to Myddleware format
@@ -180,29 +182,30 @@ class Moodle extends Solution
                 foreach ($xml->MULTIPLE->SINGLE as $data) {
                     foreach ($data as $field) {
                         // Get all the requested fields
-                        if (false !== array_search($field->attributes()->__toString(), $param['fields'])) {
+                        if (in_array($field->attributes()->__toString(), $param['fields'])) {
                             $row[$field->attributes()->__toString()] = $field->VALUE->__toString();
                         }
                     }
                     $result[] = $row;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // Permet de créer des données
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
-        // Transformation du tableau d'entrée pour être compatible webservice Sugar
+        $result = [];
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-                $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     // We don't send Myddleware_element_id field to Moodle
@@ -213,46 +216,46 @@ class Moodle extends Solution
                         $obj->$key = $value;
                     }
                 }
+                $params = [];
                 switch ($param['module']) {
                     case 'users':
                         $users = [$obj];
                         $params = ['users' => $users];
-                        $functionname = 'core_user_create_users';
+                        $methodName = 'core_user_create_users';
                         break;
                     case 'courses':
                         $courses = [$obj];
                         $params = ['courses' => $courses];
-                        $functionname = 'core_course_create_courses';
+                        $methodName = 'core_course_create_courses';
                         break;
                     case 'groups':
                         $groups = [$obj];
                         $params = ['groups' => $groups];
-                        $functionname = 'core_group_create_groups';
+                        $methodName = 'core_group_create_groups';
                         break;
                     case 'group_members':
                         $members = [$obj];
                         $params = ['members' => $members];
-                        $functionname = 'core_group_add_group_members';
+                        $methodName = 'core_group_add_group_members';
                         break;
                     case 'manual_enrol_users':
                         $enrolments = [$obj];
                         $params = ['enrolments' => $enrolments];
-                        $functionname = 'enrol_manual_enrol_users';
+                        $methodName = 'enrol_manual_enrol_users';
                         break;
                     case 'manual_unenrol_users':
                         break;
                     case 'notes':
                         $notes = [$obj];
                         $params = ['notes' => $notes];
-                        $functionname = 'core_notes_create_notes';
+                        $methodName = 'core_notes_create_notes';
                         break;
                     default:
-                        throw new \Exception('Module unknown. ');
-                        break;
+                        throw new Exception('Module unknown. ');
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                $response = $this->moodleClient->post($serverurl, $params);
+                $url = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$methodName;
+                $response = $this->moodleClient->post($url, $params);
                 $xml = simplexml_load_string($response);
 
                 // Réponse standard pour les modules avec retours
@@ -266,52 +269,52 @@ class Moodle extends Solution
                     ];
                 } elseif (
                         !empty($xml->MULTIPLE->SINGLE->KEY[1]->VALUE)
-                    && in_array($param['module'], ['notes'])
+                    && 'notes' == $param['module']
                 ) {
                     $result[$idDoc] = [
                         'id' => $xml->MULTIPLE->SINGLE->KEY[1]->VALUE,
                         'error' => false,
                     ];
                 } elseif (!empty($xml->ERRORCODE)) {
-                    throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
+                    throw new Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
                 }
                 // Si pas d'erreur et module sans retour alors on génère l'id
-                elseif (in_array($param['module'], ['manual_enrol_users'])) {
+                elseif ('manual_enrol_users' == $param['module']) {
                     $result[$idDoc] = [
                         'id' => $obj->courseid.'_'.$obj->userid.'_'.$obj->roleid,
                         'error' => false,
                     ];
-                } elseif (in_array($param['module'], ['group_members'])) {
+                } elseif ('group_members' == $param['module']) {
                     $result[$idDoc] = [
                         'id' => $obj->groupid.'_'.$obj->userid,
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('Error unknown. ');
+                    throw new Exception('Error unknown. ');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
-        // Transformation du tableau d'entrée pour être compatible webservice Sugar
+        $result = [];
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
                 $data = $this->checkDataBeforeUpdate($param, $data);
-                $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     if ('target_id' == $key) {
@@ -331,18 +334,18 @@ class Moodle extends Solution
                         $obj->id = $data['target_id'];
                         $users = [$obj];
                         $params = ['users' => $users];
-                        $functionname = 'core_user_update_users';
+                        $methodName = 'core_user_update_users';
                         break;
                     case 'courses':
                         $obj->id = $data['target_id'];
                         $courses = [$obj];
                         $params = ['courses' => $courses];
-                        $functionname = 'core_course_update_courses';
+                        $methodName = 'core_course_update_courses';
                         break;
                     case 'manual_enrol_users':
                         $enrolments = [$obj];
                         $params = ['enrolments' => $enrolments];
-                        $functionname = 'enrol_manual_enrol_users';
+                        $methodName = 'enrol_manual_enrol_users';
                         break;
                     case 'notes':
                         $obj->id = $data['target_id'];
@@ -350,33 +353,32 @@ class Moodle extends Solution
                         unset($obj->courseid);
                         $notes = [$obj];
                         $params = ['notes' => $notes];
-                        $functionname = 'core_notes_update_notes';
+                        $methodName = 'core_notes_update_notes';
                         break;
                     case 'group_members':
                         $members = [$obj];
                         $params = ['members' => $members];
-                        $functionname = 'core_group_add_group_members';
+                        $methodName = 'core_group_add_group_members';
                         break;
                     default:
-                        throw new \Exception('Module unknown. ');
-                        break;
+                        throw new Exception('Module unknown. ');
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                $response = $this->moodleClient->post($serverurl, $params);
+                $url = $this->connectionParam['url'].'/webservice/rest/server.php'.'?wstoken='.$this->connectionParam['token'].'&wsfunction='.$methodName;
+                $response = $this->moodleClient->post($url, $params);
                 $xml = simplexml_load_string($response);
 
                 // Réponse standard pour les modules avec retours
                 if (!empty($xml->ERRORCODE)) {
-                    throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' Debug : '.$xml->DEBUGINFO : ''));
+                    throw new Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' Debug : '.$xml->DEBUGINFO : ''));
                 }
                 // Si pas d'erreur et module sans retour alors on génère l'id
-                elseif (in_array($param['module'], ['manual_enrol_users'])) {
+                elseif ('manual_enrol_users' == $param['module']) {
                     $result[$idDoc] = [
                         'id' => $obj->courseid.'_'.$obj->userid.'_'.$obj->roleid,
                         'error' => false,
                     ];
-                } elseif (in_array($param['module'], ['group_members'])) {
+                } elseif ('group_members' == $param['module']) {
                     $result[$idDoc] = [
                         'id' => $obj->groupid.'_'.$obj->userid,
                         'error' => false,
@@ -387,14 +389,13 @@ class Moodle extends Solution
                         'error' => false,
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
@@ -403,12 +404,12 @@ class Moodle extends Solution
 
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
-    // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    // Si la règle n'est qu'en création, pas en modification alors le mode est C
+    public function getRuleMode($module, $type): array
     {
         if (
                 'target' == $type
-            && in_array($module, ['groups'])
+            && 'groups' == $module
         ) { // Si le module est dans le tableau alors c'est uniquement de la création
             return [
                 'C' => 'create_only',
@@ -418,28 +419,28 @@ class Moodle extends Solution
         return parent::getRuleMode($module, $type);
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToMyddleware($dateTime): string
     {
-        $date = new \DateTime();
-        $date->setTimestamp($dateTime);
+        $date = new DateTime();
+        $date->setTimestamp((int) $dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
 
-    // Function de conversion de datetime format Myddleware à un datetime format solution
+    /**
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware($dateTime): string
     {
-        $date = new \DateTime($dateTime);
+        $date = new DateTime($dateTime);
 
         return $date->format('U');
     }
 
-    // Format webservice result if needed
-    protected function formatResponse($method, $response, $param)
+    protected function formatResponse($method, $response, $param): SimpleXMLElement|bool
     {
         $xml = simplexml_load_string($response);
-        $functionName = $this->getFunctionName($param);
+        $functionName = $this->getMethodName($param);
         if ('read' == $method) {
             if (in_array($functionName, ['core_user_get_users', 'core_course_get_courses_by_field'])) {
                 $xml = $xml->SINGLE->KEY[0];
@@ -449,8 +450,7 @@ class Moodle extends Solution
         return $xml;
     }
 
-    // Get the function name
-    protected function getFunctionName($param)
+    protected function getMethodName($param): string
     {
         // In case of duplicate search (search with a criteria)
         if (
@@ -475,10 +475,12 @@ class Moodle extends Solution
         return 'local_myddleware_'.$param['module'];
     }
 
-    // Prepare parameters for read function
-    protected function setParameters($param)
+    /**
+     * @throws Exception
+     */
+    protected function setParameters($param): array
     {
-        $functionName = $this->getFunctionName($param);
+        $functionName = $this->getMethodName($param);
         $parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);
         // If standard function called to search by criteria
         if (in_array($functionName, ['core_user_get_users', 'core_course_get_courses_by_field'])) {
@@ -492,7 +494,7 @@ class Moodle extends Solution
                     }
                 }
             } else {
-                throw new \Exception('Filter criteria empty. Not allowed to run function '.$functionName.' without filter criteria.');
+                throw new Exception('Filter criteria empty. Not allowed to run function '.$functionName.' without filter criteria.');
             }
         } elseif (!empty($param['query']['id'])) {
             $parameters['id'] = $param['query']['id'];
@@ -501,19 +503,12 @@ class Moodle extends Solution
         return $parameters;
     }
 
-    // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
-        switch ($moduleSource) {
-            case 'get_course_completion_by_date':
-                return 'timecompleted';
-                break;
-            case 'get_users_last_access':
-                return 'lastaccess';
-                break;
-            default:
-                return 'timemodified';
-                break;
-        }
+        return match ($moduleSource) {
+            'get_course_completion_by_date' => 'timecompleted',
+            'get_users_last_access' => 'lastaccess',
+            default => 'timemodified',
+        };
     }
 }

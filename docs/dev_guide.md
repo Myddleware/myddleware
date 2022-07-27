@@ -79,7 +79,7 @@ Now we need to create a new connector class, in ```myddleware/src/Solutions```, 
         protected $readDeletion = true;
         protected $sendDeletion = true;
 
-        protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+        protected $requiredFields = ['default' => ['id', 'date_modified', 'date_entered']];
         
         ...
         }
@@ -130,29 +130,29 @@ Now to connect your connector, we need to create a new function in your class, w
 
 Example code, available in the file ```myddleware/src/Solution/suitecrm.php```
 
-You have to add this function login to check the connexion with you application.
+You have to add this function login to check the connection with you application.
 
-Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
+Make sure every error is catched and "this->isConnectionValid = true" if the connection works.
 
 ```php
-         public function login($paramConnexion)
+         public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $login_paramaters = [
                 'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
+                    'user_name' => $this->connectionParam['login'],
+                    'password' => md5($this->connectionParam['password']),
                     'version' => '.01',
                 ],
                 'application_name' => 'myddleware',
             ];
             // remove index.php in the url
-            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+            $this->connectionParam['url'] = str_replace('index.php', '', $this->connectionParam['url']);
             // Add the suffix with rest parameters to the url
-            $this->paramConnexion['url'] .= $this->urlSuffix;
+            $this->connectionParam['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $result = $this->call('login', $login_paramaters, $this->connectionParam['url']);
 
             if (false != $result) {
                 if (empty($result->id)) {
@@ -160,7 +160,7 @@ Make sure every error is catched and "this->connexion_valide = true" if the conn
                 }
 
                 $this->session = $result->id;
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 throw new \Exception('Please check url');
             }
@@ -177,13 +177,13 @@ To debug this function, you can click on the button "Test" and check the result 
 
 *Let's now create the first rule*
 
-### Method get_modules
+### Method getModules
 
-Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "get_modules" function.
+Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "getModules" function.
 
 Here, you have to add the module you want to connect in the method.
 
-In input you have access to the type of connexion, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
+In input you have access to the type of connection, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
 
 You then return an array with a list of module:
 
@@ -209,11 +209,11 @@ Now you can debug (with firebug for example) your function when the module list 
 
 Next step is the fields mapping, we now need to create a function for it.
 
-### Method get_module_fields
+### Method getModuleFields
 
 You have to indicate to Myddleware what fields are available for each module. If your application has a function which describe all fields for every module, you should use it. For example, we did it for Salesforce or Prestashop. Otherwise you have to describe every field.
 
-- Add the function get_module_fields in you class.
+- Add the function getModuleFields in you class.
 
 <!-- tabs:start -->
 
@@ -270,7 +270,7 @@ Parameters :
 
 Myddleware has to be able to read records from the source application. The list of fields returns must be the ones in the rule field mapping (input entry : fields). But some other fields are requiered : the id of the record and its reference (usually the modified record datetime). But the id and reference can be named differently depending on the application and the module.
 
-> It is the reason why you have to create the attribute required_fields in your class :
+> It is the reason why you have to create the attribute requiredFields in your class :
 
 IMAGE
 

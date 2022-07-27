@@ -34,14 +34,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UpgradeCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:upgrade';
+
+    private LoggerInterface $logger;
+
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -55,10 +52,7 @@ class UpgradeCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:upgrade')
-            ->setDescription('Upgrade of Myddleware')
-        ;
+        $this->setDescription('Upgrade of Myddleware');
     }
 
     // Process to the upgrade

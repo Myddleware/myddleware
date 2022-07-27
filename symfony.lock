@@ -22,9 +22,6 @@
     "automattic/woocommerce": {
         "version": "3.0.0"
     },
-    "babdev/pagerfanta-bundle": {
-        "version": "v3.6.1"
-    },
     "beberlei/doctrineextensions": {
         "version": "v1.3.0"
     },
@@ -232,12 +229,6 @@
     "jetbrains/phpstorm-stubs": {
         "version": "v2019.3"
     },
-    "jquery/jquery": {
-        "version": "3.5.1"
-    },
-    "jquery/jquery_ui": {
-        "version": "1.11.1"
-    },
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
@@ -312,9 +303,6 @@
     },
     "nikic/php-parser": {
         "version": "v4.13.2"
-    },
-    "pagerfanta/pagerfanta": {
-        "version": "v3.6.0"
     },
     "paragonie/random_compat": {
         "version": "v2.0.21"
@@ -489,6 +477,9 @@
     "shapecode/cron-bundle": {
         "version": "5.0.0"
     },
+    "stella-maris/clock": {
+        "version": "0.1.4"
+    },
     "stof/doctrine-extensions-bundle": {
         "version": "1.7",
         "recipe": {
@@ -607,15 +598,15 @@
         "version": "v5.4.3"
     },
     "symfony/flex": {
-        "version": "1.18",
+        "version": "1.19",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
+            "branch": "main",
             "version": "1.0",
-            "ref": "c0eeb50665f0f77226616b6038a9b06c03752d8e"
+            "ref": "146251ae39e06a95be0fe3d13c807bcf3938b172"
         },
         "files": [
-            "./.env"
+            ".env"
         ]
     },
     "symfony/form": {
@@ -716,12 +707,12 @@
         "version": "5.4",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "4.3",
-            "ref": "25e3c964d3aee480b3acc3114ffb7940c89edfed"
+            "branch": "main",
+            "version": "5.4",
+            "ref": "dfe610928a5c61619bdfc830cd7fa7f091368023"
         },
         "files": [
-            "./config/packages/messenger.yaml"
+            "config/packages/messenger.yaml"
         ]
     },
     "symfony/mime": {
@@ -975,19 +966,19 @@
         "version": "1.14",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
+            "branch": "main",
             "version": "1.10",
-            "ref": "2858aeed7e1d81a45365c049eb533cc8827e380b"
+            "ref": "91f4d29f5ebbd2fcccc71ca55a17d14a17b308e8"
         },
         "files": [
-            "./assets/app.js",
-            "./assets/bootstrap.js",
-            "./assets/controllers.json",
-            "./assets/controllers/hello_controller.js",
-            "./assets/styles/app.css",
-            "./config/packages/webpack_encore.yaml",
-            "./package.json",
-            "./webpack.config.js"
+            "assets/app.js",
+            "assets/bootstrap.js",
+            "assets/controllers.json",
+            "assets/controllers/hello_controller.js",
+            "assets/styles/app.css",
+            "config/packages/webpack_encore.yaml",
+            "package.json",
+            "webpack.config.js"
         ]
     },
     "symfony/yaml": {
@@ -1042,15 +1033,15 @@
         "version": "v1.4.2"
     },
     "zenstruck/foundry": {
-        "version": "1.17",
+        "version": "1.18",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "master",
             "version": "1.10",
-            "ref": "934cdd918703a7fcfc3ef91723a2eac42a0f7690"
+            "ref": "37c2f894cc098ab4c08874b80cccc8e2f8de7976"
         },
         "files": [
-            "./config/packages/zenstruck_foundry.yaml"
+            "config/packages/zenstruck_foundry.yaml"
         ]
     }
 }

@@ -40,11 +40,8 @@ class InstallVoter extends Voter
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
             case 'DATABASE_EDIT':
-                return $this->canInstall($config);
-                break;
             case 'DATABASE_VIEW':
                 return $this->canInstall($config);
-                break;
         }
 
         return false;

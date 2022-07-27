@@ -27,9 +27,8 @@ namespace App\Manager;
 
 class FormulaManager
 {
-    private $path = "App\Manager\FormulaFunctionManager::";
-
     public $parse = [];
+
     public $formulaFunctionManager;
 
     public function __construct(FormulaFunctionManager $formulaFunctionManager)
@@ -92,70 +91,6 @@ class FormulaManager
         }
     }
 
-    // récupère toutes les méthodes
-    private function getMethode()
-    {
-        $stringFunc = $this->parse['formuleConvert'];
-
-        // enlève les variables
-        if (isset($this->parse['field'])) {
-            foreach ($this->parse['field'] as $field) {
-                $stringFunc = str_replace('{'.$field.'}', '', $stringFunc);
-            }
-        }
-
-        // enlève les chaines
-        if (isset($this->parse['text'])) {
-            foreach ($this->parse['text'] as $txt) {
-                $txt = str_replace(';', '', $txt);
-                $stringFunc = str_replace(';', '', $stringFunc);
-                $stringFunc = str_replace('"'.$txt.'"', '', $stringFunc); // 0 space
-
-                $stringFunc = str_replace('" '.$txt.'"', '', $stringFunc); // left
-                $stringFunc = str_replace('"'.$txt.' "', '', $stringFunc); // right
-                $stringFunc = str_replace('" '.$txt.' "', '', $stringFunc); // two
-            }
-        }
-
-        $stringFunc = str_replace(['.', '?', ',', '=', '', '+', '-', '"', ';'], '', $stringFunc);
-        $stringFunc = str_replace('[]', ',', $stringFunc);
-        $stringFunc = str_replace('()', ' ', $stringFunc);
-        $stringFunc = str_replace('(', '', $stringFunc);
-        $stringFunc = str_replace(')', '', $stringFunc);
-        $r = explode(' ', $stringFunc);
-        $r = implode(',', $r);
-        $r = explode(',', $r);
-
-        if ($r) {
-            foreach ($r as $k) {
-                $ktrim = trim($k);
-                if ('' != $ktrim && strlen($k) > 2) {
-                    if (!preg_match('#[0-9]#', $ktrim)) {
-                        $this->parse['function'][] = $ktrim;
-                    }
-                }
-            }
-
-            if (isset($this->parse['function']) && count($this->parse['function']) > 0) {
-                $this->parse['function'] = array_unique($this->parse['function']);
-                $this->parse['error'] = $this->verifAutorisationSecure($this->secureFunction(), $this->parse['function'], $this->parse['error']);
-            }
-        }
-    }
-
-    // Autorisation des méthodes
-    private function secureFunction()
-    {
-        // Récupère le chemin des fonctions de myddlewareFormulaFunctions.php
-        $pathFunctions = $this->formulaFunctionManager->getPathFunctions();
-
-        // array("pow","exp","abs","sin","cos","tan"); MATHS
-        $array = ['mb_strtolower', 'trim', 'ltrim', 'rtrim', 'mb_strtoupper', 'round', 'ceil', 'abs', 'mb_substr', 'str_replace', 'preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode', 'html_entity_decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'json_decode', 'json_encode'];
-        $const = ['ENT_COMPAT', 'ENT_QUOTES', 'ENT_NOQUOTES', 'ENT_HTML401', 'ENT_XML1', 'ENT_XHTML', 'ENT_HTML5'];
-
-        return array_merge($array, $const, $pathFunctions);
-    }
-
     private function replaceStringFunction($string)
     {
         $string = str_replace('lower(', 'mb_strtolower(', $string);
@@ -167,9 +102,8 @@ class FormulaManager
         $string = str_replace('utf8decode(', 'utf8_decode(', $string);
         $string = str_replace('htmlEntityDecode(', 'html_entity_decode(', $string);
         $string = str_replace('htmlentities(', 'htmlentities(', $string);
-        $string = str_replace('htmlspecialchars(', 'htmlspecialchars(', $string);
 
-        return $string;
+        return str_replace('htmlspecialchars(', 'htmlspecialchars(', $string);
     }
 
     // Change les méthodes
@@ -201,7 +135,7 @@ class FormulaManager
             // REPLACE FUNCTION ----------------------------------------
 
             $i = 0;
-            foreach ($new_text as $index => $name) {
+            foreach ($new_text as $name) {
                 $string = str_replace('@@@txt'.$i.'@@@', $name, $string);
                 ++$i;
             }
@@ -214,22 +148,6 @@ class FormulaManager
         // str_replace sur toutes les fonctions de myddlewareFormulaFunctions.php
         $string = $this->formulaFunctionManager->addPathFunctions($string);
         $this->parse['formuleConvert'] = $string;
-    }
-
-    // Verification des tableaux pour détecter les erreurs
-    private function verifAutorisationSecure($tabSecure, $tabListe, $error)
-    {
-        if (count($tabListe) > 0) {
-            foreach ($tabListe as $l) {
-                if (!in_array($l, $tabSecure)) {
-                    ++$error;
-                }
-            }
-
-            return $error;
-        }
-
-        return $error;
     }
 
     // Détecte si une chaine possède des accents

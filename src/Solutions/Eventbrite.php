@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -42,6 +45,7 @@ class Eventbrite extends Solution
     ];
 
     private $token;
+
     private $urlBase = 'https://www.eventbrite.com/json/';
 
     public function getFieldsLogin(): array
@@ -55,20 +59,21 @@ class Eventbrite extends Solution
         ];
     }
 
-    protected $required_fields = ['default' => ['id', 'modified']];
+    protected array $requiredFields = ['default' => ['id', 'modified']];
+
     protected $eventStatuses = ''; // 'live,started,ended'
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             $parameters = [];
-            $this->token = $this->paramConnexion['token'];
+            $this->token = $this->connectionParam['token'];
             $response = $this->call($this->urlBase.'user_list_organizers', $parameters);
 
             // Pour tester la validité du token, on vérifie le retour  du webservice user_list_organizers
             if (isset($response['organizers'])) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
                 if (!empty($response['error'])) {
                     $error = $response['error']->error_message;
@@ -83,7 +88,7 @@ class Eventbrite extends Solution
         }
     }
 
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
         try {
             // Le module attendee n'est accessible d'en source
@@ -114,16 +119,14 @@ class Eventbrite extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Pour chaque module, traitement différent
             switch ($module) {
@@ -288,7 +291,6 @@ class Eventbrite extends Solution
                     break;
                 default:
                     throw new \Exception('Fields unreadable');
-                    break;
             }
 
             return $this->moduleFields;
@@ -340,7 +342,6 @@ class Eventbrite extends Solution
             try {
                 // Check control before create
                 $parametersEvent = $this->checkDataBeforeCreate($param, $parametersEvent);
-                $idDoc = '';
                 // array_shift permet de supprimer la première entrée du tableau contenant l'id du docuement et de la sauvegarder dans la variable idDoc
                 $idDoc = array_shift($parametersEvent);
                 $responseEvent = $this->call($this->urlBase.$moduleSingle.'_new', $parametersEvent);
@@ -385,7 +386,6 @@ class Eventbrite extends Solution
             try {
                 // Check control before update
                 $parametersEvent = $this->checkDataBeforeUpdate($param, $parametersEvent);
-                $idDoc = '';
                 // array_shift permet de supprimer la première entrée du tableau contenant l'id du docuement et de la sauvegarder dans la variable idDoc
                 $idDoc = array_shift($parametersEvent);
                 // On renomme l'entrée target_id en id
@@ -642,8 +642,6 @@ class Eventbrite extends Solution
                                     if (strtotime($value) <= strtotime($param['date_ref'])) {
                                         break 2;
                                     }
-
-                                    $dateRefTmp = $value;
                                 }
                             }
                             $result['values'][$id] = $record;
@@ -696,12 +694,9 @@ class Eventbrite extends Solution
             curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $json_data = curl_exec($ch);
-            $resp_info = curl_getinfo($ch);
             curl_close($ch);
 
-            $response = get_object_vars(json_decode($json_data));
-
-            return $response;
+            return get_object_vars(json_decode($json_data));
         } catch (\Exception $e) {
             return false;
         }

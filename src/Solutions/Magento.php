@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -46,7 +49,7 @@ class Magento extends Solution
         'customers' => ['email'],
     ];
 
-    protected $required_fields = ['default' => ['updated_at']];
+    protected array $requiredFields = ['default' => ['updated_at']];
 
     protected $callLimit = 100;
 
@@ -71,12 +74,12 @@ class Magento extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            $userData = ['username' => $this->paramConnexion['login'], 'password' => $this->paramConnexion['password']];
-            $result = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);
+            $userData = ['username' => $this->connectionParam['login'], 'password' => $this->connectionParam['password']];
+            $result = $this->call($this->connectionParam['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);
             if (!empty($result['message'])) {
                 throw new \Exception($result['message']);
             } elseif (!empty($result)) {
@@ -84,7 +87,7 @@ class Magento extends Solution
             } else {
                 throw new \Exception('No token found. ');
             }
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -93,7 +96,7 @@ class Magento extends Solution
         }
     }
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -111,9 +114,9 @@ class Magento extends Solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // Pour chaque module, traitement différent
             switch ($module) {
@@ -170,7 +173,7 @@ class Magento extends Solution
                     ];
                     try {
                         // Get list of countries
-                        $countries = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/directory/countries', 'GET');
+                        $countries = $this->call($this->connectionParam['url'].'/index.php/rest/V1/directory/countries', 'GET');
                         foreach ($countries as $country) {
                             $moduleFields['country_id']['option'][$country['id']] = $country['full_name_locale'];
                         }
@@ -437,14 +440,13 @@ class Magento extends Solution
                     break;
                 default:
                     throw new \Exception('Fields unreadable');
-                    break;
             }
 
             // Add list here (field could exist in several fields or was part of a rrelate field)
             try {
                 if (!empty($moduleFields['website_id'])) {
                     // Get list of website
-                    $websites = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/store/websites ', 'GET');
+                    $websites = $this->call($this->connectionParam['url'].'/index.php/rest/V1/store/websites ', 'GET');
                     foreach ($websites as $website) {
                         $moduleFields['website_id']['option'][$website['id']] = $website['name'];
                     }
@@ -456,7 +458,7 @@ class Magento extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $e->getMessage();
 
             return false;
         }
@@ -499,7 +501,6 @@ class Magento extends Solution
                     break;
                 default:
                     throw new \Exception('Module unknown. ');
-                    break;
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -542,14 +543,13 @@ class Magento extends Solution
             }
 
             // Call to Magento
-            $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$function.$searchCriteria, 'GET');
+            $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$function.$searchCriteria, 'GET');
             if (!empty($resultList['message'])) {
                 throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
             }
 
             // Traitement des résultats
             if (!empty($resultList['items'])) {
-                $cpt = 0;
                 foreach ($resultList['items'] as $record) {
                     // if submodule, example addresses in the module customer
                     if (!empty($subModule)) {
@@ -577,34 +577,32 @@ class Magento extends Solution
                     }
 
                     // Transform data from Magento to create document in Myddleware
-                    if (!empty($subRecordsNoDimension)) {
-                        foreach ($subRecordsNoDimension as $subRecordNoDimension) {
-                            $row = [];
-                            // Ajout de l'ID, $fieldId vaut "customer_id" pour le module "customer" par exemple
-                            if (!empty($subRecordNoDimension[$fieldId])) {
-                                $row['id'] = $subRecordNoDimension[$fieldId];
-                            } else {
-                                throw new \Exception('Failed to find an Id for a record.');
-                            }
-                            foreach ($subRecordNoDimension as $key => $value) {
-                                if ($key == $dateRefField) {
-                                    $row['date_modified'] = $value;
-                                    // Sauvegarde de la date de référence
-                                    if (
-                                            empty($result['date_ref'])
-                                        || $value > $result['date_ref']
-                                    ) {
-                                        $result['date_ref'] = $value;
-                                    }
-                                }
-                                // Magento doens't return empty field
-                                if (in_array($key, $param['fields'])) {
-                                    $row[$key] = $value;
-                                }
-                            }
-                            $result['values'][$row['id']] = $row;
-                            ++$result['count'];
+                    foreach ($subRecordsNoDimension as $subRecordNoDimension) {
+                        $row = [];
+                        // Ajout de l'ID, $fieldId vaut "customer_id" pour le module "customer" par exemple
+                        if (!empty($subRecordNoDimension[$fieldId])) {
+                            $row['id'] = $subRecordNoDimension[$fieldId];
+                        } else {
+                            throw new \Exception('Failed to find an Id for a record.');
                         }
+                        foreach ($subRecordNoDimension as $key => $value) {
+                            if ($key == $dateRefField) {
+                                $row['date_modified'] = $value;
+                                // Sauvegarde de la date de référence
+                                if (
+                                        empty($result['date_ref'])
+                                    || $value > $result['date_ref']
+                                ) {
+                                    $result['date_ref'] = $value;
+                                }
+                            }
+                            // Magento doens't return empty field
+                            if (in_array($key, $param['fields'])) {
+                                $row[$key] = $value;
+                            }
+                        }
+                        $result['values'][$row['id']] = $row;
+                        ++$result['count'];
                     }
                 }
             }
@@ -644,7 +642,7 @@ class Magento extends Solution
                     unset($dataMagento);
                     $dataMagento[$keyParameters] = $dataMagentoTmp;
                 }
-                $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$param['module'], 'POST', $dataMagento);
+                $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$param['module'], 'POST', $dataMagento);
 
                 if (!empty($resultList['message'])) {
                     throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
@@ -708,7 +706,7 @@ class Magento extends Solution
                     unset($dataMagento);
                     $dataMagento[$keyParameters] = $dataMagentoTmp;
                 }
-                $resultList = $this->call($this->paramConnexion['url'].'/index.php/rest/V1/'.$param['module'].'/'.$target_id, 'PUT', $dataMagento);
+                $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$param['module'].'/'.$target_id, 'PUT', $dataMagento);
 
                 if (!empty($resultList['message'])) {
                     throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));

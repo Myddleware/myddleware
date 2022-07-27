@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Install Myddleware
+{% endblock %}
+
+{% block body %}
+	{# Logo myddleware #}
+	<div>
+		<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
+	</div>
+	<div class="install">
+		<div class="card-body">
+			<h3 class="install-title">Install Step 3 : checking Myddleware is connected to the database</h3>
+			<p>Database connection check</p>
+			<p></p>
+
+			<button class="home_item btn btn-primary">
+				<a href="{{path('app_database_')}}">Next</a>
+			</button>
+		</div>
+	</div>
+
+{% endblock %}

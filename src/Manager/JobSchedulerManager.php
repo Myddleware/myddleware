@@ -27,18 +27,15 @@ namespace App\Manager;
 use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Psr\Log\LoggerInterface;
 
 class JobSchedulerManager
 {
     protected $env;
+
     protected $entityManager;
+
     protected $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
     /**
      * @var RuleRepository
      */
@@ -46,12 +43,10 @@ class JobSchedulerManager
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        RuleRepository $ruleRepository,
-        LoggerInterface $logger
+        RuleRepository $ruleRepository
     ) {
         $this->entityManager = $entityManager;
         $this->ruleRepository = $ruleRepository;
-        $this->logger = $logger;
     }
 
     public function getJobsParams()

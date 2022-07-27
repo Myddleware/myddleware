@@ -5,9 +5,10 @@ namespace App\DataFixtures;
 use App\Entity\Module;
 use App\Entity\Solution;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class ModuleFixtures extends Fixture
+class ModuleFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -90,6 +91,13 @@ class ModuleFixtures extends Fixture
             ['name' => 'posts', 'nameKey' => 'Posts', 'solution' => 'WordPress', 'direction' => 'source'],
             ['name' => 'pages', 'nameKey' => 'Pages', 'solution' => 'WordPress', 'direction' => 'source'],
             ['name' => 'comments', 'nameKey' => 'Comments', 'solution' => 'WordPress', 'direction' => 'source'],
+        ];
+    }
+
+    public function getDependencies()
+    {
+        return [
+            SolutionFixtures::class,
         ];
     }
 }

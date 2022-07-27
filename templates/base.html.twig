@@ -1,45 +1,50 @@
-{#/*********************************************************************************
- * This file is part of Myddleware.
-
- * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com	
- 
- This file is part of Myddleware.
- 
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Myddleware{% endblock %}</title>
-        <!-- Latest compiled and minified CSS -->     
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    </head>
-    <body>  
-        {% block body %}
-        {% endblock %}  
-        <footer>
-            {{ include('footer.html.twig')}}
-        </footer>
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-    </body>
+	<head>
+		<meta charset="UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>
+			{% block title %}Myddleware
+			{% endblock %}
+		</title>
+		<link rel="icon" type="image/x-icon" href="{{absolute_url(asset('build/images/favicon_io/favicon.ico'))}}">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{absolute_url(asset('build/images/favicon_io/apple-touch-icon.png'))}}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{absolute_url(asset('build/images/favicon_io/favicon-32x32.png'))}}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{absolute_url(asset('build/images/favicon_io/favicon-16x16.png'))}}">
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+		{% block javascripts %}
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
+	</head>
+	<body>
+		{% block notifications %}
+			<div {{ stimulus_controller('toast') }}>
+				{% for label, messages in app.flashes(['success', 'warning', 'verify_email_error']) %}
+					{% for message in messages %}
+						<div class="position-fixed bottom-0 end-0 p-3 flash-{{ label }}" style="z-index: 99">
+							<div id="liveToast" class="toast show me-3 mb-5" role="alert" aria-live="assertive" aria-atomic="true" data-toast-target="toast">
+								<div class="toast-header d-flex justify-content-between">
+									<img src="{{ absolute_url(asset('build/images/logo/logo1.png')) }}" class="me-2" alt="" width="128" height="64">
+									<div>
+										<small class="me-0">Notifications</small>
+										<button type="button" class="btn-close me-2" data-bs-dismiss="toast" aria-label="Close"></button>
+									</div>
+								</div>
+								<div class="toast-body">
+									{{ message }}
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				{% endfor %}
+			</div>
+		{% endblock %}
+		{% block body %}{% endblock %}
+		<footer class="text-center position-absolute bottom-0">
+			{{ include('footer.html.twig')}}
+		</footer>
+	</body>
 </html>

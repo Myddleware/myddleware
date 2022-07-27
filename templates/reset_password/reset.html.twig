@@ -1,12 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}{{ 'reset_your_password' | trans }}
+{% endblock %}
 
 {% block body %}
-    <h1>Reset your password</h1>
-
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">Reset password</button>
-    {{ form_end(resetForm) }}
+<section class="container">
+	<div class="row justify-content-center">
+		<div  class="col text-center pt-5">
+			<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+		</div>
+	</div>
+	<div class="row justify-content-center">
+		<div class="card shadow rounded p-5 col-lg-8">
+			<h1>{{ 'reset_your_password' | trans }}</h1>
+			{{ form_start(resetForm) }}
+				{{ form_row(resetForm.plainPassword) }}
+				<button class="btn btn-dark">{{ 'reset_password' | trans }}</button>
+			{{ form_end(resetForm) }}
+		</div>
+	</div>
+</section>
 {% endblock %}

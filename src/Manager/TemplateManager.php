@@ -47,26 +47,41 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class TemplateManager
 {
     protected $lang;
+
     protected $solutionSourceName;
+
     protected $solutionTarget;
+
     protected $connectorSource;
+
     protected $connectorTarget;
+
     protected $idUser;
+
     protected $templateDir;
+
     protected $rules;
+
     protected $ruleNameSlugArray;
+
     protected $entityManager;
+
     protected $sourceSolution;
+
     protected $targetSolution;
+
     protected $connection;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var string
      */
     private $projectDir;
+
     /**
      * @var SolutionManager
      */
@@ -263,7 +278,7 @@ class TemplateManager
                 throw new Exception('No rule found in the template. ');
             }
 
-            // Login to the source and target solution
+            // login to the source and target solution
             $this->initSolutions($sourceSolution, $targetSolution, $connectorSource, $connectorTarget);
 
             // Get list of module for each solution for source and target

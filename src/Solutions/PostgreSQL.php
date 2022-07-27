@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -27,22 +30,19 @@ namespace App\Solutions;
 
 class PostgreSQL extends Database
 {
-    protected $driver = 'pgsql';
+    protected string $driver = 'pgsql';
 
     // Enable to delete data
-    protected $sendDeletion = true;
-    protected $readDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $stringSeparatorOpen = '';
-    protected $stringSeparatorClose = '';
+    protected bool $readDeletion = true;
 
-    protected function generatePdo()
-    {
-        return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
-    }
+    protected string $stringSeparatorOpen = '';
+
+    protected string $stringSeparatorClose = '';
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function getQueryShowTables(): string
     {
         return "SELECT *
 				FROM pg_catalog.pg_tables
@@ -51,12 +51,12 @@ class PostgreSQL extends Database
     }
 
     // Get all tables from the database
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             $modules = [];
             // Send the query to the database
-            $q = $this->pdo->prepare($this->get_query_show_tables());
+            $q = $this->pdo->prepare($this->getQueryShowTables());
             $exec = $q->execute();
             // Error management
             if (!$exec) {
@@ -73,18 +73,16 @@ class PostgreSQL extends Database
 
             return $modules;
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return $error;
+            return ['error' => 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'];
         }
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         try {
             // Get all fields of the table in input
-            $q = $this->pdo->prepare($this->get_query_describe_table($module));
+            $q = $this->pdo->prepare($this->getQueryDescribeTable($module));
             $exec = $q->execute();
 
             if (!$exec) {
@@ -108,7 +106,7 @@ class PostgreSQL extends Database
                     'relate' => false,
                 ];
                 if (
-                        'ID' == strtoupper(substr($field['column_name'], 0, 2))
+                    'ID' == strtoupper(substr($field['column_name'], 0, 2))
                     or 'ID' == strtoupper(substr($field['column_name'], -2))
                 ) {
                     $this->moduleFields[$field['column_name']] = [
@@ -123,7 +121,7 @@ class PostgreSQL extends Database
                 // If the field contains the id indicator, we add it to the moduleFields list
                 if (!empty($idFields)) {
                     foreach ($idFields as $idField) {
-                        if (false !== strpos($field['column_name'], $idField)) {
+                        if (str_contains($field['column_name'], $idField)) {
                             $this->moduleFields[$field['column_name']] = [
                                 'label' => $field['column_name'],
                                 'type' => $field['data_type'],
@@ -149,18 +147,19 @@ class PostgreSQL extends Database
                 ];
             }
             // Add relationship fields coming from other rules
-            $this->get_module_fields_relate($module, $param);
+            $this->getModuleFieldsRelate($module, $param);
 
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return null;
         }
     }
 
-    // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    // Query to get all the fields of the table
+    protected function getQueryDescribeTable($table): string
     {
         // Get the schema and table namespace
         $tableParam = explode('.', $table);
@@ -168,12 +167,12 @@ class PostgreSQL extends Database
         return "	SELECT column_name, data_type
 					FROM information_schema.columns
 					WHERE
-							table_catalog = '".$this->paramConnexion['database_name']."'
+							table_catalog = '".$this->connectionParam['database_name']."'
 						AND table_schema = '".$tableParam[0]."'
 						AND table_name = '".$tableParam[1]."'";
     }
 
-    protected function create($param, $record)
+    protected function create($param, $record): bool|string|null
     {
         // Change separator for PostgreSQL
         $record = array_map('pg_escape_string', $record);
@@ -187,15 +186,5 @@ class PostgreSQL extends Database
         $record = array_map('pg_escape_string', $record);
 
         return parent::update($param, $record);
-    }
-
-    // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
-    {
-        if (empty($param['offset'])) {
-            $param['offset'] = 0;
-        }
-
-        return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
 }

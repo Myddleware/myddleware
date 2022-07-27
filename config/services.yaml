@@ -13,6 +13,9 @@ parameters:
   fallbacks: ['%locale%', 'fr']
   secret: '%env(APP_SECRET)%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
+  admin_email_address: '%env(resolve:ADMIN_EMAIL)%'
+  admin_password: '%env(resolve:ADMIN_PASSWORD)%'
+  admin_username: '%env(resolve:ADMIN_USERNAME)%'
 
 services:
   # default configuration for services in *this* file
@@ -20,8 +23,8 @@ services:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
     public: false       # Allows optimizing the container by removing unused services; this also means
-    # fetching services directly from the container via $container->get() won't work.
-    # The best practice is to be explicit about your dependencies anyway.
+    bind:
+      $secret: '%env(APP_SECRET)%'
 
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
@@ -37,19 +40,6 @@ services:
 
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
-  App\EventListener\RequestListener:
-    autowire: true
-    tags:
-      - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-
-  App\EventListener\ResponseListener:
-    autowire: true
-    tags:
-      - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
-
-  App\EventListener\ExceptionListener:
-    tags:
-      - { name: kernel.event_listener, event: kernel.exception }
 
   App\Manager\SolutionManager:
     public: false

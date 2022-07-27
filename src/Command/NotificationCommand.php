@@ -34,14 +34,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class NotificationCommand extends Command
 {
-    /**
-     * @var NotificationManager
-     */
-    private $notificationManager;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:notification';
+
+    private NotificationManager $notificationManager;
+
+    private JobManager $jobManager;
 
     public function __construct(
         NotificationManager $notificationManager,
@@ -55,9 +52,7 @@ class NotificationCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:notification')
-            ->setDescription('Send notification')
+        $this->setDescription('Send notification')
             ->addArgument('type', InputArgument::OPTIONAL, 'Notification type')
         ;
     }

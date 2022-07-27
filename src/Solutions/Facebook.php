@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -31,11 +34,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class Facebook extends Solution
 {
     protected $baseUrl = 'https://graph.facebook.com';
+
     protected $apiVersion = 'v11.0';
+
     protected $facebook;
+
     protected $readLast = false;
 
-    protected $required_fields = ['default' => ['id', 'created_time']];
+    protected array $requiredFields = ['default' => ['id', 'created_time']];
 
     public function getFieldsLogin(): array
     {
@@ -58,20 +64,20 @@ class Facebook extends Solution
         ];
     }
 
-    // Login to Facebook
-    public function login($paramConnexion)
+    // login to Facebook
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Create Facebook object
             $this->facebook = new \Facebook\Facebook([
-                'app_id' => $this->paramConnexion['clientid'],
-                'app_secret' => $this->paramConnexion['clientsecret'],
+                'app_id' => $this->connectionParam['clientid'],
+                'app_secret' => $this->connectionParam['clientsecret'],
                 'default_graph_version' => $this->apiVersion,
             ]);
 
             // Set the user access token
-            $this->facebook->setDefaultAccessToken($this->paramConnexion['useraccesstoken']);
+            $this->facebook->setDefaultAccessToken($this->connectionParam['useraccesstoken']);
 
             // Test the access getting me info
             $response = $this->facebook->get('/me');
@@ -80,7 +86,7 @@ class Facebook extends Solution
             if (empty($meId)) {
                 throw new \Exception('Failed to get the access token from Facebook');
             }
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
 
             return;
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {
@@ -96,17 +102,17 @@ class Facebook extends Solution
     }
 
     // Get available modules
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         try {
             $modules = [];
             // Get the account's pages
-            $responsePages = $this->facebook->get('me/accounts?fields=name,access_token&type=page');
+            $responsePages = $this->facebook->get('me/accounts?fields=name,accessToken&type=page');
             $bodyPages = $responsePages->getDecodedBody();
             if (!empty($bodyPages['data'])) {
                 foreach ($bodyPages['data'] as $page) {
                     // Get the page's lead forms
-                    $responseLeadForms = $this->facebook->get($page['id'].'/leadgen_forms', $page['access_token']);
+                    $responseLeadForms = $this->facebook->get($page['id'].'/leadgen_forms', $page['accessToken']);
                     $bodyForms = $responseLeadForms->getDecodedBody();
                     // Build the module list
                     if (!empty($bodyForms['data'])) {
@@ -124,9 +130,9 @@ class Facebook extends Solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             $fields = [];
 

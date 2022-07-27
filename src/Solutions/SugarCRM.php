@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -7,21 +10,21 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
@@ -33,19 +36,25 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class SugarCRM extends Solution
 {
     // Enable to read deletion and to delete data
-    protected $readDeletion = true;
-    protected $sendDeletion = true;
+    protected bool $readDeletion = true;
+
+    protected bool $sendDeletion = true;
 
     protected $sugarAPI;
-    protected $sugarAPIVersion = 'v11';
-    protected $sugarPlatform = 'base';
-    protected $defaultLimit = 100;
-    protected $bulkLimit = 250;
-    protected $delaySearch = '-1 month';
 
-    protected $required_fields = ['default' => ['id', 'date_modified']];
+    protected string $sugarAPIVersion = 'v11';
 
-    protected $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected string $sugarPlatform = 'base';
+
+    protected int $defaultLimit = 100;
+
+    protected int $bulkLimit = 250;
+
+    protected string $delaySearch = '-1 month';
+
+    protected array $requiredFields = ['default' => ['id', 'date_modified']];
+
+    protected array $fieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -74,14 +83,14 @@ class SugarCRM extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam): void
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
-            $server = $this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/';
+            $server = $this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/';
             $credentials = [
-                'username' => $this->paramConnexion['login'],
-                'password' => $this->paramConnexion['password'],
+                'username' => $this->connectionParam['login'],
+                'password' => $this->connectionParam['password'],
                 'platform' => $this->sugarPlatform,
             ];
 
@@ -92,22 +101,21 @@ class SugarCRM extends Solution
             // Check the token
             $token = $this->sugarAPI->getToken();
             if (!empty($token->access_token)) {
-                $this->connexion_valide = true;
+                $this->isConnectionValid = true;
             } else {
-                return ['error' => 'Failed to connect to Sugar, no error returned.'];
+                $this->logger->error('Failed to connect to Sugar, no error returned.');
             }
         } catch (\SugarAPI\SDK\Exception\SDKException $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): ?array
     {
+        $modules = [];
         try {
-            $modulesSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
+            $modulesSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=full_module_list');
             if (!empty($modulesSugar->full_module_list)) {
                 foreach ($modulesSugar->full_module_list as $module => $label) {
                     // hash isn't a Sugar module
@@ -119,7 +127,7 @@ class SugarCRM extends Solution
             }
 
             // Add many-to-many relationships
-            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            $relationshipsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
             if (!empty($relationshipsSugar->relationships)) {
                 foreach ($relationshipsSugar->relationships as $relationship => $value) {
                     // hash isn't a Sugar module
@@ -128,7 +136,7 @@ class SugarCRM extends Solution
                     }
                     // Only many-to-many relationships
                     if (
-                            !empty($value->relationship_type)
+                        !empty($value->relationship_type)
                         and 'many-to-many' != $value->relationship_type
                     ) {
                         continue;
@@ -141,18 +149,22 @@ class SugarCRM extends Solution
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
-            return false;
+            return null;
         }
     }
 
-    // Check if the module is a relationship and return the relationship parameters
-    protected function isManyToManyRel($module)
+    /**
+     * Check if the module is a relationship and return the relationship parameters.
+     *
+     * @throws Exception
+     */
+    protected function isManyToManyRel($module): mixed
     {
         if (
-                !empty($module)
-            and 'link_' == substr($module, 0, 5)
+            !empty($module)
+            and str_starts_with($module, 'link_')
         ) {
-            $relationshipsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
+            $relationshipsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=relationships');
             $relName = substr($module, 5);
             if (!empty($relationshipsSugar->relationships->$relName)) {
                 return $relationshipsSugar->relationships->$relName;
@@ -162,48 +174,48 @@ class SugarCRM extends Solution
         return false;
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             // If module is a many-to-many relationship
             $rel = $this->isManyToManyRel($module);
             if (!empty($rel)) {
                 $this->moduleFields[$rel->join_key_lhs] = [
-                        'label' => $rel->join_key_lhs,
-                        'type' => 'varchar(36)',
-                        'type_bdd' => 'varchar(36)',
-                        'required' => 0,
-                        'required_relationship' => 1,
-                        'relate' => true,
-                    ];
+                    'label' => $rel->join_key_lhs,
+                    'type' => 'varchar(36)',
+                    'type_bdd' => 'varchar(36)',
+                    'required' => 0,
+                    'required_relationship' => 1,
+                    'relate' => true,
+                ];
                 $this->moduleFields[$rel->join_key_rhs] = [
-                        'label' => $rel->join_key_rhs,
-                        'type' => 'varchar(36)',
-                        'type_bdd' => 'varchar(36)',
-                        'required' => 0,
-                        'required_relationship' => 1,
-                        'relate' => true,
-                    ];
+                    'label' => $rel->join_key_rhs,
+                    'type' => 'varchar(36)',
+                    'type_bdd' => 'varchar(36)',
+                    'required' => 0,
+                    'required_relationship' => 1,
+                    'relate' => true,
+                ];
 
                 return $this->moduleFields;
             }
             // Call teh detail of all Sugar fields for the module
-            $fieldsSugar = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
+            $fieldsSugar = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/metadata?type_filter=modules&module_filter='.$module);
             // Browse fields
             if (!empty($fieldsSugar->modules->$module->fields)) {
                 foreach ($fieldsSugar->modules->$module->fields as $field) {
                     if (
-                            empty($field->type)
-                         or 'link' == $field->type // Module linked not just a related fields (example : module bigs for contact)
+                        empty($field->type)
+                        or 'link' == $field->type // Module linked not just a related fields (example : module bigs for contact)
                     ) {
                         continue;
                     }
 
                     // Calculate the database type
-                    if (!in_array($field->type, $this->type_valide)) {
-                        if (isset($this->exclude_field_list[$module])) {
-                            if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
+                    if (!in_array($field->type, $this->validDatabaseTypes)) {
+                        if (isset($this->excludedFields[$module])) {
+                            if (in_array($field->name, $this->excludedFields[$module]) && 'target' == $type) {
                                 continue;
                             } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
                         }
@@ -223,9 +235,9 @@ class SugarCRM extends Solution
 
                     // Add option for enum fields
                     if (in_array($field->type, ['enum', 'multienum'])) {
-                        $fieldsList = $this->customCall($this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/'.$module.'/enum/'.$field->name);
+                        $fieldsList = $this->customCall($this->connectionParam['url'].'/rest/'.$this->sugarAPIVersion.'/'.$module.'/enum/'.$field->name);
                         if (
-                                !empty($fieldsList)
+                            !empty($fieldsList)
                             and is_array($fieldsList)
                         ) {
                             // Transform object to array
@@ -237,11 +249,11 @@ class SugarCRM extends Solution
 
                     // Add relate fields
                     if (
-                            '_id' == substr($field->name, -3)
-                        or '_ida' == substr($field->name, -4)
-                        or '_idb' == substr($field->name, -4)
+                        str_ends_with($field->name, '_id')
+                        or str_ends_with($field->name, '_ida')
+                        or str_ends_with($field->name, '_idb')
                         or (
-                                'id' == $field->type
+                            'id' == $field->type
                             and 'id' != $field->name
                         )
                         or 'created_by' == $field->name
@@ -262,14 +274,12 @@ class SugarCRM extends Solution
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
-            return false;
+            return null;
         }
     }
 
     /**
-     * @param $param
-     *
-     * @return mixed
+     * @throws Exception
      */
     public function read($param): ?array
     {
@@ -327,7 +337,7 @@ class SugarCRM extends Solution
             foreach ($records as $record) {
                 // Manage deletion by adding the flag Myddleware_deletion to the record
                 if (
-                        true == $deleted
+                    $deleted
                     and !empty($record->deleted)
                 ) {
                     $result[$record->id]['myddleware_deletion'] = true;
@@ -335,7 +345,7 @@ class SugarCRM extends Solution
                 foreach ($param['fields'] as $field) {
                     // Sugar returns multilist value as array
                     if (
-                            !empty($record->$field)
+                        !empty($record->$field)
                         and is_array($record->$field)
                     ) {
                         // Some fields can be an object like teamname field
@@ -362,16 +372,11 @@ class SugarCRM extends Solution
         return $filterArgs;
     }
 
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         return 'date_modified';
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
     public function createData($param): ?array
     {
         $result = [];
@@ -396,12 +401,7 @@ class SugarCRM extends Solution
         return $result;
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData($param)
+    public function updateData($param): array
     {
         $result = [];
         $error = '';
@@ -425,12 +425,7 @@ class SugarCRM extends Solution
         return $result;
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         $result = [];
         $error = '';
@@ -454,10 +449,11 @@ class SugarCRM extends Solution
         return $result;
     }
 
-    public function upsert($method, $param)
+    public function upsert($method, $param): array
     {
+        $bulkData = [];
+        $result = [];
         try {
-            $i = 0;
             // Build bulk call
             foreach ($param['data'] as $idDoc => $data) {
                 // Check control before create/update
@@ -475,11 +471,11 @@ class SugarCRM extends Solution
                     }
                     unset($data['target_id']);
                     $dataRel = [
-                                    'link_name' => $rel->name,
-                                    'ids' => [
-                                            $data[$rel->join_key_lhs] => ['id' => $data[$rel->join_key_rhs]],
-                                        ],
-                                ];
+                        'link_name' => $rel->name,
+                        'ids' => [
+                            $data[$rel->join_key_lhs] => ['id' => $data[$rel->join_key_rhs]],
+                        ],
+                    ];
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel];
                 // Create record
                 } elseif ('create' == $method) {
@@ -512,9 +508,9 @@ class SugarCRM extends Solution
                         if (!empty($rel)) {
                             if (!empty($records[$i]->contents->related_records[0]->id)) {
                                 $result[$idDoc] = [
-                                                        'id' => $records[$i]->contents->related_records[0]->id.'__'.$records[$i]->contents->record->id,
-                                                        'error' => false,
-                                                    ];
+                                    'id' => $records[$i]->contents->related_records[0]->id.'__'.$records[$i]->contents->record->id,
+                                    'error' => false,
+                                ];
                             } else {
                                 $result[$idDoc]['id'] = '-1';
                                 if (!empty($records[$i]->contents)) {
@@ -527,9 +523,9 @@ class SugarCRM extends Solution
                             // return for create/update record
                         } elseif (!empty($records[$i]->contents->id)) {
                             $result[$idDoc] = [
-                                                    'id' => $records[$i]->contents->id,
-                                                    'error' => false,
-                                                ];
+                                'id' => $records[$i]->contents->id,
+                                'error' => false,
+                            ];
                         } else {
                             $result[$idDoc]['id'] = '-1';
                             if (!empty($records[$i]->contents)) {
@@ -540,10 +536,10 @@ class SugarCRM extends Solution
                         }
                     } else {
                         $result[$idDoc] = [
-                                'id' => '-1',
-                                'error' => 'Error '.$records[$i]->status.' : '.$records[$i]->status_text.'. '.
-                                    (!empty($records[$i]->contents->error) ? $records[$i]->contents->error.' : '.$records[$i]->contents->error_message : ''),
-                            ];
+                            'id' => '-1',
+                            'error' => 'Error '.$records[$i]->status.' : '.$records[$i]->status_text.'. '.
+                                (!empty($records[$i]->contents->error) ? $records[$i]->contents->error.' : '.$records[$i]->contents->error_message : ''),
+                        ];
                     }
                     $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
                     ++$i;
@@ -559,8 +555,11 @@ class SugarCRM extends Solution
         return $result;
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+    /**
+     * @throws Exception
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -570,7 +569,10 @@ class SugarCRM extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    // Convert date to SugarCRM format
+    /**
+     * @throws
+     * Convert date to SugarCRM format
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -579,23 +581,27 @@ class SugarCRM extends Solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): ?string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {
             $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-            $module = $rule->getModuleSource();
+            $module = $rule->getSourceModule();
             $recordId = $document->getSource();
         } else {
             $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-            $module = $rule->getModuleTarget();
+            $module = $rule->getTargetModule();
             $recordId = $document->gettarget();
         }
         // Build the URL (delete if exists / to be sure to not have 2 / in a row)
         return rtrim($url, '/').'/#'.$module.'/'.$recordId;
     }
 
-    // Used only for metadata (get_modules and )
+    /**
+     *  Used only for metadata (getModules and ).
+     *
+     * @throws Exception
+     */
     protected function customCall($url, $parameters = null, $method = null)
     {
         try {

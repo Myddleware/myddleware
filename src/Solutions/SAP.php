@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -7,30 +10,31 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
 use App\Manager\RuleManager;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SAP extends SAPRoot
 {
-    protected $limit = 5;
+    protected int $limit = 5;
 
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
@@ -47,7 +51,7 @@ class SAP extends SAPRoot
                                                         ),
                                         );
     */
-    protected $guidName = ['ET_BKPF' => [
+    protected array $guidName = ['ET_BKPF' => [
         'ET_BKPF' => 'BELNR',
         'ET_BSEG' => 'BELNR',
         'ET_ABUZ' => 'BELNR',
@@ -60,30 +64,30 @@ class SAP extends SAPRoot
         ],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'ET_BSEG' => [
             'KUNNR' => ['label' => 'Partner number', 'required_relationship' => false],
         ],
     ];
 
     // Permet d'indiquer quels champs génères l'id de chaque module
-    protected $buildId = [
+    protected array $buildId = [
         'ET_BKPF' => ['Mandt', 'Bukrs', 'Belnr', 'Gjahr'],
         'ET_BSEG' => ['Mandt', 'Bukrs', 'Belnr', 'Gjahr', 'Buzei'],
     ];
 
-    public function login($paramConnexion)
+    public function login($connectionParam): void
     {
-        $paramConnexion['wsdl'] = __DIR__.'/../Custom/Solutions/sap/wsdl/'.$paramConnexion['wsdl'];
-        parent::login($paramConnexion);
+        $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sap/wsdl/'.$connectionParam['wsdl'];
+        parent::login($connectionParam);
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -95,8 +99,8 @@ class SAP extends SAPRoot
         ];
     }
 
-    // On appelle la fonction get_module_fields de SAP standard et on ajoute les champ de relation spécifique
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    // On appelle la fonction getModuleFields de SAP standard et on ajoute les champ de relation spécifique
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         // Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
         if ('ET_BSEG' == $module) {
@@ -108,33 +112,38 @@ class SAP extends SAPRoot
             ];
         }
 
-        return parent::get_module_fields($module, $type);
+        return parent::getModuleFields($module, $type);
     }
 
-    // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
-    // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
-    public function get_rule_custom_relationship($module, $type)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas.
+     *                                  Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
+     */
+    public function getRuleCustomRelationship($module, $type, array $parameters = []): ?array
     {
         // Si module est ET_BSEG alors on autorise les règles PARTNER de SAP CRM
         if ('source' == $type) {
             if ('ET_BSEG' == $module) {
                 $sql = "SELECT 
-							Rule.id, 
-							Rule.name, 
-							Rule.version 
-						FROM Rule
+							rule.id, 
+							rule.name, 
+							rule.version 
+						FROM rule
 						WHERE
-								Rule.deleted = 0
-							AND Rule.module_source = 'BU_PARTNER'";
-                $stmt = $this->conn->prepare($sql);
-                $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
-                $stmt->execute();
-                $rules = $stmt->fetchAll();
+								rule.deleted = 0
+							AND rule.source_module_id = 'BU_PARTNER'";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bindValue(':idHeaderRule', $parameters['rule']['id']);
+                $result = $stmt->executeQuery();
+                $rules = $result->fetchAllAssociative();
                 if (!empty($rules)) {
                     return $rules;
                 }
             }
         }
+
+        return null;
     }
 
     public function getFieldsParamUpd($type, $module): array
@@ -143,7 +152,7 @@ class SAP extends SAPRoot
             $params = [];
             if ('source' == $type) {
                 // Ajout du paramètre de l'exercice comptable obligatoire pour FI
-                if (in_array($module, ['ET_BKPF'])) {
+                if ('ET_BKPF' == $module) {
                     $gjahrParam = [
                         'id' => 'GJAHR',
                         'name' => 'GJAHR',
@@ -160,7 +169,7 @@ class SAP extends SAPRoot
                 }
 
                 // Ajout du paramètre correspondant à la société
-                if (in_array($module, ['ET_BKPF'])) {
+                if ('ET_BKPF' == $module) {
                     $bukrsParam = [
                         'id' => 'BUKRS',
                         'name' => 'BUKRS',
@@ -173,15 +182,17 @@ class SAP extends SAPRoot
             }
 
             return $params;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
             return [];
         }
     }
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    /**
+     * @throws Exception
+     */
+    public function readData($param): ?array
     {
         // Initialisation de la limit
         if (empty($param['limit'])) {
@@ -204,26 +215,24 @@ class SAP extends SAPRoot
             ];
 
             return $this->readFiDocument($param, $parameters, false);
-        }
-        // Pas de lecture pour les autres modules FI, tout est lu via le module ET_BKPF et ses règles liées
-        elseif (in_array($param['module'], ['ET_BSEG', 'ET_ABUZ', 'ET_ACCHD', 'ET_ACCCR', 'ET_ACCIT'])) {
-            return;
-        }
+        } // Pas de lecture pour les autres modules FI, tout est lu via le module ET_BKPF et ses règles liées
+
+        return null;
     }
 
     // Permet de lire les document FI
     // C'est une règle particulière car elle peut générer de document fils sur d'autres règles
-    public function readFiDocument($param, $parameters, $readLast)
+    public function readFiDocument($param, $parameters, $readLast): array
     {
         try {
             try {
                 // Erreur s'il manque des données
                 if (!$readLast) {
                     if (empty($param['ruleParams']['BUKRS'])) {
-                        throw new \Exception('Failed to read data. No company code.');
+                        throw new Exception('Failed to read data. No company code.');
                     }
                     if (empty($param['ruleParams']['GJAHR'])) {
-                        throw new \Exception('Failed to read data. No fiscal year.');
+                        throw new Exception('Failed to read data. No fiscal year.');
                     }
                 }
 
@@ -237,7 +246,7 @@ class SAP extends SAPRoot
                 $response = $this->client->ZmydSearchFiDocument($parameters);
 
                 if ('E' == $response->EvTypeMessage) {
-                    throw new \Exception('Read FI document failed : '.$response->EvTypeMessage);
+                    throw new Exception('Read FI document failed : '.$response->EvTypeMessage);
                 }
 
                 if ($response->EvCount > 0) {
@@ -279,19 +288,19 @@ class SAP extends SAPRoot
                         // Récupération des règles liées à la règle actuelle
                         // Récupération de toutes les règles avec l'id connector en cours qui sont root et qui ont au moins une référence
                         $sql = 'SELECT DISTINCT
-									Rule.id,
-									Rule.module_source,
-									Rule.name_slug
-								FROM RuleRelationShip
-									INNER JOIN Rule
-										ON Rule.id = RuleRelationShip.rule_id
+									rule.id,
+									rule.source_module_id,
+									rule.name_slug
+								FROM rulerelationship
+									INNER JOIN rule
+										ON rule.id = rulerelationship.rule_id
 								WHERE
-										Rule.deleted = 0
-									AND RuleRelationShip.field_id = :idHeaderRule';
-                        $stmt = $this->conn->prepare($sql);
+										rule.deleted = 0
+									AND rulerelationship.field_id = :idHeaderRule';
+                        $stmt = $this->connection->prepare($sql);
                         $stmt->bindValue(':idHeaderRule', $param['rule']['id']);
-                        $stmt->execute();
-                        $rules = $stmt->fetchAll();
+                        $result = $stmt->executeQuery();
+                        $rules = $result->fetchAllAssociative();
                         if (!empty($rules)) {
                             // Pour chaque règle liée on récupérère les données et on génère les documents fils
                             foreach ($rules as $rule) {
@@ -306,7 +315,8 @@ class SAP extends SAPRoot
                                 if (!empty($childData)) {
                                     // Si le module de la règle est présent dans la réponse du webservice, on génère l'objet règle
                                     $param['ruleId'] = $rule['id'];
-                                    $ruleMyddleware = new RuleManager($this->logger, $this->container, $this->conn, $param);
+                                    // TODO: bugfix signature
+                                    $ruleMyddleware = new RuleManager($this->logger, $this->container, $this->connection, $param);
                                     // Pour toutes les lignes du module fils on génère un document fils
                                     foreach ($childData as $childDocument) {
                                         $data = '';
@@ -351,13 +361,12 @@ class SAP extends SAPRoot
                 return $result;
             } catch (\SoapFault $fault) {
                 if (!empty($fault->getMessage())) {
-                    throw new \Exception($fault->getMessage());
+                    throw new Exception($fault->getMessage());
                 }
-                throw new \Exception('SOAP FAULT. Read order failed.');
+                throw new Exception('SOAP FAULT. Read order failed.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Failed to read FI document from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
-            echo $error.';';
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -365,7 +374,11 @@ class SAP extends SAPRoot
     }
 
     // Permet de generer un id en fonction des champs du module
-    protected function generateId($module, $data)
+
+    /**
+     * @throws Exception
+     */
+    protected function generateId($module, $data): string
     {
         if (!empty($this->buildId[$module])) {
             $id = '';
@@ -381,16 +394,16 @@ class SAP extends SAPRoot
                 $id = rtrim($id, '_');
             }
             if (empty($id)) {
-                throw new \Exception('Failed to generate id. Id is empty.');
+                throw new Exception('Failed to generate id. Id is empty.');
             }
 
             return $id;
         }
 
-        throw new \Exception('Failed to generate id for the module '.$module.'. No table for id.');
+        throw new Exception('Failed to generate id for the module '.$module.'. No table for id.');
     }
 
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         // Pour l'instant tout est create only
         if ('target' == $type) {

@@ -34,14 +34,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SynchroCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:synchro';
+
+    private LoggerInterface $logger;
+
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -55,9 +52,7 @@ class SynchroCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:synchro')
-            ->setDescription('Synchronisation des données')
+        $this->setDescription('Synchronisation des données')
             ->addArgument('rule', InputArgument::REQUIRED, 'Alias de la règle')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
@@ -65,7 +60,6 @@ class SynchroCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $step = 1;
         try {
             // Source -------------------------------------------------
             // alias de la règle en params
@@ -93,7 +87,7 @@ class SynchroCommand extends Command
                             $rules[] = $rule;
                         }
                         if (!empty($rules)) {
-                            foreach ($rules as $key => $value) {
+                            foreach ($rules as $value) {
                                 // Don't display rule id if the command is called from the api
                                 if (empty($api)) {
                                     echo $value.chr(10);

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -30,8 +33,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class Mailchimp extends Solution
 {
     protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+
     protected $apiKey;
+
     protected $verify_ssl = true;
+
     protected $update = false;
     public const TIMEOUT = 60;
 
@@ -46,12 +52,12 @@ class Mailchimp extends Solution
         ];
     }
 
-    public function login($paramConnexion)
+    public function login($connectionParam)
     {
-        parent::login($paramConnexion);
+        parent::login($connectionParam);
         try {
             // Get the api key
-            $this->apiKey = $this->paramConnexion['apikey'];
+            $this->apiKey = $this->connectionParam['apikey'];
             // Api key has to cointain "-"
             if (false === strpos($this->apiKey, '-')) {
                 throw new \Exception('Invalid MailChimp API key supplied.');
@@ -62,10 +68,10 @@ class Mailchimp extends Solution
             // Call the root function to check the API
             $result = $this->call($this->apiEndpoint);
             if (empty($result['account_id'])) {
-                throw new \Exception('Login error');
+                throw new \Exception('login error');
             }
             // Connection validation
-            $this->connexion_valide = true;
+            $this->isConnectionValid = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -75,7 +81,7 @@ class Mailchimp extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         try {
             if ('target' == $type) {
@@ -90,16 +96,14 @@ class Mailchimp extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             require 'lib/mailchimp/metadata.php';
 
@@ -117,7 +121,7 @@ class Mailchimp extends Solution
     public function createUpdate($method, $param)
     {
         // Get module fields to check if the fiels is a boolean
-        $this->get_module_fields($param['module'], 'target');
+        $this->getModuleFields($param['module'], 'target');
 
         // Tranform Myddleware data to Mailchimp data
         foreach ($param['data'] as $idDoc => $data) {
@@ -217,7 +221,6 @@ class Mailchimp extends Solution
     // Create the url parameters depending the module
     protected function createUrlParam($param, $data, $method)
     {
-        $urlParam = '';
         // Manage parameters for list
         if ('members' == $param['module']) {
             if (empty($data['list_id'])) {

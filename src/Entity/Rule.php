@@ -44,52 +44,52 @@ class Rule
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
-    private $id;
+    private string $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsSource")
      * @ORM\JoinColumn(nullable=false, name="conn_id_source")
      */
-    private $connectorSource;
+    private ?Connector $connectorSource;
 
     /**
      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="rulesWhereIsTarget")
      * @ORM\JoinColumn(nullable=false, name="conn_id_target")
      */
-    private $connectorTarget;
+    private ?Connector $connectorTarget;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
-    private $active;
+    private bool $active;
 
     /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private $deleted;
+    private bool $deleted;
 
     /**
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
      * @Gedmo\Slug(fields={"name"}, separator="_")
      * @ORM\Column(length=50, nullable=false, name="name_slug")
      */
-    private $nameSlug;
+    private string $nameSlug;
 
     /**
      * @ORM\OneToMany(targetEntity="RuleParam", mappedBy="rule")
@@ -130,12 +130,12 @@ class Rule
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $createdAt;
+    private ?\DateTimeImmutable $createdAt;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $updatedAt;
+    private ?\DateTimeImmutable $updatedAt;
 
     /**
      * @ORM\OneToMany(targetEntity=DocumentRelationship::class, mappedBy="rule", orphanRemoval=true)
@@ -146,13 +146,13 @@ class Rule
      * @ORM\ManyToOne(targetEntity=Module::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $sourceModule;
+    private ?Module $sourceModule;
 
     /**
      * @ORM\ManyToOne(targetEntity=module::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $targetModule;
+    private ?module $targetModule;
 
     public function __construct()
     {
