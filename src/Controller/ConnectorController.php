@@ -21,8 +21,6 @@ class ConnectorController extends AbstractController
 {
     private mixed $secret;
 
-    private mixed $secret;
-
     public function __construct()
     {
         $this->secret = $this->getParameter('secret');
