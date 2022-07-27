@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
@@ -37,7 +38,7 @@ class Magento extends Solution
     protected $token;
 
     // Tableau de correspondance Module / ID pour les modules qui n'ont pas d'id de type "nommodule"."id"
-    protected $idByModule = [
+    protected array $idByModule = [
         'customers' => 'id',
         'customer_address' => 'id',
         'orders' => 'entity_id',
@@ -45,13 +46,13 @@ class Magento extends Solution
         'orders_items' => 'item_id',
     ];
 
-    protected $fieldsDuplicate = [
+    protected array $fieldsDuplicate = [
         'customers' => ['email'],
     ];
 
     protected array $requiredFields = ['default' => ['updated_at']];
 
-    protected $callLimit = 100;
+    protected int $callLimit = 100;
 
     public function getFieldsLogin(): array
     {
@@ -74,25 +75,23 @@ class Magento extends Solution
         ];
     }
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
             $userData = ['username' => $this->connectionParam['login'], 'password' => $this->connectionParam['password']];
             $result = $this->call($this->connectionParam['url'].'/index.php/rest/V1/integration/admin/token', $method = 'POST', $userData);
             if (!empty($result['message'])) {
-                throw new \Exception($result['message']);
+                throw new Exception($result['message']);
             } elseif (!empty($result)) {
                 $this->token = $result;
             } else {
-                throw new \Exception('No token found. ');
+                throw new Exception('No token found. ');
             }
             $this->isConnectionValid = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -113,12 +112,10 @@ class Magento extends Solution
         ];
     }
 
-    // Renvoie les champs du module passé en paramètre
     public function getModuleFields($module, $type = 'source', $param = null): array
     {
         parent::getModuleFields($module, $type);
         try {
-            // Pour chaque module, traitement différent
             switch ($module) {
                 case 'customers':
                     $moduleFields = [
@@ -177,7 +174,7 @@ class Magento extends Solution
                         foreach ($countries as $country) {
                             $moduleFields['country_id']['option'][$country['id']] = $country['full_name_locale'];
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         // We don't bloc the program if the ws for countries didn't work
                     }
                     break;
@@ -439,7 +436,7 @@ class Magento extends Solution
                     ];
                     break;
                 default:
-                    throw new \Exception('Fields unreadable');
+                    throw new Exception('Fields unreadable');
             }
 
             // Add list here (field could exist in several fields or was part of a rrelate field)
@@ -451,21 +448,21 @@ class Magento extends Solution
                         $moduleFields['website_id']['option'][$website['id']] = $website['name'];
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
+                $this->logger->error($e->getMessage());
                 // We don't bloc the program if the ws for countries didn't work
             }
             $this->moduleFields = array_merge($this->moduleFields, $moduleFields);
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            $e->getMessage();
-
-            return false;
+        } catch (Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($result['error']);
+            return $result;
         }
     }
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         $result = [];
         $result['count'] = 0;
@@ -474,33 +471,31 @@ class Magento extends Solution
             if (!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
                 $fieldId = $this->idByModule[$param['module']];
             }
-
-            // Add requiered fields
+            
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
             // Init parameters for modules or submodules
-            $function = '';
             $subModule = '';
             switch ($param['module']) {
                 case 'customers':
-                    $function = 'customers/search';
+                    $methodName = 'customers/search';
                     break;
                 case 'customer_address':
-                    $function = 'customers/search';
+                    $methodName = 'customers/search';
                     $subModule = 'addresses';
                     break;
                 case 'orders':
-                    $function = 'orders';
+                    $methodName = 'orders';
                     break;
                 case 'orders_items':
-                    $function = 'orders';
+                    $methodName = 'orders';
                     $subModule = 'items';
                     break;
                 case 'products':
-                    $function = 'products';
+                    $methodName = 'products';
                     break;
                 default:
-                    throw new \Exception('Module unknown. ');
+                    throw new Exception('Module unknown. ');
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -543,9 +538,9 @@ class Magento extends Solution
             }
 
             // Call to Magento
-            $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$function.$searchCriteria, 'GET');
+            $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$methodName.$searchCriteria, 'GET');
             if (!empty($resultList['message'])) {
-                throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
+                throw new Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
             }
 
             // Traitement des résultats
@@ -583,7 +578,7 @@ class Magento extends Solution
                         if (!empty($subRecordNoDimension[$fieldId])) {
                             $row['id'] = $subRecordNoDimension[$fieldId];
                         } else {
-                            throw new \Exception('Failed to find an Id for a record.');
+                            throw new Exception('Failed to find an Id for a record.');
                         }
                         foreach ($subRecordNoDimension as $key => $value) {
                             if ($key == $dateRefField) {
@@ -606,21 +601,21 @@ class Magento extends Solution
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // Permet de créer un enregistrement
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
-        // Initialisation de paramètre en fonction du module
-        switch ($param['module']) {
-            case 'customers':
-                $keyParameters = 'customer';
-                break;
+        $result = [];
+        if ($param['module'] == 'customers') {
+            $keyParameters = 'customer';
         }
 
         // Transformation du tableau d'entrée pour être compatible webservice Magento
@@ -645,7 +640,7 @@ class Magento extends Solution
                 $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$param['module'], 'POST', $dataMagento);
 
                 if (!empty($resultList['message'])) {
-                    throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
+                    throw new Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
                 }
                 if (!empty($resultList['id'])) {
                     $result[$idDoc] = [
@@ -658,39 +653,36 @@ class Magento extends Solution
                         'error' => '01',
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
-        // Initialisation de paramètre en fonction du module
-        switch ($param['module']) {
-            case 'customers':
-                $keyParameters = 'customer';
-                break;
+        $result = [];
+        if ($param['module'] == 'customers') {
+            $keyParameters = 'customer';
         }
 
-        // Transformation du tableau d'entrée pour être compatible webservice Magento
         foreach ($param['data'] as $idDoc => $data) {
             try {
-                // Check control before update
                 $data = $this->checkDataBeforeUpdate($param, $data);
                 $target_id = '';
                 $dataMagento = [];
                 foreach ($data as $key => $value) {
-                    // Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
+                    // Important de renommer le champ id pour que Magento puisse effectuer une modification et non une création
                     if ('target_id' == $key) {
                         $target_id = $value;
                         continue;
@@ -698,7 +690,7 @@ class Magento extends Solution
                     $dataMagento[$key] = $value;
                 }
                 if (empty($target_id)) {
-                    throw new \Exception('Failed to update the record. No ID found for the record in the data transfer. ');
+                    throw new Exception('Failed to update the record. No ID found for the record in the data transfer. ');
                 }
                 // Add a dimension for Magento call
                 if (!empty($keyParameters)) {
@@ -709,7 +701,7 @@ class Magento extends Solution
                 $resultList = $this->call($this->connectionParam['url'].'/index.php/rest/V1/'.$param['module'].'/'.$target_id, 'PUT', $dataMagento);
 
                 if (!empty($resultList['message'])) {
-                    throw new \Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
+                    throw new Exception($resultList['message'].(!empty($resultList['parameters']) ? ' parameters : '.print_r($resultList['parameters'], true) : ''));
                 }
                 if (!empty($resultList['id'])) {
                     $result[$idDoc] = [
@@ -722,14 +714,13 @@ class Magento extends Solution
                         'error' => '01',
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
@@ -737,8 +728,9 @@ class Magento extends Solution
     }
 
     // remove one dimension by replacing the dimension by __
-    protected function removeDimension($subRecords)
+    protected function removeDimension($subRecords): array
     {
+        $result = [];
         foreach ($subRecords as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $subKey => $subValue) {
@@ -753,29 +745,22 @@ class Magento extends Solution
     }
 
     /**
-     * Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle.
+     * @throws Exception
      */
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         if (in_array($ruleMode, ['0', 'S'])) {
             return 'updated_at';
         } elseif ('C' == $ruleMode) {
             return 'created_at';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
     /**
-     * Performs the underlying HTTP request. Not very exciting.
-     *
-     * @param string $method  The API method to be called
-     * @param array  $args    Assoc array of parameters to be passed
-     * @param mixed  $url
-     * @param mixed  $timeout
-     *
-     * @return array Assoc array of decoded result
+     * @throws Exception
      */
-    protected function call($url, $method = 'GET', $args = [], $timeout = 10)
+    protected function call($url, $method = 'GET', $args = [], $timeout = 10): mixed
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init($url);
@@ -798,6 +783,6 @@ class Magento extends Solution
 
             return $result ? json_decode($result, true) : false;
         }
-        throw new \Exception('curl extension is missing!');
+        throw new Exception('curl extension is missing!');
     }
 }

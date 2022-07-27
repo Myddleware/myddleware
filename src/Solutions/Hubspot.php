@@ -330,8 +330,9 @@ class Hubspot extends Solution
 
             return $this->moduleFields;
         } catch (Exception $e) {
-            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $error = $e->getMessage().$e->getFile().$e->getLine();
             $this->logger->error($error);
+
             return ['error' => $error];
         }
     }
@@ -585,7 +586,6 @@ class Hubspot extends Solution
         return $result;
     }
 
-
     public function updateData($param): array
     {
         $result = [];
@@ -652,7 +652,7 @@ class Hubspot extends Solution
                 } else {
                     throw new Exception('Module '.$module.' unknown.');
                 }
-                $resultQuery = $this->call(url: $url, method: $method,  args: $dataHubspot);
+                $resultQuery = $this->call(url: $url, method: $method, args: $dataHubspot);
 
                 if (
                     $resultQuery['info']['http_code'] >= 200 // 200 is used to update deals for example
@@ -703,8 +703,6 @@ class Hubspot extends Solution
         return $identifyProfiles;
     }
 
-    // Build the url depending on the module
-
     /**
      * @throws Exception
      */
@@ -717,10 +715,10 @@ class Hubspot extends Solution
         if (!empty($param['query']['id'])) {
             // Calls can be differents depending on the modules
             $result['url'] = match ($module) {
-                'deal' => $this->url . 'deals/' . $version . '/' . $module . '/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
-                'contact' => $this->url . 'contacts/' . $version . '/' . $module . '/vid/' . $param['query']['id'] . '/profile?hapikey=' . $this->connectionParam['apikey'],
-                'deals' => $this->url . 'deals/' . $version . '/pipelines/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
-                default => $this->url . $module . '/' . $version . '/' . $module . '/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
+                'deal' => $this->url.'deals/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'],
+                'contact' => $this->url.'contacts/'.$version.'/'.$module.'/vid/'.$param['query']['id'].'/profile?hapikey='.$this->connectionParam['apikey'],
+                'deals' => $this->url.'deals/'.$version.'/pipelines/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'],
+                default => $this->url.$module.'/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'],
             };
 
             return $result;
@@ -961,7 +959,6 @@ class Hubspot extends Solution
             // Module Company or Engagement
         } elseif (
                     'companies' === $param['module']
-                 or str_starts_with($param['module'], 'engagement')
                  or str_starts_with($param['module'], 'engagement')
         ) {
             // The response key can be different depending the API call
