@@ -457,11 +457,7 @@ class ERPNext extends Solution
     }
 
     /**
-     * @param string $url
-     * @param string $method
      * @param array $parameters
-     * @param int $timeout
-     * @return mixed
      *
      * @throws Exception
      */

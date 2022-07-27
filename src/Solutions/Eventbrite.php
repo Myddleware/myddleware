@@ -252,7 +252,8 @@ class Eventbrite extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage() . $e->getFile() .$e->getLine());
+            $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+
             return null;
         }
     }
@@ -409,7 +410,7 @@ class Eventbrite extends Solution
                         'id' => $event->event->id,
                         'only_display' => implode(',', $param['fields']),
                     ];
-                    $responseEvent = $this->call(url:$this->urlBase.'event_list_attendees', parameters:  $parametersEvent);
+                    $responseEvent = $this->call(url: $this->urlBase.'event_list_attendees', parameters: $parametersEvent);
                     if (!empty($responseEvent[strtolower($param['module'])][0]->$moduleSingle)) {
                         $result['done'] = true;
                         foreach ($responseEvent[strtolower($param['module'])][0]->$moduleSingle as $key => $value) {
@@ -446,7 +447,7 @@ class Eventbrite extends Solution
                 // Si le module n'est pas ticket on récupère l'historique
                 if ('Tickets' != $param['module']) {
                     $parameters['id'] = $param['query']['id'];
-                    $response = $this->call(url:$this->urlBase.$moduleSingle.'_get', parameters: $parameters);
+                    $response = $this->call(url: $this->urlBase.$moduleSingle.'_get', parameters: $parameters);
                     // Si une erreur est rencontrée
                     if (!empty($response['error'])) {
                         $result['error'] = $response['error']->error_type.' : '.$response['error']->error_message;
@@ -581,7 +582,7 @@ class Eventbrite extends Solution
             ];
 
             // Récupération de tous les évènement du user
-            $response = $this->call(url:$this->urlBase.'user_list_events', parameters: $parameters);
+            $response = $this->call(url: $this->urlBase.'user_list_events', parameters: $parameters);
             if (!empty($response['events'][0])) {
                 // Boucle sur tous les évènements
                 foreach ($response['events'] as $event) {

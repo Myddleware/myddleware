@@ -458,6 +458,7 @@ class Magento extends Solution
         } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($result['error']);
+
             return $result;
         }
     }
@@ -471,7 +472,7 @@ class Magento extends Solution
             if (!empty($this->idByModule[$param['module']])) { // Si le champ id existe dans le tableau
                 $fieldId = $this->idByModule[$param['module']];
             }
-            
+
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 
             // Init parameters for modules or submodules
@@ -614,7 +615,7 @@ class Magento extends Solution
     public function createData($param): array
     {
         $result = [];
-        if ($param['module'] == 'customers') {
+        if ('customers' == $param['module']) {
             $keyParameters = 'customer';
         }
 
@@ -672,7 +673,7 @@ class Magento extends Solution
     public function updateData($param): array
     {
         $result = [];
-        if ($param['module'] == 'customers') {
+        if ('customers' == $param['module']) {
             $keyParameters = 'customer';
         }
 

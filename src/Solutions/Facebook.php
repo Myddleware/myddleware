@@ -95,7 +95,6 @@ class Facebook extends Solution
             $error = $e->getMessage();
         }
         $this->logger->error($error);
-
     }
 
     public function getModules($type = 'source'): array
@@ -121,7 +120,8 @@ class Facebook extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+
             return ['error' => $error];
         }
     }
@@ -163,7 +163,8 @@ class Facebook extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+
             return ['error' => $error];
         }
     }
@@ -300,6 +301,7 @@ class Facebook extends Solution
                 $data[$field->getField('name')] = $field->getField('values')->getField('0');
             }
         }
+
         return $data;
     }
 
