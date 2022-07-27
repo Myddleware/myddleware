@@ -109,8 +109,6 @@ class VtigerCRM extends Solution
             $this->session = $client->getSessionName();
             $this->isConnectionValid = true;
             $this->vtigerClient = $client;
-
-            return $result;
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
@@ -119,14 +117,6 @@ class VtigerCRM extends Solution
 
     public function logout(): bool
     {
-        // TODO: Creare ed usare il loguot di vtiger (Non Funziona)
-        /*
-        if(empty($this->vtigerClient))
-            return false;
-
-        return $this->vtigerClient->logout();
-        */
-
         return true;
     }
 
@@ -187,7 +177,7 @@ class VtigerCRM extends Solution
         }
     }
 
-    public function setModulePrefix($moduleName = null)
+    public function setModulePrefix($moduleName = null): bool
     {
         if (empty($moduleName)) {
             $result = $this->vtigerClient->listTypes();
@@ -212,11 +202,10 @@ class VtigerCRM extends Solution
 
             return false;
         }
+
+        return false;
     }
 
-    /**
-     * Return the fields for a specific module without the specified ones.
-     */
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
@@ -472,7 +461,7 @@ class VtigerCRM extends Solution
                             }
                             $parent = $this->vtigerClient->retrieve($resultCreate['result']['parent_id']);
                             $parent = $parent['result'];
-                            if (!isset($parent['invoicestatus']) || empty($parent['invoicestatus'])) {
+                            if (empty($parent['invoicestatus'])) {
                                 $parent['invoicestatus'] = 'AutoCreated';
                             }
                             unset($parent['LineItems_FinalDetails']);
@@ -493,7 +482,7 @@ class VtigerCRM extends Solution
                 }
                 // Transfert status update
                 if (
-                        !empty($subDocIdArray)
+                    !empty($subDocIdArray)
                     and empty($result[$idDoc]['error'])
                 ) {
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {

@@ -31,7 +31,9 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Mautic\Auth\ApiAuth;
+use Mautic\Exception\ContextNotFoundException;
 use Mautic\MauticApi;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -43,9 +45,9 @@ class Mautic extends Solution
 
     // Modules name depending on the context (call to create date, result of a search, result of a creation/update)
     protected array $moduleParameters = [
-        'contact' => ['plurial' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
-        'company' => ['plurial' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
-        'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
+        'contact' => ['plural' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
+        'company' => ['plural' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
+        'segment' => ['plural' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
     ];
 
     protected array $requiredFields = [
@@ -108,28 +110,23 @@ class Mautic extends Solution
                 $this->auth = $auth;
                 $this->isConnectionValid = true;
             } elseif (!empty($user['error']['message'])) {
-                throw new \Exception('Failed to login to Mautic. Code '.$user['error']['code'].' : '.$user['error']['message']);
+                throw new Exception('Failed to login to Mautic. Code '.$user['error']['code'].' : '.$user['error']['message']);
             } else {
-                throw new \Exception('Failed to login to Mautic. No error message returned by the API.');
+                throw new Exception('Failed to login to Mautic. No error message returned by the API.');
             }
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = $e->getMessage().$e->getFile().$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Get the modules available
     public function getModules($type = 'source'): array
     {
-        // Modules available in source and target
         $modules = [
             'contact' => 'Contacts',
             'company' => 'Companies',
             'companies__contact' => 'Add contact to company',
         ];
-        // Modules only available in target
         if ('target' == $type) {
             $modules['segment'] = 'Segment';
             $modules['segments__contacts'] = 'Add contact to segment';
@@ -138,7 +135,6 @@ class Mautic extends Solution
         return $modules;
     }
 
-    // Get the fields available
     public function getModuleFields($module, $type = 'source', $param = null): array
     {
         parent::getModuleFields($module, $type);
@@ -149,7 +145,6 @@ class Mautic extends Solution
                 $api = new MauticApi();
                 $fieldApi = $api->newApi($module.'Fields', $this->auth, $this->connectionParam['url']);
                 $fieldlist = $fieldApi->getList();
-                // Transform fields to Myddleware format
                 if (!empty($fieldlist['fields'])) {
                     foreach ($fieldlist['fields'] as $field) {
                         if ('relate' == $field['type']) {
@@ -158,7 +153,7 @@ class Mautic extends Solution
                                 'type' => 'varchar(255)',
                                 'type_bdd' => 'varchar(255)',
                                 'required' => '',
-                                'required_relationship' => (!empty($field['isRequired']) ? true : false),
+                                'required_relationship' => !empty($field['isRequired']),
                                 'relate' => true,
                             ];
                         } else {
@@ -166,7 +161,7 @@ class Mautic extends Solution
                                 'label' => $field['label'],
                                 'type' => ('text' == $field['type'] ? TextType::class : 'varchar(255)'),
                                 'type_bdd' => ('text' == $field['type'] ? $field['type'] : 'varchar(255)'),
-                                'required' => (!empty($field['isRequired']) ? true : false),
+                                'required' => !empty($field['isRequired']),
                                 'relate' => false,
                             ];
                             // manage dropdown lists
@@ -186,6 +181,7 @@ class Mautic extends Solution
                     }
                 }
             } else {
+                $moduleFields = [];
                 // Use Mautic metadata (field added manually in metadata file)
                 require 'lib/mautic/metadata.php';
                 if (!empty($moduleFields[$module])) {
@@ -194,56 +190,63 @@ class Mautic extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
-        // Specific management depending on the module
-        switch ($param['module']) {
-            case 'companies__contact':
-                return $this->manageRelationship('create', $param, 'company', 'contact');
-            case 'segments__contacts':
-                return $this->manageRelationship('create', $param, 'segment', 'contact');
-            default:
-                return $this->createUpdate('create', $param);
-        }
+        return match ($param['module']) {
+            'companies__contact' => $this->manageRelationship('create', $param, 'company', 'contact'),
+            'segments__contacts' => $this->manageRelationship('create', $param, 'segment', 'contact'),
+            default => $this->createUpdate('create', $param),
+        };
     }
 
-    public function updateData($param)
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
-        // Specific management depending on the module
-        switch ($param['module']) {
-            case 'companies__contact':
-                return $this->manageRelationship('create', $param, 'company', 'contact');
-            case 'segments__contacts':
-                return $this->manageRelationship('create', $param, 'segment', 'contact');
-            default:
-                return $this->createUpdate('update', $param);
-        }
+        return match ($param['module']) {
+            'companies__contact' => $this->manageRelationship('create', $param, 'company', 'contact'),
+            'segments__contacts' => $this->manageRelationship('create', $param, 'segment', 'contact'),
+            default => $this->createUpdate('update', $param),
+        };
     }
 
-    public function deleteData($param)
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function deleteData($param): array
     {
-        // Specific management depending on the module
-        switch ($param['module']) {
-            case 'companies__contact':
-                return $this->manageRelationship('delete', $param, 'company', 'contact');
-            case 'segments__contacts':
-                return $this->manageRelationship('delete', $param, 'segment', 'contact');
-            default:
-                return $this->deleteRecord($param);
-        }
+        return match ($param['module']) {
+            'companies__contact' => $this->manageRelationship('delete', $param, 'company', 'contact'),
+            'segments__contacts' => $this->manageRelationship('delete', $param, 'segment', 'contact'),
+            default => $this->deleteRecord($param),
+        };
     }
 
-    // Create reconto to Mautic
-    public function createUpdate($action, $param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws ContextNotFoundException
+     */
+    public function createUpdate($action, $param): array
     {
+        $result = [];
         // Create API object depending on the module
         $api = new MauticApi();
-        $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
+        $moduleName = (!empty($this->moduleParameters[$param['module']]['plural']) ? $this->moduleParameters[$param['module']]['plural'] : $param['module']);
         $moduleResultKey = (!empty($this->moduleParameters[$param['module']]['resultKeyUpsert']) ? $this->moduleParameters[$param['module']]['resultKeyUpsert'] : $param['module']);
         $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
@@ -254,12 +257,11 @@ class Mautic extends Solution
                 $targetId = '';
                 if ('update' == $action) {
                     if (empty($data['target_id'])) {
-                        throw new \Exception('Failed to update the record to Mautic. The target id is empty.');
+                        throw new Exception('Failed to update the record to Mautic. The target id is empty.');
                     }
                     $targetId = $data['target_id'];
                 }
 
-                // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 // update the record to Mautic
                 if ('update' == $action) {
@@ -275,31 +277,32 @@ class Mautic extends Solution
                         'error' => false,
                     ];
                 } elseif (!empty($record['error']['message'])) {
-                    throw new \Exception('Failed to '.$action.' the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
+                    throw new Exception('Failed to '.$action.' the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
                 } else {
-                    throw new \Exception('Failed to '.$action.' the record to Mautic. No error message returned by the API.');
+                    throw new Exception('Failed to '.$action.' the record to Mautic. No error message returned by the API.');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Create reconto to Mautic
-    public function manageRelationship($action, $param, $module1, $module2)
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function manageRelationship($action, $param, $module1, $module2): array
     {
-        // Create API object depending on the module
+        $result = [];
         $api = new MauticApi();
-        $moduleName = (!empty($this->moduleParameters[$module1]['plurial']) ? $this->moduleParameters[$module1]['plurial'] : $param['module']);
-        // Init API instance
+        $moduleName = (!empty($this->moduleParameters[$module1]['plural']) ? $this->moduleParameters[$module1]['plural'] : $param['module']);
         $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -308,10 +311,10 @@ class Mautic extends Solution
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 if (empty($data[$module1])) {
-                    throw new \Exception('Failed to manage the '.$module2.' to the '.$module1.' to Mautic because '.$module1.' is empty.');
+                    throw new Exception('Failed to manage the '.$module2.' to the '.$module1.' to Mautic because '.$module1.' is empty.');
                 }
                 if (empty($data['contact'])) {
-                    throw new \Exception('Failed to manage the '.$module2.' to the '.$module1.' to Mautic because '.$module2.' is empty.');
+                    throw new Exception('Failed to manage the '.$module2.' to the '.$module1.' to Mautic because '.$module2.' is empty.');
                 }
 
                 // Create relationship into Mautic
@@ -320,7 +323,7 @@ class Mautic extends Solution
                 } elseif ('delete' == $action) {
                     $record = $moduleApi->removeContact($data[$module1], $data[$module2]);
                 } else {
-                    throw new \Exception('Action '.$action.' unknown');
+                    throw new Exception('Action '.$action.' unknown');
                 }
 
                 // Manage return data from Mautic
@@ -330,45 +333,42 @@ class Mautic extends Solution
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('Failed to add the '.$module2.' to the '.$module1.' to Mautic.');
+                    throw new Exception('Failed to add the '.$module2.' to the '.$module1.' to Mautic.');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Function to delete a record
-    public function deleteRecord($param)
+    public function deleteRecord($param): array
     {
+        $result = [];
         try {
-            // Create API object depending on the module
             $api = new MauticApi();
-            $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
+            $moduleName = (!empty($this->moduleParameters[$param['module']]['plural']) ? $this->moduleParameters[$param['module']]['plural'] : $param['module']);
             $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
-            // For every document
             foreach ($param['data'] as $idDoc => $data) {
                 try {
                     // Check control before delete
                     $data = $this->checkDataBeforeDelete($param, $data);
                     if (empty($data['target_id'])) {
-                        throw new \Exception('No target id found. Failed to delete the record.');
+                        throw new Exception('No target id found. Failed to delete the record.');
                     }
                     // remove record from Mautic
                     $record = $moduleApi->delete($data['target_id']);
 
                     // Manage return data from Mautic
                     if (
-                            !empty($record[$param['module']])
+                        !empty($record[$param['module']])
                         and array_key_exists('id', $record[$param['module']])
                     ) {
                         $result[$idDoc] = [
@@ -376,49 +376,50 @@ class Mautic extends Solution
                             'error' => false,
                         ];
                     } elseif (!empty($record['error']['message'])) {
-                        throw new \Exception('Failed to delete the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
+                        throw new Exception('Failed to delete the record to Mautic. Code '.$record['error']['code'].' : '.$record['error']['message']);
                     } else {
-                        throw new \Exception('Failed to delete the record to Mautic. No error message returned by the API.');
+                        throw new Exception('Failed to delete the record to Mautic. No error message returned by the API.');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => $error,
                     ];
                 }
-                // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result[$idDoc] = [
-                'id' => '-1',
-                'error' => $error,
-            ];
+            $this->logger->error($error);
+            $result['error'] = $error;
         }
 
         return $result;
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): ?string
     {
         try {
             // Get url, module and record ID depending on the type
             if ('source' == $type) {
                 $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-                $module = $rule->getModuleSource();
+                $module = $rule->getSourceModule();
                 $recordId = $document->getSource();
             } else {
                 $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-                $module = $rule->getModuleTarget();
+                $module = $rule->getTargetModule();
                 $recordId = $document->gettarget();
             }
 
             // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-            return rtrim($url, '/').'/s/'.$this->moduleParameters[$module]['plurial'].'/view/'.$recordId;
-        } catch (\Exception $e) {
+            return rtrim($url, '/').'/s/'.$this->moduleParameters[$module]['plural'].'/view/'.$recordId;
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return null;
         }
     }
 
@@ -432,7 +433,9 @@ class Mautic extends Solution
         return $data;
     }
 
-    // Function to convert datetime format from the current application to Myddleware date format
+    /**
+     * @throws Exception
+     */
     protected function dateTimeToMyddleware($dateTime): string
     {
         $date = new \DateTime($dateTime);

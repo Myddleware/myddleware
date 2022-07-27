@@ -271,7 +271,7 @@ class Airtable extends Solution
 
                 ++$page;
             } while (
-                    !$stop
+                !$stop
                 and $currentCount === $this->defaultLimit
                 and $result['count'] < $param['limit'] // count < rule limit
                 and !empty($offset) // Only if there is more data to be read

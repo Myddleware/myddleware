@@ -33,13 +33,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Facebook extends Solution
 {
-    protected $baseUrl = 'https://graph.facebook.com';
+    protected string $baseUrl = 'https://graph.facebook.com';
 
-    protected $apiVersion = 'v11.0';
+    protected string $apiVersion = 'v11.0';
 
     protected $facebook;
 
-    protected $readLast = false;
+    protected bool $readLast = false;
 
     protected array $requiredFields = ['default' => ['id', 'created_time']];
 
@@ -64,12 +64,10 @@ class Facebook extends Solution
         ];
     }
 
-    // login to Facebook
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
-            // Create Facebook object
             $this->facebook = new \Facebook\Facebook([
                 'app_id' => $this->connectionParam['clientid'],
                 'app_secret' => $this->connectionParam['clientsecret'],
@@ -97,11 +95,8 @@ class Facebook extends Solution
             $error = $e->getMessage();
         }
         $this->logger->error($error);
-
-        return ['error' => $error];
     }
 
-    // Get available modules
     public function getModules($type = 'source'): array
     {
         try {
@@ -125,11 +120,12 @@ class Facebook extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+
+            return ['error' => $error];
         }
     }
 
-    // Get the fields available for the module in input
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
@@ -167,12 +163,13 @@ class Facebook extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().$e->getFile().$e->getLine();
+
+            return ['error' => $error];
         }
     }
 
-    // Permet de lire les données
-    public function readData($param)
+    public function readData($param): ?array
     {
         try {
             $result = [];
@@ -231,7 +228,7 @@ class Facebook extends Solution
                             $row['date_modified'] = $recordNode->getField($field)->format('Y-m-d H:i:s');
                         // If the field exists in the form (fieldData), we get the data from it
                         } elseif (
-                                !empty($fieldData)
+                            !empty($fieldData)
                             and isset($fieldData[$field])
                         ) {
                             $row[$field] = $fieldData[$field];
@@ -242,7 +239,7 @@ class Facebook extends Solution
                     // Saved the record only if the record reference date is greater than the rule reference date
                     // (important when we can't filter by date in Facebook call)
                     if (
-                            !empty($row['date_modified'])
+                        !empty($row['date_modified'])
                         && $param['date_ref'] < $row['date_modified']
                     ) {
                         $result['values'][$row['id']] = $row;
@@ -267,14 +264,14 @@ class Facebook extends Solution
             // If the number of record read is greater than the limit,
             // We read the result from the end to the beginning (oldest record first) and keep only the number of record expected
             if (
-                    !empty($result['values'])
+                !empty($result['values'])
                 and count($result['values']) > $param['limit']
             ) {
                 $reverseValues = array_reverse($result['values'], true);
                 $result['values'] = [];
                 foreach ($reverseValues as $key => $value) {
                     if (
-                            !empty($result['values'])
+                        !empty($result['values'])
                         and count($result['values']) >= $param['limit']
                     ) {
                         break;
@@ -296,18 +293,19 @@ class Facebook extends Solution
     }
 
     // Transform Facebook data structure to a json type key => value
-    protected function formatToArray($fbDataObject)
+    protected function formatToArray($fbDataObject): array
     {
+        $data = [];
         if (!empty($fbDataObject)) {
             foreach ($fbDataObject as $field) {
                 $data[$field->getField('name')] = $field->getField('values')->getField('0');
             }
-
-            return $data;
         }
+
+        return $data;
     }
 
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Only leads module for now
         return 'created_time';

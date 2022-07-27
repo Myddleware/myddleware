@@ -26,7 +26,7 @@ class DemoteUserCommand extends Command
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepository $userRepository
-        ) {
+    ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;

@@ -65,7 +65,7 @@ class LogRepository extends ServiceEntityRepository
             ->setParameter('limitDate', $limitDate)
             ->getQuery()
             ->getResult()
-            ;
+        ;
     }
 
     public function getLogsReportForDocumentsSent(Job $job)
@@ -79,6 +79,6 @@ class LogRepository extends ServiceEntityRepository
             ->orderBy('document.globalStatus')
             ->getQuery()
             ->getResult()
-            ;
+        ;
     }
 }

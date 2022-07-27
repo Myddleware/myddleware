@@ -150,7 +150,7 @@ class JobManager
             }
             // Error if the rule is inactive and if we try to run it from a job (not manually)
             elseif (
-                    empty($rule['active'])
+                empty($rule['active'])
                 && 0 == $this->manual
             ) {
                 throw new \Exception('Rule '.$filter.' is inactive.');
@@ -420,7 +420,7 @@ class JobManager
             }
             // No filter on status if the action is restore/changeStatus or if forceAll = 'Y'
             if (
-                    'Y' != $forceAll
+                'Y' != $forceAll
                 and 'restore' != $action
                 and 'changeStatus' != $action
             ) {
@@ -611,14 +611,14 @@ class JobManager
                         $order = 0;
                         // Si on est une règle sans ordre
                         if (
-                                !empty($rule['rule_order'])
+                            !empty($rule['rule_order'])
                             and '99' == $rule['rule_order']
                         ) {
                             // Récupération des règles liées et recherche dans le tableau keyValue
                             $rulesLink = explode(';', $rule['field_id']);
                             foreach ($rulesLink as $ruleLink) {
                                 if (
-                                        !empty($ruleKeyVakue[$ruleLink])
+                                    !empty($ruleKeyVakue[$ruleLink])
                                     && $ruleKeyVakue[$ruleLink] > $order
                                 ) {
                                     $order = $ruleKeyVakue[$ruleLink];

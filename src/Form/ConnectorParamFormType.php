@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
 use Symfony\Component\Form\AbstractType;
@@ -56,7 +55,7 @@ class ConnectorParamFormType extends AbstractType
     {
         $resolver->setDefaults([
             // 'data_class' => ConnectorParam::class,
-            'inherit_data' => true
+            'inherit_data' => true,
         ]);
     }
 

@@ -74,7 +74,7 @@ class RuleRepository extends ServiceEntityRepository
             ->addSelect('ct.name lbl_target')
             ->addSelect('Solution_source.name solution_source')
             ->addSelect('Solution_target.name solution_target')
-            ;
+        ;
 
         // si ce n'est pas le support alors on affecte l'id client sinon on affiche tout
         if (!$user->isAdmin()) {

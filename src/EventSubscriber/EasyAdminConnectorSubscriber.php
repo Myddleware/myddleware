@@ -28,7 +28,7 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
         $this->connectorParamRepository = $connectorParamRepository;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             AfterEntityPersistedEvent::class => ['createConnectorParams'],
@@ -87,7 +87,7 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
 
                 $connectorParam = $this->connectorParamRepository->findOneBy([
                     'name' => $paramKey,
-                    'connector' => $entity
+                    'connector' => $entity,
                 ]);
 
                 if ($connectorParam) {
@@ -111,7 +111,7 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
     {
         $crud = $event->getAdminContext()->getCrud();
 
-        if ($crud->getEntityFqcn() !== Connector::class || $crud->getCurrentAction() !== 'detail') {
+        if (Connector::class !== $crud->getEntityFqcn() || 'detail' !== $crud->getCurrentAction()) {
             return;
         }
 

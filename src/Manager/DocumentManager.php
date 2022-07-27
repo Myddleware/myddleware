@@ -733,10 +733,10 @@ class DocumentManager
 
             // Update the target ID if we found it (target Id is required for update and deletion)
             if ((
-                    'U' == $this->documentType
-                    or 'D' == $this->documentType
-                )
-                and !$this->isChild()
+                'U' == $this->documentType
+                or 'D' == $this->documentType
+            )
+            and !$this->isChild()
             ) {
                 if (empty($this->targetId)) {
                     // If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
@@ -967,10 +967,10 @@ class DocumentManager
             // If the document type is a modification or a deletion we get target data for the record using its ID
             // And if the rule is not a child (no target id is required, it will be send with the parent rule)
             if ((
-                    'U' == $this->documentType
-                    or 'D' == $this->documentType
-                )
-                && !$this->isChild()
+                'U' == $this->documentType
+                or 'D' == $this->documentType
+            )
+            && !$this->isChild()
             ) {
                 // Récupération des données avec l'id de la cible
                 $searchFields = ['id' => $this->targetId];
@@ -1200,7 +1200,7 @@ class DocumentManager
         $rule = $this->getRule();
         $read['module'] = $rule['module_target'];
         // Get all fields for document type D (delete) to backup the whole record before delete it
-        ('D' == $this->documentType ? $all = true : $all = false);
+        'D' == $this->documentType ? $all = true : $all = false;
         $read['fields'] = $this->getTargetFields($all);
         $read['query'] = $searchFields;
         $read['ruleParams'] = $this->ruleParams;
@@ -1822,13 +1822,13 @@ class DocumentManager
                 if (!empty($this->ruleDocuments[$this->ruleId]['sourceId'][$id])) {
                     foreach ($this->ruleDocuments[$this->ruleId]['sourceId'][$id] as $document) {
                         if ((
-                                'Cancel' != $document['global_status']
-                                or (
-                                    'Cancel' == $document['global_status']
-                                    and 'No_send' == $document['status']
-                                )
+                            'Cancel' != $document['global_status']
+                            or (
+                                'Cancel' == $document['global_status']
+                                and 'No_send' == $document['status']
                             )
-                            and $document['id'] !== $this->id
+                        )
+                        and $document['id'] !== $this->id
                         ) {
                             // Si on trouve la target dans la règle liée alors on passe le doc en UPDATE (the target id can be found even if the relationship is a parent (if we update data), but it isn't required)
                             if (!empty($document['target_id'])) {
@@ -2210,10 +2210,10 @@ class DocumentManager
                     if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id])) {
                         foreach ($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id] as $document) {
                             if ((
-                                    'Close' == $document['global_status']
-                                    or 'No_send' == $document['status']
-                                )
-                                and '' != $document['target_id']
+                                'Close' == $document['global_status']
+                                or 'No_send' == $document['status']
+                            )
+                            and '' != $document['target_id']
                             ) {
                                 $result['record_id'] = $document['target_id'];
                                 $result['document_id'] = $document['id'];
@@ -2225,10 +2225,10 @@ class DocumentManager
                     if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id])) {
                         foreach ($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id] as $document) {
                             if ((
-                                    'Close' == $document['global_status']
-                                    or 'No_send' == $document['status']
-                                )
-                                and '' != $document['source_id']
+                                'Close' == $document['global_status']
+                                or 'No_send' == $document['status']
+                            )
+                            and '' != $document['source_id']
                             ) {
                                 $result['record_id'] = $document['source_id'];
                                 $result['document_id'] = $document['id'];

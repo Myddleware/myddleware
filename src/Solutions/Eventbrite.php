@@ -33,7 +33,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Eventbrite extends Solution
 {
-    protected $typeRead = [
+    protected array $typeRead = [
         'Organizer' => 'User',
         'Events' => 'User',
         'Tickets' => 'User',
@@ -46,7 +46,7 @@ class Eventbrite extends Solution
 
     private $token;
 
-    private $urlBase = 'https://www.eventbrite.com/json/';
+    private string $urlBase = 'https://www.eventbrite.com/json/';
 
     public function getFieldsLogin(): array
     {
@@ -61,30 +61,26 @@ class Eventbrite extends Solution
 
     protected array $requiredFields = ['default' => ['id', 'modified']];
 
-    protected $eventStatuses = ''; // 'live,started,ended'
+    protected string $eventStatuses = ''; // 'live,started,ended'
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
             $parameters = [];
             $this->token = $this->connectionParam['token'];
-            $response = $this->call($this->urlBase.'user_list_organizers', $parameters);
+            $response = $this->call(url: $this->urlBase.'user_list_organizers', parameters: $parameters);
 
             // Pour tester la validité du token, on vérifie le retour  du webservice user_list_organizers
             if (isset($response['organizers'])) {
                 $this->isConnectionValid = true;
-            } else {
-                if (!empty($response['error'])) {
-                    $error = $response['error']->error_message;
-                }
+            } elseif (!empty($response['error'])) {
+                $error = $response['error']->error_message;
                 throw new \Exception($error);
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -119,7 +115,7 @@ class Eventbrite extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            return $e->getMessage();
+            return ['error' => $e->getMessage()];
         }
     }
 
@@ -129,173 +125,136 @@ class Eventbrite extends Solution
         parent::getModuleFields($module, $type);
         try {
             // Pour chaque module, traitement différent
-            switch ($module) {
-                case 'Organizer':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'description' => ['label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                        'url' => ['label' => 'Profile page URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    break;
-                case 'Events':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'title' => ['label' => 'Title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'description' => ['label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                        'start_date' => ['label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'end_date' => ['label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'timezone' => ['label' => 'Timezone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'modified' => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'privacy' => ['label' => 'Private', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'password' => ['label' => 'Password.', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'capacity' => ['label' => 'Capacity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'url' => ['label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'logo' => ['label' => 'Logo URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => ['draft' => 'draft', 'live' => 'live', 'started' => 'started', 'ended' => 'ended', 'canceled' => 'canceled']],
-                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
-                        'venue_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
-                    ];
-                    break;
-                case 'Tickets':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'name' => ['label' => 'Name.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'description' => ['label' => 'Description.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                        'type' => ['label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'min' => ['label' => 'Minimum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'max' => ['label' => 'Maximum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'currency' => ['label' => 'Currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'start_date' => ['label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'end_date' => ['label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'quantity_available' => ['label' => 'Quantity available', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'quantity_sold' => ['label' => 'Quantity sold', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'visible' => ['label' => 'Visible', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'event_id' => ['label' => 'Event id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
-                    ];
-                    break;
-                case 'Venues':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'name' => ['label' => 'Name.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'address' => ['label' => 'Address.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'address_2' => ['label' => 'Address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'city' => ['label' => 'City.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'region' => ['label' => 'Region/state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'postal_code' => ['label' => 'Postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'country' => ['label' => 'Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'country_code' => ['label' => 'Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-                        'longitude' => ['label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'latitude' => ['label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'Lat-Long' => ['label' => 'Latitude/Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
-                    ];
-                    break;
-                /* case 'Access_Codes':
-                    $this->moduleFields = array(
-                        'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'code' => array('label' => 'Code.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-                    // Il faudra probalement faire une relation tickets - access code
-                        'tickets' => array('label' => 'Tickets', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'start_date' => array('label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-                        'end_date' => array('label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-                        'quantity_available' => array('label' => 'Quantity available', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1),
-                        'quantity_sold' => array('label' => 'Quantity sold', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-                    );
-                    break;
-                case 'Discount_Codes':
-                    $this->moduleFields = array(
-                        'id' => array('label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'code' => array('label' => 'Code.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'amount_off' => array('label' => 'Amount off', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'percent_off' => array('label' => 'Tickets', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                    // Il faudra probalement faire une relation tickets - discount code
-                        'tickets' => array('label' => 'Tickets', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'start_date' => array('label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'end_date' => array('label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'quantity_available' => array('label' => 'Quantity available', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0),
-                        'quantity_sold' => array('label' => 'Quantity sold', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0)
-                    );
-                    break;	 */
-                case 'Attendees':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'quantity' => ['label' => 'Quantity of tickets purchased.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'currency' => ['label' => 'Ticket currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'amount_paid' => ['label' => 'Amount paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        // Liste de code bar... relation ou module
-                        'barcode' => ['label' => 'Barcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'order_type' => ['label' => 'Order type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'modified' => ['label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'event_date' => ['label' => 'Event date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'discount' => ['label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'notes' => ['label' => 'Notes.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
-                        'email' => ['label' => 'Email address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'prefix' => ['label' => 'Prefix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'first_name' => ['label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'last_name' => ['label' => 'Last name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'suffix' => ['label' => 'Suffix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_address' => ['label' => 'Home address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_address_2' => ['label' => 'Home address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_city' => ['label' => 'Home city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_postal_code' => ['label' => 'Home postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_region' => ['label' => 'Home state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_country' => ['label' => 'Home country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_country_code' => ['label' => 'Home country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'home_phone' => ['label' => 'Home phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'cell_phone' => ['label' => 'Cell phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_address' => ['label' => 'Shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_address_2' => ['label' => 'Shipping address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_city' => ['label' => 'Shipping city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_postal_code' => ['label' => 'Shipping postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_region' => ['label' => 'Shipping state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_country' => ['label' => 'Shipping country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'ship_country_code' => ['label' => 'Shipping country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_address' => ['label' => 'Work address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_address_2' => ['label' => 'Work address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_city' => ['label' => 'Work city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_postal_code' => ['label' => 'Work postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_region' => ['label' => 'Work state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_country' => ['label' => 'Work country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_country_code' => ['label' => 'Work country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'work_phone' => ['label' => 'Work phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'job_title' => ['label' => 'Job title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'company' => ['label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'website' => ['label' => 'Website link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'blog' => ['label' => 'Blog', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'gender' => ['label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'birth_date' => ['label' => 'Birth date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'age' => ['label' => 'Age', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        // Liste des réponses à voir, probablement relation ou module
-                        'answers' => ['label' => 'Answers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'order_id' => ['label' => 'Order ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'event_id' => ['label' => 'Event ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
-                        'ticket_id' => ['label' => 'Ticket ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
-                    ];
-                    break;
-                case 'Users':
-                    $this->moduleFields = [
-                        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'email' => ['label' => 'Email address.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'first_name' => ['label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'last_name' => ['label' => 'Last name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'user_key' => ['label' => 'API user key', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'date_created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        'date_modified' => ['label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                        // Peut-être une relation user - user
-                        'subusers' => ['label' => 'Subusers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-                    ];
-                    break;
-                default:
-                    throw new \Exception('Fields unreadable');
-            }
+            $this->moduleFields = match ($module) {
+                'Organizer' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'description' => ['label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
+                    'url' => ['label' => 'Profile page URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                ],
+                'Events' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'title' => ['label' => 'Title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'description' => ['label' => 'Description', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
+                    'start_date' => ['label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'end_date' => ['label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'timezone' => ['label' => 'Timezone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'modified' => ['label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'privacy' => ['label' => 'Private', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'password' => ['label' => 'Password.', 'type' => PasswordType::class, 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'capacity' => ['label' => 'Capacity', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'url' => ['label' => 'URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'logo' => ['label' => 'Logo URL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'status' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'option' => ['draft' => 'draft', 'live' => 'live', 'started' => 'started', 'ended' => 'ended', 'canceled' => 'canceled']],
+                    'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
+                    'venue_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'required_relationship' => 0, 'relate' => true],
+                ],
+                'Tickets' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'name' => ['label' => 'Name.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'description' => ['label' => 'Description.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
+                    'type' => ['label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'min' => ['label' => 'Minimum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'max' => ['label' => 'Maximum ticket', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'currency' => ['label' => 'Currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'price' => ['label' => 'Price', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'start_date' => ['label' => 'Start date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'end_date' => ['label' => 'End date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'quantity_available' => ['label' => 'Quantity available', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'quantity_sold' => ['label' => 'Quantity sold', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'visible' => ['label' => 'Visible', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'event_id' => ['label' => 'Event id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
+                ],
+                'Venues' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'name' => ['label' => 'Name.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'address' => ['label' => 'Address.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'address_2' => ['label' => 'Address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'city' => ['label' => 'City.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'region' => ['label' => 'Region/state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'postal_code' => ['label' => 'Postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'country' => ['label' => 'Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'country_code' => ['label' => 'Country', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+                    'longitude' => ['label' => 'Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'latitude' => ['label' => 'Latitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'Lat-Long' => ['label' => 'Latitude/Longitude', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'organizer_id' => ['label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+                ],
+                'Attendees' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'quantity' => ['label' => 'Quantity of tickets purchased.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'currency' => ['label' => 'Ticket currency', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'amount_paid' => ['label' => 'Amount paid', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    // Liste de code bar... relation ou module
+                    'barcode' => ['label' => 'Barcode', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'order_type' => ['label' => 'Order type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'modified' => ['label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'event_date' => ['label' => 'Event date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'discount' => ['label' => 'Discount', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'notes' => ['label' => 'Notes.', 'type' => TextType::class, 'type_bdd' => 'text', 'required' => 0],
+                    'email' => ['label' => 'Email address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'prefix' => ['label' => 'Prefix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'first_name' => ['label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'last_name' => ['label' => 'Last name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'suffix' => ['label' => 'Suffix', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_address' => ['label' => 'Home address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_address_2' => ['label' => 'Home address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_city' => ['label' => 'Home city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_postal_code' => ['label' => 'Home postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_region' => ['label' => 'Home state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_country' => ['label' => 'Home country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_country_code' => ['label' => 'Home country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'home_phone' => ['label' => 'Home phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'cell_phone' => ['label' => 'Cell phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_address' => ['label' => 'Shipping address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_address_2' => ['label' => 'Shipping address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_city' => ['label' => 'Shipping city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_postal_code' => ['label' => 'Shipping postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_region' => ['label' => 'Shipping state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_country' => ['label' => 'Shipping country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'ship_country_code' => ['label' => 'Shipping country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_address' => ['label' => 'Work address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_address_2' => ['label' => 'Work address 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_city' => ['label' => 'Work city', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_postal_code' => ['label' => 'Work postal code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_region' => ['label' => 'Work state/province/county', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_country' => ['label' => 'Work country name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_country_code' => ['label' => 'Work country code', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'work_phone' => ['label' => 'Work phone', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'job_title' => ['label' => 'Job title', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'company' => ['label' => 'Company', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'website' => ['label' => 'Website link', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'blog' => ['label' => 'Blog', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'gender' => ['label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'birth_date' => ['label' => 'Birth date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'age' => ['label' => 'Age', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    // Liste des réponses à voir, probablement relation ou module
+                    'answers' => ['label' => 'Answers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'order_id' => ['label' => 'Order ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'event_id' => ['label' => 'Event ID.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+                    'ticket_id' => ['label' => 'Ticket ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true],
+                ],
+                'Users' => [
+                    'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'email' => ['label' => 'Email address.', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'first_name' => ['label' => 'First name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'last_name' => ['label' => 'Last name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'user_key' => ['label' => 'API user key', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'date_created' => ['label' => 'Date created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    'date_modified' => ['label' => 'Date modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                    // Peut-être une relation user - user
+                    'subusers' => ['label' => 'Subusers', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+                ],
+                default => throw new \Exception('Fields unreadable'),
+            };
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+
+            return null;
         }
     }
 
@@ -311,7 +270,7 @@ class Eventbrite extends Solution
      * 		date_ref : la nouvelle date de référence
      *   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18).
      */
-    public function readData($param)
+    public function readData($param): ?array
     {
         if (!isset($param['fields'])) {
             $param['fields'] = [];
@@ -334,8 +293,13 @@ class Eventbrite extends Solution
     }
 
     // Permet de créer des données
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): ?array
     {
+        $result = [];
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $parametersEvent) {
@@ -378,8 +342,13 @@ class Eventbrite extends Solution
     }
 
     // Permet de créer des données
-    public function updateData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
+        $result = [];
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $parametersEvent) {
@@ -391,7 +360,7 @@ class Eventbrite extends Solution
                 // On renomme l'entrée target_id en id
                 $parametersEvent['id'] = $parametersEvent['target_id'];
                 unset($parametersEvent['target_id']);
-                $responseEvent = $this->call($this->urlBase.$moduleSingle.'_update', $parametersEvent);
+                $responseEvent = $this->call(url: $this->urlBase.$moduleSingle.'_update', parameters: $parametersEvent);
 
                 // Gestion des retours du webservice
                 if (!empty($responseEvent['process']->id)) {
@@ -424,7 +393,7 @@ class Eventbrite extends Solution
         return $result;
     }
 
-    protected function readLastEventType($param)
+    protected function readLastEventType($param): array
     {
         try {
             $parameters = [
@@ -432,7 +401,7 @@ class Eventbrite extends Solution
                 'asc_or_desc' => 'desc',
             ];
             $moduleSingle = substr(strtolower($param['module']), 0, -1);
-            $response = $this->call($this->urlBase.'user_list_events', $parameters);
+            $response = $this->call(url: $this->urlBase.'user_list_events', parameters: $parameters);
 
             if (!empty($response['events'][0])) {
                 // Boucle sur tous les évènements
@@ -441,7 +410,7 @@ class Eventbrite extends Solution
                         'id' => $event->event->id,
                         'only_display' => implode(',', $param['fields']),
                     ];
-                    $responseEvent = $this->call($this->urlBase.'event_list_attendees', $parametersEvent);
+                    $responseEvent = $this->call(url: $this->urlBase.'event_list_attendees', parameters: $parametersEvent);
                     if (!empty($responseEvent[strtolower($param['module'])][0]->$moduleSingle)) {
                         $result['done'] = true;
                         foreach ($responseEvent[strtolower($param['module'])][0]->$moduleSingle as $key => $value) {
@@ -464,7 +433,7 @@ class Eventbrite extends Solution
         }
     }
 
-    protected function readLastUserType($param)
+    protected function readLastUserType($param): array
     {
         try {
             $parameters = [
@@ -478,7 +447,7 @@ class Eventbrite extends Solution
                 // Si le module n'est pas ticket on récupère l'historique
                 if ('Tickets' != $param['module']) {
                     $parameters['id'] = $param['query']['id'];
-                    $response = $this->call($this->urlBase.$moduleSingle.'_get', $parameters);
+                    $response = $this->call(url: $this->urlBase.$moduleSingle.'_get', parameters: $parameters);
                     // Si une erreur est rencontrée
                     if (!empty($response['error'])) {
                         $result['error'] = $response['error']->error_type.' : '.$response['error']->error_message;
@@ -503,7 +472,7 @@ class Eventbrite extends Solution
             }
             // Sinon si on est sur une demande aléatoire pour le test de la règle
             else {
-                $response = $this->call($this->urlBase.'user_list_'.strtolower($param['module']), $parameters);
+                $response = $this->call(url: $this->urlBase.'user_list_'.strtolower($param['module']), parameters: $parameters);
                 // Si une erreur est rencontrée
                 if (!empty($response['error'])) {
                     $result['error'] = $response['error']->error_type.' : '.$response['error']->error_message;
@@ -529,7 +498,7 @@ class Eventbrite extends Solution
     }
 
     // Lescture directe s'il s'agit d'un module lié au user
-    protected function readUserType($param)
+    protected function readUserType($param): array
     {
         try {
             $i = 0;
@@ -539,7 +508,7 @@ class Eventbrite extends Solution
                 'only_display' => implode(',', $param['fields']),
                 'asc_or_desc' => 'desc',
             ];
-            $response = $this->call($this->urlBase.'user_list_'.strtolower($param['module']), $parameters);
+            $response = $this->call(url: $this->urlBase.'user_list_'.strtolower($param['module']), parameters: $parameters);
 
             // Si une erreur est rencontrée
             if (!empty($response['error'])) {
@@ -593,7 +562,7 @@ class Eventbrite extends Solution
     }
 
     // Lecture indirecte s'il s'agit d'un module lié aux évènements car il faut d'abord récupérer les event du users pour enseuite récupérer les autres éléments (ex : attendee)
-    protected function readEventType($param)
+    protected function readEventType($param): array
     {
         try {
             // Sauvegarde de la date de référence temp qui est maintenant à GMT
@@ -613,7 +582,7 @@ class Eventbrite extends Solution
             ];
 
             // Récupération de tous les évènement du user
-            $response = $this->call($this->urlBase.'user_list_events', $parameters);
+            $response = $this->call(url: $this->urlBase.'user_list_events', parameters: $parameters);
             if (!empty($response['events'][0])) {
                 // Boucle sur tous les évènements
                 foreach ($response['events'] as $event) {
@@ -621,7 +590,7 @@ class Eventbrite extends Solution
                         'id' => $event->event->id,
                         'modified_after' => $param['date_ref'],
                     ];
-                    $responseEvent = $this->call($this->urlBase.'event_list_attendees', $parametersEvent);
+                    $responseEvent = $this->call(url: $this->urlBase.'event_list_attendees', parameters: $parametersEvent);
 
                     if (!empty($responseEvent[strtolower($param['module'])][0])) {
                         $record = [];
@@ -667,10 +636,10 @@ class Eventbrite extends Solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         if (
-                'target' == $type
+            'target' == $type
             && in_array($module, ['Events', 'Attendees', 'Users'])
         ) {
             return [
@@ -681,8 +650,7 @@ class Eventbrite extends Solution
         return parent::getRuleMode($module, $type);
     }
 
-    // Fonction permettant de faire l'appel REST
-    protected function call($url, $parameters)
+    protected function call(string $url, string $method = 'GET', mixed $parameters = []): mixed
     {
         try {
             $ch = curl_init();

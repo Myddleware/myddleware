@@ -1507,7 +1507,7 @@ class RuleManager
                     // Remove the document in the list to be sent
                     unset($send['data'][$docId]);
                     // Change document status
-                    $this->changeStatus($docId, 'No_send', $e->getMessage(), (!empty($docIdRefError) ? $docIdRefError : ''));
+                    $this->changeStatus($docId, 'No_send', $e->getMessage(), !empty($docIdRefError) ? $docIdRefError : '');
                 }
             }
             // Exception if all documents has been removed from data

@@ -260,7 +260,7 @@ class Moodle extends Solution
 
                 // Réponse standard pour les modules avec retours
                 if (
-                        !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
+                    !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
                     && !in_array($param['module'], ['manual_enrol_users', 'group_members'])
                 ) {
                     $result[$idDoc] = [
@@ -268,7 +268,7 @@ class Moodle extends Solution
                         'error' => false,
                     ];
                 } elseif (
-                        !empty($xml->MULTIPLE->SINGLE->KEY[1]->VALUE)
+                    !empty($xml->MULTIPLE->SINGLE->KEY[1]->VALUE)
                     && 'notes' == $param['module']
                 ) {
                     $result[$idDoc] = [
@@ -408,7 +408,7 @@ class Moodle extends Solution
     public function getRuleMode($module, $type): array
     {
         if (
-                'target' == $type
+            'target' == $type
             && 'groups' == $module
         ) { // Si le module est dans le tableau alors c'est uniquement de la création
             return [
@@ -454,7 +454,7 @@ class Moodle extends Solution
     {
         // In case of duplicate search (search with a criteria)
         if (
-                !empty($param['query'])
+            !empty($param['query'])
             and empty($param['query']['id'])
         ) {
             // We use the standard function to search for a user (allow Myddleware to search a user by username or email)
@@ -463,7 +463,7 @@ class Moodle extends Solution
             } elseif ('courses' == $param['module']) {
                 return 'core_course_get_courses_by_field';
             }
-            // In case of read by date or search a specific record with an id for specific modules user or course
+        // In case of read by date or search a specific record with an id for specific modules user or course
         } else {
             if ('users' == $param['module']) {
                 return 'local_myddleware_get_users_by_date';

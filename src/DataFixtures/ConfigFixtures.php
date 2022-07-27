@@ -72,7 +72,7 @@ class ConfigFixtures extends Fixture implements FixtureGroupInterface
             }
             // Update only if the config has the flag update = true
             if (
-                    $foundConfig
+                $foundConfig
                 and !$configData['update']
             ) {
                 continue;

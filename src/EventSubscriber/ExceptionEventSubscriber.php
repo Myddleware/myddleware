@@ -33,11 +33,8 @@ class ExceptionEventSubscriber implements EventSubscriberInterface
         }
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function getSubscribedEvents(): array
     {
-        return [KernelEvents::EXCEPTION => ''];
+        return [KernelEvents::EXCEPTION => 'onKernelException'];
     }
 }

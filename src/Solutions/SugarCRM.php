@@ -307,7 +307,7 @@ class SugarCRM extends Solution
             foreach ($param['query'] as $key => $value) {
                 $filterArgs['filter'][] = [$key => ['$equals' => $value]];
             }
-            // Search By reference
+        // Search By reference
         } else {
             $filterArgs['filter'] = [
                 [
@@ -520,7 +520,7 @@ class SugarCRM extends Solution
                                 }
                             }
 
-                            // return for create/update record
+                        // return for create/update record
                         } elseif (!empty($records[$i]->contents->id)) {
                             $result[$idDoc] = [
                                 'id' => $records[$i]->contents->id,

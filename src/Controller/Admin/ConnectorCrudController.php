@@ -75,15 +75,14 @@ class ConnectorCrudController extends AbstractCrudController
                 ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
-                        'data-solution-info-url-value' => $pageName === 'edit' ? $credentialsFormEditController : $credentialsFormController,
+                        'data-solution-info-url-value' => 'edit' === $pageName ? $credentialsFormEditController : $credentialsFormController,
                     ],
                     'attr' => [
                         'data-action' => 'change->solution#onSelect',
                         'data-solution-target' => 'credential',
                     ],
                 ])->setHelp('login fields: ')
-                ->setFormTypeOption('disabled','edit' === $pageName ? 'disabled' : '')
-            ,
+                ->setFormTypeOption('disabled', 'edit' === $pageName ? 'disabled' : ''),
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),

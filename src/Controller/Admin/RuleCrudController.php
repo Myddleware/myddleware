@@ -89,8 +89,7 @@ class RuleCrudController extends AbstractCrudController
                         'data-solution-target' => 'module',
                     ],
                 ])
-                ->setHelp('Modules disponibles: ')
-            ,
+                ->setHelp('Modules disponibles: '),
             AssociationField::new('connectorTarget')
                 ->setFormTypeOptions([
                     'row_attr' => [
@@ -102,8 +101,7 @@ class RuleCrudController extends AbstractCrudController
                         'data-solution-target' => 'module',
                     ],
                 ])
-                ->setHelp('Modules disponibles: ')
-            ,
+                ->setHelp('Modules disponibles: '),
             // AssociationField::new('sourceModule'),
             // AssociationField::new('targetModule'),
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),

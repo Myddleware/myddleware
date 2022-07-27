@@ -289,7 +289,7 @@ class File extends Solution
         try {
             // Get the file with the way of this file. But we take the oldest file of the folder
             // If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
-            $file = $this->getLastFile($this->connectionParam['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
+            $file = $this->getLastFile($this->connectionParam['directory'].'/'.$param['module'], !empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']);
             // If there is no file
             if (empty($file)) {
                 return null;

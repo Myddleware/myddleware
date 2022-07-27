@@ -81,13 +81,13 @@ class Connector implements \Stringable
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="created_by")
      */
-    private ?User $createdBy;
+    private User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, name="modified_by")
      */
-    private ?User $modifiedBy;
+    private User $modifiedBy;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -247,24 +247,24 @@ class Connector implements \Stringable
         return $this;
     }
 
-    public function getCreatedBy(): ?User
+    public function getCreatedBy(): User
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(?User $createdBy): self
+    public function setCreatedBy(User $createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    public function getModifiedBy(): ?User
+    public function getModifiedBy(): User
     {
         return $this->modifiedBy;
     }
 
-    public function setModifiedBy(?User $modifiedBy): self
+    public function setModifiedBy(User $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 
