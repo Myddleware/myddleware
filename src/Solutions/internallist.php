@@ -33,7 +33,6 @@ class internallistcore extends mysql
 
 
     public function getFieldsLogin()
-
     {
         return [
             [
@@ -44,6 +43,28 @@ class internallistcore extends mysql
         ];
     }
 
+
+    public function get_modules($type = 'source')
+    {
+        return [
+            'internal_list' => 'InternalList'
+            // 'internal_list_value' => 'InternalListValue'
+        ];
+    }
+
+    public function get_module_fields($module, $type = 'source', $extension = false)
+    {
+        parent::get_module_fields($module, $type);
+        require 'lib/woocommerce/metadata.php';
+        try {
+            if (!empty($moduleFields[$module])) {
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+            return false;
+        }
+    }
 
     public function login($paramConnexion)
     {
