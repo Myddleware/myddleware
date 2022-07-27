@@ -28,23 +28,21 @@ declare(strict_types=1);
 namespace App\Solutions;
 
 use Datetime;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class Hubspot extends Solution
 {
-    protected $url = 'https://api.hubapi.com/';
+    protected string $url = 'https://api.hubapi.com/';
 
-    protected $version = 'v1';
+    protected string $version = 'v1';
 
-    protected $readLast = false;
+    protected bool $readLast = false;
 
-    protected $migrationMode = false;
+    protected bool $migrationMode = false;
 
-    protected $fieldsDuplicate = [
-        // 'contacts' => array('email'), // No duplicate search for now
-    ];
+    protected array $fieldsDuplicate = [];
 
-    // Requiered fields for each modules
     protected array $requiredFields = [
         'companies' => ['hs_lastmodifieddate'],
         'deal' => ['hs_lastmodifieddate'],
@@ -57,7 +55,7 @@ class Hubspot extends Solution
     ];
 
     // Name of reference fields for each module
-    protected $modifiedField = [
+    protected array $modifiedField = [
         'companies' => 'hs_lastmodifieddate',
         'deal' => 'hs_lastmodifieddate',
         'contact' => 'lastmodifieddate',
@@ -68,14 +66,14 @@ class Hubspot extends Solution
         'line_items' => 'date_modified',
     ];
 
-    protected $limitCall = [
-        'companies' => 100,  // 100 max
-        'deal' => 100,  // 100 max
-        'contact' => 100, // 100 max
-        'engagements' => 100, // 100 max
+    protected array $limitCall = [
+        'companies' => 100,
+        'deal' => 100,
+        'contact' => 100,
+        'engagements' => 100,
     ];
 
-    protected $objectModule = [
+    protected array $objectModule = [
         'products' => ['properties' => ['name', 'price']],
         'line_items' => ['properties' => ['name', 'price', 'quantity', 'hs_product_id']],
     ];
@@ -91,23 +89,20 @@ class Hubspot extends Solution
         ];
     }
 
-    // Connect to Hubspot
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
             $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->connectionParam['apikey']);
             if (!empty($result['exec']['message'])) {
-                throw new \Exception($result['exec']['message']);
+                throw new Exception($result['exec']['message']);
             } elseif (empty($result)) {
-                throw new \Exception('Failed to connect but no error returned by Hubspot. ');
+                throw new Exception('Failed to connect but no error returned by Hubspot. ');
             }
             $this->isConnectionValid = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -143,12 +138,11 @@ class Hubspot extends Solution
         return $modules;
     }
 
-    // Renvoie les champs du module passé en paramètre
     public function getModuleFields($module, $type = 'source', $param = null): array
     {
         parent::getModuleFields($module, $type);
         try {
-            $engagement = 'engagement' === explode('_', $module)[0] ? true : false;
+            $engagement = 'engagement' === explode('_', $module)[0];
             $engagement_module = explode('_', $module);
 
             // Manage custom module to deal with associate_deal
@@ -226,9 +220,7 @@ class Hubspot extends Solution
 
                 switch ($engagement_module[1]) {
                     case 'note':
-                        array_push($result,
-                            ['name' => 'metadata__body', 'label' => 'Note body', 'type' => 'text']
-                        );
+                        $result[] = ['name' => 'metadata__body', 'label' => 'Note body', 'type' => 'text'];
                         break;
                      case 'call':
                         array_push($result,
@@ -293,9 +285,9 @@ class Hubspot extends Solution
                 }
             }
             if (!empty($result['message'])) {
-                throw new \Exception($result['message']);
+                throw new Exception($result['message']);
             } elseif (empty($result)) {
-                throw new \Exception('No fields returned by Hubspot. ');
+                throw new Exception('No fields returned by Hubspot. ');
             }
             // Add each field in the right list (relate fields or normal fields)
             foreach ($result as $field) {
@@ -337,35 +329,22 @@ class Hubspot extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return false;
+        } catch (Exception $e) {
+            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
-    /**
-     * Function read data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function readData($param)
+    public function readData($param): ?array
     {
         try {
             $result = [];
             $result['count'] = 0;
-            // Remove Myddleware 's system fields
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-            // Format the module name
             $module = $this->formatModuleName($param['module']);
-            // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $module, $param['ruleParams']['mode']);
-
-            // Get the id field label
             $id = $this->getIdField($param, $module);
-            // Get modified field label
             $modifiedFieldName = $this->modifiedField[$module];
 
             // In case we search a specific record, we set a date_ref far in the past to be sure to not filter the result by date
@@ -373,7 +352,7 @@ class Hubspot extends Solution
                 $param['date_ref'] = '1970-01-01 00:00:00';
             // No search with filter for now.
             } elseif (!empty($param['query'])) {
-                return;
+                return null;
             }
             $result['date_ref'] = $param['date_ref'];
             // Créer une fonction qui génère l'URL et si la différence entre la date de reference et aujourd'hui > 30 jours alors on fait l'appel sur tous les enregistrements.
@@ -494,7 +473,7 @@ class Hubspot extends Solution
                             }
 
                             // Don't set reference date normal mode, $result['date_ref'] is already set with the offset
-                            if (false == $this->migrationMode) {
+                            if (!$this->migrationMode) {
                                 // Get the last modified date
                                 $dateModified = new \DateTime($records['date_modified']);
                                 $dateRef = new \DateTime($result['date_ref']);
@@ -512,33 +491,25 @@ class Hubspot extends Solution
                     }
                 }
             }
-        } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+        } catch (Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($result['error']);
         }
 
         return $result;
     }
 
-    /**
-     * Function create data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
     public function createData($param): array
     {
+        $result = [];
         try {
             // Associate deal is always an update to Hubspot
             if ('associate_deal' == $param['module']) {
                 return $this->updateData($param);
             }
-            // Tranform Myddleware data to Mailchimp data
             foreach ($param['data'] as $idDoc => $data) {
                 $dataHubspot = [];
                 $records = [];
-
-                // formatModuleName contact
                 $module = $this->formatModuleName($param['module']);
                 if ('companies' === $module || 'deal' === $module) {
                     $version = 'companies' === $module ? 'v2' : 'v1';
@@ -555,13 +526,12 @@ class Hubspot extends Solution
                     $moduleArray = explode('_', $param['module']);
                     $data['type'] = strtoupper($moduleArray[1]); // For example : NOTE
                     unset($data['target_id']); // Used only in UPDATE
-                    // Format data
                     foreach ($data as $key => $value) {
                         // Field can have 2 dimensions, e.g. associations__contactIds
                         $fieldArray = explode('__', $key);
                         if (!empty($fieldArray[1])) {
                             // If field contains Ids, then we add it as an array
-                            if ('Ids' == substr($key, -3)) {
+                            if (str_ends_with($key, 'Ids')) {
                                 $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
                             } else {
                                 $dataHubspot[$fieldArray[0]][$fieldArray[1]] = $value;
@@ -578,7 +548,7 @@ class Hubspot extends Solution
                         if (in_array($key, ['target_id', 'Myddleware_element_id'])) {
                             continue;
                         }
-                        array_push($records, [$property => $key, 'value' => $value]);
+                        $records[] = [$property => $key, 'value' => $value];
                     }
                     $dataHubspot['properties'] = $records;
                 }
@@ -607,26 +577,18 @@ class Hubspot extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            $result[$idDoc] = [
-                'id' => '-1',
-                'error' => $error,
-            ];
+        } catch (Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($result['error']);
         }
 
         return $result;
     }
 
-    /**
-     * Function update data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData($param)
+
+    public function updateData($param): array
     {
+        $result = [];
         try {
             $module = $this->formatModuleName($param['module']);
             if ('companies' === $module || 'deal' === $module) {
@@ -640,7 +602,6 @@ class Hubspot extends Solution
                 $method = 'PATCH';
             }
 
-            // Tranform Myddleware data to hubspot data
             foreach ($param['data'] as $idDoc => $data) {
                 $records = [];
                 // No properties for module associate_deal
@@ -659,7 +620,7 @@ class Hubspot extends Solution
                             $fieldArray = explode('__', $key);
                             if (!empty($fieldArray[1])) {
                                 // If field contains Ids, then we add it as an array
-                                if ('Ids' == substr($key, -3)) {
+                                if (str_ends_with($key, 'Ids')) {
                                     $dataHubspot[$fieldArray[0]][$fieldArray[1]][] = $value;
                                 } else {
                                     $dataHubspot[$fieldArray[0]][$fieldArray[1]] = $value;
@@ -668,7 +629,7 @@ class Hubspot extends Solution
                                 $dataHubspot['engagement'][$key] = $value;
                             }
                         } else {
-                            array_push($records, [$property => $key, 'value' => $value]);
+                            $records[] = [$property => $key, 'value' => $value];
                         }
                     }
                     // No properties for engagement module
@@ -689,10 +650,9 @@ class Hubspot extends Solution
                 } elseif ('engagements' === $module) {
                     $url = $this->url.$module.'/v1/'.$module.'/'.$idProfile.'?hapikey='.$this->connectionParam['apikey'];
                 } else {
-                    throw new \Exception('Module '.$module.' unknown.');
+                    throw new Exception('Module '.$module.' unknown.');
                 }
-                // Call to Hubspot
-                $resultQuery = $this->call($url, $method, $dataHubspot);
+                $resultQuery = $this->call(url: $url, method: $method,  args: $dataHubspot);
 
                 if (
                     $resultQuery['info']['http_code'] >= 200 // 200 is used to update deals for example
@@ -711,19 +671,18 @@ class Hubspot extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            $result[$idDoc] = [
-                'id' => '-1',
-                'error' => $error,
-            ];
+        } catch (Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($result['error']);
         }
 
         return $result;
     }
 
-    // Change the result
-    protected function beforeGenerateResult($identifyProfiles, $param)
+    /**
+     * @throws Exception
+     */
+    protected function beforeGenerateResult($identifyProfiles, $param): array
     {
         if (!empty($identifyProfiles)) {
             // In case of line Item, we add the dealId if requested
@@ -745,29 +704,24 @@ class Hubspot extends Solution
     }
 
     // Build the url depending on the module
-    protected function getUrl($param)
+
+    /**
+     * @throws Exception
+     */
+    protected function getUrl($param): array
     {
-        // Format the module name
         $module = $this->formatModuleName($param['module']);
-        // Get the version label
         $version = $this->getVersion($param, $module);
 
         // In case we search a specific record
         if (!empty($param['query']['id'])) {
             // Calls can be differents depending on the modules
-            switch ($module) {
-                case 'deal':
-                    $result['url'] = $this->url.'deals/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
-                    break;
-                case 'contact':
-                    $result['url'] = $this->url.'contacts/'.$version.'/'.$module.'/vid/'.$param['query']['id'].'/profile?hapikey='.$this->connectionParam['apikey'];
-                    break;
-                case 'deals':
-                    $result['url'] = $this->url.'deals/'.$version.'/pipelines/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
-                    break;
-                default:
-                    $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/'.$param['query']['id'].'?hapikey='.$this->connectionParam['apikey'];
-            }
+            $result['url'] = match ($module) {
+                'deal' => $this->url . 'deals/' . $version . '/' . $module . '/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
+                'contact' => $this->url . 'contacts/' . $version . '/' . $module . '/vid/' . $param['query']['id'] . '/profile?hapikey=' . $this->connectionParam['apikey'],
+                'deals' => $this->url . 'deals/' . $version . '/pipelines/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
+                default => $this->url . $module . '/' . $version . '/' . $module . '/' . $param['query']['id'] . '?hapikey=' . $this->connectionParam['apikey'],
+            };
 
             return $result;
         }
@@ -845,7 +799,7 @@ class Hubspot extends Solution
                         $result['offset'] = '&offset='.$offset;
                         break;
                     default:
-                        throw new \Exception('No API call for search more than 30 days in the past with the module '.$module);
+                        throw new Exception('No API call for search more than 30 days in the past with the module '.$module);
                 }
             } else {
                 switch ($module) {
@@ -880,7 +834,7 @@ class Hubspot extends Solution
                         $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/recent/modified'.'?hapikey='.$this->connectionParam['apikey'].'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
                         break;
                     default:
-                       throw new \Exception('No API call with the module '.$module);
+                       throw new Exception('No API call with the module '.$module);
                 }
             }
         }
@@ -888,20 +842,9 @@ class Hubspot extends Solution
         return $result;
     }
 
-    /**
-     * Select les engagements+6+
-     * 9***.selon le type.
-     *
-     * @param $results
-     * @param $module
-     * @param mixed $first
-     *
-     * @return array
-     */
-    public function selectType($results, $module, $first = true)
+    public function selectType($results, $module, bool $first = true): array
     {
         $moduleResult = explode('_', $module);
-        $resultFinal = [];
         // Delete all engagement not in the type searched
         foreach ($results['exec']['results'] as $key => $record) {
             if ($record['engagement']['type'] != strtoupper($moduleResult[1])) {
@@ -912,8 +855,7 @@ class Hubspot extends Solution
         return $results;
     }
 
-    // Get version label
-    protected function getVersion($param, $module)
+    protected function getVersion($param, $module): string
     {
         if (
                 'companies' === $module
@@ -925,8 +867,7 @@ class Hubspot extends Solution
         return 'v1';
     }
 
-    // Get the id label depending of the module
-    protected function getIdField($param, $module)
+    protected function getIdField($param, $module): string
     {
         // In case of object module, we return objectId
         if (!empty($this->objectModule[$module])) {
@@ -962,17 +903,10 @@ class Hubspot extends Solution
     }
 
     /**
-     * Function for get data.
-     *
-     * @param $request
-     * @param $url
-     * @param $param
-     *
-     * @return array
+     * @throws Exception
      */
-    protected function getresultQuery($request, $url, $param)
+    protected function getresultQuery($request, $url, $param): array
     {
-        // Module contact or Deal
         if (
                 'contacts' == $param['module']
              or 'deals' == $param['module']
@@ -985,7 +919,7 @@ class Hubspot extends Solution
             // The key of the array return is different depending the module
             // If there is no more data to read
             if (
-                    true == $this->readLast // Only one call if read_last is requested
+                    $this->readLast // Only one call if read_last is requested
                 or (
                         empty($request['exec']['has-more'])
                     and empty($request['exec']['hasMore'])
@@ -1027,12 +961,12 @@ class Hubspot extends Solution
             // Module Company or Engagement
         } elseif (
                     'companies' === $param['module']
-                 or 'engagement' === substr($param['module'], 0, 10)
-                 or 'engagement' === substr($param['module'], 0, 10)
+                 or str_starts_with($param['module'], 'engagement')
+                 or str_starts_with($param['module'], 'engagement')
         ) {
             // The response key can be different depending the API call
             if ('companies' === $param['module']) {
-                if (false !== strpos($url, 'paged')) {
+                if (str_contains($url, 'paged')) {
                     $key = $param['module'];
                 } else {
                     $key = 'results';
@@ -1054,7 +988,7 @@ class Hubspot extends Solution
                         empty($request['exec']['hasMore'])  // Engagement module
                     and empty($request['exec']['has-more']) // Company module
                 )
-                or true == $this->readLast  // Only one call if read_last is requested
+                or $this->readLast  // Only one call if read_last is requested
             ) {
                 $result = $this->getresultQueryBydate($request['exec'][$key], $param, false);
             } else {
@@ -1069,7 +1003,7 @@ class Hubspot extends Solution
                                 !empty($resultOffset['exec']['status'])
                             and 'error' == $resultOffset['exec']['status']
                         ) {
-                            throw new \Exception($resultOffset['exec']['message']);
+                            throw new Exception($resultOffset['exec']['message']);
                         }
 
                         $offset = $resultOffset['exec']['offset'];
@@ -1122,17 +1056,7 @@ class Hubspot extends Solution
         return $result;
     }
 
-    /**
-     * Function for get data with date_ref.
-     *
-     * @param $request
-     * @param $url
-     * @param $param
-     * @param mixed $offset
-     *
-     * @return array
-     */
-    protected function getresultQueryBydate($request, $param, $offset)
+    protected function getresultQueryBydate($request, $param, $offset): array
     {
         'deals' === $param['module'] || 'companies' === $param['module'] ? $modified = 'hs_lastmodifieddate' : $modified = 'lastmodifieddate';
         if ('owners' === $param['module']) {
@@ -1151,7 +1075,7 @@ class Hubspot extends Solution
             if (
                     'deals' === $param['module']
                  or 'companies' === $param['module']
-                 or 'engagement' === substr($param['module'], 0, 10)
+                 or str_starts_with($param['module'], 'engagement')
             ) {
                 $module = 'results';
                 $result['exec'][$module] = [];
@@ -1182,9 +1106,9 @@ class Hubspot extends Solution
                     if ($item['engagement'][$modified] > $dateTimestamp) {
                         if (!$offset) {
                             // array_push($result['exec'][$param['module']], $item);
-                            array_push($result['exec']['results'], $item);
+                            $result['exec']['results'][] = $item;
                         } else {
-                            array_push($result, $item);
+                            $result[] = $item;
                         }
                     }
                 }
@@ -1197,9 +1121,9 @@ class Hubspot extends Solution
                 // For pipeline, we read all data
                 foreach ($request as $key => $item) {
                     if (!$offset) {
-                        array_push($result['exec'][$module], $item);
+                        $result['exec'][$module][] = $item;
                     } else {
-                        array_push($result, $item);
+                        $result[] = $item;
                     }
                 }
             }
@@ -1219,9 +1143,9 @@ class Hubspot extends Solution
                         // We take the most recent date modified between name modified and price modified
                         $item['date_modified'] = $lastChange;
                         if (!$offset) {
-                            array_push($result['exec'][$module], $item);
+                            $result['exec'][$module][] = $item;
                         } else {
-                            array_push($result, $item);
+                            $result[] = $item;
                         }
                     }
                 }
@@ -1231,9 +1155,9 @@ class Hubspot extends Solution
                 foreach ($request as $key => $item) {
                     if ($item[$modified] > $dateTimestamp) {
                         if (!$offset) {
-                            array_push($result['exec'][$module], $item);
+                            $result['exec'][$module][] = $item;
                         } else {
-                            array_push($result, $item);
+                            $result[] = $item;
                         }
                     }
                 }
@@ -1249,14 +1173,14 @@ class Hubspot extends Solution
                     )
                 ) {
                     // The response key can be different : deals for deal/paged/ and result for recent/modified/
-                    $request = (isset($request['deals']) ? $request['deals'] : $request['results']);
+                    $request = ($request['deals'] ?? $request['results']);
                 }
                 foreach ($request as $key => $item) {
                     if ($item['properties'][$modified]['value'] > $dateTimestamp) {
                         if (!$offset) {
-                            array_push($result['exec'][$module], $item);
+                            $result['exec'][$module][] = $item;
                         } else {
-                            array_push($result, $item);
+                            $result[] = $item;
                         }
                     }
                 }
@@ -1266,8 +1190,7 @@ class Hubspot extends Solution
         return $result;
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
-    protected function dateTimeToTimestamp($dateTime)
+    protected function dateTimeToTimestamp($dateTime): float|int
     {
         $date = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
 
@@ -1275,16 +1198,9 @@ class Hubspot extends Solution
     }
 
     /**
-     * return the reference date field name.
-     *
-     * @param $moduleSource
-     * @param $ruleMode
-     *
-     * @return string|null
-     *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
@@ -1293,17 +1209,10 @@ class Hubspot extends Solution
         } elseif ('C' == $ruleMode) {
             return 'CreationDate';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new Exception("$ruleMode is not a correct Rule mode.");
     }
 
-    /**
-     * get singular of module.
-     *
-     * @param $name
-     *
-     * @return string
-     */
-    public function formatModuleName($name)
+    public function formatModuleName($name): string
     {
         if ('contacts' === $name) {
             return 'contact';
@@ -1332,19 +1241,12 @@ class Hubspot extends Solution
     }
 
     /**
-     * Performs the underlying HTTP request. Not very exciting.
-     *
-     * @param string $method  The API method to be called
-     * @param array  $args    Assoc array of parameters to be passed
-     * @param mixed  $url
-     * @param mixed  $timeout
-     *
-     * @return array Assoc array of decoded result
+     * @throws Exception
      */
-    protected function call($url, $method = 'GET', $args = [], $timeout = 120)
+    protected function call($url, $method = 'GET', $args = [], $timeout = 120): mixed
     {
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
-            throw new \Exception('curl extension is missing!');
+            throw new Exception('curl extension is missing!');
         }
 
         $ch = curl_init($url);
