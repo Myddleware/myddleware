@@ -28,29 +28,30 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use PDO;
+
 class MicrosoftSQL extends Database
 {
-    protected $driver;
+    protected string $driver;
 
-    protected $fieldName = 'COLUMN_NAME';
+    protected string $fieldName = 'COLUMN_NAME';
 
-    protected $fieldLabel = 'COLUMN_NAME';
+    protected string $fieldLabel = 'COLUMN_NAME';
 
-    protected $fieldType = 'DATA_TYPE';
+    protected string $fieldType = 'DATA_TYPE';
 
     protected string $stringSeparatorOpen = '[';
 
     protected string $stringSeparatorClose = ']';
 
-    // Generate PDO object
-    protected function generatePdo()
+    protected function generatePdo(): PDO
     {
         $this->set_driver();
         if ('sqlsrv' == $this->driver) {
-            return new \PDO($this->driver.':Server='.$this->connectionParam['host'].','.$this->connectionParam['port'].';Database='.$this->connectionParam['database_name'], $this->connectionParam['login'], $this->connectionParam['password']);
+            return new PDO($this->driver.':Server='.$this->connectionParam['host'].','.$this->connectionParam['port'].';Database='.$this->connectionParam['database_name'], $this->connectionParam['login'], $this->connectionParam['password']);
         }
 
-        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
+        return new PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
     }
 
     // We use sqlsrv for windows and dblib for linux
@@ -64,23 +65,23 @@ class MicrosoftSQL extends Database
     }
 
     // Query to get all the tables of the database
-    protected function getQueryShowTables()
+    protected function getQueryShowTables(): string
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->connectionParam['database_name'].'\'';
     }
 
-    // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    // Query to get all the fields of the table
+    protected function getQueryDescribeTable($table): string
     {
         return 'SELECT * FROM information_schema.columns WHERE table_name = \''.$table.'\'';
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
+    protected function getQuerySelectLimitOffset($param, $method): ?string
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {
-            return;
+            return null;
         }
         if (empty($param['offset'])) {
             $param['offset'] = 0;
@@ -89,13 +90,12 @@ class MicrosoftSQL extends Database
         return ' OFFSET '.$param['offset'].' ROWS FETCH NEXT '.$param['limit'].' ROWS ONLY';
     }
 
-    // Function to escape characters
-    protected function escape($value)
+    protected function escape($value): array|string
     {
         return str_replace("'", "''", $value);
     }
 
-    protected function getQuerySelectHeader($param, $method)
+    protected function getQuerySelectHeader($param, $method): string
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {
