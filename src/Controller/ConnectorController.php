@@ -13,7 +13,6 @@ use App\Solutions\Solution;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -53,7 +52,7 @@ class ConnectorController extends AbstractController
             'form' => $form,
             'loginFields' => $loginFields,
             'urlTest' => $this->generateUrl('test_connexion'),
-            'solution' => $solution->getName()
+            'solution' => $solution->getName(),
         ]);
     }
 
@@ -67,7 +66,7 @@ class ConnectorController extends AbstractController
         foreach ($loginFields as $loginField) {
             $connectorParam = $connectorParamRepository->findOneBy([
                 'name' => $loginField['name'],
-                'connector' => $connector
+                'connector' => $connector,
             ]);
 
             // If connector param does not exist add an empty input.
@@ -94,7 +93,7 @@ class ConnectorController extends AbstractController
             'form' => $form,
             'loginFields' => $loginFields,
             'urlTest' => $this->generateUrl('test_connexion'),
-            'solution' => $connector->getSolution()->getName()
+            'solution' => $connector->getSolution()->getName(),
         ]);
     }
 
@@ -120,7 +119,7 @@ class ConnectorController extends AbstractController
         }
 
         return $this->render('connector/test-connector-params.html.twig', [
-            'isCredentialsValid' => $isValid
+            'isCredentialsValid' => $isValid,
         ], new Response(null, $statusCode));
     }
 }

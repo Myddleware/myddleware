@@ -29,16 +29,17 @@ class RuleController extends AbstractController
         $form = $this->createFormBuilder([]);
         $form->add($origin, ChoiceType::class, [
             'choices' => $choices,
-            'label' => sprintf('Module %s', $origin)
+            'label' => sprintf('Module %s', $origin),
         ]);
 
         $form = $form->getForm();
 
         return $this->renderForm('rule/index.html.twig', [
             'form' => $form,
-            'origin' => $origin
+            'origin' => $origin,
         ]);
     }
+
     /**
      * @throws Exception
      */
@@ -47,7 +48,6 @@ class RuleController extends AbstractController
     {
         $connector = $connectorRepository->find($connectorId);
         $solution = $connector->getSolution();
-
 
         // @todo Je n'ai pas pu finir il me manque les module fields
         // mais l'idée serait d'utiliser ce controller pour renvoyer la liste des fields par connector
@@ -68,7 +68,7 @@ class RuleController extends AbstractController
             $form->add('fieldSelect', ChoiceType::class, [
                 'choices' => $choices,
                 'expanded' => true,
-                'multiple' => true
+                'multiple' => true,
             ]);
         }
 
