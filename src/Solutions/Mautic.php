@@ -368,7 +368,7 @@ class Mautic extends Solution
 
                     // Manage return data from Mautic
                     if (
-                            !empty($record[$param['module']])
+                        !empty($record[$param['module']])
                         and array_key_exists('id', $record[$param['module']])
                     ) {
                         $result[$idDoc] = [

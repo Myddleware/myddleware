@@ -154,7 +154,7 @@ class Mailchimp extends Solution
 
                 // Error management
                 if (
-                        !empty($resultMailchimp['status'])
+                    !empty($resultMailchimp['status'])
                     && $resultMailchimp['status'] >= 400
                 ) {
                     $errorMsg = '';
@@ -205,7 +205,7 @@ class Mailchimp extends Solution
     protected function transformValueType($key, $value): bool
     {
         if (
-                !empty($this->moduleFields[$key]['type'])
+            !empty($this->moduleFields[$key]['type'])
             && 'bool' == $this->moduleFields[$key]['type']
         ) {
             if (!empty($value)) {

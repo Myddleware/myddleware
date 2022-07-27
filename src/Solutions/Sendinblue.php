@@ -206,7 +206,7 @@ class Sendinblue extends Solution
                     } else {
                         throw new Exception('No event found in the id  '.$param['query']['id'].'. Failed to search the record into Sendinblue');
                     }
-                    // Set call parameters when we read transactional email using reference date
+                // Set call parameters when we read transactional email using reference date
                 } else {
                     // Because offset is managed in this function, we don't need the +1 in the rule param limit
                     if ($param['limit'] > 1) {

@@ -338,7 +338,7 @@ class DocumentRepository extends ServiceEntityRepository
         }
 
         if (
-                (!empty($data['rule']) && is_string($data['rule']))
+            (!empty($data['rule']) && is_string($data['rule']))
             or (!empty($data['customWhere']['rule']) && is_string($data['customWhere']['rule']))
         ) {
             $ruleFilter = (!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']);

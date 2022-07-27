@@ -222,7 +222,7 @@ class Hubspot extends Solution
                     case 'note':
                         $result[] = ['name' => 'metadata__body', 'label' => 'Note body', 'type' => 'text'];
                         break;
-                     case 'call':
+                    case 'call':
                         array_push($result,
                             ['name' => 'metadata__toNumber', 'label' => 'To number', 'type' => 'varchar(255)'],
                             ['name' => 'metadata__fromNumber', 'label' => 'From number', 'type' => 'varchar(25)'],
@@ -300,7 +300,7 @@ class Hubspot extends Solution
                 }
                 // If the fields is a relationship
                 if (
-                        'ID' == strtoupper(substr($field['name'], -2))
+                    'ID' == strtoupper(substr($field['name'], -2))
                      or 'IDS' == strtoupper(substr($field['name'], -3))
                      or 'ID__VALUE' == strtoupper(substr($field['name'], -9)) // Used for module's type object
                 ) {
@@ -375,7 +375,7 @@ class Hubspot extends Solution
 
             $resultQuery = $resultQuery['exec'];
             if (
-                    'companies' === $module
+                'companies' === $module
                  or 'deal' === $module
                  or 'engagements' === $module
             ) {
@@ -451,7 +451,7 @@ class Hubspot extends Solution
 
                             // Result are different with the engagement module
                             if (
-                                    'engagements' === $module
+                                'engagements' === $module
                                 and !empty($identifyProfile['engagement'][$id])
                             ) {
                                 $records['id'] = $identifyProfile['engagement'][$id];
@@ -687,7 +687,7 @@ class Hubspot extends Solution
         if (!empty($identifyProfiles)) {
             // In case of line Item, we add the dealId if requested
             if (
-                    'line_items' == $param['module']
+                'line_items' == $param['module']
                 and in_array('dealdId', $param['fields'])
             ) {
                 foreach ($identifyProfiles as $key => $identifyProfile) {
@@ -751,16 +751,16 @@ class Hubspot extends Solution
             // If date_ref is more than 30 days in the past or if an offset is in the reference
             // We are in migration mode and we will call all records for the module not only the recent ones
             if (
-                    is_numeric($param['date_ref'])
+                is_numeric($param['date_ref'])
                  or empty($param['date_ref'])	// In case the user removed the reference on the rule
                  or (
-                        isset($interval)
+                     isset($interval)
                     and $interval->format('%a') >= 30
-                )
+                 )
             ) {
                 // In case we have more than 30 days, we set offeset to 0 to read all records
                 if (
-                        isset($interval)
+                    isset($interval)
                     and $interval->format('%a') >= 30
                 ) {
                     $param['date_ref'] = 0;
@@ -774,7 +774,7 @@ class Hubspot extends Solution
                 $this->migrationMode = true;
                 switch ($module) {
                     case 'companies' === $module
-                         or 'deal' === $module:
+                    or 'deal' === $module:
                         if (!empty($param['fields'])) { // Add fields in the call
                             foreach ($param['fields'] as $fields) {
                                 $property .= '&properties='.$fields;
@@ -802,7 +802,7 @@ class Hubspot extends Solution
             } else {
                 switch ($module) {
                     case 'companies' === $module
-                         or 'deal' === $module:
+                    or 'deal' === $module:
                         if (!empty($param['fields'])) { // Add fields in the call
                             foreach ($param['fields'] as $fields) {
                                 $property .= '&properties='.$fields;
@@ -832,7 +832,7 @@ class Hubspot extends Solution
                         $result['url'] = $this->url.$module.'/'.$version.'/'.$module.'/recent/modified'.'?hapikey='.$this->connectionParam['apikey'].'&count='.$this->limitCall[$module].'&since='.$dateRef->getTimestamp().'000';
                         break;
                     default:
-                       throw new Exception('No API call with the module '.$module);
+                        throw new Exception('No API call with the module '.$module);
                 }
             }
         }
@@ -856,7 +856,7 @@ class Hubspot extends Solution
     protected function getVersion($param, $module): string
     {
         if (
-                'companies' === $module
+            'companies' === $module
              or 'owners' === $module
         ) {
             return 'v2';
@@ -892,11 +892,11 @@ class Hubspot extends Solution
                     return 'stageId';
                 }
 
-                    return 'id';
+                return 'id';
 
                 break;
             default: // engagement for example
-               return 'id';
+                return 'id';
         }
     }
 
@@ -906,7 +906,7 @@ class Hubspot extends Solution
     protected function getresultQuery($request, $url, $param): array
     {
         if (
-                'contacts' == $param['module']
+            'contacts' == $param['module']
              or 'deals' == $param['module']
         ) {
             // In case on the search for a specific record is requested we add a dimension to the result array
@@ -917,9 +917,9 @@ class Hubspot extends Solution
             // The key of the array return is different depending the module
             // If there is no more data to read
             if (
-                    $this->readLast // Only one call if read_last is requested
+                $this->readLast // Only one call if read_last is requested
                 or (
-                        empty($request['exec']['has-more'])
+                    empty($request['exec']['has-more'])
                     and empty($request['exec']['hasMore'])
                 )
             ) {
@@ -949,16 +949,16 @@ class Hubspot extends Solution
 
                     // Call again only if we haven't reached the reference date
                 } while (
-                        !empty($resultOffsetTemps)	// Date_ref has been reached (no result in getresultQueryBydate)
+                    !empty($resultOffsetTemps)	// Date_ref has been reached (no result in getresultQueryBydate)
                     and (!empty($resultOffset['exec']['hasMore']) // No more data to read
-                         or !empty($resultOffset['exec']['has-more'])
-                        )
+                     or !empty($resultOffset['exec']['has-more'])
+                    )
                     and count($result['exec'][$keyResult]) < ($param['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
                 );
             }
-            // Module Company or Engagement
+        // Module Company or Engagement
         } elseif (
-                    'companies' === $param['module']
+            'companies' === $param['module']
                  or str_starts_with($param['module'], 'engagement')
         ) {
             // The response key can be different depending the API call
@@ -982,7 +982,7 @@ class Hubspot extends Solution
             // If there is no more data to read
             if (
                 (
-                        empty($request['exec']['hasMore'])  // Engagement module
+                    empty($request['exec']['hasMore'])  // Engagement module
                     and empty($request['exec']['has-more']) // Company module
                 )
                 or $this->readLast  // Only one call if read_last is requested
@@ -997,7 +997,7 @@ class Hubspot extends Solution
                     if (!empty($resultOffset)) {
                         // Check if error
                         if (
-                                !empty($resultOffset['exec']['status'])
+                            !empty($resultOffset['exec']['status'])
                             and 'error' == $resultOffset['exec']['status']
                         ) {
                             throw new Exception($resultOffset['exec']['message']);
@@ -1009,10 +1009,10 @@ class Hubspot extends Solution
                         $result['exec']['results'] = $merge;
                     }
                 } while (
-                        !empty($resultOffsetTemps)	// Date_ref has been reached (no result in getresultQueryBydate)
+                    !empty($resultOffsetTemps)	// Date_ref has been reached (no result in getresultQueryBydate)
                     and (!empty($resultOffset['exec']['hasMore']) // No more data to read
-                         or !empty($resultOffset['exec']['has-more'])
-                        )
+                     or !empty($resultOffset['exec']['has-more'])
+                    )
                     and count($result['exec']['results']) < ($param['limit'] - 1) // Stop if we reach the limit (-1 see method rule->setLimit)  set in the rule
                 );
             }
@@ -1020,7 +1020,7 @@ class Hubspot extends Solution
             // In case on the search for a specific record is requested we add a dimension to the result array
             if (!empty($param['query']['id'])) {
                 if (
-                        'owners' === $param['module']
+                    'owners' === $param['module']
                      or 'deal_pipeline' === $param['module']
                 ) {
                     $requestTmp['exec'][0] = $request['exec'];
@@ -1035,7 +1035,7 @@ class Hubspot extends Solution
 
         // If we have read all records we set the migration mode to false and let the read function set the reference date thanks to the default value '1970-01-01 00:00:00'
         if (
-                empty($result['exec']['results']) // We can have another index than result, with deal_pipeline for example
+            empty($result['exec']['results']) // We can have another index than result, with deal_pipeline for example
              or count($result['exec']['results']) < ($param['limit'] - 1) // (-1 see method rule->setLimit)
         ) {
             $this->migrationMode = false;
@@ -1059,7 +1059,7 @@ class Hubspot extends Solution
         if ('owners' === $param['module']) {
             $modified = 'updatedAt';
         } elseif (
-                'engagement_call' === $param['module']
+            'engagement_call' === $param['module']
              or 'engagement_task' === $param['module']
              or 'engagement_note' === $param['module']
              or 'engagement_meeting' === $param['module']
@@ -1070,7 +1070,7 @@ class Hubspot extends Solution
         }
         if (!$offset) {
             if (
-                    'deals' === $param['module']
+                'deals' === $param['module']
                  or 'companies' === $param['module']
                  or str_starts_with($param['module'], 'engagement')
             ) {
@@ -1092,7 +1092,7 @@ class Hubspot extends Solution
         // Init the reference with the current date_ref
         // $result['date_ref'] = $dateTimestamp;
         if (
-                'engagement_call' === $param['module']
+            'engagement_call' === $param['module']
              or 'engagement_task' === $param['module']
              or 'engagement_meeting' === $param['module']
              or 'engagement_note' === $param['module']
@@ -1111,7 +1111,7 @@ class Hubspot extends Solution
                 }
             }
         } elseif (
-                'deal_pipeline' === $param['module']
+            'deal_pipeline' === $param['module']
              or 'deal_pipeline_stage' === $param['module']
         ) {
             if (!empty($request)) {
@@ -1124,7 +1124,7 @@ class Hubspot extends Solution
                     }
                 }
             }
-            // Module type object
+        // Module type object
         } elseif (!empty($this->objectModule[$param['module']])) {
             if (!empty($request['objects'])) {
                 foreach ($request['objects'] as $item) {
@@ -1163,9 +1163,9 @@ class Hubspot extends Solution
             if (!empty($request)) {
                 // An entry result exists for the module deals
                 if (
-                        'deals' === $param['module']
+                    'deals' === $param['module']
                     and (
-                            isset($request['deals'])
+                        isset($request['deals'])
                          or isset($request['results'])
                     )
                 ) {
@@ -1220,12 +1220,12 @@ class Hubspot extends Solution
         } elseif ('owners' === $name) {
             return 'owners';
         } elseif (
-                'deal_pipeline' === $name
+            'deal_pipeline' === $name
              or 'deal_pipeline_stage' === $name
         ) {
             return 'deals';
         } elseif (
-                'engagement_call' === $name
+            'engagement_call' === $name
              or 'engagement_task' === $name
              or 'engagement_email' === $name
              or 'engagement_note' === $name

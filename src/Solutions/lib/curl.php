@@ -352,7 +352,7 @@ class curl
 
         return $this->error;
         // exception is not ajax friendly
-            // throw new moodle_exception($this->error, 'curl');
+        // throw new moodle_exception($this->error, 'curl');
     }
 
     /**

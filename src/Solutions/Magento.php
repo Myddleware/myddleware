@@ -140,7 +140,7 @@ class Magento extends Solution
                         'default_billing' => ['label' => 'Default billing address id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false],
                         'gender' => ['label' => 'Gender', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
                     ];
-                        break;
+                    break;
                 case 'customer_address':
                     $moduleFields = [
                         'id' => ['label' => 'ID address', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -522,7 +522,7 @@ class Magento extends Solution
                     // Workaround for a Magento bug, if we keep order_id then we get the Magento error : Column 'order_id' in where clause is ambiguous
                     // So we change the where condition to make it work on Magento side
                     if (
-                            'order_id' == $key
+                        'order_id' == $key
                         and in_array($param['module'], ['orders_items', 'orders'])
                     ) {
                         $key = 'main_table.entity_id';
@@ -586,7 +586,7 @@ class Magento extends Solution
                                 $row['date_modified'] = $value;
                                 // Sauvegarde de la date de référence
                                 if (
-                                        empty($result['date_ref'])
+                                    empty($result['date_ref'])
                                     || $value > $result['date_ref']
                                 ) {
                                     $result['date_ref'] = $value;

@@ -28,7 +28,7 @@ class EasyAdminConnectorSubscriber implements EventSubscriberInterface
         $this->connectorParamRepository = $connectorParamRepository;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             AfterEntityPersistedEvent::class => ['createConnectorParams'],

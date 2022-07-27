@@ -42,25 +42,23 @@ class RuleParam
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="params")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private ?Rule $rule;
 
     /**
      * @ORM\Column(name="name", type="string", length=100, nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="value", type="text", nullable=false)
      */
-    private $value;
+    private string $value;
 
     /**
      * @ORM\OneToMany(targetEntity=RuleParamAudit::class, mappedBy="ruleParam")

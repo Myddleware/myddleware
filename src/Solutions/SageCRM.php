@@ -274,7 +274,7 @@ class SageCRM extends Solution
                     // Si le champ finit par "id"
                     // Et si le champ ne fait pas partie des champs du tableau $fieldsNotRelate
                     if (
-                            str_ends_with($field->name, 'id')
+                        str_ends_with($field->name, 'id')
                         && !isset($this->fieldsNotRelate[$module][$field->name])
                     ) {
                         // Si le champ n'est pas $module + "id" concaténés

@@ -251,7 +251,7 @@ class NotificationManager
 
             $email = new TemplatedEmail();
             $email->subject($this->tools->getTranslation(['email_notification', 'subject']));
-            $email->from((!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'));
+            $email->from(!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com');
             $email->text($textMail);
 
             // Send the message to all admins

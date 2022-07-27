@@ -34,6 +34,6 @@ class UserCrudController extends AbstractCrudController
     {
         return $filters->add(TextFilter::new('email', 'Email'))
                         ->add('timezone')
-                        ;
+        ;
     }
 }

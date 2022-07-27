@@ -639,7 +639,7 @@ class Eventbrite extends Solution
     public function getRuleMode($module, $type): array
     {
         if (
-                'target' == $type
+            'target' == $type
             && in_array($module, ['Events', 'Attendees', 'Users'])
         ) {
             return [

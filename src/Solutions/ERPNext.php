@@ -335,7 +335,7 @@ class ERPNext extends Solution
                         // We don't send Myddleware fields
                         if (in_array($key, ['target_id', 'Myddleware_element_id'])) {
                             if (
-                                    'target_id' == $key
+                                'target_id' == $key
                                 and !empty($value)
                             ) {
                                 $url = $this->connectionParam['url'].'/api/resource/'.rawurlencode($param['module']).'/'.$value;
@@ -389,7 +389,7 @@ class ERPNext extends Solution
                 }
                 // Transfert status update
                 if (
-                        !empty($subDocIdArray)
+                    !empty($subDocIdArray)
                     and empty($result[$idDoc]['error'])
                 ) {
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {
@@ -488,7 +488,7 @@ class ERPNext extends Solution
         $response = curl_exec($ch);
         // if Traceback found, we have an error
         if (
-                'GET' != $method
+            'GET' != $method
             and str_contains($response, 'Traceback')
         ) {
             // Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'

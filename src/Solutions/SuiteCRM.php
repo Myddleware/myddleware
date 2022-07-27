@@ -801,7 +801,7 @@ class SuiteCRM extends Solution
                     }
                 }
             }
-            // Filter by date only for read method (no need for read_last method
+        // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
             $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents

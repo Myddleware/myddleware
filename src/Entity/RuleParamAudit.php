@@ -44,7 +44,7 @@ class RuleParamAudit
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\PrePersist()
@@ -57,35 +57,35 @@ class RuleParamAudit
     /**
      * @ORM\Column(name="before_value", type="string", nullable=true)
      */
-    private $before;
+    private string $before;
 
     /**
      * @ORM\Column(name="after_value", type="string", nullable=true)
      */
-    private $after;
+    private string $after;
 
     /**
      * @ORM\ManyToOne(targetEntity=RuleParam::class, inversedBy="ruleParamAudits")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $ruleParam;
+    private ?RuleParam $ruleParam;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $updatedAt;
+    private ?\DateTimeImmutable $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ruleParamAudits")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=Job::class, inversedBy="ruleParamAudits")
      * @ORM\JoinColumn(name="job")
      */
-    private $job;
+    private ?Job $job;
 
     public function getId(): int
     {

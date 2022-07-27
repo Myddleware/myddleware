@@ -482,7 +482,7 @@ class VtigerCRM extends Solution
                 }
                 // Transfert status update
                 if (
-                        !empty($subDocIdArray)
+                    !empty($subDocIdArray)
                     and empty($result[$idDoc]['error'])
                 ) {
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {

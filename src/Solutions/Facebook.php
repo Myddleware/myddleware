@@ -228,7 +228,7 @@ class Facebook extends Solution
                             $row['date_modified'] = $recordNode->getField($field)->format('Y-m-d H:i:s');
                         // If the field exists in the form (fieldData), we get the data from it
                         } elseif (
-                                !empty($fieldData)
+                            !empty($fieldData)
                             and isset($fieldData[$field])
                         ) {
                             $row[$field] = $fieldData[$field];
@@ -239,7 +239,7 @@ class Facebook extends Solution
                     // Saved the record only if the record reference date is greater than the rule reference date
                     // (important when we can't filter by date in Facebook call)
                     if (
-                            !empty($row['date_modified'])
+                        !empty($row['date_modified'])
                         && $param['date_ref'] < $row['date_modified']
                     ) {
                         $result['values'][$row['id']] = $row;
@@ -264,14 +264,14 @@ class Facebook extends Solution
             // If the number of record read is greater than the limit,
             // We read the result from the end to the beginning (oldest record first) and keep only the number of record expected
             if (
-                    !empty($result['values'])
+                !empty($result['values'])
                 and count($result['values']) > $param['limit']
             ) {
                 $reverseValues = array_reverse($result['values'], true);
                 $result['values'] = [];
                 foreach ($reverseValues as $key => $value) {
                     if (
-                            !empty($result['values'])
+                        !empty($result['values'])
                         and count($result['values']) >= $param['limit']
                     ) {
                         break;

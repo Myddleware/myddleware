@@ -216,7 +216,7 @@ class CirrusShield extends Solution
                     // Add the condition
                     $query .= $key." = '".$value."' ";
                 }
-                // Function called as a standard read, we use the reference date
+            // Function called as a standard read, we use the reference date
             } else {
                 $query .= ' WHERE '.$dateRefField.' > '.$param['date_ref'].$this->organizationTimezoneOffset;
             }
@@ -263,7 +263,7 @@ class CirrusShield extends Solution
                         }
                     }
                     if (
-                            !empty($record[$dateRefField])
+                        !empty($record[$dateRefField])
                         && $result['date_ref'] < $record[$dateRefField]
                     ) {
                         // Transform the date with the organization timezone
